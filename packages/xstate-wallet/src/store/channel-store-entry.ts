@@ -21,6 +21,9 @@ export interface SignatureEntry {
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 type MaybeHashedStateVars = StateVariables & {stateHash?: string};
 
+export const enum Errors {
+  signingStaleState = 'Asked to sign a stale state'
+}
 export class ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
   public readonly myIndex: number;
@@ -181,6 +184,7 @@ export class ChannelStoreEntry {
     const latestSignedByMe = this._latestSupportedByMe;
     if (latestSignedByMe) {
       if (this.statesEqual(stateVars, latestSignedByMe)) return latestSignedByMe;
+      if (stateVars.turnNum.lte(latestSignedByMe.turnNum)) throw Error(Errors.signingStaleState);
     }
 
     const state = {...stateVars, ...this.channelConstants};
