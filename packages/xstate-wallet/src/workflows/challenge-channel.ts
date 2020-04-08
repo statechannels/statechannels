@@ -37,11 +37,11 @@ type Context = Typestate['context'];
 interface Schema extends StateSchema<Context> {
   states: {
     init: {};
-    waitForResponseOrTimeout: {};
     submitTransaction: {};
     retry: {};
-    done: {};
     waitMining: {};
+    waitForResponseOrTimeout: {};
+    done: {};
     failure: {};
   };
 }
