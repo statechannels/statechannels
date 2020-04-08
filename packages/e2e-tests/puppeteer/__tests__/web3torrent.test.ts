@@ -6,10 +6,10 @@ import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from 
 
 import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
 
-jest.setTimeout(200_000);
-
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
+jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
+
 const USES_VIRTUAL_FUNDING = process.env.REACT_APP_FUNDING_STRATEGY === 'Virtual';
 
 let browserA: Browser;
