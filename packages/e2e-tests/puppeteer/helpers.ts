@@ -104,12 +104,20 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
 }
 
-export async function waitAndOpenChannel(page: Page): Promise<void> {
-  const createChannelButton = 'div.application-workflow-prompt > div > button';
+export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
+  page: Page
+): Promise<void> => {
+  if (usingVirtualFunding) {
+    return new Promise(r => {
+      setTimeout(() => r(), 10000);
+    });
+  } else {
+    const createChannelButton = 'div.application-workflow-prompt > div > button';
 
-  const walletIFrame = page.frames()[1];
-  await waitForAndClickButton(page, walletIFrame, createChannelButton);
-}
+    const walletIFrame = page.frames()[1];
+    await waitForAndClickButton(page, walletIFrame, createChannelButton);
+  }
+};
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingText = 'div.application-workflow-prompt > h1';
