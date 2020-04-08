@@ -7,6 +7,7 @@ import {preSeededTorrents, defaultTrackers} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
+import {Web3TorrentContext, web3torrent} from '../../clients/web3torrent-client';
 
 const log = debug('web3torrent:welcome-page-tracker-client');
 
@@ -52,6 +53,10 @@ class Welcome extends React.Component<RouteComponentProps & Props, {[infoHash: s
     this.trackerClient.destroy();
   }
 
+  async componentWillMount() {
+    await web3torrent.paymentChannelClient.enable();
+  }
+
   render() {
     const {history, ready} = this.props;
     return (
@@ -60,6 +65,20 @@ class Welcome extends React.Component<RouteComponentProps & Props, {[infoHash: s
           <h1>Streaming file transfer over WebTorrent</h1>
           <h2>TORRENTS ON THE WEB</h2>
         </div>
+        <Web3TorrentContext.Consumer>
+          {w3 => {
+            return (
+              <>
+                <FormButton
+                  name="withdraw"
+                  block={true}
+                  disabled={!ready}
+                  onClick={async () => w3.paymentChannelClient.closeAndWithdraw()}
+                ></FormButton>
+              </>
+            );
+          }}
+        </Web3TorrentContext.Consumer>
         <div className="subtitle">
           <p>
             Web3Torrent offers a new experience for sharing files in a decentralized way via paid
