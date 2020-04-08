@@ -49,7 +49,7 @@ export type Init = {
 type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 
-const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
+const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
   const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
@@ -68,6 +68,8 @@ const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor>
       ...participants.map(p => p.destination)
     )
   });
+
+  // TODO: We never actually check that the guarantor channel's state is supported.
 
   return {
     type: 'FundGuarantor',
@@ -254,11 +256,11 @@ export const options = (
 
   const services: Record<Services, ServiceConfig<Init>> = {
     getDeductions: getDeductions(store),
-    supportState: SupportState.machine(store as any),
+    supportState: SupportState.machine(store),
     ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
-    fundGuarantor: getObjective(store),
+    fundGuarantor: getFundGuarantorObjective(store),
     updateJointChannelFunding: updateJointChannelFunding(store)
   };
 
