@@ -26,7 +26,7 @@ function getFirebaseApp() {
   const connectedRef = firebase.database().ref('.info/connected');
   object(connectedRef)
     .pipe(map(change => (change.snapshot.val() ? 'connected' : 'disconnected')))
-    .subscribe(status => log.info('FIREBASE', status));
+    .subscribe(status => log.info(`FIREBASE ${status}`));
 
   return firebaseApp;
 }

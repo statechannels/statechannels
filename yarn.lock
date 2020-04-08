@@ -6542,13 +6542,19 @@
     "@types/node" "*"
     "@types/parse-torrent-file" "*"
 
-"@types/pino@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.npmjs.org/@types/pino/-/pino-5.20.0.tgz#d4bafa71d992d223d29c857c11988e8c3abc66f0"
-  integrity sha512-gz3Ahvx1UDEveXViOQtYqnUkjSVQFdoJqpZTW/63spEHwOGRJRJIi3JMJSClp5Sk1x1ljn9tHWjGczmP6s/rvg==
+"@types/pino-std-serializers@*":
+  version "2.4.0"
+  resolved "https://registry.npmjs.org/@types/pino-std-serializers/-/pino-std-serializers-2.4.0.tgz#8cad99175cb79c2448f7455a2d32fb3fde29579c"
+  integrity sha512-eAdu+NW1IkCdmp85SnhyKha+OOREQMT9lXaoICQxa7bhSauRiLzu3WSNt9Mf2piuJvWeXF/G0hGWHr63xNpIRA==
+
+"@types/pino@5.17.0":
+  version "5.17.0"
+  resolved "https://registry.npmjs.org/@types/pino/-/pino-5.17.0.tgz#850cd1d7c5a0e123f022badc2e2bb42d8d0efd9d"
+  integrity sha512-L5DBGFBRY4DKc7ufjZqV4J61ji9FSn4zKvQ5CUBbWi0gE0uOSNwDBpj1t7VwRwdmrpG3QlFxAeXgpViGUOS5Bg==
   dependencies:
-    "@types/events" "*"
     "@types/node" "*"
+    "@types/pino-std-serializers" "*"
+    "@types/sonic-boom" "*"
 
 "@types/postcss-import@12.0.0":
   version "12.0.0"
@@ -6809,6 +6815,13 @@
   version "0.2.3"
   resolved "https://registry.npmjs.org/@types/solidity-parser-antlr/-/solidity-parser-antlr-0.2.3.tgz#bb2d9c6511bf483afe4fc3e2714da8a924e59e3f"
   integrity sha512-FoSyZT+1TTaofbEtGW1oC9wHND1YshvVeHerME/Jh6gIdHbBAWFW8A97YYqO/dpHcFjIwEPEepX0Efl2ckJgwA==
+
+"@types/sonic-boom@*":
+  version "0.7.0"
+  resolved "https://registry.npmjs.org/@types/sonic-boom/-/sonic-boom-0.7.0.tgz#38337036293992a1df65dd3161abddf8fb9b7176"
+  integrity sha512-AfqR0fZMoUXUNwusgXKxcE9DPlHNDHQp6nKYUd4PSRpLobF5CCevSpyTEBcVZreqaWKCnGBr9KI1fHMTttoB7A==
+  dependencies:
+    "@types/node" "*"
 
 "@types/source-list-map@*":
   version "0.1.2"
@@ -8505,6 +8518,11 @@ atob@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
+
+atomic-sleep@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
+  integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
 
 auto-parse@^1.3.0:
   version "1.8.0"
@@ -26005,17 +26023,17 @@ pino@4.10.2:
     quick-format-unescaped "^1.1.1"
     split2 "^2.2.0"
 
-pino@5.16.0:
-  version "5.16.0"
-  resolved "https://registry.npmjs.org/pino/-/pino-5.16.0.tgz#94d01cb38b5f4a16dd4d7c47aa489fbfe40c3c06"
-  integrity sha512-k9cDzHd9S/oYSQ9B9g9+7RXkfsZX78sQXERC8x4p2XArECZXULx9nqNwZvJHsLj779wPCt+ybN+dG8jFR70p6Q==
+pino@6.1.1:
+  version "6.1.1"
+  resolved "https://registry.npmjs.org/pino/-/pino-6.1.1.tgz#445151a1456635b3a056ed15dae1b3d16b599a43"
+  integrity sha512-enLaR5hDiiegrbh5q4vfiO9aaNrG8EDB7vfPihEmQ/TfLBacnkV3mw2RikAm16UE4OQahnw1en0j/B3+ypNImA==
   dependencies:
     fast-redact "^2.0.0"
     fast-safe-stringify "^2.0.7"
     flatstr "^1.0.12"
     pino-std-serializers "^2.4.2"
-    quick-format-unescaped "^3.0.3"
-    sonic-boom "^0.7.5"
+    quick-format-unescaped "^4.0.1"
+    sonic-boom "^1.0.0"
 
 pino@^5.8.0:
   version "5.17.0"
@@ -27586,6 +27604,11 @@ quick-format-unescaped@^3.0.3:
   version "3.0.3"
   resolved "https://registry.npmjs.org/quick-format-unescaped/-/quick-format-unescaped-3.0.3.tgz#fb3e468ac64c01d22305806c39f121ddac0d1fb9"
   integrity sha512-dy1yjycmn9blucmJLXOfZDx1ikZJUi6E8bBZLnhPG5gBrVhHXx2xVyqqgKBubVNEXmx51dBACMHpoMQK/N/AXQ==
+
+quick-format-unescaped@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/quick-format-unescaped/-/quick-format-unescaped-4.0.1.tgz#437a5ea1a0b61deb7605f8ab6a8fd3858dbeb701"
+  integrity sha512-RyYpQ6Q5/drsJyOhrWHYMWTedvjTIat+FTwv0K4yoUxzvekw2aRHMQJLlnvt8UantkZg2++bEzD9EdxXqkWf4A==
 
 quick-lru@^1.0.0:
   version "1.1.0"
@@ -30512,6 +30535,14 @@ sonic-boom@^0.7.5:
   resolved "https://registry.npmjs.org/sonic-boom/-/sonic-boom-0.7.6.tgz#c42df6df884a6a3d54fa7a45b11e4e2196818d45"
   integrity sha512-k9E2QQ4zxuVRLDW+ZW6ISzJs3wlEorVdmM7ApDgor7wsGKSDG5YGHsGmgLY4XYh4DMlr/2ap2BWAE7yTFJtWnQ==
   dependencies:
+    flatstr "^1.0.12"
+
+sonic-boom@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/sonic-boom/-/sonic-boom-1.0.1.tgz#a5fdfcab1ddea31732ce9c7c054f3a5751eee089"
+  integrity sha512-o9tx+bonVEXSaPtptyXQXpP8l6UV9Bi3im2geZskvWw2a/o/hrbWI7EBbbv+rOx6Hubnzun9GgH4WfbgEA3MFQ==
+  dependencies:
+    atomic-sleep "^1.0.0"
     flatstr "^1.0.12"
 
 sort-keys-length@^1.0.0:
