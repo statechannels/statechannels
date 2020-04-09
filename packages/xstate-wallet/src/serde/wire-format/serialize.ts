@@ -3,9 +3,17 @@ import {
   Outcome as OutcomeWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
+  Guarantee as GuaranteeWire,
   Message as WireMessage
 } from '@statechannels/wire-format';
-import {SignedState, Outcome, AllocationItem, SimpleAllocation, Message} from '../../store/types';
+import {
+  SignedState,
+  Outcome,
+  AllocationItem,
+  SimpleAllocation,
+  Message,
+  SimpleGuarantee
+} from '../../store/types';
 import {calculateChannelId} from '../../store/state-utils';
 import {BigNumber, hexZeroPad, hexlify} from 'ethers/utils';
 
@@ -47,7 +55,7 @@ function serializeOutcome(outcome: Outcome): OutcomeWire {
     case 'MixedAllocation':
       return outcome.simpleAllocations.map(serializeSimpleAllocation);
     case 'SimpleGuarantee':
-      return [outcome];
+      return [serializeSimpleGuarantee(outcome)];
   }
 }
 
@@ -55,6 +63,14 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire
   return {
     assetHolderAddress: allocation.assetHolderAddress,
     allocationItems: allocation.allocationItems.map(serializeAllocationItem)
+  };
+}
+
+function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
+  return {
+    assetHolderAddress: guarantee.assetHolderAddress,
+    targetChannelId: guarantee.targetChannelId,
+    destinations: guarantee.destinations
   };
 }
 
