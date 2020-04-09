@@ -105,6 +105,16 @@ commands:
           path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
           destination: << parameters.job >>-click.error.png
 
+  upload_e2e_output:
+    description: 'Upload e2e browser output'
+    parameters:
+      job:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e-tests/browserOutput.log
+          destination: << parameters.job >>-browserOutput.log
+
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -306,9 +316,8 @@ jobs:
       - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=true yarn test)
       - upload_logs:
           file: integration-test-stats
-      # TODO: Enable once the test runs reliably
-      #- upload_e2e_screenshots:
-      #    job: integration-test-with-hub
+      - upload_e2e_screenshots:
+          job: integration-test-with-hub
 
   integration-test-web3torrent-with-hub:
     resource_class: medium
@@ -343,7 +352,7 @@ jobs:
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts 2> browserOutput.log)
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:
