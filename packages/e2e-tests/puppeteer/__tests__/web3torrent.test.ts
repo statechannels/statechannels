@@ -31,6 +31,7 @@ describe('Supports torrenting among peers with channels', () => {
     console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
+    tabs = [web3tTabA, web3tTabB];
 
     const logPageOutput = (role: string) => (msg: any) =>
       // use console.error so we can redirect STDERR to a file
