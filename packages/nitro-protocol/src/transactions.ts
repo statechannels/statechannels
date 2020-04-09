@@ -75,19 +75,33 @@ export function createConcludeTransaction(
 
 // Currently we assume each signedState is a unique combination of state/signature
 // So if multiple participants sign a state we expect a SignedState for each participant
-function createSignatureArguments(
+export function createSignatureArguments(
   signedStates: SignedState[]
 ): {states: State[]; signatures: utils.Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
-
-  // Get a list of all unique states.
-  const uniqueSignedStates = signedStates.filter((s, i, a) => a.indexOf(s) === i);
-  const states = uniqueSignedStates.map(s => s.state);
-
-  // Generate whoSignedWhat based on the original list of states (which may contain the same state signed by multiple participants)
-  const whoSignedWhat = signedStates.map(s => participants.indexOf(getStateSignerAddress(s)));
+  const states = [];
+  const whoSignedWhat = new Array<number>(participants.length);
   const signatures = [];
-  participants.forEach((p, i) => signatures.push(uniqueSignedStates[whoSignedWhat[i]].signature));
+
+  // Get a list of all unique signed states.
+  const uniqueSignedStates = signedStates.filter((s, i, a) => a.indexOf(s) === i);
+  // Get a list of unique states ignoring their signatures
+  // This allows us to create a single state with multiple signatures
+  // which is required by the contracts
+  const uniqueStates = uniqueSignedStates.map(s => s.state).filter((s, i, a) => a.indexOf(s) === i);
+
+  for (let i = 0; i < uniqueStates.length; i++) {
+    states.push(uniqueStates[i]);
+    // Get a list of all signed states that have the state
+    const signedStatesForUniqueState = uniqueSignedStates.filter(s => s.state === uniqueStates[i]);
+    // Iterate through the signatures and set signatures/whoSignedWhawt
+    for (const ss of signedStatesForUniqueState) {
+      signatures.push(ss.signature);
+
+      const participantIndex = participants.indexOf(getStateSignerAddress(ss));
+      whoSignedWhat[participantIndex] = i;
+    }
+  }
 
   return {states, signatures, whoSignedWhat};
 }

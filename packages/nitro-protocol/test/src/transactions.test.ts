@@ -10,9 +10,11 @@ import {
   createConcludeTransaction,
   createForceMoveTransaction,
   createRespondTransaction,
+  createSignatureArguments,
 } from '../../src/transactions';
 
 const wallet = Wallet.createRandom();
+
 const channel: Channel = {
   chainId: '0x1',
   channelNonce: '0x1',
@@ -73,6 +75,74 @@ describe('transaction-generators', () => {
     const transactionRequest: TransactionRequest = createConcludeTransaction([signedState]);
 
     expect(transactionRequest.data).toBeDefined();
+  });
+
+  it('creates a correct signature arguments when handling a state with multiple signatures', async () => {
+    const wallet2 = Wallet.createRandom();
+    const twoPlayerChannel = {...channel, participants: [wallet.address, wallet2.address]};
+    const state = {
+      turnNum: 0,
+      isFinal: false,
+      appDefinition: AddressZero,
+      appData: '0x0',
+      outcome: [],
+      channel: twoPlayerChannel,
+      challengeDuration: 0x0,
+    };
+    const signedStates = [
+      await signState(state, wallet.privateKey),
+      await signState(state, wallet2.privateKey),
+    ];
+    const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+
+    expect(states).toHaveLength(1);
+    expect(signatures).toHaveLength(2);
+    expect(whoSignedWhat).toEqual([0, 0]);
+  });
+
+  it('creates a correct signature arguments when handling multiple states', async () => {
+    const wallet2 = Wallet.createRandom();
+    const twoPlayerChannel = {...channel, participants: [wallet.address, wallet2.address]};
+    const state = {
+      turnNum: 0,
+      isFinal: false,
+      appDefinition: AddressZero,
+      appData: '0x0',
+      outcome: [],
+      channel: twoPlayerChannel,
+      challengeDuration: 0x0,
+    };
+    const signedStates = [
+      await signState(
+        {
+          turnNum: 0,
+          isFinal: false,
+          appDefinition: AddressZero,
+          appData: '0x0',
+          outcome: [],
+          channel: twoPlayerChannel,
+          challengeDuration: 0x0,
+        },
+        wallet.privateKey
+      ),
+      await signState(
+        {
+          turnNum: 1,
+          isFinal: false,
+          appDefinition: AddressZero,
+          appData: '0x0',
+          outcome: [],
+          channel: twoPlayerChannel,
+          challengeDuration: 0x0,
+        },
+        wallet2.privateKey
+      ),
+    ];
+    const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+
+    expect(states).toHaveLength(2);
+    expect(signatures).toHaveLength(2);
+    expect(whoSignedWhat).toEqual([0, 1]);
   });
 
   describe('respond transactions', () => {
