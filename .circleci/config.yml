@@ -353,7 +353,7 @@ jobs:
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts 2> browserOutput.log)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:
