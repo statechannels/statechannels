@@ -57,6 +57,11 @@ const outcome: Outcome = simpleEthAllocation([
 ]);
 
 const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
+const hubContext: VirtualFundingAsHub.Init = {
+  ...context,
+  [ParticipantIdx.A]: {},
+  [ParticipantIdx.B]: {}
+};
 
 const ledgerAmounts = [4, 4].map(bigNumberify);
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
@@ -76,7 +81,7 @@ beforeEach(async () => {
 });
 
 test('virtual funding with smart hub', async () => {
-  const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(context));
+  const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(hubContext));
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
@@ -125,7 +130,6 @@ test('virtual funding with smart hub', async () => {
     expect(hubService.state.value).toEqual('success');
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
-
     const {supported: supportedState} = await aStore.getEntry(jointChannelId);
     const outcome = supportedState.outcome;
     const amount = bigNumberify(5);
