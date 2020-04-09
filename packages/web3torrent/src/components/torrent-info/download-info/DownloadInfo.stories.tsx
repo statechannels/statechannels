@@ -56,7 +56,7 @@ storiesOf('Web3Torrent', module)
                 peerAccount: b,
                 pseChannelId: c2
               },
-              uploaded: 333
+              downloaded: 333
             }
           ]
         } as unknown) as Torrent
