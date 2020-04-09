@@ -3,12 +3,31 @@ import {Contract, ContractFactory, ethers, providers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
+import {logger} from '../logger';
+
+const log = logger();
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(cHubChainPK, provider);
 
 const lock = new AsyncLock();
+
+export async function makeDeposits(
+  depositsToMake: {
+    channelId: string;
+    amountToDeposit: BigNumber;
+  }[]
+) {
+  log.info('Depositing');
+  await Promise.all(
+    depositsToMake.map(depositToMake => {
+      log.info(`depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`);
+      return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
+    })
+  );
+  log.info('Deposited');
+}
 export class Blockchain {
   static ethAssetHolder: Contract;
   static async fund(channelID: string, value: BigNumber): Promise<string> {

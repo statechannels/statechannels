@@ -1,13 +1,15 @@
 import * as firebase from 'firebase';
-import {stateChanges, ListenEvent} from 'rxfire/database';
+import {stateChanges, ListenEvent, object} from 'rxfire/database';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {Message as WireMessage, validateMessage} from '@statechannels/wire-format';
 import {map} from 'rxjs/operators';
-import {Message, serializeMessage} from '../wallet/xstate-wallet-internals';
+import {Message, serializeMessage, deserializeMessage} from '../wallet/xstate-wallet-internals';
 import * as _ from 'lodash/fp';
 import {notContainsHubParticipantId} from '../utils';
+import {tryCatch, chain, right, map as fpMap, toError} from 'fp-ts/lib/Either';
+import {pipe} from 'fp-ts/lib/pipeable';
 
 const log = logger();
 
@@ -20,6 +22,12 @@ function getFirebaseApp() {
     apiKey: process.env.FIREBASE_API_KEY,
     databaseURL: process.env.FIREBASE_URL
   });
+
+  const connectedRef = firebase.database().ref('.info/connected');
+  object(connectedRef)
+    .pipe(map(change => (change.snapshot.val() ? 'connected' : 'disconnected')))
+    .subscribe(status => log.info(`FIREBASE ${status}`));
+
   return firebaseApp;
 }
 
@@ -35,14 +43,17 @@ function fbSend(message: WireMessage) {
 }
 
 export function fbObservable() {
-  log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubParticipantId);
   return stateChanges(hubRef, [ListenEvent.added]).pipe(
     map(change => ({
       snapshotKey: change.snapshot.key,
-      messageObj: change.snapshot.val()
+      message: pipe(right(change.snapshot.val()), chain(isValidMessage), fpMap(deserializeMessage))
     }))
   );
+}
+
+function isValidMessage(messageObj) {
+  return tryCatch(() => validateMessage(messageObj), toError);
 }
 
 // exported just for unit testing
@@ -58,10 +69,10 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
     );
 }
 
-export async function sendReplies(snapshotKey: string, messageToSend: Message) {
-  const hubRef = getMessagesRef().child(cHubParticipantId);
+export async function sendReplies(messageToSend: Message) {
+  log.info({messageToSend}, 'Responding with message');
   await Promise.all(messagesToSend(messageToSend).map(fbSend));
-  await hubRef.child(snapshotKey).remove();
+  log.info('Messages sent');
 }
 
 export async function deleteIncomingMessage(snapshotKey: string) {

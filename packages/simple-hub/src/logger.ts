@@ -6,5 +6,10 @@ export function logger() {
   if (!_logger) {
     _logger = pino();
   }
-  return _logger;
+  return {
+    debug: _logger.debug.bind(_logger),
+    info: _logger.info.bind(_logger),
+    error: _logger.error.bind(_logger),
+    fatal: _logger.fatal.bind(_logger)
+  };
 }
