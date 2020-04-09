@@ -12,7 +12,27 @@
         "node_modules/.bin/jest",
         "--runInBand",
         "--env=jsdom",
-        "--config=${workspaceRoot}/jest.config.js",
+        "--config=${workspaceRoot}/config/jest/jest.config.js",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "<node_internals>/**/*.js"]
+    },
+    {
+      "name": "Jest Current Contract Test",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.contracts.config.js",
         "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",
