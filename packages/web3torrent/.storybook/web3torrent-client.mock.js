@@ -6,17 +6,17 @@ const mockWeb3TorrentClient = () => {
   const torrent = utils.createMockTorrent({
     numPeers: Object.keys(_peers).length,
     _peers,
-    wires: Array.from(_peers).map(({wire}) => wire)
+    wires: Array.from(_peers, ({ wire }) => wire)
   });
 
-  return {torrents: [torrent]};
+  return { torrents: [torrent] };
 };
 
-const web3torrent = mockWeb3TorrentClient();
+const web3Torrent = mockWeb3TorrentClient();
 
-const Web3TorrentContext = React.createContext(web3torrent);
+const Web3TorrentContext = React.createContext(web3Torrent);
 
 module.exports = {
   Web3TorrentContext,
-  web3torrent
+  web3Torrent
 };

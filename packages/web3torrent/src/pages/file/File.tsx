@@ -8,18 +8,18 @@ import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTabl
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {parseMagnetURL} from '../../utils/magnet';
-import torrentStatusChecker from '../../utils/torrent-status-checker';
+import {torrentStatusChecker} from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
 import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 import _ from 'lodash';
 
 const getTorrentAndPeersData: (
-  web3torrent: WebTorrentPaidStreamingClient,
+  web3Torrent: WebTorrentPaidStreamingClient,
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
   setPeers: React.Dispatch<React.SetStateAction<TorrentPeers>>
-) => (torrent: Torrent) => void = (web3torrent, setTorrent, setPeers) => torrent => {
-  const liveTorrent = torrentStatusChecker(web3torrent)(torrent, torrent.infoHash);
+) => (torrent: Torrent) => void = (web3Torrent, setTorrent, setPeers) => torrent => {
+  const liveTorrent = torrentStatusChecker(web3Torrent, torrent, torrent.infoHash);
   const livePeers = getTorrentPeers(torrent.infoHash);
   setTorrent(liveTorrent);
   setPeers(livePeers);

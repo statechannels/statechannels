@@ -1,18 +1,16 @@
 import {web3torrent} from '../clients/web3torrent-client';
 import {Status, Torrent} from '../types';
 import {createMockTorrent} from './test-utils';
-import torrentStatusCheck, {getFormattedETA, getStatus} from './torrent-status-checker';
+import {torrentStatusChecker, getFormattedETA, getStatus} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
 
 describe('Torrent Status Checker', () => {
   let torrent: Torrent;
   const mockInfoHash = '123';
-  let checkTorrentStatus: (previousData: Torrent, infohash: any) => Torrent;
 
   beforeAll(() => {
     mockMetamask();
     web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
-    checkTorrentStatus = torrentStatusCheck(web3torrent);
   });
   beforeEach(() => {
     torrent = createMockTorrent() as Torrent;
@@ -23,7 +21,7 @@ describe('Torrent Status Checker', () => {
 
   describe('Main function', () => {
     it('should return a torrent with a status of Idle when no info hash exists', () => {
-      expect(checkTorrentStatus(torrent, undefined)).toEqual({
+      expect(torrentStatusChecker(web3torrent, torrent, undefined)).toEqual({
         ...torrent,
         status: Status.Idle
       } as Torrent);
@@ -32,7 +30,7 @@ describe('Torrent Status Checker', () => {
     it('should return a torrent with a status of Idle when the torrent is no longer live', () => {
       const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
 
-      const result = checkTorrentStatus(torrent, mockInfoHash);
+      const result = torrentStatusChecker(web3torrent, torrent, mockInfoHash);
 
       expect(getSpy).toHaveBeenCalledWith(mockInfoHash);
       expect(result).toEqual({
@@ -60,7 +58,7 @@ describe('Torrent Status Checker', () => {
         ...inProgressTorrent
       }));
 
-      const result = checkTorrentStatus(torrent, mockInfoHash);
+      const result = torrentStatusChecker(web3torrent, torrent, mockInfoHash);
 
       expect(result).toEqual({
         ...torrent,
