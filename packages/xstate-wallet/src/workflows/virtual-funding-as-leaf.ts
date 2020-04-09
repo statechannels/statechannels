@@ -8,7 +8,7 @@ import {
   StateNodeConfig,
   ActionTypes
 } from 'xstate';
-import {filter, map, take, flatMap, tap} from 'rxjs/operators';
+import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store';
 import {SupportState, LedgerFunding} from '.';
@@ -48,8 +48,9 @@ export type Init = {
 
 type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
+type WithObjectiveData = WithDeductions & {guarantorChannelId: string; ledgerId: string};
 
-const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
+const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
   const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
@@ -68,6 +69,8 @@ const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor>
       ...participants.map(p => p.destination)
     )
   });
+
+  // TODO: We never actually check that the guarantor channel's state is supported.
 
   return {
     type: 'FundGuarantor',
@@ -95,6 +98,7 @@ export const enum States {
 
 const enum Services {
   getDeductions = 'getDeductions',
+  waitForSupportedGuarantorState = 'waitForSuppotedGuarantorState',
   waitForFirstJointState = 'waitForFirstJointState',
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
@@ -102,6 +106,15 @@ const enum Services {
   fundGuarantor = 'fundGuarantor',
   updateJointChannelFunding = 'updateJointChannelFunding'
 }
+
+const waitForSupportedGuarantorState = (store: Store) => async (ctx: WithObjectiveData) =>
+  store
+    .channelUpdatedFeed(ctx.guarantorChannelId)
+    .pipe(
+      filter(u => u.isSupported),
+      first()
+    )
+    .toPromise();
 
 export const config: StateNodeConfig<Init, any, any> = {
   key: 'virtual-funding-as-leaf',
@@ -126,20 +139,20 @@ export const config: StateNodeConfig<Init, any, any> = {
         getObjective: {
           invoke: {
             src: Services.fundGuarantor,
-            onDone: 'runObjective',
+            onDone: 'preparingGuarantorChannel',
             onError: '#workflow.failure'
-          }
+          },
+          exit: [Actions.triggerGuarantorObjective, Actions.assignGuarantorId]
+        },
+        preparingGuarantorChannel: {
+          invoke: {src: Services.waitForSupportedGuarantorState, onDone: 'runObjective'}
         },
         runObjective: {
-          entry: [Actions.triggerGuarantorObjective, Actions.assignGuarantorId],
           invoke: {
             src: Services.ledgerFunding,
-            data: (
-              ctx: WithDeductions,
-              {data}: DoneInvokeEvent<FundGuarantor>
-            ): LedgerFunding.Init => ({
-              targetChannelId: data.data.guarantorId,
-              ledgerChannelId: data.data.ledgerId,
+            data: (ctx: WithObjectiveData): LedgerFunding.Init => ({
+              targetChannelId: ctx.guarantorChannelId,
+              ledgerChannelId: ctx.ledgerId,
               deductions: ctx.deductions
             }),
             onDone: 'updateFunding'
@@ -215,7 +228,7 @@ export const jointChannelUpdate = (store: Store) => ({
     .toPromise();
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
-  const {latestSupportedByMe, myIndex} = await store.getEntry(ctx.jointChannelId);
+  const {latestSignedByMe: latestSupportedByMe, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
   const outcomeIdx = myIndex === ParticipantIdx.A ? OutcomeIdx.A : OutcomeIdx.B;
@@ -231,9 +244,7 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   };
 };
 
-type GuarantorKnown = Init & {guarantorChannelId: string};
-
-const updateJointChannelFunding = (store: Store) => async (ctx: GuarantorKnown) => {
+const updateJointChannelFunding = (store: Store) => async (ctx: WithObjectiveData) => {
   const {jointChannelId, guarantorChannelId} = ctx;
   await store.setFunding(jointChannelId, {type: 'Guarantee', guarantorChannelId});
 };
@@ -248,17 +259,19 @@ export const options = (
       (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({...ctx, ...data})
     ),
     [Actions.assignGuarantorId]: assign({
-      guarantorChannelId: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data.data.guarantorId
+      guarantorChannelId: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data.data.guarantorId,
+      ledgerId: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data.data.ledgerId
     })
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {
+    waitForSuppotedGuarantorState: waitForSupportedGuarantorState(store),
     getDeductions: getDeductions(store),
-    supportState: SupportState.machine(store as any),
+    supportState: SupportState.machine(store),
     ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
-    fundGuarantor: getObjective(store),
+    fundGuarantor: getFundGuarantorObjective(store),
     updateJointChannelFunding: updateJointChannelFunding(store)
   };
 

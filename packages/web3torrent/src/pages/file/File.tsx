@@ -12,6 +12,7 @@ import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
 import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
+import _ from 'lodash';
 
 const getTorrentAndPeersData: (
   web3torrent: WebTorrentPaidStreamingClient,
@@ -63,7 +64,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
             mySigningAddress: me
           } = web3Torrent.paymentChannelClient;
           // Only show budget when any channel exists.
-          const showBudget = budgetCache && Object.keys(channelCache).length > 0;
+          const showBudget = !_.isEmpty(budgetCache) && Object.keys(channelCache).length > 0;
           return (
             <>
               <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />

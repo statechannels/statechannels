@@ -36,13 +36,9 @@ const testContext = {
 const approveBudgetAndFund = machine(store, messagingService, testContext);
 
 function Toggle() {
-  const [current, send] = useMachine(approveBudgetAndFund, {devTools: true});
+  const [current] = useMachine(approveBudgetAndFund, {devTools: true});
 
-  return (
-    <button onClick={() => send('USER_APPROVES_BUDGET')}>
-      {current.matches('inactive') ? 'Off' : 'On'}
-    </button>
-  );
+  return <div>{current.value}</div>;
 }
 
 ReactDOM.render(<Toggle />, document.getElementById('root'));

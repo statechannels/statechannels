@@ -1,4 +1,6 @@
 import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
+import {filter, first, map} from 'rxjs/operators';
+import {ChannelLock} from '../store/store';
 
 import {SupportState} from '.';
 import {Store, Errors as StoreErrors, Funding} from '../store';
@@ -26,6 +28,7 @@ const enum Services {
   getTargetOutcome = 'getTargetOutcome',
   updateFunding = 'updateFunding',
   supportState = 'supportState',
+  checkTarget = 'checkTarget',
   acquireLock = 'acquireLock',
   releaseLock = 'releaseLock'
 }
@@ -33,7 +36,8 @@ const enum Services {
 export const enum Errors {
   underfunded = 'Ledger channel is underfunded',
   underallocated = 'Ledger channel is underallocated',
-  finalized = 'Ledger channel is finalized'
+  finalized = 'Ledger channel is finalized',
+  unSupportedTargetChannel = 'Target channel has no supported state: '
 }
 
 const FAILURE = `#${WORKFLOW}.failure`;
@@ -45,13 +49,21 @@ const fundingTarget = getDataAndInvoke(
   'releasingLock'
 );
 
+const checkTarget = (store: Store) => async (ctx: Init) => {
+  const {isSupported} = await store.getEntry(ctx.targetChannelId);
+  if (!isSupported) throw Error(Errors.unSupportedTargetChannel + ctx.targetChannelId);
+};
+
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
   initial: 'acquiringLock',
   states: {
     acquiringLock: {
-      invoke: {src: Services.acquireLock, onDone: 'fundingTarget'},
+      invoke: {src: Services.acquireLock, onDone: 'checkingTarget'},
       exit: assign<WithLock>({lock: (_, event: DoneInvokeEvent<ChannelLock>) => event.data})
+    },
+    checkingTarget: {
+      invoke: {src: Services.checkTarget, onDone: 'fundingTarget', onError}
     },
     fundingTarget,
     failure: {
@@ -66,8 +78,6 @@ export const config: MachineConfig<any, any, any> = {
   }
 };
 
-import {filter, first, map} from 'rxjs/operators';
-import {ChannelLock} from '../store/store';
 const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
   try {
     return await store.acquireChannelLock(ctx.ledgerChannelId);
@@ -94,7 +104,10 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   const {targetChannelId, ledgerChannelId, deductions} = ctx;
   const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
-  const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+  const {
+    amount,
+    channelStorage: {finalizesAt}
+  } = await store.chain.getChainInfo(ledgerChannelId);
 
   const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
     .allocationItems.map(i => i.amount)
@@ -102,7 +115,11 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   const toDeduct = deductions.map(i => i.amount).reduce(add);
 
   if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
-  if (finalized) throw new Error(Errors.finalized);
+
+  // TODO: Store should expose method as opposed to workflow checking chain directly
+  if (finalizesAt.gt(0) && finalizesAt.lte(await store.chain.getBlockNumber()))
+    throw new Error(Errors.finalized);
+
   if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
 
   return {
@@ -121,6 +138,7 @@ const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId
 };
 
 const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
+  checkTarget: checkTarget(store),
   getTargetOutcome: getTargetOutcome(store),
   updateFunding: updateFunding(store),
   supportState: SupportState.machine(store),

@@ -2,7 +2,7 @@ import React from 'react';
 import {EventData} from 'xstate';
 import './wallet.scss';
 import {Button, Heading, Flex, Text} from 'rimble-ui';
-import {WorkflowState} from '../workflows/confirm-create-channel';
+import {WorkflowState} from '../workflows/confirm';
 
 interface Props {
   current: WorkflowState;

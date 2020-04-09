@@ -9,10 +9,14 @@ import * as CreateAndFundLedger from './create-and-fund-ledger';
 import * as VirtualDefundingAsLeaf from './virtual-defunding-as-leaf';
 import * as VirtualDefundingAsHub from './virtual-defunding-as-hub';
 import * as ConcludeChannel from './conclude-channel';
+import * as ChallengeChannel from './challenge-channel';
 import * as ApproveBudgetAndFund from './approve-budget-and-fund';
 import * as CloseLedgerAndWithdraw from './close-ledger-and-withdraw';
+import * as Application from './application';
+import * as Confirm from './confirm';
 
 export {
+  Application,
   SupportState,
   DirectFunding,
   Depositing,
@@ -23,7 +27,9 @@ export {
   VirtualDefundingAsLeaf,
   VirtualDefundingAsHub,
   CreateAndFundLedger,
+  ChallengeChannel,
   ConcludeChannel,
   ApproveBudgetAndFund,
-  CloseLedgerAndWithdraw
+  CloseLedgerAndWithdraw,
+  Confirm
 };

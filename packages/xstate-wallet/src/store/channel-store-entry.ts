@@ -3,49 +3,57 @@ import {
   StateVariables,
   SignedState,
   Participant,
-  ChannelStoredData
+  ChannelStoredData,
+  SignedStateWithHash,
+  SignedStateVarsWithHash,
+  StateVariablesWithHash
 } from './types';
-import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
+import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 
 import {Funding} from './store';
+export interface SignatureEntry {
+  signature: string;
+  signer: string;
+}
+
+export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {
-  public readonly channelConstants: ChannelConstants;
-  public readonly myIndex: number;
-  private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {};
-  private signatures: Record<string, Array<string | undefined>> = {};
+  private stateVariables: Array<SignedStateVarsWithHash> = [];
+
   public funding: Funding | undefined = undefined;
+
+  public readonly myIndex: number;
+  public readonly channelConstants: ChannelConstants;
   public readonly applicationSite?: string;
+
   constructor(channelData: ChannelStoredData) {
+    const {
+      myIndex,
+      stateVariables,
+      funding,
+      applicationSite,
+      channelConstants: {chainId, participants, appDefinition, challengeDuration, channelNonce}
+    } = channelData;
+
+    this.myIndex = myIndex;
+    this.stateVariables = stateVariables;
+    this.funding = funding;
+    this.applicationSite = applicationSite;
+
     this.myIndex = channelData.myIndex;
-    this.stateVariables = channelData.stateVariables;
-    this.signatures = channelData.signatures;
-    this.funding = channelData.funding;
-    this.applicationSite = channelData.applicationSite;
+
     this.channelConstants = {
-      chainId: channelData.channelConstants.chainId,
-      participants: channelData.channelConstants.participants,
-      appDefinition: channelData.channelConstants.appDefinition,
-      challengeDuration: bigNumberify(channelData.channelConstants.challengeDuration),
-      channelNonce: bigNumberify(channelData.channelConstants.channelNonce)
+      chainId,
+      participants,
+      appDefinition,
+      challengeDuration: bigNumberify(challengeDuration),
+      channelNonce: bigNumberify(channelNonce)
     };
 
-    this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
-      result[stateHash] = _.pick(
-        stateVariables,
-        'turnNum',
-        'outcome',
-        'appData',
-        'isFinal',
-        'participants',
-        'channelNonce',
-        'appDefinition',
-        'challengeDuration',
-        'chainId'
-      );
-    });
+    this.stateVariables = channelData.stateVariables;
   }
 
   public setFunding(funding: Funding) {
@@ -53,40 +61,22 @@ export class ChannelStoreEntry {
   }
 
   public get sortedStates() {
-    return this.sortedByDescendingTurnNum.map(s => ({...this.channelConstants, ...s}));
+    return this.signedStates.map(s => ({...this.channelConstants, ...s}));
   }
 
-  private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
-    const state = {...stateVars, ...this.channelConstants};
-    return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
+  private mySignature(stateVars: StateVariables, signatures: SignatureEntry[]): boolean {
+    return signatures.some(sig => sig.signer === this.myAddress);
   }
 
-  private get myAddress(): string {
+  public get myAddress(): string {
     return this.participants[this.myIndex].signingAddress;
   }
 
-  private getStateVariables(k): StateVariables {
-    const vars = this.stateVariables[k];
-    if (!vars) throw 'No variable found';
-    return vars;
-  }
-
-  private getFilteredSignatures(k): string[] {
-    function isString(x: string | undefined): x is string {
-      return x !== undefined;
-    }
-    return (this.signatures[k] || []).filter(isString);
-  }
-
-  private get signedStates(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.stateVariables).map(k => ({
-      ...this.getStateVariables(k),
-      signatures: this.getFilteredSignatures(k)
+  private get signedStates(): Array<SignedStateWithHash> {
+    return this.stateVariables.map(s => ({
+      ...this.channelConstants,
+      ...s
     }));
-  }
-
-  private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
   get isSupported() {
@@ -97,11 +87,69 @@ export class ChannelStoreEntry {
     return this.isSupported && this.supported.isFinal;
   }
 
+  get isChallenging() {
+    // TODO: Check chain
+    return false;
+  }
+
   private get _supported() {
-    // TODO: proper check
-    return this.sortedByDescendingTurnNum.find(
-      s => s.signatures.filter(sig => !!sig).length === this.participants.length
-    );
+    const latestSupport = this._support;
+    return latestSupport.length === 0 ? undefined : latestSupport[0];
+  }
+
+  public get support(): Array<SignedState> {
+    return this._support.map(s => ({...s, ...this.channelConstants}));
+  }
+
+  // This is a simple check based on _requireValidTransition from NitroProtocol
+  // We will eventually want to perform a proper validTransition check
+  // but we will have to be careful where we do that to prevent eating up a ton of cpu
+  private validChain(firstState: SignedState, secondState: SignedState): boolean {
+    if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
+      return false;
+    }
+    if (secondState.isFinal) {
+      return outcomesEqual(firstState.outcome, secondState.outcome);
+    }
+    if (secondState.turnNum.lt(2 * this.nParticipants())) {
+      return (
+        outcomesEqual(firstState.outcome, secondState.outcome) &&
+        firstState.appData === secondState.appData
+      );
+    }
+    return true;
+  }
+
+  private get _support(): Array<SignedStateWithHash> {
+    let support: Array<SignedStateWithHash> = [];
+
+    let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+    let previousState;
+
+    for (const signedState of this.signedStates.reverse()) {
+      // If there is not a valid transition we know there cannot be a valid support
+      // so we clear out what we have and start at the current signed state
+      if (previousState && !this.validChain(signedState, previousState)) {
+        support = [];
+        participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+      }
+      const moverIndex = signedState.turnNum.mod(this.nParticipants()).toNumber();
+      const moverForThisTurn = this.participants[moverIndex].signingAddress;
+
+      // If the mover hasn't signed the state then we know it cannot be part of the support
+      if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
+        support.push(signedState);
+
+        for (const signature of signedState.signatures) {
+          participantsWhoHaveNotSigned.delete(signature.signer);
+          if (participantsWhoHaveNotSigned.size === 0) {
+            return support;
+          }
+        }
+      }
+      previousState = signedState;
+    }
+    return [];
   }
 
   get supported() {
@@ -109,27 +157,23 @@ export class ChannelStoreEntry {
     if (!vars) throw new Error('No supported state found');
     return {...this.channelConstants, ...vars};
   }
-  get support() {
-    // TODO: This should return the whole support
-    // aka the whole chain of signed states that support the latest state
-    return [{...this.channelConstants, ...this.supported}];
-  }
+
   get isSupportedByMe() {
     return !!this._latestSupportedByMe;
   }
 
   private get _latestSupportedByMe() {
-    return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
+    return this.signedStates.find(s => this.mySignature(s, s.signatures));
   }
 
-  get latestSupportedByMe() {
+  get latestSignedByMe() {
     const vars = this._latestSupportedByMe;
     if (!vars) throw new Error('No state supported by me');
     return {...this.channelConstants, ...vars};
   }
 
   get latest() {
-    return {...this.channelConstants, ...this.sortedByDescendingTurnNum[0]};
+    return {...this.channelConstants, ...this.signedStates[this.signedStates.length - 1]};
   }
 
   get latestState() {
@@ -147,62 +191,63 @@ export class ChannelStoreEntry {
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     const state = {...stateVars, ...this.channelConstants};
 
-    const signatureString = signState(state, privateKey);
+    const signatureEntry = createSignatureEntry(state, privateKey);
 
-    this.addState(stateVars, signatureString);
-
-    return {
-      ...stateVars,
-      ...this.channelConstants,
-      signatures: this.getFilteredSignatures(hashState(state))
-    };
+    return this.addState(stateVars, signatureEntry);
   }
 
-  addState(stateVars: StateVariables, signature: string) {
-    const state = {
+  addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
+    const signedStateVars: SignedStateVariables = {
       ...stateVars,
-      ...this.channelConstants
+      signatures: [signatureEntry]
     };
-    const stateHash = hashState(state);
-    this.stateVariables[stateHash] = stateVars;
+    const withHash: StateVariablesWithHash = {
+      ...stateVars,
+      stateHash: hashState(this.state(signedStateVars))
+    };
+
+    // TODO: This check could be more efficient
     const {participants} = this.channelConstants;
 
     // check the signature
-    const signer = getSignerAddress(state, signature);
-    const signerIndex = participants.findIndex(p => p.signingAddress === signer);
+
+    const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
+    let entry = this.stateVariables.find(s => s.stateHash === withHash.stateHash);
+
+    if (!entry) {
+      entry = {...withHash, signatures: []};
+      this.stateVariables.push(entry);
+    }
 
     if (signerIndex === -1) {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    const signatures =
-      this.signatures[stateHash] ?? new Array<string | undefined>(this.nParticipants());
-    signatures[signerIndex] = signature;
-    this.signatures[stateHash] = signatures;
+    entry.signatures = _.uniq(_.concat(entry.signatures, signatureEntry));
 
-    // TODO: Since the supported state check doesn't work correctly this GC doesn't work
-    // and eats up a lot of CPU. Temporarily disabling
-    // See https://github.com/statechannels/monorepo/issues/1344
+    this.clearOldStates();
 
-    // // Garbage collect stale states
-    // // TODO: Examine the safety here
-    // this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
-    //   if (
-    //     !this.isSupported ||
-    //     this.inSupport(stateHash) ||
-    //     stateVars.turnNum.gt(this.supported.turnNum)
-    //   )
-    //     result[stateHash] = stateVars;
-    // });
+    return this.state(entry);
   }
 
-  // private inSupport(key): boolean {
-  //   const supportKeys = this.isSupported
-  //     ? // TODO get the proper keys
-  //       [hashState({...this.supported, ...this.channelConstants})]
-  //     : [];
-  //   return supportKeys.indexOf(key) !== -1;
-  // }
+  private state(stateVars: SignedStateVariables): SignedState {
+    return {...this.channelConstants, ...stateVars};
+  }
+
+  private clearOldStates() {
+    // If we don't have a supported state we don't clean anything out
+    if (this.isSupported) {
+      // The support is returned in descending turn number so we need to grab the last element to find the earliest state
+      const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
+
+      // Find where the first support state is in our current state array
+      const supportIndex = this.stateVariables.findIndex(
+        sv => sv.stateHash === firstSupportStateHash
+      );
+      // Take everything after that
+      this.stateVariables = this.stateVariables.slice(supportIndex);
+    }
+  }
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;
@@ -215,44 +260,43 @@ export class ChannelStoreEntry {
       channelNonce: this.channelConstants.channelNonce.toString()
     };
 
-    const stateVariables: Record<string, any> = ChannelStoreEntry.prepareStateVariables(
+    const stateVariables = ChannelStoreEntry.prepareStateVariables(
       _.cloneDeep(this.stateVariables)
     );
 
     return {
       stateVariables,
       channelConstants,
-      signatures: this.signatures,
       funding: this.funding,
       myIndex: this.myIndex,
       applicationSite: this.applicationSite
     };
   }
+
   static fromJson(data) {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
-    const {channelConstants, signatures, funding, myIndex, applicationSite} = data;
+    const {channelConstants, funding, myIndex, applicationSite} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
+
     return new ChannelStoreEntry({
       channelConstants,
       myIndex,
       stateVariables,
-      signatures,
       funding,
       applicationSite
     });
   }
 
   private static prepareStateVariables(
-    stateVariables,
+    stateVariables, // TODO: Make this typesafe!
     parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
   ) {
-    for (const stateHash in stateVariables) {
-      const state = stateVariables[stateHash];
+    for (const state of stateVariables) {
       if (state.turnNum) {
         state.turnNum = parserFunction(state.turnNum);
       }

@@ -6,7 +6,7 @@ import {Init, machine} from '../create-and-fund';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat, isSimpleEthAllocation, add} from '../../utils';
@@ -70,14 +70,14 @@ const allocation: Outcome = {
 const ledgerAmounts = amounts.map(a => a.add(2));
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
-const context: Init = {channelId: targetChannelId, allocation};
+const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
 let aStore: TestStore;
 let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
 
 let chain: FakeChain;
@@ -107,8 +107,8 @@ beforeEach(async () => {
   });
 });
 
-const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
-test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined', async () => {
+test('it uses direct funding when told', async () => {
+  const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -125,14 +125,11 @@ test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined',
 });
 
 test('it uses virtual funding when enabled', async () => {
-  const mockVirtualFunding = jest.spyOn(constants, 'useVirtualFunding');
-  mockVirtualFunding.mockImplementation(() => true);
-
-  process.env.USE_VIRTUAL_FUNDING = 'true';
-
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
-  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+  let signatures = [wallet1, wallet3].map(({privateKey}) =>
+    createSignatureEntry(state, privateKey)
+  );
   await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
   await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
@@ -140,12 +137,14 @@ test('it uses virtual funding when enabled', async () => {
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
-  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const [aService, bService] = [aStore, bStore].map(connectToStore);
+  const [aService, bService] = [aStore, bStore].map((store: Store) =>
+    interpret(machine(store).withContext({...context, funding: 'Virtual'})).start()
+  );
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('success');
@@ -161,13 +160,11 @@ test('it uses virtual funding when enabled', async () => {
   // Verify the budgets are allocated to the channel
   const aBudget = await aStore.getBudget(TEST_SITE);
   const aChannelAmount =
-    aBudget.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    aBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
   const bBudget = await bStore.getBudget(TEST_SITE);
   const bChannelAmount =
-    bBudget.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    bBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
-
-  mockVirtualFunding.mockRestore();
 });

@@ -1,5 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 import {Funding} from './store';
+import {FundingStrategy} from '@statechannels/client-api-schema/src';
+import {SignatureEntry} from './channel-store-entry';
 
 export interface SiteBudget {
   domain: string;
@@ -29,7 +31,7 @@ export interface StateVariables {
   appData: string;
   isFinal: boolean;
 }
-
+export type StateVariablesWithHash = StateVariables & Hashed;
 export type Destination = string & {_isDestination: void};
 export interface AllocationItem {
   destination: Destination;
@@ -70,11 +72,16 @@ export interface ChannelConstants {
 export interface State extends ChannelConstants, StateVariables {}
 
 interface Signed {
-  signatures: string[];
+  signatures: SignatureEntry[];
 }
+interface Hashed {
+  stateHash: string;
+}
+export type SignedState = State & Signed;
+export type SignedStateWithHash = SignedState & Hashed;
 
-export interface SignedState extends State, Signed {}
-export interface SignedStateVariables extends StateVariables, Signed {}
+export type SignedStateVariables = StateVariables & Signed;
+export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
 type _Objective<Name, Data> = {
   participants: Participant[];
@@ -85,6 +92,7 @@ export type OpenChannel = _Objective<
   'OpenChannel',
   {
     targetChannelId: string;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<
@@ -130,12 +138,11 @@ export interface Message {
 }
 
 export type ChannelStoredData = {
-  stateVariables: Record<string, StateVariables>;
+  stateVariables: Array<SignedStateWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
-    challengeDuration: BigNumber | string;
+    challengeDuration: BigNumber | string; // TODO: This probably shouldn't be a BigNumber
     channelNonce: BigNumber | string;
   };
-  signatures: Record<string, Array<string | undefined>>;
   funding: Funding | undefined;
   applicationSite: string | undefined;
   myIndex: number;

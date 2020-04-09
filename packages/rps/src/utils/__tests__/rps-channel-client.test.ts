@@ -147,7 +147,8 @@ describe('when createChannel() is called', () => {
       participants,
       allocations,
       appDefinition,
-      encodeAppData(appData.start)
+      encodeAppData(appData.start),
+      'Direct'
     );
   });
   it('decodes and returns the result', async () => {

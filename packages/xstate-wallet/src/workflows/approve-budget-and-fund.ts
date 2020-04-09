@@ -4,9 +4,9 @@ import {
   ActionObject,
   createMachine,
   Guard,
-  State as XStateState,
   assign,
-  DoneInvokeEvent
+  DoneInvokeEvent,
+  Interpreter
 } from 'xstate';
 import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
 
@@ -19,10 +19,11 @@ import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
+import {ChannelChainInfo} from '../chain';
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
-  blockNum: number;
+  blockNum: BigNumber;
   balance: BigNumber;
 }
 
@@ -51,8 +52,8 @@ interface Deposit {
 
 interface Chain {
   ledgerTotal: BigNumber;
-  lastChangeBlockNum: number;
-  currentBlockNum: number;
+  lastChangeBlockNum: BigNumber;
+  currentBlockNum: BigNumber;
 }
 
 interface Transaction {
@@ -60,7 +61,7 @@ interface Transaction {
 }
 
 type Typestate =
-  | {value: 'waitForApproval'; context: Initial}
+  | {value: 'waitForUserApproval'; context: Initial}
   | {value: 'createBudgetAndLedger'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
   | {value: {deposit: 'init'}; context: LedgerExists & Deposit}
@@ -93,10 +94,6 @@ export interface Schema extends StateSchema<Context> {
     failure: {};
   };
 }
-
-export type WorkflowState = XStateState<Context, Event, Schema, Typestate>;
-
-export type StateValue = keyof Schema['states'];
 
 export const machine = (
   store: Store,
@@ -301,10 +298,10 @@ const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: Led
 
 const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
-    map(chainInfo => ({
+    map<ChannelChainInfo, ChainEvent>(({amount: balance, blockNum}) => ({
       type: 'CHAIN_EVENT',
-      balance: chainInfo.amount,
-      blockNum: chainInfo.blockNum
+      balance,
+      blockNum
     }))
   );
 
@@ -358,3 +355,5 @@ const submitDepositTransaction = (store: Store) => async (
 
   return store.chain.deposit(ctx.ledgerId, ctx.ledgerTotal.toHexString(), amount.toHexString());
 };
+
+export type ApproveBudgetAndFundService = Interpreter<Context, any, Event, Typestate>;

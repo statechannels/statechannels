@@ -4,7 +4,8 @@ import {
   Participant,
   Allocation,
   SiteBudget,
-  Message
+  Message,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
 
@@ -35,7 +36,8 @@ export interface ChannelClientInterface {
     participants: Participant[],
     allocations: Allocation[],
     appDefinition: string,
-    appData: string
+    appData: string,
+    fundingStrategy: FundingStrategy
   ) => Promise<ChannelResult>;
   joinChannel: (channelId: string) => Promise<ChannelResult>;
   updateChannel: (
@@ -64,5 +66,3 @@ export interface EventsWithArgs {
   // TODO: Is `ChannelResult` the right type to use here?
   ChannelProposed: [ChannelResult];
 }
-
-type UnsubscribeFunction = () => void;

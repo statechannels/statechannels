@@ -1,7 +1,7 @@
+/* eslint-disable no-unreachable */
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
-import {utils} from 'ethers';
-const bigNumberify = utils.bigNumberify;
+import {parseEther, hexZeroPad, bigNumberify} from 'ethers/utils';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
@@ -29,13 +29,8 @@ export const fireBaseConfig =
     ? undefined
     : {
         apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
-        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
-        projectId: process.env.REACT_APP_FIREBASE_PROJECT,
-        storageBucket: '',
-        messagingSenderId: '913007764573'
+        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`
       };
-export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
 const url = process.env.REACT_APP_TRACKER_URL;
@@ -124,3 +119,8 @@ if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
   throw new Error('Contract address not defined');
 }
 export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
+
+export const FUNDING_STRATEGY =
+  process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
+
+export const INITIAL_BUDGET_AMOUNT = hexZeroPad(parseEther('10').toHexString(), 32);

@@ -1,5 +1,5 @@
 import {bigNumberify, BigNumber} from 'ethers/utils';
-import {calculateChannelId, signState} from './../state-utils';
+import {calculateChannelId, createSignatureEntry} from './../state-utils';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
@@ -37,7 +37,7 @@ const challengeDuration = bigNumberify(CHALLENGE_DURATION);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
-const signature = signState(state, aPrivateKey);
+const signature = createSignatureEntry(state, aPrivateKey);
 const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
@@ -84,7 +84,7 @@ test('newObjectiveFeed', async () => {
   const objective: Objective = {
     type: 'OpenChannel',
     participants: [],
-    data: {targetChannelId: 'foo'}
+    data: {targetChannelId: 'foo', fundingStrategy: 'Direct'}
   };
 
   const store = await aStore();
@@ -146,7 +146,7 @@ describe('pushMessage', () => {
 
     const nextState = {...state, turnNum: state.turnNum.add(2)};
     await store.pushMessage({
-      signedStates: [{...nextState, signatures: [signState(nextState, bPrivateKey)]}]
+      signedStates: [{...nextState, signatures: [createSignatureEntry(nextState, bPrivateKey)]}]
     });
     expect((await store.getEntry(channelId)).latest).toMatchObject(nextState);
   });

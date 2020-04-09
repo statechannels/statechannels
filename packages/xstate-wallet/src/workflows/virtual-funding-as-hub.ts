@@ -7,29 +7,36 @@ import {
   DoneInvokeEvent,
   ServiceConfig,
   assign,
-  spawn
+  spawn,
+  AssignAction
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {Store} from '../store';
-import {LedgerFunding, VirtualFundingAsLeaf} from '.';
+import {Store, State} from '../store';
+import {LedgerFunding, VirtualFundingAsLeaf, SupportState} from '.';
 import {checkThat, isSimpleEthAllocation} from '../utils';
 
 import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
 import _ from 'lodash';
 import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';
+import {Observable} from 'rxjs';
 
-type Init = VirtualFundingAsLeaf.Init;
-
+type RoleData = {
+  ledgerId: string;
+  guarantorId: string;
+  guarantorState: State;
+};
 type Deductions = {
-  deductions: {
-    [ParticipantIdx.A]: AllocationItem[];
-    [ParticipantIdx.B]: AllocationItem[];
-  };
+  [ParticipantIdx.A]: AllocationItem[];
+  [ParticipantIdx.B]: AllocationItem[];
+};
+export type Init = VirtualFundingAsLeaf.Init & {
+  [ParticipantIdx.A]: Partial<RoleData>;
+  [ParticipantIdx.B]: Partial<RoleData>;
 };
 
-type WithDeductions = Init & Deductions;
+type WithDeductions = Init & {deductions: Deductions};
 
 type TEvent = AnyEventObject;
 
@@ -51,6 +58,18 @@ const enum Events {
   FundGuarantorWithB = 'FundGuarantorWithB'
 }
 
+type Objective = Pick<FundGuarantor, 'data' | 'participants'> & {state: State; type: Events};
+const assignObjectiveData = (
+  role: ParticipantIdx.A | ParticipantIdx.B
+): AssignAction<Init, Objective> =>
+  assign<Init>({
+    [role]: (_, {data, state}: Objective): RoleData => ({
+      guarantorId: data.guarantorId,
+      ledgerId: data.ledgerId,
+      guarantorState: state
+    })
+  });
+
 const waitThenFundGuarantor = (
   role: ParticipantIdx.A | ParticipantIdx.B
 ): StateNodeConfig<WithDeductions, any, any> => {
@@ -58,15 +77,26 @@ const waitThenFundGuarantor = (
   return {
     initial: 'waitForObjective',
     states: {
-      waitForObjective: {on: {[event]: 'runObjective'}},
+      waitForObjective: {
+        on: {[event]: {target: 'supportingGuarantorState', actions: assignObjectiveData(role)}}
+      },
+      supportingGuarantorState: {
+        invoke: {
+          src: Services.supportState,
+          data: (ctx: Init): SupportState.Init => ({state: (ctx[role] as RoleData).guarantorState}),
+          onDone: 'runObjective'
+        }
+      },
       runObjective: {
         invoke: {
           src: Services.ledgerFunding,
-          data: (ctx: WithDeductions, {data}: FundGuarantor): LedgerFunding.Init => ({
-            targetChannelId: data.guarantorId,
-            ledgerChannelId: data.ledgerId,
-            deductions: ctx.deductions[role]
-          }),
+          data: (ctx: WithDeductions): LedgerFunding.Init => {
+            // We know that the data has already been assigned in the
+            // transition out of waitForObjective
+            const {guarantorId: targetChannelId, ledgerId: ledgerChannelId} = ctx[role] as RoleData;
+            const deductions = ctx.deductions[role];
+            return {targetChannelId, ledgerChannelId, deductions};
+          },
           onDone: 'done'
         }
       },
@@ -94,30 +124,29 @@ export const config: MachineConfig<Init, any, any> = {
 };
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
-  const {latestSupportedByMe} = await store.getEntry(ctx.jointChannelId);
+  const entry = await store.getEntry(ctx.jointChannelId);
+  const {latestSignedByMe: latestSupportedByMe} = entry;
   const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
   return {
-    deductions: {
-      [ParticipantIdx.A]: [
-        {
-          destination: allocationItems[OutcomeIdx.Hub].destination,
-          amount: allocationItems[OutcomeIdx.B].amount
-        },
-        allocationItems[OutcomeIdx.A]
-      ],
-      [ParticipantIdx.B]: [
-        {
-          destination: allocationItems[OutcomeIdx.Hub].destination,
-          amount: allocationItems[OutcomeIdx.A].amount
-        },
-        allocationItems[OutcomeIdx.B]
-      ]
-    }
+    [ParticipantIdx.A]: [
+      {
+        destination: allocationItems[OutcomeIdx.Hub].destination,
+        amount: allocationItems[OutcomeIdx.B].amount
+      },
+      allocationItems[OutcomeIdx.A]
+    ],
+    [ParticipantIdx.B]: [
+      {
+        destination: allocationItems[OutcomeIdx.Hub].destination,
+        amount: allocationItems[OutcomeIdx.A].amount
+      },
+      allocationItems[OutcomeIdx.B]
+    ]
   };
 };
 
-const watchObjectives = (store: Store) => (ctx: Init) =>
+const watchObjectives = (store: Store) => (ctx: Init): Observable<Objective> =>
   store.objectiveFeed.pipe(
     filter(isFundGuarantor),
     filter(o => o.data.jointChannelId === ctx.jointChannelId),
@@ -126,11 +155,13 @@ const watchObjectives = (store: Store) => (ctx: Init) =>
       const jointParticipants: Participant[] = await (await store.getEntry(ctx.jointChannelId))
         .channelConstants.participants;
 
+      const {latest} = await store.getEntry(o.data.guarantorId);
+
       switch (participant) {
         case jointParticipants[ParticipantIdx.A].participantId:
-          return {...o, type: Events.FundGuarantorWithA};
+          return {...o, type: Events.FundGuarantorWithA, state: latest};
         case jointParticipants[ParticipantIdx.B].participantId:
-          return {...o, type: Events.FundGuarantorWithB};
+          return {...o, type: Events.FundGuarantorWithB, state: latest};
         default:
           throw 'Participant not found';
       }
@@ -140,12 +171,9 @@ const watchObjectives = (store: Store) => (ctx: Init) =>
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
     watchObjectives: assign<any>({watcher: (ctx: Init) => spawn(watchObjectives(store)(ctx))}),
-    [Actions.assignDeductions]: assign(
-      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({
-        ...ctx,
-        ...data
-      })
-    )
+    [Actions.assignDeductions]: assign({
+      deductions: (_, {data}: DoneInvokeEvent<Deductions>) => data
+    })
   };
 
   const leafServices = VirtualFundingAsLeaf.options(store).services;

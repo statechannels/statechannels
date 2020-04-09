@@ -8,13 +8,14 @@ if (process.env.RUNTIME_ENV) {
     environment: process.env.RUNTIME_ENV
   });
 }
-import {fbObservable, sendMessagesAndCleanup} from './message/firebase-relay';
+import {fbObservable, deleteIncomingMessage, sendReplies} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
-import {map, retry} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
-import {Blockchain} from './blockchain/eth-asset-holder';
-
+import {makeDeposits} from './blockchain/eth-asset-holder';
+import {pipe} from 'fp-ts/lib/pipeable';
+import {map as fpMap, fold} from 'fp-ts/lib/Either';
 const log = logger();
 
 export async function startServer() {
@@ -22,36 +23,26 @@ export async function startServer() {
     .pipe(
       map(({snapshotKey, message}) => ({
         snapshotKey,
-        messageToSend: respondToMessage(message)
+        messageToSend: pipe(message, fpMap(respondToMessage))
       })),
       map(({snapshotKey, messageToSend}) => ({
         snapshotKey,
         messageToSend,
-        depositsToMake: depositsToMake(messageToSend)
-      })),
-      retry()
+        depositsToMake: pipe(messageToSend, fpMap(depositsToMake))
+      }))
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
         try {
-          log.info({messageToSend}, 'Responding with message');
-          await Promise.all(
-            depositsToMake.map(depositToMake => {
-              log.info(`depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`);
-              return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
-            })
-          );
-          log.info('Deposited');
-          await sendMessagesAndCleanup(snapshotKey, messageToSend);
-          log.info('Messages sent');
+          deleteIncomingMessage(snapshotKey);
+          pipe(depositsToMake, fold(log.error, makeDeposits));
+          pipe(messageToSend, fold(log.error, sendReplies));
         } catch (e) {
           log.error(e);
         }
       },
-      error => log.error(error),
-      () => {
-        log.info('Completed listening to Firebase');
-      }
+      error => log.fatal(error),
+      () => log.fatal('Completed listening to Firebase')
     );
 
   log.info(`Listening on database ${process.env.FIREBASE_URL}`);

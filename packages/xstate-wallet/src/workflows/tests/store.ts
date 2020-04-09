@@ -3,6 +3,7 @@ import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
 import {XstateStore, Funding, Store} from '../../store';
+import {SigningKey} from 'ethers/utils';
 
 export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
@@ -14,6 +15,7 @@ export class TestStore extends XstateStore implements Store {
     opts?: {
       funding?: Funding;
       applicationSite?: string;
+      hasChallenge?: boolean;
     }
   ): Promise<ChannelStoreEntry> {
     const address = await this.getAddress();
@@ -21,11 +23,11 @@ export class TestStore extends XstateStore implements Store {
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
     const {funding, applicationSite} = opts || {};
+    const stateHash = hashState(signedState);
     const entry = new ChannelStoreEntry({
       channelConstants: signedState,
       myIndex,
-      stateVariables: {[hashState(signedState)]: signedState},
-      signatures: {[hashState(signedState)]: signedState.signatures},
+      stateVariables: [{...signedState, stateHash}],
       funding,
       applicationSite
     });
@@ -33,6 +35,7 @@ export class TestStore extends XstateStore implements Store {
 
     return entry;
   }
+
   async setLedgerByEntry(entry: ChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
@@ -41,5 +44,10 @@ export class TestStore extends XstateStore implements Store {
     const peerId = entry.participants.find(p => p.signingAddress !== address);
     if (!peerId) throw 'No peer';
     this.backend.setLedger(peerId?.participantId, channelId);
+  }
+
+  async setPrivateKey(pk: string) {
+    const {address} = new SigningKey(pk);
+    await this.backend.setPrivateKey(address, pk);
   }
 }

@@ -15,7 +15,9 @@ import {
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
   CloseAndWithdrawRequest,
-  ErrorResponse
+  ErrorResponse,
+  ChallengeChannelRequest,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 
 import {fromEvent, Observable} from 'rxjs';
@@ -34,6 +36,7 @@ import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
 
 type ChannelRequest =
+  | ChallengeChannelRequest
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
@@ -47,6 +50,11 @@ interface InternalEvents {
   SendMessage: [Response | Notification | ErrorResponse];
 }
 
+export const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
+  'method' in m && m.method === 'ChannelUpdated';
+export const isChannelProposed = (m: Response | Notification): m is ChannelProposedNotification =>
+  'method' in m && m.method === 'ChannelProposed';
+
 export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification>;
   readonly requestFeed: Observable<AppRequestEvent>;
@@ -54,11 +62,12 @@ export interface MessagingServiceInterface {
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
-    method:
-      | ChannelClosingNotification['method']
-      | ChannelUpdatedNotification['method']
-      | ChannelProposedNotification['method'],
+    method: (ChannelClosingNotification | ChannelUpdatedNotification)['method'],
     notificationData: ChannelResult
+  );
+  sendChannelNotification(
+    method: ChannelProposedNotification['method'],
+    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
@@ -103,7 +112,14 @@ export class MessagingService implements MessagingServiceInterface {
   public async sendChannelNotification(
     method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
-  ) {
+  );
+  // eslint-disable-next-line no-dupe-class-members
+  public async sendChannelNotification(
+    method: ChannelProposedNotification['method'],
+    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+  );
+  // eslint-disable-next-line no-dupe-class-members
+  public async sendChannelNotification(method, notificationData) {
     const notification = {jsonrpc: '2.0', method, params: notificationData} as Notification; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', notification);
   }
@@ -166,6 +182,7 @@ export class MessagingService implements MessagingServiceInterface {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
         break;
+      case 'ChallengeChannel':
       case 'CreateChannel':
       case 'UpdateChannel':
       case 'CloseChannel':
@@ -184,11 +201,9 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':
-        const site = request.params.hubAddress;
-        const siteBudget = await this.store.getBudget(site);
+        const siteBudget = await this.store.getBudget(fromDomain);
         await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
-      case 'ChallengeChannel':
       case 'GetState':
         // TODO: handle these requests
         break;
@@ -250,6 +265,12 @@ async function convertToInternalEvent(
   domain: string
 ): Promise<AppRequestEvent> {
   switch (request.method) {
+    case 'ChallengeChannel':
+      return {
+        type: 'PLAYER_REQUEST_CHALLENGE',
+        requestId: request.id,
+        channelId: request.params.channelId
+      };
     case 'CloseAndWithdraw':
       return {
         type: 'CLOSE_AND_WITHDRAW',

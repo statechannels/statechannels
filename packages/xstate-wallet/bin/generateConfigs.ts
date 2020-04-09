@@ -16,9 +16,9 @@ function saveConfig(
   fs.writeFile(
     filename,
     `
-const config = ${serialize(config)}
 const guards = ${serialize(guards || {})}
 const customActions = ${serialize(actions || {})}
+const config = ${serialize(config)}
 const machine = Machine(config, {guards, actions: customActions})
     `,
     err => {

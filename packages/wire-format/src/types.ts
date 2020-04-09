@@ -78,10 +78,12 @@ type _Objective<Name, Data> = {
   type: Name;
   data: Data;
 };
+type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export type OpenChannel = _Objective<
   'OpenChannel',
   {
     targetChannelId: Bytes32;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<

@@ -122,11 +122,13 @@ export type EnableEthereumResponse = JsonRpcResponse<{
 export type EnableEthereumError = JsonRpcError<100, 'Ethereum Not Enabled'>;
 
 // CreateChannel
+export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];
   appDefinition: Address;
   appData: string;
+  fundingStrategy: FundingStrategy;
 }
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;

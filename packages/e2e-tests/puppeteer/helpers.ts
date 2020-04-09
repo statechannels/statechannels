@@ -3,7 +3,11 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promise<void> {
+export async function loadDapp(
+  page: Page,
+  ganacheAccountIndex: number,
+  ignoreConsoleError?: boolean
+): Promise<void> {
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
@@ -24,14 +28,12 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
     window.ethereum.on = () => {};
   `);
 
-  await page.goto('http://localhost:3000/', {waitUntil: 'load'});
-
   page.on('pageerror', error => {
     throw error;
   });
 
   page.on('console', msg => {
-    if (msg.type() === 'error') {
+    if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
   });
@@ -91,4 +93,17 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
   });
 
   return browser;
+}
+
+export async function waitAndOpenChannel(page: Page): Promise<void> {
+  const createChannelButton = 'div.application-workflow-prompt > div > button';
+
+  const walletIFrame = page.frames()[1];
+  await waitForAndClickButton(page, walletIFrame, createChannelButton);
+}
+
+export async function waitForClosingChannel(page: Page): Promise<void> {
+  const closingText = 'div.application-workflow-prompt > h1';
+  const closingIframeB = page.frames()[1];
+  await closingIframeB.waitForSelector(closingText);
 }

@@ -9,11 +9,10 @@
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
     "@statechannels/wire-format": "0.0.1",
-    "@xstate/react": "0.8.1",
+    "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",
-    "extract-domain": "2.2.1",
     "filter-async-rxjs-pipe": "0.1.5",
     "guid-typescript": "1.0.9",
     "jest": "25.1.0",
@@ -21,6 +20,7 @@
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "rxjs": "6.5.4",
+    "url-parse": "1.4.7",
     "xstate": "4.8.0"
   },
   "devDependencies": {
@@ -39,6 +39,7 @@
     "@types/react-dom": "16.9.5",
     "@types/storybook__addon-info": "5.2.1",
     "@types/styled-components": "4.4.2",
+    "@types/url-parse": "1.4.3",
     "@types/webpack": "4.41.3",
     "@types/webpack-merge": "4.1.5",
     "awesome-typescript-loader": "5.2.1",
@@ -77,7 +78,7 @@
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
     "test": "npx jest -c ./config/jest/jest.config.js",
-    "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
+    "test:ci": "yarn test --ci && yarn test:with-chain",
     "test:with-chain": "npx jest --runInBand -c ./config/jest/jest.with-chain.config.js --detectOpenHandles"
   }
 }

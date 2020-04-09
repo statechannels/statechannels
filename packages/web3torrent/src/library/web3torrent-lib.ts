@@ -29,6 +29,7 @@ import {utils} from 'ethers';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
+// To enable logs in the browser, run `localStorage.debug = "web3torrent:*"`
 const log = debug('web3torrent:library');
 
 export type TorrentCallback = (torrent: Torrent) => any;
@@ -195,7 +196,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const knownPeerAccount = this.peersList[torrent.infoHash][peerAccount];
 
         if (!knownPeerAccount) {
-          log(`>> wire first_request of ${peerAccount} with outcomeAddress ${peerOutcomeAddress}`);
+          log(
+            `>> wire first_request of ${peerAccount} with outcomeAddress ${peerOutcomeAddress} and leecherBalance ${WEI_PER_BYTE.mul(
+              torrent.length
+            )}`
+          );
           const {channelId} = await this.paymentChannelClient.createChannel(
             this.pseAccount, // seeder
             peerAccount, // leecher
@@ -378,32 +383,35 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
     let amountToPay = BUFFER_REFILL_RATE.sub(
       WEI_PER_BYTE.mul(BLOCK_LENGTH).mul(PEER_TRUST - wire.requests.length)
-    ).toString();
-    log(`<< STOP ${peerAccount} - About to pay`, torrent, amountToPay);
+    );
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
-    if (torrent.downloaded === 0 && this.isLastPieceIsReservedToWire(torrent, peerAccount)) {
-      amountToPay = BUFFER_REFILL_RATE.sub(
-        WEI_PER_BYTE.mul(BLOCK_LENGTH - torrent.store.store.lastChunkLength)
-      ).toString();
-      log(`<< STOP ${peerAccount} - LAST PIECE`, amountToPay);
+    if (this.isAboutToPayForLastPiece(torrent, peerAccount)) {
+      const diffBetweenStandardSizeAndTheLastPieceSize = WEI_PER_BYTE.mul(
+        BLOCK_LENGTH - torrent.store.store.lastChunkLength
+      );
+      amountToPay = amountToPay.sub(diffBetweenStandardSizeAndTheLastPieceSize);
     }
-
-    await this.paymentChannelClient.makePayment(peerChannelId, amountToPay);
+    log(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
+    await this.paymentChannelClient.makePayment(peerChannelId, amountToPay.toString());
 
     const balance =
       this.paymentChannelClient.channelCache[peerChannelId] &&
-      this.paymentChannelClient.channelCache[peerChannelId].beneficiaryBalance;
+      bigNumberify(
+        this.paymentChannelClient.channelCache[peerChannelId].beneficiaryBalance
+      ).toString();
     log(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${wire.downloaded}`);
   }
 
-  private isLastPieceIsReservedToWire(torrent: PaidStreamingTorrent, peerAccount: string) {
+  private isAboutToPayForLastPiece(torrent: PaidStreamingTorrent, peerAccount: string) {
     const lastPieceReservations: PaidStreamingWire[] =
       torrent._reservations[torrent.pieces.length - 1];
     if (!lastPieceReservations || !lastPieceReservations.length) return false;
-    return lastPieceReservations.find(
+
+    const lastPieceIsReservedToThisWire = lastPieceReservations.some(
       wire => wire && wire.paidStreamingExtension.peerAccount === peerAccount
     );
+    return torrent.downloaded === 0 && lastPieceIsReservedToThisWire;
   }
   /**
    * Close any channels that I am downloading from (that my peer opened)

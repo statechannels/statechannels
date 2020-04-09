@@ -4,6 +4,7 @@ import {
   Outcome,
   AllocationItem,
   SignedState,
+  Destination,
   SimpleAllocation
 } from './types';
 import {
@@ -15,10 +16,13 @@ import {
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
-  convertAddressToBytes32
+  convertAddressToBytes32,
+  convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
+import {Wallet} from 'ethers';
+import {SignatureEntry} from './channel-store-entry';
 
 function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
@@ -39,12 +43,33 @@ function toNitroState(state: State): NitroState {
   };
 }
 
+export function fromNitroState(state: NitroState): State {
+  const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
+
+  return {
+    appDefinition,
+    isFinal,
+    appData,
+    outcome: fromNitroOutcome(outcome),
+    turnNum: bigNumberify(turnNum),
+    challengeDuration: bigNumberify(challengeDuration),
+    channelNonce: bigNumberify(channel.channelNonce),
+    chainId: channel.chainId,
+    participants: channel.participants.map(x => ({
+      signingAddress: x,
+      // FIXME: Get real values
+      participantId: x,
+      destination: x.padStart(64, '0') as Destination
+    }))
+  };
+}
+
 // Since the nitro signed state only contains one signature we may get multiple
 // NitroSignedStates for a signed state with multiple signatures
 export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
   const state = toNitroState(signedState);
   const {signatures} = signedState;
-  return signatures.map(sig => ({state, signature: splitSignature(sig)}));
+  return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
 }
 
 export function calculateChannelId(channelConstants: ChannelConstants): string {
@@ -57,6 +82,12 @@ export function calculateChannelId(channelConstants: ChannelConstants): string {
   });
 }
 
+export function createSignatureEntry(state: State, privateKey: string): SignatureEntry {
+  const {address} = new Wallet(privateKey);
+  const nitroState = toNitroState(state);
+  const {signature} = signNitroState(nitroState, privateKey);
+  return {signature: joinSignature(signature), signer: address};
+}
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
@@ -132,6 +163,16 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
   }));
 }
 
+function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
+  return allocationItems.map(a => ({
+    amount: bigNumberify(a.amount),
+    destination:
+      a.destination.substr(2, 22) === '00000000000000000000'
+        ? (convertBytes32ToAddress(a.destination) as Destination)
+        : (a.destination as Destination)
+  }));
+}
+
 export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
   switch (outcome.type) {
     case 'SimpleAllocation':
@@ -152,8 +193,37 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
         }
       ];
     case 'MixedAllocation':
+      // FIXME: is this a typo?
       return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
   }
+}
+
+export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
+  const [singleOutcomeItem] = outcome;
+
+  if (typeof singleOutcomeItem['allocationItems'] !== 'undefined') {
+    return {
+      type: 'SimpleAllocation',
+      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems'])
+    };
+  }
+
+  if (typeof singleOutcomeItem['guarantee'] !== 'undefined') {
+    return {
+      type: 'SimpleGuarantee',
+      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      targetChannelId: singleOutcomeItem['guarantee'].targetChannelId,
+      destinations: singleOutcomeItem['guarantee'].destinations
+    };
+  }
+
+  return {
+    type: 'MixedAllocation',
+    // FIXME: Figure out what needs to be here
+    simpleAllocations: []
+    // simpleAllocations: outcome.map(fromNitroOutcome)
+  };
 }
 
 export function nextState(state: State, outcome: Outcome) {

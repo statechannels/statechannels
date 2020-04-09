@@ -3,32 +3,35 @@ import {State, EventData} from 'xstate';
 import './wallet.scss';
 import {Flex, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
-import {StateValue, WorkflowState} from '../workflows/application';
 import {
   isConfirmCreateChannel,
-  getConfirmCreateChannelState,
+  getConfirmCreateChannelService,
   getApplicationOpenProgress,
   isApplicationOpening,
-  getApplicationStateValue
+  getApplicationStateValue,
+  isApplicationChallenging
 } from './selectors';
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
+import {Application} from '../workflows';
 
 interface Props {
-  current: WorkflowState;
+  current: Application.WorkflowState;
   send: (event: any, payload?: EventData | undefined) => State<any, any, any, any>;
 }
 
 export const ApplicationWorkflow = (props: Props) => {
   const current = props.current;
-  const messages: Record<StateValue, string> = {
-    initializing: 'Initializing...',
-    confirmCreateChannelWorkflow: 'Creating channel...',
-    createChannelInStore: 'Creating channel...',
-    confirmJoinChannelWorkflow: 'Joining channel ... ',
+  const messages: Record<Application.StateValue, string> = {
+    branchingOnFundingStrategy: '', // UI never sees this state
+    confirmingWithUser: 'Confirming with user...',
+    creatingChannel: 'Creating channel...',
+    joiningChannel: 'Joining channel ... ',
     openChannelAndFundProtocol: 'Opening channel...',
     running: 'Running channel...',
+    sendChallenge: 'Challenging channel...',
     closing: 'Closing channel...',
-    done: 'Channel closed'
+    done: 'Channel closed',
+    failure: 'Something went wrong ...'
   };
   return (
     <div
@@ -36,6 +39,7 @@ export const ApplicationWorkflow = (props: Props) => {
         paddingTop: '50px',
         textAlign: 'center'
       }}
+      className="application-workflow-prompt"
     >
       <h1>{messages[getApplicationStateValue(current)]}</h1>
       {!isConfirmCreateChannel(current) && (
@@ -44,7 +48,10 @@ export const ApplicationWorkflow = (props: Props) => {
         </Flex>
       )}
       {isConfirmCreateChannel(current) && (
-        <ConfirmCreateChannel current={getConfirmCreateChannelState(current)} send={props.send} />
+        <ConfirmCreateChannel service={getConfirmCreateChannelService(current)} />
+      )}
+      {isApplicationChallenging(current) && (
+        <p>app requested a challenging! check ur wallet. u can reject if you want</p>
       )}
       {!isConfirmCreateChannel(current) && isApplicationOpening(current) && (
         <Progress value={getApplicationOpenProgress(current)} />
