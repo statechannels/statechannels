@@ -1,8 +1,13 @@
 import {bigNumberify} from 'ethers/utils';
-import {Message, SignedState} from '../../store/types';
-import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
+import {Message, SignedState, SimpleGuarantee} from '../../store/types';
+import {
+  Message as WireMessage,
+  SignedState as WireState,
+  Guarantees as WireGuarantees
+} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../store/state-utils';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 
 export const wireStateFormat: WireState = {
   participants: [
@@ -175,3 +180,24 @@ export const internalMessageFormat: Message = {
     }
   ]
 };
+
+export const internalSimpleGuarantee: SimpleGuarantee = {
+  type: 'SimpleGuarantee',
+  targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+  destinations: [
+    makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
+    makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7')
+  ],
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
+};
+
+export const externalSimpleGuarantee: WireGuarantees = [
+  {
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+    destinations: [
+      makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
+      makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7')
+    ]
+  }
+];

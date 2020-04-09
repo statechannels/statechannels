@@ -138,6 +138,13 @@ export class MessagingService implements MessagingServiceInterface {
       .map(p => p.participantId);
 
     filteredRecipients.forEach(recipient => {
+      const params = serializeMessage(message, recipient, sender);
+      try {
+        validateMessage(params);
+      } catch {
+        // eslint-disable-next-line no-debugger
+        debugger;
+      }
       const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',

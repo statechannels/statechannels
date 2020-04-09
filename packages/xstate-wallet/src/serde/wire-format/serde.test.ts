@@ -3,10 +3,12 @@ import {
   wireStateFormat,
   internalStateFormat,
   internalMessageFormat,
-  wireMessageFormat
+  wireMessageFormat,
+  externalSimpleGuarantee,
+  internalSimpleGuarantee
 } from './example';
-import {serializeState, serializeMessage} from './serialize';
-import {deserializeState, deserializeMessage} from './deserialize';
+import {serializeState, serializeMessage, serializeOutcome} from './serialize';
+import {deserializeState, deserializeMessage, deserializeOutcome} from './deserialize';
 import {validateState} from '@statechannels/wire-format';
 
 it('works for states', () => {
@@ -23,4 +25,11 @@ it('works for a message', () => {
 it('creates valid wire format', () => {
   const serializedState = serializeState(internalStateFormat);
   expect(() => validateState(serializedState)).not.toThrow();
+});
+
+it('deserializes a guarantee outcome', () => {
+  expect(deserializeOutcome(externalSimpleGuarantee)).toEqual(internalSimpleGuarantee);
+});
+it('serializes a guarantee outcome', () => {
+  expect(serializeOutcome(internalSimpleGuarantee)).toEqual(externalSimpleGuarantee);
 });

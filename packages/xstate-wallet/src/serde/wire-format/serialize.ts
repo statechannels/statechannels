@@ -16,6 +16,7 @@ import {
 } from '../../store/types';
 import {calculateChannelId} from '../../store/state-utils';
 import {BigNumber, hexZeroPad, hexlify} from 'ethers/utils';
+import {makeDestination} from '../../utils';
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
@@ -48,7 +49,7 @@ export function serializeState(state: SignedState): SignedStateWire {
   };
 }
 
-function serializeOutcome(outcome: Outcome): OutcomeWire {
+export function serializeOutcome(outcome: Outcome): OutcomeWire {
   switch (outcome.type) {
     case 'SimpleAllocation':
       return [serializeSimpleAllocation(outcome)];
@@ -57,6 +58,14 @@ function serializeOutcome(outcome: Outcome): OutcomeWire {
     case 'SimpleGuarantee':
       return [serializeSimpleGuarantee(outcome)];
   }
+}
+
+function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
+  return {
+    assetHolderAddress: guarantee.assetHolderAddress,
+    targetChannelId: guarantee.targetChannelId,
+    destinations: guarantee.destinations.map(makeDestination)
+  };
 }
 
 function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
