@@ -19,10 +19,11 @@ import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
+import {ChannelChainInfo} from '../chain';
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
-  blockNum: number;
+  blockNum: BigNumber;
   balance: BigNumber;
 }
 
@@ -51,8 +52,8 @@ interface Deposit {
 
 interface Chain {
   ledgerTotal: BigNumber;
-  lastChangeBlockNum: number;
-  currentBlockNum: number;
+  lastChangeBlockNum: BigNumber;
+  currentBlockNum: BigNumber;
 }
 
 interface Transaction {
@@ -297,10 +298,10 @@ const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: Led
 
 const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
-    map(chainInfo => ({
+    map<ChannelChainInfo, ChainEvent>(({amount: balance, blockNum}) => ({
       type: 'CHAIN_EVENT',
-      balance: chainInfo.amount,
-      blockNum: chainInfo.blockNum
+      balance,
+      blockNum
     }))
   );
 

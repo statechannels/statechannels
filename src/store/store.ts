@@ -1,6 +1,23 @@
-import {Observable, fromEvent, merge, from, of} from 'rxjs';
+import {AddressZero} from 'ethers/constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
+import {EventEmitter} from 'eventemitter3';
+import {filter, map, concatAll} from 'rxjs/operators';
+import {Guid} from 'guid-typescript';
+import {Observable, fromEvent, merge, from, of} from 'rxjs';
+import {Wallet} from 'ethers';
+import * as _ from 'lodash';
+import AsyncLock from 'async-lock';
+
+import {Chain, FakeChain} from '../chain';
+import {NETWORK_ID, HUB} from '../constants';
+import {checkThat, isSimpleEthAllocation} from '../utils';
+
+import {calculateChannelId, hashState} from './state-utils';
+import {ChannelStoreEntry} from './channel-store-entry';
+import {MemoryBackend} from './memory-backend';
+import {Errors} from '.';
 import {
+  ChannelStoredData,
   DBBackend,
   Message,
   Objective,
@@ -8,27 +25,8 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables,
-  ChannelStoredData
+  StateVariables
 } from './types';
-
-import {filter, map, concatAll} from 'rxjs/operators';
-import {EventEmitter} from 'eventemitter3';
-import * as _ from 'lodash';
-
-import {Wallet} from 'ethers';
-
-import {ChannelStoreEntry} from './channel-store-entry';
-import {AddressZero} from 'ethers/constants';
-import {Chain, FakeChain} from '../chain';
-import {calculateChannelId, hashState} from './state-utils';
-import {NETWORK_ID, HUB} from '../constants';
-
-import {Guid} from 'guid-typescript';
-import {MemoryBackend} from './memory-backend';
-import {Errors} from '.';
-import AsyncLock from 'async-lock';
-import {checkThat, isSimpleEthAllocation} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
@@ -78,11 +76,14 @@ interface InternalEvents {
   lockUpdated: [ChannelLock];
 }
 export interface Store {
+  // Feeds
   objectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-  getAddress(): Promise<string>;
+
+  /* Core Channels API */
+  // Write
+  pushMessage: (message: Message) => Promise<void>;
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
@@ -91,18 +92,24 @@ export interface Store {
     appDefinition?: string,
     applicationSite?: string
   ): Promise<ChannelStoreEntry>;
+  // Read
+  getAddress(): Promise<string>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+  getPrivateKey(signingAddress: string): Promise<string>;
 
+  /* Locking API */
   lockFeed: Observable<ChannelLock>;
   acquireChannelLock(channelId: string): Promise<ChannelLock>;
   releaseChannelLock(lock: ChannelLock): Promise<void>;
 
-  setLedger(ledgerId: string): Promise<void>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
+  setLedger(ledgerId: string): Promise<void>;
 
-  setFunding(channelId: string, funding: Funding): Promise<void>;
   setApplicationSite(channelId: string, applicationSite: string): Promise<void>;
   addObjective(objective: Objective): void;
+
+  /* Environmental API (browser-specific) */
+  setFunding(channelId: string, funding: Funding): Promise<void>;
   getBudget: (site: string) => Promise<SiteBudget | undefined>;
   createBudget: (budget: SiteBudget) => Promise<void>;
   clearBudget: (site: string) => Promise<void>;
@@ -114,6 +121,7 @@ export interface Store {
   releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
   chain: Chain;
+
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
 }
 
@@ -343,6 +351,12 @@ export class XstateStore implements Store {
   }
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
+
+  public async getPrivateKey(signingAddress: string): Promise<string> {
+    const ret = await this.backend.getPrivateKey(signingAddress);
+    if (!ret) throw new Error('No longer have private key');
+    return ret;
+  }
 
   async signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelData = await this.backend.getChannel(channelId);

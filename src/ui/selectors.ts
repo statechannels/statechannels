@@ -36,6 +36,11 @@ export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowStat
   return applicationWorkflowState.value === 'confirmingWithUser';
 }
 
+export function isApplicationChallenging(applicationWorkflowState: AppWorkflowState): boolean {
+  const stateValue = getApplicationStateValue(applicationWorkflowState);
+  return stateValue === 'sendChallenge';
+}
+
 export function isApplicationOpening(applicationWorkflowState: AppWorkflowState): boolean {
   const stateValue = getApplicationStateValue(applicationWorkflowState);
   return (
@@ -58,6 +63,7 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
     case 'running':
       return 1;
     case 'closing':
+    case 'sendChallenge':
     case 'done':
     case 'failure':
     case 'branchingOnFundingStrategy':

@@ -94,7 +94,10 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   const {targetChannelId, ledgerChannelId, deductions} = ctx;
   const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
-  const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+  const {
+    amount,
+    channelStorage: {finalizesAt}
+  } = await store.chain.getChainInfo(ledgerChannelId);
 
   const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
     .allocationItems.map(i => i.amount)
@@ -102,7 +105,11 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   const toDeduct = deductions.map(i => i.amount).reduce(add);
 
   if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
-  if (finalized) throw new Error(Errors.finalized);
+
+  // TODO: Store should expose method as opposed to workflow checking chain directly
+  if (finalizesAt.gt(0) && finalizesAt.lte(await store.chain.getBlockNumber()))
+    throw new Error(Errors.finalized);
+
   if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
 
   return {
