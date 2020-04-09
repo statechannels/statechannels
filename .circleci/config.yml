@@ -333,7 +333,7 @@ jobs:
       ADD_LOGS: true
       GANACHE_PORT: 8547
       REACT_APP_FIREBASE_URL: ws://localhost:5555
-      NODE_ENV: test
+      NODE_ENV: development
     steps:
       - checkout
       - puppeteer/install
