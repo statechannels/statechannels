@@ -8,7 +8,8 @@ import {
   getConfirmCreateChannelService,
   getApplicationOpenProgress,
   isApplicationOpening,
-  getApplicationStateValue
+  getApplicationStateValue,
+  isApplicationChallenging
 } from './selectors';
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
 import {Application} from '../workflows';
@@ -27,6 +28,7 @@ export const ApplicationWorkflow = (props: Props) => {
     joiningChannel: 'Joining channel ... ',
     openChannelAndFundProtocol: 'Opening channel...',
     running: 'Running channel...',
+    sendChallenge: 'Challenging channel...',
     closing: 'Closing channel...',
     done: 'Channel closed',
     failure: 'Something went wrong ...'
@@ -47,6 +49,9 @@ export const ApplicationWorkflow = (props: Props) => {
       )}
       {isConfirmCreateChannel(current) && (
         <ConfirmCreateChannel service={getConfirmCreateChannelService(current)} />
+      )}
+      {isApplicationChallenging(current) && (
+        <p>app requested a challenging! check ur wallet. u can reject if you want</p>
       )}
       {!isConfirmCreateChannel(current) && isApplicationOpening(current) && (
         <Progress value={getApplicationOpenProgress(current)} />

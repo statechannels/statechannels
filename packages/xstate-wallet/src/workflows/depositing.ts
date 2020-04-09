@@ -3,6 +3,7 @@ import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {Store} from '../store';
 import {map, filter} from 'rxjs/operators';
 import {MachineFactory, exists} from '../utils';
+import {ChannelChainInfo} from '../chain';
 
 export type Init = {
   channelId: string;
@@ -28,7 +29,7 @@ type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BigNumber};
 export const machine: MachineFactory<Init, any> = (store: Store) => {
   const subscribeDepositEvent = (ctx: Init) =>
     store.chain.chainUpdatedFeed(ctx.channelId).pipe(
-      map((chainInfo): 'FUNDED' | SafeToDeposit | undefined => {
+      map((chainInfo: ChannelChainInfo): 'FUNDED' | SafeToDeposit | undefined => {
         if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
         else if (chainInfo.amount.gte(ctx.depositAt))
           return {type: 'SAFE_TO_DEPOSIT', currentHoldings: chainInfo.amount};

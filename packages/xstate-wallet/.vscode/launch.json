@@ -24,7 +24,7 @@
       "request": "launch",
       "args": [
         "node_modules/.bin/jest",
-        "--config=${workspaceRoot}/config/jest/jest.config.js",
+        "--config=${workspaceFolder}/config/jest/jest.config.js",
         "--runInBand",
         "--env=jsdom",
         "--watch",

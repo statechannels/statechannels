@@ -21,22 +21,36 @@ export interface SignatureEntry {
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {
-  public readonly channelConstants: ChannelConstants;
-  public readonly myIndex: number;
   private stateVariables: Array<SignedStateVarsWithHash> = [];
+
   public funding: Funding | undefined = undefined;
+
+  public readonly myIndex: number;
+  public readonly channelConstants: ChannelConstants;
   public readonly applicationSite?: string;
+
   constructor(channelData: ChannelStoredData) {
+    const {
+      myIndex,
+      stateVariables,
+      funding,
+      applicationSite,
+      channelConstants: {chainId, participants, appDefinition, challengeDuration, channelNonce}
+    } = channelData;
+
+    this.myIndex = myIndex;
+    this.stateVariables = stateVariables;
+    this.funding = funding;
+    this.applicationSite = applicationSite;
+
     this.myIndex = channelData.myIndex;
 
-    this.funding = channelData.funding;
-    this.applicationSite = channelData.applicationSite;
     this.channelConstants = {
-      chainId: channelData.channelConstants.chainId,
-      participants: channelData.channelConstants.participants,
-      appDefinition: channelData.channelConstants.appDefinition,
-      challengeDuration: bigNumberify(channelData.channelConstants.challengeDuration),
-      channelNonce: bigNumberify(channelData.channelConstants.channelNonce)
+      chainId,
+      participants,
+      appDefinition,
+      challengeDuration: bigNumberify(challengeDuration),
+      channelNonce: bigNumberify(channelNonce)
     };
 
     this.stateVariables = channelData.stateVariables;
@@ -54,7 +68,7 @@ export class ChannelStoreEntry {
     return signatures.some(sig => sig.signer === this.myAddress);
   }
 
-  private get myAddress(): string {
+  public get myAddress(): string {
     return this.participants[this.myIndex].signingAddress;
   }
 
@@ -71,6 +85,11 @@ export class ChannelStoreEntry {
 
   get isFinalized() {
     return this.isSupported && this.supported.isFinal;
+  }
+
+  get isChallenging() {
+    // TODO: Check chain
+    return false;
   }
 
   private get _supported() {
@@ -253,6 +272,7 @@ export class ChannelStoreEntry {
       applicationSite: this.applicationSite
     };
   }
+
   static fromJson(data) {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
