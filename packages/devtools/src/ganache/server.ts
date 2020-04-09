@@ -40,8 +40,13 @@ export class GanacheServer {
     const cmd = `ganache-cli ${opts}`;
 
     this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
-    this.server.stderr.on('data', (data: unknown) => {
-      log.error(`Server threw error ${data}`);
+    if (process.env.SHOW_GANACHE_OUTPUT === 'true') {
+      this.server.stdout.on('data', data => {
+        log.info(data.toString());
+      });
+    }
+    this.server.stderr.on('data', data => {
+      log.error(`Server threw error ${data.toString()}`);
       throw new Error('Ganache server failed to start');
     });
 
