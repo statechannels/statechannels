@@ -254,6 +254,7 @@ export class XstateStore implements Store {
 
   public async releaseChannelLock(status: ChannelLock): Promise<void> {
     if (!status.lock) throw new Error('Invalid lock');
+
     const {channelId, lock} = status;
     const currentStatus = this._channelLocks[channelId];
     if (!currentStatus) return;
