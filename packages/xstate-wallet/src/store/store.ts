@@ -392,7 +392,22 @@ export class XstateStore implements Store {
     }
   }
 
-  async addState(state: SignedState): Promise<ChannelStoreEntry> {
+  private channelLock = new AsyncLock();
+  private async withLock<T>(channelId: string, fn: (...args: any[]) => T | Promise<T>): Promise<T> {
+    return await this.channelLock.acquire(channelId, async release => {
+      try {
+        return await fn();
+      } finally {
+        release();
+      }
+    });
+  }
+
+  public addState: (state: SignedState) => Promise<ChannelStoreEntry> = async (
+    state: SignedState
+  ) => await this.withLock(calculateChannelId(state), () => this._addState(state));
+
+  private async _addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelData =
       (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state)).data();
