@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
@@ -29,7 +31,12 @@ describe('Supports torrenting among peers with channels', () => {
     console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
-    tabs = [web3tTabA, web3tTabB];
+
+    const logPageOutput = (role: string) => (msg: any) =>
+      // use console.error so we can redirect STDERR to a file
+      process.env.CI && console.error(`${role}: `, msg.text());
+    web3tTabA.on('console', logPageOutput('A'));
+    web3tTabB.on('console', logPageOutput('B'));
 
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
