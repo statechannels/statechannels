@@ -47,7 +47,7 @@ function serializeOutcome(outcome: Outcome): OutcomeWire {
     case 'MixedAllocation':
       return outcome.simpleAllocations.map(serializeSimpleAllocation);
     case 'SimpleGuarantee':
-      throw 'TODO'; // TODO
+      return [outcome];
   }
 }
 
