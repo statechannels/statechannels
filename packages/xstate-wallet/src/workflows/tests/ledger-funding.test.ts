@@ -4,7 +4,7 @@ import {add, checkThat, isSimpleEthAllocation} from '../../utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
-import {Store} from '../../store';
+import {Store, SignedState} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
@@ -70,130 +70,173 @@ const allSignState = (state: State) => ({
   signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
 
-beforeEach(async () => {
-  aStore = new TestStore(chain);
-  await aStore.initialize([wallet1.privateKey]);
-  bStore = new TestStore(chain);
-  await bStore.initialize([wallet2.privateKey]);
+describe('success', () => {
+  beforeEach(async () => {
+    aStore = new TestStore(chain);
+    await aStore.initialize([wallet1.privateKey]);
+    bStore = new TestStore(chain);
+    await bStore.initialize([wallet2.privateKey]);
 
-  await Promise.all(
-    [aStore, bStore].map(async (store: TestStore) => {
-      await store.createEntry(allSignState(firstState(outcome, targetChannel)));
-      await store.setLedgerByEntry(
-        await store.createEntry(allSignState(firstState(outcome, ledgerChannel)))
-      );
-    })
-  );
-
-  subscribeToMessages({
-    [participants[0].participantId]: aStore,
-    [participants[1].participantId]: bStore
-  });
-});
-
-test('happy path', async () => {
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
-  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
-
-  const aService = interpret(machine(aStore).withContext(context));
-
-  const bService = interpret(machine(bStore).withContext(context));
-  [aService, bService].map(s => s.start());
-
-  await waitForExpect(async () => {
-    expect(bService.state.value).toEqual('success');
-    expect(aService.state.value).toEqual('success');
-
-    const {supported: supportedState} = await aStore.getEntry(ledgerChannelId);
-    const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
-
-    expect(outcome.allocationItems).toMatchObject(
-      [0, 1]
-        .map(i => ({
-          destination: destinations[i],
-          amount: amounts[i].sub(deductionAmounts[i])
-        }))
-        .concat([{destination: targetChannelId as any, amount: deductionAmounts.reduce(add)}])
+    await Promise.all(
+      [aStore, bStore].map(async (store: TestStore) => {
+        await store.createEntry(allSignState(firstState(outcome, targetChannel)));
+        await store.setLedgerByEntry(
+          await store.createEntry(allSignState(firstState(outcome, ledgerChannel)))
+        );
+      })
     );
 
-    expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({
-      type: 'Indirect',
-      ledgerId: ledgerChannelId
+    subscribeToMessages({
+      [participants[0].participantId]: aStore,
+      [participants[1].participantId]: bStore
     });
-  }, EXPECT_TIMEOUT);
-});
-
-test('locks', async () => {
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
-  [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
-
-  const aService = interpret(machine(aStore).withContext(context));
-  const bService = interpret(machine(bStore).withContext(context));
-  // Note: We need player B to block on the lock since technically
-  // if player B signs state 1 then state 1 is supported and it won't block
-  // waiting for player A
-  const status = await bStore.acquireChannelLock(context.ledgerChannelId);
-  expect(status).toEqual({
-    channelId: context.ledgerChannelId,
-    lock: expect.any(Guid)
   });
 
-  [aService, bService].map(s => s.start());
+  test('happy path', async () => {
+    const _chain = new FakeChain();
+    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+    [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
 
-  await waitForExpect(async () => {
-    expect(bService.state.value).toEqual('acquiringLock');
-    expect(aService.state.value).toEqual({fundingTarget: 'supportState'});
-  }, EXPECT_TIMEOUT);
+    const aService = interpret(machine(aStore).withContext(context));
 
-  aService.onTransition(s => {
-    if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
-      expect((s.context as any).lock).toBeDefined();
-      expect((s.context as any).lock).not.toEqual(status.lock);
+    const bService = interpret(machine(bStore).withContext(context));
+    [aService, bService].map(s => s.start());
+
+    await waitForExpect(async () => {
+      expect(bService.state.value).toEqual('success');
+      expect(aService.state.value).toEqual('success');
+
+      const {supported: supportedState} = await aStore.getEntry(ledgerChannelId);
+      const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
+
+      expect(outcome.allocationItems).toMatchObject(
+        [0, 1]
+          .map(i => ({
+            destination: destinations[i],
+            amount: amounts[i].sub(deductionAmounts[i])
+          }))
+          .concat([{destination: targetChannelId as any, amount: deductionAmounts.reduce(add)}])
+      );
+
+      expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({
+        type: 'Indirect',
+        ledgerId: ledgerChannelId
+      });
+    }, EXPECT_TIMEOUT);
+  });
+
+  test('locks', async () => {
+    const _chain = new FakeChain();
+    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+    [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
+
+    const aService = interpret(machine(aStore).withContext(context));
+    const bService = interpret(machine(bStore).withContext(context));
+    // Note: We need player B to block on the lock since technically
+    // if player B signs state 1 then state 1 is supported and it won't block
+    // waiting for player A
+    const status = await bStore.acquireChannelLock(context.ledgerChannelId);
+    expect(status).toEqual({
+      channelId: context.ledgerChannelId,
+      lock: expect.any(Guid)
+    });
+
+    [aService, bService].map(s => s.start());
+
+    await waitForExpect(async () => {
+      expect(bService.state.value).toEqual('acquiringLock');
+      expect(aService.state.value).toEqual({fundingTarget: 'supportState'});
+    }, EXPECT_TIMEOUT);
+
+    aService.onTransition(s => {
+      if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
+        expect((s.context as any).lock).toBeDefined();
+        expect((s.context as any).lock).not.toEqual(status.lock);
+      }
+    });
+    await bStore.releaseChannelLock(status);
+
+    await waitForExpect(async () => {
+      expect(aService.state.value).toEqual('success');
+    }, EXPECT_TIMEOUT);
+
+    expect(bStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
+  });
+});
+
+describe('failure modes', () => {
+  type Data = {
+    ledgerOutcome?: Outcome;
+    initialTargetState?: SignedState;
+    chainInfo?: {amount: string; finalized: boolean};
+  };
+  const oneWeiDeposited: Data = {
+    ledgerOutcome: outcome,
+    chainInfo: {amount: '1', finalized: false}
+  };
+  const fiveTotalAllocated: Data = {
+    ledgerOutcome: {
+      type: 'SimpleAllocation',
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      allocationItems: [0, 1].map(i => ({
+        destination: destinations[i],
+        amount: deductionAmounts[i].sub(1)
+      }))
     }
+  };
+
+  const finalizedLedger: Data = {chainInfo: {finalized: true, amount: '12'}};
+  const unsupportedTarget: Data = {
+    initialTargetState: {...firstState(outcome, targetChannel), signatures: []}
+  };
+
+  test.each`
+    description             | data                  | error
+    ${'underfunded'}        | ${oneWeiDeposited}    | ${Errors.underfunded}
+    ${'underallocated'}     | ${fiveTotalAllocated} | ${Errors.underallocated}
+    ${'finalized'}          | ${finalizedLedger}    | ${Errors.finalized}
+    ${'unsupported target'} | ${unsupportedTarget}  | ${Errors.unSupportedTargetChannel}
+  `('failure mode: $description', async ({error, data}: {error: string; data: Data}) => {
+    const ledgerOutcome = data.ledgerOutcome ?? outcome;
+    const initialTargetState =
+      data.initialTargetState ?? allSignState(firstState(outcome, targetChannel));
+    const chainInfo = data.chainInfo ?? {amount: '12', finalized: false};
+
+    aStore = new TestStore(chain);
+    await aStore.initialize([wallet1.privateKey]);
+    bStore = new TestStore(chain);
+    await bStore.initialize([wallet2.privateKey]);
+
+    const initialLedgerState = allSignState(firstState(ledgerOutcome, ledgerChannel));
+    await Promise.all(
+      [aStore, bStore].map(async (store: TestStore) => {
+        await store.createEntry(initialTargetState);
+        await store.setLedgerByEntry(await store.createEntry(initialLedgerState));
+      })
+    );
+
+    subscribeToMessages({
+      [participants[0].participantId]: aStore,
+      [participants[1].participantId]: bStore
+    });
+
+    const _chain = new FakeChain();
+    _chain.depositSync(ledgerChannelId, '0', chainInfo.amount);
+    chainInfo.finalized && _chain.finalizeSync(ledgerChannelId);
+    (aStore as any).chain = _chain;
+
+    aStore.createEntry(
+      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
+    );
+    aStore.chain.initialize();
+
+    const aService = interpret(machine(aStore).withContext(context), {
+      parent: {send: () => undefined} as any // Consumes uncaught errors
+    }).start();
+
+    await waitForExpect(async () => {
+      expect(aService.state.value).toEqual('failure');
+      expect(aService.state.context).toMatchObject({error});
+    }, EXPECT_TIMEOUT);
   });
-  await bStore.releaseChannelLock(status);
-
-  await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('success');
-  }, EXPECT_TIMEOUT);
-
-  expect(bStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
-});
-
-const twelveTotalAllocated = outcome;
-const fiveTotalAllocated: Outcome = {
-  type: 'SimpleAllocation',
-  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [0, 1].map(i => ({
-    destination: destinations[i],
-    amount: deductionAmounts[i].sub(1)
-  }))
-};
-
-test.each`
-  description         | ledgerOutcome           | chainInfo            | error
-  ${'underfunded'}    | ${twelveTotalAllocated} | ${{amount: '1'}}     | ${Errors.underfunded}
-  ${'underallocated'} | ${fiveTotalAllocated}   | ${undefined}         | ${Errors.underallocated}
-  ${'finalized'}      | ${twelveTotalAllocated} | ${{finalized: true}} | ${Errors.finalized}
-`('failure mode: $description', async ({ledgerOutcome, error, chainInfo}) => {
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', chainInfo?.amount || '12');
-  chainInfo?.finalized && _chain.finalizeSync(ledgerChannelId);
-  (aStore as any).chain = _chain;
-
-  aStore.createEntry(
-    allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
-  );
-  aStore.chain.initialize();
-
-  const aService = interpret(machine(aStore).withContext(context), {
-    parent: {send: () => undefined} as any // Consumes uncaught errors
-  }).start();
-
-  await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('failure');
-    expect(aService.state.context).toMatchObject({error});
-  }, EXPECT_TIMEOUT);
 });
