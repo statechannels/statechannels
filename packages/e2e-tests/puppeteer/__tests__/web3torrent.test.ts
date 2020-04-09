@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
@@ -6,10 +8,11 @@ import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from 
 
 import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
 
-jest.setTimeout(200_000);
-
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
+jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
+
+const USES_VIRTUAL_FUNDING = process.env.REACT_APP_FUNDING_STRATEGY === 'Virtual';
 
 let browserA: Browser;
 let browserB: Browser;
@@ -20,13 +23,23 @@ let tabs: [Page, Page];
 describe('Supports torrenting among peers with channels', () => {
   beforeAll(async () => {
     // 100ms sloMo avoids some undiagnosed race conditions
+    console.log('Opening browsers');
+
     browserA = await setUpBrowser(HEADLESS, 100);
     browserB = await setUpBrowser(HEADLESS, 100);
 
+    console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
     tabs = [web3tTabA, web3tTabB];
 
+    const logPageOutput = (role: string) => (msg: any) =>
+      // use console.error so we can redirect STDERR to a file
+      process.env.CI && console.error(`${role}: `, msg.text());
+    web3tTabA.on('console', logPageOutput('A'));
+    web3tTabB.on('console', logPageOutput('B'));
+
+    console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
     await loadDapp(web3tTabB, 0, true);
 
@@ -44,13 +57,13 @@ describe('Supports torrenting among peers with channels', () => {
 
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
-    const url = await uploadFile(web3tTabA);
+    const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING);
 
     console.log('B starts downloading...');
-    await startDownload(web3tTabB, url);
+    await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING);
 
     console.log('Waiting for open channels');
-    await Promise.all(tabs.map(waitAndOpenChannel));
+    await Promise.all(tabs.map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
 
     // Let the download cointinue for some time
     console.log('Downloading');

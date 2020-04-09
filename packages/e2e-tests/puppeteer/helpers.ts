@@ -14,6 +14,7 @@ export async function loadDapp(
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
+    localStorage.debug = "web3torrent*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
     window.ethereum.enable = () => new Promise(r => {
@@ -95,12 +96,44 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
   return browser;
 }
 
-export async function waitAndOpenChannel(page: Page): Promise<void> {
-  const createChannelButton = 'div.application-workflow-prompt > div > button';
+export async function waitAndApproveBudget(page: Page): Promise<void> {
+  console.log('Approving budget');
+
+  const approveBudgetButton = '.approve-budget-button';
 
   const walletIFrame = page.frames()[1];
-  await waitForAndClickButton(page, walletIFrame, createChannelButton);
+  await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
 }
+
+interface Window {
+  channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
+  channelRunning(): void;
+}
+declare let window: Window;
+
+export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
+  page: Page
+): Promise<void> => {
+  if (!usingVirtualFunding) {
+    console.log('Waiting for create channel button');
+
+    const createChannelButton = 'div.application-workflow-prompt > div > button';
+
+    const walletIFrame = page.frames()[1];
+    await waitForAndClickButton(page, walletIFrame, createChannelButton);
+  } else {
+    return new Promise(resolve =>
+      page.exposeFunction('channelRunning', resolve).then(() =>
+        page.evaluate(() => {
+          window.channelProvider.on('ChannelUpdated', () => {
+            window.channelRunning();
+            window.channelProvider.off('ChannelUpdated');
+          });
+        })
+      )
+    );
+  }
+};
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingText = 'div.application-workflow-prompt > h1';
