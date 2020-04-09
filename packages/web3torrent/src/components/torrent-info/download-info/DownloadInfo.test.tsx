@@ -37,7 +37,7 @@ const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => 
   };
 };
 
-describe.skip('<DownloadInfo />', () => {
+describe('<DownloadInfo />', () => {
   let downloadInfo: MockDownloadInfo;
 
   beforeEach(() => {

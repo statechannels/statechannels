@@ -12,7 +12,8 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents
+  WireEvents,
+  TorrentClientCapabilities
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
@@ -45,12 +46,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
 
+  clientCapability: TorrentClientCapabilities = TorrentClientCapabilities.NOT_TESTED;
+
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
+    if (process.env.NODE_ENV !== 'test') this.testTorrentingCapability();
   }
 
   async enable() {
@@ -70,7 +74,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.outcomeAddress = null;
   }
 
-  async testTorrentingCapability(timeOut: number) {
+  async testTorrentingCapability(timeOut: number = 3000): Promise<void> {
+    this.emit(ClientEvents.CLIENT_CAPABILITY_TEST, this.clientCapability);
     log('Testing torrenting capability...');
     let torrentId;
     const gotAWire = new Promise(resolve => {
@@ -84,9 +89,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
     const raceResult = await Promise.race([gotAWire, timer]);
     if (torrentId) {
-      this.remove(torrentId);
+      super.remove(torrentId);
     }
-    return raceResult;
+    this.clientCapability = raceResult
+      ? TorrentClientCapabilities.CAPABLE
+      : TorrentClientCapabilities.NOT_CAPABLE;
+
+    this.emit(ClientEvents.CLIENT_CAPABILITY_TEST, this.clientCapability);
   }
 
   seed(

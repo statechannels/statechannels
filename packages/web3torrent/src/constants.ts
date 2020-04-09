@@ -33,21 +33,16 @@ export const fireBaseConfig =
         databaseURL: process.env.REACT_APP_FIREBASE_URL
       };
 
-const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
+// Tracker URLs
+const suffix = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL === 'https' ? 's' : '';
 const url = process.env.REACT_APP_TRACKER_URL;
 export const defaultTrackers = [
-  // 'udp://explodie.org:6969',
-  // 'udp://tracker.coppersurfer.tk:6969',
-  // 'udp://tracker.empire-js.us:1337',
-  // 'udp://tracker.leechers-paradise.org:6969',
-  // 'udp://tracker.opentrackr.org:1337',
-  // 'wss://tracker.btorrent.xyz',
-  // 'wss://tracker.openwebtorrent.com'
-  `${httpProtocol}://${url}/announce`,
+  `http${suffix}://${url}/announce`,
   `udp://${url}`,
-  `ws://${url}`
+  `ws${suffix}://${url}`
 ];
 
+// Default Torrent Data
 export const EmptyTorrent = ({
   name: 'unknown',
   magnetURI: '',
@@ -74,6 +69,15 @@ export const preSeededTorrents: Array<Partial<Torrent>> = [
       'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
   }
 ];
+
+// Welcome Page Tracker creation options
+export const welcomePageTrackerOpts = {
+  infoHash: [preSeededTorrents[0].infoHash],
+  announce: defaultTrackers,
+  peerId: '2d5757303030372d37454e613073307937495630', // random
+  port: 6881,
+  getAnnounceOpts: () => ({pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777'}) // dummy pseAccount, but it works
+};
 
 export const testTorrent = {
   name: 'Big Buck Bunny',
