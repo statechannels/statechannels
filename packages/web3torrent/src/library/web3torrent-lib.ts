@@ -15,7 +15,6 @@ import {
   WireEvents,
   TorrentClientCapabilities
 } from './types';
-import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
   defaultTrackers,
@@ -27,7 +26,8 @@ import {
   testTorrent
 } from '../constants';
 import {Message} from '@statechannels/client-api-schema';
-import {hexZeroPad} from 'ethers/utils';
+import {utils} from 'ethers';
+const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
 // To enable logs in the browser, run `localStorage.debug = "web3torrent:*"`

@@ -1,9 +1,8 @@
-import {web3torrent} from '../clients/web3torrent-client';
 import {Status, Torrent} from '../types';
 
-export const getStatus = (torrent: Torrent): Status => {
+export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
   const {uploadSpeed, downloadSpeed, progress, uploaded, paused, done, createdBy} = torrent;
-  if (createdBy && createdBy === web3torrent.pseAccount) {
+  if (createdBy && createdBy === pseAccount) {
     return Status.Seeding;
   }
   if (progress && done) {
@@ -51,13 +50,13 @@ export const getPeerStatus = (torrent, wire) => {
   return Object.keys(torrent._peers).includes(peerId);
 };
 
-export default (previousData: Torrent, infoHash): Torrent => {
+export const torrentStatusChecker = (web3Torrent, previousData: Torrent, infoHash): Torrent => {
   if (!infoHash) {
     // torrent in magnet form
     return {...previousData, status: Status.Idle};
   }
 
-  const live = web3torrent.get(infoHash) as Torrent;
+  const live = web3Torrent.get(infoHash) as Torrent;
   if (!live) {
     // torrent after being destroyed
     return {...previousData, downloaded: 0, status: Status.Idle};
@@ -71,13 +70,13 @@ export default (previousData: Torrent, infoHash): Torrent => {
       name: live.name || previousData.name,
       length: live.length || previousData.length,
       downloaded: live.downloaded || 0,
-      status: getStatus(live),
+      status: getStatus(live, web3Torrent.pseAccount),
       uploadSpeed: live.uploadSpeed,
       downloadSpeed: live.downloadSpeed,
       numPeers: live.numPeers,
       parsedTimeRemaining: getFormattedETA(live),
       ready: true,
-      originalSeed: live.createdBy === web3torrent.pseAccount
+      originalSeed: live.createdBy === web3Torrent.pseAccount
     }
   };
 };

@@ -1,22 +1,21 @@
 /* eslint-disable no-unreachable */
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
-import {bigNumberify} from 'ethers/utils';
-import {parseEther, hexZeroPad} from 'ethers/utils';
+import {utils} from 'ethers';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
+export const WEI_PER_BYTE = utils.bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
 export const PEER_TRUST = 4; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
 // The recomended value is 5 ( the size of the queue of requests made by the leecher to the seeder)
 
-export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
+export const BUFFER_REFILL_RATE = utils.bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
 // number of requests the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
 // It can also cause a payment to go above the leecher's balance / capabilities
 
-export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
+export const INITIAL_SEEDER_BALANCE = utils.bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 
 // firebase setup
 export const HUB = {
@@ -96,23 +95,23 @@ export const mockChannels: Array<Partial<ChannelState>> = [
   {
     channelId: '0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c',
     payer: mockLeecherA,
-    payerBalance: bigNumberify(mockBalance / 2).toString(),
+    payerBalance: utils.bigNumberify(mockBalance / 2).toString(),
     beneficiary: mockCurrentUser,
-    beneficiaryBalance: bigNumberify(mockBalance).toString()
+    beneficiaryBalance: utils.bigNumberify(mockBalance).toString()
   },
   {
     channelId: '0xb43b0a0d3e029c4c5a0b54d5dc17e0aadc383d2d',
     payer: mockLeecherB,
-    payerBalance: bigNumberify(mockBalance * 6).toString(),
+    payerBalance: utils.bigNumberify(mockBalance * 6).toString(),
     beneficiary: mockCurrentUser,
-    beneficiaryBalance: bigNumberify(mockBalance).toString()
+    beneficiaryBalance: utils.bigNumberify(mockBalance).toString()
   },
   {
     channelId: '0x7bc8f170fdf3772c5ebdcd90bf257316c69ba45',
     payer: mockCurrentUser,
-    payerBalance: bigNumberify(mockBalance).toString(),
+    payerBalance: utils.bigNumberify(mockBalance).toString(),
     beneficiary: mockSeeder,
-    beneficiaryBalance: bigNumberify(mockBalance * 2).toString()
+    beneficiaryBalance: utils.bigNumberify(mockBalance * 2).toString()
   }
 ];
 
@@ -128,4 +127,4 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 export const FUNDING_STRATEGY =
   process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
-export const INITIAL_BUDGET_AMOUNT = hexZeroPad(parseEther('10').toHexString(), 32);
+export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('10').toHexString(), 32);

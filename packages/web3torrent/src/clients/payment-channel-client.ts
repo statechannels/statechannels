@@ -12,13 +12,13 @@ import {
   FUNDING_STRATEGY,
   INITIAL_BUDGET_AMOUNT
 } from '../constants';
-import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import debug from 'debug';
 import _ from 'lodash';
 const log = debug('web3torrent:payment-channel');
+const hexZeroPad = utils.hexZeroPad;
 
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
