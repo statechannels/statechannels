@@ -332,7 +332,7 @@ jobs:
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       ADD_LOGS: true
       GANACHE_PORT: 8547
-      FIREBASE_URL: ws://localhost:5555
+      REACT_APP_FIREBASE_URL: ws://localhost:5555
       NODE_ENV: test
     steps:
       - checkout
