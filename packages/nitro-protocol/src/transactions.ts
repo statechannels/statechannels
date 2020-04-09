@@ -6,6 +6,7 @@ import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress} from './signatures';
 import {SignedState} from '.';
+import {Signature} from 'ethers/utils';
 
 export async function getData(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
@@ -81,7 +82,6 @@ export function createSignatureArguments(
   const {participants} = signedStates[0].state.channel;
   const states = [];
   const whoSignedWhat = new Array<number>(participants.length);
-  const signatures = [];
 
   // Get a list of all unique signed states.
   const uniqueSignedStates = signedStates.filter((s, i, a) => a.indexOf(s) === i);
@@ -89,16 +89,16 @@ export function createSignatureArguments(
   // This allows us to create a single state with multiple signatures
   // which is required by the contracts
   const uniqueStates = uniqueSignedStates.map(s => s.state).filter((s, i, a) => a.indexOf(s) === i);
-
+  const signatures = new Array<Signature>(uniqueStates.length);
   for (let i = 0; i < uniqueStates.length; i++) {
     states.push(uniqueStates[i]);
     // Get a list of all signed states that have the state
     const signedStatesForUniqueState = uniqueSignedStates.filter(s => s.state === uniqueStates[i]);
     // Iterate through the signatures and set signatures/whoSignedWhawt
     for (const ss of signedStatesForUniqueState) {
-      signatures.push(ss.signature);
-
       const participantIndex = participants.indexOf(getStateSignerAddress(ss));
+
+      signatures[participantIndex] = ss.signature;
       whoSignedWhat[participantIndex] = i;
     }
   }
