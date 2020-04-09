@@ -1,16 +1,18 @@
 import {web3torrent} from '../clients/web3torrent-client';
 import {Status, Torrent} from '../types';
 import {createMockTorrent} from './test-utils';
-import checkTorrentStatus, {getFormattedETA, getStatus} from './torrent-status-checker';
+import torrentStatusCheck, {getFormattedETA, getStatus} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
 
 describe('Torrent Status Checker', () => {
   let torrent: Torrent;
   const mockInfoHash = '123';
+  let checkTorrentStatus: (previousData: Torrent, infohash: any) => Torrent;
 
   beforeAll(() => {
     mockMetamask();
     web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
+    checkTorrentStatus = torrentStatusCheck(web3torrent);
   });
   beforeEach(() => {
     torrent = createMockTorrent() as Torrent;
@@ -112,41 +114,53 @@ describe('Torrent Status Checker', () => {
     describe('getStatus()', () => {
       it('should return Seeding if the torrent is now Seeding', () => {
         expect(
-          getStatus({
-            createdBy: web3torrent.pseAccount,
-            uploadSpeed: 1000,
-            downloadSpeed: 0,
-            progress: 50,
-            done: false
-          } as Torrent)
+          getStatus(
+            {
+              createdBy: web3torrent.pseAccount,
+              uploadSpeed: 1000,
+              downloadSpeed: 0,
+              progress: 50,
+              done: false
+            } as Torrent,
+            web3torrent.pseAccount
+          )
         ).toEqual(Status.Seeding);
       });
 
       it('should return Completed if the torrent is done', () => {
         expect(
-          getStatus({
-            uploadSpeed: 1000,
-            downloadSpeed: 1000,
-            progress: 100,
-            done: true
-          } as Torrent)
+          getStatus(
+            {
+              uploadSpeed: 1000,
+              downloadSpeed: 1000,
+              progress: 100,
+              done: true
+            } as Torrent,
+            web3torrent.pseAccount
+          )
         ).toEqual(Status.Completed);
       });
 
       it('should return Connecting if there is no traffic yet', () => {
         expect(
-          getStatus({uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as Torrent)
+          getStatus(
+            {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as Torrent,
+            web3torrent.pseAccount
+          )
         ).toEqual(Status.Connecting);
       });
 
       it('should return Downloading for any other cases', () => {
         expect(
-          getStatus({
-            uploadSpeed: 0,
-            downloadSpeed: 1000,
-            progress: 10,
-            done: false
-          } as Torrent)
+          getStatus(
+            {
+              uploadSpeed: 0,
+              downloadSpeed: 1000,
+              progress: 10,
+              done: false
+            } as Torrent,
+            web3torrent.pseAccount
+          )
         ).toEqual(Status.Downloading);
       });
     });

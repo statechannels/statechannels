@@ -98,7 +98,7 @@ describe('<File />', () => {
   it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
       .spyOn(TorrentStatus, 'default')
-      .mockImplementation((_pD: Torrent, _iH: any) => EmptyTorrent);
+      .mockImplementation(() => (_pD: Torrent, _iH: any) => EmptyTorrent);
 
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');
