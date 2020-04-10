@@ -24,10 +24,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('networkChanged', chainId => {
-        setCurrentNetwork(Number(chainId));
-      });
+      const listener = chainId => setCurrentNetwork(Number(chainId));
+      window.ethereum.on('networkChanged', listener);
+      return () => {
+        window.ethereum.removeListener('networkChanged', listener);
+      };
     }
+    return () => ({});
   }, []);
 
   const ready = currentNetwork === requiredNetwork;
