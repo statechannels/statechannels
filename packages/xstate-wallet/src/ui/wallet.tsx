@@ -8,6 +8,8 @@ import {EnableEthereum} from './enable-ethereum-workflow';
 import {Layout} from './layout';
 import {ApproveBudgetAndFund} from './approve-budget-and-fund-workflow';
 
+import {CloseLedgerAndWithdraw} from './close-ledger-and-withdraw';
+
 interface Props {
   workflow: Interpreter<any, any, any>;
 }
@@ -25,6 +27,9 @@ export const Wallet = (props: Props) => {
         )}
         {props.workflow.id === 'approve-budget-and-fund' && (
           <ApproveBudgetAndFund service={props.workflow} />
+        )}
+        {props.workflow.id === 'close-and-withdraw' && (
+          <CloseLedgerAndWithdraw current={current} send={send} />
         )}
       </Layout>
     </WindowContext.Provider>

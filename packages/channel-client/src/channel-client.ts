@@ -158,7 +158,17 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.send({method: 'GetBudget', params: {hubAddress}});
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
-    return this.provider.send({method: 'CloseAndWithdraw', params: {hubAddress}});
+  async closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<SiteBudget> {
+    return this.provider.send({
+      method: 'CloseAndWithdraw',
+      params: {
+        playerParticipantId: this.signingAddress as string,
+        hub: {
+          participantId: HUB.participantId,
+          signingAddress: hubAddress,
+          destination: hubOutcomeAddress
+        }
+      }
+    });
   }
 }

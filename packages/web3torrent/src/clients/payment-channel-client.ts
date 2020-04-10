@@ -118,12 +118,12 @@ export class PaymentChannelClient {
       }
     });
 
-    myFirebaseRef.on('child_added', snapshot => {
+    myFirebaseRef.on('child_added', async snapshot => {
       const key = snapshot.key;
       const message = snapshot.val();
       myFirebaseRef.child(key).remove();
       log('GOT FROM FIREBASE: ' + message);
-      this.pushMessage(message);
+      await this.pushMessage(message);
     });
   }
 
@@ -345,8 +345,8 @@ export class PaymentChannelClient {
     return this.budgetCache;
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
-    return await this.channelClient.closeAndWithdraw(hubAddress);
+  async closeAndWithdraw(): Promise<SiteBudget | {}> {
+    return this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
   }
 }
 

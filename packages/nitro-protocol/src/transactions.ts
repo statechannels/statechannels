@@ -6,6 +6,7 @@ import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress} from './signatures';
 import {SignedState} from '.';
+import {Signature} from 'ethers/utils';
 
 export async function getData(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
@@ -75,19 +76,32 @@ export function createConcludeTransaction(
 
 // Currently we assume each signedState is a unique combination of state/signature
 // So if multiple participants sign a state we expect a SignedState for each participant
-function createSignatureArguments(
+export function createSignatureArguments(
   signedStates: SignedState[]
 ): {states: State[]; signatures: utils.Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
+  const states = [];
+  const whoSignedWhat = new Array<number>(participants.length);
 
-  // Get a list of all unique states.
+  // Get a list of all unique signed states.
   const uniqueSignedStates = signedStates.filter((s, i, a) => a.indexOf(s) === i);
-  const states = uniqueSignedStates.map(s => s.state);
+  // Get a list of unique states ignoring their signatures
+  // This allows us to create a single state with multiple signatures
+  // which is required by the contracts
+  const uniqueStates = uniqueSignedStates.map(s => s.state).filter((s, i, a) => a.indexOf(s) === i);
+  const signatures = new Array<Signature>(uniqueStates.length);
+  for (let i = 0; i < uniqueStates.length; i++) {
+    states.push(uniqueStates[i]);
+    // Get a list of all signed states that have the state
+    const signedStatesForUniqueState = uniqueSignedStates.filter(s => s.state === uniqueStates[i]);
+    // Iterate through the signatures and set signatures/whoSignedWhawt
+    for (const ss of signedStatesForUniqueState) {
+      const participantIndex = participants.indexOf(getStateSignerAddress(ss));
 
-  // Generate whoSignedWhat based on the original list of states (which may contain the same state signed by multiple participants)
-  const whoSignedWhat = signedStates.map(s => participants.indexOf(getStateSignerAddress(s)));
-  const signatures = [];
-  participants.forEach((p, i) => signatures.push(uniqueSignedStates[whoSignedWhat[i]].signature));
+      signatures[participantIndex] = ss.signature;
+      whoSignedWhat[participantIndex] = i;
+    }
+  }
 
   return {states, signatures, whoSignedWhat};
 }

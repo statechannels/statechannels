@@ -10,9 +10,11 @@ import {
   createConcludeTransaction,
   createForceMoveTransaction,
   createRespondTransaction,
+  createSignatureArguments,
 } from '../../src/transactions';
 
 const wallet = Wallet.createRandom();
+
 const channel: Channel = {
   chainId: '0x1',
   channelNonce: '0x1',
@@ -74,6 +76,50 @@ describe('transaction-generators', () => {
 
     expect(transactionRequest.data).toBeDefined();
   });
+
+  it.each`
+    turnNum   | expectedWhoSignedWhat
+    ${[0, 1]} | ${[0, 1]}
+    ${[1, 2]} | ${[1, 0]}
+  `(
+    'creates a correct signature arguments when handling multiple states',
+    async ({turnNum, expectedWhoSignedWhat}) => {
+      const wallet2 = Wallet.createRandom();
+      const twoPlayerChannel = {...channel, participants: [wallet.address, wallet2.address]};
+
+      const signedStates = [
+        await signState(
+          {
+            turnNum: turnNum[0],
+            isFinal: false,
+            appDefinition: AddressZero,
+            appData: '0x0',
+            outcome: [],
+            channel: twoPlayerChannel,
+            challengeDuration: 0x0,
+          },
+          turnNum[0] % 2 === 0 ? wallet.privateKey : wallet2.privateKey
+        ),
+        await signState(
+          {
+            turnNum: turnNum[1],
+            isFinal: false,
+            appDefinition: AddressZero,
+            appData: '0x0',
+            outcome: [],
+            channel: twoPlayerChannel,
+            challengeDuration: 0x0,
+          },
+          turnNum[1] % 2 === 0 ? wallet.privateKey : wallet2.privateKey
+        ),
+      ];
+      const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+
+      expect(states).toHaveLength(2);
+      expect(signatures).toHaveLength(2);
+      expect(whoSignedWhat).toEqual(expectedWhoSignedWhat);
+    }
+  );
 
   describe('respond transactions', () => {
     it('creates a transaction', async () => {
