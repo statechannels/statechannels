@@ -13,7 +13,7 @@ jest.setTimeout(30000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
-
+  await fakeChain.ethereumEnable();
   const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',

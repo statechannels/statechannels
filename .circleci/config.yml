@@ -105,6 +105,16 @@ commands:
           path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
           destination: << parameters.job >>-click.error.png
 
+  upload_e2e_output:
+    description: 'Upload e2e browser output'
+    parameters:
+      job:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e-tests/browserOutput.log
+          destination: << parameters.job >>-browserOutput.log
+
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -256,9 +266,9 @@ jobs:
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
       - upload_logs:
-          file: integration-test-stats
+          file: integration-test-web3torrent-stats
       - upload_e2e_screenshots:
-          job: integration-test
+          job: integration-test-web3torrent
 
   integration-test-with-hub:
     resource_class: medium
@@ -306,9 +316,48 @@ jobs:
       - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=true yarn test)
       - upload_logs:
           file: integration-test-stats
-      # TODO: Enable once the test runs reliably
-      #- upload_e2e_screenshots:
-      #    job: integration-test-with-hub
+      - upload_e2e_screenshots:
+          job: integration-test-with-hub
+
+  integration-test-web3torrent-with-hub:
+    resource_class: medium
+    working_directory: /home/circleci/project
+    docker:
+      - image: circleci/node:10.16.3
+    environment:
+      FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      REACT_APP_FUNDING_STRATEGY: Virtual
+      REACT_APP_AUTO_FUND_LEDGER: true
+      USE_GANACHE_DEPLOYMENT_CACHE: true
+      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
+      ADD_LOGS: true
+      GANACHE_PORT: 8547
+      REACT_APP_FIREBASE_URL: ws://localhost:5555
+      NODE_ENV: development
+    steps:
+      - checkout
+      - puppeteer/install
+      - log_stats:
+          file: integration-test-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: (cd packages/devtools && yarn run start:shared-ganache)
+          background: true
+      - run:
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
+          background: true
+      - run:
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
+          background: true
+      - run:
+          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
+          background: true
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
+      - upload_logs:
+          file: integration-test-web3torrent-with-hub-stats
+      - upload_e2e_screenshots:
+          job: integration-test-web3torrent-with-hub
 
   release-incremental:
     <<: *defaults
@@ -356,6 +405,9 @@ workflows:
       #      - prepare
       #      - integration-test
       - integration-test-web3torrent:
+          requires:
+            - prepare
+      - integration-test-web3torrent-with-hub:
           requires:
             - prepare
       - release-incremental:

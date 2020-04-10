@@ -12,13 +12,13 @@ import {
   FUNDING_STRATEGY,
   INITIAL_BUDGET_AMOUNT
 } from '../constants';
-import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import debug from 'debug';
 import _ from 'lodash';
 const log = debug('web3torrent:payment-channel');
+const hexZeroPad = utils.hexZeroPad;
 
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
@@ -118,12 +118,12 @@ export class PaymentChannelClient {
       }
     });
 
-    myFirebaseRef.on('child_added', snapshot => {
+    myFirebaseRef.on('child_added', async snapshot => {
       const key = snapshot.key;
       const message = snapshot.val();
       myFirebaseRef.child(key).remove();
       log('GOT FROM FIREBASE: ' + message);
-      this.pushMessage(message);
+      await this.pushMessage(message);
     });
   }
 
@@ -345,8 +345,8 @@ export class PaymentChannelClient {
     return this.budgetCache;
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
-    return await this.channelClient.closeAndWithdraw(hubAddress);
+  async closeAndWithdraw(): Promise<SiteBudget | {}> {
+    return this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
   }
 }
 

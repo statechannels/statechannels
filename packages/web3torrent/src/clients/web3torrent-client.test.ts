@@ -86,7 +86,7 @@ describe('Web3TorrentClient', () => {
     });
   });
 
-  describe('remove()', () => {
+  describe('cancel()', () => {
     let removeSpy: jest.SpyInstance<
       Promise<void>,
       [string | WebTorrent.Torrent | Buffer, (((err: string | Error) => void) | undefined)?]

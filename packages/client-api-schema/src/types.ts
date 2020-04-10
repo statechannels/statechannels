@@ -210,7 +210,7 @@ export type ApproveBudgetAndFundRequest = JsonRpcRequest<
 >;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 
-export type CloseAndWithdrawParams = {player: Participant; hub: Participant};
+export type CloseAndWithdrawParams = {hub: Participant; playerParticipantId: string};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 

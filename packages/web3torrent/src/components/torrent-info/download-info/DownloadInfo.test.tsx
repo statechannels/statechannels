@@ -37,7 +37,7 @@ const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => 
   };
 };
 
-describe.skip('<DownloadInfo />', () => {
+describe('<DownloadInfo />', () => {
   let downloadInfo: MockDownloadInfo;
 
   beforeEach(() => {
@@ -73,7 +73,7 @@ describe.skip('<DownloadInfo />', () => {
     );
   });
 
-  it('can call Web3TorrentClient.remove() when clicking the Cancel button', () => {
+  it('can call Web3TorrentClient.cancel() when clicking the Cancel button', () => {
     const removeSpy = jest
       .spyOn(Web3TorrentClient, 'cancel')
       .mockImplementation(async (_?: string) => {

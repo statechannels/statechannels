@@ -368,13 +368,13 @@
         "hub": {
           "$ref": "#/definitions/Participant"
         },
-        "player": {
-          "$ref": "#/definitions/Participant"
+        "playerParticipantId": {
+          "type": "string"
         }
       },
       "required": [
-        "player",
-        "hub"
+        "hub",
+        "playerParticipantId"
       ],
       "type": "object"
     },

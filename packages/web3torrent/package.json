@@ -73,9 +73,6 @@
     "typescript": "3.7.5",
     "webtorrent-fixtures": "1.7.3"
   },
-  "engines": {
-    "node": "^10.16.3"
-  },
   "eslintConfig": {
     "extends": "react-app"
   },

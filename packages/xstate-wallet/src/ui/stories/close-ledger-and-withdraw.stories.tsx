@@ -9,7 +9,7 @@ import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
 import {XstateStore} from '../../store';
 import React from 'react';
-import {CloseLegerWithdraw} from '../close-ledger-and-withdraw';
+import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {Participant} from '../../store/types';
 
@@ -49,7 +49,7 @@ if (config.states) {
     storiesOf('Workflows / Close And Withdraw', module).add(
       state.toString(),
       renderComponentInFrontOfApp(
-        <CloseLegerWithdraw current={machine.state} send={machine.send} />
+        <CloseLedgerAndWithdraw current={machine.state} send={machine.send} />
       )
     );
     machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.

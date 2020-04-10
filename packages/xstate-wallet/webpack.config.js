@@ -53,6 +53,7 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin([
       'ETH_ASSET_HOLDER_ADDRESS',
+      'NITRO_ADJUDICATOR_ADDRESS',
       'HUB_ADDRESS',
       'CHAIN_NETWORK_ID',
       'ADD_LOGS',
