@@ -173,7 +173,7 @@ function deserializeAllocationItem(allocationItem: AllocationItemWire): Allocati
   return {destination, amount: bigNumberify(amount)};
 }
 
-function serializeOutcome(outcome: Outcome): OutcomeWire {
+export function serializeOutcome(outcome: Outcome): OutcomeWire {
   switch (outcome.type) {
     case 'SimpleAllocation':
       return [serializeSimpleAllocation(outcome)];
