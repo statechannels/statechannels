@@ -16,6 +16,7 @@ import {depositsToMake} from './wallet/deposit';
 import {makeDeposits} from './blockchain/eth-asset-holder';
 import {pipe} from 'fp-ts/lib/pipeable';
 import {map as fpMap, fold} from 'fp-ts/lib/Either';
+import {cHubParticipantId, cFirebasePrefix} from './constants';
 const log = logger();
 
 export async function startServer() {
@@ -46,6 +47,8 @@ export async function startServer() {
     );
 
   log.info(`Listening on database ${process.env.FIREBASE_URL}`);
+  log.info(`Firebase prefix set to ${cFirebasePrefix}`);
+  log.info(`Hub listening for messages sent to ${cHubParticipantId}`);
 }
 
 if (require.main === module) {
