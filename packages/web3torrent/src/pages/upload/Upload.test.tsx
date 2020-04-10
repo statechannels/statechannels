@@ -2,7 +2,7 @@ import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
-import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
+import {MemoryRouter as Router} from 'react-router-dom';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentSeedInput} from '../../library/types';
 import {Status, Torrent} from '../../types';

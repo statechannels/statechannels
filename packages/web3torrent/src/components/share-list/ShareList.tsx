@@ -1,4 +1,3 @@
-import {History} from 'history';
 import React from 'react';
 import {RoutePath} from '../../routes';
 import {Torrent} from '../../types';
