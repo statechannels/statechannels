@@ -50,11 +50,9 @@ const App: React.FC = () => {
           <LayoutHeader />
         </Route>
         <Switch>
-          <Route
-            exact
-            path={RoutePath.Root}
-            render={props => <Welcome {...props} ready={ready} />}
-          />
+          <Route exact path={RoutePath.Root}>
+            <Welcome ready={ready} />
+          </Route>
           <Route exact path={RoutePath.File}>
             <File ready={ready} />
           </Route>
