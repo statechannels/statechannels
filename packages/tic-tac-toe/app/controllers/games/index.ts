@@ -19,7 +19,7 @@ export default class GamesIndexController extends Controller {
   @tracked showCreateGameModal = false;
 
   get blockieSrc(): string {
-    return makeBlockie(this.user.userAddress ?? '0');
+    return makeBlockie(this.user.outcomeAddress ?? '0');
   }
 
   get publicGames(): ChallengeModel[] {
@@ -32,8 +32,8 @@ export default class GamesIndexController extends Controller {
     console.log('Create New Game');
     this.showCreateGameModal = false;
     const myPublicOpenGame = {
-      address: this.user.userAddress,
-      outcomeAddress: this.user.walletAddress,
+      address: this.user.address,
+      outcomeAddress: this.user.outcomeAddress,
       name: this.user.username,
       stake: parseEther(this.buyInAmount.toString()).toString(),
       createdAt: new Date().getTime(),

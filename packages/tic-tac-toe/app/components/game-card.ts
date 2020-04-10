@@ -26,7 +26,7 @@ export default class GameCardComponent extends Component<GameCardComponentArgs> 
   @action
   async joinGame(game: ChallengeModel): Promise<void> {
     game.playerAName = this.user.username;
-    game.playerAOutcomeAddress = this.user.walletAddress;
+    game.playerAOutcomeAddress = this.user.outcomeAddress;
     game.isPublic = false;
     await game.save();
     this.currentGame.setGame(game);
@@ -40,12 +40,12 @@ export default class GameCardComponent extends Component<GameCardComponentArgs> 
 
     console.log('Lets createChannel');
     await this.tttChannelClient.createChannel(
-      this.user.userAddress,
+      this.user.address,
       game.address,
       aBal,
       bBal,
       startState,
-      this.user.walletAddress,
+      this.user.outcomeAddress,
       game.outcomeAddress
     );
     console.log('Created Channel?');
