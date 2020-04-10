@@ -1,6 +1,6 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
-import React from 'react';
+import React, {useContext} from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {Web3TorrentContext} from '../../../clients/web3torrent-client';
@@ -9,112 +9,103 @@ import {utils} from 'ethers';
 import {Torrent} from '../../../types';
 import {getPeerStatus} from '../../../utils/torrent-status-checker';
 
-export type UploadInfoProps = {
+type UploadInfoProps = {
   torrent: Torrent;
   channels: Dictionary<ChannelState>;
   participantType: 'payer' | 'beneficiary';
 };
 
-class ChannelsList extends React.Component<UploadInfoProps> {
-  static contextType = Web3TorrentContext;
-
-  // Adds typing information to this.context
-  context!: React.ContextType<typeof Web3TorrentContext>;
-
-  channelIdToTableRow(
-    channelId: string,
-    channels: Dictionary<ChannelState>,
-    torrent: Torrent,
-    participantType: 'payer' | 'beneficiary'
-  ) {
-    let channelButton;
-    const channel = channels[channelId];
-    const isBeneficiary = participantType === 'beneficiary';
-    const wire = torrent.wires.find(
-      wire =>
-        wire.paidStreamingExtension.peerChannelId === channelId ||
-        wire.paidStreamingExtension.pseChannelId === channelId
+function channelIdToTableRow(
+  channelId: string,
+  channels: Dictionary<ChannelState>,
+  torrent: Torrent,
+  participantType: 'payer' | 'beneficiary',
+  clickHandler: (string) => Promise<ChannelState>
+) {
+  let channelButton;
+  const channel = channels[channelId];
+  const isBeneficiary = participantType === 'beneficiary';
+  const wire = torrent.wires.find(
+    wire =>
+      wire.paidStreamingExtension.peerChannelId === channelId ||
+      wire.paidStreamingExtension.pseChannelId === channelId
+  );
+  if (channel.status === 'closing') {
+    channelButton = <button disabled>Closing ...</button>;
+  } else if (channel.status === 'closed') {
+    channelButton = <button disabled>Closed</button>;
+  } else if (channel.status === 'challenging') {
+    channelButton = <button disabled>Challenging</button>;
+  } else {
+    channelButton = getPeerStatus(torrent, wire) ? (
+      <button disabled>Running</button>
+    ) : (
+      <button className="button-alt" onClick={() => clickHandler(channelId)}>
+        Challenge Channel
+      </button>
     );
-    if (channel.status === 'closing') {
-      channelButton = <button disabled>Closing ...</button>;
-    } else if (channel.status === 'closed') {
-      channelButton = <button disabled>Closed</button>;
-    } else if (channel.status === 'challenging') {
-      channelButton = <button disabled>Challenging</button>;
-    } else {
-      channelButton = getPeerStatus(torrent, wire) ? (
-        <button disabled>Running</button>
+  }
+
+  let dataTransferred: string;
+  const peerAccount = channel[participantType];
+  if (wire) {
+    dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
+  } else {
+    // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
+    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
+  }
+
+  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
+
+  return (
+    <tr className="peerInfo" key={channelId}>
+      <td className="channel">{channelButton}</td>
+      <td className="channel-id">{channelId}</td>
+      <td className="peer-id">{peerAccount}</td>
+      <td className="transferred">
+        {dataTransferred}
+        <i className={isBeneficiary ? 'up' : 'down'}></i>
+      </td>
+      {isBeneficiary ? (
+        <td className="earned">{weiTransferred}</td>
       ) : (
-        <button
-          className="button-alt"
-          onClick={() => this.context.paymentChannelClient.challengeChannel(channelId)}
-        >
-          Challenge Channel
-        </button>
-      );
-    }
-
-    let dataTransferred: string;
-    const peerAccount = channel[participantType];
-    if (wire) {
-      dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
-    } else {
-      // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
-      dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
-    }
-
-    const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
-
-    return (
-      <tr className="peerInfo" key={channelId}>
-        <td className="channel">{channelButton}</td>
-        <td className="channel-id">{channelId}</td>
-        <td className="peer-id">{peerAccount}</td>
-        <td className="transferred">
-          {dataTransferred}
-          <i className={isBeneficiary ? 'up' : 'down'}></i>
-        </td>
-        {isBeneficiary ? (
-          <td className="earned">{weiTransferred}</td>
-        ) : (
-          <td className="paid">-{weiTransferred}</td>
-        )}
-      </tr>
-    );
-  }
-
-  render() {
-    const channelsInfo = _.keys(this.props.channels).sort(
-      (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
-    );
-    return (
-      <section className="wires-list">
-        <table className="wires-list-table">
-          {channelsInfo.length > 0 && (
-            <thead>
-              <tr className="peerInfo">
-                <td>Status</td>
-                <td>Channel</td>
-                <td>Peer</td>
-                <td>Data</td>
-                <td>Funds</td>
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {channelsInfo.map(id =>
-              this.channelIdToTableRow(
-                id,
-                this.props.channels,
-                this.props.torrent,
-                this.props.participantType
-              )
-            )}
-          </tbody>
-        </table>
-      </section>
-    );
-  }
+        <td className="paid">-{weiTransferred}</td>
+      )}
+    </tr>
+  );
 }
 
-export {ChannelsList};
+export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, participantType}) => {
+  const context = useContext(Web3TorrentContext);
+  const channelsInfo = _.keys(channels).sort(
+    (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
+  );
+  return (
+    <section className="wires-list">
+      <table className="wires-list-table">
+        {channelsInfo.length > 0 && (
+          <thead>
+            <tr className="peerInfo">
+              <td>Status</td>
+              <td>Channel</td>
+              <td>Peer</td>
+              <td>Data</td>
+              <td>Funds</td>
+            </tr>
+          </thead>
+        )}
+        <tbody>
+          {channelsInfo.map(id =>
+            channelIdToTableRow(
+              id,
+              channels,
+              torrent,
+              participantType,
+              context.paymentChannelClient.challengeChannel
+            )
+          )}
+        </tbody>
+      </table>
+    </section>
+  );
+};
