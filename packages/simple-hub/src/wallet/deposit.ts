@@ -3,7 +3,8 @@ import {
   State,
   calculateChannelId,
   ChannelConstants,
-  SimpleAllocation
+  SimpleAllocation,
+  makeDestination
 } from './xstate-wallet-internals';
 import {ethers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
@@ -42,5 +43,3 @@ export function depositsToMake(
       amountToDeposit: state.outcome.allocationItems[0].amount
     }));
 }
-
-const makeDestination = (address: string): string => ethers.utils.hexZeroPad(address, 32);
