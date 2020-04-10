@@ -1,6 +1,5 @@
 import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import {createMemoryHistory} from 'history';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
@@ -13,20 +12,6 @@ import {mockMetamask} from '../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
 
-function setup() {
-  const torrentUpload = jest
-    .spyOn(Web3TorrentClient, 'upload')
-    .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Seeding}));
-
-  const component = mount(
-    <Router>
-      <Upload ready={true} />
-    </Router>
-  );
-
-  return {component, torrentUpload};
-}
-
 describe('<Upload />', () => {
   let component: Enzyme.ReactWrapper;
   let torrentUpload: jest.SpyInstance<Promise<Torrent>, [WebTorrentSeedInput]>;
@@ -36,9 +21,15 @@ describe('<Upload />', () => {
   });
 
   beforeEach(() => {
-    const mock = setup();
-    component = mock.component;
-    torrentUpload = mock.torrentUpload;
+    torrentUpload = jest
+      .spyOn(Web3TorrentClient, 'upload')
+      .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Seeding}));
+    component = mount(
+      <Router>
+        <Upload ready={true} />
+      </Router>
+    );
+
     jest.useFakeTimers();
   });
 
