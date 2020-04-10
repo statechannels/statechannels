@@ -62,10 +62,7 @@ const Welcome: React.FC<Props> = props => {
         </p>
       </div>
       <h2>Download a sample file</h2>
-      <ShareList
-        torrents={preSeededTorrents.filter(torrent => torrents[torrent.infoHash])}
-        history={history}
-      />
+      <ShareList torrents={preSeededTorrents.filter(torrent => torrents[torrent.infoHash])} />
       <h2>Or share a file</h2>
       <FormButton
         name="upload"
