@@ -139,12 +139,7 @@ export class MessagingService implements MessagingServiceInterface {
 
     filteredRecipients.forEach(recipient => {
       const params = serializeMessage(message, recipient, sender);
-      try {
-        validateMessage(params);
-      } catch {
-        // eslint-disable-next-line no-debugger
-        debugger;
-      }
+      validateMessage(params);
       const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
@@ -201,6 +196,7 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'PushMessage':
         const message = validateMessage(request.params);
+
         if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
