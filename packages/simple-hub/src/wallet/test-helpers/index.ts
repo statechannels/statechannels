@@ -5,7 +5,8 @@ import {
   SignedState,
   State,
   firstState,
-  signState
+  signState,
+  makeDestination
 } from '../xstate-wallet-internals';
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ethers} from 'ethers';
@@ -23,19 +24,23 @@ export const wallet2 = new ethers.Wallet(
 
 const first: Participant = {
   signingAddress: wallet1.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000001',
+  destination: makeDestination(
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+  ),
   participantId: 'a'
 };
 
 const hub: Participant = {
   signingAddress: cHubChannelSigningAddress,
-  destination: hexZeroPad(cHubChannelSigningAddress, 32),
+  destination: makeDestination(hexZeroPad(cHubChannelSigningAddress, 32)),
   participantId: cHubParticipantId
 };
 
 const second: Participant = {
   signingAddress: wallet2.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000003',
+  destination: makeDestination(
+    '0x0000000000000000000000000000000000000000000000000000000000000003'
+  ),
   participantId: 'b'
 };
 
