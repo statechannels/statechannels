@@ -326,6 +326,7 @@ jobs:
       - image: circleci/node:10.16.3
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
       REACT_APP_FUNDING_STRATEGY: Virtual
       REACT_APP_AUTO_FUND_LEDGER: true
       USE_GANACHE_DEPLOYMENT_CACHE: true

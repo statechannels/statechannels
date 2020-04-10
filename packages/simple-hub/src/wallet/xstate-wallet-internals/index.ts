@@ -5,7 +5,8 @@ import {
   Outcome as OutcomeWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
-  isAllocations
+  isAllocations,
+  Guarantee as GuaranteeWire
 } from '@statechannels/wire-format';
 import {
   convertAddressToBytes32,
@@ -15,6 +16,7 @@ import {
   Outcome as NitroOutcome,
   State as NitroState
 } from '@statechannels/nitro-protocol';
+import {ethers} from 'ethers';
 
 interface AllocationItem {
   destination: string;
@@ -178,11 +180,17 @@ function serializeOutcome(outcome: Outcome): OutcomeWire {
     case 'MixedAllocation':
       return outcome.simpleAllocations.map(serializeSimpleAllocation);
     case 'SimpleGuarantee':
-      // TODO
-      return [];
+      return [serializeSimpleGuarantee(outcome)];
   }
 }
 
+function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
+  return {
+    assetHolderAddress: guarantee.assetHolderAddress,
+    targetChannelId: guarantee.targetChannelId,
+    destinations: guarantee.destinations.map(makeDestination)
+  };
+}
 function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
   return {
     assetHolderAddress: allocation.assetHolderAddress,
@@ -309,3 +317,13 @@ export const firstState = (
   participants,
   outcome
 });
+
+export function makeDestination(addressOrDestination: string): string {
+  if (addressOrDestination.length === 42) {
+    return ethers.utils.hexZeroPad(ethers.utils.getAddress(addressOrDestination), 32);
+  } else if (addressOrDestination.length === 66) {
+    return addressOrDestination;
+  } else {
+    throw new Error('Invalid input');
+  }
+}

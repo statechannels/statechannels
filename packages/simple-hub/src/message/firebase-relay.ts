@@ -70,8 +70,10 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
 }
 
 export async function sendReplies(messageToSend: Message) {
-  log.info({messageToSend}, 'Responding with message');
-  await Promise.all(messagesToSend(messageToSend).map(fbSend));
+  const messages = messagesToSend(messageToSend);
+
+  log.info({messages}, 'Responding with message');
+  await Promise.all(messages.map(fbSend));
   log.info('Messages sent');
 }
 
