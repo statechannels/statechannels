@@ -129,6 +129,7 @@ export type ChannelLock = {
   channelId: string;
   lock?: Guid;
 };
+
 export class XstateStore implements Store {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
@@ -220,7 +221,10 @@ export class XstateStore implements Store {
     return new ChannelStoreEntry(data);
   }
 
-  public async setFunding(channelId: string, funding: Funding): Promise<void> {
+  public setFunding = (channelId: string, funding: Funding) =>
+    this.withLock(channelId, () => this._setFunding(channelId, funding));
+
+  private async _setFunding(channelId: string, funding: Funding): Promise<void> {
     const channelData = await this.backend.getChannel(channelId);
     if (!channelData) {
       throw new Error(`No channel for ${channelId}`);
@@ -279,6 +283,7 @@ export class XstateStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
+  // TODO: Remove this method, seems unnecessary now
   public async setApplicationSite(channelId: string, applicationSite: string) {
     const entry = await this.getEntry(channelId);
 
@@ -287,7 +292,9 @@ export class XstateStore implements Store {
     await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
   }
 
-  public async setLedger(ledgerId: string) {
+  public setLedger = (ledgerId: string) => this.withLock(ledgerId, () => this._setLedger(ledgerId));
+
+  private async _setLedger(ledgerId: string) {
     const data = await this.backend.getChannel(ledgerId);
     if (!data) {
       throw new Error(`No channel found with channel id ${ledgerId}`);
@@ -359,7 +366,10 @@ export class XstateStore implements Store {
     return ret;
   }
 
-  async signAndAddState(channelId: string, stateVars: StateVariables) {
+  public signAndAddState = (channelId: string, stateVars: StateVariables) =>
+    this.withLock(channelId, () => this._signAndAddState(channelId, stateVars));
+
+  private async _signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelData = await this.backend.getChannel(channelId);
     if (!channelData) {
       throw new Error('Channel not found');
@@ -392,7 +402,21 @@ export class XstateStore implements Store {
     }
   }
 
-  async addState(state: SignedState): Promise<ChannelStoreEntry> {
+  private channelLock = new AsyncLock();
+  private async withLock<T>(channelId: string, fn: (...args: any[]) => T | Promise<T>): Promise<T> {
+    return await this.channelLock.acquire(channelId, async release => {
+      try {
+        return await fn();
+      } finally {
+        release();
+      }
+    });
+  }
+
+  public addState = (state: SignedState) =>
+    this.withLock(calculateChannelId(state), () => this._addState(state));
+
+  private async _addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelData =
       (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state)).data();

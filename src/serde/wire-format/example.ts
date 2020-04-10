@@ -1,9 +1,10 @@
 import {bigNumberify} from 'ethers/utils';
-import {Message} from '../../store/types';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {Message, SignedState} from '../../store/types';
+import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';
+import {calculateChannelId} from '../../store/state-utils';
 
-export const wireStateFormat = {
+export const wireStateFormat: WireState = {
   participants: [
     {
       destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
@@ -45,7 +46,21 @@ export const wireStateFormat = {
   ]
 };
 
-export const internalStateFormat = {
+const wireStateFormat2: WireState = {
+  ...wireStateFormat,
+  channelNonce: '0x11b1a311d845ca99f8e3c9a5f828f574b1afe2c3a0eb8cd51115dff18f0f34a1',
+  channelId: '0x2efa65eb2b780f3a838c431a019d52392aebec6898056eee5688c5fbe00c63d2',
+  outcome: [
+    {
+      assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
+      destinations: ['0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'],
+      targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
+    }
+  ],
+  signatures: []
+};
+
+export const internalStateFormat: SignedState = {
   participants: [
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
@@ -68,7 +83,7 @@ export const internalStateFormat = {
   channelNonce: bigNumberify('0x11b1a311d845ca99f8e3c9a5f828f574b1afe2c3a0eb8cd51115dff18f0f34a0'),
   isFinal: false,
   outcome: {
-    type: 'SimpleAllocation' as 'SimpleAllocation',
+    type: 'SimpleAllocation',
     assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
     allocationItems: [
       {
@@ -94,11 +109,24 @@ export const internalStateFormat = {
     }
   ]
 };
+
+export const internalStateFormat2: SignedState = {
+  ...internalStateFormat,
+  channelNonce: internalStateFormat.channelNonce.add(1),
+  outcome: {
+    assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
+    type: 'SimpleGuarantee',
+    targetChannelId: calculateChannelId(internalStateFormat),
+    destinations: [makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7')]
+  },
+  signatures: []
+};
+
 export const wireMessageFormat: WireMessage = {
   recipient: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
   sender: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
   data: {
-    signedStates: [wireStateFormat],
+    signedStates: [wireStateFormat, wireStateFormat2],
     objectives: [
       {
         type: 'OpenChannel',
@@ -124,7 +152,7 @@ export const wireMessageFormat: WireMessage = {
 };
 
 export const internalMessageFormat: Message = {
-  signedStates: [internalStateFormat],
+  signedStates: [internalStateFormat, internalStateFormat2],
   objectives: [
     {
       type: 'OpenChannel',
