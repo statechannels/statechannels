@@ -48,10 +48,12 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
+  id: 'close-and-withdraw',
   initial: 'waitForUserApproval',
   states: {
     waitForUserApproval: {
       entry: ['displayUi'],
+
       on: {
         USER_APPROVES_CLOSE: [
           {cond: 'doesChannelIdExist', target: 'closeLedger'},
@@ -72,7 +74,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
       entry: ['clearBudget'],
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
     },
-    done: {type: 'final', entry: ['sendResponse']},
+    done: {type: 'final', entry: ['sendResponse', 'hideUi']},
     failure: {type: 'final'}
   }
 };

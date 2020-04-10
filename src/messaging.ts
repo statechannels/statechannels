@@ -272,10 +272,17 @@ async function convertToInternalEvent(
         channelId: request.params.channelId
       };
     case 'CloseAndWithdraw':
+      if (!store.chain.selectedAddress) {
+        throw new Error('No selected destination');
+      }
       return {
         type: 'CLOSE_AND_WITHDRAW',
         requestId: request.id,
-        player: convertToInternalParticipant(request.params.player),
+        player: convertToInternalParticipant({
+          participantId: request.params.playerParticipantId,
+          signingAddress: await store.getAddress(),
+          destination: store.chain.selectedAddress
+        }),
         hub: convertToInternalParticipant(request.params.hub),
         site: domain
       };

@@ -15,13 +15,14 @@ import {
 import {tokenAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
 import {checkThat, exists} from '../../utils';
+import {bigNumberify} from 'ethers/utils';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
       channelId,
-      amount: assetBudget.channels[channelId].amount.toHexString()
+      amount: bigNumberify(assetBudget.channels[channelId].amount).toHexString() // TODO: Malformed bignumber
     }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,
