@@ -14,29 +14,17 @@ import {mockMetamask} from '../../library/testing/test-utils';
 Enzyme.configure({adapter: new Adapter()});
 
 function setup() {
-  const history = createMemoryHistory({initialEntries: ['/upload']});
-  const props: RouteComponentProps = {
-    history,
-    location: history.location,
-    match: {
-      isExact: true,
-      params: {},
-      path: '/',
-      url: 'http://localhost/'
-    }
-  };
-
   const torrentUpload = jest
     .spyOn(Web3TorrentClient, 'upload')
     .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Seeding}));
 
   const component = mount(
     <Router>
-      <Upload {...props} ready={true} />
+      <Upload ready={true} />
     </Router>
   );
 
-  return {props, component, torrentUpload};
+  return {component, torrentUpload};
 }
 
 describe('<Upload />', () => {
