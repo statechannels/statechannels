@@ -41,6 +41,8 @@ export const defaultTrackers = [
   `ws${suffix}://${url}`
 ];
 
+export const requiredNetwork = Number(process.env.REACT_APP_CHAIN_NETWORK_ID);
+
 // Default Torrent Data
 export const EmptyTorrent = ({
   name: 'unknown',
