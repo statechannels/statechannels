@@ -1,54 +1,88 @@
-import {bigNumberify, joinSignature, BigNumber} from 'ethers/utils';
+import {
+  bigNumberify,
+  joinSignature,
+  BigNumber,
+  hexZeroPad,
+  hexlify,
+  splitSignature
+} from 'ethers/utils';
 import {
   SignedState as SignedStateWire,
   Message as WireMessage,
   Outcome as OutcomeWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
+  Objective as ObjectiveWire,
   isAllocations,
   Guarantee as GuaranteeWire
 } from '@statechannels/wire-format';
 import {
   convertAddressToBytes32,
-  getChannelId,
   signState as signNitroState,
   AllocationItem as NitroAllocationItem,
   Outcome as NitroOutcome,
-  State as NitroState
+  State as NitroState,
+  getStateSignerAddress as getNitroSignerAddress,
+  getChannelId
 } from '@statechannels/nitro-protocol';
-import {ethers} from 'ethers';
+import {ethers, Wallet} from 'ethers';
 
-interface AllocationItem {
-  destination: string;
-  amount: BigNumber;
+export interface SiteBudget {
+  domain: string;
+  hubAddress: string;
+  forAsset: Record<string, AssetBudget | undefined>;
 }
 
+interface ChannelBudgetEntry {
+  amount: BigNumber;
+}
+export interface AssetBudget {
+  assetHolderAddress: string;
+  availableReceiveCapacity: BigNumber;
+  availableSendCapacity: BigNumber;
+  channels: Record<string, ChannelBudgetEntry>;
+}
+export interface Participant {
+  participantId: string;
+  signingAddress: string;
+  destination: Destination;
+}
+// signers
+
+export interface StateVariables {
+  outcome: Outcome;
+  turnNum: BigNumber;
+  appData: string;
+  isFinal: boolean;
+}
+export type StateVariablesWithHash = StateVariables & Hashed;
+export type Destination = string & {_isDestination: void};
+export interface AllocationItem {
+  destination: Destination;
+  amount: BigNumber;
+}
 export interface SimpleAllocation {
   type: 'SimpleAllocation';
   assetHolderAddress: string;
   allocationItems: AllocationItem[];
 }
-
-interface SimpleGuarantee {
+export interface SimpleGuarantee {
   type: 'SimpleGuarantee';
   targetChannelId: string;
   assetHolderAddress: string;
   destinations: string[];
 }
-
-interface MixedAllocation {
+export interface MixedAllocation {
   type: 'MixedAllocation';
   simpleAllocations: SimpleAllocation[];
 }
 
-type Allocation = SimpleAllocation | MixedAllocation;
+// Should we even have these two different types??
+export type Allocation = SimpleAllocation | MixedAllocation;
 export type Outcome = Allocation | SimpleGuarantee;
 
-interface StateVariables {
-  outcome: Outcome;
-  turnNum: BigNumber;
-  appData: string;
-  isFinal: boolean;
+export function isAllocation(outcome: Outcome): outcome is Allocation {
+  return outcome.type !== 'SimpleGuarantee';
 }
 
 export interface ChannelConstants {
@@ -60,32 +94,43 @@ export interface ChannelConstants {
 }
 
 export interface State extends ChannelConstants, StateVariables {}
+export interface SignatureEntry {
+  signature: string;
+  signer: string;
+}
 
 interface Signed {
-  signatures: string[];
+  signatures: SignatureEntry[];
 }
+interface Hashed {
+  stateHash: string;
+}
+export type SignedState = State & Signed;
+export type SignedStateWithHash = SignedState & Hashed;
+
+export type SignedStateVariables = StateVariables & Signed;
+export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
 type _Objective<Name, Data> = {
   participants: Participant[];
   type: Name;
   data: Data;
 };
-
-type OpenChannel = _Objective<
+export type OpenChannel = _Objective<
   'OpenChannel',
   {
     targetChannelId: string;
-    fundingStrategy: 'Direct' | 'Virtual' | 'Ledger';
+    fundingStrategy: 'Direct' | 'Ledger' | 'Virtual';
   }
 >;
-type VirtuallyFund = _Objective<
+export type VirtuallyFund = _Objective<
   'VirtuallyFund',
   {
     targetChannelId: string;
     jointChannelId: string;
   }
 >;
-type FundGuarantor = _Objective<
+export type FundGuarantor = _Objective<
   'FundGuarantor',
   {
     jointChannelId: string;
@@ -93,13 +138,13 @@ type FundGuarantor = _Objective<
     guarantorId: string;
   }
 >;
-type FundLedger = _Objective<
+export type FundLedger = _Objective<
   'FundLedger',
   {
     ledgerId: string;
   }
 >;
-type CloseLedger = _Objective<
+export type CloseLedger = _Objective<
   'CloseLedger',
   {
     ledgerId: string;
@@ -107,31 +152,63 @@ type CloseLedger = _Objective<
 >;
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
-export interface Participant {
-  participantId: string;
-  signingAddress: string;
-  destination: string;
-}
-export interface SignedState extends State, Signed {}
+const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
+  o.type === name;
+export const isOpenChannel = guard<OpenChannel>('OpenChannel');
+export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
+export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
+export const isFundLedger = guard<FundLedger>('FundLedger');
+export const isCloseLedger = guard<CloseLedger>('CloseLedger');
+
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
 }
-
-function deserializeState(state: SignedStateWire): SignedState {
-  const stateWithoutChannelId = {...state};
-  delete stateWithoutChannelId.channelId;
+export function deserializeMessage(message: WireMessage): Message {
+  const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
+  const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
 
   return {
+    signedStates,
+    objectives
+  };
+}
+
+export function deserializeState(state: SignedStateWire): SignedState {
+  const stateWithoutChannelId = {...state};
+  delete stateWithoutChannelId.channelId;
+  const deserializedState = {
     ...stateWithoutChannelId,
     challengeDuration: bigNumberify(state.challengeDuration),
     channelNonce: bigNumberify(state.channelNonce),
     turnNum: bigNumberify(state.turnNum),
-    outcome: deserializeOutcome(state.outcome)
+    outcome: deserializeOutcome(state.outcome),
+    participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
+  };
+
+  return {
+    ...deserializedState,
+    signatures: state.signatures.map(sig => ({
+      signature: sig,
+      signer: getSignerAddress(deserializedState, sig)
+    }))
   };
 }
 
-function deserializeOutcome(outcome: OutcomeWire): Outcome {
+export function deserializeObjective(objective: ObjectiveWire): Objective {
+  return {
+    ...objective,
+    participants: objective.participants.map(p => ({
+      ...p,
+      destination: makeDestination(p.destination)
+    }))
+  };
+}
+// where do I move between token and asset holder?
+// I have to have asset holder between the wallets, otherwise there is ambiguity
+// I don't want asset holders in the json rpc layer, as the client shouldn't care
+
+export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {
     switch (outcome.length) {
       case 0:
@@ -170,77 +247,7 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination, amount: bigNumberify(amount)};
-}
-
-export function serializeOutcome(outcome: Outcome): OutcomeWire {
-  switch (outcome.type) {
-    case 'SimpleAllocation':
-      return [serializeSimpleAllocation(outcome)];
-    case 'MixedAllocation':
-      return outcome.simpleAllocations.map(serializeSimpleAllocation);
-    case 'SimpleGuarantee':
-      return [serializeSimpleGuarantee(outcome)];
-  }
-}
-
-function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
-  return {
-    assetHolderAddress: guarantee.assetHolderAddress,
-    targetChannelId: guarantee.targetChannelId,
-    destinations: guarantee.destinations.map(makeDestination)
-  };
-}
-function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
-  return {
-    assetHolderAddress: allocation.assetHolderAddress,
-    allocationItems: allocation.allocationItems.map(serializeAllocationItem)
-  };
-}
-
-function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
-  const {destination, amount} = allocationItem;
-  return {destination, amount: amount.toHexString()};
-}
-
-function serializeState(state: SignedState): SignedStateWire {
-  return {
-    ...state,
-    challengeDuration: state.challengeDuration.toHexString(),
-    channelNonce: state.channelNonce.toHexString(),
-    turnNum: state.turnNum.toHexString(),
-    outcome: serializeOutcome(state.outcome),
-    channelId: calculateChannelId(state)
-  };
-}
-
-export function calculateChannelId(channelConstants: ChannelConstants): string {
-  const {chainId, channelNonce, participants} = channelConstants;
-  const addresses = participants.map(p => p.signingAddress);
-  return getChannelId({
-    chainId,
-    channelNonce: channelNonce.toString(),
-    participants: addresses
-  });
-}
-
-export function deserializeMessage(message: WireMessage): Message {
-  const signedStates = (message.data.signedStates || []).map(ss => deserializeState(ss));
-  const {objectives} = message.data;
-  return {
-    signedStates,
-    objectives
-  };
-}
-
-export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
-  const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
-  const {objectives} = message;
-  return {
-    recipient,
-    sender,
-    data: {signedStates, objectives}
-  };
+  return {destination: makeDestination(destination), amount: bigNumberify(amount)};
 }
 
 function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
@@ -265,7 +272,7 @@ function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
     case 'MixedAllocation':
       // todo: this looks incorrect
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
+      return outcome.simpleAllocations.map(() => convertToNitroOutcome[0]);
   }
 }
 
@@ -296,10 +303,11 @@ function toNitroState(state: State): NitroState {
   };
 }
 
-export function signState(state: State, privateKey: string): string {
+export function signState(state: State, privateKey: string): SignatureEntry {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return joinSignature(signature);
+  const signer = new Wallet(privateKey).address;
+  return {signature: joinSignature(signature), signer};
 }
 
 export const firstState = (
@@ -318,12 +326,101 @@ export const firstState = (
   outcome
 });
 
-export function makeDestination(addressOrDestination: string): string {
+export function makeDestination(addressOrDestination: string): Destination {
   if (addressOrDestination.length === 42) {
-    return ethers.utils.hexZeroPad(ethers.utils.getAddress(addressOrDestination), 32);
+    return ethers.utils.hexZeroPad(
+      ethers.utils.getAddress(addressOrDestination),
+      32
+    ) as Destination;
   } else if (addressOrDestination.length === 66) {
-    return addressOrDestination;
+    return addressOrDestination as Destination;
   } else {
     throw new Error('Invalid input');
   }
+}
+
+export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
+  const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
+  const {objectives} = message;
+  return {
+    recipient,
+    sender,
+    data: {signedStates, objectives}
+  };
+}
+
+function bigNumberToUint256(bigNumber: BigNumber): string {
+  return hexZeroPad(hexlify(bigNumber), 32);
+}
+export function calculateChannelId(channelConstants: ChannelConstants): string {
+  const {chainId, channelNonce, participants} = channelConstants;
+  const addresses = participants.map(p => p.signingAddress);
+  return getChannelId({
+    chainId,
+    channelNonce: channelNonce.toString(),
+    participants: addresses
+  });
+}
+
+export function serializeState(state: SignedState): SignedStateWire {
+  const {appData, appDefinition, isFinal, chainId, participants} = state;
+  return {
+    challengeDuration: bigNumberToUint256(state.challengeDuration),
+    channelNonce: bigNumberToUint256(state.channelNonce),
+    turnNum: bigNumberToUint256(state.turnNum),
+    outcome: serializeOutcome(state.outcome),
+    channelId: calculateChannelId(state),
+    signatures: state.signatures.map(s => s.signature),
+    appData,
+    appDefinition,
+    isFinal,
+    chainId,
+    participants
+  };
+}
+
+export function serializeOutcome(outcome: Outcome): OutcomeWire {
+  switch (outcome.type) {
+    case 'SimpleAllocation':
+      return [serializeSimpleAllocation(outcome)];
+    case 'MixedAllocation':
+      return outcome.simpleAllocations.map(serializeSimpleAllocation);
+    case 'SimpleGuarantee':
+      return [serializeSimpleGuarantee(outcome)];
+  }
+}
+
+function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
+  return {
+    assetHolderAddress: guarantee.assetHolderAddress,
+    targetChannelId: guarantee.targetChannelId,
+    destinations: guarantee.destinations.map(makeDestination)
+  };
+}
+
+function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
+  return {
+    assetHolderAddress: allocation.assetHolderAddress,
+    allocationItems: allocation.allocationItems.map(serializeAllocationItem)
+  };
+}
+
+function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
+  const {destination, amount} = allocationItem;
+  return {destination, amount: bigNumberToUint256(amount)};
+}
+export function convertToInternalParticipant(participant: {
+  destination: string;
+  signingAddress: string;
+  participantId: string;
+}): Participant {
+  return {
+    ...participant,
+    destination: makeDestination(participant.destination)
+  };
+}
+
+export function getSignerAddress(state: State, signature: string): string {
+  const nitroState = toNitroState(state);
+  return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
 }
