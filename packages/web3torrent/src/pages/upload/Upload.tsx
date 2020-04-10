@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {RouteComponentProps} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import {upload} from '../../clients/web3torrent-client';
 import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 
-const Upload: React.FC<RouteComponentProps & {ready: boolean}> = ({history, ready}) => {
+const Upload: React.FC<{ready: boolean}> = ({ready}) => {
+  const history = useHistory();
   const [showSpinner, setSpinner] = useState<boolean>(false);
 
   return (
