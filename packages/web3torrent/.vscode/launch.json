@@ -34,6 +34,15 @@
       "protocol": "inspector",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    // Install Debugger for Chrome extension
+    {
+      "name": "Attach to running client",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:3000/file/new/",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }
