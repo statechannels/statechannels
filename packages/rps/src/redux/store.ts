@@ -6,7 +6,6 @@ import reducer from './reducer';
 const sagaMiddleware = createSagaMiddleware();
 import stateChannelWalletSaga from './wallet/saga';
 
-import loginSaga from './login/saga';
 import metamaskSaga from './metamask/saga';
 import openGameSaga from './open-games/saga';
 import {firebaseInboxListener} from './message-service/firebase-inbox-listener';
@@ -26,7 +25,6 @@ const store = createStore(reducer, enhancers);
 
 function* rootSaga() {
   yield fork(metamaskSaga);
-  yield fork(loginSaga);
 
   let client: RPSChannelClient;
   if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
