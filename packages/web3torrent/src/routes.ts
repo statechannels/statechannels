@@ -1,5 +1,6 @@
 export enum RoutePath {
   Root = '/',
   File = '/file/',
-  Upload = '/file/new/'
+  FileWithInfoHash = '/file/:infoHash',
+  Upload = '/upload/'
 }
