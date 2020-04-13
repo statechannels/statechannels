@@ -8,6 +8,7 @@ export function testSelector(name: string): string {
 export function createMockTorrent(props?: Partial<Torrent>): Torrent {
   return {
     ...EmptyTorrent,
+    infoHash: '0303b8f867f4377ef4a25eba8836cc5f7fdd992b',
     magnetURI:
       'magnet:?xt=urn%3Abtih%3A0303b8f867f4377ef4a25eba8836cc5f7fdd992b&dn=on-the-shortness-of-life-1.jpg&xl=128864&cost=0',
     name: 'on-the-shortness-of-life-1.jpg',
