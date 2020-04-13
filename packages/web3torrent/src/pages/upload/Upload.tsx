@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useHistory} from 'react-router-dom';
 import {upload} from '../../clients/web3torrent-client';
-import {generateMagnetURL} from '../../utils/magnet';
+import {generateURL} from '../../utils/magnet';
 import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 
@@ -26,7 +26,7 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
               setSpinner(true);
-              history.push(generateMagnetURL(await upload(event.target.files)));
+              history.push(generateURL(await upload(event.target.files)));
             }
           }}
         ></input>
