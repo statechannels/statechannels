@@ -264,7 +264,7 @@ jobs:
       - run:
           command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots:
@@ -352,7 +352,7 @@ jobs:
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
