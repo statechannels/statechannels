@@ -4,9 +4,10 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
+import {setUpBrowser, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
+import {Dappeteer} from 'dappeteer';
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -17,8 +18,6 @@ const USES_VIRTUAL_FUNDING = true;
 const enum Label {
   A = 'A',
   B = 'B'
-  // C = 'C',
-  // D = 'D'
 }
 
 const labels: Label[] = [Label.A, Label.B];
@@ -33,6 +32,7 @@ const forEach = async <T>(data: Data<T>, cb: (obj: T, label: Label) => any) =>
 describe('Supports torrenting among peers with channels', () => {
   const browsers: Data<Browser> = {} as Data<Browser>;
   const tabs: Data<Page> = {} as Data<Page>;
+  const metamasks: Data<Dappeteer> = {} as Data<Dappeteer>;
   afterAll(async () => {
     if (HEADLESS) {
       await forEach(browsers, async browser => browser && (await browser.close()));
@@ -53,19 +53,13 @@ describe('Supports torrenting among peers with channels', () => {
       console.error(`${role}: `, msg.text());
     forEach(tabs, (tab, label) => tab.on('console', logPageOutput(label)));
 
-    console.log('Loading dapps');
-    await forEach(tabs, async (tab, label) => {
-      await loadDapp(tab, 0, true);
-      console.log(`${label} dapp loaded`);
-    });
-
     await tabs.A.goto('http://localhost:3000/file/new', {waitUntil: 'load'});
 
     console.log('A uploads a file');
-    const url = await uploadFile(tabs.A, USES_VIRTUAL_FUNDING);
+    const url = await uploadFile(tabs.A, USES_VIRTUAL_FUNDING, metamasks.A);
 
     console.log('B starts downloading...');
-    await startDownload(tabs.B, url, USES_VIRTUAL_FUNDING);
+    await startDownload(tabs.B, url, USES_VIRTUAL_FUNDING, metamasks.B);
 
     console.log('Waiting for open channels');
     await forEach(tabs, waitAndOpenChannel(USES_VIRTUAL_FUNDING));
