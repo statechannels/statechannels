@@ -1,9 +1,8 @@
 import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import {createMemoryHistory} from 'history';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
-import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
+import {MemoryRouter as Router} from 'react-router-dom';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentAddInput} from '../../library/types';
 import {Status, Torrent} from '../../types';
@@ -12,52 +11,24 @@ import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import File from './File';
 
-// import {ChannelClient} from '@statechannels/channel-client';
-// import {JsonRpcResponse} from '@statechannels/channel-provider';
-
-const mockFileURL =
-  '/file/#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
-
 Enzyme.configure({adapter: new Adapter()});
 
-// const mockResponse: JsonRpcResponse = {jsonrpc: '2.0', id: 123, result: ''};
-
 jest.mock('@statechannels/channel-client');
-
-function setup() {
-  const history = createMemoryHistory({initialEntries: [mockFileURL]});
-  const props: RouteComponentProps = {
-    history,
-    location: history.location,
-    match: {
-      isExact: true,
-      params: {},
-      path: '/',
-      url: 'http://localhost/'
-    }
-  };
-
-  const torrentFile = jest
-    .spyOn(Web3TorrentClient, 'download')
-    .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Connecting}));
-
-  const component = mount(
-    <Router>
-      <File {...props} ready={true} />
-    </Router>
-  );
-
-  return {props, component, torrentFile};
-}
 
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
   let torrentFile: jest.SpyInstance<Promise<Torrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {
-    const mock = setup();
-    component = mock.component;
-    torrentFile = mock.torrentFile;
+    torrentFile = jest
+      .spyOn(Web3TorrentClient, 'download')
+      .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Connecting}));
+
+    component = mount(
+      <Router>
+        <File ready={true} />
+      </Router>
+    );
     jest.useFakeTimers();
   });
 

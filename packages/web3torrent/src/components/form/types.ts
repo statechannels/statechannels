@@ -8,30 +8,6 @@ export type InputChangeProps = {
   value?: number | string | boolean;
 };
 
-export type FormInputProps = {
-  className?: string;
-  label: string | React.ReactNode;
-  name?: string;
-  max?: number;
-  min?: number;
-  step?: number;
-  error?: string;
-  type?: string;
-  units?: Array<{name: string; shortName: string}>;
-  required?: boolean;
-  disabled?: boolean;
-  value?: string | number;
-  autofocus?: boolean;
-  change?: ((props: InputChangeProps) => void) | undefined;
-};
-
-export type ExtendedFormInputProps = {
-  lastChangeEvent?: React.ChangeEvent<HTMLInputElement>;
-  value?: string | number;
-  error: string | undefined;
-  valid: boolean;
-};
-
 export type FormButtonProps = {
   className?: string;
   name?: string;

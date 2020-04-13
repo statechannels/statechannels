@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {RouteComponentProps, useLocation} from 'react-router-dom';
+import {useLocation} from 'react-router-dom';
 
 import {download, getTorrentPeers, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
@@ -29,7 +29,7 @@ interface Props {
   ready: boolean;
 }
 
-const File: React.FC<RouteComponentProps & Props> = props => {
+const File: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
   const [, setPeers] = useState({});

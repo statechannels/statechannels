@@ -1,42 +1,25 @@
 import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import {createMemoryHistory} from 'history';
+import {createMemoryHistory, MemoryHistory} from 'history';
 import React from 'react';
-import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
+import {Router} from 'react-router-dom';
 import {RoutePath} from '../../../routes';
 import {testSelector} from '../../../utils/test-utils';
 import {LayoutHeader} from './LayoutHeader';
 
-function setup() {
-  Enzyme.configure({adapter: new Adapter()});
-  const history = createMemoryHistory();
-  const props: RouteComponentProps = {
-    history,
-    location: history.location,
-    match: {
-      isExact: true,
-      params: {},
-      path: '/',
-      url: 'http://localhost/'
-    }
-  };
-  const component = mount(
-    <Router>
-      <LayoutHeader {...props} />
-    </Router>
-  );
-
-  return {props, component};
-}
+Enzyme.configure({adapter: new Adapter()});
 
 describe('<LayoutHeader />', () => {
   let component: Enzyme.ReactWrapper;
-  let props: RouteComponentProps;
+  let history: MemoryHistory<{}>;
 
   beforeEach(() => {
-    const mock = setup();
-    component = mock.component;
-    props = mock.props;
+    history = createMemoryHistory();
+    component = mount(
+      <Router history={history}>
+        <LayoutHeader />
+      </Router>
+    );
   });
 
   it('renders the header with the logo and the upload button', () => {
@@ -47,6 +30,6 @@ describe('<LayoutHeader />', () => {
 
   it('should re-route to Upload screen upon Upload Button click', () => {
     component.find(testSelector('upload-button')).simulate('click');
-    expect(props.history.location.pathname).toBe(RoutePath.Upload);
+    expect(history.location.pathname).toBe(RoutePath.Upload);
   });
 });

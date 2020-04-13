@@ -1,8 +1,7 @@
 import ConnectionBanner from '@rimble/connection-banner';
 import {Flash} from 'rimble-ui';
-import {createBrowserHistory} from 'history';
 import React, {useState, useContext, useEffect} from 'react';
-import {Route, Router, Switch} from 'react-router-dom';
+import {Route, Switch, BrowserRouter} from 'react-router-dom';
 import './App.scss';
 import {LayoutFooter, LayoutHeader} from './components/layout';
 import Welcome from './pages/welcome/Welcome';
@@ -13,8 +12,6 @@ import {RoutePath} from './routes';
 import {Web3TorrentContext} from './clients/web3torrent-client';
 import {TorrentClientCapabilities} from './library/types';
 import {requiredNetwork} from './constants';
-
-const history = createBrowserHistory();
 
 const App: React.FC = () => {
   const Web3Torrent = useContext(Web3TorrentContext);
@@ -36,7 +33,7 @@ const App: React.FC = () => {
   const ready = currentNetwork === requiredNetwork;
   const showNetworkWarning = Web3Torrent.clientCapability === TorrentClientCapabilities.NOT_CAPABLE;
   return (
-    <Router history={history}>
+    <BrowserRouter>
       <main>
         {showNetworkWarning && (
           <Flash variant="danger">
@@ -49,23 +46,25 @@ const App: React.FC = () => {
           requiredNetwork={requiredNetwork}
           onWeb3Fallback={!('ethereum' in window)}
         />
-        <Route path={RoutePath.Root} render={props => <LayoutHeader {...props} />} />
+        <Route path={RoutePath.Root}>
+          <LayoutHeader />
+        </Route>
         <Switch>
-          <Route
-            exact
-            path={RoutePath.Root}
-            render={props => <Welcome {...props} ready={ready} />}
-          />
-          <Route exact path={RoutePath.File} render={props => <File {...props} ready={ready} />} />
-          <Route
-            exact
-            path={RoutePath.Upload}
-            render={props => <Upload {...props} ready={ready} />}
+          <Route exact path={RoutePath.Root}>
+            <Welcome ready={ready} />
+          </Route>
+          <Route exact path={RoutePath.File}>
+            <File ready={ready} />
+          </Route>
+          } />
+          <Route exact path={RoutePath.Upload}>
+            <Upload ready={ready} />
+          </Route>
           />
         </Switch>
       </main>
       <Route path={RoutePath.Root} component={LayoutFooter} />
-    </Router>
+    </BrowserRouter>
   );
 };
 
