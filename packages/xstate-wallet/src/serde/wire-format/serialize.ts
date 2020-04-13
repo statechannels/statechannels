@@ -75,14 +75,6 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire
   };
 }
 
-function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
-  return {
-    assetHolderAddress: guarantee.assetHolderAddress,
-    targetChannelId: guarantee.targetChannelId,
-    destinations: guarantee.destinations
-  };
-}
-
 function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
   const {destination, amount} = allocationItem;
   return {destination, amount: bigNumberToUint256(amount)};
