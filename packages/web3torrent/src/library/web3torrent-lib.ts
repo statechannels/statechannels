@@ -104,17 +104,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
     this.ensureEnabled();
-    let torrent: PaidStreamingTorrent;
 
-    if (typeof optionsOrCallback === 'function') {
-      torrent = super.seed(
-        input,
-        {createdBy: this.pseAccount, announce: defaultTrackers} as TorrentOptions,
-        optionsOrCallback
-      ) as PaidStreamingTorrent;
-    } else {
-      torrent = super.seed(input, optionsOrCallback, callback) as PaidStreamingTorrent;
-    }
+    const options =
+      typeof optionsOrCallback === 'function'
+        ? {createdBy: this.pseAccount, announce: defaultTrackers}
+        : {createdBy: this.pseAccount, announce: defaultTrackers, ...optionsOrCallback};
+
+    const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
     this.setupTorrent(torrent);
 
     return torrent;

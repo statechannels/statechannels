@@ -24,10 +24,10 @@ export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torre
   );
 };
 
-export const upload: (files: WebTorrentSeedInput) => Promise<Torrent> = files => {
+export const upload: (input: WebTorrentSeedInput) => Promise<Torrent> = input => {
   return new Promise(resolve =>
     web3torrent.enable().then(() => {
-      web3torrent.seed(files as FileList, (torrent: any) => {
+      web3torrent.seed(input, {...torrentNamer(input)}, (torrent: any) => {
         resolve({
           ...torrent,
           status: Status.Seeding,
@@ -48,4 +48,14 @@ export const cancel = (id: string = '') => {
       }
     })
   );
+};
+
+const torrentNamer = (input: WebTorrentSeedInput) => {
+  if ((input as FileList).length) {
+    const files = input as FileList;
+    return {
+      name: files.length > 1 ? `various_${String(Date.now()).slice(-5)}.zip` : files[0].name
+    };
+  }
+  return {};
 };

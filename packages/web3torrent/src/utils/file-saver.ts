@@ -11,7 +11,10 @@ export const getFileBlobURL: (file: TorrentFile) => Promise<string> = file => {
   return new Promise(resolve => file.getBlobURL((_, blob) => resolve(blob as string)));
 };
 
-export const getFileSavingData: (files: TorrentFile[]) => Promise<SavingData> = async files => {
+export const getFileSavingData: (
+  files: TorrentFile[],
+  fileName: string
+) => Promise<SavingData> = async (files, fileName) => {
   if (!files.length) {
     return Promise.reject();
   }
@@ -28,6 +31,6 @@ export const getFileSavingData: (files: TorrentFile[]) => Promise<SavingData> = 
     })
     .then(data => ({
       content: URL.createObjectURL(data),
-      name: 'torrent.zip'
+      name: fileName
     }));
 };
