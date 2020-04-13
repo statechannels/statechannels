@@ -328,12 +328,10 @@ jobs:
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
       REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
       REACT_APP_FUNDING_STRATEGY: Virtual
-      REACT_APP_AUTO_FUND_LEDGER: true
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      ADD_LOGS: true
       GANACHE_PORT: 8547
-      REACT_APP_FIREBASE_URL: ws://localhost:5555
+      ADD_LOGS: true
       NODE_ENV: development
     steps:
       - checkout
@@ -356,9 +354,9 @@ jobs:
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
       - upload_logs:
-          file: integration-test-web3torrent-with-hub-stats
+          file: integration-test-stats
       - upload_e2e_screenshots:
-          job: integration-test-web3torrent-with-hub
+          job: integration-test-with-hub
 
   release-incremental:
     <<: *defaults
