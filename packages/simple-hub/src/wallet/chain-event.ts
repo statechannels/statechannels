@@ -1,10 +1,8 @@
 import {AssetHolderEvent} from '../blockchain/eth-asset-holder-watcher';
 import {Blockchain} from '../blockchain/eth-asset-holder';
 import {Observable} from 'rxjs';
-import {logger} from '../logger';
+import {log} from '../logger';
 import {filter} from 'rxjs/operators';
-
-const log = logger();
 
 export function subscribeToEthAssetHolder(observable: Observable<AssetHolderEvent>) {
   log.info('subscribeToEthAssetHolder: subscribing');

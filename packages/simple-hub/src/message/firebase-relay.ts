@@ -2,7 +2,7 @@ import * as firebase from 'firebase';
 import {stateChanges, ListenEvent, object} from 'rxfire/database';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
-import {logger} from '../logger';
+import {log} from '../logger';
 import {Message as WireMessage, validateMessage} from '@statechannels/wire-format';
 import {map} from 'rxjs/operators';
 import {Message, serializeMessage, deserializeMessage} from '../wallet/xstate-wallet-internals';
@@ -10,8 +10,6 @@ import * as _ from 'lodash/fp';
 import {notContainsHubParticipantId} from '../utils';
 import {tryCatch, chain, right, map as fpMap, toError} from 'fp-ts/lib/Either';
 import {pipe} from 'fp-ts/lib/pipeable';
-
-const log = logger();
 
 let firebaseApp: firebase.app.App;
 function getFirebaseApp() {

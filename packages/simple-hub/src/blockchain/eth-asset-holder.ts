@@ -3,9 +3,7 @@ import {Contract, ContractFactory, ethers, providers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
-import {logger} from '../logger';
-
-const log = logger();
+import {log} from '../logger';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
