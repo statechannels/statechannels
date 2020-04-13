@@ -100,10 +100,10 @@ commands:
     steps:
       - store_artifacts:
           path: /home/circleci/project/packages/e2e-tests/e2e-wait.error.png
-          destination: << parameters.job >>-wait.error.png
+          destination: wait.error.png
       - store_artifacts:
           path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
-          destination: << parameters.job >>-click.error.png
+          destination: click.error.png
 
   upload_e2e_output:
     description: 'Upload e2e browser output'
