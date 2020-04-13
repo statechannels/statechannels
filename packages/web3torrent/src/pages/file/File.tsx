@@ -63,8 +63,12 @@ const File: React.FC<Props> = props => {
             budgetCache,
             mySigningAddress: me
           } = web3Torrent.paymentChannelClient;
-
-          const showBudget = !_.isEmpty(budgetCache);
+          // TODO: We shouldn't have to check all these different conditions
+          const showBudget =
+            !!budgetCache &&
+            !_.isEmpty(budgetCache) &&
+            !!budgetCache.budgets &&
+            budgetCache.budgets.length > 0;
           return (
             <>
               <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />

@@ -52,6 +52,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
                 <tr className="budget-info">
                   <td className="budget-button">
                     <button
+                      id="budget-withdraw"
                       onClick={async () => {
                         web3Torrent.paymentChannelClient.closeAndWithdraw();
                       }}

@@ -331,7 +331,7 @@ export class PaymentChannelClient {
 
   async createBudget(amount: string) {
     const playerDestinationAddress = this.channelClient.selectedAddress;
-    await this.channelClient.approveBudgetAndFund(
+    this.budgetCache = await this.channelClient.approveBudgetAndFund(
       amount,
       amount,
       playerDestinationAddress,
@@ -346,7 +346,13 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(): Promise<SiteBudget | {}> {
-    return this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
+    const result = await this.channelClient.closeAndWithdraw(
+      HUB.signingAddress,
+      HUB.outcomeAddress
+    );
+
+    this.budgetCache = _.isEmpty(result) ? undefined : result;
+    return this.budgetCache;
   }
 }
 
