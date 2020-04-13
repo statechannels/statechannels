@@ -54,7 +54,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
-    if (process.env.NODE_ENV !== 'test') this.testTorrentingCapability();
   }
 
   async enable() {
