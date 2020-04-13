@@ -2,25 +2,11 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
+import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../../helpers';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
 
-import {
-  setUpBrowser,
-  loadDapp,
-  waitAndOpenChannel,
-  waitForClosingChannel,
-  withdrawAndWait,
-  waitForBudgetEntry,
-  waitForEmptyBudget
-} from '../helpers';
-
-import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
-
-configureEnvVariables();
-const HEADLESS = getEnvBool('HEADLESS');
-jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
-
-const USES_VIRTUAL_FUNDING = process.env.REACT_APP_FUNDING_STRATEGY === 'Virtual';
+jest.setTimeout(JEST_TIMEOUT);
 
 let browserA: Browser;
 let browserB: Browser;
@@ -29,7 +15,7 @@ let web3tTabB: Page;
 let tabs: [Page, Page];
 
 describe('Web3-Torrent Integration Tests', () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
@@ -46,18 +32,14 @@ describe('Web3-Torrent Integration Tests', () => {
       process.env.CI && console.error(`${role}: `, msg.text());
     web3tTabA.on('console', logPageOutput('A'));
     web3tTabB.on('console', logPageOutput('B'));
-  });
-  beforeEach(async () => {
+
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
     await loadDapp(web3tTabB, 0, true);
 
     await web3tTabA.goto('http://localhost:3000/file/new', {waitUntil: 'load'});
   });
-  afterEach(async () => {
-    await web3tTabA.close();
-    await web3tTabB.close();
-  });
+
   afterAll(async () => {
     if (browserA) {
       await browserA.close();
@@ -66,18 +48,6 @@ describe('Web3-Torrent Integration Tests', () => {
       await browserB.close();
     }
   });
-
-  if (USES_VIRTUAL_FUNDING) {
-    it('allows a player to withdraw funds from the ledger channel', async () => {
-      await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING);
-
-      await waitForBudgetEntry(web3tTabA);
-
-      await withdrawAndWait(web3tTabA);
-
-      await waitForEmptyBudget(web3tTabA);
-    });
-  }
 
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
