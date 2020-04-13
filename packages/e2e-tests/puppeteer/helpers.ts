@@ -102,9 +102,7 @@ export async function waitForBudgetEntry(page: Page): Promise<void> {
 
 export async function waitForEmptyBudget(page: Page): Promise<void> {
   // eslint-disable-next-line no-undef
-  await page.waitForFunction(() => !document.querySelector('.site-budget-table'), {
-    mutation: true
-  } as any);
+  await page.waitForFunction(() => !document.querySelector('.site-budget-table'));
 }
 
 export async function withdrawAndWait(page: Page): Promise<void> {
@@ -159,4 +157,3 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
 }
-
