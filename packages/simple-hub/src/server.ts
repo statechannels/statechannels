@@ -11,13 +11,12 @@ if (process.env.RUNTIME_ENV) {
 import {fbObservable, deleteIncomingMessage, sendReplies} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
 import {map} from 'rxjs/operators';
-import {logger} from './logger';
+import {log} from './logger';
 import {depositsToMake} from './wallet/deposit';
 import {makeDeposits} from './blockchain/eth-asset-holder';
 import {pipe} from 'fp-ts/lib/pipeable';
 import {map as fpMap, fold} from 'fp-ts/lib/Either';
 import {cHubParticipantId, cFirebasePrefix} from './constants';
-const log = logger();
 
 export async function startServer() {
   fbObservable()
