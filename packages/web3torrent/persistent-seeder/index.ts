@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {Page} from 'puppeteer';
+import puppeteer, {Page} from 'puppeteer';
+import * as dappeteer from 'dappeteer';
 import fs from 'fs';
 
-import {waitAndApproveBudget, setUpBrowser, loadDapp} from './helpers';
+import {waitAndApproveBudget, setUpBrowser, loadDapp, waitForBudgetEntry} from './helpers';
 
 function prepareUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(100000);
@@ -67,7 +68,10 @@ async function script() {
   // 100ms sloMo avoids some undiagnosed race conditions
   console.log('Opening browsers');
 
-  const browser = await setUpBrowser(HEADLESS, 100);
+  const browser = await dappeteer.launch(puppeteer);
+  const metamask = await dappeteer.getMetamask(browser);
+  // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
+  await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
 
   console.log('Waiting on pages');
   const web3tTab = (await browser.pages())[0];
@@ -78,7 +82,10 @@ async function script() {
   await web3tTab.goto('http://localhost:3000/file/new', {waitUntil: 'load'}); // TODO replace with deployed app
 
   console.log('A uploads a file');
-  const url = await uploadFile(web3tTab, false); // TODO setup budget manually so that metamask is not required
+
+  await uploadFile(web3tTab, true);
+
+  await waitForBudgetEntry(web3tTab);
 }
 
 script();
