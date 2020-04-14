@@ -2,11 +2,19 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../../helpers';
-import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
 
-jest.setTimeout(JEST_TIMEOUT);
+import {
+  setUpBrowser,
+  loadDapp,
+  waitAndOpenChannel,
+  waitForClosingChannel,
+  waitForNthState
+} from '../../helpers';
+
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+
+jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
 
 let browserA: Browser;
 let browserB: Browser;
@@ -61,7 +69,7 @@ describe('Web3-Torrent Integration Tests', () => {
 
     // Let the download cointinue for some time
     console.log('Downloading');
-    await web3tTabB.waitFor(1000);
+    await waitForNthState(web3tTabB, 10);
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
