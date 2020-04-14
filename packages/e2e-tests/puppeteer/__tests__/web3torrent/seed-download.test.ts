@@ -43,7 +43,7 @@ describe('Web3-Torrent Integration Tests', () => {
 
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
-    await loadDapp(web3tTabB, 0, true);
+    await loadDapp(web3tTabB, 1, true);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
   });
