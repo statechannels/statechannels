@@ -1,0 +1,14 @@
+{
+  "name": "@statechannels/web3torrent-persistent-seeder",
+  "version": "0.0.0",
+  "scripts": {
+    "build-and-release": "./build-push-release.sh",
+    "puppeteer:dev": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./index.ts"
+  },
+  "dependencies": {
+    "fs-extra": "8.1.0",
+    "debug": "4.1.1",
+    "puppeteer": "2.1.1",
+    "ts-node": "8.6.2"
+  }
+}
