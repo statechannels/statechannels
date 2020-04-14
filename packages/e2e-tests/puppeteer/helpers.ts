@@ -14,7 +14,6 @@ export async function loadDapp(
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
-    // localStorage.debug = "web3torrent*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
     window.ethereum.enable = () => new Promise(r => {
@@ -37,6 +36,7 @@ export async function loadDapp(
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
+    console.log('Page console log: ', msg.text());
   });
 }
 
