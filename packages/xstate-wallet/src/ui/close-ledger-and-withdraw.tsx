@@ -23,7 +23,9 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
         channels.
       </Text>
 
-      <Button onClick={() => props.send('USER_APPROVES_CLOSE')}>Close and withdraw</Button>
+      <Button id="approve-withdraw" onClick={() => props.send('USER_APPROVES_CLOSE')}>
+        Close and withdraw
+      </Button>
       <Button.Text onClick={() => props.send('USER_REJECTS_CLOSE')}>Cancel</Button.Text>
     </Flex>
   );

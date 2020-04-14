@@ -2,17 +2,11 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
+import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../../helpers';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
 
-import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
-
-import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
-
-configureEnvVariables();
-const HEADLESS = getEnvBool('HEADLESS');
-jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
-
-const USES_VIRTUAL_FUNDING = process.env.REACT_APP_FUNDING_STRATEGY === 'Virtual';
+jest.setTimeout(JEST_TIMEOUT);
 
 let browserA: Browser;
 let browserB: Browser;
@@ -20,7 +14,7 @@ let web3tTabA: Page;
 let web3tTabB: Page;
 let tabs: [Page, Page];
 
-describe('Supports torrenting among peers with channels', () => {
+describe('Web3-Torrent Integration Tests', () => {
   beforeAll(async () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');

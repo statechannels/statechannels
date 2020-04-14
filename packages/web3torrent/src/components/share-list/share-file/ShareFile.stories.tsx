@@ -1,4 +1,4 @@
-import {action, withActions} from '@storybook/addon-actions';
+import {withActions} from '@storybook/addon-actions';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/react';
 import React from 'react';
@@ -21,7 +21,6 @@ storiesOf('Web3Torrent', module)
             numPeers: number('Number of peers', 17, {step: 1}, 'File data'),
             magnetURI: text('Magnet link', '', 'File data')
           }}
-          goTo={action('button-clicked')}
         ></ShareFile>
       </tbody>
     </table>

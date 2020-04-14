@@ -14,7 +14,6 @@ export async function loadDapp(
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
-    // localStorage.debug = "web3torrent*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
     window.ethereum.enable = () => new Promise(r => {
@@ -37,6 +36,7 @@ export async function loadDapp(
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
+    console.log('Page console log: ', msg.text());
   });
 }
 
@@ -94,6 +94,23 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
   });
 
   return browser;
+}
+
+export async function waitForBudgetEntry(page: Page): Promise<void> {
+  await page.waitForSelector('.site-budget-table > tbody > tr');
+}
+
+export async function waitForEmptyBudget(page: Page): Promise<void> {
+  // eslint-disable-next-line no-undef
+  await page.waitForFunction(() => !document.querySelector('.site-budget-table'));
+}
+
+export async function withdrawAndWait(page: Page): Promise<void> {
+  console.log('Withdrawing funds');
+  const walletIFrame = page.frames()[1];
+  const web3TorrentIFrame = page.frames()[0];
+  await waitForAndClickButton(page, web3TorrentIFrame, '#budget-withdraw');
+  await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
 }
 
 export async function waitAndApproveBudget(page: Page): Promise<void> {

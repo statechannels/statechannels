@@ -38,7 +38,7 @@
     "lint:write": "eslint \"**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
     "puppeteer:dev": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
-    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest --runInBand",
+    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
     "test:show": "HEADLESS=false yarn run test"
   }
 }
