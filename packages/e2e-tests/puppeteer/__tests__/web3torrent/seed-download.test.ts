@@ -49,11 +49,10 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    if (browserA) {
-      await browserA.close();
-    }
-    if (browserB) {
-      await browserB.close();
+    if (HEADLESS) {
+      await Promise.all(
+        [browserA, browserB].map(async browser => browser && (await browser.close()))
+      );
     }
   });
 
