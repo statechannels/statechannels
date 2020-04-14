@@ -40,7 +40,7 @@ module.exports = {
     browser: true,
     es6: true
   },
-  plugins: [...baseConfig.plugins, 'jest'],
+  plugins: [...baseConfig.plugins, "react-hooks", 'jest'],
   extends: [
     'plugin:jest/recommended',
     'plugin:jest/style',
