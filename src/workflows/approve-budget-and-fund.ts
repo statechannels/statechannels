@@ -14,7 +14,14 @@ import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {checkThat, exists, simpleEthAllocation} from '../utils';
+import {
+  checkThat,
+  exists,
+  simpleEthAllocation,
+  sendUserDeclinedResponse,
+  hideUI,
+  displayUI
+} from '../utils';
 import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
@@ -181,7 +188,11 @@ export const machine = (
           // /* This might be overkill */ actions.sendBudgetUpdated
         ]
       },
-      failure: {id: 'failure', type: 'final'}
+      failure: {
+        type: 'final',
+        id: 'failure',
+        entry: [hideUI(messagingService), sendUserDeclinedResponse(messagingService)]
+      }
     }
   });
 
@@ -245,15 +256,6 @@ function convertPendingBudgetToAllocation({hub, player, budget}: Context): Simpl
   };
   return simpleEthAllocation([hubItem, playerItem]);
 }
-
-const displayUI = (messagingService: MessagingServiceInterface): ActionObject<Context, Event> => ({
-  type: 'displayUI',
-  exec: () => messagingService.sendDisplayMessage('Show')
-});
-const hideUI = (messagingService: MessagingServiceInterface): ActionObject<Context, Event> => ({
-  type: 'hideUI',
-  exec: () => messagingService.sendDisplayMessage('Hide')
-});
 
 const sendResponse = (
   messagingService: MessagingServiceInterface

@@ -4,12 +4,11 @@ import {
   StateMachine,
   Machine,
   ActionFunction,
-  ActionFunctionMap,
   DoneInvokeEvent,
   assign,
   ConditionPredicate
 } from 'xstate';
-import {getDataAndInvoke} from '../utils';
+import {getDataAndInvoke, CommonWorkflowActions, commonWorkflowActions} from '../utils';
 import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
@@ -33,11 +32,9 @@ export type WorkflowContext = {
 type WorkflowGuards = {
   doesChannelIdExist: ConditionPredicate<WorkflowContext, WorkflowEvent>;
 };
-interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
+interface WorkflowActions extends CommonWorkflowActions {
   sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
   assignLedgerId: ActionFunction<WorkflowContext, DoneInvokeEvent<CloseLedger>>;
-  hideUi: ActionFunction<WorkflowContext, any>;
-  displayUi: ActionFunction<WorkflowContext, any>;
   clearBudget: ActionFunction<WorkflowContext, any>;
 }
 interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
@@ -75,7 +72,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
     },
     done: {type: 'final', entry: ['sendResponse', 'hideUi']},
-    failure: {type: 'final'}
+    failure: {type: 'final', entry: ['sendUserDeclinedErrorResponse', 'hideUI']}
   }
 };
 
@@ -139,13 +136,9 @@ const options = (
     createObjective: createObjective(store)
   },
   actions: {
+    ...commonWorkflowActions(messagingService),
     clearBudget: clearBudget(store),
-    displayUi: () => {
-      messagingService.sendDisplayMessage('Show');
-    },
-    hideUi: () => {
-      messagingService.sendDisplayMessage('Hide');
-    },
+
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
     assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
