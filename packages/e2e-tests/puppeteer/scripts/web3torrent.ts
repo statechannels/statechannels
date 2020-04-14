@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import {waitAndApproveBudget} from '../helpers';
 
 function prepareUploadFile(path: string): void {
-  const content = 'web3torrent\n'.repeat(100000);
+  const content = 'web3torrent\n'.repeat(1000000);
   const buf = Buffer.from(content);
   fs.writeFile(path, buf, err => {
     if (err) {
