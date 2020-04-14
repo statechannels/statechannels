@@ -252,19 +252,27 @@ jobs:
       - checkout
       - puppeteer/install
       - log_stats:
-          file: integration-test-stats
+          file: integration-test-web3torrent-stats
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: (cd packages/devtools && yarn run start:shared-ganache)
+          command: (cd packages/devtools && yarn run start:shared-ganache | tee /tmp/ganache.log)
           background: true
       - run:
-          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/xstate-wallet.log)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start | tee /tmp/web3torrent.log)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/| tee /tmp/e2e.log)
+      - store_artifacts:
+          path: /tmp/ganache.log
+      - store_artifacts:
+          path: /tmp/xstate-wallet.log
+      - store_artifacts:
+          path: /tmp/web3torrent.log
+      - store_artifacts:
+          path: /tmp/e2e.log
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots:
@@ -337,24 +345,34 @@ jobs:
       - checkout
       - puppeteer/install
       - log_stats:
-          file: integration-test-stats
+          file: integration-test-web3torrent-with-hub-stats
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: (cd packages/devtools && yarn run start:shared-ganache)
+          command: (cd packages/devtools && yarn run start:shared-ganache | tee /tmp/ganache.log)
           background: true
       - run:
-          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/xstate-wallet.log)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/web3torrent.log)
           background: true
       - run:
-          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
+          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch | tee /tmp/simple-hub.log)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/ | tee /tmp/e2e.log)
+      - store_artifacts:
+          path: /tmp/ganache.log
+      - store_artifacts:
+          path: /tmp/xstate-wallet.log
+      - store_artifacts:
+          path: /tmp/web3torrent.log
+      - store_artifacts:
+          path: /tmp/simple-hub.log
+      - store_artifacts:
+          path: /tmp/e2e.log
       - upload_logs:
-          file: integration-test-stats
+          file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:
           job: integration-test-with-hub
 
