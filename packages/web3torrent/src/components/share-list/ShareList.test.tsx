@@ -46,8 +46,10 @@ describe('<ShareList />', () => {
       .at(0)
       .find('button')
       .simulate('click');
-    expect(history.location.pathname).toBe(`${RoutePath.File}`);
-    expect(history.location.hash).toBe(`#${preSeededTorrents[0].magnetURI}`);
+    expect(history.location.pathname).toBe(`${RoutePath.File}${preSeededTorrents[0].infoHash}`);
+    expect(history.location.search).toBe(
+      `?name=${preSeededTorrents[0].name}&length=${preSeededTorrents[0].length}`
+    );
   });
 });
 
