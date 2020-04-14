@@ -92,7 +92,10 @@ export const sendUserDeclinedResponse = (
   if (!context.requestId) {
     throw new Error(`No request id in context ${JSON.stringify(context)}`);
   }
-  messageService.sendError(context.requestId, {code: 200, message: 'User declined'});
+  messageService.sendError(context.requestId, {
+    code: 200,
+    message: 'User declined'
+  });
 };
 
 export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
