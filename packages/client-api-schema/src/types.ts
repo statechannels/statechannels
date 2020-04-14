@@ -267,7 +267,8 @@ export type Response =
   | ApproveBudgetAndFundResponse
   | CloseAndWithdrawResponse;
 
-export type ErrorResponse = EnableEthereumError;
+export type UserDeclinedErrorResponse = JsonRpcError<200, 'User declined'>;
+export type ErrorResponse = EnableEthereumError | UserDeclinedErrorResponse;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 

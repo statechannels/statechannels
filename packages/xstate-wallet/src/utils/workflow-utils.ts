@@ -6,9 +6,13 @@ import {
   Machine,
   DoneInvokeEvent,
   StateNodeConfig,
-  assign
+  assign,
+  ActionFunction,
+  ActionObject,
+  ActionFunctionMap
 } from 'xstate';
 import {Store} from '../store';
+import {MessagingServiceInterface} from '../messaging';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -72,3 +76,34 @@ export const debugAction = (c, e, {state}) => {
   // eslint-disable-next-line no-debugger
   debugger;
 };
+
+export const displayUI = (messagingService: MessagingServiceInterface): ActionObject<any, any> => ({
+  type: 'displayUI',
+  exec: () => messagingService.sendDisplayMessage('Show')
+});
+export const hideUI = (messagingService: MessagingServiceInterface): ActionObject<any, any> => ({
+  type: 'hideUI',
+  exec: () => messagingService.sendDisplayMessage('Hide')
+});
+
+export const sendUserDeclinedResponse = (
+  messageService: MessagingServiceInterface
+): ActionFunction<any, any> => (context, _) => {
+  if (!context.requestId) {
+    throw new Error(`No request id in context ${JSON.stringify(context)}`);
+  }
+  messageService.sendError(context.requestId, {code: 200, message: 'User declined'});
+};
+
+export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
+  sendUserDeclinedErrorResponse: ActionFunction<{requestId: number}, any>;
+  hideUI: ActionObject<any, any>;
+  displayUI: ActionObject<any, any>;
+}
+export const commonWorkflowActions = (
+  messageService: MessagingServiceInterface
+): CommonWorkflowActions => ({
+  displayUI: displayUI(messageService),
+  hideUI: hideUI(messageService),
+  sendUserDeclinedErrorResponse: sendUserDeclinedResponse(messageService)
+});
