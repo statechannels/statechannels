@@ -51,11 +51,8 @@ export const cancel = (id: string = '') => {
 };
 
 const torrentNamer = (input: WebTorrentSeedInput) => {
-  if ((input as FileList).length) {
-    const files = input as FileList;
-    return {
-      name: files.length > 1 ? `various_${String(Date.now()).slice(-5)}.zip` : files[0].name
-    };
+  if ((input as FileList).length && (input as FileList).length > 1) {
+    return {name: `various.zip`};
   }
   return {};
 };
