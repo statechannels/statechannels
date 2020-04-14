@@ -1,10 +1,9 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {useParams} from 'react-router-dom';
-import {download, getTorrentPeers, Web3TorrentContext} from '../../clients/web3torrent-client';
+import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {parseURL, useQuery} from '../../utils/magnet';
 import {torrentStatusChecker} from '../../utils/torrent-status-checker';
@@ -12,17 +11,14 @@ import {useInterval} from '../../utils/useInterval';
 import './File.scss';
 import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 import _ from 'lodash';
-import {EmptyTorrent} from '../../constants';
 
-const getTorrentAndPeersData: (
+const getLiveData: (
   web3Torrent: WebTorrentPaidStreamingClient,
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
-  setPeers: React.Dispatch<React.SetStateAction<TorrentPeers>>
-) => (torrent: Torrent) => void = (web3Torrent, setTorrent, setPeers) => torrent => {
+  torrent: Torrent
+) => void = (web3Torrent, setTorrent, torrent) => {
   const liveTorrent = torrentStatusChecker(web3Torrent, torrent, torrent.infoHash);
-  const livePeers = getTorrentPeers(torrent.infoHash);
   setTorrent(liveTorrent);
-  setPeers(livePeers);
 };
 
 interface Props {
@@ -33,27 +29,20 @@ const File: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
   const {infoHash} = useParams();
   const queryParams = useQuery();
-  const [torrent, setTorrent] = useState<Torrent>(EmptyTorrent);
-  const [, setPeers] = useState({});
+  const [torrent, setTorrent] = useState<Torrent>(() => parseURL(infoHash, queryParams));
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
 
-  const getLiveData = getTorrentAndPeersData(web3Torrent, setTorrent, setPeers);
-
-  useEffect(() => {
-    setTorrent(parseURL(infoHash, queryParams));
-    // eslint-disable-next-line
-  }, []);
-
   useEffect(() => {
     if (torrent.infoHash) {
-      getLiveData(torrent);
+      getLiveData(web3Torrent, setTorrent, torrent);
     }
     // eslint-disable-next-line
   }, [torrent.infoHash]);
+
   useInterval(
-    () => getLiveData(torrent),
+    () => getLiveData(web3Torrent, setTorrent, torrent),
     (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
   );
 
