@@ -96,6 +96,23 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
   return browser;
 }
 
+export async function waitForBudgetEntry(page: Page): Promise<void> {
+  await page.waitForSelector('.site-budget-table > tbody > tr');
+}
+
+export async function waitForEmptyBudget(page: Page): Promise<void> {
+  // eslint-disable-next-line no-undef
+  await page.waitForFunction(() => !document.querySelector('.site-budget-table'));
+}
+
+export async function withdrawAndWait(page: Page): Promise<void> {
+  console.log('Withdrawing funds');
+  const walletIFrame = page.frames()[1];
+  const web3TorrentIFrame = page.frames()[0];
+  await waitForAndClickButton(page, web3TorrentIFrame, '#budget-withdraw');
+  await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+}
+
 export async function waitAndApproveBudget(page: Page): Promise<void> {
   console.log('Approving budget');
 
