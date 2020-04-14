@@ -10,9 +10,9 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   const [file, setFile] = useState({} as SavingData);
   useEffect(() => {
     if (torrent.done) {
-      getFileSavingData(torrent.files).then(data => setFile(data));
+      getFileSavingData(torrent.files, torrent.name).then(data => setFile(data));
     }
-  }, [torrent.done, torrent.files]);
+  }, [torrent.done, torrent.files, torrent.name]);
 
   return (
     <>

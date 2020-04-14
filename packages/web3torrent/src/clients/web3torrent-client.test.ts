@@ -63,7 +63,11 @@ describe('Web3TorrentClient', () => {
       seedSpy = jest
         .spyOn(web3torrent, 'seed')
         .mockImplementation(
-          (_: WebTorrentSeedInput, callback: TorrentOptions | TorrentCallback | undefined) => {
+          (
+            _: WebTorrentSeedInput,
+            __?: TorrentOptions | TorrentCallback,
+            callback?: TorrentCallback
+          ) => {
             return (callback as TorrentCallback)(torrent as PaidStreamingTorrent);
           }
         );
