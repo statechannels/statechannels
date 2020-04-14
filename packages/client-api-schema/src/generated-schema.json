@@ -705,6 +705,13 @@
       ],
       "type": "object"
     },
+    "ErrorCode": {
+      "enum": [
+        200,
+        100
+      ],
+      "type": "number"
+    },
     "ErrorResponse": {
       "anyOf": [
         {
