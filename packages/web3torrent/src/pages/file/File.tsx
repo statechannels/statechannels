@@ -12,6 +12,7 @@ import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
+import {getUserFriendlyError} from '../../utils/error';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -130,18 +131,15 @@ const File: React.FC<Props> = props => {
                   })
                 );
               } catch (error) {
-                setErrorLabel(
-                  // FIXME: 'put human readable error here'
-                  error.toString()
-                  // getUserFriendlyError(error.code)
-                );
+                setLoading(false);
+                setErrorLabel(getUserFriendlyError(error.code));
               }
               setLoading(false);
             }}
           >
             {buttonLabel(loading)}
           </FormButton>
-          {errorLabel && <p className="error">{errorLabel}</p>}
+          {errorLabel && errorLabel !== '' && <Flash variant="danger">{errorLabel}</Flash>}
           <div className="subtitle">
             <p>
               <strong>How do I pay for the download?</strong>
