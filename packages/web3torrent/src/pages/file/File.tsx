@@ -38,7 +38,7 @@ const File: React.FC<Props> = props => {
     if (torrent.infoHash) {
       getLiveData(web3Torrent, setTorrent, torrent);
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [torrent.infoHash]);
 
   useInterval(
