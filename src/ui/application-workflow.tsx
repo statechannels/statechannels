@@ -1,7 +1,7 @@
 import React from 'react';
 import {State, EventData} from 'xstate';
 import './wallet.scss';
-import {Flex, Progress} from 'rimble-ui';
+import {Flex, Heading, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
 import {
   isConfirmCreateChannel,
@@ -41,7 +41,9 @@ export const ApplicationWorkflow = (props: Props) => {
       }}
       className="application-workflow-prompt"
     >
-      <h1>{messages[getApplicationStateValue(current)]}</h1>
+      <Heading textAlign="center" mb={0}>
+        {messages[getApplicationStateValue(current)]}
+      </Heading>
       {!isConfirmCreateChannel(current) && (
         <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
           <ChannelId channelId={current.context.channelId} />
