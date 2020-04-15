@@ -82,6 +82,7 @@ async function script() {
 
   const browser = await dappeteer.launch(puppeteer);
   const metamask = await dappeteer.getMetamask(browser);
+  await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
   // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
   await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
 
