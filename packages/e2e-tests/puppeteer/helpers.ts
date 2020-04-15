@@ -153,7 +153,7 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
 };
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
-  const closingText = 'div.application-workflow-prompt > h1';
+  const closingText = 'div.application-workflow-prompt > h2';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
 }
