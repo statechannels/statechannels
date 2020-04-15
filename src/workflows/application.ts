@@ -196,7 +196,7 @@ const generateConfig = (
 
     //This could handled by another workflow instead of the application workflow
     closing: {
-      entry: actions.displayUi,
+      entry: [actions.displayUi, actions.assignRequestId],
       exit: actions.hideUi,
       invoke: {
         id: 'closing-protocol',
@@ -308,7 +308,9 @@ export const workflow = (
           return unreachable(event);
       }
     }),
-    assignRequestId: assign((context, event: JoinChannelEvent) => ({requestId: event.requestId})),
+    assignRequestId: assign((context, event: JoinChannelEvent | PlayerRequestConclude) => ({
+      requestId: event.requestId
+    })),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
         const existingState = await (await store.getEntry(event.channelId)).latest;
