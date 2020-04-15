@@ -77,7 +77,11 @@ export const welcomePageTrackerOpts = {
   announce: defaultTrackers,
   peerId: '2d5757303030372d37454e613073307937495630', // random
   port: 6881,
-  getAnnounceOpts: () => ({pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777'}) // dummy pseAccount, but it works
+  getAnnounceOpts: () => ({
+    pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777',
+    uploaded: 0,
+    downloaded: 0
+  }) // dummy pseAccount, but it works
 };
 
 export const testTorrent = {

@@ -8,8 +8,7 @@ export enum ClientEvents {
   CLIENT_RESET = 'client_reset',
   TORRENT_DONE = 'torrent_done',
   TORRENT_ERROR = 'torrent_error',
-  TORRENT_NOTICE = 'torrent_notice',
-  CLIENT_CAPABILITY_TEST = 'client_capability_test'
+  TORRENT_NOTICE = 'torrent_notice'
 }
 
 export enum TorrentEvents {
@@ -45,12 +44,6 @@ export type PaidStreamingExtendedHandshake = {
   pseAccount: string;
   outcomeAddress: string;
 };
-
-export enum TorrentClientCapabilities {
-  CAPABLE = 'CAPABLE',
-  NOT_CAPABLE = 'NOT_CAPABLE',
-  NOT_TESTED = 'NOT_TESTED'
-}
 
 export type PaidStreamingWire = Omit<Wire, 'requests'> &
   {
@@ -189,11 +182,6 @@ declare module 'webtorrent' {
         command: PaidStreamingExtensionNotices;
         data: any;
       }) => void
-    ): this;
-
-    on(
-      event: ClientEvents.CLIENT_CAPABILITY_TEST,
-      callback: (status: TorrentClientCapabilities) => void
     ): this;
   }
 
