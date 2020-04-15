@@ -13,6 +13,10 @@ export async function loadDapp(
     throw error;
   });
 
+  //   await evaluateOnNewDocument(`
+  //     window.ethereum.selectedAddress = web3.eth.defaultAccount;
+  // `);
+
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
@@ -110,6 +114,7 @@ export async function waitAndApproveMetaMask(page: Page, metamask: Dappeteer): P
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, connectWithMetamaskButton);
   await metamask.approve();
+  await page.waitFor(1000);
 }
 
 interface Window {
@@ -146,4 +151,12 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingText = 'div.application-workflow-prompt > h1';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
+}
+
+export function enableSlowMo(page, delay) {
+  const origin = page._client._onMessage;
+  page._client._onMessage = async (...args) => {
+    await new Promise(x => setTimeout(x, 250));
+    return origin.call(page._client, ...args);
+  };
 }

@@ -8,7 +8,8 @@ import {
   setUpBrowser,
   loadDapp,
   waitForBudgetEntry,
-  waitAndApproveMetaMask
+  waitAndApproveMetaMask,
+  enableSlowMo
 } from './helpers';
 
 function prepareUploadFile(path: string): void {
@@ -42,6 +43,9 @@ export async function uploadFile(
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
 
+  page.evaluate(`() => {
+    console.log(window.ethereum);
+  }`);
   await waitAndApproveMetaMask(page, metamask);
 
   if (handleBudgetPrompt) {
@@ -80,7 +84,21 @@ async function script() {
   // 100ms sloMo avoids some undiagnosed race conditions
   console.log('Opening browsers');
 
-  const browser = await dappeteer.launch(puppeteer);
+  const browser = await dappeteer.launch(puppeteer, {
+    headless: false,
+    slowMo: 0,
+    //, Needed to allow both windows to execute JS at the same time
+    ignoreDefaultArgs: [
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ],
+    args: [
+      // Needed to inject web3.js code into wallet iframe
+      // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
+      '--disable-features=site-per-process'
+    ]
+  });
   const metamask = await dappeteer.getMetamask(browser);
   await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
   // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
@@ -88,6 +106,8 @@ async function script() {
 
   console.log('Waiting on pages');
   const web3tTab = (await browser.pages())[0];
+  await enableSlowMo(web3tTab, 250);
+
   console.log('Loading dapp');
   await loadDapp(web3tTab, 0, true);
 
