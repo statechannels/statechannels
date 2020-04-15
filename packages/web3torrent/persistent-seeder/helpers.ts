@@ -106,6 +106,7 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
 }
+
 export async function waitAndApproveMetaMask(page: Page, metamask: Dappeteer): Promise<void> {
   console.log('Approving metamask');
 
@@ -115,6 +116,14 @@ export async function waitAndApproveMetaMask(page: Page, metamask: Dappeteer): P
   await waitForAndClickButton(page, walletIFrame, connectWithMetamaskButton);
   await metamask.approve();
   await page.waitFor(1000);
+}
+
+export async function waitAndApproveDeposit(page: Page, metamask: Dappeteer): Promise<void> {
+  console.log('Making deposit');
+
+  const walletIFrame = page.frames()[1];
+  await walletIFrame.waitForSelector('#please-approve-transaction');
+  await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
 }
 
 interface Window {

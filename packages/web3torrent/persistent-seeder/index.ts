@@ -9,7 +9,8 @@ import {
   loadDapp,
   waitForBudgetEntry,
   waitAndApproveMetaMask,
-  enableSlowMo
+  enableSlowMo,
+  waitAndApproveDeposit
 } from './helpers';
 
 function prepareUploadFile(path: string): void {
@@ -52,6 +53,8 @@ export async function uploadFile(
     await waitAndApproveBudget(page);
   }
 
+  await waitAndApproveDeposit(page, metamask);
+
   const downloadLinkSelector = '#download-link';
   await page.waitForSelector(downloadLinkSelector);
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
@@ -77,8 +80,6 @@ export async function startDownload(
 export async function cancelDownload(page: Page): Promise<void> {
   await page.click('#cancel-download-button');
 }
-
-const HEADLESS = false; // TODO set true
 
 async function script() {
   // 100ms sloMo avoids some undiagnosed race conditions
