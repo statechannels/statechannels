@@ -3,7 +3,13 @@ import puppeteer, {Page} from 'puppeteer';
 import * as dappeteer from 'dappeteer';
 import fs from 'fs';
 
-import {waitAndApproveBudget, setUpBrowser, loadDapp, waitForBudgetEntry} from './helpers';
+import {
+  waitAndApproveBudget,
+  setUpBrowser,
+  loadDapp,
+  waitForBudgetEntry,
+  waitAndApproveMetaMask
+} from './helpers';
 
 function prepareUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(100000);
@@ -16,7 +22,11 @@ function prepareUploadFile(path: string): void {
   });
 }
 
-export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promise<string> {
+export async function uploadFile(
+  page: Page,
+  handleBudgetPrompt: boolean,
+  metamask: dappeteer.Dappeteer
+): Promise<string> {
   await page.waitForSelector('input[type=file]');
 
   // Generate a /tmp file with deterministic data for upload testing
@@ -31,6 +41,8 @@ export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promi
     // eslint-disable-next-line no-undef
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
+
+  await waitAndApproveMetaMask(page, metamask);
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
@@ -83,7 +95,7 @@ async function script() {
 
   console.log('A uploads a file');
 
-  await uploadFile(web3tTab, true);
+  await uploadFile(web3tTab, true, metamask);
 
   await waitForBudgetEntry(web3tTab);
 }

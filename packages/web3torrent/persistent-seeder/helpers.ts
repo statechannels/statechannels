@@ -2,6 +2,7 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
+import {Dappeteer} from 'dappeteer';
 
 export async function loadDapp(
   page: Page,
@@ -100,6 +101,15 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
 
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
+}
+export async function waitAndApproveMetaMask(page: Page, metamask: Dappeteer): Promise<void> {
+  console.log('Approving metamask');
+
+  const connectWithMetamaskButton = '#connect-with-metamask-button';
+
+  const walletIFrame = page.frames()[1];
+  await waitForAndClickButton(page, walletIFrame, connectWithMetamaskButton);
+  await metamask.approve();
 }
 
 interface Window {
