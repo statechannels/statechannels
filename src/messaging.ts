@@ -91,6 +91,9 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendResponse(id: number, result: Response['result']) {
+    if (!id) {
+      throw new Error(`No id provided for the response`);
+    }
     const response: Response = {id, jsonrpc: '2.0', result};
     this.eventEmitter.emit('SendMessage', response);
   }
