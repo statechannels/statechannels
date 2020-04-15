@@ -53,7 +53,7 @@ const App: React.FC = () => {
           <Route exact path={RoutePath.Root}>
             <Welcome ready={ready} />
           </Route>
-          <Route exact path={RoutePath.File}>
+          <Route exact path={RoutePath.FileWithInfoHash}>
             <File ready={ready} />
           </Route>
           } />

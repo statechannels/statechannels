@@ -1,39 +1,40 @@
 import {defaultTrackers, EmptyTorrent} from '../constants';
 import {RoutePath} from '../routes';
 import {Torrent} from '../types';
+import {useLocation} from 'react-router-dom';
 
-export const parseMagnetURL: (rawMagnetURL: string) => Torrent = (rawMagnetURL = '') => {
-  const emptyTorrentData = {...EmptyTorrent, magnetURI: ''} as Torrent;
-  if (!rawMagnetURL.trim()) {
-    return emptyTorrentData;
-  }
-  const magnetParams = new URLSearchParams(rawMagnetURL.trim().replace(/#magnet:/g, ''));
-  if (!magnetParams.has('xt')) {
-    return emptyTorrentData;
-  }
-
-  if (!magnetParams.has('tr')) {
-    defaultTrackers.map(tr => magnetParams.append('tr', tr));
-  }
-
-  return {
-    ...emptyTorrentData,
-    name: magnetParams.get('name') || magnetParams.get('dn') || 'unknown',
-    magnetURI: decodeURIComponent(`magnet:?${magnetParams.toString()}`),
-    infoHash: (magnetParams.get('xt') as string).substring(9),
-    length: Number(magnetParams.get('xl')) || 0,
-    cost: magnetParams.get('cost') || '0'
-  };
+/**
+ * Custom Hook that retrieves the queryParams of the URL.
+ *
+ * This is the recommended approach by the React Router:
+ * https://reacttraining.com/react-router/web/example/query-parameters
+ */
+export const useQuery = () => {
+  return new URLSearchParams(useLocation().search);
 };
 
-export const generateMagnetURL = (torrent: Torrent) => {
-  if (!torrent.magnetURI) {
-    return window.location.origin;
+/**
+ * Parses the URL from the page, and creates the information necessary in the UI and to start the download.
+ * @param infoHash the id of the torrent
+ * @param queryParams extra information for the UI, not necessary, but usefull.
+ */
+export function parseURL(infoHash: string, queryParams: URLSearchParams): Torrent {
+  if (!infoHash || !infoHash.trim()) {
+    return EmptyTorrent;
   }
-  const magnetParams = new URLSearchParams(torrent.magnetURI.replace(/magnet:/g, ''));
-  magnetParams.delete('tr');
-  magnetParams.append('xl', String(torrent.length));
-  magnetParams[!magnetParams.has('xl') ? 'append' : 'set']('xl', String(torrent.length));
+  const name = queryParams.get('name') || 'unknown';
+  const length = Number(queryParams.get('length')) || 0;
+  const magnetURI = buildMagnetURI(name, length, infoHash);
+  return {...EmptyTorrent, infoHash, name, length, magnetURI};
+}
 
-  return `${RoutePath.File}#magnet:?${magnetParams.toString()}`;
-};
+export function buildMagnetURI(name: string, length: number, infoHash: string): string {
+  return defaultTrackers.reduce(
+    (magnetURI, tracker) => magnetURI + '&tr=' + tracker,
+    `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(name)}&xl=${length}`
+  );
+}
+
+export function generateURL({infoHash, length, name}: Torrent): string {
+  return `${RoutePath.File}${infoHash}?name=${encodeURIComponent(name)}&length=${length}`;
+}
