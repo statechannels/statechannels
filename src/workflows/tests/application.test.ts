@@ -81,7 +81,8 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
       fundingStrategy: 'Direct',
       channelId,
       type: 'JOIN_CHANNEL',
-      applicationSite: 'localhost'
+      applicationSite: 'localhost',
+      requestId: 5
     };
 
     const store = new XstateStore();
@@ -107,10 +108,9 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
 
     service.start();
 
-    await waitForExpect(
-      async () => expect(service.state.value).toEqual({joiningChannel: 'joining'}),
-      2000
-    );
+    await waitForExpect(async () => {
+      expect(service.state.value).toEqual({joiningChannel: 'joining'});
+    }, 2000);
 
     const joinEvent: JoinChannelEvent = {
       type: 'JOIN_CHANNEL',
