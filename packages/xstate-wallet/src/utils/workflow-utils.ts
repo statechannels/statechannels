@@ -14,6 +14,14 @@ import {
 import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 
+// export interface WorkflowStateSchema<T extends {value:any; context:any}> {
+//   meta?: any;
+//   context?: Partial<any>;
+//   states?: {
+//     [key: keyof T]: WorkflowStateSchema<T>;
+//   };
+// }
+
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
     name: guardName,
@@ -97,6 +105,20 @@ export const sendUserDeclinedResponse = (
     message: 'User declined'
   });
 };
+
+
+export const sendGenericResponse = (
+  messageService: MessagingServiceInterface
+): ActionFunction<any, any> => (context, _) => {
+  if (!context.requestId) {
+    throw new Error(`No request id in context ${JSON.stringify(context)}`);
+  }
+  messageService.sendError(context.requestId, {
+    code: 200,
+    message: 'User declined'
+  });
+};
+
 
 export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
   sendUserDeclinedErrorResponse: ActionFunction<{requestId: number}, any>;
