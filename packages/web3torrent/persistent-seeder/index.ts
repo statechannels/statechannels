@@ -80,10 +80,7 @@ async function script() {
   // 100ms sloMo avoids some undiagnosed race conditions
   console.log('Opening browsers');
 
-  const browser = await dappeteer.launch(puppeteer, {
-    metamaskPath:
-      '/Users/georgeknee/Library/Application Support/Google/Chrome/Default/Extensions/nkbihfbeogaeaoehlefnkodbefgpgknn/6.7.1_0'
-  });
+  const browser = await dappeteer.launch(puppeteer);
   const metamask = await dappeteer.getMetamask(browser);
   // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
   await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
