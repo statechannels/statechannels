@@ -22,9 +22,6 @@ const jestViolations = {
 
 const otherViolations = {
   '@typescript-eslint/camelcase': 'off',
-  // React Hooks rules
-  'react-hooks/rules-of-hooks': 'error',
-  'react-hooks/exhaustive-deps': 'warn',
   // Below rules should probably be revisited
   '@typescript-eslint/no-inferrable-types': 'off',
   '@typescript-eslint/ban-ts-ignore': 'off',
@@ -54,7 +51,9 @@ module.exports = {
   rules: {
     ...leftoverTsLintRules,
     ...jestViolations,
-    ...otherViolations
+    ...otherViolations,
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn'
   },
   globals: {
     fail: 'readonly',
