@@ -308,9 +308,7 @@ export const workflow = (
           return unreachable(event);
       }
     }),
-    assignRequestId: assign((context, event: JoinChannelEvent) => {
-      return {requestId: event.requestId};
-    }),
+    assignRequestId: assign((context, event: JoinChannelEvent) => ({requestId: event.requestId})),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
         const existingState = await (await store.getEntry(event.channelId)).latest;
