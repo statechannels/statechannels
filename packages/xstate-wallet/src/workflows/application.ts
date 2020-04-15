@@ -69,6 +69,7 @@ export interface WorkflowActions {
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
+  assignRequestId: Action<WorkflowContext, any>;
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
@@ -135,7 +136,7 @@ const generateConfig = (
             ],
             JOIN_CHANNEL: {
               target: 'settingSite',
-              actions: [actions.sendJoinChannelResponse]
+              actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
           }
         },
@@ -299,15 +300,16 @@ export const workflow = (
       if (context.channelId) return context;
       switch (event.type) {
         case 'PLAYER_STATE_UPDATE':
-          return {channelId: event.channelId};
         case 'JOIN_CHANNEL':
-          // TODO: Might be better to split set request Id in it's own action
-          return {channelId: event.channelId, requestId: event.requestId};
+          return {channelId: event.channelId};
         case 'done.invoke.createChannel':
           return {channelId: event.data};
         default:
           return unreachable(event);
       }
+    }),
+    assignRequestId: assign((context, event: JoinChannelEvent) => {
+      return {requestId: event.requestId};
     }),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
@@ -414,7 +416,8 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
-  updateStoreWithPlayerState: 'updateStoreWithPlayerState'
+  updateStoreWithPlayerState: 'updateStoreWithPlayerState',
+  assignRequestId: 'assignRequestId'
 };
 
 export const config = generateConfig(mockActions as any, mockGuards);
