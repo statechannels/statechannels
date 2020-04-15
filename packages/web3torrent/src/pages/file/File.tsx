@@ -1,15 +1,14 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
 import {Status, Torrent} from '../../types';
-import {parseURL, useQuery} from '../../utils/magnet';
-import {torrentStatusChecker} from '../../utils/torrent-status-checker';
-import {useInterval} from '../../utils/useInterval';
+import {useQuery} from '../../utils/magnet';
+import {getTorrent} from '../../utils/torrent-status-checker';
 import './File.scss';
-import WebTorrentPaidStreamingClient, {TorrentTestResult} from '../../library/web3torrent-lib';
+import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
@@ -26,13 +25,8 @@ async function checkTorrent(infoHash: string) {
   }
 }
 
-function getLiveData(
-  web3Torrent: WebTorrentPaidStreamingClient,
-  setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
-  torrent: Torrent
-): void {
-  const liveTorrent = torrentStatusChecker(web3Torrent, torrent, torrent.infoHash);
-  setTorrent(liveTorrent);
+function buttonLabel(loading: boolean): string {
+  return loading ? 'Preparing Download...' : 'Start Download';
 }
 
 interface Props {
@@ -43,11 +37,12 @@ const File: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
   const {infoHash} = useParams();
   const queryParams = useQuery();
-  const [torrent, setTorrent] = useState<Torrent>(() => parseURL(infoHash, queryParams));
   const [loading, setLoading] = useState(false);
-  const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
   const [warning, setWarning] = useState('');
+  const [torrent, setTorrent] = useState<Torrent>(() =>
+    getTorrent(web3Torrent, {infoHash, queryParams})
+  );
 
   useEffect(() => {
     const testResult = async () => {
@@ -61,16 +56,15 @@ const File: React.FC<Props> = props => {
   }, [infoHash]);
 
   useEffect(() => {
-    if (torrent.infoHash) {
-      getLiveData(web3Torrent, setTorrent, torrent);
+    if (torrent.status !== Status.Idle || !!torrent.originalSeed) {
+      const cancelId = setTimeout(
+        () => setTorrent(getTorrent(web3Torrent, {infoHash, queryParams})),
+        1000
+      );
+      return () => clearTimeout(cancelId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [torrent.infoHash]);
-
-  useInterval(
-    () => getLiveData(web3Torrent, setTorrent, torrent),
-    (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
-  );
+    return undefined;
+  }, [torrent, infoHash, queryParams, web3Torrent]);
 
   const {channelCache, budgetCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
   // TODO: We shouldn't have to check all these different conditions
@@ -106,15 +100,15 @@ const File: React.FC<Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={!props.ready || buttonLabel === 'Preparing Download...'}
+            disabled={!props.ready || loading}
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');
-              setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
                 // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
-                setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+                await download(torrent.magnetURI);
+                setTorrent(getTorrent(web3Torrent, {infoHash, queryParams}));
               } catch (error) {
                 setErrorLabel(
                   // FIXME: 'put human readable error here'
@@ -123,10 +117,9 @@ const File: React.FC<Props> = props => {
                 );
               }
               setLoading(false);
-              setButtonLabel('Start Download');
             }}
           >
-            {buttonLabel}
+            {buttonLabel(loading)}
           </FormButton>
           {errorLabel && <p className="error">{errorLabel}</p>}
           <div className="subtitle">

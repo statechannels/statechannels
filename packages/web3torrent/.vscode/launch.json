@@ -41,7 +41,7 @@
       "type": "chrome",
       "request": "attach",
       "port": 9222,
-      "url": "http://localhost:3000/upload",
+      "url": "http://localhost:3000/upload/",
       "webRoot": "${workspaceFolder}"
     }
   ]
