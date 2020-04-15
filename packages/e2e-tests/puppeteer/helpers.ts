@@ -132,19 +132,22 @@ declare let window: Window;
 let doneFuncCounter = 0;
 const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
+  const cb = `cb${doneFuncCounter}`;
+
   return new Promise(resolve =>
-    page.exposeFunction(doneFunc, resolve).then(() =>
+    page.exposeFunction(doneFunc, resolve).then(() => {
       page.evaluate(
         `
-    window.channelProvider.on('ChannelUpdated', channelStatus => {
-      if (${done}) {
-        window.${doneFunc}();
-        window.channelProvider.off('ChannelUpdated');
-      }
-    });
-    `
-      )
-    )
+          ${cb} = channelStatus => {
+            if (${done}) {
+              window.${doneFunc}('Done');
+              window.channelProvider.off('ChannelUpdated', ${cb});
+            } 
+          }
+          window.channelProvider.on('ChannelUpdated', ${cb});
+          `
+      );
+    })
   );
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
@@ -162,7 +165,7 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   }
 };
 export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
-  return doneWhen(page, `parseInt(channelStatus.turnNum) > ${n}`);
+  return doneWhen(page, `parseInt(channelStatus.turnNum) >= ${n}`);
 };
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
