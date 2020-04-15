@@ -1,12 +1,11 @@
 import {
-  StateNodeConfig,
   ServiceConfig,
   StateMachine,
   Machine,
   ActionFunction,
   DoneInvokeEvent,
   assign,
-  ConditionPredicate
+  MachineConfig
 } from 'xstate';
 import {getDataAndInvoke, CommonWorkflowActions, commonWorkflowActions} from '../utils';
 import {SupportState} from '.';
@@ -14,6 +13,38 @@ import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
+import {BigNumber} from 'ethers/utils';
+interface Initial {
+  requestId: number;
+  opponent: Participant;
+  player: Participant;
+  site: string;
+}
+interface LedgerExists extends Initial {
+  ledgerId: string;
+}
+interface Chain {
+  ledgerTotal: BigNumber;
+  lastChangeBlockNum: BigNumber;
+  currentBlockNum: BigNumber;
+}
+
+interface Transaction {
+  transactionId: string;
+}
+
+type WorkflowTypeState =
+  | {value: 'waitForUserApproval'; context: Initial}
+  | {value: 'createObjective'; context: LedgerExists}
+  | {value: 'closeLedger'; context: LedgerExists}
+  | {value: {withdraw: 'init'}; context: LedgerExists}
+  | {value: {deposit: 'submitTransaction'}; context: LedgerExists & Chain}
+  | {value: {deposit: 'retry'}; context: LedgerExists & Chain}
+  | {value: {deposit: 'waitMining'}; context: LedgerExists & Chain & Transaction}
+  | {value: 'done'; context: LedgerExists}
+  | {value: 'failure'; context: Initial};
+
+type WorkflowContext = WorkflowTypeState['context'];
 
 type WorkflowEvent = UserApproves | UserRejects | DoneInvokeEvent<CloseLedger>;
 interface UserApproves {
@@ -22,41 +53,34 @@ interface UserApproves {
 interface UserRejects {
   type: 'USER_REJECTS_CLOSE';
 }
-export type WorkflowContext = {
-  requestId: number;
-  opponent: Participant;
-  player: Participant;
-  ledgerId?: string;
-  site: string;
-};
-type WorkflowGuards = {
-  doesChannelIdExist: ConditionPredicate<WorkflowContext, WorkflowEvent>;
-};
-interface WorkflowActions extends CommonWorkflowActions {
-  sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
-  assignLedgerId: ActionFunction<WorkflowContext, DoneInvokeEvent<CloseLedger>>;
-  clearBudget: ActionFunction<WorkflowContext, any>;
+enum Actions {
+  sendResponse = 'sendResponse',
+  assignLedgerId = 'assignLedgerId',
+  clearBudget = 'clearBudget'
 }
+
+export type WorkflowActions = CommonWorkflowActions &
+  Record<Actions, ActionFunction<WorkflowContext, WorkflowEvent>>;
 interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
-  getFinalState: (context: WorkflowContext, event: WorkflowEvent) => Promise<SupportState.Init>;
+  constructFinalState: (
+    context: WorkflowContext,
+    event: WorkflowEvent
+  ) => Promise<SupportState.Init>;
   supportState: StateMachine<any, any, any>;
   submitWithdrawTransaction: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
   createObjective: (context: WorkflowContext, event: any) => Promise<Objective>;
 }
 
-export const config: StateNodeConfig<WorkflowContext, any, any> = {
+const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
+
   initial: 'waitForUserApproval',
   states: {
     waitForUserApproval: {
       entry: ['displayUi'],
-
       on: {
-        USER_APPROVES_CLOSE: [
-          {cond: 'doesChannelIdExist', target: 'closeLedger'},
-          'createObjective'
-        ],
-        USER_REJECTS_CLOSE: {target: 'failure'}
+        USER_APPROVES_CLOSE: {target: 'createObjective'},
+        USER_REJECTS_CLOSE: {target: 'userDeclinedFailure'}
       }
     },
 
@@ -66,17 +90,37 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
         onDone: {target: 'closeLedger', actions: ['assignLedgerId']}
       }
     },
-    closeLedger: getDataAndInvoke({src: 'getFinalState'}, {src: 'supportState'}, 'withdraw'),
+    closeLedger: getDataAndInvoke<any>(
+      {src: 'constructFinalState'},
+      {src: 'supportState'},
+      'withdraw'
+    ),
     withdraw: {
-      entry: ['clearBudget'],
-      invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
+      invoke: {
+        id: 'observeChain',
+        src: 'observeLedgerOnChainBalance(store)'
+      },
+      states: {
+        submitTransaction: {
+          invoke: {
+            id: 'submitTransaction',
+            src: 'submitWithdrawalTransaction',
+            onDone: {target: 'waitMining', actions: 'setTransactionId'}
+          }
+        },
+        waitMining: {},
+        done: {type: 'final'}
+      },
+      onDone: 'clearBudget'
     },
+    clearBudget: {invoke: {src: 'clearBudget', onDone: 'done', onError: 'budgetFailure'}},
     done: {type: 'final', entry: ['sendResponse', 'hideUi']},
-    failure: {type: 'final', entry: ['sendUserDeclinedErrorResponse', 'hideUI']}
+    userDeclinedFailure: {type: 'final', entry: ['sendUserDeclinedErrorResponse', 'hideUI']},
+    budgetFailure: {type: 'final', entry: ['hideUi'] /* TODO Should we send a response?  */}
   }
 };
 
-const getFinalState = (store: Store): WorkflowServices['getFinalState'] => async ({
+const constructFinalState = (store: Store): WorkflowServices['constructFinalState'] => async ({
   opponent: hub
 }) => {
   const {latestSignedByMe: latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
@@ -128,9 +172,9 @@ const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => asyn
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
-): {services: WorkflowServices; actions: WorkflowActions; guards: WorkflowGuards} => ({
+): {services: WorkflowServices; actions: WorkflowActions} => ({
   services: {
-    getFinalState: getFinalState(store),
+    constructFinalState: constructFinalState(store),
     supportState: SupportState.machine(store),
     submitWithdrawTransaction: submitWithdrawTransaction(store),
     createObjective: createObjective(store)
@@ -141,10 +185,8 @@ const options = (
 
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
-    assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
-  },
-  guards: {
-    doesChannelIdExist: context => !!context.ledgerId
+    assignLedgerId: async (_, event: DoneInvokeEvent<CloseLedger>) =>
+      assign({ledgerId: event.data.data.ledgerId})
   }
 });
 export const workflow = (
