@@ -12,14 +12,14 @@ import './File.scss';
 import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 import _ from 'lodash';
 
-const getLiveData: (
+function getLiveData(
   web3Torrent: WebTorrentPaidStreamingClient,
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
   torrent: Torrent
-) => void = (web3Torrent, setTorrent, torrent) => {
+): void {
   const liveTorrent = torrentStatusChecker(web3Torrent, torrent, torrent.infoHash);
   setTorrent(liveTorrent);
-};
+}
 
 interface Props {
   ready: boolean;
@@ -46,41 +46,33 @@ const File: React.FC<Props> = props => {
     (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
   );
 
+  const {channelCache, budgetCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
+  // TODO: We shouldn't have to check all these different conditions
+  const showBudget =
+    !!budgetCache &&
+    !_.isEmpty(budgetCache) &&
+    !!budgetCache.budgets &&
+    budgetCache.budgets.length > 0;
+
   return (
     <section className="section fill download">
       <div className="jumbotron-upload">
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
-      <Web3TorrentContext.Consumer>
-        {web3Torrent => {
-          const {
-            channelCache,
-            budgetCache,
-            mySigningAddress: me
-          } = web3Torrent.paymentChannelClient;
-          // TODO: We shouldn't have to check all these different conditions
-          const showBudget =
-            !!budgetCache &&
-            !_.isEmpty(budgetCache) &&
-            !!budgetCache.budgets &&
-            budgetCache.budgets.length > 0;
-          return (
-            <>
-              <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
-              <br />
-              {showBudget ? (
-                <SiteBudgetTable
-                  budgetCache={budgetCache}
-                  channelCache={channelCache}
-                  mySigningAddress={me}
-                />
-              ) : (
-                false
-              )}
-            </>
-          );
-        }}
-      </Web3TorrentContext.Consumer>
+      <>
+        <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+        <br />
+        {showBudget ? (
+          <SiteBudgetTable
+            budgetCache={budgetCache}
+            channelCache={channelCache}
+            mySigningAddress={me}
+          />
+        ) : (
+          false
+        )}
+      </>
+      }
       {torrent.status === Status.Idle ? (
         <>
           <FormButton

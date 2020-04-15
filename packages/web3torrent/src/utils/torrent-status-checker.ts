@@ -1,4 +1,5 @@
 import {Status, Torrent} from '../types';
+import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 
 export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
   const {uploadSpeed, downloadSpeed, progress, uploaded, paused, done, createdBy} = torrent;
@@ -50,7 +51,11 @@ export const getPeerStatus = (torrent, wire) => {
   return Object.keys(torrent._peers).includes(peerId);
 };
 
-export const torrentStatusChecker = (web3Torrent, previousData: Torrent, infoHash): Torrent => {
+export function torrentStatusChecker(
+  web3Torrent: WebTorrentPaidStreamingClient,
+  previousData: Torrent,
+  infoHash: string
+): Torrent {
   if (!infoHash) {
     // torrent in magnet form
     return {...previousData, status: Status.Idle};
@@ -79,4 +84,4 @@ export const torrentStatusChecker = (web3Torrent, previousData: Torrent, infoHas
       originalSeed: live.createdBy === web3Torrent.pseAccount
     }
   };
-};
+}
