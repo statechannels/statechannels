@@ -25,7 +25,10 @@ As the client is a custom, extended version of [Webtorrent](https://github.com/w
 
 ### Demo
 
-You can see it working [here](https://sc-web3torrent.netlify.com/)
+You can try it out [here](https://sc-web3torrent.netlify.com/).
+
+The screen recording below demonstrates a seeder on the left and a leacher on the right. The left seeder has a fresh wallet without a connection with the hub. The right leacher has a connection with the hub, allowing it to quickly open a payment channel and start downloading
+![A screen recording](demo.gif)
 
 ### Installing and using
 
