@@ -59,21 +59,16 @@ const File: React.FC<Props> = props => {
       <div className="jumbotron-upload">
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
-      <>
-        <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
-        <br />
-        {showBudget ? (
-          <SiteBudgetTable
-            budgetCache={budgetCache}
-            channelCache={channelCache}
-            mySigningAddress={me}
-          />
-        ) : (
-          false
-        )}
-      </>
-      }
-      {torrent.status === Status.Idle ? (
+      <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+      <br />
+      {showBudget && (
+        <SiteBudgetTable
+          budgetCache={budgetCache}
+          channelCache={channelCache}
+          mySigningAddress={me}
+        />
+      )}
+      {torrent.status === Status.Idle && (
         <>
           <FormButton
             name="download"
@@ -125,8 +120,6 @@ const File: React.FC<Props> = props => {
             </p>
           </div>
         </>
-      ) : (
-        false
       )}
     </section>
   );
