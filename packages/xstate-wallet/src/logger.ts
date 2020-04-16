@@ -1,3 +1,8 @@
 import pino from 'pino';
 
-export const logger = pino({prettyPrint: true});
+export const logger = pino({
+  prettyPrint: {
+    translateTime: true,
+    ignore: 'pid,hostname'
+  }
+});
