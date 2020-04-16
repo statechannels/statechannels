@@ -19,7 +19,7 @@ const checkTorrent = async (web3Torrent, infoHash) => {
     case TorrentTestResult.NO_CONNECTION:
       return `Your connection to the tracker may be limited, you might have unexpected functionality`;
     case TorrentTestResult.NO_SEEDERS_FOUND:
-      return `Seems like the torrent doesn't have any seeders. You can give it a try nonetheless.`;
+      return "Seems like the torrent doesn't have any seeders. You can give it a try nonetheless.";
     default:
       return '';
   }
