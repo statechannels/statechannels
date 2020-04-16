@@ -9,8 +9,21 @@ import {parseURL, useQuery} from '../../utils/magnet';
 import {torrentStatusChecker} from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
-import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
+import WebTorrentPaidStreamingClient, {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
+import {Flash} from 'rimble-ui';
+
+const checkTorrent = async (web3Torrent, infoHash) => {
+  const testResult = await web3Torrent.checkTorrentInTracker(infoHash);
+  switch (testResult) {
+    case TorrentTestResult.NO_CONNECTION:
+      return `Your connection to the tracker may be limited, you might have unexpected functionality`;
+    case TorrentTestResult.NO_SEEDERS_FOUND:
+      return `Seems like the torrent doesn't have any seeders. You can give it a try nonetheless.`;
+    default:
+      return ``;
+  }
+};
 
 function getLiveData(
   web3Torrent: WebTorrentPaidStreamingClient,
@@ -33,6 +46,19 @@ const File: React.FC<Props> = props => {
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
+  const [warning, setWarning] = useState('');
+
+  useEffect(() => {
+    const testResult = async () => {
+      const torrentCheckResult = await checkTorrent(web3Torrent, infoHash);
+      setWarning(torrentCheckResult);
+    };
+
+    if (infoHash) {
+      testResult();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (torrent.infoHash) {
@@ -60,6 +86,13 @@ const File: React.FC<Props> = props => {
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
       <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+      {warning &&
+        ((!torrent.uploaded && torrent.status === Status.Seeding) ||
+          torrent.status === Status.Idle) && (
+          <div className="warning-wrapper">
+            <Flash variant="danger">{warning}</Flash>
+          </div>
+        )}
       <br />
       {showBudget && (
         <SiteBudgetTable
