@@ -17,13 +17,17 @@ export async function loadDapp(
     // localStorage.debug = "web3torrent:*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
+    
+
     window.ethereum.enable = () => new Promise(r => {
       console.log("[puppeteer] window.ethereum.enable() was called");
-      return r();
-    });
-    web3.eth.getAccounts().then(lst => {
-      web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
-      window.ethereum.selectedAddress = web3.eth.defaultAccount;
+      web3.eth.getAccounts().then(lst => {
+        web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
+        window.ethereum.selectedAddress = web3.eth.defaultAccount;
+        r([window.ethereum.selectedAddress]);
+    });    
+    
+      
     });
     window.ethereum.networkVersion = 9001;
     window.ethereum.on = () => {};
@@ -40,7 +44,6 @@ export async function loadDapp(
     console.log('Page console log: ', msg.text());
   });
 }
-
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
 // an XPath and then calling .click() on the resolved handle. We do not use the return value from the
 // waitForSelector promise, so we avoid any errors where that return value loses its meaning
@@ -68,7 +71,6 @@ export async function waitForAndClickButton(
     throw error;
   }
 }
-
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
   const browser = await launch({
     headless,
@@ -115,6 +117,9 @@ export async function withdrawAndWait(page: Page): Promise<void> {
 }
 
 export async function waitAndApproveBudget(page: Page): Promise<void> {
+  console.log('Enabling Ethereum');
+  await waitForAndClickButton(page, page.frames()[1], '#approveEnable');
+
   console.log('Approving budget');
 
   const approveBudgetButton = '.approve-budget-button';

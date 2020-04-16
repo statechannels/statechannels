@@ -22,7 +22,11 @@ export const EnableEthereum = (props: Props) => {
   const currentNetwork = networkVersion && Number(networkVersion);
 
   const metaMaskButton = (disabled, message) => (
-    <MetaMaskButton.Outline disabled={disabled} onClick={() => props.send('USER_APPROVES_ENABLE')}>
+    <MetaMaskButton.Outline
+      id="approveEnable"
+      disabled={disabled}
+      onClick={() => props.send('USER_APPROVES_ENABLE')}
+    >
       {message}
     </MetaMaskButton.Outline>
   );
