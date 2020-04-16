@@ -14,6 +14,7 @@ import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
 import {BigNumber} from 'ethers/utils';
+
 interface Initial {
   requestId: number;
   opponent: Participant;
@@ -36,17 +37,24 @@ interface Transaction {
 type WorkflowTypeState =
   | {value: 'waitForUserApproval'; context: Initial}
   | {value: 'createObjective'; context: LedgerExists}
-  | {value: 'closeLedger'; context: LedgerExists}
-  | {value: {withdraw: 'init'}; context: LedgerExists}
-  | {value: {deposit: 'submitTransaction'}; context: LedgerExists & Chain}
-  | {value: {deposit: 'retry'}; context: LedgerExists & Chain}
-  | {value: {deposit: 'waitMining'}; context: LedgerExists & Chain & Transaction}
+  | {value: {closeLedger: 'constructFinalState'}; context: LedgerExists}
+  | {value: {closeLedger: 'supportState'}; context: LedgerExists}
+  | {value: {closeLedger: 'done'}; context: LedgerExists & Chain}
+  | {value: {withdraw: 'submitTransaction'}; context: LedgerExists & Chain}
+  | {value: {withdraw: 'waitMining'}; context: LedgerExists & Chain & Transaction}
+  | {value: {withdraw: 'done'}; context: LedgerExists}
   | {value: 'done'; context: LedgerExists}
-  | {value: 'failure'; context: Initial};
+  | {value: 'clearBudget'; context: LedgerExists}
+  | {value: 'budgetFailure'; context: Initial}
+  | {value: 'userDeclinedFailure'; context: Initial};
 
-type WorkflowContext = WorkflowTypeState['context'];
+export type WorkflowContext = WorkflowTypeState['context'];
 
-type WorkflowEvent = UserApproves | UserRejects | DoneInvokeEvent<CloseLedger>;
+type WorkflowEvent =
+  | UserApproves
+  | UserRejects
+  | DoneInvokeEvent<CloseLedger>
+  | DoneInvokeEvent<LedgerExists>;
 interface UserApproves {
   type: 'USER_APPROVES_CLOSE';
 }
@@ -71,7 +79,7 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
   createObjective: (context: WorkflowContext, event: any) => Promise<Objective>;
 }
 
-const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
+export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
 
   initial: 'waitForUserApproval',
@@ -90,11 +98,11 @@ const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
         onDone: {target: 'closeLedger', actions: ['assignLedgerId']}
       }
     },
-    closeLedger: getDataAndInvoke<any>(
+    closeLedger: getDataAndInvoke<LedgerExists>(
       {src: 'constructFinalState'},
       {src: 'supportState'},
       'withdraw'
-    ),
+    ) as any,
     withdraw: {
       invoke: {
         id: 'observeChain',
@@ -193,7 +201,7 @@ export const workflow = (
   store: Store,
   messagingService: MessagingServiceInterface,
   context: WorkflowContext
-) =>
+): StateMachine<WorkflowContext, any, WorkflowEvent, WorkflowTypeState> =>
   Machine(config)
     .withConfig(options(store, messagingService))
     .withContext(context);
