@@ -85,13 +85,15 @@ export const preSeededTorrents: Array<Partial<Torrent>> = [
 ];
 
 // Welcome Page Tracker creation options
-export const welcomePageTrackerOpts = {
+export const defaultTrackerOpts = {
   infoHash: [preSeededTorrents[0].infoHash],
   announce: defaultTrackers,
-  peerId: '2d5757303030372d37454e613073307937495630', // random
+  peerId: generateRandomPeerId(), // random
   port: 6881,
   getAnnounceOpts: () => ({
     pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777',
+    // the pseAccount is only used to allow the client on the tracker server, see
+    // https://github.com/statechannels/monorepo/blob/d0c6b1be3a637c88880c0c937d9a6ebc8078799c/packages/web3torrent/tracker/index.js#L16
     uploaded: 0,
     downloaded: 0
   }) // dummy pseAccount, but it works
