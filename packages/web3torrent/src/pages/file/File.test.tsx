@@ -50,7 +50,7 @@ describe('<File />', () => {
   //   expect(torrentFile).toHaveBeenCalled();
   // });
 
-  it.skip('should run checker function if the File Button is clicked', async () => {
+  it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
       .spyOn(TorrentStatus, 'getTorrent')
       .mockImplementation((_w3t: any, _urlData: TorrentStatus.UrlData) => EmptyTorrent);
