@@ -107,7 +107,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      ADD_LOGS && log('MESSAGE A->B: %O', pushMessageRequest);
+      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE A->B:');
       await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
@@ -115,7 +115,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      ADD_LOGS && log('MESSAGE B->A: %O', pushMessageRequest);
+      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE B->A:');
 
       playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
