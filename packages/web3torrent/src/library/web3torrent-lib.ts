@@ -1,6 +1,5 @@
 import debug from 'debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
-import {Client} from 'bittorrent-tracker';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
 import {
   ClientEvents,
@@ -13,8 +12,7 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents,
-  TorrentTestResult
+  WireEvents
 } from './types';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
@@ -23,9 +21,7 @@ import {
   BUFFER_REFILL_RATE,
   INITIAL_SEEDER_BALANCE,
   BLOCK_LENGTH,
-  PEER_TRUST,
-  welcomePageTrackerOpts,
-  generateRandomPeerId
+  PEER_TRUST
 } from '../constants';
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
@@ -145,37 +141,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     } else {
       this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     }
-  }
-
-  async checkTorrentInTracker(infoHash: string) {
-    const trackerClient: Client = new Client({
-      ...welcomePageTrackerOpts,
-      peerId: generateRandomPeerId(),
-      infoHash: [infoHash]
-    });
-    let completePeers;
-    const gotAWire: Promise<boolean> = new Promise(resolve => {
-      const updateIfSeederFound = data => {
-        completePeers = data.complete;
-      };
-      trackerClient.once('peer', function() {
-        resolve(true);
-      });
-      trackerClient.once('update', updateIfSeederFound);
-      trackerClient.start();
-    });
-    const timer: Promise<undefined> = new Promise((resolve, _) => setTimeout(resolve, 5000));
-    const raceResult = await Promise.race([gotAWire, timer]);
-    trackerClient.stop();
-    trackerClient.destroy();
-    if (raceResult) {
-      return TorrentTestResult.SEEDERS_FOUND; // Could connect to a peer
-    }
-    if (Number.isInteger(completePeers)) {
-      // was able to connect to the tracker, but couldn't connect to a peer
-      return TorrentTestResult.NO_SEEDERS_FOUND;
-    }
-    return TorrentTestResult.NO_CONNECTION; // wasn't able to get a response from the tracker
   }
 
   protected ensureEnabled() {

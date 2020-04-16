@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {preSeededTorrents, welcomePageTrackerOpts} from '../../constants';
+import {preSeededTorrents, defaultTrackerOpts} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
@@ -16,7 +16,7 @@ interface Props {
 
 const Welcome: React.FC<Props> = props => {
   const history = useHistory();
-  const [trackerClient] = useState(new Client(welcomePageTrackerOpts));
+  const [trackerClient] = useState(new Client(defaultTrackerOpts));
   const [torrents, setTorrents] = useState({
     [preSeededTorrents[0].infoHash]: false
   }); // do not display by default
