@@ -99,11 +99,6 @@ export async function cancelDownload(page: Page): Promise<void> {
     console.log('Waiting on pages');
     const web3tTabA = (await browser.pages())[0];
 
-    const logPageOutput = (role: string) => (msg: any) =>
-      // use console.error so we can redirect STDERR to a file
-      process.env.CI && console.error(`${role}: `, msg.text());
-    web3tTabA.on('console', logPageOutput('A'));
-
     console.log('Setting up logging...');
     await setupLogging(web3tTabA, true);
 
