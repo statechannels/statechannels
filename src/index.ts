@@ -24,14 +24,14 @@ const log = logger.info.bind(logger);
   // Communicate via postMessage
   window.addEventListener('message', event => {
     if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
-      constants.ADD_LOGS && log('INCOMING JSONRPC REQUEST: %o', event.data);
+      constants.ADD_LOGS && log({jsonRpcRequest: event.data}, 'INCOMING JSONRPC REQUEST:');
       const {host} = new Url(event.origin);
       channelWallet.pushMessage(event.data, host);
     }
   });
-  channelWallet.onSendMessage(m => {
-    window.parent.postMessage(m, '*');
-    constants.ADD_LOGS && log('OUTGOING JSONRPC REQUEST: %o', m);
+  channelWallet.onSendMessage(message => {
+    window.parent.postMessage(message, '*');
+    constants.ADD_LOGS && log({jsonRpcResponse: message}, 'OUTGOING JSONRPC REQUEST:');
   });
 
   window.parent.postMessage('WalletReady', '*');

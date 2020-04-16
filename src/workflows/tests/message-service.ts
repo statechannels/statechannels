@@ -22,7 +22,7 @@ export function subscribeToMessages(
           .filter(exists)
           .filter(p => p.signingAddress !== address)
           .map(p => {
-            ADD_LOGS && log(`${participantId} to ${p.participantId}: %o`, message);
+            ADD_LOGS && log({message}, `${participantId} to ${p.participantId}:`);
             return stores[p.participantId].pushMessage(message);
           });
       });
