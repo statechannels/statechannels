@@ -118,7 +118,7 @@ export interface Store {
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
-  releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
+  releaseFunds(assetHolderAddress: string, ledgerChannelId: string): Promise<SiteBudget>;
 
   chain: Chain;
 
@@ -471,8 +471,8 @@ export class XstateStore implements Store {
     this.backend.deleteBudget(site);
   }
 
-  public async releaseFunds(assetHolderAddress: string, channelId: string) {
-    const {applicationSite} = await this.getEntry(channelId);
+  public async releaseFunds(assetHolderAddress: string, ledgerChannelId: string) {
+    const {applicationSite} = await this.getEntry(ledgerChannelId);
     if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
 
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
@@ -482,16 +482,17 @@ export class XstateStore implements Store {
 
       if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
 
-      const {outcome, participants} = (await this.getEntry(channelId)).supported;
+      const {outcome, participants} = (await this.getEntry(ledgerChannelId)).supported;
       const playerAddress = await this.getAddress();
       const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
       const playerDestination = participants.find(p => p.signingAddress === playerAddress)
         ?.destination;
       const hubDestination = participants.find(p => p === HUB.destination)?.destination;
       if (!playerDestination || !hubDestination) {
+        console.error(participants, HUB.destination);
         throw new Error(Errors.cannotFindDestination);
       }
-      const channelBudget = assetBudget.channels[channelId];
+      const channelBudget = assetBudget.channels[ledgerChannelId];
       if (!channelBudget) throw new Error(Errors.channelNotInBudget);
       const sendAmount =
         currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
@@ -502,7 +503,7 @@ export class XstateStore implements Store {
         receiveAmount
       );
       assetBudget.availableSendCapacity = assetBudget.availableSendCapacity.add(sendAmount);
-      delete assetBudget.channels[channelId];
+      delete assetBudget.channels[ledgerChannelId];
 
       await this.backend.setBudget(applicationSite, currentBudget);
       release();
