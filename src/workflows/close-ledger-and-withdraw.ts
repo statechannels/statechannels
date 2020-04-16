@@ -7,7 +7,12 @@ import {
   assign,
   MachineConfig
 } from 'xstate';
-import {getDataAndInvoke, CommonWorkflowActions, commonWorkflowActions} from '../utils';
+import {
+  getDataAndInvoke,
+  CommonWorkflowActions,
+  commonWorkflowActions,
+  CommonActions
+} from '../utils';
 import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
@@ -64,20 +69,22 @@ interface UserRejects {
 enum Actions {
   sendResponse = 'sendResponse',
   assignLedgerId = 'assignLedgerId',
+  setTransactionId = 'setTransactionId'
+}
+
+enum Services {
+  constructFinalState = 'constructFinalState',
+  supportState = 'supportState',
+  submitWithdrawTransaction = 'submitWithdrawTransaction',
+  createObjective = 'createObjective',
+  observeLedgerOnChainBalance = 'observeLedgerOnChainBalance',
   clearBudget = 'clearBudget'
 }
 
 export type WorkflowActions = CommonWorkflowActions &
   Record<Actions, ActionFunction<WorkflowContext, WorkflowEvent>>;
-interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
-  constructFinalState: (
-    context: WorkflowContext,
-    event: WorkflowEvent
-  ) => Promise<SupportState.Init>;
-  supportState: StateMachine<any, any, any>;
-  submitWithdrawTransaction: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
-  createObjective: (context: WorkflowContext, event: any) => Promise<Objective>;
-}
+
+export type WorkflowServices = Record<Services, ServiceConfig<WorkflowContext>>;
 
 export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
@@ -85,7 +92,7 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   initial: 'waitForUserApproval',
   states: {
     waitForUserApproval: {
-      entry: ['displayUi'],
+      entry: [CommonActions.displayUI],
       on: {
         USER_APPROVES_CLOSE: {target: 'createObjective'},
         USER_REJECTS_CLOSE: {target: 'userDeclinedFailure'}
@@ -94,26 +101,26 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
 
     createObjective: {
       invoke: {
-        src: 'createObjective',
-        onDone: {target: 'closeLedger', actions: ['assignLedgerId']}
+        src: Services.createObjective,
+        onDone: {target: 'closeLedger', actions: [Actions.assignLedgerId]}
       }
     },
     closeLedger: getDataAndInvoke<LedgerExists>(
-      {src: 'constructFinalState'},
-      {src: 'supportState'},
+      {src: Services.constructFinalState},
+      {src: Services.supportState},
       'withdraw'
     ) as any,
     withdraw: {
       invoke: {
         id: 'observeChain',
-        src: 'observeLedgerOnChainBalance(store)'
+        src: Services.observeLedgerOnChainBalance
       },
       states: {
         submitTransaction: {
           invoke: {
             id: 'submitTransaction',
-            src: 'submitWithdrawalTransaction',
-            onDone: {target: 'waitMining', actions: 'setTransactionId'}
+            src: Services.submitWithdrawTransaction,
+            onDone: {target: 'waitMining', actions: [Actions.setTransactionId]}
           }
         },
         waitMining: {},
@@ -121,16 +128,20 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
       },
       onDone: 'clearBudget'
     },
-    clearBudget: {invoke: {src: 'clearBudget', onDone: 'done', onError: 'budgetFailure'}},
-    done: {type: 'final', entry: ['sendResponse', 'hideUi']},
-    userDeclinedFailure: {type: 'final', entry: ['sendUserDeclinedErrorResponse', 'hideUI']},
-    budgetFailure: {type: 'final', entry: ['hideUi'] /* TODO Should we send a response?  */}
+    clearBudget: {invoke: {src: Services.clearBudget, onDone: 'done', onError: 'budgetFailure'}},
+    done: {type: 'final', entry: [Actions.sendResponse, CommonActions.hideUI]},
+    userDeclinedFailure: {
+      type: 'final',
+      entry: [CommonActions.hideUI, CommonActions.sendUserDeclinedErrorResponse]
+    },
+    budgetFailure: {
+      type: 'final',
+      entry: [CommonActions.hideUI] /* TODO Should we send a response?  */
+    }
   }
 };
 
-const constructFinalState = (store: Store): WorkflowServices['constructFinalState'] => async ({
-  opponent: hub
-}) => {
+const constructFinalState = (store: Store) => async ({opponent: hub}) => {
   const {latestSignedByMe: latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
 
   // If we've received a new final state that matches our outcome we support that
@@ -151,9 +162,7 @@ const constructFinalState = (store: Store): WorkflowServices['constructFinalStat
   };
 };
 
-const submitWithdrawTransaction = (
-  store: Store
-): WorkflowServices['submitWithdrawTransaction'] => async context => {
+const submitWithdrawTransaction = (store: Store) => async context => {
   // TODO: Should we just fetch this once and store on the context
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
   if (!ledgerEntry.isFinalized) {
@@ -162,7 +171,7 @@ const submitWithdrawTransaction = (
   await store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
-const createObjective = (store: Store): WorkflowServices['createObjective'] => async context => {
+const createObjective = (store: Store) => async context => {
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
 
   const objective: Objective = {
@@ -174,7 +183,7 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
   return objective;
 };
 
-const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => async context => {
+const clearBudget = (store: Store) => async context => {
   await store.clearBudget(context.site);
 };
 const options = (
@@ -185,12 +194,19 @@ const options = (
     constructFinalState: constructFinalState(store),
     supportState: SupportState.machine(store),
     submitWithdrawTransaction: submitWithdrawTransaction(store),
-    createObjective: createObjective(store)
+    createObjective: createObjective(store),
+    observeLedgerOnChainBalance: async () => {
+      /* TODO FIXME */
+    },
+    clearBudget: async () => {
+      /* TODO FIXME */
+    }
   },
   actions: {
     ...commonWorkflowActions(messagingService),
-    clearBudget: clearBudget(store),
-
+    setTransactionId: async () => {
+      /* TODO FIXME */
+    },
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
     assignLedgerId: async (_, event: DoneInvokeEvent<CloseLedger>) =>
