@@ -6,7 +6,6 @@ import {
   DoneInvokeEvent,
   assign,
   MachineConfig,
-  Condition,
   AssignAction
 } from 'xstate';
 import {
@@ -85,17 +84,12 @@ enum Services {
   clearBudget = 'clearBudget'
 }
 
-enum Guards {
-  isBlockDeepEnough = 'isBlockDeepEnough'
-}
-
 export type WorkflowActions = CommonWorkflowActions &
   Record<
     Actions,
     ActionFunction<WorkflowContext, WorkflowEvent> | AssignAction<WorkflowContext, WorkflowEvent>
   >;
 export type WorkflowServices = Record<Services, ServiceConfig<WorkflowContext>>;
-export type WorkflowGuards = Record<Guards, Condition<WorkflowContext, WorkflowEvent>>;
 
 export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
@@ -122,6 +116,10 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
       'withdraw'
     ) as any,
     withdraw: {
+      initial: 'submitTransaction',
+      on: {
+        FUNDS_WITHDRAWN: 'clearBudget'
+      },
       invoke: {
         id: 'observeChain',
         src: Services.observeFundsWithdrawal
@@ -137,14 +135,8 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
             }
           }
         },
-        waitMining: {
-          on: {
-            BLOCK_UPDATED: [{target: 'done', cond: Guards.isBlockDeepEnough}]
-          }
-        },
-        done: {type: 'final'}
-      },
-      onDone: 'clearBudget'
+        waitMining: {}
+      }
     },
     clearBudget: {
       invoke: {src: Services.clearBudget, onDone: 'done', onError: 'budgetFailure'}
@@ -188,7 +180,7 @@ const submitWithdrawTransaction = (store: Store) => async context => {
   if (!ledgerEntry.isFinalized) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
-  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
+  return store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
 const createObjective = (store: Store) => async context => {
