@@ -169,7 +169,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     trackerClient.stop();
     trackerClient.destroy();
     if (raceResult) {
-      return TorrentTestResult.SEEDERS_FOUND; // Could connect connect to a peer
+      return TorrentTestResult.SEEDERS_FOUND; // Could connect to a peer
     }
     if (Number.isInteger(completePeers)) {
       // was able to connect to the tracker, but couldn't connect to a peer
