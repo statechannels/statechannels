@@ -17,11 +17,17 @@ export const BUFFER_REFILL_RATE = utils.bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENG
 
 export const INITIAL_SEEDER_BALANCE = utils.bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 
-const VERSION_STR = '0.7.2'.replace(/\d*./g, v => `0${Number(v) % 100}`.slice(-2)).slice(0, 4);
+const randomNumberGenerator = (length: number) => {
+  // Programatic way of getting fixed length number, based of https://stackoverflow.com/a/21816636/6569950
+  const base = Math.pow(10, length - 1);
+  return Math.floor(base + Math.random() * 9 * base);
+};
+
 export function generateRandomPeerId() {
-  return Buffer.from(
-    `-WW${VERSION_STR}-` + btoa((Math.random() * 99999999999).toFixed(0).slice(0, 9))
-  ).toString('hex');
+  // based of webtorrent's way of generating random peerId's
+  // https://github.com/webtorrent/webtorrent/blob/ed2809159585d2611dff24a48f25748baf78e8fb/index.js#L52
+  const randomNumber = String(randomNumberGenerator(9));
+  return Buffer.from(`-WW0007-${btoa(randomNumber)}`).toString('hex');
 }
 
 // firebase setup
