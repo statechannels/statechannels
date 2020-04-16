@@ -1,40 +1,17 @@
-import {Browser, Page, Frame, launch} from 'puppeteer';
+import puppeteer, {Browser, Page, Frame} from 'puppeteer';
+import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
-export async function loadDapp(
+export async function setupLogging(
   page: Page,
   ganacheAccountIndex: number,
   logPrefix: string,
   ignoreConsoleError?: boolean
 ): Promise<void> {
-  // TODO: This is kinda ugly but it works
-  // We need to instantiate a web3 for the wallet so we import the web 3 script
-  // and then assign it on the window
-  const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
-  await page.evaluateOnNewDocument(web3JsFile);
-  await page.evaluateOnNewDocument(`
-    window.web3 = new Web3("http://localhost:8547");
-    window.ethereum = window.web3.currentProvider;
-    
-
-    window.ethereum.enable = () => new Promise(r => {
-      console.log("[puppeteer] window.ethereum.enable() was called");
-      web3.eth.getAccounts().then(lst => {
-        web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
-        window.ethereum.selectedAddress = web3.eth.defaultAccount;
-        r([window.ethereum.selectedAddress]);
-    });    
-    
-      
-    });
-    window.ethereum.networkVersion = 9001;
-    window.ethereum.on = () => {};
-  `);
-
   page.on('pageerror', error => {
     throw error;
   });
@@ -75,6 +52,7 @@ export async function loadDapp(
     else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
   });
 }
+
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
 // an XPath and then calling .click() on the resolved handle. We do not use the return value from the
 // waitForSelector promise, so we avoid any errors where that return value loses its meaning
@@ -102,18 +80,14 @@ export async function waitForAndClickButton(
     throw error;
   }
 }
-export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
-  const browser = await launch({
+
+export async function setUpBrowser(
+  headless: boolean,
+  slowMo?: number
+): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
+  const browser = await dappeteer.launch(puppeteer, {
     headless,
     slowMo,
-    devtools: !headless,
-    // Keep code here for convenience... if you want to use redux-dev-tools
-    // then download and unzip the release from Github and specify the location.
-    // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases
-    // args: [
-    //   '--disable-extensions-except=/Users/liam/Downloads/redux-dev-tools',
-    //   '--load-extension=/Users/liam/Downloads/redux-dev-tools'
-    // ],
     //, Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       '--disable-background-timer-throttling',
@@ -126,8 +100,11 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
       '--disable-features=site-per-process'
     ]
   });
-
-  return browser;
+  const metamask = await dappeteer.getMetamask(browser);
+  await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
+  // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
+  await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
+  return {browser, metamask};
 }
 
 export async function waitForBudgetEntry(page: Page): Promise<void> {
@@ -139,14 +116,6 @@ export async function waitForEmptyBudget(page: Page): Promise<void> {
   await page.waitForFunction(() => !document.querySelector('.site-budget-table'));
 }
 
-export async function withdrawAndWait(page: Page): Promise<void> {
-  console.log('Withdrawing funds');
-  const walletIFrame = page.frames()[1];
-  const web3TorrentIFrame = page.frames()[0];
-  await waitForAndClickButton(page, web3TorrentIFrame, '#budget-withdraw');
-  await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
-}
-
 export async function waitAndApproveBudget(page: Page): Promise<void> {
   console.log('Approving budget');
 
@@ -154,6 +123,54 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
 
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
+}
+
+export async function waitAndApproveMetaMask(
+  page: Page,
+  metamask: dappeteer.Dappeteer
+): Promise<void> {
+  console.log('Approving metamask');
+
+  const connectWithMetamaskButton = '#connect-with-metamask-button';
+
+  const walletIFrame = page.frames()[1];
+  await waitForAndClickButton(page, walletIFrame, connectWithMetamaskButton);
+  await metamask.approve();
+  await page.bringToFront();
+}
+
+export async function waitAndApproveDeposit(
+  page: Page,
+  metamask: dappeteer.Dappeteer
+): Promise<void> {
+  console.log('Making deposit');
+
+  const walletIFrame = page.frames()[1];
+  await walletIFrame.waitForSelector('#please-approve-transaction');
+  await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
+  await page.bringToFront();
+}
+
+export async function waitAndApproveWithdraw(
+  page: Page,
+  metamask: dappeteer.Dappeteer
+): Promise<void> {
+  console.log('Making deposit');
+
+  const walletIFrame = page.frames()[1];
+  await walletIFrame.waitForSelector('#approve-withdraw');
+  await page.waitFor(5000); // there's no prompt to approve tx, since the close-ledger-and-withdraw is not a full workflow
+  await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
+  await page.bringToFront();
+}
+
+export async function withdrawAndWait(page: Page, metamask: dappeteer.Dappeteer): Promise<void> {
+  console.log('Withdrawing funds');
+  const walletIFrame = page.frames()[1];
+  const web3TorrentIFrame = page.frames()[0];
+  await waitForAndClickButton(page, web3TorrentIFrame, '#budget-withdraw');
+  await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+  await waitAndApproveWithdraw(page, metamask);
 }
 
 interface Window {

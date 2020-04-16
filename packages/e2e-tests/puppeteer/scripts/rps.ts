@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 
-import {waitForAndClickButton, setUpBrowser, loadDapp} from '../helpers';
+import {waitForAndClickButton, setUpBrowser, setupLogging} from '../helpers';
 import {getEnvBool} from '@statechannels/devtools';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
@@ -143,14 +143,20 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
  */
 (async (): Promise<void> => {
   if (require.main === module) {
-    const browserA = await setUpBrowser(false);
-    const browserB = await setUpBrowser(false);
+    const browserPromiseA = setUpBrowser(false);
+    const browserPromiseB = setUpBrowser(false);
+
+    const {browser: browserA} = await browserPromiseA;
+    const {browser: browserB} = await browserPromiseB;
 
     const rpsTabA = (await browserA.pages())[0];
     const rpsTabB = (await browserB.pages())[0];
 
-    await loadDapp(rpsTabA, 0);
-    await loadDapp(rpsTabB, 1);
+    await setupLogging(rpsTabA);
+    await setupLogging(rpsTabB);
+
+    await rpsTabA.bringToFront();
+    await rpsTabB.bringToFront();
 
     await login(rpsTabA, rpsTabB);
   }

@@ -2,7 +2,7 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadDapp} from '../helpers';
+import {setUpBrowser, setupLogging} from '../helpers';
 import {
   login,
   aChallenges,
@@ -23,18 +23,26 @@ let rpsTabB: Page;
 
 describe('completes game 1 (challenge by A, challenge by B, resign by B) and begins game 2 ', () => {
   beforeAll(async () => {
-    browserA = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
-    browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions. TODO: remove sloMo and address underlying problem
+    const browserPromiseA = setUpBrowser(HEADLESS, 0);
+    const browserPromiseB = setUpBrowser(HEADLESS, 0); // 100ms sloMo avoids some undiagnosed race conditions. TODO: remove sloMo and address underlying problem
+
+    const {browser: browserA} = await browserPromiseA;
+    const {browser: browserB} = await browserPromiseB;
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
 
-    await loadDapp(rpsTabA, 0);
-    await loadDapp(rpsTabB, 1);
+    await setupLogging(rpsTabA);
+    await setupLogging(rpsTabB);
 
     const url = 'http://localhost:3000';
-    await rpsTabA.goto(url, {waitUntil: 'load'});
-    await rpsTabB.goto(url, {waitUntil: 'load'});
+
+    const gotoPromiseA = rpsTabA.goto(url, {waitUntil: 'load'});
+    const gotoPromiseB = rpsTabB.goto(url, {waitUntil: 'load'});
+    await Promise.all([gotoPromiseA, gotoPromiseB]);
+
+    await rpsTabA.bringToFront();
+    await rpsTabB.bringToFront();
 
     await login(rpsTabA, rpsTabB);
   });
