@@ -1,12 +1,17 @@
 import {web3torrent} from '../clients/web3torrent-client';
 import {Status, Torrent} from '../types';
-import {createMockTorrent} from './test-utils';
-import {getFormattedETA, getStatus} from './torrent-status-checker';
+import {createMockTorrent, infoHash} from './test-utils';
+import {getFormattedETA, getStatus, getTorrent, UrlData} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
+import {parseURL} from './magnet';
 
 describe('Torrent Status Checker', () => {
   let torrent: Torrent;
-  const mockInfoHash = '123';
+
+  const urlData: UrlData = {
+    infoHash: infoHash,
+    queryParams: new URLSearchParams('')
+  };
 
   beforeAll(() => {
     mockMetamask();
@@ -20,30 +25,19 @@ describe('Torrent Status Checker', () => {
   });
 
   describe('Main function', () => {
-    // todo: refactor the test below using getTorrent
-    it.skip('should return a torrent with a status of Idle when no info hash exists', () => {
-      /*     expect(torrentStatusChecker(web3torrent, torrent, undefined)).toEqual({
-        ...torrent,
-        status: Status.Idle
-      } as Torrent); */
+    it('should return a torrent with a status of Idle when the torrent is no longer live', () => {
+      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
+
+      const result = getTorrent(web3torrent, urlData);
+
+      expect(getSpy).toHaveBeenCalledWith(infoHash);
+      expect(result).toEqual(parseURL(urlData.infoHash, urlData.queryParams));
+
+      getSpy.mockRestore();
     });
 
-    it.skip('should return a torrent with a status of Idle when the torrent is no longer live', () => {
-      /*       const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
-
-      const result = torrentStatusChecker(web3torrent, torrent, mockInfoHash);
-
-      expect(getSpy).toHaveBeenCalledWith(mockInfoHash);
-      expect(result).toEqual({
-        ...torrent,
-        status: Status.Idle
-      } as Torrent);
-
-      getSpy.mockRestore(); */
-    });
-
-    it.skip("should return a torrent with a valid status if it's a live torrent", () => {
-      /*    expect(process.env.REACT_APP_FAKE_CHANNEL_PROVIDER).toBe('true');
+    it("should return a torrent with a valid status if it's a live torrent", () => {
+      expect(process.env.REACT_APP_FAKE_CHANNEL_PROVIDER).toBe('true');
       const inProgressTorrent: Partial<Torrent> = {
         downloaded: 12891.3,
         uploadSpeed: 3000,
@@ -59,7 +53,7 @@ describe('Torrent Status Checker', () => {
         ...inProgressTorrent
       }));
 
-      const result = torrentStatusChecker(web3torrent, torrent, mockInfoHash);
+      const result = getTorrent(web3torrent, urlData);
 
       expect(result).toEqual({
         ...torrent,
@@ -68,7 +62,7 @@ describe('Torrent Status Checker', () => {
         parsedTimeRemaining: 'ETA 50s'
       });
 
-      getSpy.mockRestore();*/
+      getSpy.mockRestore();
     });
   });
 
