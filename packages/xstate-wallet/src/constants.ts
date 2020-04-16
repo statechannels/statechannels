@@ -57,3 +57,5 @@ export function getBool(val: string | undefined, throwIfMissing = true): boolean
 }
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START, false);
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB, false);
+
+export const ADD_LOGS = getBool(process.env.ADD_LOGS);

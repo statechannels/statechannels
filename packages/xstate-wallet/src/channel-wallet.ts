@@ -14,6 +14,7 @@ import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workf
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 import {serializeChannelEntry} from './serde/app-messages/serialize';
+import {ADD_LOGS} from './constants';
 
 export interface Workflow {
   id: string;
@@ -149,9 +150,7 @@ export class ChannelWallet {
       throw new Error(`There is already a workflow running with id ${workflowId}`);
     }
     const service = interpret(machineConfig, {devTools})
-      .onTransition(
-        (state, event) => process.env.ADD_LOGS && logTransition(state, event, workflowId)
-      )
+      .onTransition((state, event) => ADD_LOGS && logTransition(state, event, workflowId))
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
