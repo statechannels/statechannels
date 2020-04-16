@@ -1,3 +1,3 @@
 export * from './types';
 
-export {parseRequest} from './parse-request';
+export {parseRequest, parseResponse} from './validation';

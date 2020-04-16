@@ -1,5 +1,5 @@
 import {Store} from './store';
-import {MessagingServiceInterface, convertToChannelResult} from './messaging';
+import {MessagingServiceInterface} from './messaging';
 
 import ReactDOM from 'react-dom';
 import React from 'react';
@@ -13,6 +13,7 @@ import {Message, isOpenChannel, OpenChannel} from './store/types';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
+import {serializeChannelEntry} from './serde/app-messages/serialize';
 
 export interface Workflow {
   id: string;
@@ -55,7 +56,7 @@ export class ChannelWallet {
       );
 
       this.messagingService.sendChannelNotification('ChannelProposed', {
-        ...(await convertToChannelResult(channelEntry)),
+        ...(await serializeChannelEntry(channelEntry)),
         fundingStrategy: objective.data.fundingStrategy
       });
     });
