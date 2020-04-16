@@ -232,7 +232,7 @@ export class FakeChain implements Chain {
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  public selectedAddress: string | null = null;
+  private mySelectedAddress: string | null;
 
   public async initialize() {
     const provider = getProvider();
@@ -250,7 +250,7 @@ export class ChainWatcher implements Chain {
   public async ethereumEnable(): Promise<string> {
     if (window.ethereum) {
       try {
-        this.selectedAddress = (await window.ethereum.enable())[0];
+        this.mySelectedAddress = (await window.ethereum.enable())[0];
         if (typeof this.selectedAddress === 'string') {
           return this.selectedAddress;
         } else {
@@ -265,6 +265,10 @@ export class ChainWatcher implements Chain {
     } else {
       return Promise.reject('window.ethereum not found');
     }
+  }
+
+  public get selectedAddress(): string | null {
+    return this.mySelectedAddress || null;
   }
 
   public get ethereumIsEnabled(): boolean {
