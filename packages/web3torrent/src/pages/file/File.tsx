@@ -14,7 +14,7 @@ import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
 
-const checkTorrent = async infoHash => {
+async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
   switch (testResult) {
     case TorrentTestResult.NO_CONNECTION:
@@ -24,7 +24,7 @@ const checkTorrent = async infoHash => {
     default:
       return '';
   }
-};
+}
 
 function getLiveData(
   web3Torrent: WebTorrentPaidStreamingClient,
