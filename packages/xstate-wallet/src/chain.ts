@@ -53,7 +53,7 @@ export interface Chain {
   getBlockNumber: () => Promise<BigNumber>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<string | undefined>;
   challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
-  finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
+  finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
 }
 
@@ -129,7 +129,7 @@ export class FakeChain implements Chain {
     return 'fake-transaction-id';
   }
 
-  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
+  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<string | undefined> {
     const channelId = calculateChannelId(finalizationProof[0]);
     this.finalizeSync(channelId);
 
@@ -144,6 +144,7 @@ export class FakeChain implements Chain {
       channelId,
       blockNum: this.blockNumber
     });
+    return;
   }
 
   public finalizeSync(channelId: string, turnNum: BigNumber = Zero) {
@@ -192,7 +193,7 @@ export class FakeChain implements Chain {
 
     const updates = fromEvent(this.eventEmitter, 'updated').pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, channelStorage, finalized, blockNum}) => ({
+      map(({amount, channelStorage, finalized, blockNum: blockNum}) => ({
         amount,
         channelStorage,
         finalized,
@@ -284,7 +285,7 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
+  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<string | undefined> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const transactionRequest = {
@@ -294,7 +295,8 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
     const response = await signer.sendTransaction(transactionRequest);
-    await response.wait();
+    const transaction = await response.wait();
+    return transaction.transactionHash;
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
@@ -378,6 +380,13 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
+    const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
+      // TODO: Type event correctly, use ethers-utils.js
+      filter((event: Array<string | BigNumber>) => event[0] === channelId),
+      // Actually ignores the event data and just polls the chain
+      flatMap(async () => this.getChainInfo(channelId))
+    );
+
     // @ts-ignore -- FIXME: ethers events do not have .off for some reason
     const timeoutEvents = fromEvent(this._adjudicator?.provider, 'block').pipe(
       flatMap(async (blockNumber: number) => {
@@ -395,7 +404,7 @@ export class ChainWatcher implements Chain {
       map(({chainInfo}) => ({channelId, ...chainInfo}))
     );
 
-    return merge(first, depositEvents);
+    return merge(first, depositEvents, assetTransferEvents);
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
