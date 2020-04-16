@@ -254,7 +254,7 @@ export const workflow = (
     sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
-        messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+        messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
       }
     },
 
