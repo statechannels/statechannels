@@ -12,9 +12,10 @@ import './File.scss';
 import WebTorrentPaidStreamingClient, {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
 import {Flash} from 'rimble-ui';
+import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
 
-const checkTorrent = async (web3Torrent, infoHash) => {
-  const testResult = await web3Torrent.checkTorrentInTracker(infoHash);
+const checkTorrent = async infoHash => {
+  const testResult = await checkTorrentInTracker(infoHash);
   switch (testResult) {
     case TorrentTestResult.NO_CONNECTION:
       return 'Your connection to the tracker may be limited, you might have unexpected functionality';
@@ -50,15 +51,14 @@ const File: React.FC<Props> = props => {
 
   useEffect(() => {
     const testResult = async () => {
-      const torrentCheckResult = await checkTorrent(web3Torrent, infoHash);
+      const torrentCheckResult = await checkTorrent(infoHash);
       setWarning(torrentCheckResult);
     };
 
     if (infoHash) {
       testResult();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [infoHash]);
 
   useEffect(() => {
     if (torrent.infoHash) {
