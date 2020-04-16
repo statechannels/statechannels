@@ -106,7 +106,6 @@ export const sendUserDeclinedResponse = (
   });
 };
 
-
 export const sendGenericResponse = (
   messageService: MessagingServiceInterface
 ): ActionFunction<any, any> => (context, _) => {
@@ -119,7 +118,11 @@ export const sendGenericResponse = (
   });
 };
 
-
+export enum CommonActions {
+  sendUserDeclinedErrorResponse = 'sendUserDeclinedErrorResponse',
+  hideUI = 'hideUI',
+  displayUI = 'displayUI'
+}
 export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
   sendUserDeclinedErrorResponse: ActionFunction<{requestId: number}, any>;
   hideUI: ActionObject<any, any>;
