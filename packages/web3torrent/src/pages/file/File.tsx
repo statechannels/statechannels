@@ -21,7 +21,7 @@ const checkTorrent = async (web3Torrent, infoHash) => {
     case TorrentTestResult.NO_SEEDERS_FOUND:
       return `Seems like the torrent doesn't have any seeders. You can give it a try nonetheless.`;
     default:
-      return ``;
+      return '';
   }
 };
 
