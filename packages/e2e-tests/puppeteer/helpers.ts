@@ -117,9 +117,6 @@ export async function withdrawAndWait(page: Page): Promise<void> {
 }
 
 export async function waitAndApproveBudget(page: Page): Promise<void> {
-  console.log('Enabling Ethereum');
-  await waitForAndClickButton(page, page.frames()[1], '#approveEnable');
-
   console.log('Approving budget');
 
   const approveBudgetButton = '.approve-budget-button';
