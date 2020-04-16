@@ -13,7 +13,8 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents
+  WireEvents,
+  TorrentTestResult
 } from './types';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
@@ -23,7 +24,8 @@ import {
   INITIAL_SEEDER_BALANCE,
   BLOCK_LENGTH,
   PEER_TRUST,
-  welcomePageTrackerOpts
+  welcomePageTrackerOpts,
+  generateRandomPeerId
 } from '../constants';
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
@@ -145,26 +147,35 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
   }
 
-  async checkForSeeder(infoHash: string) {
-    const trackerClient: Client = new Client({...welcomePageTrackerOpts, infoHash: [infoHash]});
-    const gotAWire = new Promise(resolve => {
-      const updateIfSeederFound = data => {
-        log('Response from tracker: ', {complete: data.complete, incomplete: data.incomplete});
-        if (data.complete) {
-          trackerClient.off('update', updateIfSeederFound);
-          resolve(data.complete);
-        }
-      };
-      trackerClient.start();
-      trackerClient.on('update', updateIfSeederFound);
+  async checkTorrentInTracker(infoHash: string) {
+    const trackerClient: Client = new Client({
+      ...welcomePageTrackerOpts,
+      peerId: generateRandomPeerId(),
+      infoHash: [infoHash]
     });
-
-    const raceResult = await Promise.race([
-      gotAWire,
-      new Promise((resolve, _) => setTimeout(resolve, 8000))
-    ]);
+    let completePeers;
+    const gotAWire: Promise<boolean> = new Promise(resolve => {
+      const updateIfSeederFound = data => {
+        completePeers = data.complete;
+      };
+      trackerClient.once('peer', function() {
+        resolve(true);
+      });
+      trackerClient.once('update', updateIfSeederFound);
+      trackerClient.start();
+    });
+    const timer: Promise<undefined> = new Promise((resolve, _) => setTimeout(resolve, 5000));
+    const raceResult = await Promise.race([gotAWire, timer]);
     trackerClient.stop();
-    return !!raceResult;
+    trackerClient.destroy();
+    if (raceResult) {
+      return TorrentTestResult.SEEDERS_FOUND; // Could connect connect to a peer
+    }
+    if (Number.isInteger(completePeers)) {
+      // was able to connect to the tracker, but couldn't connect to a peer
+      return TorrentTestResult.NO_SEEDERS_FOUND;
+    }
+    return TorrentTestResult.NO_CONNECTION; // wasn't able to get a response from the tracker
   }
 
   protected ensureEnabled() {
