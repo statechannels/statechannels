@@ -167,12 +167,15 @@ export class PaymentChannelClient {
   }
 
   insertIntoChannelCache(channelState: ChannelState) {
-    this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
+    // TODO: The joinChannel promise never resolves, meaning this function is not called
+    // by the leecher.
+    this.channelCache[channelState.channelId] = channelState;
   }
 
   updateChannelCache(channelState: ChannelState) {
-    this.channelCache[channelState.channelId] && // only update an existing key
-      (this.channelCache[channelState.channelId] = channelState);
+    // TODO: This implementation is identical to insertIntoChannelCache because of joinChannel
+    // never resolving
+    this.channelCache[channelState.channelId] = channelState;
   }
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback

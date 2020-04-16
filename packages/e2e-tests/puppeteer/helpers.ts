@@ -14,6 +14,7 @@ export async function loadDapp(
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
+    // localStorage.debug = "web3torrent:*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
     window.ethereum.enable = () => new Promise(r => {
@@ -124,10 +125,31 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
 
 interface Window {
   channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
-  channelRunning(): void;
+  done(): void;
 }
 declare let window: Window;
 
+let doneFuncCounter = 0;
+const doneWhen = (page: Page, done: string): Promise<void> => {
+  const doneFunc = `done${doneFuncCounter++}`;
+  const cb = `cb${doneFuncCounter}`;
+
+  return new Promise(resolve =>
+    page.exposeFunction(doneFunc, resolve).then(() => {
+      page.evaluate(
+        `
+          ${cb} = channelStatus => {
+            if (${done}) {
+              window.${doneFunc}('Done');
+              window.channelProvider.off('ChannelUpdated', ${cb});
+            } 
+          }
+          window.channelProvider.on('ChannelUpdated', ${cb});
+          `
+      );
+    })
+  );
+};
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
 ): Promise<void> => {
@@ -139,17 +161,11 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, walletIFrame, createChannelButton);
   } else {
-    return new Promise(resolve =>
-      page.exposeFunction('channelRunning', resolve).then(() =>
-        page.evaluate(() => {
-          window.channelProvider.on('ChannelUpdated', () => {
-            window.channelRunning();
-            window.channelProvider.off('ChannelUpdated');
-          });
-        })
-      )
-    );
+    return doneWhen(page, 'true');
   }
+};
+export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
+  return doneWhen(page, `parseInt(channelStatus.turnNum) >= ${n}`);
 };
 
 export async function waitForClosingChannel(page: Page): Promise<void> {

@@ -2,11 +2,19 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../../helpers';
-import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
 
-jest.setTimeout(JEST_TIMEOUT);
+import {
+  setUpBrowser,
+  loadDapp,
+  waitAndOpenChannel,
+  waitForClosingChannel,
+  waitForNthState
+} from '../../helpers';
+
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+
+jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
 
 let browserA: Browser;
 let browserB: Browser;
@@ -35,17 +43,16 @@ describe('Web3-Torrent Integration Tests', () => {
 
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
-    await loadDapp(web3tTabB, 0, true);
+    await loadDapp(web3tTabB, 1, true);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
   });
 
   afterAll(async () => {
-    if (browserA) {
-      await browserA.close();
-    }
-    if (browserB) {
-      await browserB.close();
+    if (HEADLESS) {
+      await Promise.all(
+        [browserA, browserB].map(async browser => browser && (await browser.close()))
+      );
     }
   });
 
@@ -61,7 +68,7 @@ describe('Web3-Torrent Integration Tests', () => {
 
     // Let the download cointinue for some time
     console.log('Downloading');
-    await web3tTabB.waitFor(1000);
+    await waitForNthState(web3tTabB, 10);
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);

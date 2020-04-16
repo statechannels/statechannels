@@ -1,4 +1,4 @@
-import {Machine, StateNodeConfig, ActionFunction} from 'xstate';
+import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
 import {SupportState, VirtualDefundingAsLeaf} from '.';
 import {getDataAndInvoke} from '../utils';
@@ -7,7 +7,6 @@ import {outcomesEqual} from '../store/state-utils';
 import {State} from '../store/types';
 import {map} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -69,7 +68,6 @@ const getRole = (store: Store) => (ctx: Init) => async cb => {
 
 const virtualDefunding = {
   initial: 'gettingRole',
-  entry: ['releaseFunds'],
   states: {
     gettingRole: {invoke: {src: getRole.name}, on: {AmHub: 'asHub', AmLeaf: 'asLeaf'}},
     asLeaf: {
@@ -112,12 +110,7 @@ const services = (store: Store) => ({
   virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
 });
 
-const releaseFunds = (store: Store): ActionFunction<Init, any> => context => {
-  store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId);
-};
-
 const options = (store: Store) => ({
-  services: services(store),
-  actions: {releaseFunds: releaseFunds(store)}
+  services: services(store)
 });
 export const machine = (store: Store) => Machine(config).withConfig(options(store));
