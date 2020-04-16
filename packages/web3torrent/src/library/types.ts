@@ -19,6 +19,12 @@ export enum TorrentEvents {
   ERROR = 'error'
 }
 
+export enum TorrentTestResult {
+  NO_SEEDERS_FOUND,
+  SEEDERS_FOUND,
+  NO_CONNECTION
+}
+
 export enum WireEvents {
   DOWNLOAD = 'download',
   FIRST_REQUEST = 'first_request',

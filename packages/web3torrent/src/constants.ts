@@ -17,6 +17,13 @@ export const BUFFER_REFILL_RATE = utils.bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENG
 
 export const INITIAL_SEEDER_BALANCE = utils.bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 
+const VERSION_STR = '0.7.2'.replace(/\d*./g, v => `0${Number(v) % 100}`.slice(-2)).slice(0, 4);
+export function generateRandomPeerId() {
+  return Buffer.from(
+    `-WW${VERSION_STR}-` + btoa((Math.random() * 99999999999).toFixed(0).slice(0, 9))
+  ).toString('hex');
+}
+
 // firebase setup
 export const HUB = {
   signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
