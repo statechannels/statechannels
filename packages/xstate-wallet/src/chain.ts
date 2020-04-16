@@ -39,7 +39,7 @@ export interface ChannelChainInfo {
 export interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
-  selectedAddress: string | null;
+  selectedAddress: string | undefined;
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
@@ -232,6 +232,7 @@ export class FakeChain implements Chain {
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
+  public selectedAddress: string | undefined;
 
   public async initialize() {
     const provider = getProvider();
@@ -248,8 +249,19 @@ export class ChainWatcher implements Chain {
 
   public async ethereumEnable(): Promise<string> {
     if (window.ethereum) {
-      const [selectedAddress] = await window.ethereum.enable();
-      return selectedAddress;
+      try {
+        this.selectedAddress = (await window.ethereum.enable())[0];
+        if (typeof this.selectedAddress === 'string') {
+          return this.selectedAddress;
+        } else {
+          console.error('Ethereum enabled but no selected address is defined');
+          return Promise.reject('Ethereum enabled but no selected address is defined');
+        }
+      } catch (error) {
+        // Handle error. Likely the user rejected the login
+        console.error(error);
+        return Promise.reject('user rejected in metamask');
+      }
     } else {
       return Promise.reject('window.ethereum not found');
     }
@@ -261,10 +273,6 @@ export class ChainWatcher implements Chain {
     } else {
       return false;
     }
-  }
-
-  public get selectedAddress(): string | null {
-    return (window.ethereum && window.ethereum.selectedAddress) || null;
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
