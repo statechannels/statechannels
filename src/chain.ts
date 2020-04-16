@@ -39,7 +39,7 @@ export interface ChannelChainInfo {
 export interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
-  selectedAddress: string | undefined;
+  selectedAddress: string | null;
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
@@ -232,7 +232,7 @@ export class FakeChain implements Chain {
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  public selectedAddress: string | undefined;
+  public selectedAddress: string | null;
 
   public async initialize() {
     const provider = getProvider();
