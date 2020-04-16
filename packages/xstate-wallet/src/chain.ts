@@ -39,7 +39,7 @@ export interface ChannelChainInfo {
 export interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
-  selectedAddress: string | undefined;
+  selectedAddress: string | null;
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
@@ -232,7 +232,7 @@ export class FakeChain implements Chain {
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  public selectedAddress: string | undefined;
+  private mySelectedAddress: string | null;
 
   public async initialize() {
     const provider = getProvider();
@@ -241,6 +241,10 @@ export class ChainWatcher implements Chain {
     this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
 
     this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
+
+    if (this.ethereumIsEnabled) {
+      this.mySelectedAddress = window.ethereum.selectedAddress;
+    }
   }
 
   public async getBlockNumber() {
@@ -250,7 +254,7 @@ export class ChainWatcher implements Chain {
   public async ethereumEnable(): Promise<string> {
     if (window.ethereum) {
       try {
-        this.selectedAddress = (await window.ethereum.enable())[0];
+        this.mySelectedAddress = (await window.ethereum.enable())[0];
         if (typeof this.selectedAddress === 'string') {
           return this.selectedAddress;
         } else {
@@ -267,8 +271,13 @@ export class ChainWatcher implements Chain {
     }
   }
 
+  public get selectedAddress(): string | null {
+    return this.mySelectedAddress || null;
+  }
+
   public get ethereumIsEnabled(): boolean {
     if (window.ethereum) {
+      // window.ethereum.selectedAddress will be null if ethereum has not been enabled
       return !!window.ethereum.selectedAddress;
     } else {
       return false;

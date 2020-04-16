@@ -2,7 +2,7 @@
 import {Page} from 'puppeteer';
 import * as fs from 'fs';
 
-import {waitAndApproveBudget} from '../helpers';
+import {waitAndApproveBudget, waitForAndClickButton} from '../helpers';
 
 function prepareUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(1000000);
@@ -14,7 +14,9 @@ function prepareUploadFile(path: string): void {
     }
   });
 }
-
+export async function enableEthereum(page: Page): Promise<void> {
+  await waitForAndClickButton(page, page.frames()[1], '#approveEnable');
+}
 export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promise<string> {
   await page.waitForSelector('input[type=file]');
 
@@ -30,6 +32,8 @@ export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promi
     // eslint-disable-next-line no-undef
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
+  console.log('Enabling Ethereum');
+  await enableEthereum(page);
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
@@ -51,7 +55,8 @@ export async function startDownload(
   const downloadButton = '#download-button:not([disabled])';
   await page.waitForSelector(downloadButton);
   await page.click(downloadButton);
-
+  console.log('Enabling Ethereum');
+  await enableEthereum(page);
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
   }
