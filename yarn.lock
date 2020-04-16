@@ -13308,6 +13308,11 @@ damerau-levenshtein@^1.0.4:
   resolved "https://registry.npmjs.org/damerau-levenshtein/-/damerau-levenshtein-1.0.6.tgz#143c1641cb3d85c60c32329e26899adea8701791"
   integrity sha512-JVrozIeElnj3QzfUIt8tB8YMluBJom4Vw9qTPpjGYQ9fYlB3D/rb6OordUxf3xeFB35LKWs0xqcO5U6ySvBtug==
 
+dappeteer@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/dappeteer/-/dappeteer-1.0.0.tgz#a98e3ce8c207be7f7cdbfec30347067efdc6629b"
+  integrity sha512-7RqCfkMHSzgjUOMa2To6tJzud2nmkQXDATZP1zTGrPUdmYZVJ8VgJHqY/pl2apt5rnsOdGmqKKvi4EK7nR4XUQ==
+
 dargs@^4.0.1:
   version "4.1.0"
   resolved "https://registry.npmjs.org/dargs/-/dargs-4.1.0.tgz#03a9dbb4b5c2f139bf14ae53f0b8a2a6a86f4e17"
