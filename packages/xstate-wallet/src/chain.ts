@@ -241,6 +241,10 @@ export class ChainWatcher implements Chain {
     this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
 
     this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
+
+    if (this.ethereumIsEnabled) {
+      this.mySelectedAddress = window.ethereum.selectedAddress;
+    }
   }
 
   public async getBlockNumber() {
@@ -273,6 +277,7 @@ export class ChainWatcher implements Chain {
 
   public get ethereumIsEnabled(): boolean {
     if (window.ethereum) {
+      // window.ethereum.selectedAddress will be null if ethereum has not been enabled
       return !!window.ethereum.selectedAddress;
     } else {
       return false;
