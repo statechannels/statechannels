@@ -21,6 +21,8 @@ import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN, ADD_LOGS} from '../constants';
 import {makeDestination} from '../utils';
 import {hexZeroPad} from 'ethers/utils';
+import {logger} from '../logger';
+const log = logger.info.bind(logger);
 
 export class Player {
   privateKey: string;
@@ -105,9 +107,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (ADD_LOGS) {
-        console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
-      }
+      ADD_LOGS && log('MESSAGE A->B: %O', pushMessageRequest);
       await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
@@ -115,9 +115,8 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (ADD_LOGS) {
-        console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
-      }
+      ADD_LOGS && log('MESSAGE B->A: %O', pushMessageRequest);
+
       playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });

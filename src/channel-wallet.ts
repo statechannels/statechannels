@@ -15,6 +15,7 @@ import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 import {serializeChannelEntry} from './serde/app-messages/serialize';
 import {ADD_LOGS} from './constants';
+import {logger} from './logger';
 
 export interface Workflow {
   id: string;
@@ -180,29 +181,22 @@ export class ChannelWallet {
   }
 }
 
-export function logTransition(
-  state: State<any, any, any, any>,
-  event,
-  id?: string,
-  logger = console
-): void {
-  const to = JSON.stringify(state.value, null, 2);
+export function logTransition(state: State<any, any, any, any>, event, id?: string): void {
+  const to = state.value;
   if (!state.history) {
-    logger.log(`${id || ''} - STARTED ${state.configuration[0].id} TRANSITIONED TO ${to}`);
+    logger.info('%s - STARTED %o TRANSITIONED TO %o', id, state.configuration[0].id, to);
   } else {
-    const from = JSON.stringify(state.history.value);
-    const eventType = JSON.stringify(event.type ? event.type : event);
+    const from = state.history.value;
+    const eventType = event.type ? event.type : event;
 
-    logger.log(`${id || ''} - TRANSITION FROM ${from} EVENT ${eventType} TO  ${to}`);
+    logger.info('%s - TRANSITION FROM %o EVENT %s TO %o', id, from, eventType, to);
   }
   Object.keys(state.children).forEach(k => {
     const child = state.children[k];
 
     if (child.state && 'onTransition' in child) {
       const subId = (child as any).state.configuration[0].id;
-      (child as any).onTransition((state, event) =>
-        logTransition(state, event, `${id} - ${subId}`)
-      );
+      (child as any).onTransition((state, event) => logTransition(state, event, `${id}/${subId}`));
     }
   });
 }
