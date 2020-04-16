@@ -1,4 +1,4 @@
-import debug from 'debug';
+import debug from '../../debug';
 import React, {useState, useEffect} from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
