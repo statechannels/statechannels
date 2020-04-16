@@ -12,7 +12,7 @@ import {
   State
 } from 'xstate';
 
-import {MessagingServiceInterface, convertToChannelResult} from '../messaging';
+import {MessagingServiceInterface} from '../messaging';
 import {filter, map} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
@@ -32,6 +32,7 @@ import {
 } from '../event-types';
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import _ from 'lodash';
+import {serializeChannelEntry} from '../serde/app-messages/serialize';
 
 export interface WorkflowContext {
   applicationSite: string;
@@ -248,29 +249,29 @@ export const workflow = (
   const actions: WorkflowActions = {
     sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
       const entry = await store.getEntry(context.channelId);
-      messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+      messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
     },
 
     sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
-        messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
+        messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
       }
     },
 
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
+      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
+      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
+      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
     },
 
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
@@ -286,7 +287,7 @@ export const workflow = (
       if (event.storeEntry.channelId === context.channelId) {
         messagingService.sendChannelNotification(
           'ChannelUpdated',
-          await convertToChannelResult(event.storeEntry)
+          await serializeChannelEntry(event.storeEntry)
         );
       }
     },

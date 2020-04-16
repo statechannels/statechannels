@@ -3,31 +3,35 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
   SiteBudget as AppSiteBudget,
-  TokenBudget
+  TokenBudget,
+  ChannelResult,
+  ChannelStatus
 } from '@statechannels/client-api-schema';
 import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
   SiteBudget,
-  AssetBudget
+  AssetBudget,
+  isAllocation
 } from '../../store/types';
 import {tokenAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
-import {checkThat, exists} from '../../utils';
+import {checkThat, exists, formatAmount} from '../../utils';
 import {bigNumberify} from 'ethers/utils';
+import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
       channelId,
-      amount: bigNumberify(assetBudget.channels[channelId].amount).toHexString() // TODO: Malformed bignumber
+      amount: formatAmount(bigNumberify(assetBudget.channels[channelId].amount))
     }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,
-      availableReceiveCapacity: assetBudget.availableReceiveCapacity.toHexString(),
-      availableSendCapacity: assetBudget.availableSendCapacity.toHexString(),
+      availableReceiveCapacity: formatAmount(assetBudget.availableReceiveCapacity),
+      availableSendCapacity: formatAmount(assetBudget.availableSendCapacity),
       channels
     };
   });
@@ -63,6 +67,39 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation 
 function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationItem {
   return {
     destination: allocationItem.destination,
-    amount: allocationItem.amount.toHexString()
+    amount: formatAmount(allocationItem.amount)
+  };
+}
+
+export async function serializeChannelEntry(
+  channelEntry: ChannelStoreEntry
+): Promise<ChannelResult> {
+  const {latest, channelId} = channelEntry;
+  const {appData, turnNum, outcome} = latest;
+  const {participants, appDefinition} = channelEntry.channelConstants;
+
+  if (!isAllocation(outcome)) {
+    throw new Error('Can only send allocations to the app');
+  }
+
+  let status: ChannelStatus = 'running';
+  if (turnNum.eq(0)) {
+    status = 'proposed';
+  } else if (turnNum.lt(2 * participants.length - 1)) {
+    status = 'opening';
+  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
+    status = 'closed';
+  } else if (latest?.isFinal) {
+    status = 'closing';
+  }
+
+  return {
+    participants,
+    allocations: serializeAllocation(outcome),
+    appDefinition,
+    appData,
+    status,
+    turnNum: formatAmount(turnNum),
+    channelId
   };
 }

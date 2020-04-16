@@ -1,4 +1,4 @@
-import {validateRequest, parseRequest} from '../parse-request';
+import {validateRequest, parseRequest} from '../validation';
 import * as good from './good_sample_requests';
 import * as bad from './bad_sample_requests';
 

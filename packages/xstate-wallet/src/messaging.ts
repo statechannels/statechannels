@@ -7,7 +7,6 @@ import {
   JoinChannelRequest,
   Response,
   ChannelResult,
-  ChannelStatus,
   Notification,
   ChannelClosingNotification,
   ChannelUpdatedNotification,
@@ -17,15 +16,15 @@ import {
   CloseAndWithdrawRequest,
   ErrorResponse,
   ChallengeChannelRequest,
-  FundingStrategy
+  FundingStrategy,
+  parseResponse
 } from '@statechannels/client-api-schema';
 
 import {fromEvent, Observable} from 'rxjs';
-import {ChannelStoreEntry} from './store/channel-store-entry';
 import {validateMessage} from '@statechannels/wire-format';
 import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
-import {isAllocation, Message, SiteBudget, Participant} from './store/types';
-import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
+import {Message, SiteBudget, Participant} from './store/types';
+import {serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
@@ -91,10 +90,7 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendResponse(id: number, result: Response['result']) {
-    if (!id) {
-      throw new Error(`No id provided for the response`);
-    }
-    const response: Response = {id, jsonrpc: '2.0', result};
+    const response = parseResponse({id, jsonrpc: '2.0', result});
     this.eventEmitter.emit('SendMessage', response);
   }
 
@@ -215,41 +211,6 @@ export class MessagingService implements MessagingServiceInterface {
         unreachable(request);
     }
   }
-}
-
-export async function convertToChannelResult(
-  channelEntry: ChannelStoreEntry
-): Promise<ChannelResult> {
-  const {latest, channelId} = channelEntry;
-  const {appData, turnNum} = latest;
-  const {participants, appDefinition} = channelEntry.channelConstants;
-
-  const outcome = latest.outcome;
-
-  if (!isAllocation(outcome)) {
-    throw new Error('Can only send allocations to the app');
-  }
-
-  let status: ChannelStatus = 'running';
-  if (turnNum.eq(0)) {
-    status = 'proposed';
-  } else if (turnNum.lt(2 * participants.length - 1)) {
-    status = 'opening';
-  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
-    status = 'closed';
-  } else if (latest?.isFinal) {
-    status = 'closing';
-  }
-
-  return {
-    participants,
-    allocations: serializeAllocation(outcome),
-    appDefinition,
-    appData,
-    status,
-    turnNum: turnNum.toHexString(),
-    channelId
-  };
 }
 
 export function convertToInternalParticipant(participant: {

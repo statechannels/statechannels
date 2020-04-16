@@ -1,7 +1,7 @@
 // need to use this syntax, because ajv uses export= style exports
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
-import {Request} from './types.js';
+import {Request, Response} from './types.js';
 
 // You need to pass `jsonPointers: true`
 const ajv = new Ajv({jsonPointers: true, verbose: true});
@@ -12,7 +12,7 @@ const apiSchema = require('./generated-schema.json'); // because https://github.
 ajv.addSchema(apiSchema, 'api.json');
 
 export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/Request'});
-
+export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/Response'});
 function prettyPrintError(e: Ajv.ErrorObject): string {
   switch (e.keyword) {
     case 'additionalProperties': {
@@ -41,4 +41,13 @@ export function parseRequest(jsonBlob: object): Request {
     );
   }
   return jsonBlob as Request;
+}
+export function parseResponse(jsonBlob: object): Response {
+  const valid = validateResponse(jsonBlob);
+  if (!valid) {
+    throw new Error(
+      `Validation Error: ${validateResponse.errors?.map(e => prettyPrintError(e)).join(`;\n`)}`
+    );
+  }
+  return jsonBlob as Response;
 }
