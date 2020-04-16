@@ -232,7 +232,7 @@ export class FakeChain implements Chain {
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  public selectedAddress: string | null;
+  public selectedAddress: string | null = null;
 
   public async initialize() {
     const provider = getProvider();
