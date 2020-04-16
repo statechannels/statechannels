@@ -69,6 +69,7 @@ export interface WorkflowActions {
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
+  assignRequestId: Action<WorkflowContext, any>;
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
@@ -135,7 +136,7 @@ const generateConfig = (
             ],
             JOIN_CHANNEL: {
               target: 'settingSite',
-              actions: [actions.sendJoinChannelResponse]
+              actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
           }
         },
@@ -195,7 +196,7 @@ const generateConfig = (
 
     //This could handled by another workflow instead of the application workflow
     closing: {
-      entry: actions.displayUi,
+      entry: [actions.displayUi, actions.assignRequestId],
       exit: actions.hideUi,
       invoke: {
         id: 'closing-protocol',
@@ -253,7 +254,7 @@ export const workflow = (
     sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
-        messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+        messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
       }
     },
 
@@ -299,16 +300,17 @@ export const workflow = (
       if (context.channelId) return context;
       switch (event.type) {
         case 'PLAYER_STATE_UPDATE':
-          return {channelId: event.channelId};
         case 'JOIN_CHANNEL':
-          // TODO: Might be better to split set request Id in it's own action
-          return {channelId: event.channelId, requestId: event.requestId};
+          return {channelId: event.channelId};
         case 'done.invoke.createChannel':
           return {channelId: event.data};
         default:
           return unreachable(event);
       }
     }),
+    assignRequestId: assign((context, event: JoinChannelEvent | PlayerRequestConclude) => ({
+      requestId: event.requestId
+    })),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
         const existingState = await (await store.getEntry(event.channelId)).latest;
@@ -414,7 +416,8 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
-  updateStoreWithPlayerState: 'updateStoreWithPlayerState'
+  updateStoreWithPlayerState: 'updateStoreWithPlayerState',
+  assignRequestId: 'assignRequestId'
 };
 
 export const config = generateConfig(mockActions as any, mockGuards);
