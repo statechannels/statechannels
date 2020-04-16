@@ -5,7 +5,9 @@ import {
   ActionFunction,
   DoneInvokeEvent,
   assign,
-  MachineConfig
+  MachineConfig,
+  Condition,
+  AssignAction
 } from 'xstate';
 import {
   getDataAndInvoke,
@@ -18,7 +20,9 @@ import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
-import {BigNumber} from 'ethers/utils';
+
+import {ChannelChainInfo} from '../chain';
+import {map, filter} from 'rxjs/operators';
 
 interface Initial {
   requestId: number;
@@ -29,14 +33,12 @@ interface Initial {
 interface LedgerExists extends Initial {
   ledgerId: string;
 }
-interface Chain {
-  ledgerTotal: BigNumber;
-  lastChangeBlockNum: BigNumber;
-  currentBlockNum: BigNumber;
-}
 
 interface Transaction {
   transactionId: string;
+}
+interface FundsWithdrawn {
+  type: 'FUNDS_WITHDRAWN';
 }
 
 type WorkflowTypeState =
@@ -44,9 +46,9 @@ type WorkflowTypeState =
   | {value: 'createObjective'; context: LedgerExists}
   | {value: {closeLedger: 'constructFinalState'}; context: LedgerExists}
   | {value: {closeLedger: 'supportState'}; context: LedgerExists}
-  | {value: {closeLedger: 'done'}; context: LedgerExists & Chain}
-  | {value: {withdraw: 'submitTransaction'}; context: LedgerExists & Chain}
-  | {value: {withdraw: 'waitMining'}; context: LedgerExists & Chain & Transaction}
+  | {value: {closeLedger: 'done'}; context: LedgerExists}
+  | {value: {withdraw: 'submitTransaction'}; context: LedgerExists}
+  | {value: {withdraw: 'waitMining'}; context: LedgerExists & Transaction}
   | {value: {withdraw: 'done'}; context: LedgerExists}
   | {value: 'done'; context: LedgerExists}
   | {value: 'clearBudget'; context: LedgerExists}
@@ -59,7 +61,9 @@ type WorkflowEvent =
   | UserApproves
   | UserRejects
   | DoneInvokeEvent<CloseLedger>
-  | DoneInvokeEvent<LedgerExists>;
+  | DoneInvokeEvent<LedgerExists>
+  | DoneInvokeEvent<string>
+  | FundsWithdrawn;
 interface UserApproves {
   type: 'USER_APPROVES_CLOSE';
 }
@@ -77,14 +81,21 @@ enum Services {
   supportState = 'supportState',
   submitWithdrawTransaction = 'submitWithdrawTransaction',
   createObjective = 'createObjective',
-  observeLedgerOnChainBalance = 'observeLedgerOnChainBalance',
+  observeFundsWithdrawal = 'observeFundsWithdrawal',
   clearBudget = 'clearBudget'
 }
 
-export type WorkflowActions = CommonWorkflowActions &
-  Record<Actions, ActionFunction<WorkflowContext, WorkflowEvent>>;
+enum Guards {
+  isBlockDeepEnough = 'isBlockDeepEnough'
+}
 
+export type WorkflowActions = CommonWorkflowActions &
+  Record<
+    Actions,
+    ActionFunction<WorkflowContext, WorkflowEvent> | AssignAction<WorkflowContext, WorkflowEvent>
+  >;
 export type WorkflowServices = Record<Services, ServiceConfig<WorkflowContext>>;
+export type WorkflowGuards = Record<Guards, Condition<WorkflowContext, WorkflowEvent>>;
 
 export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
@@ -113,22 +124,31 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
     withdraw: {
       invoke: {
         id: 'observeChain',
-        src: Services.observeLedgerOnChainBalance
+        src: Services.observeFundsWithdrawal
       },
       states: {
         submitTransaction: {
           invoke: {
             id: 'submitTransaction',
             src: Services.submitWithdrawTransaction,
-            onDone: {target: 'waitMining', actions: [Actions.setTransactionId]}
+            onDone: {
+              target: 'waitMining',
+              actions: [Actions.setTransactionId]
+            }
           }
         },
-        waitMining: {},
+        waitMining: {
+          on: {
+            BLOCK_UPDATED: [{target: 'done', cond: Guards.isBlockDeepEnough}]
+          }
+        },
         done: {type: 'final'}
       },
       onDone: 'clearBudget'
     },
-    clearBudget: {invoke: {src: Services.clearBudget, onDone: 'done', onError: 'budgetFailure'}},
+    clearBudget: {
+      invoke: {src: Services.clearBudget, onDone: 'done', onError: 'budgetFailure'}
+    },
     done: {type: 'final', entry: [Actions.sendResponse, CommonActions.hideUI]},
     userDeclinedFailure: {
       type: 'final',
@@ -182,8 +202,13 @@ const createObjective = (store: Store) => async context => {
   await store.addObjective(objective);
   return objective;
 };
+const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
+  store.chain.chainUpdatedFeed(ledgerId).pipe(
+    filter(c => c.amount.eq(0)),
+    map<ChannelChainInfo, FundsWithdrawn>(c => ({type: 'FUNDS_WITHDRAWN'}))
+  );
 
-const clearBudget = (store: Store) => async context => {
+const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
   await store.clearBudget(context.site);
 };
 const options = (
@@ -195,18 +220,15 @@ const options = (
     supportState: SupportState.machine(store),
     submitWithdrawTransaction: submitWithdrawTransaction(store),
     createObjective: createObjective(store),
-    observeLedgerOnChainBalance: async () => {
-      /* TODO FIXME */
-    },
-    clearBudget: async () => {
-      /* TODO FIXME */
-    }
+    observeFundsWithdrawal: observeFundsWithdrawal(store),
+    clearBudget: clearBudget(store)
   },
   actions: {
     ...commonWorkflowActions(messagingService),
-    setTransactionId: async () => {
-      /* TODO FIXME */
-    },
+    setTransactionId: assign({
+      transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+    }),
+
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
     assignLedgerId: async (_, event: DoneInvokeEvent<CloseLedger>) =>
