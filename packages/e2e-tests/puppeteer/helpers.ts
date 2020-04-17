@@ -48,7 +48,7 @@ export async function loadDapp(
     }
 
     const text = msg.text();
-    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text);
+    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text + '\n');
     else console.log('Page console log: ', text);
   });
 }
