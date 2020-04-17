@@ -46,11 +46,12 @@ export async function loadDapp(
   // For convenience, I am requiring that logs are stored in /tmp
   const LOGS_LOCATION = path.join('/tmp', logPrefix);
 
+  const APPEND = 'a';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const writeStream = (filename: string): {write: (...x: any[]) => any} =>
     filename === 'console'
       ? {write: (): null => null}
-      : fs.createWriteStream(`${LOGS_LOCATION}.${filename}`, {flags: 'a'});
+      : fs.createWriteStream(`${LOGS_LOCATION}.${filename}`, {flags: APPEND});
   const pinoLog = writeStream(process.env.LOG_DESTINATION || 'console');
   const browserConsoleLog = writeStream(process.env.BROWSER_LOG_DESTINATION || 'console');
 
