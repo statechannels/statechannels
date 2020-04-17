@@ -180,7 +180,7 @@ const submitWithdrawTransaction = (store: Store) => async context => {
   if (!ledgerEntry.isFinalized) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
-  return store.chain.finalizeAndWithdraw(ledgerEntry.support);
+  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
 const createObjective = (store: Store) => async context => {
@@ -223,8 +223,10 @@ const options = (
 
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
-    assignLedgerId: async (_, event: DoneInvokeEvent<CloseLedger>) =>
-      assign({ledgerId: event.data.data.ledgerId})
+    assignLedgerId: assign((context: Initial, event: DoneInvokeEvent<CloseLedger>) => ({
+      ...context,
+      ledgerId: event.data.data.ledgerId
+    }))
   }
 });
 export const workflow = (
