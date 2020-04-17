@@ -24,7 +24,7 @@ describe('Torrent Status Checker', () => {
   });
 
   describe('Main function', () => {
-    it('should return a torrent with a status of Idle when the torrent is no longer live', () => {
+    it('should return a torrent with a status of Idle when the torrent is not live', () => {
       const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
 
       const result = getTorrentUI(web3torrent, staticData);
