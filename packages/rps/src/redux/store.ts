@@ -8,10 +8,9 @@ import stateChannelWalletSaga from './wallet/saga';
 
 import metamaskSaga from './metamask/saga';
 import openGameSaga from './open-games/saga';
-import {firebaseInboxListener} from './message-service/firebase-inbox-listener';
+import {setupFirebase} from './message-service/setup-firebase-messaging';
 import {RPSChannelClient} from '../utils/rps-channel-client';
 import {channelUpdatedListener} from './message-service/channel-updated-listener';
-import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
@@ -33,7 +32,6 @@ function* rootSaga() {
   } else {
     client = new RPSChannelClient(new ChannelClient(window.channelProvider));
     yield stateChannelWalletSaga();
-    yield fork(messageQueuedListener, client);
   }
 
   yield fork(channelUpdatedListener, client);
@@ -52,8 +50,10 @@ function* rootSaga() {
     yield fork(autoOpponent, 'B', client);
   } else {
     yield call([window.channelProvider, 'enable']);
-    yield fork(firebaseInboxListener, client, window.channelProvider.signingAddress);
 
+    setupFirebase(client, window.channelProvider.signingAddress);
+
+    // RPS only supports a directly funded channel, for now
     // yield call(
     //   [client, 'approveBudgetAndFund'],
     //   tenEth,
