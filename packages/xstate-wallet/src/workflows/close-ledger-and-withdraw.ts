@@ -6,7 +6,8 @@ import {
   DoneInvokeEvent,
   assign,
   MachineConfig,
-  AssignAction
+  AssignAction,
+  Interpreter
 } from 'xstate';
 import {
   getDataAndInvoke,
@@ -15,7 +16,7 @@ import {
   CommonActions
 } from '../utils';
 import {SupportState} from '.';
-import {Store} from '../store';
+import {Store, SiteBudget} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
@@ -29,7 +30,10 @@ interface Initial {
   player: Participant;
   site: string;
 }
-interface LedgerExists extends Initial {
+interface BudgetExists extends Initial {
+  budget: SiteBudget;
+}
+interface LedgerExists extends BudgetExists {
   ledgerId: string;
 }
 
@@ -41,7 +45,8 @@ interface FundsWithdrawn {
 }
 
 type WorkflowTypeState =
-  | {value: 'waitForUserApproval'; context: Initial}
+  | {value: 'fetchBudget'; context: Initial}
+  | {value: 'waitForUserApproval'; context: BudgetExists}
   | {value: 'createObjective'; context: LedgerExists}
   | {value: {closeLedger: 'constructFinalState'}; context: LedgerExists}
   | {value: {closeLedger: 'supportState'}; context: LedgerExists}
@@ -61,6 +66,7 @@ type WorkflowEvent =
   | UserRejects
   | DoneInvokeEvent<CloseLedger>
   | DoneInvokeEvent<LedgerExists>
+  | DoneInvokeEvent<SiteBudget>
   | DoneInvokeEvent<string>
   | FundsWithdrawn;
 interface UserApproves {
@@ -72,7 +78,8 @@ interface UserRejects {
 enum Actions {
   sendResponse = 'sendResponse',
   assignLedgerId = 'assignLedgerId',
-  setTransactionId = 'setTransactionId'
+  setTransactionId = 'setTransactionId',
+  assignBudget = 'assignBudget'
 }
 
 enum Services {
@@ -81,6 +88,7 @@ enum Services {
   submitWithdrawTransaction = 'submitWithdrawTransaction',
   createObjective = 'createObjective',
   observeFundsWithdrawal = 'observeFundsWithdrawal',
+  fetchBudget = 'fetchBudget',
   clearBudget = 'clearBudget'
 }
 
@@ -94,8 +102,14 @@ export type WorkflowServices = Record<Services, ServiceConfig<WorkflowContext>>;
 export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   id: 'close-and-withdraw',
 
-  initial: 'waitForUserApproval',
+  initial: 'fetchBudget',
   states: {
+    fetchBudget: {
+      invoke: {
+        src: Services.fetchBudget,
+        onDone: {target: 'waitForUserApproval', actions: [Actions.assignBudget]}
+      }
+    },
     waitForUserApproval: {
       entry: [CommonActions.displayUI],
       on: {
@@ -203,6 +217,16 @@ const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
 const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
   await store.clearBudget(context.site);
 };
+
+const fetchBudget = (store: Store): ServiceConfig<Initial> => async context =>
+  store.getBudget(context.site);
+
+const assignBudget = (store: Store): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
+  assign((context, event) => ({
+    ...context,
+    budget: event.data
+  }));
+
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
@@ -213,16 +237,19 @@ const options = (
     submitWithdrawTransaction: submitWithdrawTransaction(store),
     createObjective: createObjective(store),
     observeFundsWithdrawal: observeFundsWithdrawal(store),
-    clearBudget: clearBudget(store)
+    clearBudget: clearBudget(store),
+    fetchBudget: fetchBudget(store)
   },
   actions: {
     ...commonWorkflowActions(messagingService),
+    assignBudget: assignBudget(store),
     setTransactionId: assign({
       transactionId: (context, event: DoneInvokeEvent<string>) => event.data
     }),
 
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),
+
     assignLedgerId: assign((context: Initial, event: DoneInvokeEvent<CloseLedger>) => ({
       ...context,
       ledgerId: event.data.data.ledgerId
@@ -237,3 +264,10 @@ export const workflow = (
   Machine(config)
     .withConfig(options(store, messagingService))
     .withContext(context);
+
+export type CloseLedgerAndWithdrawService = Interpreter<
+  WorkflowContext,
+  any,
+  WorkflowEvent,
+  WorkflowTypeState
+>;
