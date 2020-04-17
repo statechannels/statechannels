@@ -93,7 +93,8 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   });
 };
 
-const assignJointChannelId = assign<VirtualFundingComplete>({
+// Uses the any type to avoid flickering compile errors
+const assignJointChannelId = assign<any>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
 

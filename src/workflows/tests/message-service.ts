@@ -1,10 +1,12 @@
 import {Store} from '../../store';
 import _ from 'lodash';
 import {exists} from '../../utils';
+import {ADD_LOGS} from '../../constants';
+import {logger} from '../../logger';
+const log = logger.info.bind(logger);
 
 export function subscribeToMessages(
-  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>,
-  log = false
+  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>
 ) {
   Object.keys(stores).map(participantId => {
     const store = stores[participantId];
@@ -20,8 +22,7 @@ export function subscribeToMessages(
           .filter(exists)
           .filter(p => p.signingAddress !== address)
           .map(p => {
-            log &&
-              console.log(`${participantId} to ${p.participantId}: ${JSON.stringify(message)}`);
+            ADD_LOGS && log({message}, `${participantId} to ${p.participantId}:`);
             return stores[p.participantId].pushMessage(message);
           });
       });

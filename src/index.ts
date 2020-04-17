@@ -6,6 +6,10 @@ import {MemoryBackend} from './store/memory-backend';
 import {XstateStore} from './store';
 import * as constants from './constants';
 import Url from 'url-parse';
+import './render';
+
+import {logger} from './logger';
+const log = logger.info.bind(logger);
 
 (async function() {
   const chain = new ChainWatcher();
@@ -20,18 +24,15 @@ import Url from 'url-parse';
   // Communicate via postMessage
   window.addEventListener('message', event => {
     if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
-      process.env.ADD_LOGS &&
-        console.log(`INCOMING JSONRPC REQUEST: ${JSON.stringify(event.data, null, 1)}`);
+      constants.ADD_LOGS && log({jsonRpcRequest: event.data}, 'INCOMING JSONRPC REQUEST:');
       const {host} = new Url(event.origin);
       channelWallet.pushMessage(event.data, host);
     }
   });
-  channelWallet.onSendMessage(m => {
-    window.parent.postMessage(m, '*');
-    process.env.ADD_LOGS && console.log(`OUTGOING JSONRPC MESSAGE: ${JSON.stringify(m, null, 1)}`);
+  channelWallet.onSendMessage(message => {
+    window.parent.postMessage(message, '*');
+    constants.ADD_LOGS && log({jsonRpcResponse: message}, 'OUTGOING JSONRPC REQUEST:');
   });
 
   window.parent.postMessage('WalletReady', '*');
 })();
-
-import './render';
