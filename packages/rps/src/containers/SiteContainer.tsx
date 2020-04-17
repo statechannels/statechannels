@@ -6,11 +6,9 @@ import {connect} from 'react-redux';
 import {SiteState} from '../redux/reducer';
 import {WalletError} from '../redux/wallet/actions';
 
-import LoginErrorPage from '../components/LoginErrorPage';
 interface SiteProps {
   isAuthenticated: boolean;
   walletError: WalletError | null;
-  loginError: string | undefined;
 }
 
 class Site extends React.PureComponent<SiteProps> {
@@ -23,9 +21,7 @@ class Site extends React.PureComponent<SiteProps> {
   render() {
     let component;
 
-    if (this.props.loginError) {
-      component = <LoginErrorPage error={this.props.loginError} />;
-    } else if (this.props.walletError !== null) {
+    if (this.props.walletError !== null) {
       component = <code>{JSON.stringify(this.props.walletError, null, 2)}</code>;
     } else if (this.props.isAuthenticated) {
       component = <ApplicationContainer />;
@@ -47,7 +43,6 @@ const mapStateToProps = (state: SiteState) => {
     isAuthenticated: state.login && state.login.loggedIn,
     walletError: state.wallet.error,
     walletVisible: state.overlay.walletVisible,
-    loginError: state.login.error,
   };
 };
 

@@ -1,24 +1,32 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {Status, Torrent} from '../../types';
-import {parseURL, useQuery} from '../../utils/magnet';
-import {torrentStatusChecker} from '../../utils/torrent-status-checker';
-import {useInterval} from '../../utils/useInterval';
+import {Status, TorrentUI} from '../../types';
+import {useQuery} from '../../utils/url';
+import {getTorrentUI} from '../../utils/torrent-status-checker';
 import './File.scss';
-import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
+import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
+import {Flash} from 'rimble-ui';
+import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
 
-function getLiveData(
-  web3Torrent: WebTorrentPaidStreamingClient,
-  setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
-  torrent: Torrent
-): void {
-  const liveTorrent = torrentStatusChecker(web3Torrent, torrent, torrent.infoHash);
-  setTorrent(liveTorrent);
+async function checkTorrent(infoHash: string) {
+  const testResult = await checkTorrentInTracker(infoHash);
+  switch (testResult) {
+    case TorrentTestResult.NO_CONNECTION:
+      return 'Your connection to the tracker may be limited, you might have unexpected functionality';
+    case TorrentTestResult.NO_SEEDERS_FOUND:
+      return "Seems like the torrent doesn't have any seeders. You can give it a try nonetheless.";
+    default:
+      return '';
+  }
+}
+
+function buttonLabel(loading: boolean): string {
+  return loading ? 'Preparing Download...' : 'Start Download';
 }
 
 interface Props {
@@ -29,22 +37,48 @@ const File: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
   const {infoHash} = useParams();
   const queryParams = useQuery();
-  const [torrent, setTorrent] = useState<Torrent>(() => parseURL(infoHash, queryParams));
   const [loading, setLoading] = useState(false);
-  const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
+  const [warning, setWarning] = useState('');
+  const torrentName = queryParams.get('name');
+  const torrentLength = Number(queryParams.get('length'));
+
+  const [torrent, setTorrent] = useState<TorrentUI>(() =>
+    getTorrentUI(web3Torrent, {
+      infoHash,
+      name: torrentName,
+      length: torrentLength
+    })
+  );
 
   useEffect(() => {
-    if (torrent.infoHash) {
-      getLiveData(web3Torrent, setTorrent, torrent);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [torrent.infoHash]);
+    const testResult = async () => {
+      const torrentCheckResult = await checkTorrent(infoHash);
+      setWarning(torrentCheckResult);
+    };
 
-  useInterval(
-    () => getLiveData(web3Torrent, setTorrent, torrent),
-    (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
-  );
+    if (infoHash) {
+      testResult();
+    }
+  }, [infoHash]);
+
+  useEffect(() => {
+    if (torrent.status !== Status.Idle || !!torrent.originalSeed) {
+      const cancelId = setTimeout(
+        () =>
+          setTorrent(
+            getTorrentUI(web3Torrent, {
+              infoHash,
+              name: torrentName,
+              length: torrentLength
+            })
+          ),
+        1000
+      );
+      return () => clearTimeout(cancelId);
+    }
+    return undefined;
+  }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
 
   const {channelCache, budgetCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
   // TODO: We shouldn't have to check all these different conditions
@@ -60,6 +94,13 @@ const File: React.FC<Props> = props => {
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
       <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+      {warning &&
+        ((!torrent.uploaded && torrent.status === Status.Seeding) ||
+          torrent.status === Status.Idle) && (
+          <div className="warning-wrapper">
+            <Flash variant="danger">{warning}</Flash>
+          </div>
+        )}
       <br />
       {showBudget && (
         <SiteBudgetTable
@@ -73,15 +114,21 @@ const File: React.FC<Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={!props.ready || buttonLabel === 'Preparing Download...'}
+            disabled={!props.ready || loading}
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');
-              setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
                 // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
-                setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+                await download(torrent.magnetURI);
+                setTorrent(
+                  getTorrentUI(web3Torrent, {
+                    infoHash,
+                    name: torrentName,
+                    length: torrentLength
+                  })
+                );
               } catch (error) {
                 setErrorLabel(
                   // FIXME: 'put human readable error here'
@@ -90,10 +137,9 @@ const File: React.FC<Props> = props => {
                 );
               }
               setLoading(false);
-              setButtonLabel('Start Download');
             }}
           >
-            {buttonLabel}
+            {buttonLabel(loading)}
           </FormButton>
           {errorLabel && <p className="error">{errorLabel}</p>}
           <div className="subtitle">

@@ -1,9 +1,9 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {Torrent} from '../../../../types';
 import './ProgressBar.scss';
+import {TorrentUI} from '../../../../types';
 
-export type ProgressBarProps = Pick<Torrent, 'downloaded' | 'length' | 'status'>;
+export type ProgressBarProps = Pick<TorrentUI, 'downloaded' | 'length' | 'status'>;
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({downloaded, length, status}) => {
   return (

@@ -6,11 +6,11 @@ import './ChannelsList.scss';
 import {Web3TorrentContext} from '../../../clients/web3torrent-client';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
-import {Torrent} from '../../../types';
 import {getPeerStatus} from '../../../utils/torrent-status-checker';
+import {TorrentUI} from '../../../types';
 
 type UploadInfoProps = {
-  torrent: Torrent;
+  torrent: TorrentUI;
   channels: Dictionary<ChannelState>;
   participantType: 'payer' | 'beneficiary';
 };
@@ -18,7 +18,7 @@ type UploadInfoProps = {
 function channelIdToTableRow(
   channelId: string,
   channels: Dictionary<ChannelState>,
-  torrent: Torrent,
+  torrent: TorrentUI,
   participantType: 'payer' | 'beneficiary',
   clickHandler: (string) => Promise<ChannelState>
 ) {

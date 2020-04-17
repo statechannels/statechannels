@@ -12,8 +12,7 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents,
-  TorrentClientCapabilities
+  WireEvents
 } from './types';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
@@ -22,8 +21,7 @@ import {
   BUFFER_REFILL_RATE,
   INITIAL_SEEDER_BALANCE,
   BLOCK_LENGTH,
-  PEER_TRUST,
-  testTorrent
+  PEER_TRUST
 } from '../constants';
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
@@ -46,15 +44,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
 
-  clientCapability: TorrentClientCapabilities = TorrentClientCapabilities.NOT_TESTED;
-
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
-    if (process.env.NODE_ENV !== 'test') this.testTorrentingCapability();
   }
 
   async enable() {
@@ -72,30 +67,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('Disabling WebTorrentPaidStreamingClient');
     this.pseAccount = null;
     this.outcomeAddress = null;
-  }
-
-  async testTorrentingCapability(timeOut: number = 3000): Promise<void> {
-    this.emit(ClientEvents.CLIENT_CAPABILITY_TEST, this.clientCapability);
-    log('Testing torrenting capability...');
-    let torrentId;
-    const gotAWire = new Promise(resolve => {
-      super.add(testTorrent.magnetURI, (torrent: Torrent) => {
-        torrentId = torrent.infoHash;
-        torrent.once('wire', () => resolve(true));
-      });
-    });
-    const timer = new Promise(function(resolve, _) {
-      setTimeout(resolve, timeOut);
-    });
-    const raceResult = await Promise.race([gotAWire, timer]);
-    if (torrentId) {
-      super.remove(torrentId);
-    }
-    this.clientCapability = raceResult
-      ? TorrentClientCapabilities.CAPABLE
-      : TorrentClientCapabilities.NOT_CAPABLE;
-
-    this.emit(ClientEvents.CLIENT_CAPABILITY_TEST, this.clientCapability);
   }
 
   seed(

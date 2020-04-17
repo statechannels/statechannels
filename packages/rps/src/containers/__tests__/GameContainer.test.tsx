@@ -14,10 +14,7 @@ describe('GameContainer', () => {
   it('should render GameProposed for state GameChosen', () => {
     const initialState: SiteState = {
       login: {
-        loading: false,
         loggedIn: true,
-        user: null,
-        error: undefined,
       },
       metamask: {},
       wallet: {

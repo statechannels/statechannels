@@ -1,7 +1,9 @@
-import {Status, Torrent} from '../types';
+import {Status, TorrentUI, TorrentStaticData} from '../types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
+import WebTorrent from 'webtorrent';
+import {getStaticTorrentUI} from '../constants';
 
-export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
+export const getStatus = (torrent: WebTorrent.Torrent, pseAccount: string): Status => {
   const {uploadSpeed, downloadSpeed, progress, uploaded, paused, done, createdBy} = torrent;
   if (createdBy && createdBy === pseAccount) {
     return Status.Seeding;
@@ -21,8 +23,7 @@ export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
   return Status.Downloading;
 };
 
-export const getFormattedETA = (torrent: Torrent) => {
-  const {done, timeRemaining} = torrent;
+export function getFormattedETA(done: boolean, timeRemaining: number) {
   if (done) {
     return 'Done';
   }
@@ -43,7 +44,7 @@ export const getFormattedETA = (torrent: Torrent) => {
     (minutes && ' ' + minutes + 'm') || '',
     !days && !hours ? ' ' + seconds + 's' : ''
   ].join('');
-};
+}
 
 export const getPeerStatus = (torrent, wire) => {
   if (!wire) return false;
@@ -51,37 +52,38 @@ export const getPeerStatus = (torrent, wire) => {
   return Object.keys(torrent._peers).includes(peerId);
 };
 
-export function torrentStatusChecker(
+export function getTorrentUI(
   web3Torrent: WebTorrentPaidStreamingClient,
-  previousData: Torrent,
-  infoHash: string
-): Torrent {
-  if (!infoHash) {
-    // torrent in magnet form
-    return {...previousData, status: Status.Idle};
-  }
+  staticData: TorrentStaticData
+): TorrentUI {
+  const staticTorrent = getStaticTorrentUI(staticData.infoHash, staticData.name, staticData.length);
 
-  const live = web3Torrent.get(infoHash) as Torrent;
-  if (!live) {
-    // torrent after being destroyed
-    return {...previousData, downloaded: 0, status: Status.Idle};
+  const liveTorrent = web3Torrent.get(staticData.infoHash);
+  if (!liveTorrent) {
+    return {
+      ...staticTorrent,
+      downloaded: 0,
+      status: Status.Idle
+    };
   }
 
   return {
-    // active torrent
-    ...previousData,
-    ...live,
-    ...{
-      name: live.name || previousData.name,
-      length: live.length || previousData.length,
-      downloaded: live.downloaded || 0,
-      status: getStatus(live, web3Torrent.pseAccount),
-      uploadSpeed: live.uploadSpeed,
-      downloadSpeed: live.downloadSpeed,
-      numPeers: live.numPeers,
-      parsedTimeRemaining: getFormattedETA(live),
-      ready: true,
-      originalSeed: live.createdBy === web3Torrent.pseAccount
-    }
+    ...staticTorrent,
+    // The spread operator above doesn't quite work for property definitions below
+    // It might be because WebTorrent.Torrent uses getters for these properties?
+    files: liveTorrent.files,
+    done: liveTorrent.done,
+    downloaded: liveTorrent.downloaded || staticTorrent.downloaded,
+    downloadSpeed: liveTorrent.downloadSpeed,
+    length: liveTorrent.length || staticTorrent.length,
+    magnetURI: liveTorrent.magnetURI || staticTorrent.magnetURI,
+    name: liveTorrent.name || staticTorrent.name,
+    numPeers: liveTorrent.numPeers,
+    ready: true,
+    paused: liveTorrent.paused,
+    status: getStatus(liveTorrent, web3Torrent.pseAccount),
+    uploadSpeed: liveTorrent.uploadSpeed,
+    parsedTimeRemaining: getFormattedETA(liveTorrent.done, liveTorrent.timeRemaining),
+    originalSeed: liveTorrent.createdBy === web3Torrent.pseAccount
   };
 }

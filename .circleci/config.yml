@@ -201,7 +201,7 @@ jobs:
           package: nitro-protocol
       - notify_slack
 
-  integration-test:
+  integration-test-rps:
     resource_class: medium
     working_directory: /home/circleci/project
     docker:
@@ -224,7 +224,7 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn run wait-on ../../.ganache-deployments && yarn run start:integration)
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/xstate-wallet.log)
           background: true
       - run:
           command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
@@ -279,7 +279,7 @@ jobs:
       - upload_e2e_screenshots:
           job: integration-test-web3torrent
 
-  integration-test-with-hub:
+  integration-test-rps-with-hub:
     resource_class: medium
     working_directory: /home/circleci/project
     docker:
@@ -314,13 +314,13 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn run wait-on ../../.ganache-deployments && yarn run start:integration)
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/xstate-wallet.log)
           background: true
       - run:
           command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
           background: true
       - run:
-          command: (cd packages/hub && yarn run wait-on ../../.ganache-deployments && yarn run hub:start:dev)
+          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch | tee /tmp/simple-hub.log)
           background: true
       - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=true yarn test)
       - upload_logs:
@@ -406,19 +406,16 @@ workflows:
       - build:
           requires:
             - prepare
-
       - test:
           requires:
             - prepare
-      # TODO: Enable once working with xstate wallet
-      #  - integration-test:
-      #      requires:
-      #        - prepare
-      # TODO: Enable once the test runs reliably
-      # - integration-test-with-hub:
-      #    requires:
-      #      - prepare
-      #      - integration-test
+      # - integration-test-rps:
+      #     requires:
+      #       - prepare
+      # - integration-test-rps-with-hub:
+      #     requires:
+      #       - prepare
+      #       - integration-test
       - integration-test-web3torrent:
           requires:
             - prepare
