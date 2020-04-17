@@ -15,7 +15,7 @@ import * as cs from '../../core/channel-state';
 import * as a from './actions';
 import * as ls from './state';
 import {randomHex} from '../../utils/randomHex';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {buffers} from 'redux-saga';
 
 let opponentResigned;
@@ -156,15 +156,15 @@ function* gameSagaRun(client: RPSChannelClient) {
 function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
   const openingBalance = bigNumberify(localState.roundBuyIn)
     .mul(5)
-    .toString();
+    .toHexString();
   const startState: AppData = {type: 'start', stake: localState.roundBuyIn};
 
   yield call(
     [client, 'createChannel'],
     localState.address,
     localState.opponentAddress,
-    openingBalance.toString(),
-    openingBalance.toString(),
+    hexZeroPad(openingBalance, 32),
+    hexZeroPad(openingBalance, 32),
     startState,
     localState.outcomeAddress,
     localState.opponentOutcomeAddress
@@ -208,8 +208,8 @@ function* generateSaltAndSendPropose(
     channelId,
     aAddress,
     bAddress,
-    aBal,
-    bBal,
+    hexZeroPad(bigNumberify(aBal).toHexString(), 32),
+    hexZeroPad(bigNumberify(bBal).toHexString(), 32),
     roundProposed,
     aOutcomeAddress,
     bOutcomeAddress
@@ -242,10 +242,10 @@ function* sendRoundAccepted(
   const [aBal2, bBal2] = [
     bigNumberify(aBal)
       .sub(stake)
-      .toString(),
+      .toHexString(),
     bigNumberify(bBal)
       .add(stake)
-      .toString(),
+      .toHexString(),
   ];
 
   yield call(
@@ -253,8 +253,8 @@ function* sendRoundAccepted(
     channelId,
     aAddress,
     bAddress,
-    aBal2,
-    bBal2,
+    hexZeroPad(aBal2, 32),
+    hexZeroPad(bBal2, 32),
     roundAccepted,
     aOutcomeAddress,
     bOutcomeAddress
@@ -294,8 +294,8 @@ function* calculateResultAndSendReveal(
     channelId,
     aAddress,
     bAddress,
-    aBal2.toString(),
-    bBal2.toString(),
+    hexZeroPad(bigNumberify(aBal2).toHexString(), 32),
+    hexZeroPad(bigNumberify(bBal2).toHexString(), 32),
     reveal,
     aOutcomeAddress,
     bOutcomeAddress
@@ -337,8 +337,8 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
     channelId,
     aAddress,
     bAddress,
-    aBal,
-    bBal,
+    hexZeroPad(bigNumberify(aBal).toHexString(), 32),
+    hexZeroPad(bigNumberify(bBal).toHexString(), 32),
     start,
     aOutcomeAddress,
     bOutcomeAddress
