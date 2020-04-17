@@ -35,10 +35,7 @@ const testState = state => () => (
 
 const initialState: SiteState = {
   login: {
-    loading: false,
     loggedIn: true,
-    user: null,
-    error: undefined,
   },
   metamask: {
     network: 0,

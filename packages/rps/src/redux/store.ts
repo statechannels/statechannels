@@ -16,7 +16,7 @@ import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 import {GotAddressFromWallet} from './game/actions';
-import {HUB, tenEth} from '../constants';
+// import {HUB, tenEth} from '../constants';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -54,14 +54,14 @@ function* rootSaga() {
     yield call([window.channelProvider, 'enable']);
     yield fork(firebaseInboxListener, client, window.channelProvider.signingAddress);
 
-    yield call(
-      [client, 'approveBudgetAndFund'],
-      tenEth,
-      tenEth,
-      window.channelProvider.selectedAddress,
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    // yield call(
+    //   [client, 'approveBudgetAndFund'],
+    //   tenEth,
+    //   tenEth,
+    //   window.channelProvider.selectedAddress,
+    //   HUB.signingAddress,
+    //   HUB.outcomeAddress
+    // );
 
     const action: GotAddressFromWallet = yield take('GotAddressFromWallet');
     yield fork(openGameSaga, action.address);
