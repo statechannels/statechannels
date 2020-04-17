@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import React from 'react';
 import prettier from 'prettier-bytes';
-import {Torrent} from '../../../types';
 import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {TorrentUI} from '../../../types';
 
 export type UploadInfoProps = {
-  torrent: Torrent;
+  torrent: TorrentUI;
   channelCache: Record<string, ChannelState>;
   mySigningAddress: string;
 };

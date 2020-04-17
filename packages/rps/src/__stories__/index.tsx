@@ -7,7 +7,6 @@ import '../index.scss';
 import {SiteState} from '../redux/reducer';
 import HomePage from '../components/HomePage';
 import LoadingPage from '../components/LoadingPage';
-import LoginErrorPage from '../components/LoginErrorPage';
 import {localStatesA, localStatesB, channelStates} from '../redux/game/__tests__/scenarios';
 import {ChannelState} from '../core';
 import GameBar from '../components/GameBar';
@@ -35,10 +34,7 @@ const testState = state => () => (
 
 const initialState: SiteState = {
   login: {
-    loading: false,
     loggedIn: true,
-    user: null,
-    error: undefined,
   },
   metamask: {
     network: 0,
@@ -83,7 +79,6 @@ export function siteStateFromLocalState<T extends states.LocalState>(
 
 storiesOf('Setup', module)
   .add('Loading Page', () => <LoadingPage />)
-  .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
   .add('Home Page', () => (
     <HomePage login={() => alert('login')} metamaskState={initialState.metamask} />
   ))

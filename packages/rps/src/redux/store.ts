@@ -6,18 +6,16 @@ import reducer from './reducer';
 const sagaMiddleware = createSagaMiddleware();
 import stateChannelWalletSaga from './wallet/saga';
 
-import loginSaga from './login/saga';
 import metamaskSaga from './metamask/saga';
 import openGameSaga from './open-games/saga';
-import {firebaseInboxListener} from './message-service/firebase-inbox-listener';
+import {setupFirebase} from './message-service/setup-firebase-messaging';
 import {RPSChannelClient} from '../utils/rps-channel-client';
 import {channelUpdatedListener} from './message-service/channel-updated-listener';
-import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 import {GotAddressFromWallet} from './game/actions';
-import {HUB} from '../constants';
+// import {HUB, tenEth} from '../constants';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -26,7 +24,6 @@ const store = createStore(reducer, enhancers);
 
 function* rootSaga() {
   yield fork(metamaskSaga);
-  yield fork(loginSaga);
 
   let client: RPSChannelClient;
   if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
@@ -35,7 +32,6 @@ function* rootSaga() {
   } else {
     client = new RPSChannelClient(new ChannelClient(window.channelProvider));
     yield stateChannelWalletSaga();
-    yield fork(messageQueuedListener, client);
   }
 
   yield fork(channelUpdatedListener, client);
@@ -54,16 +50,18 @@ function* rootSaga() {
     yield fork(autoOpponent, 'B', client);
   } else {
     yield call([window.channelProvider, 'enable']);
-    yield fork(firebaseInboxListener, client, window.channelProvider.signingAddress);
 
-    yield call(
-      [client, 'approveBudgetAndFund'],
-      '0x8ac7230489e80000', // 10 eth
-      '0x8ac7230489e80000',
-      window.channelProvider.selectedAddress,
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    setupFirebase(client, window.channelProvider.signingAddress);
+
+    // RPS only supports a directly funded channel, for now
+    // yield call(
+    //   [client, 'approveBudgetAndFund'],
+    //   tenEth,
+    //   tenEth,
+    //   window.channelProvider.selectedAddress,
+    //   HUB.signingAddress,
+    //   HUB.outcomeAddress
+    // );
 
     const action: GotAddressFromWallet = yield take('GotAddressFromWallet');
     yield fork(openGameSaga, action.address);

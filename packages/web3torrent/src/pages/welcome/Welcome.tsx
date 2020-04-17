@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {preSeededTorrents, welcomePageTrackerOpts} from '../../constants';
+import {preseededTorrentsUI, defaultTrackerOpts} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
@@ -16,9 +16,9 @@ interface Props {
 
 const Welcome: React.FC<Props> = props => {
   const history = useHistory();
-  const [trackerClient] = useState(new Client(welcomePageTrackerOpts));
+  const [trackerClient] = useState(new Client(defaultTrackerOpts));
   const [torrents, setTorrents] = useState({
-    [preSeededTorrents[0].infoHash]: false
+    [preseededTorrentsUI[0].infoHash]: false
   }); // do not display by default
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Welcome: React.FC<Props> = props => {
       log.info({data}, 'got an announce response from tracker: ');
       if (data.complete > 0) {
         // there are some seeders for this torrent
-        setTorrents({[preSeededTorrents[0].infoHash]: true});
+        setTorrents({[preseededTorrentsUI[0].infoHash]: true});
         // this torrent should be displayed
         log.info(`Seeder found for ${preSeededTorrents[0].infoHash}`);
       }
@@ -62,7 +62,7 @@ const Welcome: React.FC<Props> = props => {
         </p>
       </div>
       <h2>Download a sample file</h2>
-      <ShareList torrents={preSeededTorrents.filter(torrent => torrents[torrent.infoHash])} />
+      <ShareList torrents={preseededTorrentsUI.filter(torrent => torrents[torrent.infoHash])} />
       <h2>Or share a file</h2>
       <FormButton
         name="upload"

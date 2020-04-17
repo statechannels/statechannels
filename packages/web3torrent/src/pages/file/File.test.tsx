@@ -5,7 +5,7 @@ import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router} from 'react-router-dom';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentAddInput} from '../../library/types';
-import {Status, Torrent} from '../../types';
+import {Status, Torrent, TorrentStaticData} from '../../types';
 import {testSelector} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
@@ -40,22 +40,6 @@ describe('<File />', () => {
     expect(component.find(testSelector('download-button')).text()).toBe('Start Download');
   });
 
-  it("should change the label to 'Preparing file' and show a spinner when clicked", async () => {
-    const fileButton = component.find(testSelector('download-button'));
-
-    await act(async () => {
-      await fileButton.simulate('click');
-    });
-
-    expect(fileButton.text()).toEqual('Preparing Download...');
-
-    /**
-     * @todo This should be done with `fileButton.find(Spinner)`, but for some
-     * reason it is not working.
-     */
-    expect(fileButton.html().includes('class="spinner')).toEqual(true);
-  });
-
   // TODO: Figure out how to test mocked channelClient
   // eslint-disable-next-line
   // it('should run approveBudgetAndFund functions when the File Button is clicked', async () => {
@@ -68,8 +52,8 @@ describe('<File />', () => {
 
   it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
-      .spyOn(TorrentStatus, 'torrentStatusChecker')
-      .mockImplementation((_w3t: any, _pD: Torrent, _iH: any) => EmptyTorrent);
+      .spyOn(TorrentStatus, 'getTorrentUI')
+      .mockImplementation((_w3t: any, _staticData: TorrentStaticData) => EmptyTorrent);
 
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');

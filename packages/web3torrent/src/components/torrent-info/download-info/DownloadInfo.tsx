@@ -2,14 +2,14 @@ import _ from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
 import {cancel} from '../../../clients/web3torrent-client';
-import {Torrent} from '../../../types';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {TorrentUI} from '../../../types';
 
 export type DownloadInfoProps = {
-  torrent: Torrent;
+  torrent: TorrentUI;
   channelCache: Record<string, ChannelState>;
   mySigningAddress: string;
 };

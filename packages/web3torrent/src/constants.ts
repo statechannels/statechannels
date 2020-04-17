@@ -1,5 +1,4 @@
-/* eslint-disable no-unreachable */
-import {Status, Torrent} from './types';
+import {Status, Torrent, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
 
@@ -16,6 +15,19 @@ export const BUFFER_REFILL_RATE = utils.bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENG
 // It can also cause a payment to go above the leecher's balance / capabilities
 
 export const INITIAL_SEEDER_BALANCE = utils.bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
+
+const randomNumberGenerator = (length: number) => {
+  // Programatic way of getting fixed length number, based of https://stackoverflow.com/a/21816636/6569950
+  const base = Math.pow(10, length - 1);
+  return Math.floor(base + Math.random() * 9 * base);
+};
+
+export function generateRandomPeerId() {
+  // based of webtorrent's way of generating random peerId's
+  // https://github.com/webtorrent/webtorrent/blob/ed2809159585d2611dff24a48f25748baf78e8fb/index.js#L52
+  const randomNumber = String(randomNumberGenerator(9));
+  return Buffer.from(`-WW0007-${btoa(randomNumber)}`).toString('hex');
+}
 
 // firebase setup
 export const HUB = {
@@ -53,15 +65,32 @@ export const EmptyTorrent = ({
   ready: false,
   downloadSpeed: 0,
   uploadSpeed: 0,
-  cost: '0',
   status: Status.Idle,
   downloaded: 0,
   files: [],
   wires: []
 } as unknown) as Torrent;
 
+export const EmptyTorrentUI: TorrentUI = {
+  files: [],
+  done: false,
+  downloaded: 0,
+  downloadSpeed: 0,
+  infoHash: '',
+  length: 0,
+  magnetURI: '',
+  name: 'unknown',
+  numPeers: 0,
+  ready: false,
+  paused: false,
+  status: Status.Idle,
+  uploaded: 0,
+  uploadSpeed: 0,
+  wires: []
+};
+
 // Pre Seeded Constants (by StateChannels team)
-export const preSeededTorrents: Array<Partial<Torrent>> = [
+const preSeededTorrents: Array<Pick<TorrentUI, 'name' | 'length' | 'infoHash' | 'magnetURI'>> = [
   {
     name: 'Sintel.mp4',
     length: 129241752,
@@ -71,13 +100,45 @@ export const preSeededTorrents: Array<Partial<Torrent>> = [
   }
 ];
 
+export const preseededTorrentsUI: TorrentUI[] = preSeededTorrents.map(partialTorrent => ({
+  ...partialTorrent,
+  ...getStaticTorrentUI(partialTorrent.infoHash, partialTorrent.name, partialTorrent.length)
+}));
+
+export function getStaticTorrentUI(
+  infoHash: string,
+  nameParam?: string,
+  lengthParam?: number
+): TorrentUI {
+  const name = nameParam || 'unknown';
+  const length = lengthParam || 0;
+  const magnetURI = defaultTrackers.reduce(
+    (magnetURI, tracker) => magnetURI + '&tr=' + tracker,
+    `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(name)}&xl=${length}`
+  );
+
+  return {
+    ...EmptyTorrentUI,
+    infoHash,
+    name,
+    length,
+    magnetURI
+  };
+}
+
 // Welcome Page Tracker creation options
-export const welcomePageTrackerOpts = {
+export const defaultTrackerOpts = {
   infoHash: [preSeededTorrents[0].infoHash],
   announce: defaultTrackers,
-  peerId: '2d5757303030372d37454e613073307937495630', // random
+  peerId: generateRandomPeerId(), // random
   port: 6881,
-  getAnnounceOpts: () => ({pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777'}) // dummy pseAccount, but it works
+  getAnnounceOpts: () => ({
+    pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777',
+    // the pseAccount is only used to allow the client on the tracker server, see
+    // https://github.com/statechannels/monorepo/blob/d0c6b1be3a637c88880c0c937d9a6ebc8078799c/packages/web3torrent/tracker/index.js#L16
+    uploaded: 0,
+    downloaded: 0
+  }) // dummy pseAccount, but it works
 };
 
 export const testTorrent = {
