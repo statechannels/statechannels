@@ -87,15 +87,12 @@ export class MessagingService {
     reject: (reason?: any) => void,
     callback?: (result: ResultType) => void
   ) {
-    const guid = Guid.create().toString();
-    log('CREATE', guid);
     const listener = (event: MessageEvent) => {
       if (event.data && event.data.jsonrpc && event.data.result && event.data.id === message.id) {
         if (callback) {
           callback(event.data.result);
         }
         this.acknowledge();
-        log('REMOVE', guid);
         window.removeEventListener('message', listener);
         log('Received response: %o', event.data);
         resolve(event.data.result);
