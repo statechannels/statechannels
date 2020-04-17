@@ -1,6 +1,5 @@
 import debug from 'debug';
 import {JsonRpcRequest} from './types';
-import {Guid} from 'guid-typescript';
 
 const log = debug('channel-provider:messaging');
 
