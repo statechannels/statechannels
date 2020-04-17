@@ -3,7 +3,7 @@ import {boolean, number, optionsKnob, text, withKnobs} from '@storybook/addon-kn
 import {storiesOf} from '@storybook/react';
 import React from 'react';
 import '../../../App.scss';
-import {Status, Torrent} from '../../../types';
+import {Status, TorrentUI} from '../../../types';
 import {DownloadInfo} from './DownloadInfo';
 import './DownloadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
@@ -59,7 +59,7 @@ storiesOf('Web3Torrent', module)
               downloaded: 333
             }
           ]
-        } as unknown) as Torrent
+        } as unknown) as TorrentUI
       }
       channelCache={{
         [c1]: {

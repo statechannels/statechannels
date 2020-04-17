@@ -18,15 +18,8 @@ export const DownloadingStatuses = [
 export const UploadingStatuses = [Status.Seeding];
 export const IdleStatuses = [Status.Idle, Status.Completed];
 
-export type Torrent = ExtendedTorrent & {
-  parsedTimeRemaining?: string;
-  numSeeds?: number;
-  status: Status;
-  originalSeed?: boolean;
-};
-
 export type TorrentUI = Pick<
-  Torrent,
+  ExtendedTorrent,
   | 'files'
   | 'done'
   | 'downloaded'
@@ -36,15 +29,16 @@ export type TorrentUI = Pick<
   | 'magnetURI'
   | 'name'
   | 'numPeers'
-  | 'originalSeed'
-  | 'parsedTimeRemaining'
   | 'paused'
   | 'ready'
-  | 'status'
   | 'uploaded'
   | 'uploadSpeed'
   | 'wires'
->;
+> & {
+  originalSeed?: boolean;
+  parsedTimeRemaining?: string;
+  status: Status;
+};
 
 export interface TorrentStaticData {
   infoHash: string;

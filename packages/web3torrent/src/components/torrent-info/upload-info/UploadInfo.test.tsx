@@ -2,14 +2,14 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentPeers} from '../../../library/types';
-import {Torrent} from '../../../types';
-import {createMockTorrent, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
+import {TorrentUI} from '../../../types';
+import {createMockTorrentUI, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
 import {UploadInfo, UploadInfoProps} from './UploadInfo';
 
 Enzyme.configure({adapter: new Adapter()});
 
 type MockUploadInfo = {
-  torrent: Partial<Torrent>;
+  torrent: Partial<TorrentUI>;
   peers: TorrentPeers;
   uploadInfoWrapper: ReactWrapper<UploadInfoProps>;
   uploadingSectionElement: ReactWrapper;
@@ -18,10 +18,10 @@ type MockUploadInfo = {
 
 const mockUploadInfo = (noPeers = false): MockUploadInfo => {
   const peers = noPeers ? {} : createMockTorrentPeers();
-  const torrent = createMockTorrent({
+  const torrent = createMockTorrentUI({
     numPeers: Object.keys(peers).length,
     originalSeed: true
-  }) as Torrent;
+  });
 
   const uploadInfoWrapper = mount(
     <UploadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />

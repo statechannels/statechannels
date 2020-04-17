@@ -3,7 +3,7 @@ import {withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/react';
 import React from 'react';
 import '../../../App.scss';
-import {Torrent} from '../../../types';
+import {TorrentUI} from '../../../types';
 import {UploadInfo} from './UploadInfo';
 import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
@@ -41,7 +41,7 @@ storiesOf('Web3Torrent', module)
               uploaded: 333
             }
           ]
-        } as unknown) as Torrent
+        } as unknown) as TorrentUI
       }
       channelCache={{
         [c1]: {

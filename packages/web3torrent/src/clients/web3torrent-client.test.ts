@@ -1,13 +1,14 @@
-import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
+import WebTorrent, {TorrentOptions} from 'webtorrent';
 import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
-import {createMockTorrent, createMockTorrentPeers} from '../utils/test-utils';
+import {createMockExtendedTorrent, createMockTorrentPeers, pseAccount} from '../utils/test-utils';
 import {download, getTorrentPeers, cancel, upload, web3torrent} from './web3torrent-client';
+import {getStatus} from '../utils/torrent-status-checker';
 
 describe('Web3TorrentClient', () => {
   describe('download()', () => {
-    let torrent: Partial<Torrent>;
+    let torrent: WebTorrent.Torrent;
     let addSpy: jest.SpyInstance<
       PaidStreamingTorrent,
       [
@@ -18,7 +19,7 @@ describe('Web3TorrentClient', () => {
     >;
 
     beforeEach(() => {
-      torrent = createMockTorrent();
+      torrent = createMockExtendedTorrent();
       addSpy = jest
         .spyOn(web3torrent, 'add')
         .mockImplementation(
@@ -33,13 +34,14 @@ describe('Web3TorrentClient', () => {
     });
 
     it('should return a torrent with a status of Connecting', async () => {
+      torrent = createMockExtendedTorrent({createdBy: 'random'});
       const {magnetURI} = torrent;
 
       const result = await download(magnetURI as WebTorrentAddInput);
 
       expect(addSpy).toHaveBeenCalled();
       expect(result.magnetURI).toEqual(magnetURI);
-      expect(result.status).toEqual(Status.Connecting);
+      expect(getStatus(torrent, pseAccount)).toEqual(Status.Connecting);
     });
 
     afterEach(() => {
@@ -48,7 +50,7 @@ describe('Web3TorrentClient', () => {
   });
 
   describe('upload()', () => {
-    let torrent: Partial<Torrent>;
+    let torrent: WebTorrent.Torrent;
     let seedSpy: jest.SpyInstance<
       PaidStreamingTorrent,
       [
@@ -59,7 +61,7 @@ describe('Web3TorrentClient', () => {
     >;
 
     beforeEach(() => {
-      torrent = createMockTorrent();
+      torrent = createMockExtendedTorrent();
       seedSpy = jest
         .spyOn(web3torrent, 'seed')
         .mockImplementation(
@@ -82,7 +84,7 @@ describe('Web3TorrentClient', () => {
 
       expect(seedSpy).toHaveBeenCalled();
       expect(result.length).toEqual(torrent.length);
-      expect(result.status).toEqual(Status.Seeding);
+      expect(getStatus(result, pseAccount)).toEqual(Status.Seeding);
     });
 
     afterEach(() => {

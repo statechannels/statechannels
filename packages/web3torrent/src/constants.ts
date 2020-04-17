@@ -1,4 +1,4 @@
-import {Status, Torrent, TorrentUI} from './types';
+import {Status, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
 
@@ -54,22 +54,6 @@ export const defaultTrackers = [
 ];
 
 export const requiredNetwork = Number(process.env.REACT_APP_CHAIN_NETWORK_ID);
-
-// Default Torrent Data
-export const EmptyTorrent = ({
-  name: 'unknown',
-  magnetURI: '',
-  infoHash: '',
-  length: 0,
-  done: false,
-  ready: false,
-  downloadSpeed: 0,
-  uploadSpeed: 0,
-  status: Status.Idle,
-  downloaded: 0,
-  files: [],
-  wires: []
-} as unknown) as Torrent;
 
 export const EmptyTorrentUI: TorrentUI = {
   files: [],

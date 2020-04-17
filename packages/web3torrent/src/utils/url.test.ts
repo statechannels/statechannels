@@ -1,9 +1,9 @@
 import {RoutePath} from '../routes';
 import {generateURL} from './url';
-import {createMockTorrent} from './test-utils';
+import {createMockTorrentUI} from './test-utils';
 import {getStaticTorrentUI} from '../constants';
 
-const mockTorrent = createMockTorrent();
+const mockTorrent = createMockTorrentUI();
 const mockOptionalParams = ({name, xl}) =>
   new URLSearchParams(
     `?${name !== undefined ? 'name=' + name : ''}` + `${xl !== undefined ? '&length=' + xl : ''}`

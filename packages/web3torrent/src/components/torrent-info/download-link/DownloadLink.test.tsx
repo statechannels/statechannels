@@ -3,13 +3,13 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {TorrentFile} from 'webtorrent';
-import {createMockTorrent} from '../../../utils/test-utils';
+import {createMockTorrentUI} from '../../../utils/test-utils';
 import {DownloadLink} from './DownloadLink';
 import {mockMetamask} from '../../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
 
-const mockTorrent = createMockTorrent({
+const mockTorrent = createMockTorrentUI({
   downloaded: 128913,
   done: true,
   files: [({getBlobURL: resolve => resolve(null, 'blob')} as unknown) as TorrentFile]
@@ -21,7 +21,7 @@ describe('<DownloadLink />', () => {
   beforeAll(() => {
     mockMetamask();
     document.execCommand = jest.fn(() => true);
-    component = mount(<DownloadLink torrent={createMockTorrent()} />);
+    component = mount(<DownloadLink torrent={createMockTorrentUI()} />);
   });
 
   it('by default should be hidden', () => {

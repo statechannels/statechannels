@@ -1,12 +1,14 @@
 import {web3torrent} from '../clients/web3torrent-client';
-import {Status, Torrent, TorrentStaticData} from '../types';
-import {createMockTorrent, infoHash} from './test-utils';
+import {Status, TorrentStaticData} from '../types';
+import {createMockTorrentUI, infoHash, createMockExtendedTorrent, pseAccount} from './test-utils';
 import {getFormattedETA, getStatus, getTorrentUI} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
 import {getStaticTorrentUI} from '../constants';
+import {ExtendedTorrent} from '../library/types';
+import WebTorrent from 'webtorrent';
 
 describe('Torrent Status Checker', () => {
-  let torrent: Torrent;
+  let torrent: ExtendedTorrent;
 
   const staticData: TorrentStaticData = {
     infoHash: infoHash
@@ -17,7 +19,7 @@ describe('Torrent Status Checker', () => {
     web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
   });
   beforeEach(() => {
-    torrent = createMockTorrent() as Torrent;
+    torrent = createMockExtendedTorrent();
   });
   afterAll(() => {
     web3torrent.destroy();
@@ -37,7 +39,7 @@ describe('Torrent Status Checker', () => {
 
     it("should return a torrent with a valid status if it's a live torrent", () => {
       expect(process.env.REACT_APP_FAKE_CHANNEL_PROVIDER).toBe('true');
-      const inProgressTorrent: Partial<Torrent> = {
+      const inProgressTorrent: Partial<ExtendedTorrent> = {
         downloaded: 12891.3,
         uploaded: 0,
         uploadSpeed: 3000,
@@ -45,7 +47,6 @@ describe('Torrent Status Checker', () => {
         numPeers: 2,
         done: false,
         timeRemaining: 50000,
-        originalSeed: false,
         paused: undefined
       };
 
@@ -58,10 +59,12 @@ describe('Torrent Status Checker', () => {
       const expectedResult = {
         ...torrent,
         ...inProgressTorrent,
+        originalSeed: false,
         status: Status.Downloading,
         parsedTimeRemaining: 'ETA 50s'
       };
       delete expectedResult.timeRemaining;
+      delete expectedResult.createdBy;
 
       expect(result).toEqual(expectedResult);
 
@@ -109,7 +112,7 @@ describe('Torrent Status Checker', () => {
               downloadSpeed: 0,
               progress: 50,
               done: false
-            } as Torrent,
+            } as WebTorrent.Torrent,
             web3torrent.pseAccount
           )
         ).toEqual(Status.Seeding);
@@ -123,7 +126,7 @@ describe('Torrent Status Checker', () => {
               downloadSpeed: 1000,
               progress: 100,
               done: true
-            } as Torrent,
+            } as WebTorrent.Torrent,
             web3torrent.pseAccount
           )
         ).toEqual(Status.Completed);
@@ -132,7 +135,7 @@ describe('Torrent Status Checker', () => {
       it('should return Connecting if there is no traffic yet', () => {
         expect(
           getStatus(
-            {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as Torrent,
+            {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as WebTorrent.Torrent,
             web3torrent.pseAccount
           )
         ).toEqual(Status.Connecting);
@@ -146,7 +149,7 @@ describe('Torrent Status Checker', () => {
               downloadSpeed: 1000,
               progress: 10,
               done: false
-            } as Torrent,
+            } as WebTorrent.Torrent,
             web3torrent.pseAccount
           )
         ).toEqual(Status.Downloading);
