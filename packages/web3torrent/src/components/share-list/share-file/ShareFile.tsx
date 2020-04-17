@@ -1,13 +1,13 @@
 import React from 'react';
-import {Torrent} from '../../../types';
 import {FormButton} from '../../form';
 import './ShareFile.scss';
 import {prettyPrintWei, calculateWei} from '../../../utils/calculateWei';
 import prettier from 'prettier-bytes';
 import {useHistory} from 'react-router-dom';
 import {generateURL} from '../../../utils/magnet';
+import {TorrentUI} from '../../../types';
 
-export type ShareFileProps = {file: Partial<Torrent>};
+export type ShareFileProps = {file: TorrentUI};
 
 const ShareFile: React.FC<ShareFileProps> = ({file}: ShareFileProps) => {
   const history = useHistory();
@@ -17,7 +17,7 @@ const ShareFile: React.FC<ShareFileProps> = ({file}: ShareFileProps) => {
       <td className="other-cell">{prettier(file.length)}</td>
       <td className="other-cell">{prettyPrintWei(calculateWei(file.length))}</td>
       <td className="button-cell">
-        <FormButton name="download" onClick={() => history.push(generateURL(file as Torrent))}>
+        <FormButton name="download" onClick={() => history.push(generateURL(file))}>
           Download
         </FormButton>
       </td>

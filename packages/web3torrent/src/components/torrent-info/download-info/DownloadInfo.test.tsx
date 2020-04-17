@@ -22,7 +22,7 @@ type MockDownloadInfo = {
 
 const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => {
   const torrent = createMockTorrent(torrentProps);
-  torrent.parsedTimeRemaining = getFormattedETA(torrent as Torrent);
+  torrent.parsedTimeRemaining = getFormattedETA(torrent.done, torrent.timeRemaining);
   const downloadInfoWrapper = mount(
     <DownloadInfo torrent={torrent as Torrent} channelCache={{}} mySigningAddress="0x0" />
   );

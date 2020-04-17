@@ -1,6 +1,6 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {DownloadingStatuses, Torrent} from '../../types';
+import {DownloadingStatuses, TorrentUI} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
@@ -11,7 +11,7 @@ import {ChannelState} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 
 export type TorrentInfoProps = {
-  torrent: Torrent;
+  torrent: TorrentUI;
   channelCache: Record<string, ChannelState>;
   mySigningAddress: string;
 };

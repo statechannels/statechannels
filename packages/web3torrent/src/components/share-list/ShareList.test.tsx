@@ -3,11 +3,11 @@ import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory, MemoryHistory} from 'history';
 import React from 'react';
 import {Router} from 'react-router-dom';
-import {preSeededTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import {ShareList} from './ShareList';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import prettier from 'prettier-bytes';
+import {preseededTorrentsUI} from '../../constants';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -19,7 +19,7 @@ describe('<ShareList />', () => {
     history = createMemoryHistory();
     component = mount(
       <Router history={history}>
-        <ShareList torrents={preSeededTorrents} />
+        <ShareList torrents={preseededTorrentsUI} />
       </Router>
     );
   });
@@ -30,12 +30,12 @@ describe('<ShareList />', () => {
 
   it("renders the list with all it's torrents data", () => {
     const filesData = component.find('.share-file');
-    expect(filesData.length).toBe(preSeededTorrents.length);
+    expect(filesData.length).toBe(preseededTorrentsUI.length);
     const firstFileData = filesData.at(0);
-    expect(firstFileData.childAt(0).text()).toBe(preSeededTorrents[0].name);
-    expect(firstFileData.childAt(1).text()).toBe(prettier(preSeededTorrents[0].length));
+    expect(firstFileData.childAt(0).text()).toBe(preseededTorrentsUI[0].name);
+    expect(firstFileData.childAt(1).text()).toBe(prettier(preseededTorrentsUI[0].length));
     expect(firstFileData.childAt(2).text()).toBe(
-      prettyPrintWei(calculateWei(preSeededTorrents[0].length))
+      prettyPrintWei(calculateWei(preseededTorrentsUI[0].length))
     );
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();
   });
@@ -46,9 +46,9 @@ describe('<ShareList />', () => {
       .at(0)
       .find('button')
       .simulate('click');
-    expect(history.location.pathname).toBe(`${RoutePath.File}${preSeededTorrents[0].infoHash}`);
+    expect(history.location.pathname).toBe(`${RoutePath.File}${preseededTorrentsUI[0].infoHash}`);
     expect(history.location.search).toBe(
-      `?name=${preSeededTorrents[0].name}&length=${preSeededTorrents[0].length}`
+      `?name=${preseededTorrentsUI[0].name}&length=${preseededTorrentsUI[0].length}`
     );
   });
 });

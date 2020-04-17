@@ -1,8 +1,9 @@
-import {Status, Torrent} from '../types';
+import {Status, TorrentUI, TorrentStaticData} from '../types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
-import {parseURL} from './magnet';
+import WebTorrent from 'webtorrent';
+import {getStaticTorrentUI} from '../constants';
 
-export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
+export const getStatus = (torrent: WebTorrent.Torrent, pseAccount: string): Status => {
   const {uploadSpeed, downloadSpeed, progress, uploaded, paused, done, createdBy} = torrent;
   if (createdBy && createdBy === pseAccount) {
     return Status.Seeding;
@@ -22,8 +23,7 @@ export const getStatus = (torrent: Torrent, pseAccount: string): Status => {
   return Status.Downloading;
 };
 
-export const getFormattedETA = (torrent: Torrent) => {
-  const {done, timeRemaining} = torrent;
+export function getFormattedETA(done: boolean, timeRemaining: number) {
   if (done) {
     return 'Done';
   }
@@ -44,7 +44,7 @@ export const getFormattedETA = (torrent: Torrent) => {
     (minutes && ' ' + minutes + 'm') || '',
     !days && !hours ? ' ' + seconds + 's' : ''
   ].join('');
-};
+}
 
 export const getPeerStatus = (torrent, wire) => {
   if (!wire) return false;
@@ -52,15 +52,13 @@ export const getPeerStatus = (torrent, wire) => {
   return Object.keys(torrent._peers).includes(peerId);
 };
 
-export interface UrlData {
-  infoHash: string;
-  queryParams: URLSearchParams;
-}
+export function getTorrentUI(
+  web3Torrent: WebTorrentPaidStreamingClient,
+  staticData: TorrentStaticData
+): TorrentUI {
+  const staticTorrent = getStaticTorrentUI(staticData.infoHash, staticData.name, staticData.length);
 
-export function getTorrent(web3Torrent: WebTorrentPaidStreamingClient, urlData: UrlData): Torrent {
-  const staticTorrent = parseURL(urlData.infoHash, urlData.queryParams);
-  // todo: we shouldn't be force casting objects
-  const liveTorrent = web3Torrent.get(urlData.infoHash) as Torrent;
+  const liveTorrent = web3Torrent.get(staticData.infoHash);
   if (!liveTorrent) {
     return {
       ...staticTorrent,
@@ -71,18 +69,21 @@ export function getTorrent(web3Torrent: WebTorrentPaidStreamingClient, urlData: 
 
   return {
     ...staticTorrent,
-    ...liveTorrent,
     // The spread operator above doesn't quite work for property definitions below
     // It might be because WebTorrent.Torrent uses getters for these properties?
-    name: liveTorrent.name || staticTorrent.name,
+    files: liveTorrent.files,
+    done: liveTorrent.done,
+    downloaded: liveTorrent.downloaded || staticTorrent.downloaded,
+    downloadSpeed: liveTorrent.downloadSpeed,
     length: liveTorrent.length || staticTorrent.length,
-    downloaded: liveTorrent.downloaded || 0,
+    magnetURI: liveTorrent.magnetURI || staticTorrent.magnetURI,
+    name: liveTorrent.name || staticTorrent.name,
+    numPeers: liveTorrent.numPeers,
+    ready: true,
+    paused: liveTorrent.paused,
     status: getStatus(liveTorrent, web3Torrent.pseAccount),
     uploadSpeed: liveTorrent.uploadSpeed,
-    downloadSpeed: liveTorrent.downloadSpeed,
-    numPeers: liveTorrent.numPeers,
-    parsedTimeRemaining: getFormattedETA(liveTorrent),
-    ready: true,
+    parsedTimeRemaining: getFormattedETA(liveTorrent.done, liveTorrent.timeRemaining),
     originalSeed: liveTorrent.createdBy === web3Torrent.pseAccount
   };
 }

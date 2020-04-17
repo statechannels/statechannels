@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {Torrent} from '../../../types';
 import {getFileSavingData, SavingData} from '../../../utils/file-saver';
 
 import './DownloadLink.scss';
+import {TorrentUI} from '../../../types';
 
-export type DownloadLinkProps = {torrent: Torrent};
+export type DownloadLinkProps = {torrent: TorrentUI};
 
 export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   const [file, setFile] = useState({} as SavingData);

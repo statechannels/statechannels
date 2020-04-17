@@ -1,9 +1,9 @@
 import React from 'react';
-import {Torrent} from '../../types';
 import {ShareFile} from './share-file/ShareFile';
 import './ShareList.scss';
+import {TorrentUI} from '../../types';
 
-export type ShareListProps = {torrents: Array<Partial<Torrent>>};
+export type ShareListProps = {torrents: Array<TorrentUI>};
 
 export const ShareList: React.FC<ShareListProps> = ({torrents}) => {
   return (
