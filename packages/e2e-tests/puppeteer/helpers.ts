@@ -7,6 +7,9 @@ const pinoLog =
   process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
     ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'a'})
     : {write: (): null => null};
+const browserConsoleLog = process.env.BROWSER_LOG_DESTINATION
+  ? fs.createWriteStream(process.env.BROWSER_LOG_DESTINATION, {flags: 'a'})
+  : {write: (): null => null};
 
 export async function loadDapp(
   page: Page,
@@ -19,7 +22,6 @@ export async function loadDapp(
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
-    // localStorage.debug = "web3torrent:*";
     window.web3 = new Web3("http://localhost:8547");
     window.ethereum = window.web3.currentProvider;
     
@@ -47,9 +49,10 @@ export async function loadDapp(
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
 
-    const text = msg.text();
-    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text + '\n');
-    else console.log('Page console log: ', text);
+    const text = msg.text() + '\n';
+    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text);
+    else if (/"name":"web3torrent"/.test(text)) pinoLog.write(text);
+    else browserConsoleLog.write(text);
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for

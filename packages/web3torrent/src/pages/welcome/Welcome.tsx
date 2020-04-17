@@ -1,4 +1,3 @@
-import debug from '../../debug';
 import React, {useState, useEffect} from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
@@ -7,8 +6,9 @@ import {preseededTorrentsUI, defaultTrackerOpts} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
+import {logger} from '../../logger';
 
-const log = debug('web3torrent:welcome-page-tracker-client');
+const log = logger.child({module: 'welcome-page-tracker-client'});
 
 interface Props {
   ready: boolean;
@@ -23,12 +23,12 @@ const Welcome: React.FC<Props> = props => {
 
   useEffect(() => {
     const updateIfSeederFound = data => {
-      log('got an announce response from tracker: ', data);
+      log.info({data}, 'got an announce response from tracker: ');
       if (data.complete > 0) {
         // there are some seeders for this torrent
         setTorrents({[preseededTorrentsUI[0].infoHash]: true});
         // this torrent should be displayed
-        log(`Seeder found for ${preseededTorrentsUI[0].infoHash}`);
+        log.info(`Seeder found for ${preseededTorrentsUI[0].infoHash}`);
       }
       trackerClient.start();
     };

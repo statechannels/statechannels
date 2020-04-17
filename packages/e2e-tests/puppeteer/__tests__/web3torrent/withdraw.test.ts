@@ -27,16 +27,12 @@ describe('withdrawal from a ledger channel', () => {
     console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
 
-    const logPageOutput = (role: string) => (msg: any) =>
-      // use console.error so we can redirect STDERR to a file
-      process.env.CI && console.error(`${role}: `, msg.text());
-    web3tTabA.on('console', logPageOutput('A'));
-
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
   });
+
   afterAll(async () => {
     if (browserA) {
       await browserA.close();
