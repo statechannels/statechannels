@@ -3,13 +3,10 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const pinoLog = process.env.LOG_FILE
-  ? fs.createWriteStream(process.env.LOG_FILE, {flags: 'w'})
-  : {
-      write: (): void => {
-        // NOOP
-      }
-    };
+const pinoLog =
+  process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
+    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'w'})
+    : {write: (): null => null};
 
 export async function loadDapp(
   page: Page,
