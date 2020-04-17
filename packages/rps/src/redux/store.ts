@@ -16,7 +16,7 @@ import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 import {GotAddressFromWallet} from './game/actions';
-import {HUB} from '../constants';
+import {HUB, tenEth} from '../constants';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -56,8 +56,8 @@ function* rootSaga() {
 
     yield call(
       [client, 'approveBudgetAndFund'],
-      '0x8ac7230489e80000', // 10 eth
-      '0x8ac7230489e80000',
+      tenEth,
+      tenEth,
       window.channelProvider.selectedAddress,
       HUB.signingAddress,
       HUB.outcomeAddress
