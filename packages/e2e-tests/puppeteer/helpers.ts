@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const pinoLog =
   process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
-    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'w'})
+    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'a'})
     : {write: (): null => null};
 
 export async function loadDapp(
