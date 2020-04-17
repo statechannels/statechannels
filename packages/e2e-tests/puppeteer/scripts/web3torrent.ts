@@ -22,7 +22,7 @@ export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promi
 
   // Generate a /tmp file with deterministic data for upload testing
   const fileToUpload = `/tmp/web3torrent-tests-stub-${Date.now()}`;
-  console.log(`fileToUpload ${fileToUpload}`);
+
   prepareUploadFile(fileToUpload);
 
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
