@@ -16,7 +16,7 @@ import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import _ from 'lodash';
-import debug from '../debug';
+import debug from '../logger';
 const log = debug('web3torrent:payment-channel');
 const hexZeroPad = utils.hexZeroPad;
 
