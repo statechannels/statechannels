@@ -1,5 +1,4 @@
-/* eslint-disable no-unreachable */
-import {Status, Torrent} from './types';
+import {Status, Torrent, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
 
@@ -66,15 +65,32 @@ export const EmptyTorrent = ({
   ready: false,
   downloadSpeed: 0,
   uploadSpeed: 0,
-  cost: '0',
   status: Status.Idle,
   downloaded: 0,
   files: [],
   wires: []
 } as unknown) as Torrent;
 
+export const EmptyTorrentUI: TorrentUI = {
+  files: [],
+  done: false,
+  downloaded: 0,
+  downloadSpeed: 0,
+  infoHash: '',
+  length: 0,
+  magnetURI: '',
+  name: 'unknown',
+  numPeers: 0,
+  ready: false,
+  paused: false,
+  status: Status.Idle,
+  uploaded: 0,
+  uploadSpeed: 0,
+  wires: []
+};
+
 // Pre Seeded Constants (by StateChannels team)
-export const preSeededTorrents: Array<Partial<Torrent>> = [
+const preSeededTorrents: Array<Pick<TorrentUI, 'name' | 'length' | 'infoHash' | 'magnetURI'>> = [
   {
     name: 'Sintel.mp4',
     length: 129241752,
@@ -83,6 +99,32 @@ export const preSeededTorrents: Array<Partial<Torrent>> = [
       'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
   }
 ];
+
+export const preseededTorrentsUI: TorrentUI[] = preSeededTorrents.map(partialTorrent => ({
+  ...partialTorrent,
+  ...getStaticTorrentUI(partialTorrent.infoHash, partialTorrent.name, partialTorrent.length)
+}));
+
+export function getStaticTorrentUI(
+  infoHash: string,
+  nameParam?: string,
+  lengthParam?: number
+): TorrentUI {
+  const name = nameParam || 'unknown';
+  const length = lengthParam || 0;
+  const magnetURI = defaultTrackers.reduce(
+    (magnetURI, tracker) => magnetURI + '&tr=' + tracker,
+    `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(name)}&xl=${length}`
+  );
+
+  return {
+    ...EmptyTorrentUI,
+    infoHash,
+    name,
+    length,
+    magnetURI
+  };
+}
 
 // Welcome Page Tracker creation options
 export const defaultTrackerOpts = {

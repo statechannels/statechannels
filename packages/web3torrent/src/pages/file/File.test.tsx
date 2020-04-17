@@ -5,7 +5,7 @@ import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router} from 'react-router-dom';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentAddInput} from '../../library/types';
-import {Status, Torrent} from '../../types';
+import {Status, Torrent, TorrentStaticData} from '../../types';
 import {testSelector} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
@@ -52,8 +52,8 @@ describe('<File />', () => {
 
   it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
-      .spyOn(TorrentStatus, 'getTorrent')
-      .mockImplementation((_w3t: any, _urlData: TorrentStatus.UrlData) => EmptyTorrent);
+      .spyOn(TorrentStatus, 'getTorrentUI')
+      .mockImplementation((_w3t: any, _staticData: TorrentStaticData) => EmptyTorrent);
 
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');

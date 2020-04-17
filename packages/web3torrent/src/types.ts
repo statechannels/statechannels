@@ -25,6 +25,33 @@ export type Torrent = ExtendedTorrent & {
   originalSeed?: boolean;
 };
 
+export type TorrentUI = Pick<
+  Torrent,
+  | 'files'
+  | 'done'
+  | 'downloaded'
+  | 'downloadSpeed'
+  | 'infoHash'
+  | 'length'
+  | 'magnetURI'
+  | 'name'
+  | 'numPeers'
+  | 'originalSeed'
+  | 'parsedTimeRemaining'
+  | 'paused'
+  | 'ready'
+  | 'status'
+  | 'uploaded'
+  | 'uploadSpeed'
+  | 'wires'
+>;
+
+export interface TorrentStaticData {
+  infoHash: string;
+  name?: string;
+  length?: number;
+}
+
 declare global {
   interface Window {
     channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;

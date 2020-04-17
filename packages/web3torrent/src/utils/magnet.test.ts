@@ -1,6 +1,7 @@
 import {RoutePath} from '../routes';
-import {generateURL, parseURL} from './magnet';
+import {generateURL} from './magnet';
 import {createMockTorrent} from './test-utils';
+import {getStaticTorrentUI} from '../constants';
 
 const mockTorrent = createMockTorrent();
 const mockOptionalParams = ({name, xl}) =>
@@ -10,24 +11,14 @@ const mockOptionalParams = ({name, xl}) =>
 
 describe('URL Parsing', () => {
   it('can parse a Web3Torrent Magnet', () => {
-    const result = parseURL(
-      mockTorrent.infoHash,
-      mockOptionalParams({name: mockTorrent.name, xl: mockTorrent.length})
-    );
+    const result = getStaticTorrentUI(mockTorrent.infoHash, mockTorrent.name, mockTorrent.length);
     expect(result.name).toBe(mockTorrent.name);
     expect(result.length).toBe(mockTorrent.length);
   });
 
   it('can parse an torrent with no extra data', () => {
-    const result = parseURL(mockTorrent.infoHash, new URLSearchParams(''));
+    const result = getStaticTorrentUI(mockTorrent.infoHash);
     expect(result.infoHash).toBe(mockTorrent.infoHash);
-    expect(result.name).toBe('unknown');
-    expect(result.length).toBe(0);
-  });
-
-  it('can parse an invalid magnet (no results)', () => {
-    const result = parseURL('', new URLSearchParams(''));
-    expect(result.magnetURI).toBe('');
     expect(result.name).toBe('unknown');
     expect(result.length).toBe(0);
   });

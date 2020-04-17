@@ -4,9 +4,9 @@ import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {Status, Torrent} from '../../types';
+import {Status, TorrentUI} from '../../types';
 import {useQuery} from '../../utils/magnet';
-import {getTorrent} from '../../utils/torrent-status-checker';
+import {getTorrentUI} from '../../utils/torrent-status-checker';
 import './File.scss';
 import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
@@ -40,8 +40,15 @@ const File: React.FC<Props> = props => {
   const [loading, setLoading] = useState(false);
   const [errorLabel, setErrorLabel] = useState('');
   const [warning, setWarning] = useState('');
-  const [torrent, setTorrent] = useState<Torrent>(() =>
-    getTorrent(web3Torrent, {infoHash, queryParams})
+  const torrentName = queryParams.get('name');
+  const torrentLength = Number(queryParams.get('length'));
+
+  const [torrent, setTorrent] = useState<TorrentUI>(() =>
+    getTorrentUI(web3Torrent, {
+      infoHash,
+      name: torrentName,
+      length: torrentLength
+    })
   );
 
   useEffect(() => {
@@ -58,13 +65,20 @@ const File: React.FC<Props> = props => {
   useEffect(() => {
     if (torrent.status !== Status.Idle || !!torrent.originalSeed) {
       const cancelId = setTimeout(
-        () => setTorrent(getTorrent(web3Torrent, {infoHash, queryParams})),
+        () =>
+          setTorrent(
+            getTorrentUI(web3Torrent, {
+              infoHash,
+              name: torrentName,
+              length: torrentLength
+            })
+          ),
         1000
       );
       return () => clearTimeout(cancelId);
     }
     return undefined;
-  }, [torrent, infoHash, queryParams, web3Torrent]);
+  }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
 
   const {channelCache, budgetCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
   // TODO: We shouldn't have to check all these different conditions
@@ -108,7 +122,13 @@ const File: React.FC<Props> = props => {
                 // TODO: Put real values here
                 // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 await download(torrent.magnetURI);
-                setTorrent(getTorrent(web3Torrent, {infoHash, queryParams}));
+                setTorrent(
+                  getTorrentUI(web3Torrent, {
+                    infoHash,
+                    name: torrentName,
+                    length: torrentLength
+                  })
+                );
               } catch (error) {
                 setErrorLabel(
                   // FIXME: 'put human readable error here'

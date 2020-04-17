@@ -7,13 +7,14 @@ import '../ShareList.scss';
 import {ShareFile} from './ShareFile';
 import './ShareFile.scss';
 
+// todo: fix after type refactor
 storiesOf('Web3Torrent', module)
   .addDecorator(withKnobs())
   .addDecorator(withActions('click'))
   .add('ShareFile', () => (
     <table className="share-list">
       <tbody>
-        <ShareFile
+        {/*         <ShareFile
           key="1"
           file={{
             name: text('File name', 'Once-Upon-A-Time.zip', 'File data'),
@@ -22,6 +23,7 @@ storiesOf('Web3Torrent', module)
             magnetURI: text('Magnet link', '', 'File data')
           }}
         ></ShareFile>
+ */}
       </tbody>
     </table>
   ));
