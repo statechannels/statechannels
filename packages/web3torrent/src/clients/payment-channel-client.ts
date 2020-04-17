@@ -17,6 +17,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/database';
 import debug from 'debug';
 import _ from 'lodash';
+import {bigNumberify} from 'ethers/utils';
 const log = debug('web3torrent:payment-channel');
 const hexZeroPad = utils.hexZeroPad;
 
@@ -24,8 +25,7 @@ function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
 }
 
-const bigNumberify = utils.bigNumberify;
-const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
+const FINAL_SETUP_STATE = bigNumberify(3); // for a 2 party ForceMove channel
 const APP_DATA = constants.HashZero; // unused in the SingleAssetPaymentApp
 export interface ChannelState {
   channelId: string;
