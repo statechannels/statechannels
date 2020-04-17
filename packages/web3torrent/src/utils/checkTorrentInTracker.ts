@@ -5,7 +5,7 @@ import debug from 'debug';
 const log = debug('web3torrent:tracker-check');
 
 export async function checkTorrentInTracker(infoHash: string) {
-  log(`Scrapping tracker for torrent ${infoHash}`);
+  log(`Scraping tracker for torrent ${infoHash}`);
   const trackerClient: Client = new Client({
     ...defaultTrackerOpts,
     infoHash: [infoHash]
