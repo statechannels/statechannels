@@ -18,9 +18,11 @@ import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
-import {ETH_TOKEN} from '../constants';
+import {ETH_TOKEN, ADD_LOGS} from '../constants';
 import {makeDestination} from '../utils';
 import {hexZeroPad} from 'ethers/utils';
+import {logger} from '../logger';
+const log = logger.info.bind(logger);
 
 export class Player {
   privateKey: string;
@@ -37,7 +39,7 @@ export class Player {
       CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
       {devTools: true}
     )
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+      .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
 
       .start();
 
@@ -51,7 +53,7 @@ export class Player {
         devTools: true
       }
     )
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+      .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
 
       .start();
 
@@ -63,7 +65,7 @@ export class Player {
       App.workflow(this.store, this.messagingService).withContext(context),
       {devTools: true}
     )
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+      .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
       .start(startingState);
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
@@ -105,9 +107,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
-        console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
-      }
+      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE A->B:');
       await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
@@ -115,9 +115,8 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
-        console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
-      }
+      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE B->A:');
+
       playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });

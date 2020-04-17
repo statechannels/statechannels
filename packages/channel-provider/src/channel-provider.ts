@@ -80,7 +80,6 @@ class ChannelProvider implements ChannelProviderInterface {
       method: request.method,
       params: request.params
     });
-    console.log('got response');
 
     return response;
   }

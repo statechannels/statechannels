@@ -2,6 +2,9 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
+import {logger} from '../logger';
+import {ADD_LOGS} from '../constants';
+const log = logger.info.bind(logger);
 
 enum ObjectStores {
   channels = 'channels',
@@ -325,7 +328,7 @@ export class IndexedDBBackend implements DBBackend {
       request.onsuccess = event => {
         const cursor = event.target && (event.target as any).result;
         const record = cursor && cursor.value;
-        console.log(typeof record, typeof cursor);
+        ADD_LOGS && log('%s - %s', typeof record, typeof cursor);
         if (!cursor) {
           console.error(`Record of ${storeName} with key: ${key} not found`);
           resolve(false);
@@ -347,7 +350,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param context function/situation of the error
    */
   private logError(error, context: string): void {
-    console.error(
+    logger.error(
       `Error - IndexedDB${context ? ' - ' + context : ''}`,
       JSON.stringify(error, ['message', 'arguments', 'type', 'name', 'target'])
     );

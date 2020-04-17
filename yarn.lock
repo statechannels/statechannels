@@ -2702,6 +2702,11 @@
   resolved "https://registry.npmjs.org/@hapi/bourne/-/bourne-1.3.2.tgz#0a7095adea067243ce3283e1b56b8a8f453b242a"
   integrity sha512-1dVNHT76Uu5N3eJNTYcvxee+jzX4Z9lfciqRRHCU27ihbUcYi+iSc2iml5Ke1LXe1SyJCLA0+14Jh4tXJgOppA==
 
+"@hapi/bourne@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@hapi/bourne/-/bourne-2.0.0.tgz#5bb2193eb685c0007540ca61d166d4e1edaf918d"
+  integrity sha512-WEezM1FWztfbzqIUbsDzFRVMxSoLy3HugVcux6KDDtTqzPsLE8NDRHfXvev66aH1i2oOKKar3/XDjbvh/OUBdg==
+
 "@hapi/formula@^1.2.0":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@hapi/formula/-/formula-1.2.0.tgz#994649c7fea1a90b91a0a1e6d983523f680e10cd"
@@ -6551,6 +6556,15 @@
   version "5.17.0"
   resolved "https://registry.npmjs.org/@types/pino/-/pino-5.17.0.tgz#850cd1d7c5a0e123f022badc2e2bb42d8d0efd9d"
   integrity sha512-L5DBGFBRY4DKc7ufjZqV4J61ji9FSn4zKvQ5CUBbWi0gE0uOSNwDBpj1t7VwRwdmrpG3QlFxAeXgpViGUOS5Bg==
+  dependencies:
+    "@types/node" "*"
+    "@types/pino-std-serializers" "*"
+    "@types/sonic-boom" "*"
+
+"@types/pino@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.npmjs.org/@types/pino/-/pino-6.0.0.tgz#9c255a87e127b34a368e9f8498ed25943040b809"
+  integrity sha512-V/ygB0a3bkuNMT+MgRd5wahC3dwgEtWyZG7eY2c9gJZZFoZbIQj8vo/h9h8A+iWJfXpzvm97XtydYvKuW2kt1Q==
   dependencies:
     "@types/node" "*"
     "@types/pino-std-serializers" "*"
@@ -26010,6 +26024,23 @@ pino-pretty@^2.2.2:
     readable-stream "^3.0.6"
     split2 "^3.0.0"
 
+pino-pretty@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/pino-pretty/-/pino-pretty-4.0.0.tgz#afbff81f946342b9d6eabc434942fe490e02faa9"
+  integrity sha512-YLy/n3dMXYWOodSm530gelkSAJGmEp29L9pqiycInlIae5FEJPWAkMRO3JFMbIFtjD2Ve4SH2aBcz2aRreGpBQ==
+  dependencies:
+    "@hapi/bourne" "^2.0.0"
+    args "^5.0.1"
+    chalk "^3.0.0"
+    dateformat "^3.0.3"
+    fast-safe-stringify "^2.0.7"
+    jmespath "^0.15.0"
+    joycon "^2.2.5"
+    pump "^3.0.0"
+    readable-stream "^3.6.0"
+    split2 "^3.1.1"
+    strip-json-comments "^3.0.1"
+
 pino-std-serializers@^2.4.2:
   version "2.4.2"
   resolved "https://registry.npmjs.org/pino-std-serializers/-/pino-std-serializers-2.4.2.tgz#cb5e3e58c358b26f88969d7e619ae54bdfcc1ae1"
@@ -26051,6 +26082,18 @@ pino@^5.8.0:
     pino-std-serializers "^2.4.2"
     quick-format-unescaped "^3.0.3"
     sonic-boom "^0.7.5"
+
+pino@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.npmjs.org/pino/-/pino-6.2.0.tgz#eef83cd0d9beb2f79102ff15d7946254a1f7846b"
+  integrity sha512-UzrsiT5Wyscw7dxHa8Ec8G2kY45mwFk7rrZhMkCMg8s9F8VWDVj+WFcaSIKproTDyxlqerMaHw+11jlNXgeiCg==
+  dependencies:
+    fast-redact "^2.0.0"
+    fast-safe-stringify "^2.0.7"
+    flatstr "^1.0.12"
+    pino-std-serializers "^2.4.2"
+    quick-format-unescaped "^4.0.1"
+    sonic-boom "^1.0.0"
 
 pirates@^4.0.1:
   version "4.0.1"
@@ -28455,7 +28498,7 @@ readable-stream@1.1:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-"readable-stream@2 || 3", readable-stream@^3.0.0, readable-stream@^3.0.1, readable-stream@^3.0.2, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0:
+"readable-stream@2 || 3", readable-stream@^3.0.0, readable-stream@^3.0.1, readable-stream@^3.0.2, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
   version "3.6.0"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
   integrity sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==

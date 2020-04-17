@@ -1,6 +1,6 @@
 import bencode from 'bencode';
 import {Extension} from 'bittorrent-protocol';
-import debug from 'debug';
+import debug from '../debug';
 import EventEmitter from 'eventemitter3';
 import {
   ExtendedHandshake,

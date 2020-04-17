@@ -3,6 +3,11 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const pinoLog =
+  process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
+    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'w'})
+    : {write: (): null => null};
+
 export async function loadDapp(
   page: Page,
   ganacheAccountIndex: number,
@@ -41,7 +46,10 @@ export async function loadDapp(
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
-    console.log('Page console log: ', msg.text());
+
+    const text = msg.text();
+    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text + '\n');
+    else console.log('Page console log: ', text);
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
@@ -60,14 +68,14 @@ export async function waitForAndClickButton(
     console.error(
       'frame.waitForSelector(' + selector + ') failed on frame ' + (await frame.title())
     );
-    await page.screenshot({path: 'e2e-wait.error.png'});
+    await page.screenshot({path: 'wait.error.png'});
     throw error;
   }
   try {
     return await frame.click(selector);
   } catch (error) {
     console.error('frame.click(' + selector + ') failed on frame ' + (await frame.title()));
-    await page.screenshot({path: 'e2e-click.error.png'});
+    await page.screenshot({path: 'click.error.png'});
     throw error;
   }
 }

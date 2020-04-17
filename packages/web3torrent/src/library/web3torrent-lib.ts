@@ -1,4 +1,4 @@
-import debug from 'debug';
+import debug from '../debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
 import {
