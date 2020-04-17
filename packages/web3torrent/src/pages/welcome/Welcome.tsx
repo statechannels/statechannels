@@ -28,7 +28,7 @@ const Welcome: React.FC<Props> = props => {
         // there are some seeders for this torrent
         setTorrents({[preseededTorrentsUI[0].infoHash]: true});
         // this torrent should be displayed
-        log.info(`Seeder found for ${preSeededTorrents[0].infoHash}`);
+        log.info(`Seeder found for ${preseededTorrentsUI[0].infoHash}`);
       }
       trackerClient.start();
     };
