@@ -57,5 +57,5 @@ export function getBool(val: string | undefined): boolean {
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
-export const LOG_FILE = process.env.LOG_FILE;
-export const ADD_LOGS = !!LOG_FILE || getBool(process.env.ADD_LOGS);
+export const LOG_DESTINATION = process.env.LOG_DESTINATION;
+export const ADD_LOGS = !!LOG_DESTINATION;

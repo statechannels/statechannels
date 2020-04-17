@@ -248,7 +248,7 @@ jobs:
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
       NODE_ENV: test
-      LOG_FILE: /tmp/xstate-wallet.log
+      LOG_DESTINATION: /tmp/xstate-wallet.log
     steps:
       - checkout
       - puppeteer/install
@@ -342,7 +342,7 @@ jobs:
       GANACHE_PORT: 8547
       ADD_LOGS: true
       NODE_ENV: development
-      LOG_FILE: /tmp/xstate-wallet.log
+      LOG_DESTINATION: /tmp/xstate-wallet.log
     steps:
       - checkout
       - puppeteer/install
