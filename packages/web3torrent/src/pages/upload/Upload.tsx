@@ -26,7 +26,8 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
               setSpinner(true);
-              history.push(generateURL(await upload(event.target.files)));
+              const {infoHash, length, name} = await upload(event.target.files);
+              history.push(generateURL({infoHash, length, name}));
             }
           }}
         ></input>

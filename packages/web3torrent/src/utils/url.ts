@@ -1,6 +1,6 @@
 import {RoutePath} from '../routes';
-import {TorrentUI} from '../types';
 import {useLocation} from 'react-router-dom';
+import {ExtendedTorrent} from '../library/types';
 
 /**
  * Custom Hook that retrieves the queryParams of the URL.
@@ -12,6 +12,10 @@ export const useQuery = () => {
   return new URLSearchParams(useLocation().search);
 };
 
-export function generateURL({infoHash, length, name}: TorrentUI): string {
+export function generateURL({
+  infoHash,
+  length,
+  name
+}: Pick<ExtendedTorrent, 'infoHash' | 'length' | 'name'>): string {
   return `${RoutePath.File}${infoHash}?name=${encodeURIComponent(name)}&length=${length}`;
 }

@@ -3,13 +3,13 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {EmptyTorrent} from '../../constants';
-import {WebTorrentAddInput} from '../../library/types';
-import {Status, Torrent, TorrentStaticData} from '../../types';
-import {testSelector} from '../../utils/test-utils';
+import {WebTorrentAddInput, ExtendedTorrent} from '../../library/types';
+import {TorrentStaticData} from '../../types';
+import {testSelector, createMockExtendedTorrent, createMockTorrentUI} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import File from './File';
+import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -17,12 +17,12 @@ jest.mock('@statechannels/channel-client');
 
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
-  let torrentFile: jest.SpyInstance<Promise<Torrent>, [WebTorrentAddInput]>;
+  let torrentFile: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {
     torrentFile = jest
       .spyOn(Web3TorrentClient, 'download')
-      .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Connecting}));
+      .mockImplementation(_pD => Promise.resolve(createMockExtendedTorrent()));
 
     component = mount(
       <Router>
@@ -53,7 +53,9 @@ describe('<File />', () => {
   it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
       .spyOn(TorrentStatus, 'getTorrentUI')
-      .mockImplementation((_w3t: any, _staticData: TorrentStaticData) => EmptyTorrent);
+      .mockImplementation((_w3t: WebTorrentPaidStreamingClient, _staticData: TorrentStaticData) =>
+        createMockTorrentUI()
+      );
 
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');

@@ -1,15 +1,32 @@
-import {EmptyTorrent} from '../constants';
-import {TorrentPeers} from '../library/types';
-import {Torrent} from '../types';
+import {TorrentPeers, ExtendedTorrent} from '../library/types';
+import {TorrentUI} from '../types';
+import {EmptyTorrentUI} from '../constants';
 
 export const infoHash = '0303b8f867f4377ef4a25eba8836cc5f7fdd992b';
+export const pseAccount = 'pse123';
 
 export function testSelector(name: string): string {
   return `[data-test-selector='${name}']`;
 }
-export function createMockTorrent(props?: Partial<Torrent>): Torrent {
+
+export function createMockExtendedTorrent(props?: Partial<ExtendedTorrent>): ExtendedTorrent {
   return {
-    ...EmptyTorrent,
+    ...EmptyTorrentUI,
+    createdBy: pseAccount,
+    infoHash,
+    magnetURI:
+      'magnet:?xt=urn%3Abtih%3A0303b8f867f4377ef4a25eba8836cc5f7fdd992b&dn=on-the-shortness-of-life-1.jpg&xl=128864&cost=0',
+    name: 'on-the-shortness-of-life-1.jpg',
+    downloaded: 0,
+    length: 128913,
+    ready: true,
+    ...props
+  } as ExtendedTorrent;
+}
+
+export function createMockTorrentUI(props?: Partial<TorrentUI>): TorrentUI {
+  return {
+    ...EmptyTorrentUI,
     infoHash,
     magnetURI:
       'magnet:?xt=urn%3Abtih%3A0303b8f867f4377ef4a25eba8836cc5f7fdd992b&dn=on-the-shortness-of-life-1.jpg&xl=128864&cost=0',

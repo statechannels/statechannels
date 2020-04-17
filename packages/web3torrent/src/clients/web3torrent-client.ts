@@ -1,7 +1,7 @@
 import React from 'react';
-import {WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
+import {WebTorrentAddInput, WebTorrentSeedInput, ExtendedTorrent} from '../library/types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
-import {Status, Torrent} from '../types';
+import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 import {defaultTrackers} from '../constants';
 
@@ -14,7 +14,7 @@ export const Web3TorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 
-export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torrentData => {
+export const download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent> = torrentData => {
   return new Promise(resolve =>
     web3torrent.enable().then(() => {
       web3torrent.add(torrentData, (torrent: any) =>
@@ -24,7 +24,7 @@ export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torre
   );
 };
 
-export const upload: (input: WebTorrentSeedInput) => Promise<Torrent> = input => {
+export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = input => {
   return new Promise(resolve =>
     web3torrent.enable().then(() => {
       web3torrent.seed(input, {...torrentNamer(input)}, (torrent: any) => {

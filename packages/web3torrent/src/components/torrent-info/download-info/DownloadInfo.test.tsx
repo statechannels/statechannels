@@ -3,8 +3,8 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentFile} from 'webtorrent';
 import * as Web3TorrentClient from '../../../clients/web3torrent-client';
-import {Torrent} from '../../../types';
-import {createMockTorrent} from '../../../utils/test-utils';
+import {TorrentUI} from '../../../types';
+import {createMockTorrentUI} from '../../../utils/test-utils';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
 import {DownloadInfo, DownloadInfoProps} from './DownloadInfo';
 import {ProgressBar, ProgressBarProps} from './progress-bar/ProgressBar';
@@ -13,18 +13,17 @@ Enzyme.configure({adapter: new Adapter()});
 
 type MockDownloadInfo = {
   downloadInfoWrapper: ReactWrapper<DownloadInfoProps>;
-  torrentProps: Partial<Torrent>;
+  torrentProps: Partial<TorrentUI>;
   downloadInfoContainer: ReactWrapper;
   progressBarElement: ReactWrapper<ProgressBarProps>;
   textElement: ReactWrapper;
   cancelButton: ReactWrapper;
 };
 
-const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => {
-  const torrent = createMockTorrent(torrentProps);
-  torrent.parsedTimeRemaining = getFormattedETA(torrent.done, torrent.timeRemaining);
+const mockDownloadInfo = (torrentProps?: Partial<TorrentUI>): MockDownloadInfo => {
+  const torrent = createMockTorrentUI(torrentProps);
   const downloadInfoWrapper = mount(
-    <DownloadInfo torrent={torrent as Torrent} channelCache={{}} mySigningAddress="0x0" />
+    <DownloadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
   );
 
   return {
@@ -42,7 +41,7 @@ describe('<DownloadInfo />', () => {
 
   beforeEach(() => {
     downloadInfo = mockDownloadInfo({
-      timeRemaining: 3000,
+      parsedTimeRemaining: getFormattedETA(false, 3000),
       numPeers: 3,
       downloadSpeed: 10240,
       uploadSpeed: 5124
