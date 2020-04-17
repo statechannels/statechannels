@@ -3,10 +3,12 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const logDistinguisherCache: Record<string, true | undefined> = {};
+
 export async function loadDapp(
   page: Page,
   ganacheAccountIndex: number,
-  testFile: string,
+  logPrefix: string,
   ignoreConsoleError?: boolean
 ): Promise<void> {
   // TODO: This is kinda ugly but it works
@@ -37,8 +39,12 @@ export async function loadDapp(
     throw error;
   });
 
+  const uniquenessKey = `${ganacheAccountIndex}/${logPrefix}`;
+  if (logDistinguisherCache[uniquenessKey]) throw `Ambiguous log config detected: ${uniquenessKey}`;
+  logDistinguisherCache[uniquenessKey] = true;
+
   // For convenience, I am requiring that logs are stored in /tmp
-  const LOGS_LOCATION = path.join('/tmp', testFile);
+  const LOGS_LOCATION = path.join('/tmp', logPrefix);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const writeStream = (filename: string): {write: (...x: any[]) => any} =>
@@ -55,6 +61,8 @@ export async function loadDapp(
   };
   const isXstateWalletLog = isPinoLog('xstate-wallet');
   const isWeb3torrentLog = isPinoLog('web3torrent');
+  const withGanacheIndex = (text: string): string =>
+    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex});
 
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
@@ -62,11 +70,8 @@ export async function loadDapp(
     }
 
     const text = msg.text() + '\n';
-    if (isXstateWalletLog(text) || isWeb3torrentLog(text)) {
-      pinoLog.write(JSON.stringify({...JSON.parse(text), ganacheAccountIndex}));
-    } else {
-      browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}`);
-    }
+    if (isXstateWalletLog(text) || isWeb3torrentLog(text)) pinoLog.write(withGanacheIndex(text));
+    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}`);
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
