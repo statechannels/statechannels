@@ -2697,7 +2697,7 @@
   resolved "https://registry.npmjs.org/@hapi/address/-/address-2.1.4.tgz#5d67ed43f3fd41a69d4b9ff7b56e7c0d1d0a81e5"
   integrity sha512-QD1PhQk+s31P1ixsX0H0Suoupp3VMXzIVMSwobR3F3MSUO2YCV0B7xqLcUw/Bh8yuvd3LhpyqLQWTNcRmp6IdQ==
 
-"@hapi/bourne@1.x.x", "@hapi/bourne@^1.3.2":
+"@hapi/bourne@1.x.x":
   version "1.3.2"
   resolved "https://registry.npmjs.org/@hapi/bourne/-/bourne-1.3.2.tgz#0a7095adea067243ce3283e1b56b8a8f453b242a"
   integrity sha512-1dVNHT76Uu5N3eJNTYcvxee+jzX4Z9lfciqRRHCU27ihbUcYi+iSc2iml5Ke1LXe1SyJCLA0+14Jh4tXJgOppA==
@@ -25991,23 +25991,6 @@ pinkie@^2.0.0:
   version "2.0.4"
   resolved "https://registry.npmjs.org/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
   integrity sha1-clVrgM+g1IqXToDnckjoDtT3+HA=
-
-pino-pretty@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.npmjs.org/pino-pretty/-/pino-pretty-3.5.0.tgz#5e88003fdbaef9d541393eac4498ac9b97c1683b"
-  integrity sha512-3sg6s7nI5vgjrEBKhLckAfLPjgjm1U/Fw0C6jhoWnIU2D6QqCpF8eAqL+E1A6bBglCGR/APCx8VuxchBxtuMjA==
-  dependencies:
-    "@hapi/bourne" "^1.3.2"
-    args "^5.0.1"
-    chalk "^2.4.2"
-    dateformat "^3.0.3"
-    fast-safe-stringify "^2.0.7"
-    jmespath "^0.15.0"
-    joycon "^2.2.5"
-    pump "^3.0.0"
-    readable-stream "^3.4.0"
-    split2 "^3.1.1"
-    strip-json-comments "^3.0.1"
 
 pino-pretty@^2.2.2:
   version "2.6.1"
