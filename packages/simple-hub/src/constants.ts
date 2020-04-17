@@ -14,3 +14,5 @@ export const cHubChainPK =
 export const cHubChainAddress = new ethers.Wallet(cHubChainPK).address;
 
 export const cHubParticipantId = process.env.HUB_PARTICIPANT_ID || 'firebase:simple-hub';
+
+export const LOG_DESTINATION = process.env.LOG_DESTINATION ?? 'console';
