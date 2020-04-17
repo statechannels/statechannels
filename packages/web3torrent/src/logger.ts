@@ -38,5 +38,3 @@ const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
 const opts = {name, prettyPrint, browser};
 export const logger = destination ? pino(opts, destination) : pino(opts);
-
-// export default prefix => (...x) => logger.info(prefix, ...x);
