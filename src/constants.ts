@@ -2,8 +2,26 @@ import {bigNumberify, hexZeroPad} from 'ethers/utils';
 
 export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
 
+export const ETH_TOKEN = '0x0000000000000000000000000000000000000000';
+export const MOCK_TOKEN = '0x1000000000000000000000000000000000000001'; // Use in serde test
+
 export const ETH_ASSET_HOLDER_ADDRESS =
   process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0000000000000000000000000000000000000000';
+export const MOCK_ASSET_HOLDER_ADDRESS = '0x1111111111111111111111111111111111111111';
+
+export function assetHolderAddress(tokenAddress: string): string | undefined {
+  if (bigNumberify(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
+  else if (tokenAddress === MOCK_TOKEN) return MOCK_ASSET_HOLDER_ADDRESS;
+
+  throw 'AssetHolderAddress not found';
+}
+
+export function tokenAddress(assetHolderAddress: string): string | undefined {
+  if (assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS) return ETH_TOKEN;
+  else if (assetHolderAddress === MOCK_ASSET_HOLDER_ADDRESS) return MOCK_TOKEN;
+
+  throw 'TokenAddress not found';
+}
 
 export const NITRO_ADJUDICATOR_ADDRESS =
   process.env.NITRO_ADJUDICATOR_ADDRESS || '0x0000000000000000000000000000000000000000';
@@ -21,20 +39,6 @@ export const HUB = {
 };
 export const CHALLENGE_DURATION = bigNumberify(0x12c); // 5 minutes
 export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';
-
-export const ETH_TOKEN = '0x0000000000000000000000000000000000000000';
-
-export function assetHolderAddress(tokenAddress: string): string | undefined {
-  if (bigNumberify(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
-
-  throw 'Tokens not supported';
-}
-
-export function tokenAddress(assetHolderAddress: string): string | undefined {
-  if (assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS) return ETH_TOKEN;
-
-  throw 'Tokens not supported';
-}
 
 // TODO: Use getEnvBool from devtools once working
 export function getBool(val: string | undefined): boolean {

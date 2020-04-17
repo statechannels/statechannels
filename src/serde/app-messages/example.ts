@@ -41,7 +41,7 @@ export const internalEthAllocation: SimpleAllocation = {
 export const externalMixedAllocation: Allocations = [
   externalEthAllocation[0],
   {
-    token: '0x18f8d9125d8B87deA957F3E81EfD2F05C3120C0d',
+    token: '0x1000000000000000000000000000000000000001',
     allocationItems: [
       {
         amount: hexZeroPad('0x1', 32),
@@ -64,7 +64,7 @@ export const internalMixedAllocation: MixedAllocation = {
     internalEthAllocation,
     {
       type: 'SimpleAllocation',
-      assetHolderAddress: '0x18f8d9125d8B87deA957F3E81EfD2F05C3120C0d',
+      assetHolderAddress: '0x1111111111111111111111111111111111111111',
       allocationItems: [
         {
           amount: bigNumberify(hexZeroPad('0x1', 32)),
