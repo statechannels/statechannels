@@ -249,6 +249,7 @@ jobs:
       GANACHE_PORT: 8547
       NODE_ENV: test
       LOG_DESTINATION: /tmp/pino.log
+      REACT_APP_LOG_DESTINATION: /tmp/pino.log
     steps:
       - checkout
       - puppeteer/install
@@ -263,15 +264,13 @@ jobs:
           command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start | tee /tmp/web3torrent.log)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start)
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/| tee /tmp/e2e.log)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
           path: /tmp/pino.log
-      - store_artifacts:
-          path: /tmp/web3torrent.log
       - store_artifacts:
           path: /tmp/e2e.log
       - upload_logs:
@@ -343,6 +342,7 @@ jobs:
       ADD_LOGS: true
       NODE_ENV: development
       LOG_DESTINATION: /tmp/pino.log
+      REACT_APP_LOG_DESTINATION: /tmp/pino.log
     steps:
       - checkout
       - puppeteer/install
@@ -357,7 +357,7 @@ jobs:
           command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/web3torrent.log)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
@@ -367,8 +367,6 @@ jobs:
           path: /tmp/ganache.log
       - store_artifacts:
           path: /tmp/pino.log
-      - store_artifacts:
-          path: /tmp/web3torrent.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:
