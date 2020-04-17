@@ -1,6 +1,6 @@
 import bencode from 'bencode';
 import {Extension} from 'bittorrent-protocol';
-import debug from '../logger';
+import {logger} from '../logger';
 import EventEmitter from 'eventemitter3';
 import {
   ExtendedHandshake,
@@ -8,7 +8,8 @@ import {
   PaidStreamingExtensionNotices,
   PaidStreamingWire
 } from './types';
-const log = debug('web3torrent:extension');
+
+const log = logger.child({module: 'paid-streaming-extension'});
 
 export abstract class PaidStreamingExtension implements Extension {
   protected wire: PaidStreamingWire;
@@ -67,7 +68,7 @@ export abstract class PaidStreamingExtension implements Extension {
 
   onExtendedHandshake(handshake: ExtendedHandshake) {
     if (!handshake.m || !handshake.m[this.name]) {
-      log('WARNING: Peer does not support Web3Torrent');
+      log.warn('WARNING: Peer does not support Web3Torrent');
       return this.messageBus.emit(
         PaidStreamingExtensionEvents.WARNING,
         new Error('!>Peer does not support Web3Torrent')
@@ -132,7 +133,7 @@ export abstract class PaidStreamingExtension implements Extension {
       const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');
       this.messageHandler(jsonData);
     } catch (err) {
-      log('ERROR: onMessage decoding', err);
+      log.error({err}, 'onMessage decoding');
       return;
     }
   }
@@ -142,11 +143,11 @@ export abstract class PaidStreamingExtension implements Extension {
       case PaidStreamingExtensionNotices.ACK:
         return;
       case PaidStreamingExtensionNotices.START:
-        log(`START received from ${this.peerAccount}`);
+        log.info(`START received from ${this.peerAccount}`);
         this.isBeingChoked = false;
         break;
       case PaidStreamingExtensionNotices.STOP:
-        log(`STOP received from ${this.peerAccount}`);
+        log.info(`STOP received from ${this.peerAccount}`);
         this.peerChannelId = data;
         if (this.isBeingChoked) return;
         this.isBeingChoked = true;
@@ -156,7 +157,7 @@ export abstract class PaidStreamingExtension implements Extension {
         if (data.recipient !== this.pseAccount) {
           return;
         }
-        log(`MESSAGE received from ${this.peerAccount}`, data);
+        log.info({data}, `MESSAGE received from ${this.peerAccount}: `);
         break;
     }
     this.ack();
@@ -165,8 +166,8 @@ export abstract class PaidStreamingExtension implements Extension {
 
   protected executeExtensionCommand(command: PaidStreamingExtensionNotices, data = {}) {
     if (!this.peerAccount) {
-      log(
-        'WARNING: Peer does not support Web3Torrent - This client will block all non-web3torrent leechers.'
+      log.warn(
+        'Peer does not support Web3Torrent - This client will block all non-web3torrent leechers.'
       );
       this.messageBus.emit(
         PaidStreamingExtensionEvents.WARNING,
@@ -184,16 +185,16 @@ export abstract class PaidStreamingExtension implements Extension {
     const _onPiece = wire._onPiece;
     wire._onPiece = function(index, offset, buffer) {
       _onPiece.apply(wire, [index, offset, buffer]);
-      log(`<< _onPiece: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
+      log.info(`<< _onPiece: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
     };
     const blockedRequests = this.blockedRequests;
     const _onRequest = wire._onRequest;
     wire._onRequest = function(index, offset, length) {
-      log(`_onRequest: ${index}`);
+      log.info(`_onRequest: ${index}`);
 
       if (this.paidStreamingExtension.isForceChoking) {
         blockedRequests.push([index, offset, length]);
-        log(`_onRequest: ${index}, ${offset}, ${length} - IGNORED`);
+        log.info(`_onRequest: ${index}, ${offset}, ${length} - IGNORED`);
       } else {
         messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
           if (allow) {

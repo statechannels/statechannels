@@ -16,8 +16,8 @@ import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import _ from 'lodash';
-import debug from '../logger';
-const log = debug('web3torrent:payment-channel');
+import {logger} from '../logger';
+const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
 function sanitizeMessageForFirebase(message) {
@@ -82,11 +82,11 @@ export class PaymentChannelClient {
   }
 
   async enable() {
-    log('enabling payment channel client');
+    log.info('enabling payment channel client');
     await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
     await this.channelClient.provider.enable();
     this.initializeHubComms();
-    log('payment channel client enabled');
+    log.info('payment channel client enabled');
     // TODO: This should probably not be long term behavior
     const existingBudget = await this.getBudget();
     if (_.isEmpty(existingBudget) && FUNDING_STRATEGY !== 'Direct') {
@@ -96,7 +96,7 @@ export class PaymentChannelClient {
 
   private initializeHubComms() {
     if (!fireBaseConfig) {
-      log('Abandoning firebase setup, configuration is undefined');
+      log.error('Abandoning firebase setup, configuration is undefined');
       return;
     }
 
@@ -122,7 +122,7 @@ export class PaymentChannelClient {
       const key = snapshot.key;
       const message = snapshot.val();
       myFirebaseRef.child(key).remove();
-      log('GOT FROM FIREBASE: ' + message);
+      log.info({message}, 'GOT FROM FIREBASE: ');
       await this.pushMessage(message);
     });
   }

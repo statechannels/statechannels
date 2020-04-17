@@ -14,9 +14,24 @@ const destination =
 // If we are in a browser, but we want to LOG_TO_FILE, we assume that the
 // log statements are meant to be stored as JSON objects
 // So, we log serialized objects, appending the name (which the pino browser-api appears to remove?)
+
+// Since WebTorrentPaidStreamingClient contains circular references, we use
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#Examples
+const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (_, value) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) return;
+      seen.add(value);
+    }
+
+    return value;
+  };
+};
+
 const browser =
   LOG_TO_FILE && IS_BROWSER_CONTEXT
-    ? {write: o => console.log(JSON.stringify({...o, name}))}
+    ? {write: o => console.log(JSON.stringify({...o, name}, getCircularReplacer()))}
     : undefined;
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
@@ -24,4 +39,4 @@ const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 const opts = {name, prettyPrint, browser};
 export const logger = destination ? pino(opts, destination) : pino(opts);
 
-export default prefix => (...x) => logger.info(prefix, ...x);
+// export default prefix => (...x) => logger.info(prefix, ...x);
