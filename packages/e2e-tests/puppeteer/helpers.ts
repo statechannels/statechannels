@@ -7,6 +7,9 @@ const pinoLog =
   process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
     ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'a'})
     : {write: (): null => null};
+const browserConsoleLog = process.env.BROWSER_LOG_DESTINATION
+  ? fs.createWriteStream(process.env.BROWSER_LOG_DESTINATION, {flags: 'a'})
+  : {write: (): null => null};
 
 export async function loadDapp(
   page: Page,
@@ -46,10 +49,10 @@ export async function loadDapp(
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
 
-    const text = msg.text();
-    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text + '\n');
-    else if (/"name":"web3torrent"/.test(text)) pinoLog.write(text + '\n');
-    else console.log('Page console log: ', text);
+    const text = msg.text() + '\n';
+    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text);
+    else if (/"name":"web3torrent"/.test(text)) pinoLog.write(text);
+    else browserConsoleLog.write(text);
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
