@@ -63,16 +63,16 @@ export async function loadDapp(
   const isXstateWalletLog = isPinoLog('xstate-wallet');
   const isWeb3torrentLog = isPinoLog('web3torrent');
   const withGanacheIndex = (text: string): string =>
-    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex});
+    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
 
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
 
-    const text = msg.text() + '\n';
+    const text = msg.text();
     if (isXstateWalletLog(text) || isWeb3torrentLog(text)) pinoLog.write(withGanacheIndex(text));
-    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}`);
+    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
