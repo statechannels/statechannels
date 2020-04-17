@@ -1,6 +1,7 @@
 import * as match from 'redux-saga-test-plan/matchers';
 import {ChannelState} from '../../../core';
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 
 export const rpsChannelClientMocks = (client: RPSChannelClient) => {
   // checks and mocks a createChannel call, in the format expected by expectSaga.provide
@@ -9,8 +10,8 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
       [client, 'createChannel'],
       state.aAddress,
       state.bAddress,
-      state.aBal,
-      state.bBal,
+      hexZeroPad(bigNumberify(state.aBal).toHexString(), 32),
+      hexZeroPad(bigNumberify(state.bBal).toHexString(), 32),
       state.appData,
       state.aAddress,
       state.bAddress
@@ -29,8 +30,8 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
       state.channelId,
       state.aAddress,
       state.bAddress,
-      state.aBal,
-      state.bBal,
+      hexZeroPad(bigNumberify(state.aBal).toHexString(), 32),
+      hexZeroPad(bigNumberify(state.bBal).toHexString(), 32),
       state.appData,
       state.aAddress,
       state.bAddress
