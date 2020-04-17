@@ -360,7 +360,7 @@ jobs:
           command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start | tee /tmp/web3torrent.log)
           background: true
       - run:
-          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch | tee /tmp/simple-hub.log)
+          command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - store_artifacts:
@@ -369,8 +369,6 @@ jobs:
           path: /tmp/pino.log
       - store_artifacts:
           path: /tmp/web3torrent.log
-      - store_artifacts:
-          path: /tmp/simple-hub.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:
