@@ -157,8 +157,8 @@ export async function waitAndApproveWithdraw(
 ): Promise<void> {
   console.log('Making deposit');
 
-  const walletIFrame = page.frames()[1];
-  await walletIFrame.waitForSelector('#approve-withdraw');
+  // const walletIFrame = page.frames()[1];
+  // await walletIFrame.waitForSelector('#selector-does-not-exist-yet');
   await page.waitFor(5000); // there's no prompt to approve tx, since the close-ledger-and-withdraw is not a full workflow
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
