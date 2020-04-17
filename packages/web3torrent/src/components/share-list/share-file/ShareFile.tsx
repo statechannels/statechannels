@@ -4,7 +4,7 @@ import './ShareFile.scss';
 import {prettyPrintWei, calculateWei} from '../../../utils/calculateWei';
 import prettier from 'prettier-bytes';
 import {useHistory} from 'react-router-dom';
-import {generateURL} from '../../../utils/magnet';
+import {generateURL} from '../../../utils/url';
 import {TorrentUI} from '../../../types';
 
 export type ShareFileProps = {file: TorrentUI};

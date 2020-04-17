@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useHistory} from 'react-router-dom';
 import {upload} from '../../clients/web3torrent-client';
-import {generateURL} from '../../utils/magnet';
+import {generateURL} from '../../utils/url';
 import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 

@@ -1,5 +1,5 @@
 import {RoutePath} from '../routes';
-import {generateURL} from './magnet';
+import {generateURL} from './url';
 import {createMockTorrent} from './test-utils';
 import {getStaticTorrentUI} from '../constants';
 
