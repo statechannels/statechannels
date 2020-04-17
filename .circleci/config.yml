@@ -211,7 +211,7 @@ jobs:
       USE_VIRTUAL_FUNDING: 'FALSE'
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
+      GANACHE_PORT: 8545
       NODE_ENV: test
     steps:
       - checkout
@@ -246,7 +246,7 @@ jobs:
       REACT_APP_FUNDING_STRATEGY: Direct
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
+      GANACHE_PORT: 8545
       NODE_ENV: test
       LOG_DESTINATION: pino.log
       BROWSER_LOG_DESTINATION: browser.log
@@ -343,7 +343,7 @@ jobs:
       REACT_APP_FUNDING_STRATEGY: Virtual
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
+      GANACHE_PORT: 8545
       ADD_LOGS: true
       NODE_ENV: development
       LOG_DESTINATION: pino.log
