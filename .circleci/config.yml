@@ -408,17 +408,16 @@ workflows:
       - build:
           requires:
             - prepare
-
       - test:
           requires:
             - prepare
-       - integration-test-rps:
-           requires:
-             - prepare
+      - integration-test-rps:
+          requires:
+            - prepare
       - integration-test-rps-with-hub:
-         requires:
-           - prepare
-           - integration-test
+          requires:
+            - prepare
+            - integration-test
       - integration-test-web3torrent:
           requires:
             - prepare
