@@ -46,6 +46,7 @@
     "@types/jszip": "3.1.6",
     "@types/lodash": "4.14.149",
     "@types/node-sass": "4.11.0",
+    "@types/pino": "^6.0.0",
     "@types/prettier": "1.19.0",
     "@types/react": "16.9.19",
     "@types/react-dom": "16.9.5",
