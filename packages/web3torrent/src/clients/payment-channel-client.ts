@@ -122,7 +122,7 @@ export class PaymentChannelClient {
       const key = snapshot.key;
       const message = snapshot.val();
       myFirebaseRef.child(key).remove();
-      log('GOT FROM FIREBASE: ' + message);
+      log('GOT FROM FIREBASE: ' + JSON.stringify(message));
       await this.pushMessage(message);
     });
   }
