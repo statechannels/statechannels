@@ -28,6 +28,7 @@ const {deploy} = require('../deployment/deploy');
 
 // Ensure environment variables are read.
 configureEnvVariables();
+console.log(`Firebase prefix set to ${process.env.REACT_APP_FIREBASE_PREFIX || 'default-prefix'}`);
 
 void (async () => {
   const {deployer} = await setupGanache();

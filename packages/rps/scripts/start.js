@@ -33,6 +33,10 @@ const configFactory = require('../config/webpack.config');
 const {getNetworkName, setupGanache} = require('@statechannels/devtools');
 const {deploy} = require('../deployment/deploy');
 
+console.log(
+  chalk.cyan(`Firebase prefix set to ${process.env.FIREBASE_PREFIX || 'default-prefix'}`)
+);
+
 void (async () => {
   process.on('SIGINT', () => {
     if (devServer) {
