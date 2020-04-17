@@ -58,7 +58,7 @@
     "hub:start:dev": "NODE_ENV=development ts-node ./start-dev-server.ts",
     "hub:start:prod": "NODE_ENV=production ts-node ./src/server.ts",
     "hub:test": "npx jest --runInBand -c ./jest/jest.config.js",
-    "hub:watch": "NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts | npx pino-pretty",
+    "hub:watch": "NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "precommit": "lint-staged --quiet",
