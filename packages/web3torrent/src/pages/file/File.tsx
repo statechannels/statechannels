@@ -5,7 +5,7 @@ import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
 import {Status, TorrentUI} from '../../types';
-import {useQuery} from '../../utils/magnet';
+import {useQuery} from '../../utils/url';
 import {getTorrentUI} from '../../utils/torrent-status-checker';
 import './File.scss';
 import {TorrentTestResult} from '../../library/web3torrent-lib';
