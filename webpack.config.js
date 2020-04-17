@@ -57,7 +57,7 @@ module.exports = {
       'HUB_ADDRESS',
       'CHAIN_NETWORK_ID',
       'ADD_LOGS',
-      'LOG_FILE',
+      'LOG_DESTINATION',
       'USE_INDEXED_DB',
       'CLEAR_STORAGE_ON_START'
     ]),
