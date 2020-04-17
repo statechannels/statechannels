@@ -59,4 +59,4 @@ export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB, false);
 
 export const LOG_FILE = process.env.LOG_FILE;
-export const ADD_LOGS = LOG_FILE ? true : getBool(process.env.ADD_LOGS);
+export const ADD_LOGS = LOG_FILE ? true : getBool(process.env.ADD_LOGS || 'false');
