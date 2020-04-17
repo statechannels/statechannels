@@ -8,7 +8,6 @@ import {
   StateNodeConfig,
   assign,
   ActionFunction,
-  ActionObject,
   ActionFunctionMap
 } from 'xstate';
 import {Store} from '../store';
@@ -85,14 +84,13 @@ export const debugAction = (c, e, {state}) => {
   debugger;
 };
 
-export const displayUI = (messagingService: MessagingServiceInterface): ActionObject<any, any> => ({
-  type: 'displayUI',
-  exec: () => messagingService.sendDisplayMessage('Show')
-});
-export const hideUI = (messagingService: MessagingServiceInterface): ActionObject<any, any> => ({
-  type: 'hideUI',
-  exec: () => messagingService.sendDisplayMessage('Hide')
-});
+export const displayUI = (
+  messagingService: MessagingServiceInterface
+): ActionFunction<any, any> => () => messagingService.sendDisplayMessage('Show');
+
+export const hideUI = (
+  messagingService: MessagingServiceInterface
+): ActionFunction<any, any> => () => messagingService.sendDisplayMessage('Hide');
 
 export const sendUserDeclinedResponse = (
   messageService: MessagingServiceInterface
@@ -125,8 +123,8 @@ export enum CommonActions {
 }
 export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
   sendUserDeclinedErrorResponse: ActionFunction<{requestId: number}, any>;
-  hideUI: ActionObject<any, any>;
-  displayUI: ActionObject<any, any>;
+  hideUI: ActionFunction<any, any>;
+  displayUI: ActionFunction<any, any>;
 }
 export const commonWorkflowActions = (
   messageService: MessagingServiceInterface
