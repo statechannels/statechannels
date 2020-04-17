@@ -3,17 +3,10 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const pinoLog =
-  process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
-    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'a'})
-    : {write: (): null => null};
-const browserConsoleLog = process.env.BROWSER_LOG_DESTINATION
-  ? fs.createWriteStream(process.env.BROWSER_LOG_DESTINATION, {flags: 'a'})
-  : {write: (): null => null};
-
 export async function loadDapp(
   page: Page,
   ganacheAccountIndex: number,
+  logFilePrefix: string,
   ignoreConsoleError?: boolean
 ): Promise<void> {
   // TODO: This is kinda ugly but it works
@@ -43,6 +36,17 @@ export async function loadDapp(
   page.on('pageerror', error => {
     throw error;
   });
+
+  // For convenience, I am requiring that logs are stored in /tmp
+  const LOGS_LOCATION = path.join('/tmp', logFilePrefix);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const writeStream = (filename: string): {write: (...x: any[]) => any} =>
+    filename === 'console'
+      ? {write: (): null => null}
+      : fs.createWriteStream(`${LOGS_LOCATION}.${filename}`, {flags: 'a'});
+  const pinoLog = writeStream(process.env.LOG_DESTINATION || 'console');
+  const browserConsoleLog = writeStream(process.env.BROWSER_LOG_DESTINATION || 'console');
 
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
