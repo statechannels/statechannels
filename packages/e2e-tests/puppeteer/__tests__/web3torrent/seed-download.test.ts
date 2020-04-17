@@ -35,12 +35,6 @@ describe('Web3-Torrent Integration Tests', () => {
     web3tTabB = (await browserB.pages())[0];
     tabs = [web3tTabA, web3tTabB];
 
-    const logPageOutput = (role: string) => (msg: any) =>
-      // use console.error so we can redirect STDERR to a file
-      process.env.CI && console.error(`${role}: `, msg.text());
-    web3tTabA.on('console', logPageOutput('A'));
-    web3tTabB.on('console', logPageOutput('B'));
-
     console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
     await loadDapp(web3tTabB, 1, true);
