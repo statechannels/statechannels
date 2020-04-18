@@ -29,7 +29,7 @@ export type Bytes32 = string;
 export type Uint256 = string;
 
 interface JsonRpcRequest<MethodName, RequestParams> {
-  id: number; // in the json-rpc spec this is optional, but we require it for all our requests
+  id: string; // in the json-rpc spec this is optional, but we require it for all our requests
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
