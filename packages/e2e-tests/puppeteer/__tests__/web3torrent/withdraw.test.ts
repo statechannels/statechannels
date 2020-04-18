@@ -28,7 +28,7 @@ describe('withdrawal from a ledger channel', () => {
     web3tTabA = (await browserA.pages())[0];
 
     console.log('Loading dapps');
-    await loadDapp(web3tTabA, 0, true);
+    await loadDapp(web3tTabA, 0, 'withdraw', true);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
   });

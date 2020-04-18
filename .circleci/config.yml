@@ -248,9 +248,9 @@ jobs:
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
       NODE_ENV: test
-      LOG_DESTINATION: /tmp/pino.log
-      BROWSER_LOG_DESTINATION: /tmp/browser.log
-      REACT_APP_LOG_DESTINATION: /tmp/pino.log
+      LOG_DESTINATION: pino.log
+      BROWSER_LOG_DESTINATION: browser.log
+      REACT_APP_LOG_DESTINATION: pino.log
     steps:
       - checkout
       - puppeteer/install
@@ -271,9 +271,13 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/pino.log
+          path: /tmp/seed-download.pino.log
       - store_artifacts:
-          path: /tmp/browser.log
+          path: /tmp/seed-download.browser.log
+      - store_artifacts:
+          path: /tmp/withdraw.pino.log
+      - store_artifacts:
+          path: /tmp/withdraw.browser.log
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots:
@@ -342,9 +346,9 @@ jobs:
       GANACHE_PORT: 8547
       ADD_LOGS: true
       NODE_ENV: development
-      LOG_DESTINATION: /tmp/pino.log
-      BROWSER_LOG_DESTINATION: /tmp/browser.log
-      REACT_APP_LOG_DESTINATION: /tmp/pino.log
+      LOG_DESTINATION: pino.log
+      BROWSER_LOG_DESTINATION: browser.log
+      REACT_APP_LOG_DESTINATION: pino.log
     steps:
       - checkout
       - puppeteer/install
@@ -368,9 +372,13 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/pino.log
+          path: /tmp/seed-download.pino.log
       - store_artifacts:
-          path: /tmp/browser.log
+          path: /tmp/seed-download.browser.log
+      - store_artifacts:
+          path: /tmp/withdraw.pino.log
+      - store_artifacts:
+          path: /tmp/withdraw.browser.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:

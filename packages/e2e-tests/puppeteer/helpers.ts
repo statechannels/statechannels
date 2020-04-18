@@ -3,17 +3,12 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const pinoLog =
-  process.env.LOG_DESTINATION && process.env.LOG_DESTINATION !== 'console'
-    ? fs.createWriteStream(process.env.LOG_DESTINATION, {flags: 'a'})
-    : {write: (): null => null};
-const browserConsoleLog = process.env.BROWSER_LOG_DESTINATION
-  ? fs.createWriteStream(process.env.BROWSER_LOG_DESTINATION, {flags: 'a'})
-  : {write: (): null => null};
+const logDistinguisherCache: Record<string, true | undefined> = {};
 
 export async function loadDapp(
   page: Page,
   ganacheAccountIndex: number,
+  logPrefix: string,
   ignoreConsoleError?: boolean
 ): Promise<void> {
   // TODO: This is kinda ugly but it works
@@ -44,15 +39,40 @@ export async function loadDapp(
     throw error;
   });
 
+  const uniquenessKey = `${ganacheAccountIndex}/${logPrefix}`;
+  if (logDistinguisherCache[uniquenessKey]) throw `Ambiguous log config detected: ${uniquenessKey}`;
+  logDistinguisherCache[uniquenessKey] = true;
+
+  // For convenience, I am requiring that logs are stored in /tmp
+  const LOGS_LOCATION = path.join('/tmp', logPrefix);
+
+  const APPEND = 'a';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const writeStream = (filename: string): {write: (...x: any[]) => any} =>
+    filename === 'console'
+      ? {write: (): null => null}
+      : fs.createWriteStream(`${LOGS_LOCATION}.${filename}`, {flags: APPEND});
+  const pinoLog = writeStream(process.env.LOG_DESTINATION || 'console');
+  const browserConsoleLog = writeStream(process.env.BROWSER_LOG_DESTINATION || 'console');
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const isPinoLog = (name: string) => {
+    const regex = new RegExp(`"name":"${name}"`);
+    return (text: string): boolean => regex.test(text);
+  };
+  const isXstateWalletLog = isPinoLog('xstate-wallet');
+  const isWeb3torrentLog = isPinoLog('web3torrent');
+  const withGanacheIndex = (text: string): string =>
+    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
+
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
 
-    const text = msg.text() + '\n';
-    if (/"name":"xstate-wallet"/.test(text)) pinoLog.write(text);
-    else if (/"name":"web3torrent"/.test(text)) pinoLog.write(text);
-    else browserConsoleLog.write(text);
+    const text = msg.text();
+    if (isXstateWalletLog(text) || isWeb3torrentLog(text)) pinoLog.write(withGanacheIndex(text));
+    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
   });
 }
 // waiting for a css selector, and then clicking that selector is more robust than waiting for
