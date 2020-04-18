@@ -1,5 +1,5 @@
 import pino from 'pino';
-import {LOG_DESTINATION, ADD_LOGS} from './constants';
+import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL} from './constants';
 
 // TODO: Is there a better way to determine if we're in a browser context?
 const IS_BROWSER_CONTEXT = process.env.NODE_ENV !== 'test';
@@ -36,10 +36,7 @@ const browser =
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-// We default to info
-// Some very large classes are currently being logged at the trace level.
-// To enablee logging of these objects (only advisable in the browser!) set it to 'trace'
-const level = process.env.REACT_APP_LOG_LEVEL || 'info';
-
+const level = LOG_LEVEL;
 const opts = {name, prettyPrint, browser, level};
+
 export const logger = destination ? pino(opts, destination) : pino(opts);
