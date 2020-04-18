@@ -49,14 +49,16 @@ export class MessagingService {
     }
   }
 
+  private requestNumber = 0;
   async request<ResultType = any>(
     target: Window,
     message: JsonRpcRequest,
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
-    if (!message.id) {
-      message.id = Date.now();
-    }
+    // TODO: I don't know the requirements on message IDs, but it's important
+    // that they be unique
+    message.id = this.requestNumber++;
+    message.time = Date.now();
 
     return new Promise<ResultType>((resolve, reject) => {
       window.addEventListener(
