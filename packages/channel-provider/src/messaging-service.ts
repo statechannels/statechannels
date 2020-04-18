@@ -1,5 +1,6 @@
 import debug from 'debug';
 import {JsonRpcRequest} from './types';
+import {Guid} from 'guid-typescript';
 
 const log = debug('channel-provider:messaging');
 
@@ -55,7 +56,7 @@ export class MessagingService {
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
     if (!message.id) {
-      message.id = Date.now();
+      message.id = Guid.create().toString();
     }
 
     return new Promise<ResultType>((resolve, reject) => {

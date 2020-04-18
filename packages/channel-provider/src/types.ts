@@ -27,14 +27,14 @@ import {
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
-  id?: number;
+  id?: string;
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
 }
 
 export interface JsonRpcResponse<ResponseType = any> {
-  id: number;
+  id: string;
   jsonrpc: '2.0';
   result: ResponseType;
 }
