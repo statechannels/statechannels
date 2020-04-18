@@ -101,7 +101,7 @@ export class PaymentChannelClient {
     }
 
     if (firebase.apps.length > 0) {
-      log('Firebase app already initialized');
+      log.warn('Firebase app already initialized');
     } else {
       // Hub messaging
       firebase.initializeApp(fireBaseConfig);
@@ -121,13 +121,14 @@ export class PaymentChannelClient {
         }
       });
 
-    myFirebaseRef.on('child_added', async snapshot => {
-      const key = snapshot.key;
-      const message = snapshot.val();
-      myFirebaseRef.child(key).remove();
-      log.info({message}, 'GOT FROM FIREBASE: ');
-      await this.pushMessage(message);
-    });
+      myFirebaseRef.on('child_added', async snapshot => {
+        const key = snapshot.key;
+        const message = snapshot.val();
+        myFirebaseRef.child(key).remove();
+        log.info({message}, 'GOT FROM FIREBASE: ');
+        await this.pushMessage(message);
+      });
+    }
   }
 
   async createChannel(

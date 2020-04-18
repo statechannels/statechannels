@@ -14,7 +14,7 @@ export const Web3TorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 
-export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torrentData => {
+export const download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent> = torrentData => {
   return new Promise((resolve, reject) =>
     web3torrent
       .enable()
@@ -27,7 +27,7 @@ export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torre
   );
 };
 
-export const upload: (input: WebTorrentSeedInput) => Promise<Torrent> = input => {
+export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = input => {
   return new Promise((resolve, reject) =>
     web3torrent
       .enable()
