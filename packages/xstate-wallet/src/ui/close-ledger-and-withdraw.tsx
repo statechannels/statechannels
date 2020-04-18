@@ -45,7 +45,7 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
         <Button
           disabled={waiting}
           onClick={() => send('USER_APPROVES_CLOSE')}
-          className="approve-budget-button"
+          id="approve-withdraw"
         >
           Close and Withdraw
         </Button>
