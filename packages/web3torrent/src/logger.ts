@@ -36,5 +36,10 @@ const browser =
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-const opts = {name, prettyPrint, browser};
+// We default to info
+// Some very large classes are currently being logged at the trace level.
+// To enablee logging of these objects (only advisable in the browser!) set it to 'trace'
+const level = process.env.REACT_APP_LOG_LEVEL || 'info';
+
+const opts = {name, prettyPrint, browser, level};
 export const logger = destination ? pino(opts, destination) : pino(opts);
