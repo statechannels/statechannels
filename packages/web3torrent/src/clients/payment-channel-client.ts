@@ -17,6 +17,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/database';
 import _ from 'lodash';
 import {logger} from '../logger';
+import EventEmitter from 'eventemitter3';
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
@@ -73,7 +74,12 @@ export class PaymentChannelClient {
 
   constructor(private readonly channelClient: ChannelClientInterface) {
     this.channelClient.onChannelUpdated(channelResult => {
-      this.updateChannelCache(convertToChannelState(channelResult));
+      log.info({channelResult}, 'Converting to channel state');
+      const channelState = convertToChannelState(channelResult);
+      log.info({channelState}, 'Channel state received');
+      this.updateChannelCache(channelState);
+
+      this._eventEmitter.emit('ChannelState', channelState);
     });
 
     this.channelClient.onBudgetUpdated(budgetResult => {
@@ -175,15 +181,11 @@ export class PaymentChannelClient {
       (this.channelCache[channelState.channelId] = channelState);
   }
 
+  private _eventEmitter = new EventEmitter<{ChannelState: [ChannelState]}>();
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
-    function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
-    }
-    const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
-    return () => {
-      unsubChannelUpdated();
-    };
+  onChannelStateReceived(web3tCallback: (channelState: ChannelState) => any) {
+    this._eventEmitter.on('ChannelState', web3tCallback);
+    return () => this._eventEmitter.off('ChannelState', web3tCallback);
   }
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
@@ -257,10 +259,10 @@ export class PaymentChannelClient {
       const currentState = this.channelCache[channelId];
       if (readyToPay(currentState)) resolve(currentState);
 
-      const unsubscribeListener = this.channelClient.onChannelUpdated(cu => {
-        if (readyToPay(convertToChannelState(cu))) {
+      const unsubscribeListener = this.onChannelStateReceived(cu => {
+        if (readyToPay(cu)) {
           unsubscribeListener();
-          resolve(convertToChannelState(cu));
+          resolve(cu);
         }
       });
     });

@@ -249,7 +249,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       }
     });
 
-    this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
+    this.paymentChannelClient.onChannelStateReceived(async (channelState: ChannelState) => {
       if (
         channelState.channelId === wire.paidStreamingExtension.pseChannelId ||
         channelState.channelId === wire.paidStreamingExtension.peerChannelId
