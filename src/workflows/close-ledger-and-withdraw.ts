@@ -61,7 +61,7 @@ type WorkflowTypeState =
 
 export type WorkflowContext = WorkflowTypeState['context'];
 
-type WorkflowEvent =
+export type WorkflowEvent =
   | UserApproves
   | UserRejects
   | DoneInvokeEvent<CloseLedger>

@@ -29,7 +29,7 @@ export const Wallet = (props: Props) => {
           <ApproveBudgetAndFund service={props.workflow} />
         )}
         {props.workflow.id === 'close-and-withdraw' && (
-          <CloseLedgerAndWithdraw current={current} send={send} />
+          <CloseLedgerAndWithdraw service={props.workflow} />
         )}
       </Layout>
     </WindowContext.Provider>
