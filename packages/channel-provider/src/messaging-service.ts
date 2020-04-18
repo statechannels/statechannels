@@ -55,9 +55,14 @@ export class MessagingService {
     message: JsonRpcRequest,
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
+    // Some tests rely on being able to supply the id on the message
+    // We should not allow this in production, as we cannot guarantee unique
+    // message ids.
+    if (message.id) console.error('message id should not be defined');
+
     // TODO: I don't know the requirements on message IDs, but it's important
     // that they be unique
-    message.id = this.requestNumber++;
+    message.id = message.id || this.requestNumber++;
     message.time = Date.now();
 
     return new Promise<ResultType>((resolve, reject) => {
