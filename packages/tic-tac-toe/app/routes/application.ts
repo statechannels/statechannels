@@ -5,6 +5,8 @@ import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelProviderInterface} from '@statechannels/channel-provider';
 import TttChannelClientService from '../services/ttt-channel-client';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
+import {Message} from '@statechannels/client-api-schema';
+import MessageModel from '../models/message';
 
 const {WALLET_URL} = ENV;
 
@@ -14,12 +16,32 @@ declare global {
   }
 }
 
+function sanitizeMessageForFirebase(message: MessageModel): MessageModel {
+  return JSON.parse(JSON.stringify(message));
+}
+
 export default class ApplicationRoute extends Route {
   @service tttChannelClient!: TttChannelClientService;
 
-  async beforeModel(transition: Transition): Promise<void> {
+  beforeModel(transition: Transition): void {
     super.beforeModel(transition);
+
     window.channelProvider.mountWalletComponent(WALLET_URL);
+
     this.tttChannelClient.enable(new ChannelClient(window.channelProvider));
+
+    this.tttChannelClient.onMessageQueued((message: Message) => {
+      const messageData = {
+        recipient: message.recipient,
+        sender: message.sender,
+        data: message.data
+      } as MessageModel;
+
+      const newMessage = this.store.createRecord(
+        'message',
+        sanitizeMessageForFirebase(messageData)
+      );
+      newMessage.save();
+    });
   }
 }

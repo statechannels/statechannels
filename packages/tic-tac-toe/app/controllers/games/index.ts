@@ -40,7 +40,7 @@ export default class GamesIndexController extends Controller {
       isPublic: true,
       playerAName: 'unknown',
       playerAOutcomeAddress: 'unknown'
-    };
+    } as ChallengeModel;
     const newGame = this.store.createRecord('challenge', myPublicOpenGame);
     await newGame.save();
     this.currentGame.setGame(newGame);
