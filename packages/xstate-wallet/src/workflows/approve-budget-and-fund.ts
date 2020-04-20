@@ -13,7 +13,7 @@ import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/t
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
-import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS, IS_PRODUCTION} from '../constants';
 import {
   checkThat,
   exists,
@@ -22,6 +22,7 @@ import {
   hideUI,
   displayUI
 } from '../utils';
+
 import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
@@ -108,6 +109,7 @@ export const machine = (
   context: Initial
 ): StateMachine<Context, Schema, Event, Typestate> =>
   createMachine<Context, Event, Typestate>({
+    strict: !IS_PRODUCTION,
     id: 'approve-budget-and-fund',
     context,
     initial: 'waitForUserApproval',

@@ -33,6 +33,7 @@ import {
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
+import {IS_PRODUCTION} from '../constants';
 
 export interface WorkflowContext {
   applicationSite: string;
@@ -121,6 +122,7 @@ const generateConfig = (
   actions: WorkflowActions,
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
+  strict: !IS_PRODUCTION,
   id: 'application-workflow',
   initial: 'joiningChannel',
   on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
