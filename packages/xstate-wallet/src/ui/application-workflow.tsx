@@ -41,6 +41,11 @@ export const ApplicationWorkflow = (props: Props) => {
       }}
       className="application-workflow-prompt"
     >
+      <div
+        id={
+          getApplicationStateValue(current) === 'joiningChannel' ? 'joiningChannel' : 'noPromptId'
+        }
+      />
       <Heading textAlign="center" mb={0}>
         {messages[getApplicationStateValue(current)]}
       </Heading>
