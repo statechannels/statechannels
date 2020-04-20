@@ -178,3 +178,9 @@ export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('10').toH
 
 export const LOG_DESTINATION = process.env.REACT_APP_LOG_DESTINATION;
 export const ADD_LOGS = !!LOG_DESTINATION;
+
+// When logging, we default to 'info', as most logs happen at this level.
+// Some very large classes are serialized at the 'trace' level
+// We probably don't want these logged to the console, but strictly enabling this
+// in the browser might sometimes be helpful
+export const LOG_LEVEL = ADD_LOGS ? process.env.REACT_APP_LOG_LEVEL || 'info' : 'silent';

@@ -120,7 +120,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrentInfoHash,
       peerAccount
     });
-    log.info({from: this.peersList}, '<< blockedPeer %s', peerAccount);
+    log.info({from: Object.keys(this.peersList)[0]}, '<< blockedPeer %s', peerAccount);
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
@@ -150,7 +150,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
-    log.info({wire}, 'Wire Setup');
+    log.info('Wire Setup');
+    log.trace({wire});
 
     wire.use(
       paidStreamingExtension({pseAccount: this.pseAccount, outcomeAddress: this.outcomeAddress})
@@ -158,7 +159,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
     wire.on(WireEvents.KEEP_ALIVE, () => {
-      log.info({torrent}, 'wire keep-alive : %s', !torrent.done && wire.amChoking);
+      log.info('wire keep-alive : %s', !torrent.done && wire.amChoking);
+      log.trace({torrent});
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
@@ -338,7 +340,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
-      log.info({torrent, peers: this.peersList[torrent.infoHash]}, '<< Torrent DONE!');
+      log.info('<< Torrent DONE!');
+      log.trace({torrent, peers: this.peersList[torrent.infoHash]});
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
     });
@@ -405,13 +408,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    */
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
     if (torrent.done) {
-      log.info({torrent, wire}, '<< JUMPSTART: FINISHED');
+      log.info('<< JUMPSTART: FINISHED');
+      log.trace({torrent, wire});
       return;
     }
-    log.info(
-      {pieces: torrent.pieces, requests: wire.requests},
-      `<< START ${wire.paidStreamingExtension.peerAccount}`
-    );
+    log.info({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
+    log.trace({pieces: torrent.pieces});
     wire.unchoke();
     (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
   }

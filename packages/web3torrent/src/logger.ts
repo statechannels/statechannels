@@ -1,5 +1,5 @@
 import pino from 'pino';
-import {LOG_DESTINATION, ADD_LOGS} from './constants';
+import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL} from './constants';
 
 // TODO: Is there a better way to determine if we're in a browser context?
 const IS_BROWSER_CONTEXT = process.env.NODE_ENV !== 'test';
@@ -36,5 +36,7 @@ const browser =
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-const opts = {name, prettyPrint, browser};
+const level = LOG_LEVEL;
+const opts = {name, prettyPrint, browser, level};
+
 export const logger = destination ? pino(opts, destination) : pino(opts);
