@@ -5,15 +5,16 @@ import {SimpleHub} from './simple-hub';
 import {bigNumberify, BigNumberish} from 'ethers/utils';
 import _ from 'lodash';
 import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {Participant, Outcome, SignedState, ChannelConstants} from '../../store/types';
+import {Participant, Outcome, SignedState, ChannelConstants, SiteBudget} from '../../store/types';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
 
-import {wallet1, wallet2, wallet3, threeParticipants as participants} from './data';
+import {wallet1, wallet2, wallet3, threeParticipants as participants, TEST_SITE} from './data';
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 import {TestStore} from './store';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -146,11 +147,26 @@ const context: VirtualDefundingAsLeaf.Init = {targetChannelId};
 let aStore: TestStore;
 let bStore: TestStore;
 
+const generateBudget = (ledgerAmounts): SiteBudget => ({
+  domain: TEST_SITE,
+  hubAddress: HUB.signingAddress,
+  forAsset: {
+    [ETH_ASSET_HOLDER_ADDRESS]: {
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      availableReceiveCapacity: ledgerAmounts[1],
+      availableSendCapacity: ledgerAmounts[0],
+      channels: {[targetChannelId]: {amount: totalTargetAmount}}
+    }
+  }
+});
+
 beforeEach(async () => {
   aStore = new TestStore();
   await aStore.initialize([wallet1.privateKey]);
 
-  await aStore.createEntry(ledger1State, {funding: {type: 'Direct'}});
+  await aStore.createBudget(generateBudget(ledger1Amounts));
+
+  await aStore.createEntry(ledger1State, {funding: {type: 'Direct'}, applicationSite: TEST_SITE});
   await aStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
   await aStore.createEntry(jointState, {
     funding: {type: 'Guarantee', guarantorChannelId: guarantor1Id}
@@ -159,7 +175,10 @@ beforeEach(async () => {
 
   bStore = new TestStore();
   await bStore.initialize([wallet2.privateKey]);
-  await bStore.createEntry(ledger2State, {funding: {type: 'Direct'}});
+
+  await bStore.createBudget(generateBudget(ledger2Amounts));
+
+  await bStore.createEntry(ledger2State, {funding: {type: 'Direct'}, applicationSite: TEST_SITE});
   await bStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
   await bStore.createEntry(jointState, {
     funding: {type: 'Guarantee', guarantorChannelId: guarantor2Id}
