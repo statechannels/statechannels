@@ -18,6 +18,9 @@ $ yarn install
 $ yarn hub:watch (will rebuild app on file change)
 ```
 
+- To enable logging to the console, set `LOG_DESTINATION=console`
+- To enable logging to a file, set `LOG_DESTINATION=someFilenameOtherThanConsole`
+
 ### Establishing a virtual channel between clients through the hub
 
 **NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_PARTICIPANT_ID` to one that is likely not being used by any other developer for local development purposes.
