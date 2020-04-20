@@ -59,3 +59,6 @@ export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
 export const LOG_DESTINATION = process.env.LOG_DESTINATION;
 export const ADD_LOGS = !!LOG_DESTINATION;
+
+export const IS_PRODUCTION =
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod';
