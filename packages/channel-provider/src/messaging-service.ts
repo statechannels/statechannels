@@ -60,8 +60,7 @@ export class MessagingService {
     // message ids.
     if (message.id) console.error('message id should not be defined');
 
-    // TODO: I don't know the requirements on message IDs, but it's important
-    // that they be unique
+    // message IDs should be unique
     message.id = message.id || this.requestNumber++;
 
     return new Promise<ResultType>((resolve, reject) => {
