@@ -67,9 +67,6 @@
         },
         "params": {
           "$ref": "#/definitions/TokenBudgetRequest"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -94,9 +91,6 @@
         },
         "result": {
           "$ref": "#/definitions/SiteBudget"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -178,9 +172,6 @@
             "channelId"
           ],
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -205,9 +196,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -410,9 +398,6 @@
         },
         "params": {
           "$ref": "#/definitions/CloseAndWithdrawParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -446,9 +431,6 @@
             "success"
           ],
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -490,9 +472,6 @@
         },
         "params": {
           "$ref": "#/definitions/CloseChannelParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -517,9 +496,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -583,9 +559,6 @@
         },
         "params": {
           "$ref": "#/definitions/CreateChannelParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -610,9 +583,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -685,9 +655,6 @@
         "params": {
           "additionalProperties": false,
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -729,9 +696,6 @@
             "walletVersion"
           ],
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -814,9 +778,6 @@
             "hubAddress"
           ],
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -849,9 +810,6 @@
               "type": "object"
             }
           ]
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -893,9 +851,6 @@
         },
         "params": {
           "$ref": "#/definitions/GetStateParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -920,9 +875,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -953,9 +905,6 @@
         "params": {
           "additionalProperties": false,
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1004,9 +953,6 @@
             "walletVersion"
           ],
           "type": "object"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1048,9 +994,6 @@
         },
         "params": {
           "$ref": "#/definitions/JoinChannelParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1075,9 +1018,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1232,9 +1172,6 @@
         },
         "params": {
           "$ref": "#/definitions/Message"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1259,9 +1196,6 @@
         },
         "result": {
           "$ref": "#/definitions/PushMessageResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1531,9 +1465,6 @@
         },
         "params": {
           "$ref": "#/definitions/UpdateChannelParams"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [
@@ -1558,9 +1489,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        },
-        "time": {
-          "type": "number"
         }
       },
       "required": [

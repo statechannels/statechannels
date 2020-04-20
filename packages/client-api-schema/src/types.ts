@@ -30,14 +30,12 @@ export type Uint256 = string;
 
 interface JsonRpcRequest<MethodName, RequestParams> {
   id: number; // in the json-rpc spec this is optional, but we require it for all our requests
-  time?: number;
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
 }
 interface JsonRpcResponse<ResultType> {
   id: number;
-  time?: number;
   jsonrpc: '2.0';
   result: ResultType;
 }
