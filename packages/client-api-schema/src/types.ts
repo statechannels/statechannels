@@ -49,7 +49,7 @@ interface JsonRpcNotification<NotificationName, NotificationParams> {
 export const UserDeclinedErrorCode = 200;
 export const EthereumNotEnabledErrorCode = 100;
 
-export type ErrorCode = typeof UserDeclinedErrorCode | typeof EthereumNotEnabledErrorCode;
+type ErrorCode = typeof UserDeclinedErrorCode | typeof EthereumNotEnabledErrorCode;
 interface JsonRpcError<Code extends ErrorCode, Message, Data = undefined> {
   id: number;
   jsonrpc: '2.0';
