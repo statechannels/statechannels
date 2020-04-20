@@ -100,31 +100,35 @@ export class PaymentChannelClient {
       return;
     }
 
-    // Hub messaging
-    firebase.initializeApp(fireBaseConfig);
-    const myFirebaseRef = firebase
-      .database()
-      .ref(`/${FIREBASE_PREFIX}/messages/${this.mySigningAddress}`);
-    const hubFirebaseRef = firebase
-      .database()
-      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
+    if (firebase.apps.length > 0) {
+      log.warn('Firebase app already initialized');
+    } else {
+      // Hub messaging
+      firebase.initializeApp(fireBaseConfig);
+      const myFirebaseRef = firebase
+        .database()
+        .ref(`/${FIREBASE_PREFIX}/messages/${this.mySigningAddress}`);
+      const hubFirebaseRef = firebase
+        .database()
+        .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
 
-    // firebase setup
-    myFirebaseRef.onDisconnect().remove();
+      // firebase setup
+      myFirebaseRef.onDisconnect().remove();
 
-    this.onMessageQueued((message: Message) => {
-      if (message.recipient === HUB.participantId) {
-        hubFirebaseRef.push(sanitizeMessageForFirebase(message));
-      }
-    });
+      this.onMessageQueued((message: Message) => {
+        if (message.recipient === HUB.participantId) {
+          hubFirebaseRef.push(sanitizeMessageForFirebase(message));
+        }
+      });
 
-    myFirebaseRef.on('child_added', async snapshot => {
-      const key = snapshot.key;
-      const message = snapshot.val();
-      myFirebaseRef.child(key).remove();
-      log.info({message}, 'GOT FROM FIREBASE: ');
-      await this.pushMessage(message);
-    });
+      myFirebaseRef.on('child_added', async snapshot => {
+        const key = snapshot.key;
+        const message = snapshot.val();
+        myFirebaseRef.child(key).remove();
+        log.info({message}, 'GOT FROM FIREBASE: ');
+        await this.pushMessage(message);
+      });
+    }
   }
 
   async createChannel(

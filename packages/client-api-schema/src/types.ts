@@ -46,7 +46,11 @@ interface JsonRpcNotification<NotificationName, NotificationParams> {
   params: NotificationParams;
 }
 
-interface JsonRpcError<Code, Message, Data = undefined> {
+export const UserDeclinedErrorCode = 200;
+export const EthereumNotEnabledErrorCode = 100;
+
+type ErrorCode = typeof UserDeclinedErrorCode | typeof EthereumNotEnabledErrorCode;
+interface JsonRpcError<Code extends ErrorCode, Message, Data = undefined> {
   id: number;
   jsonrpc: '2.0';
   error: Data extends undefined
@@ -119,7 +123,10 @@ export type EnableEthereumResponse = JsonRpcResponse<{
   selectedAddress: Address;
   walletVersion: string;
 }>;
-export type EnableEthereumError = JsonRpcError<100, 'Ethereum Not Enabled'>;
+export type EnableEthereumError = JsonRpcError<
+  typeof EthereumNotEnabledErrorCode,
+  'Ethereum Not Enabled'
+>;
 
 // CreateChannel
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
@@ -267,7 +274,9 @@ export type Response =
   | ApproveBudgetAndFundResponse
   | CloseAndWithdrawResponse;
 
-export type ErrorResponse = EnableEthereumError;
+export type UserDeclinedErrorResponse = JsonRpcError<typeof UserDeclinedErrorCode, 'User declined'>;
+
+export type ErrorResponse = EnableEthereumError | UserDeclinedErrorResponse;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 

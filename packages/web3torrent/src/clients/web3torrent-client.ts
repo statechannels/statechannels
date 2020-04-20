@@ -15,26 +15,32 @@ export const Web3TorrentContext = React.createContext(web3torrent);
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 
 export const download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent> = torrentData => {
-  return new Promise(resolve =>
-    web3torrent.enable().then(() => {
-      web3torrent.add(torrentData, (torrent: any) =>
-        resolve({...torrent, status: Status.Connecting})
-      );
-    })
+  return new Promise((resolve, reject) =>
+    web3torrent
+      .enable()
+      .then(() => {
+        web3torrent.add(torrentData, (torrent: any) =>
+          resolve({...torrent, status: Status.Connecting})
+        );
+      })
+      .catch(reject)
   );
 };
 
 export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = input => {
-  return new Promise(resolve =>
-    web3torrent.enable().then(() => {
-      web3torrent.seed(input, {...torrentNamer(input)}, (torrent: any) => {
-        resolve({
-          ...torrent,
-          status: Status.Seeding,
-          originalSeed: true
+  return new Promise((resolve, reject) =>
+    web3torrent
+      .enable()
+      .then(() => {
+        web3torrent.seed(input, {...torrentNamer(input)}, (torrent: any) => {
+          resolve({
+            ...torrent,
+            status: Status.Seeding,
+            originalSeed: true
+          });
         });
-      });
-    })
+      })
+      .catch(reject)
   );
 };
 

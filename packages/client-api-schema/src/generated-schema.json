@@ -705,8 +705,22 @@
       ],
       "type": "object"
     },
+    "ErrorCode": {
+      "enum": [
+        200,
+        100
+      ],
+      "type": "number"
+    },
     "ErrorResponse": {
-      "$ref": "#/definitions/EnableEthereumError"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EnableEthereumError"
+        },
+        {
+          "$ref": "#/definitions/UserDeclinedErrorResponse"
+        }
+      ]
     },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
@@ -1495,6 +1509,48 @@
         "id",
         "jsonrpc",
         "result"
+      ],
+      "type": "object"
+    },
+    "UserDeclinedErrorResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                200
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "User declined"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
       ],
       "type": "object"
     }

@@ -6,9 +6,20 @@ import {
   Machine,
   DoneInvokeEvent,
   StateNodeConfig,
-  assign
+  assign,
+  ActionFunction,
+  ActionFunctionMap
 } from 'xstate';
 import {Store} from '../store';
+import {MessagingServiceInterface} from '../messaging';
+
+// export interface WorkflowStateSchema<T extends {value:any; context:any}> {
+//   meta?: any;
+//   context?: Partial<any>;
+//   states?: {
+//     [key: keyof T]: WorkflowStateSchema<T>;
+//   };
+// }
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -72,3 +83,53 @@ export const debugAction = (c, e, {state}) => {
   // eslint-disable-next-line no-debugger
   debugger;
 };
+
+export const displayUI = (
+  messagingService: MessagingServiceInterface
+): ActionFunction<any, any> => () => messagingService.sendDisplayMessage('Show');
+
+export const hideUI = (
+  messagingService: MessagingServiceInterface
+): ActionFunction<any, any> => () => messagingService.sendDisplayMessage('Hide');
+
+export const sendUserDeclinedResponse = (
+  messageService: MessagingServiceInterface
+): ActionFunction<any, any> => (context, _) => {
+  if (!context.requestId) {
+    throw new Error(`No request id in context ${JSON.stringify(context)}`);
+  }
+  messageService.sendError(context.requestId, {
+    code: 200,
+    message: 'User declined'
+  });
+};
+
+export const sendGenericResponse = (
+  messageService: MessagingServiceInterface
+): ActionFunction<any, any> => (context, _) => {
+  if (!context.requestId) {
+    throw new Error(`No request id in context ${JSON.stringify(context)}`);
+  }
+  messageService.sendError(context.requestId, {
+    code: 200,
+    message: 'User declined'
+  });
+};
+
+export enum CommonActions {
+  sendUserDeclinedErrorResponse = 'sendUserDeclinedErrorResponse',
+  hideUI = 'hideUI',
+  displayUI = 'displayUI'
+}
+export interface CommonWorkflowActions extends ActionFunctionMap<any, any> {
+  sendUserDeclinedErrorResponse: ActionFunction<{requestId: number}, any>;
+  hideUI: ActionFunction<any, any>;
+  displayUI: ActionFunction<any, any>;
+}
+export const commonWorkflowActions = (
+  messageService: MessagingServiceInterface
+): CommonWorkflowActions => ({
+  displayUI: displayUI(messageService),
+  hideUI: hideUI(messageService),
+  sendUserDeclinedErrorResponse: sendUserDeclinedResponse(messageService)
+});
