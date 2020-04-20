@@ -151,15 +151,17 @@ export class ChannelWallet {
     }
     const service = interpret(machine, {devTools})
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, workflowId))
+      .onTransition(
+        async () =>
+          IS_PRODUCTION &&
+          logger.info({workflowId, store: await this.store.dumpBackend()}, 'Done workflow')
+      )
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
-      .onStop(async () => {
-        if (!IS_PRODUCTION) {
-          logger.info({workflowId, store: await this.store.dumpBackend()}, 'Done workflow');
-        }
-        if (service.state.value !== 'done') {
-          logger.error('Service finished prematurely in %s', service.state.value);
-        }
-      })
+      .onStop(
+        async () =>
+          service.state.value === 'done' ||
+          logger.error('Service finished prematurely in %s', service.state.value)
+      )
       .start();
     // TODO: Figure out how to resolve rendering priorities
     this.renderUI(service);
