@@ -145,8 +145,9 @@ export async function waitAndApproveDeposit(
 ): Promise<void> {
   console.log('Making deposit');
 
-  const walletIFrame = page.frames()[1];
-  await walletIFrame.waitForSelector('#please-approve-transaction');
+  await page.waitFor(2000); // no prompt when direct funding
+  // const walletIFrame = page.frames()[1];
+  // await walletIFrame.waitForSelector('#please-approve-transaction');
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
 }

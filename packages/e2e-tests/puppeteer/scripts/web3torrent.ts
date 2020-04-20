@@ -5,7 +5,6 @@ import * as fs from 'fs';
 import {
   waitAndApproveBudget,
   waitAndApproveMetaMask,
-  waitAndApproveDeposit,
   setUpBrowser,
   setupLogging,
   waitForBudgetEntry,
@@ -74,10 +73,7 @@ export async function startDownload(
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
-  } else {
-    await waitForAndApproveChannelOpening(page);
   }
-  await waitAndApproveDeposit(page, metamask);
 }
 
 export async function cancelDownload(page: Page): Promise<void> {
