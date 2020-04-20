@@ -31,7 +31,25 @@ const otherViolations = {
   '@typescript-eslint/no-var-requires': 'off',
   'import/no-duplicates': 'off',
   'import/no-unresolved': 'off',
-  'prefer-rest-params': 'off'
+  'prefer-rest-params': 'off',
+  'react/no-unescaped-entities': 'off',
+  'react/prop-types': 'off'
+};
+
+// From https://github.com/yannickcr/eslint-plugin-react#configuration
+const reactSettings = {
+  react: {
+    createClass: 'createReactClass',
+    pragma: 'React',
+    version: 'detect',
+    flowVersion: '0.53'
+  },
+  propWrapperFunctions: [
+    'forbidExtraProps',
+    {property: 'freeze', object: 'Object'},
+    {property: 'myFavoriteWrapper'}
+  ],
+  linkComponents: ['Hyperlink', {name: 'Link', linkAttribute: 'to'}]
 };
 
 module.exports = {
@@ -40,13 +58,14 @@ module.exports = {
     browser: true,
     es6: true
   },
-  plugins: [...baseConfig.plugins, "react-hooks", 'jest'],
+  plugins: [...baseConfig.plugins, 'jest', 'react-hooks'],
   extends: [
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:import/typescript'
+    'plugin:import/typescript',
+    'plugin:react/recommended'
   ],
   rules: {
     ...leftoverTsLintRules,
@@ -61,5 +80,6 @@ module.exports = {
     module: 'readonly',
     global: 'readonly',
     Buffer: 'readonly'
-  }
+  },
+  settings: {...baseConfig.settings, ...reactSettings}
 };
