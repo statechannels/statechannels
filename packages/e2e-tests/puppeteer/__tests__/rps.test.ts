@@ -47,17 +47,15 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
 
     await rpsTabA.bringToFront();
     await rpsTabB.bringToFront();
-
-    await login(rpsTabA, rpsTabB);
   });
 
   afterAll(async () => {
-    if (browserA) {
-      await browserA.close();
-    }
-    if (browserB) {
-      await browserB.close();
-    }
+    // if (browserA) {
+    //   await browserA.close();
+    // }
+    // if (browserB) {
+    //   await browserB.close();
+    // }
   });
 
   it('works', async () => {
@@ -66,10 +64,12 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
       waitAndApproveMetaMask(rpsTabA, metamaskA),
       waitAndApproveMetaMask(rpsTabB, metamaskB)
     ]);
+    await rpsTabA.bringToFront();
+    await rpsTabB.bringToFront();
     console.log('logging in..');
     await login(rpsTabA, rpsTabB);
     console.log('starting first game...');
-    await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
+    await startFundAndPlaySingleMove(rpsTabA, metamaskA, rpsTabB, metamaskB);
     console.log('A challenging...');
     await aChallenges(rpsTabA, rpsTabB);
     console.log('B challenging...');
@@ -77,7 +77,7 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
     console.log('B resigning...');
     await bResigns(rpsTabA, rpsTabB);
     console.log('starting second game...');
-    return await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
+    return await startFundAndPlaySingleMove(rpsTabA, metamaskA, rpsTabB, metamaskB);
     // (ultimate and intermediate) test success implied by promises resolving
     // therefore no assertions needed in this test
   });
