@@ -4,7 +4,7 @@ import './wallet.scss';
 import {useService} from '@xstate/react';
 
 import {formatEther} from 'ethers/utils';
-import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
 import {SiteBudget} from '../store';
@@ -17,26 +17,18 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
   const [current, send] = useService(props.service);
 
   const waitForUserApproval = ({waiting, budget}: {waiting: boolean; budget: SiteBudget}) => {
-    const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
+    const {playerAmount} = getAmountsFromBudget(budget);
     return (
       <Flex alignItems="left" flexDirection="column">
         <Heading textAlign="center" mb={0}>
-          Close your App Budget
+          Withdraw Funds
         </Heading>
         <Heading textAlign="center" as="h4" mt={0} mb={2}>
           {budget.domain}
         </Heading>
-
         <Text fontSize={1} pb={2}>
-          Close your budget with <strong>{budget.domain}</strong> and withdraw your funds?
+          Close your hub connection with <strong>{budget.domain}</strong> and withdraw your funds?
         </Text>
-
-        <Flex justifyContent="center" pb={2}>
-          <Box>
-            <Text>Send: {formatEther(playerAmount)} ETH</Text>
-            <Text>Receive: {formatEther(hubAmount)} ETH</Text>
-          </Box>
-        </Flex>
 
         <Text pb={3} fontSize={1}>
           You will receive {formatEther(playerAmount)} ETH and the budget will be closed with the
