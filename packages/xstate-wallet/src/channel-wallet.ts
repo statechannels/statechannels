@@ -154,6 +154,9 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .onStop(async () => {
         if (!IS_PRODUCTION) logger.info({store: await this.store.dumpBackend()});
+        if (service.state.value !== 'done') {
+          logger.error('Service finished prematurely in %s', service.state.value);
+        }
       })
       .start();
     // TODO: Figure out how to resolve rendering priorities
