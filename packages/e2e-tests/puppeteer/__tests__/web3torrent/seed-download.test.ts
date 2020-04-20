@@ -10,7 +10,8 @@ import {
   waitAndOpenChannel,
   waitForClosingChannel,
   waitForNthState,
-  waitAndApproveDeposit
+  waitAndApproveDeposit,
+  waitAndApproveDepositWithHub
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -70,7 +71,8 @@ describe('Web3-Torrent Integration Tests', () => {
     // only works if done in series.... not sure why
     await Promise.all([web3tTabB].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
 
-    await waitAndApproveDeposit(web3tTabB, metamaskB); // only if !USES_VIRTUAL_FUNDING ?
+    if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
+    else waitAndApproveDeposit(web3tTabB, metamaskB);
 
     // Let the download continue for some time
     console.log('Downloading');

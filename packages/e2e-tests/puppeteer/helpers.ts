@@ -220,7 +220,7 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, walletIFrame, createChannelButton);
   } else {
-    return doneWhen(page, 'true');
+    return;
   }
 };
 export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
