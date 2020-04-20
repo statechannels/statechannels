@@ -2,7 +2,7 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
 import {SimpleHub} from './simple-hub';
-import {bigNumberify, BigNumberish} from 'ethers/utils';
+import {bigNumberify, BigNumberish, BigNumber} from 'ethers/utils';
 import _ from 'lodash';
 import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {Participant, Outcome, SignedState, ChannelConstants, SiteBudget} from '../../store/types';
@@ -204,6 +204,11 @@ test('virtual defunding with a simple hub', async () => {
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
+    const expectedAmounts1 = [
+      targetAmounts[1].add(ledger1Amounts[0]),
+      targetAmounts[0].add(ledger1Amounts[1])
+    ];
+    expectBudgetIsUpdated(expectedAmounts1, aStore);
 
     const {supported} = await aStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
@@ -251,3 +256,16 @@ test('virtual defunding with a proper hub', async () => {
     ]);
   }, EXPECT_TIMEOUT);
 });
+
+async function expectBudgetIsUpdated(expectedLedgerAmounts: BigNumber[], store: TestStore) {
+  const budget = assumeNotUndefined(await store.getBudget(TEST_SITE));
+  const ethBudget = assumeNotUndefined(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]);
+  expect(ethBudget.availableSendCapacity.eq(expectedLedgerAmounts[1])).toBe(true);
+  expect(ethBudget.availableReceiveCapacity.eq(expectedLedgerAmounts[0])).toBe(true);
+  expect(Object.keys(ethBudget.channels)).toHaveLength(0);
+}
+
+function assumeNotUndefined<T>(value: T | undefined): T {
+  if (!value) throw new Error('Value is undefined');
+  return value;
+}

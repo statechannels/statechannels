@@ -125,9 +125,8 @@ const releaseFundsFromBudget: StateNodeConfig<any, any, any> = {
   }
 };
 
-const releaseFunds = (store: Store) => async (context: ChannelsSet) => {
-  return store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.ledgerId);
-};
+const releaseFunds = (store: Store) => async (context: ChannelsSet) =>
+  store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.ledgerId, context.targetChannelId);
 
 const getApplicationSite = (store: Store) => async (context: ChannelsSet) => {
   const ledgerEntry = await store.getEntry(context.ledgerId);
