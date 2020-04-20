@@ -49,14 +49,19 @@ export class MessagingService {
     }
   }
 
+  private requestNumber = 0;
   async request<ResultType = any>(
     target: Window,
     message: JsonRpcRequest,
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
-    if (!message.id) {
-      message.id = Date.now();
-    }
+    // Some tests rely on being able to supply the id on the message
+    // We should not allow this in production, as we cannot guarantee unique
+    // message ids.
+    if (message.id) console.error('message id should not be defined');
+
+    // message IDs should be unique
+    message.id = message.id || this.requestNumber++;
 
     return new Promise<ResultType>((resolve, reject) => {
       window.addEventListener(
