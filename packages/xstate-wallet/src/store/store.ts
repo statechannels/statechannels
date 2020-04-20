@@ -123,6 +123,7 @@ export interface Store {
   chain: Chain;
 
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
+  dumpBackend(): Promise<object>;
 }
 
 export type ChannelLock = {
@@ -552,6 +553,10 @@ export class XstateStore implements Store {
         console.error(e);
         throw e;
       });
+  }
+
+  public async dumpBackend() {
+    return await this.backend.dump();
   }
 }
 

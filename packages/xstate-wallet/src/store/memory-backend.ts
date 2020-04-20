@@ -21,6 +21,11 @@ export class MemoryBackend implements DBBackend {
       this._budgets = {};
     }
   }
+
+  public async dump(): Promise<object> {
+    throw 'Unimplemented'; // I don't think we need this
+  }
+
   // Generic Getters
 
   public async privateKeys() {

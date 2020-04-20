@@ -3,7 +3,7 @@ import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
 import {logger} from '../logger';
-import {ADD_LOGS} from '../constants';
+import {ADD_LOGS, IS_PRODUCTION} from '../constants';
 const log = logger.info.bind(logger);
 
 enum ObjectStores {
@@ -17,7 +17,7 @@ enum ObjectStores {
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class IndexedDBBackend implements DBBackend {
-  private _db: any;
+  private _db: IDBDatabase;
 
   constructor() {
     if (!indexedDB) {
@@ -41,6 +41,7 @@ export class IndexedDBBackend implements DBBackend {
         this.clear(ObjectStores.budgets)
       ]);
     }
+
     return createdDB;
   }
 
@@ -61,9 +62,38 @@ export class IndexedDBBackend implements DBBackend {
       request.onerror = err => reject(err);
       request.onsuccess = () => {
         this._db = request.result;
+
         resolve(request.result);
       };
     });
+  }
+
+  public async dump(): Promise<object> {
+    if (IS_PRODUCTION) throw 'Dumping store in production';
+    const results = {};
+
+    await Promise.all(
+      Object.keys(ObjectStores).map(async store => {
+        const storeDump = {};
+        results[store] = storeDump;
+        await new Promise(resolve => {
+          const tx = this._db
+            .transaction(store, 'readonly')
+            .objectStore(store)
+            .openCursor();
+
+          tx.onsuccess = event => {
+            const cursor = event.target && (event.target as any).result;
+            if (cursor) {
+              storeDump[cursor.primaryKey] = cursor.value;
+              cursor.continue();
+            } else resolve();
+          };
+        });
+      })
+    );
+
+    return results;
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {

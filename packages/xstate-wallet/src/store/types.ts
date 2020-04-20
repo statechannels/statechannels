@@ -170,4 +170,6 @@ export interface DBBackend {
   setObjective(key: number, value: Objective): Promise<Objective>;
   getObjective(key: number): Promise<Objective | undefined>;
   setReplaceObjectives(values: Objective[]): Promise<Objective[]>;
+
+  dump(): Promise<object>;
 }
