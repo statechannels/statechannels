@@ -111,7 +111,7 @@ export class ChannelWallet {
         this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
         break;
       case 'APPROVE_BUDGET_AND_FUND': {
-        const workflow = this.startWorkflow(
+        this.startWorkflow(
           ApproveBudgetAndFund.machine(this.store, this.messagingService, {
             player: request.player,
             hub: request.hub,
@@ -122,7 +122,6 @@ export class ChannelWallet {
           true // devtools
         );
 
-        workflow.service.send(request);
         break;
       }
       case 'CLOSE_AND_WITHDRAW': {
