@@ -155,7 +155,7 @@ export async function waitAndApproveWithdraw(
   page: Page,
   metamask: dappeteer.Dappeteer
 ): Promise<void> {
-  console.log('Making deposit');
+  console.log('withdrawing...');
 
   // const walletIFrame = page.frames()[1];
   // await walletIFrame.waitForSelector('#selector-does-not-exist-yet');
