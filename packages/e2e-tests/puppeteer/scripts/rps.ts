@@ -152,8 +152,8 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
     const rpsTabA = (await browserA.pages())[0];
     const rpsTabB = (await browserB.pages())[0];
 
-    await setupLogging(rpsTabA);
-    await setupLogging(rpsTabB);
+    await setupLogging(rpsTabA, 0, 'rps-test', true);
+    await setupLogging(rpsTabB, 1, 'rps-test', true);
 
     await rpsTabA.bringToFront();
     await rpsTabB.bringToFront();

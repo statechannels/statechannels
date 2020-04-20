@@ -2,7 +2,7 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, setupLogging} from '../helpers';
+import {setUpBrowser, setupLogging, waitAndApproveMetaMask} from '../helpers';
 import {
   login,
   aChallenges,
@@ -10,6 +10,7 @@ import {
   bResigns,
   startFundAndPlaySingleMove
 } from '../scripts/rps';
+import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(200_000);
 
@@ -18,6 +19,8 @@ const HEADLESS = getEnvBool('HEADLESS');
 
 let browserA: Browser;
 let browserB: Browser;
+let metamaskA: Dappeteer;
+let metamaskB: Dappeteer;
 let rpsTabA: Page;
 let rpsTabB: Page;
 
@@ -26,20 +29,21 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
     const browserPromiseA = setUpBrowser(HEADLESS, 0);
     const browserPromiseB = setUpBrowser(HEADLESS, 0); // 100ms sloMo avoids some undiagnosed race conditions. TODO: remove sloMo and address underlying problem
 
-    const {browser: browserA} = await browserPromiseA;
-    const {browser: browserB} = await browserPromiseB;
+    ({browser: browserA, metamask: metamaskA} = await browserPromiseA);
+    ({browser: browserB, metamask: metamaskB} = await browserPromiseB);
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
 
-    await setupLogging(rpsTabA);
-    await setupLogging(rpsTabB);
+    await setupLogging(rpsTabA, 0, 'rps-test', true);
+    await setupLogging(rpsTabB, 1, 'rps-test', true);
 
     const url = 'http://localhost:3000';
 
-    const gotoPromiseA = rpsTabA.goto(url, {waitUntil: 'load'});
-    const gotoPromiseB = rpsTabB.goto(url, {waitUntil: 'load'});
-    await Promise.all([gotoPromiseA, gotoPromiseB]);
+    await Promise.all([
+      rpsTabA.goto(url, {waitUntil: 'load'}),
+      rpsTabB.goto(url, {waitUntil: 'load'})
+    ]);
 
     await rpsTabA.bringToFront();
     await rpsTabB.bringToFront();
@@ -57,6 +61,13 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
   });
 
   it('works', async () => {
+    console.log('approving MetaMask..');
+    await Promise.all([
+      waitAndApproveMetaMask(rpsTabA, metamaskA),
+      waitAndApproveMetaMask(rpsTabB, metamaskB)
+    ]);
+    console.log('logging in..');
+    await login(rpsTabA, rpsTabB);
     console.log('starting first game...');
     await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
     console.log('A challenging...');
