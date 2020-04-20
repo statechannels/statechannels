@@ -72,7 +72,7 @@ const assignObjectiveData = (
 
 const waitThenFundGuarantor = (
   role: ParticipantIdx.A | ParticipantIdx.B
-): StateNodeConfig<WithDeductions, any, any> => {
+): StateNodeConfig<any, any, any> => {
   const event = role === ParticipantIdx.A ? Events.FundGuarantorWithA : Events.FundGuarantorWithB;
   return {
     initial: 'waitForObjective',

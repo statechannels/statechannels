@@ -505,8 +505,9 @@ export class XstateStore implements Store {
       assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
       delete assetBudget.channels[targetChannelId];
 
-      await this.backend.setBudget(applicationSite, currentBudget);
+      const result = await this.backend.setBudget(applicationSite, currentBudget);
       release();
+      return result;
     });
   }
 
