@@ -283,14 +283,14 @@ export class XstateStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
-  // TODO: Remove this method, seems unnecessary now
-  public async setApplicationSite(channelId: string, applicationSite: string) {
-    const entry = await this.getEntry(channelId);
+  public setApplicationSite = (channelId: string, applicationSite: string) =>
+    this.withLock(channelId, async () => {
+      const entry = await this.getEntry(channelId);
 
-    if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
+      if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
 
-    await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
-  }
+      await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
+    });
 
   public setLedger = (ledgerId: string) => this.withLock(ledgerId, () => this._setLedger(ledgerId));
 
