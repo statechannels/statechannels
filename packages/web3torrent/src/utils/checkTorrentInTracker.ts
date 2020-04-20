@@ -1,33 +1,32 @@
 import {Client} from 'bittorrent-tracker';
 import {defaultTrackerOpts} from '../constants';
 import {TorrentTestResult} from '../library/types';
-import debug from 'debug';
-const log = debug('web3torrent:tracker-check');
+import {logger} from '../logger';
+const log = logger.child({module: 'tracker-check'});
 
 export async function checkTorrentInTracker(infoHash: string) {
-  log(`Scraping tracker for torrent ${infoHash}`);
+  log.info(`Scraping tracker for torrent ${infoHash}`);
+
   const trackerClient: Client = new Client({
     ...defaultTrackerOpts,
     infoHash: [infoHash]
   });
-  const trackerScrape: Promise<number> = new Promise(resolve => {
+  const trackerScrape: Promise<number> = new Promise((resolve, reject) => {
     trackerClient.once('scrape', data => resolve(data.complete));
     setTimeout(() => trackerClient.scrape(), 2500); // waits ~2 seconds as that's the tracker update tick
+    setTimeout(() => resolve(-1), 5000); // returns -1 if there was no answer from the tracker(s) for ~2.5 seconds
   });
-  const timer: Promise<undefined> = new Promise((resolve, _) => setTimeout(resolve, 5000));
+  const scrapeResult = await trackerScrape;
+  trackerClient.stop();
+  trackerClient.destroy();
 
-  const raceResult = await Promise.race([trackerScrape, timer]);
-  trackerClient.stop(); // cleanup
-  trackerClient.destroy(); // cleanup
-
-  if (Number.isInteger(raceResult)) {
-    if (raceResult > 0) {
-      log(`Test Result: SEEDERS_FOUND (${raceResult})`);
-      return TorrentTestResult.SEEDERS_FOUND; // Found seeders (peers with the complete torrent)
-    }
-    log('Test Result: NO_SEEDERS_FOUND');
-    return TorrentTestResult.NO_SEEDERS_FOUND; // was able to connect, but no seeders found
+  if (scrapeResult > 0) {
+    log.info(`Test Result: SEEDERS_FOUND (${scrapeResult})`);
+    return TorrentTestResult.SEEDERS_FOUND; // Found seeders (peers with the complete torrent)
+  } else if (scrapeResult < 0) {
+    log.error('Test Result: NO_CONNECTION');
+    return TorrentTestResult.NO_CONNECTION;
   }
-  log('Test Result: NO_CONNECTION');
-  return TorrentTestResult.NO_CONNECTION; // wasn't able to get a response from the tracker
+  log.warn('Test Result: NO_SEEDERS_FOUND');
+  return TorrentTestResult.NO_SEEDERS_FOUND; // was able to connect, but no seeders found
 }
