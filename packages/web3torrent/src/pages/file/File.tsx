@@ -11,7 +11,7 @@ import './File.scss';
 import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
 import {Flash} from 'rimble-ui';
-import {checkTorrentInTracker} from '../../utils/checkTorrentInTracker';
+import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 
 async function checkTorrent(infoHash: string) {

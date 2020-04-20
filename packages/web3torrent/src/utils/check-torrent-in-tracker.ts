@@ -4,7 +4,7 @@ import {TorrentTestResult} from '../library/types';
 import {logger} from '../logger';
 const log = logger.child({module: 'tracker-check'});
 
-export async function checkTorrentInTracker(infoHash: string) {
+export async function checkTorrentInTracker(infoHash: string): Promise<TorrentTestResult> {
   log.info(`Scraping tracker for torrent ${infoHash}`);
 
   const client = new Client({...defaultTrackerOpts, infoHash: [infoHash]});
@@ -13,6 +13,7 @@ export async function checkTorrentInTracker(infoHash: string) {
     setTimeout(() => client.scrape(), 2500); // waits ~2 seconds as that's the tracker update tick
     setTimeout(() => resolve(-1), 5000); // returns -1 if there was no answer from the tracker(s) for ~2.5 seconds
   });
+
   const scrapeResult = await trackerScrape;
   client.stop();
   client.destroy();
