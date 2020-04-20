@@ -11,7 +11,7 @@ export async function checkTorrentInTracker(infoHash: string) {
     ...defaultTrackerOpts,
     infoHash: [infoHash]
   });
-  const trackerScrape: Promise<number> = new Promise((resolve, reject) => {
+  const trackerScrape: Promise<number> = new Promise(resolve => {
     trackerClient.once('scrape', data => resolve(data.complete));
     setTimeout(() => trackerClient.scrape(), 2500); // waits ~2 seconds as that's the tracker update tick
     setTimeout(() => resolve(-1), 5000); // returns -1 if there was no answer from the tracker(s) for ~2.5 seconds
