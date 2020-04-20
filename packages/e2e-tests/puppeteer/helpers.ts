@@ -139,15 +139,23 @@ export async function waitAndApproveMetaMask(
   await page.bringToFront();
 }
 
+export async function waitAndApproveDepositWithHub(
+  page: Page,
+  metamask: dappeteer.Dappeteer
+): Promise<void> {
+  console.log('Making deposit with hub');
+  const walletIFrame = page.frames()[1];
+  await walletIFrame.waitForSelector('#please-approve-transaction');
+  await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
+  await page.bringToFront();
+}
+
 export async function waitAndApproveDeposit(
   page: Page,
   metamask: dappeteer.Dappeteer
 ): Promise<void> {
   console.log('Making deposit');
-
   await page.waitFor(2000); // no prompt when direct funding
-  // const walletIFrame = page.frames()[1];
-  // await walletIFrame.waitForSelector('#please-approve-transaction');
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
 }

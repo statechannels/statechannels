@@ -9,7 +9,8 @@ import {
   setupLogging,
   waitForBudgetEntry,
   withdrawAndWait,
-  waitForEmptyBudget
+  waitForEmptyBudget,
+  waitAndApproveDepositWithHub
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
 
@@ -48,6 +49,7 @@ export async function uploadFile(
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
+    await waitAndApproveDepositWithHub(page, metamask);
   }
 
   const downloadLinkSelector = '#download-link';
