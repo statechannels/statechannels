@@ -51,7 +51,6 @@ export async function uploadFile(
     await waitAndApproveBudget(page);
   }
 
-  await waitAndApproveDeposit(page, metamask);
   const downloadLinkSelector = '#download-link';
   await page.waitForSelector(downloadLinkSelector);
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
@@ -75,6 +74,8 @@ export async function startDownload(
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
+  } else {
+    await waitForAndApproveChannelOpening(page);
   }
   await waitAndApproveDeposit(page, metamask);
 }
@@ -100,7 +101,7 @@ export async function cancelDownload(page: Page): Promise<void> {
     const web3tTabA = (await browser.pages())[0];
 
     console.log('Setting up logging...');
-    await setupLogging(web3tTabA, true);
+    await setupLogging(web3tTabA, 0, 'seed-download', true);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
