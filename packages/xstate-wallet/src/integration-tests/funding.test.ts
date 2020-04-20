@@ -57,7 +57,6 @@ it('allows for two wallets to fund an app', async () => {
   expect(playerB.channelWallet.getWorkflow(expectedId).id).toEqual(expectedId);
 
   playerB.channelWallet.pushMessage(generateJoinChannelRequest(channelId), 'localhost');
-  playerB.channelWallet.workflows[0].service.send({type: 'USER_APPROVES'});
 
   await Promise.all(
     [playerA, playerB].map(player =>
