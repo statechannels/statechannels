@@ -70,6 +70,7 @@ interface Transaction {
 type Typestate =
   | {value: 'waitForUserApproval'; context: Initial}
   | {value: 'createLedger'; context: Initial}
+  | {value: 'createBudget'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
   | {value: {deposit: 'init'}; context: LedgerExists & Deposit}
   | {value: {deposit: 'waitTurn'}; context: LedgerExists & Deposit & Chain}
@@ -86,6 +87,7 @@ export interface Schema extends StateSchema<Context> {
   states: {
     waitForUserApproval: {};
     createLedger: {};
+    createBudget: {};
     waitForPreFS: {};
     deposit: {
       states: {
