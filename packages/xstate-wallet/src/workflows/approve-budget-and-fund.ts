@@ -206,8 +206,7 @@ interface LedgerInitRetVal {
 const createBudgetAndLedger = (store: Store) => async (
   context: Initial
 ): Promise<LedgerInitRetVal> => {
-  // create budget
-  store.createBudget(context.budget);
+  await store.createBudget(context.budget);
 
   // create ledger
   const initialOutcome = convertPendingBudgetToAllocation(context);
