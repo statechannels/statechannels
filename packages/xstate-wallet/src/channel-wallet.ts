@@ -14,7 +14,7 @@ import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workf
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 import {serializeChannelEntry} from './serde/app-messages/serialize';
-import {ADD_LOGS} from './constants';
+import {ADD_LOGS, IS_PRODUCTION} from './constants';
 import {logger} from './logger';
 
 export interface Workflow {
@@ -152,6 +152,9 @@ export class ChannelWallet {
     const service = interpret(machine, {devTools})
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, workflowId))
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
+      .onStop(async () => {
+        if (!IS_PRODUCTION) logger.info({store: await this.store.dumpBackend()});
+      })
       .start();
     // TODO: Figure out how to resolve rendering priorities
     this.renderUI(service);
