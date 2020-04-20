@@ -28,7 +28,6 @@ import {
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
   id?: number;
-  time?: number;
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;

@@ -63,7 +63,6 @@ export class MessagingService {
     // TODO: I don't know the requirements on message IDs, but it's important
     // that they be unique
     message.id = message.id || this.requestNumber++;
-    message.time = Date.now();
 
     return new Promise<ResultType>((resolve, reject) => {
       window.addEventListener(
