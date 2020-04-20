@@ -503,6 +503,8 @@ export class XstateStore implements Store {
       // Simply set the budget to the current ledger outcome
       assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
       assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
+
+      // Delete the funds assigned to the channel
       delete assetBudget.channels[targetChannelId];
 
       const result = await this.backend.setBudget(applicationSite, currentBudget);
