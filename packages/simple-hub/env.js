@@ -13,10 +13,15 @@ function configureEnvVariables(monorepo = true) {
   // Intended usage is a single file in monorepo root defining configuration for multiple packages
   const SC_ENV = process.env.SC_ENV;
   if (SC_ENV) {
+    const scEnvFile = path.join('../..', '.env.' + SC_ENV);
+    if (!fs.existsSync(scEnvFile)) {
+      throw new Error(`.env.${SC_ENV} must exist in the monorepo root`);
+    }
+
     /* eslint-disable @typescript-eslint/no-var-requires */
     require('dotenv-expand')(
       require('dotenv').config({
-        path: path.join('../..', '.env.' + SC_ENV)
+        path: scEnvFile
       })
     );
     /* eslint-enable @typescript-eslint/no-var-requires */
