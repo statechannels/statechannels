@@ -1,13 +1,11 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {AddressZero} from 'ethers/constants';
 import {XstateStore} from '../../store';
-import {StateVariables, SignedState, isOpenChannel} from '../../store/types';
+import {StateVariables, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
-import {calculateChannelId} from '../../store/state-utils';
 import {simpleEthAllocation, exists} from '../../utils';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {Application} from '..';
@@ -232,25 +230,10 @@ it('starts challenging when requested', async () => {
   }, 2000);
 });
 
-// TODO: (liam) I don't think `states` matters in this test, channelid could be any string
 it('starts concluding when receiving a final state', async () => {
   const store = new XstateStore();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
-  const states: SignedState[] = [
-    {
-      isFinal: true,
-      appDefinition: AddressZero,
-      appData: '0x0',
-      outcome: simpleEthAllocation([]),
-      turnNum: bigNumberify(55),
-      challengeDuration: bigNumberify(500),
-      chainId: '0x0',
-      channelNonce: bigNumberify('0x0'),
-      participants: [],
-      signatures: [{signature: '0x0', signer: '0x0'}]
-    }
-  ];
   const services: Partial<Application.WorkflowServices> = {
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -258,7 +241,7 @@ it('starts concluding when receiving a final state', async () => {
       })
     )
   };
-  const channelId = calculateChannelId(states[0]);
+
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
     requestId: 5,
@@ -270,11 +253,11 @@ it('starts concluding when receiving a final state', async () => {
   const service = interpret<any, any, any>(
     Application.workflow(store, messagingService).withConfig(
       {services} as any, //TODO: Casting
-      {channelId, fundingStrategy: 'Direct', applicationSite: 'localhost'}
+      {channelId: '0x0a', fundingStrategy: 'Direct', applicationSite: 'localhost'}
     )
   );
-  service.start('running');
 
+  service.start('running');
   service.send(channelUpdate);
 
   await waitForExpect(async () => {
