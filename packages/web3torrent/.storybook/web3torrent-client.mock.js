@@ -6,11 +6,11 @@ function mockWeb3TorrentClient() {
   const torrent = utils.createMockTorrentUI({
     numPeers: Object.keys(_peers).length,
     _peers,
-    wires: Array.from(_peers, ({ wire }) => wire)
+    wires: Array.from(_peers, ({wire}) => wire)
   });
 
-  return { torrents: [torrent], paymentChannelClient: {challengeChannel:(id)=>{}} };
-};
+  return {torrents: [torrent], paymentChannelClient: {challengeChannel: _ => {}}};
+}
 
 const web3Torrent = mockWeb3TorrentClient();
 
