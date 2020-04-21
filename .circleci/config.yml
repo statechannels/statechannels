@@ -419,9 +419,9 @@ workflows:
       - test:
           requires:
             - prepare
-      # - integration-test-rps:
-      #     requires:
-      #       - prepare
+      - integration-test-rps:
+          requires:
+            - prepare
       # - integration-test-rps-with-hub:
       #     requires:
       #       - prepare
