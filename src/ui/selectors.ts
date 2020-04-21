@@ -31,6 +31,12 @@ export function getConfirmCreateChannelService(
   return applicationWorkflowState.children.invokeCreateChannelConfirmation as any;
 }
 
+export function getChallengeChannelService(
+  applicationWorkflowState: AppWorkflowState
+): Interpreter<any> {
+  return applicationWorkflowState.children.invokeChallengingProtocol as any;
+}
+
 // TODO:Ideally this should be a type guard
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
   return applicationWorkflowState.value === 'confirmingWithUser';

@@ -6,11 +6,13 @@ import {ChannelId} from './channel-id';
 import {
   isConfirmCreateChannel,
   getConfirmCreateChannelService,
+  getChallengeChannelService,
   getApplicationOpenProgress,
   isApplicationOpening,
   getApplicationStateValue,
   isApplicationChallenging
 } from './selectors';
+import {ChallengeChannel} from './challenge-channel-workflow';
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
 import {Application} from '../workflows';
 
@@ -44,7 +46,7 @@ export const ApplicationWorkflow = (props: Props) => {
       <Heading textAlign="center" mb={0}>
         {messages[getApplicationStateValue(current)]}
       </Heading>
-      {!isConfirmCreateChannel(current) && (
+      {!isConfirmCreateChannel(current) && !isApplicationChallenging(current) && (
         <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
           <ChannelId channelId={current.context.channelId} />
         </Flex>
@@ -53,7 +55,7 @@ export const ApplicationWorkflow = (props: Props) => {
         <ConfirmCreateChannel service={getConfirmCreateChannelService(current)} />
       )}
       {isApplicationChallenging(current) && (
-        <p>app requested a challenging! check ur wallet. u can reject if you want</p>
+        <ChallengeChannel service={getChallengeChannelService(current)} />
       )}
       {!isConfirmCreateChannel(current) && isApplicationOpening(current) && (
         <Progress value={getApplicationOpenProgress(current)} />
