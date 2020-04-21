@@ -16,4 +16,4 @@ const web3Torrent = mockWeb3TorrentClient();
 
 const Web3TorrentContext = React.createContext(web3Torrent);
 
-module.exports = {Web3TorrentContext,web3Torrent};
+module.exports = {Web3TorrentContext, web3Torrent};
