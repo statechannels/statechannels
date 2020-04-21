@@ -16,10 +16,11 @@ function configureEnvVariables(monorepo = true) {
     /* eslint-disable @typescript-eslint/no-var-requires */
     require('dotenv-expand')(
       require('dotenv').config({
-        path: path.join('../..', SC_ENV)
+        path: path.join('../..', '.env.' + SC_ENV)
       })
     );
     /* eslint-enable @typescript-eslint/no-var-requires */
+    return;
   }
 
   const NODE_ENV = process.env.NODE_ENV;

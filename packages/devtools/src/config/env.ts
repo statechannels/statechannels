@@ -29,7 +29,7 @@ export function configureEnvVariables(monorepo = true): void {
     /* eslint-disable @typescript-eslint/no-var-requires */
     require('dotenv-expand')(
       require('dotenv').config({
-        path: path.join('../..', SC_ENV)
+        path: path.join('../..', '.env.' + SC_ENV)
       })
     );
     /* eslint-enable @typescript-eslint/no-var-requires */
