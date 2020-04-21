@@ -50,7 +50,7 @@
     "run:ewt": "lerna run start --scope=**/embedded-wallet",
     "run:w3t": "lerna run start --scope=**/web3torrent --scope=**/embedded-wallet",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
-    "test": "lerna run --stream --concurrency 8 test",
+    "test": "lerna run --stream --concurrency 6 test",
     "test:ci": "lerna run  test:ci --stream --no-sort --include-dependents",
     "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent "
