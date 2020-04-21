@@ -46,7 +46,11 @@ export function parseResponse(jsonBlob: object): Response {
   const valid = validateResponse(jsonBlob);
   if (!valid) {
     throw new Error(
-      `Validation Error: ${validateResponse.errors?.map(e => prettyPrintError(e)).join(`;\n`)}`
+      `
+      Validation Error:
+        input: ${JSON.stringify(jsonBlob)};\n
+        ${validateResponse.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+      `
     );
   }
   return jsonBlob as Response;
