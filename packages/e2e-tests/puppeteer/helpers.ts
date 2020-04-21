@@ -86,6 +86,7 @@ export async function setUpBrowser(
   slowMo?: number
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   const browser = await dappeteer.launch(puppeteer, {
+    executablePath: process.env.PUPPETEER_EXEC_PATH, // https://github.com/marketplace/actions/puppeteer-headful
     headless,
     slowMo,
     //, Needed to allow both windows to execute JS at the same time
