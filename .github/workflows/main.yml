@@ -30,4 +30,4 @@ jobs:
         env:
           CI: 'true'
         with:
-          args: npm test:e2e
+          args: run test:e2e

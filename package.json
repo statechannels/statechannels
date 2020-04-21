@@ -54,7 +54,7 @@
     "test:ci": "lerna run  test:ci --stream --no-sort --include-dependents",
     "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent",
-    "test:e2e": "lerna run test --concurrency 1 --scope=**/e2e"
+    "test:e2e": "cd packages/e2e-tests && yarn test:ci"
   },
   "workspaces": [
     "packages/*"
