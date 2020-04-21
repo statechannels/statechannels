@@ -13,7 +13,7 @@ import {SimpleHub} from './simple-hub';
 import {subscribeToMessages} from './message-service';
 
 import {machine as approveBudgetAndFund} from '../approve-budget-and-fund';
-import {MessagingService} from '../../messaging';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
@@ -34,7 +34,10 @@ const initialContext = {
   player,
   requestId: 123
 };
-let chain, playerStore, hubStore, messagingService;
+let chain: FakeChain;
+let playerStore: TestStore;
+let hubStore: SimpleHub;
+let messagingService: MessagingServiceInterface;
 
 beforeEach(async () => {
   chain = new FakeChain();
@@ -73,7 +76,7 @@ it('works end to end', async () => {
 
   const ledgerId = (runningWorkflow.state.context as any).ledgerId;
 
-  chain.depositSync(ledgerId, 0, 5);
+  chain.depositSync(ledgerId, '0x0', '0x5');
 
   // goes to submitTransaction
   // waitMining, which happens immediately
@@ -110,7 +113,7 @@ it('works when someone else deposits the full amount', async () => {
 
   const ledgerId = (runningWorkflow.state.context as any).ledgerId;
 
-  chain.depositSync(ledgerId, 0, 10);
+  chain.depositSync(ledgerId, '0x0', '0x10');
 
   // skip submitTransaction
   // skip waitMining
@@ -120,4 +123,22 @@ it('works when someone else deposits the full amount', async () => {
   await waitForExpect(async () => {
     expect(runningWorkflow.state.value).toEqual('done');
   }, EXPECT_TIMEOUT);
+});
+
+it('does not create a budget on failure', async () => {
+  const runningWorkflow = interpret(
+    approveBudgetAndFund(playerStore, messagingService, initialContext)
+  ).start();
+
+  await waitForExpect(async () => {
+    expect(runningWorkflow.state.value).toEqual('waitForUserApproval');
+  }, EXPECT_TIMEOUT);
+
+  await runningWorkflow.send({type: 'USER_REJECTS_BUDGET'});
+
+  await waitForExpect(async () => {
+    expect(runningWorkflow.state.value).toEqual('failure');
+  }, EXPECT_TIMEOUT);
+
+  expect(await playerStore.getBudget('example.com')).toBeUndefined();
 });

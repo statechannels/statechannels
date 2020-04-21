@@ -69,7 +69,8 @@ interface Transaction {
 
 type Typestate =
   | {value: 'waitForUserApproval'; context: Initial}
-  | {value: 'createBudgetAndLedger'; context: Initial}
+  | {value: 'createLedger'; context: Initial}
+  | {value: 'createBudget'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
   | {value: {deposit: 'init'}; context: LedgerExists & Deposit}
   | {value: {deposit: 'waitTurn'}; context: LedgerExists & Deposit & Chain}
@@ -85,7 +86,8 @@ type Context = Typestate['context'];
 export interface Schema extends StateSchema<Context> {
   states: {
     waitForUserApproval: {};
-    createBudgetAndLedger: {};
+    createLedger: {};
+    createBudget: {};
     waitForPreFS: {};
     deposit: {
       states: {
@@ -115,14 +117,14 @@ export const machine = (
     states: {
       waitForUserApproval: {
         on: {
-          USER_APPROVES_BUDGET: {target: 'createBudgetAndLedger'},
+          USER_APPROVES_BUDGET: {target: 'createLedger'},
           USER_REJECTS_BUDGET: {target: 'failure'}
         }
       },
-      createBudgetAndLedger: {
+      createLedger: {
         invoke: {
-          id: 'createBudgetAndLedger',
-          src: createBudgetAndLedger(store),
+          id: 'createLedger',
+          src: createLedger(store),
           onDone: {target: 'waitForPreFS', actions: setLedgerInfo}
         }
       },
@@ -133,6 +135,13 @@ export const machine = (
           onDone: {target: 'deposit', actions: assignDepositingInfo}
         }
       },
+      createBudget: {
+        invoke: {
+          id: 'createBudget',
+          src: createBudget(store),
+          onDone: {target: 'done'}
+        }
+      },
       deposit: {
         initial: 'init',
         invoke: {
@@ -141,7 +150,7 @@ export const machine = (
         },
         on: {
           CHAIN_EVENT: [
-            {target: 'done', actions: assignChainData, cond: fullAmountConfirmed},
+            {target: 'createBudget', actions: assignChainData, cond: fullAmountConfirmed},
             {target: '.waitFullyFunded', actions: assignChainData, cond: myAmountConfirmed}
           ]
         },
@@ -200,13 +209,11 @@ interface LedgerInitRetVal {
   ledgerId: string;
   ledgerState: ChannelState;
 }
-
-const createBudgetAndLedger = (store: Store) => async (
-  context: Initial
-): Promise<LedgerInitRetVal> => {
+const createBudget = (store: Store) => async (context: Initial): Promise<void> => {
   // create budget
-  store.createBudget(context.budget);
-
+  await store.createBudget(context.budget);
+};
+const createLedger = (store: Store) => async (context: Initial): Promise<LedgerInitRetVal> => {
   // create ledger
   const initialOutcome = convertPendingBudgetToAllocation(context);
   const participants = [context.player, context.hub];

@@ -120,7 +120,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
   if (current.matches('waitForUserApproval')) {
     return waitForUserApproval();
-  } else if (current.matches('createBudgetAndLedger')) {
+  } else if (current.matches('createLedger')) {
     return waitForUserApproval({waiting: true});
   } else if (current.matches('waitForPreFS')) {
     return waitForPreFS;
@@ -135,6 +135,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
   } else if (current.matches({deposit: 'retry'})) {
     return depositRetry();
   } else if (current.matches({deposit: 'waitFullyFunded'})) {
+    return depositFullyFunded;
+  } else if (current.matches('createBudget')) {
     return depositFullyFunded;
   } else if (current.matches('done')) {
     // workflow hides ui, so user shouldn't ever see this
