@@ -344,23 +344,11 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      # For multiple
-      NODE_ENV: development
-      # For shared-ganache
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
       # For simple-hub
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
       # For web3torrent
       REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FUNDING_STRATEGY: Virtual
-      REACT_APP_LOG_DESTINATION: pino.log
-      # for xstate-wallet
-      ADD_LOGS: true
-      LOG_DESTINATION: pino.log
-      # For e2e-test
-      BROWSER_LOG_DESTINATION: browser.log
+      SC_ENV: circle-integration-w3t-with-hub
     steps:
       - checkout
       - puppeteer/install
