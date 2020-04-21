@@ -99,7 +99,8 @@ export async function setUpBrowser(
       // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
       '--disable-features=site-per-process',
       '--no-sandbox',
-      '--disable-setuid-sandbox'
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
     ]
   });
   const metamask = await dappeteer.getMetamask(browser);
