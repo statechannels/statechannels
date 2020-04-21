@@ -242,15 +242,21 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FUNDING_STRATEGY: Direct
+      # For multiple
+      NODE_ENV: test
+      # For shared-ganache
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
-      NODE_ENV: test
-      LOG_DESTINATION: pino.log
-      BROWSER_LOG_DESTINATION: browser.log
+      # For simple-hub
+      FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      # For web3torrent
+      REACT_APP_FUNDING_STRATEGY: Direct
       REACT_APP_LOG_DESTINATION: pino.log
+      # for xstate-wallet
+      LOG_DESTINATION: pino.log
+      # For e2e-test
+      BROWSER_LOG_DESTINATION: browser.log
     steps:
       - checkout
       - puppeteer/install
@@ -338,17 +344,23 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FUNDING_STRATEGY: Virtual
+      # For multiple
+      NODE_ENV: development
+      # For shared-ganache
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
-      ADD_LOGS: true
-      NODE_ENV: development
-      LOG_DESTINATION: pino.log
-      BROWSER_LOG_DESTINATION: browser.log
+      # For simple-hub
+      FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      # For web3torrent
+      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      REACT_APP_FUNDING_STRATEGY: Virtual
       REACT_APP_LOG_DESTINATION: pino.log
+      # for xstate-wallet
+      ADD_LOGS: true
+      LOG_DESTINATION: pino.log
+      # For e2e-test
+      BROWSER_LOG_DESTINATION: browser.log
     steps:
       - checkout
       - puppeteer/install
