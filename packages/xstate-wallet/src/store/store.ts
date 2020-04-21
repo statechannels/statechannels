@@ -15,7 +15,7 @@ import {checkThat, isSimpleEthAllocation} from '../utils';
 import {calculateChannelId, hashState} from './state-utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {MemoryBackend} from './memory-backend';
-import {Errors} from '.';
+import {Errors, Outcome} from '.';
 import {
   ChannelStoredData,
   DBBackend,
@@ -118,7 +118,11 @@ export interface Store {
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
-  releaseFunds(assetHolderAddress: string, ledgerChannelId: string): Promise<SiteBudget>;
+  releaseFunds(
+    assetHolderAddress: string,
+    ledgerChannelId: string,
+    targetChannelId: string
+  ): Promise<SiteBudget>;
 
   chain: Chain;
 
@@ -471,8 +475,13 @@ export class XstateStore implements Store {
     this.backend.deleteBudget(site);
   }
 
-  public async releaseFunds(assetHolderAddress: string, ledgerChannelId: string) {
-    const {applicationSite} = await this.getEntry(ledgerChannelId);
+  public async releaseFunds(
+    assetHolderAddress: string,
+    ledgerChannelId: string,
+    targetChannelId: string
+  ) {
+    const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
+    const {outcome} = supported;
     if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
 
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
@@ -482,31 +491,25 @@ export class XstateStore implements Store {
 
       if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
 
-      const {outcome, participants} = (await this.getEntry(ledgerChannelId)).supported;
+      const channelBudget = assetBudget.channels[targetChannelId];
+      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
       const playerAddress = await this.getAddress();
-      const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
+
       const playerDestination = participants.find(p => p.signingAddress === playerAddress)
         ?.destination;
-      const hubDestination = participants.find(p => p === HUB.destination)?.destination;
-      if (!playerDestination || !hubDestination) {
-        console.error(participants, HUB.destination);
+      if (!playerDestination) {
         throw new Error(Errors.cannotFindDestination);
       }
-      const channelBudget = assetBudget.channels[ledgerChannelId];
-      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
-      const sendAmount =
-        currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
-        0;
-      const receiveAmount =
-        currentAllocation.allocationItems.find(a => a.destination === hubDestination)?.amount || 0;
-      assetBudget.availableReceiveCapacity = assetBudget.availableReceiveCapacity.add(
-        receiveAmount
-      );
-      assetBudget.availableSendCapacity = assetBudget.availableSendCapacity.add(sendAmount);
-      delete assetBudget.channels[ledgerChannelId];
+      // Simply set the budget to the current ledger outcome
+      assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
+      assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
 
-      await this.backend.setBudget(applicationSite, currentBudget);
+      // Delete the funds assigned to the channel
+      delete assetBudget.channels[targetChannelId];
+
+      const result = await this.backend.setBudget(applicationSite, currentBudget);
       release();
+      return result;
     });
   }
 
@@ -560,4 +563,13 @@ export function supportedStateFeed(store: Store, channelId: string) {
     filter(e => e.isSupported),
     map(({supported}) => ({state: supported}))
   );
+}
+
+function getAllocationAmount(outcome: Outcome, destination: string) {
+  const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
+  const amount = allocationItems.find(a => a.destination === destination)?.amount;
+  if (!amount) {
+    throw new Error(`Cannot find allocation entry with destination ${destination}`);
+  }
+  return amount;
 }
