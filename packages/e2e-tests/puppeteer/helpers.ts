@@ -97,7 +97,9 @@ export async function setUpBrowser(
     args: [
       // Needed to inject web3.js code into wallet iframe
       // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
-      '--disable-features=site-per-process'
+      '--disable-features=site-per-process',
+      '--no-sandbox',
+      '--disable-setuid-sandbox'
     ]
   });
   const metamask = await dappeteer.getMetamask(browser);
