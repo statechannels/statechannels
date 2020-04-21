@@ -29,4 +29,5 @@ jobs:
         uses: mujo-code/puppeteer-headful@12.3.1
         env:
           CI: 'true'
-        run: cd packages/e2e-tests && yarn test:ci
+        with:
+          args: npm test:e2e
