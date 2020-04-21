@@ -3,13 +3,7 @@ import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
 import {setUpBrowser, setupLogging, waitAndApproveMetaMask} from '../helpers';
-import {
-  login,
-  aChallenges,
-  bChallenges,
-  bResigns,
-  startFundAndPlaySingleMove
-} from '../scripts/rps';
+import {login, startFundAndPlaySingleMove} from '../scripts/rps';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(200_000);
