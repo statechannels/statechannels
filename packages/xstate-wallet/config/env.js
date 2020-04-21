@@ -31,7 +31,7 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 // These are wallet configuration values that should be injected into the application
-const WALLET_CONFIGS = ['TARGET_NETWORK', 'CHAIN_NETWORK_ID', 'GANACHE_PORT', 'USE_STORAGE'];
+const WALLET_CONFIGS = ['TARGET_NETWORK', 'CHAIN_NETWORK_ID', 'GANACHE_PORT'];
 
 const CONTRACT_ADDRESSES = /_ADDRESS$/i;
 

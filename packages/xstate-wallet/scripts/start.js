@@ -43,9 +43,10 @@ void (async () => {
     }
   });
 
-  const port = !!process.env.PORT ? parseInt(process.env.PORT, 10) : 3055;
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3055;
 
-  const deployer = await (await setupGanache()).deployer;
+  const deployer = await (await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX))
+    .deployer;
   const deployedArtifacts = await deploy(deployer);
 
   process.env = {...process.env, ...deployedArtifacts};

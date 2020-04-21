@@ -8,7 +8,7 @@ const environment = EmberApp.env();
 const IS_DEV = environment === 'development';
 
 const setupDeployEnv = async () => {
-  const {deployer} = await setupGanache();
+  const {deployer} = await setupGanache(process.env.DEPLOYER_ACCOUNT_INDEX);
   const deployedArtifacts = await deploy(deployer);
 
   process.env = {...process.env, ...deployedArtifacts};

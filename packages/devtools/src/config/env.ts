@@ -22,7 +22,21 @@ export function getEnvBool(name: string, throwIfMissing = true): boolean {
 }
 
 export function configureEnvVariables(monorepo = true): void {
+  // State Channel Environment
+  // Intended usage is a single file in monorepo root defining configuration for multiple packages
+  const SC_ENV = process.env.SC_ENV;
+  if (SC_ENV) {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    require('dotenv-expand')(
+      require('dotenv').config({
+        path: path.join('../..', SC_ENV)
+      })
+    );
+    /* eslint-enable @typescript-eslint/no-var-requires */
+  }
+
   const NODE_ENV = process.env.NODE_ENV;
+
   if (!NODE_ENV) {
     throw new Error('The NODE_ENV environment variable is required but was not specified.');
   }

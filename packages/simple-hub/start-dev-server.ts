@@ -6,7 +6,7 @@ import {deploy} from './deployment/deploy';
 import {startServer} from './src/server';
 
 async function setupGanacheAndContracts() {
-  const {deployer} = await setupGanache();
+  const {deployer} = await setupGanache(Number(process.env.SIMPLE_HUB_DEPLOYER_ACCOUNT_INDEX));
   const deployedArtifacts = await deploy(deployer);
 
   process.env = {...process.env, ...deployedArtifacts};
