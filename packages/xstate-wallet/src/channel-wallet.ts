@@ -158,7 +158,7 @@ export class ChannelWallet {
       )
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .onStop(
-        async () =>
+        () =>
           service.state.value === 'done' ||
           logger.error('Service finished prematurely in %s', service.state.value)
       )
