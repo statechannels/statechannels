@@ -228,6 +228,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
   const ledgerId = entry.channelId;
   await store.setFunding(entry.channelId, {type: 'Direct'});
   await store.setLedger(entry.channelId);
+  await store.setApplicationSite(ledgerId, context.budget.domain);
   await store.addObjective({
     type: 'FundLedger',
     participants: participants,
