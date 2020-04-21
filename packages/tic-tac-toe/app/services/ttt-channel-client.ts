@@ -103,7 +103,7 @@ export default class TttChannelClientService extends Service {
   }
 
   // Accepts a ttt-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => void {
+  onChannelUpdated(tttCallback: (channelState: ChannelState) => unknown): () => void {
     function callback(channelResult: ChannelResult): void {
       tttCallback(convertToChannelState(channelResult));
     }

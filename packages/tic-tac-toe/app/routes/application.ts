@@ -7,6 +7,8 @@ import TttChannelClientService from '../services/ttt-channel-client';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
 import {Message} from '@statechannels/client-api-schema';
 import MessageModel from '../models/message';
+import {ChannelState} from '../core/channel-state';
+import {AppData} from '../core/app-data';
 
 const {WALLET_URL} = ENV;
 
@@ -42,6 +44,10 @@ export default class ApplicationRoute extends Route {
         sanitizeMessageForFirebase(messageData)
       );
       newMessage.save();
+    });
+
+    this.tttChannelClient.onChannelUpdated((channelState: ChannelState<AppData>) => {
+      console.log(channelState);
     });
   }
 }
