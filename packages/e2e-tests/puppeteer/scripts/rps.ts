@@ -39,31 +39,28 @@ export async function startFundAndPlaySingleMove(
   rpsTabB: Page,
   metamaskB: Dappeteer
 ): Promise<boolean> {
-  async function playerA(page: Page): Promise<void> {
+  async function playerA(page: Page, metamask: Dappeteer): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, page.mainFrame(), '#join');
     await waitForAndClickButton(page, walletIFrame, '#yes');
-    await metamaskA.approve();
-    await rpsTabA.bringToFront();
+    await waitAndApproveDeposit(page, metamask);
     await playMove(page, 'paper');
     await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
-  async function playerB(page: Page): Promise<void> {
+  async function playerB(page: Page, metamask: Dappeteer): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, page.mainFrame(), '#create-a-game');
     await waitForAndClickButton(page, page.mainFrame(), '#create-game');
     await waitForAndClickButton(page, walletIFrame, '#yes');
-    await page.waitFor(5000); // TODO there's currently nothing 'visible' to wait for
-    await rpsTabB.bringToFront();
-    await metamaskB.approve();
+    await waitAndApproveDeposit(rpsTabB, metamask);
     await rpsTabB.bringToFront();
     await playMove(page, 'rock');
     await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
 
-  await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  await Promise.all([playerA(rpsTabA, metamaskA), playerB(rpsTabB, metamaskB)]);
   return true;
 }
 
