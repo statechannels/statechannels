@@ -41,7 +41,8 @@
     "precommit": "lint-staged --quiet",
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
-    "test:ci": "xvfb-run -a --server-args='-screen 0 1024x768x24' && wait-on http://localhost:3000 http://localhost:3055 && jest",
+    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
+    "test:ci": "wait-on http://localhost:3000 http://localhost:3055 && xvfb-run -a yarn run jest",
     "test:show": "HEADLESS=false yarn run test"
   }
 }
