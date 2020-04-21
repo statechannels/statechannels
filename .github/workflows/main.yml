@@ -18,16 +18,19 @@ jobs:
         with:
           node-version: '10.16.3'
       - name: Install Dependencies
-
         uses: bahmutov/npm-install@v1
-
         env:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
         with:
           args: install
+      - name: Start ganache, web3t, xstate-wallet
+        run: |
+          (cd packages/devtools && yarn start:shared-ganache) & 
+          (cd packages/web3torrent && yarn start) &
+          (cd packages/xstate-wallet && yarn start) &
       - name: Test Code
         uses: mujo-code/puppeteer-headful@12.3.1
         env:
           CI: 'true'
         with:
-          args: run test:e2e
+          args: npm run test:e2e
