@@ -33,6 +33,7 @@ export function configureEnvVariables(monorepo = true): void {
       })
     );
     /* eslint-enable @typescript-eslint/no-var-requires */
+    return;
   }
 
   const NODE_ENV = process.env.NODE_ENV;
