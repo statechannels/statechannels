@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: End to End Testing (Direct Funding)
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -11,27 +11,12 @@ on:
     branches: [master]
 
 jobs:
-  installDependencies:
-    name: Install Dependencies
+  e2e-test:
+    name: End to End Tests
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '10.16.3'
-      - name: Install Dependencies
-        uses: bahmutov/npm-install@v1
-        env:
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
-        with:
-          args: install
-  launchApps:
-    name: Launch Apps For Direct Funding
-    runs-on: ubuntu-latest
-    needs: installDependencies
     env:
       CI: 'true'
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      FIREBASE_PREFIX: ${{ github.ref }}
       REACT_APP_FUNDING_STRATEGY: Direct
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
@@ -42,73 +27,18 @@ jobs:
       REACT_APP_LOG_DESTINATION: pino.log
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
     steps:
-      - run: |
-          (cd packages/devtools && yarn start:shared-ganache) & 
-          (cd packages/web3torrent && yarn start) &
-          (cd packages/xstate-wallet && yarn start) &
-  launchAppsAndHub:
-    name: Launch Apps For Virtual Funding
-    runs-on: ubuntu-latest
-    needs: installDependencies
-    env:
-      CI: 'true'
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FUNDING_STRATEGY: Virtual
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8545
-      ADD_LOGS: true
-      NODE_ENV: development
-      LOG_DESTINATION: pino.log
-      BROWSER_LOG_DESTINATION: browser.log
-      REACT_APP_LOG_DESTINATION: pino.log
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-    steps:
-      - run: |
-          (cd packages/devtools && yarn start:shared-ganache) & 
-          (cd packages/web3torrent && yarn start) &
-          (cd packages/xstate-wallet && yarn start) &
-          (cd packages/simple-hub && yarn hub:watch) &
-  runE2eDirect:
-    name: Run end-to-end tests (Direct Funding)
-    runs-on: ubuntu-latest
-    needs: launchApps
-    steps:
-      - uses: mujo-code/puppeteer-headful@master
-        env:
-          CI: 'true'
-          FIREBASE_PREFIX: ${{ github.ref }}
-          REACT_APP_FUNDING_STRATEGY: Direct
-          USE_GANACHE_DEPLOYMENT_CACHE: true
-          GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-          GANACHE_PORT: 8545
-          NODE_ENV: test
-          LOG_DESTINATION: pino.log
-          BROWSER_LOG_DESTINATION: browser.log
-          REACT_APP_LOG_DESTINATION: pino.log
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
         with:
-          args: npm run test:e2e
-  runE2eVirtual:
-    name: Run end-to-end tests ( Virtual Funding )
-    runs-on: ubuntu-latest
-    needs: launchAppsAndHub
-    steps:
+          node-version: '10.16.3'
+      - name: Install Dependencies
+        run: yarn
+      - name: Launch Apps For Direct Funding
+        run: |
+            (cd packages/devtools && yarn start:shared-ganache) & 
+            (cd packages/web3torrent && yarn start) &
+            (cd packages/xstate-wallet && yarn start) &
       - uses: mujo-code/puppeteer-headful@master
-        env:
-          CI: 'true'
-          FIREBASE_PREFIX: << pipeline.git.branch >>-1
-          REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
-          REACT_APP_FUNDING_STRATEGY: Virtual
-          USE_GANACHE_DEPLOYMENT_CACHE: true
-          GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-          GANACHE_PORT: 8545
-          ADD_LOGS: true
-          NODE_ENV: development
-          LOG_DESTINATION: pino.log
-          BROWSER_LOG_DESTINATION: browser.log
-          REACT_APP_LOG_DESTINATION: pino.log
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
         with:
-          args: npm run test:e2e
+          args: yarn test:e2e
+
