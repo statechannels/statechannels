@@ -140,8 +140,7 @@ export class Backend implements DBBackend {
   // Individual Setters
 
   public async setPrivateKey(signingAddress: string, privateKey: string) {
-    const pksPutted = await this.put(ObjectStores.privateKeys, privateKey, signingAddress);
-    return pksPutted;
+    return this.put(ObjectStores.privateKeys, privateKey, signingAddress);
   }
   public async setChannel(key: string, value: ChannelStoredData) {
     return this.put(ObjectStores.channels, value, key);
