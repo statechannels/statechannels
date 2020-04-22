@@ -46,12 +46,12 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
   });
 
   afterAll(async () => {
-    // if (browserA) {
-    //   await browserA.close();
-    // }
-    // if (browserB) {
-    //   await browserB.close();
-    // }
+    if (browserA) {
+      await browserA.close();
+    }
+    if (browserB) {
+      await browserB.close();
+    }
   });
 
   it('works', async () => {

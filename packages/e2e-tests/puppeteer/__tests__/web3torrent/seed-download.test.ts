@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
+import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING, USE_DAPPETEER} from '../../constants';
 
 import {
   setUpBrowser,
@@ -56,7 +56,7 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    if (HEADLESS) {
+    if (HEADLESS && !USE_DAPPETEER) {
       await Promise.all(
         [browserA, browserB].map(async browser => browser && (await browser.close()))
       );
