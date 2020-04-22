@@ -108,17 +108,6 @@ export class MemoryBackend implements DBBackend {
     return value;
   }
 
-  public async setReplaceObjectives(values: Objective[]) {
-    const newObjectives: Objective[] = [];
-    values.forEach(objective => {
-      if (!this._objectives.some(saved => _.isEqual(objective, saved))) {
-        this._objectives.push(objective);
-        newObjectives.push(objective);
-      }
-    });
-    return newObjectives;
-  }
-
   public async getObjective(key: number) {
     return this._objectives[key];
   }

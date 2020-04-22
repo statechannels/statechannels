@@ -170,5 +170,4 @@ export interface DBBackend {
   getNonce(key: string): Promise<BigNumber | undefined>;
   setObjective(key: number, value: Objective): Promise<Objective>;
   getObjective(key: number): Promise<Objective | undefined>;
-  setReplaceObjectives(values: Objective[]): Promise<Objective[]>;
 }

@@ -161,24 +161,6 @@ export class Backend implements DBBackend {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
   }
 
-  /**
-   * Updates the objectives object store with new objectives.
-   * @param values objetives that may or may not be already in the object store.
-   * @returns the added objectives, if any
-   */
-  public async setReplaceObjectives(values: Objective[]) {
-    const _objectives: Objective[] = await this.getAll(ObjectStores.objectives, true);
-    const newObjectives: Objective[] = [];
-    values.forEach(objective => {
-      if (!_objectives.some(saved => _.isEqual(objective, saved))) {
-        _objectives.push(objective);
-        newObjectives.push(objective);
-      }
-    });
-    await this.setArray(ObjectStores.objectives, _objectives);
-    return newObjectives;
-  }
-
   // Private Internal Methods
 
   /**
@@ -209,18 +191,6 @@ export class Backend implements DBBackend {
     await this._db[storeName].put({key, value}, key);
 
     return this._db[storeName].get(key);
-  }
-
-  /**
-   * Replace an array with another
-   * @param storeName
-   * @param values
-   */
-  private async setArray(storeName: ObjectStores, values: any[]): Promise<any[]> {
-    return this._db.transaction('rw', this._db[storeName], () =>
-      // FIXME
-      []
-    );
   }
 
   /**
