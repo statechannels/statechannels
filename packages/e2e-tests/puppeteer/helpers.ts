@@ -101,13 +101,13 @@ class FakeMetaMask implements dappeteer.Dappeteer {
 }
 
 export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
-    // TODO condition on USE_DAPPETEER env var
-    // TODO: This is kinda ugly but it works
-    // We need to instantiate a web3 for the wallet so we import the web 3 script
-    // and then assign it on the window
-    const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
-    await page.evaluateOnNewDocument(web3JsFile);
-    await page.evaluateOnNewDocument(`
+  // TODO condition on USE_DAPPETEER env var
+  // TODO: This is kinda ugly but it works
+  // We need to instantiate a web3 for the wallet so we import the web 3 script
+  // and then assign it on the window
+  const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
+  await page.evaluateOnNewDocument(web3JsFile);
+  await page.evaluateOnNewDocument(`
     window.web3 = new Web3("http://localhost:8545");
     window.ethereum = window.web3.currentProvider;
     
