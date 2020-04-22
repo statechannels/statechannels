@@ -36,9 +36,7 @@ export class ChannelClient implements ChannelClientInterface {
 
   constructor(readonly provider: ChannelProviderInterface) {
     this.channelState = new ReplaySubject(1);
-    this.provider.on('ChannelUpdated', result => {
-      this.channelState.next(result);
-    });
+    this.provider.on('ChannelUpdated', result => this.channelState.next(result));
   }
 
   onMessageQueued(
