@@ -53,8 +53,8 @@ export class Backend implements DBBackend {
       [ObjectStores.channels]: '',
       [ObjectStores.nonces]: '',
       [ObjectStores.privateKeys]: '',
-      [ObjectStores.ledgers]: 'peerParticipantId',
-      [ObjectStores.budgets]: 'applicationSite'
+      [ObjectStores.ledgers]: '',
+      [ObjectStores.budgets]: ''
     });
 
     return this._db.open();
