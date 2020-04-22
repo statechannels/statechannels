@@ -22,7 +22,7 @@ let rpsTabB: Page;
 describe('completes game 1 (challenge by A, challenge by B, resign by B) and begins game 2 ', () => {
   beforeAll(async () => {
     const browserPromiseA = setUpBrowser(HEADLESS, 0);
-    const browserPromiseB = setUpBrowser(HEADLESS, 0); // 100ms sloMo avoids some undiagnosed race conditions. TODO: remove sloMo and address underlying problem
+    const browserPromiseB = setUpBrowser(HEADLESS, 0);
 
     ({browser: browserA, metamask: metamaskA} = await browserPromiseA);
     ({browser: browserB, metamask: metamaskB} = await browserPromiseB);
