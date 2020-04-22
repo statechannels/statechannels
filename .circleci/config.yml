@@ -46,7 +46,6 @@ save_lib: &save_lib
       - packages/client-api-schema/lib
       - packages/e2e-tests/lib
       - packages/web3torrent/lib
-      - packages/embedded-wallet/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib
       - packages/channel-provider/lib
