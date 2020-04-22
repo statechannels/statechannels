@@ -32,11 +32,16 @@
 }
 
 .actions-container {
+  display: flex;
+  flex-direction: row;
+  display: flex;
+  height: 40px;
   margin-top: 0px;
   margin-bottom: 20px;
   button {
     margin-top: 0px;
     margin-bottom: 0px;
+    margin-left: 10px;
   }
 }
 

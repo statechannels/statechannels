@@ -9,11 +9,18 @@ import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
+import {Budgets} from './pages/budgets/Budgets';
+import {web3torrent} from './clients/web3torrent-client';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
     window.ethereum ? Number(window.ethereum.networkVersion) : undefined
   );
+
+  const [initialized, setInitialized] = useState(false);
+  useEffect(() => {
+    web3torrent.paymentChannelClient.initialize().then(() => setInitialized(true));
+  }, [initialized]);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -26,7 +33,8 @@ const App: React.FC = () => {
     return () => ({});
   }, []);
 
-  const ready = currentNetwork === requiredNetwork;
+  const ready = currentNetwork === requiredNetwork && initialized;
+
   return (
     <BrowserRouter>
       <main>
@@ -48,6 +56,9 @@ const App: React.FC = () => {
           } />
           <Route exact path={RoutePath.Upload}>
             <Upload ready={ready} />
+          </Route>
+          <Route exact path={RoutePath.Budgets}>
+            <Budgets ready={ready} />
           </Route>
           />
         </Switch>

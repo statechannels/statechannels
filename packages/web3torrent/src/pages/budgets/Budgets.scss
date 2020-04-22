@@ -1,0 +1,27 @@
+@import '../../styles/variables';
+section.fill.download {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 100px;
+  padding-top: 0px;
+  .error {
+    margin: 10px auto;
+    font-size: 14px;
+  }
+  .warning-wrapper {
+    margin-top: 20px;
+  }
+}
+
+button,
+.subtitle {
+  margin-top: 30px;
+}
+
+.subtitle {
+  font-size: 18px;
+  line-height: 32px;
+  text-align: center;
+  margin: 30px auto 20px;
+}
