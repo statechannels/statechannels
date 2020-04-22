@@ -38,7 +38,7 @@ jobs:
             (cd packages/devtools && yarn start:shared-ganache) & 
             (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start) &
             (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start) &
-      - uses: ./actions/
+      - uses: ./.github/actions/
         with:
           args: yarn test:e2e
 
