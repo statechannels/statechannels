@@ -199,7 +199,7 @@ export class Backend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    return this._db.transaction('r', this._db[storeName], () => this._db[storeName].get(key));
+    return (await this._db[storeName].get(key))?.value;
   }
 
   /**

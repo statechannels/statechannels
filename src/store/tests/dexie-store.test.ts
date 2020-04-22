@@ -82,7 +82,7 @@ describe('channelUpdatedFeed', () => {
   });
 });
 
-test.skip('newObjectiveFeed', async () => {
+test('newObjectiveFeed', async () => {
   const objective: Objective = {
     type: 'OpenChannel',
     participants: [],
