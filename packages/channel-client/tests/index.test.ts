@@ -9,6 +9,7 @@ describe('ChannelClient', () => {
         enable: () => {
           /* do nothing */
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         on: (_method, _callback) => {
           /* do nothing */
         }
