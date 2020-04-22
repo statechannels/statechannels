@@ -61,7 +61,7 @@ export class Backend implements DBBackend {
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
-    return 'TODO'; // FIXME
+    return this._db[storeName]?.clear();
   }
 
   // Generic Getters
