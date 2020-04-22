@@ -26,6 +26,7 @@
     "react-icons": "3.9.0",
     "react-router-dom": "5.1.0",
     "react-scripts": "3.1.2",
+    "rxjs": "6.5.4",
     "webtorrent": "0.107.16"
   },
   "devDependencies": {
