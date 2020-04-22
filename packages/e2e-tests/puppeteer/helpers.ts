@@ -101,7 +101,6 @@ class FakeMetaMask implements dappeteer.Dappeteer {
 }
 
 export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
-  // TODO condition on USE_DAPPETEER env var
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
