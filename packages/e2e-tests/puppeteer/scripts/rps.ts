@@ -1,7 +1,14 @@
 import {Page} from 'puppeteer';
 
-import {waitForAndClickButton, setUpBrowser, loadDapp} from '../helpers';
+import {
+  waitForAndClickButton,
+  setUpBrowser,
+  setupLogging,
+  waitAndApproveMetaMask,
+  waitAndApproveDeposit
+} from '../helpers';
 import {getEnvBool} from '@statechannels/devtools';
+import {Dappeteer} from 'dappeteer';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
@@ -26,28 +33,34 @@ export async function playMove(page: Page, move: 'rock' | 'paper' | 'scissors'):
   return waitForAndClickButton(page, page.mainFrame(), selector);
 }
 
-export async function startFundAndPlaySingleMove(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
-  async function playerA(page: Page): Promise<void> {
+export async function startFundAndPlaySingleMove(
+  rpsTabA: Page,
+  metamaskA: Dappeteer,
+  rpsTabB: Page,
+  metamaskB: Dappeteer
+): Promise<boolean> {
+  async function playerA(page: Page, metamask: Dappeteer): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, page.mainFrame(), '#join');
     await waitForAndClickButton(page, walletIFrame, '#yes');
-    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitAndApproveDeposit(page, metamask);
     await playMove(page, 'paper');
     await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
-  async function playerB(page: Page): Promise<void> {
+  async function playerB(page: Page, metamask: Dappeteer): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, page.mainFrame(), '#create-a-game');
     await waitForAndClickButton(page, page.mainFrame(), '#create-game');
     await waitForAndClickButton(page, walletIFrame, '#yes');
-    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitAndApproveDeposit(rpsTabB, metamask);
+    await rpsTabB.bringToFront();
     await playMove(page, 'rock');
     await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
 
-  await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  await Promise.all([playerA(rpsTabA, metamaskA), playerB(rpsTabB, metamaskB)]);
   return true;
 }
 
@@ -137,21 +150,39 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
 /**
  * Useful for local testing. Run with:
  *
- * yarn puppeteer:dev
+ * yarn puppeteer:dev:rps
  *
  * It opens two windows ready for you to manually use.
  */
 (async (): Promise<void> => {
   if (require.main === module) {
-    const browserA = await setUpBrowser(false);
-    const browserB = await setUpBrowser(false);
+    const browserPromiseA = setUpBrowser(false);
+    const browserPromiseB = setUpBrowser(false);
+
+    const {browser: browserA, metamask: metamaskA} = await browserPromiseA;
+    const {browser: browserB, metamask: metamaskB} = await browserPromiseB;
 
     const rpsTabA = (await browserA.pages())[0];
     const rpsTabB = (await browserB.pages())[0];
 
-    await loadDapp(rpsTabA, 0);
-    await loadDapp(rpsTabB, 1);
+    await setupLogging(rpsTabA, 0, 'rps-test', true);
+    await setupLogging(rpsTabB, 1, 'rps-test', true);
 
+    const url = 'http://localhost:3000';
+
+    await Promise.all([
+      rpsTabA.goto(url, {waitUntil: 'load'}),
+      rpsTabB.goto(url, {waitUntil: 'load'})
+    ]);
+
+    await rpsTabA.bringToFront();
+    await rpsTabB.bringToFront();
+    console.log('approving MetaMask..');
+    await Promise.all([
+      waitAndApproveMetaMask(rpsTabA, metamaskA),
+      waitAndApproveMetaMask(rpsTabB, metamaskB)
+    ]);
+    console.log('logging in..');
     await login(rpsTabA, rpsTabB);
   }
 })();

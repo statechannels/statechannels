@@ -3,17 +3,20 @@
 /* eslint-disable jest/expect-expect */
 import {
   setUpBrowser,
-  loadDapp,
   waitForBudgetEntry,
   withdrawAndWait,
-  waitForEmptyBudget
+  waitForEmptyBudget,
+  setupLogging,
+  setupFakeWeb3
 } from '../../helpers';
-import {JEST_TIMEOUT, USES_VIRTUAL_FUNDING, HEADLESS} from '../../constants';
+import {JEST_TIMEOUT, USES_VIRTUAL_FUNDING, HEADLESS, USE_DAPPETEER} from '../../constants';
 import {Browser, Page} from 'puppeteer';
 import {uploadFile} from '../../scripts/web3torrent';
+import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(JEST_TIMEOUT);
-let browserA: Browser;
+let browser: Browser;
+let metamask: Dappeteer;
 
 let web3tTabA: Page;
 const itOrSkip = USES_VIRTUAL_FUNDING ? it : it.skip;
@@ -22,29 +25,30 @@ describe('withdrawal from a ledger channel', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browser');
 
-    browserA = await setUpBrowser(HEADLESS, 100);
+    ({browser, metamask} = await setUpBrowser(HEADLESS, 0));
 
     console.log('Waiting on pages');
-    web3tTabA = (await browserA.pages())[0];
+    web3tTabA = (await browser.pages())[0];
 
     console.log('Loading dapps');
-    await loadDapp(web3tTabA, 0, 'withdraw', true);
-
+    await setupLogging(web3tTabA, 0, 'withdraw', true);
+    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await web3tTabA.bringToFront();
   });
 
   afterAll(async () => {
-    if (browserA) {
-      await browserA.close();
+    if (browser) {
+      await browser.close();
     }
   });
 
   itOrSkip('allows a player to withdraw funds from the ledger channel', async () => {
-    await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING);
+    await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamask);
 
     await waitForBudgetEntry(web3tTabA);
 
-    await withdrawAndWait(web3tTabA);
+    await withdrawAndWait(web3tTabA, metamask);
 
     await waitForEmptyBudget(web3tTabA);
   });
