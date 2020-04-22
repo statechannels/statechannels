@@ -101,7 +101,6 @@ class FakeMetaMask implements dappeteer.Dappeteer {
 }
 
 export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
-  if (!USE_DAPPETEER) {
     // TODO condition on USE_DAPPETEER env var
     // TODO: This is kinda ugly but it works
     // We need to instantiate a web3 for the wallet so we import the web 3 script
@@ -123,7 +122,6 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
     window.ethereum.networkVersion = 9001;
     window.ethereum.on = () => {};
   `);
-  }
 }
 
 export async function setUpBrowser(
@@ -179,11 +177,11 @@ export async function setUpBrowser(
       ]
     });
     metamask = await dappeteer.getMetamask(browser);
+    await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
+    // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
+    await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
   }
 
-  await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
-  // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
-  await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
   return {browser, metamask};
 }
 

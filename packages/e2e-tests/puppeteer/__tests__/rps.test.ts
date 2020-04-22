@@ -5,6 +5,7 @@ import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 import {setUpBrowser, setupLogging, waitAndApproveMetaMask, setupFakeWeb3} from '../helpers';
 import {login, startFundAndPlaySingleMove} from '../scripts/rps';
 import {Dappeteer} from 'dappeteer';
+import {USE_DAPPETEER} from '../constants';
 
 jest.setTimeout(200_000);
 
@@ -31,8 +32,8 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
 
     await setupLogging(rpsTabA, 0, 'rps-test', true);
     await setupLogging(rpsTabB, 1, 'rps-test', true);
-    await setupFakeWeb3(rpsTabA, 0);
-    await setupFakeWeb3(rpsTabB, 1);
+    if (!USE_DAPPETEER) await setupFakeWeb3(rpsTabA, 0);
+    if (!USE_DAPPETEER) await setupFakeWeb3(rpsTabB, 1);
 
     const url = 'http://localhost:3000';
 
