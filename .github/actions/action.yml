@@ -5,7 +5,7 @@ inputs:
   command:  # id of input
     description: 'command to run'
     required: true
-    default: ''
+    default: yarn test:e2e
 runs:
   using: 'docker'
   image: 'Dockerfile'
