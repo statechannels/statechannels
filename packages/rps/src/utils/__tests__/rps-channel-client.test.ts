@@ -9,7 +9,7 @@ import {encodeAppData, ChannelState} from '../../core';
 import {bigNumberify} from 'ethers/utils';
 import {RPS_ADDRESS} from '../../constants';
 import {SiteBudget} from '@statechannels/client-api-schema';
-
+import {ReplaySubject} from 'rxjs';
 const MOCK_ADDRESS = '0xAddress';
 const MOCK_CHANNEL_ID = '0xChannelId';
 const participants = [
@@ -59,6 +59,7 @@ class MockChannelClient implements ChannelClientInterface {
   onMessageQueued = jest.fn(function(callback) {
     return onMessageQueuedMockReturn;
   });
+  channelState = new ReplaySubject<ChannelResult>(1);
   onChannelUpdated = jest.fn(function(callback) {
     return onChannelUpdatedMockReturn;
   });
