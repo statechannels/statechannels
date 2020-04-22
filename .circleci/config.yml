@@ -204,14 +204,15 @@ jobs:
     resource_class: medium
     working_directory: /home/circleci/project
     docker:
-      - image: circleci/node:10.16.3
+      - image: circleci/node:10.16.3-browsers
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
       USE_VIRTUAL_FUNDING: 'FALSE'
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
+      GANACHE_PORT: 8545
       NODE_ENV: test
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
     steps:
       - checkout
       - puppeteer/install
@@ -228,8 +229,7 @@ jobs:
       - run:
           command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
           background: true
-      - run: (cd packages/wallet && yarn run test:ci:integration)
-      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test)
+      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test:ci rps)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
@@ -239,7 +239,7 @@ jobs:
     resource_class: large
     working_directory: /home/circleci/project
     docker:
-      - image: circleci/node:10.16.3
+      - image: circleci/node:10.16.3-browsers
     environment:
       SC_ENV: circle-integration-w3t
       # For web3torrent
@@ -260,7 +260,7 @@ jobs:
       - run:
           command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test:ci puppeteer/__tests__/web3torrent/)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -295,7 +295,7 @@ jobs:
       # NOTE: This MUST be unique for the CircleCI environment, otherwise messages might overlap on Firebase.
       HUB_ADDRESS: '0x24170308A71bc41d0dE9B7CEF74c0EeCc8033521'
       HUB_PRIVATE_KEY: '0x8bf18c8953c7b41aac4cc3351dc179cda6831fcca852cbf71e4b0a75daf464ae'
-
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
     steps:
       - checkout
       - puppeteer/install
@@ -329,7 +329,7 @@ jobs:
     resource_class: large
     working_directory: /home/circleci/project
     docker:
-      - image: circleci/node:10.16.3
+      - image: circleci/node:10.16.3-browsers
     environment:
       # For simple-hub
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
@@ -355,7 +355,7 @@ jobs:
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
-      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test:ci puppeteer/__tests__/web3torrent/)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -406,9 +406,9 @@ workflows:
       - test:
           requires:
             - prepare
-      # - integration-test-rps:
-      #     requires:
-      #       - prepare
+      - integration-test-rps:
+          requires:
+            - prepare
       # - integration-test-rps-with-hub:
       #     requires:
       #       - prepare
