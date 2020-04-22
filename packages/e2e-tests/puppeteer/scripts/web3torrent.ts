@@ -2,7 +2,17 @@
 import {Page} from 'puppeteer';
 import * as fs from 'fs';
 
-import {waitAndApproveBudget, waitForAndClickButton} from '../helpers';
+import {
+  waitAndApproveBudget,
+  waitAndApproveMetaMask,
+  setUpBrowser,
+  setupLogging,
+  waitForBudgetEntry,
+  withdrawAndWait,
+  waitForEmptyBudget,
+  waitAndApproveDepositWithHub
+} from '../helpers';
+import {Dappeteer} from 'dappeteer';
 
 function prepareUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(1000000);
@@ -14,10 +24,12 @@ function prepareUploadFile(path: string): void {
     }
   });
 }
-export async function enableEthereum(page: Page): Promise<void> {
-  await waitForAndClickButton(page, page.frames()[1], '#approveEnable');
-}
-export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promise<string> {
+
+export async function uploadFile(
+  page: Page,
+  handleBudgetPrompt: boolean,
+  metamask: Dappeteer
+): Promise<string> {
   await page.waitForSelector('input[type=file]');
 
   // Generate a /tmp file with deterministic data for upload testing
@@ -32,11 +44,12 @@ export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promi
     // eslint-disable-next-line no-undef
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
-  console.log('Enabling Ethereum');
-  await enableEthereum(page);
+
+  await waitAndApproveMetaMask(page, metamask);
 
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
+    await waitAndApproveDepositWithHub(page, metamask);
   }
 
   const downloadLinkSelector = '#download-link';
@@ -49,14 +62,17 @@ export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promi
 export async function startDownload(
   page: Page,
   url: string,
-  handleBudgetPrompt: boolean
+  handleBudgetPrompt: boolean,
+  metamask: Dappeteer
 ): Promise<void> {
   await page.goto(url);
+  await page.bringToFront();
   const downloadButton = '#download-button:not([disabled])';
   await page.waitForSelector(downloadButton);
   await page.click(downloadButton);
-  console.log('Enabling Ethereum');
-  await enableEthereum(page);
+
+  await waitAndApproveMetaMask(page, metamask);
+
   if (handleBudgetPrompt) {
     await waitAndApproveBudget(page);
   }
@@ -65,3 +81,35 @@ export async function startDownload(
 export async function cancelDownload(page: Page): Promise<void> {
   await page.click('#cancel-download-button');
 }
+
+/**
+ * Useful for local testing. Run with:
+ *
+ * yarn puppeteer:dev
+ 
+ */
+(async (): Promise<void> => {
+  if (require.main === module) {
+    // 100ms sloMo avoids some undiagnosed race conditions
+    console.log('Opening browser');
+
+    const {browser, metamask} = await setUpBrowser(false, 0);
+
+    console.log('Waiting on pages');
+    const web3tTabA = (await browser.pages())[0];
+
+    console.log('Setting up logging...');
+    await setupLogging(web3tTabA, 0, 'seed-download', true);
+
+    await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await web3tTabA.bringToFront();
+
+    await uploadFile(web3tTabA, true, metamask);
+
+    await waitForBudgetEntry(web3tTabA);
+
+    await withdrawAndWait(web3tTabA, metamask);
+
+    await waitForEmptyBudget(web3tTabA);
+  }
+})();
