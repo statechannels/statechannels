@@ -16,6 +16,7 @@ import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import _ from 'lodash';
+import {takeWhile, map, filter, take} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
@@ -72,7 +73,7 @@ export class PaymentChannelClient {
   }
 
   constructor(private readonly channelClient: ChannelClientInterface) {
-    this.channelClient.onChannelUpdated(channelResult => {
+    this.channelClient.channelState.subscribe(channelResult => {
       this.updateChannelCache(convertToChannelState(channelResult));
     });
 
@@ -258,15 +259,13 @@ export class PaymentChannelClient {
         state.payer === this.mySigningAddress &&
         state.turnNum.mod(2).eq(Index.Payer);
 
-      const currentState = this.channelCache[channelId];
-      if (readyToPay(currentState)) resolve(currentState);
-
-      const unsubscribeListener = this.channelClient.onChannelUpdated(cu => {
-        if (readyToPay(convertToChannelState(cu))) {
-          unsubscribeListener();
-          resolve(convertToChannelState(cu));
-        }
-      });
+      this.channelClient.channelState
+        .pipe(
+          map((result: ChannelResult) => convertToChannelState(result)),
+          takeWhile((latestChannelState: ChannelState) => !readyToPay(latestChannelState), true),
+          filter(readyToPay)
+        )
+        .subscribe(channelState => resolve(channelState));
     });
 
     const {payerBalance} = channelState;
