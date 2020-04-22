@@ -74,12 +74,6 @@ export class MemoryBackend implements DBBackend {
     this._channels[key] = value;
     return value;
   }
-  public async addChannel(key: string, value: ChannelStoredData) {
-    if (!this._channels[key]) {
-      this._channels[key] = value;
-    }
-    return value;
-  }
 
   public async getChannel(key: string) {
     if (!this._channels[key]) {

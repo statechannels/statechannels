@@ -160,9 +160,6 @@ export class IndexedDBBackend implements DBBackend {
   public async setChannel(key: string, value: ChannelStoredData) {
     return this.put(ObjectStores.channels, value, key);
   }
-  public async addChannel(key: string, value: ChannelStoredData) {
-    return this.add(ObjectStores.channels, value, key, true);
-  }
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
@@ -238,36 +235,6 @@ export class IndexedDBBackend implements DBBackend {
         reject(request.error);
       };
       request.onsuccess = _ => resolve(request.result);
-    });
-  }
-
-  /**
-   * Adds an element in a object store
-   * @param storeName
-   * @param value
-   * @param key
-   * @param silentOverwriteError silences the "Key already exists in the object store." Error
-   */
-  private async add(
-    storeName: ObjectStores,
-    value: any,
-    key: string | number,
-    silentOverwriteError: boolean
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const request = transaction.objectStore(storeName).add(value, key);
-      transaction.onerror = _ => {
-        if (silentOverwriteError) {
-          resolve(value);
-        } else {
-          this.logError(request.error, 'add ' + storeName);
-          reject(request.error);
-        }
-      };
-      transaction.oncomplete = _ => {
-        resolve(value);
-      };
     });
   }
 
