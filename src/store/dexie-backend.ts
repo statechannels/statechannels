@@ -3,10 +3,6 @@ import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
 
-// FIXME: Perhaps this should be required by jest before running tests?
-// Or, accept explicit references to the fake indexedDB
-// https://github.com/dumbmatter/fakeIndexedDB#with-dexie-and-other-indexeddb-api-wrappers
-if (process.env.NODE_ENV === 'test') require('fake-indexeddb/auto');
 import Dexie from 'dexie';
 
 enum ObjectStores {
@@ -48,7 +44,7 @@ export class Backend implements DBBackend {
   }
 
   private async create(databaseName: string) {
-    this._db = new Dexie(databaseName);
+    this._db = new Dexie(databaseName, {indexedDB});
     this._db.version(1).stores({
       [ObjectStores.channels]: '',
       [ObjectStores.nonces]: '',
@@ -116,8 +112,9 @@ export class Backend implements DBBackend {
   public async deleteBudget(key: string) {
     return this.delete(ObjectStores.budgets, key);
   }
+
   public async getChannel(key: string) {
-    // FIXME: This is typed to return ChannelStoredData, but it actually
+    // TODO: This is typed to return ChannelStoredData, but it actually
     // returns ChannelStoreEntry.
     // This happens all over the place.
     const channel = await this.get(ObjectStores.channels, key);
@@ -201,8 +198,6 @@ export class Backend implements DBBackend {
    * @returns true on success, false on fail.
    */
   private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
-    return this._db.transaction('rw', this._db[storeName], () => {
-      // FIXME
-    });
+    return this._db[storeName].delete(key);
   }
 }
