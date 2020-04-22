@@ -8,6 +8,9 @@ describe('ChannelClient', () => {
       new ChannelClient({
         enable: () => {
           /* do nothing */
+        },
+        on: (_method, _callback) => {
+          /* do nothing */
         }
       } as ChannelProviderInterface)
     ).toBeDefined();
