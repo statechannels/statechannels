@@ -136,7 +136,7 @@ describe('createChannel', () => {
   });
 });
 
-describe.skip('pushMessage', () => {
+describe('pushMessage', () => {
   it('stores states', async () => {
     const store = await aStore();
     await store.createChannel(
@@ -160,7 +160,7 @@ describe.skip('pushMessage', () => {
   });
 });
 
-describe.skip('getBudget', () => {
+describe('getBudget', () => {
   it('returns an address', async () => {
     const store = await aStore();
     const budget: SiteBudget = {
