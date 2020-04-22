@@ -1,0 +1,91 @@
+import React, {useContext, useState, useEffect} from 'react';
+import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
+import {
+  Web3TorrentContext,
+  web3torrent,
+  budgetCacheContext
+} from '../../clients/web3torrent-client';
+import _ from 'lodash';
+import {Spinner} from '../../components/form/spinner/Spinner';
+import {FormButton} from '../../components/form';
+import {INITIAL_BUDGET_AMOUNT} from '../../constants';
+
+interface Props {
+  ready: boolean;
+}
+
+export const Budgets: React.FC<Props> = props => {
+  return (
+    <div>
+      <section className="section fill download">
+        <h1>What are budgets?</h1>
+        <p>
+          <strong>How do I pay for the download?</strong>
+          <br />
+          When you click "Start Download", you'll be asked to allocate an amount of ETH so
+          Web3Torrent can collect payments on your behalf and transfer those funds to peers who have
+          pieces of the file . Unlike other systems, the payment is not upfront; instead, you pay as
+          you download.
+        </p>
+        <p>
+          <strong>Is it safe?</strong>
+          <br />
+          Web3Torrent operates with budgets; therefore, the app will <b>never</b> use any funds
+          outside whatever amount you allocate when starting the download. Also, Web3Torrent is
+          powered by{' '}
+          <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
+            State Channels
+          </a>
+          , a technique that reduces fees for blockchain users, allowing them to transact with each
+          other on faster-than-on-chain operating times. This technology enables a private,
+          efficient and secure environment for transactions.
+        </p>
+      </section>
+      <CurrentBudget ready={props.ready} />
+    </div>
+  );
+};
+
+const CurrentBudget: React.FC<Props> = props => {
+  const web3Torrent = useContext(Web3TorrentContext);
+  const budgetCache = useContext(budgetCacheContext);
+  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
+  const [budgetFetched, setBudgetFetched] = useState(false);
+
+  useEffect(() => {
+    web3Torrent.paymentChannelClient.getBudget().then(() => {
+      console.log(web3Torrent.paymentChannelClient.budgetCache);
+      console.log(budgetCache);
+      setBudgetFetched(true);
+    });
+  });
+  const budgetExists = !!budgetCache && !_.isEmpty(budgetCache);
+  console.log(budgetExists);
+  console.log(budgetCache);
+
+  const createBudget = async () => {
+    await web3Torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+  };
+
+  return (
+    <section className="section fill download">
+      <h1>Your current budget</h1>
+      {!budgetFetched && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
+      {budgetFetched && budgetExists && (
+        <SiteBudgetTable
+          budgetCache={budgetCache}
+          channelCache={channelCache}
+          mySigningAddress={me}
+        />
+      )}
+      {budgetFetched && !budgetExists && (
+        <div>
+          <div>You don't have a budget yet!</div>
+          <FormButton name="create-budget" disabled={!props.ready} onClick={createBudget}>
+            Create a budget
+          </FormButton>
+        </div>
+      )}
+    </section>
+  );
+};

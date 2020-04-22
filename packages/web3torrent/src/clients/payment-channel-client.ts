@@ -82,17 +82,17 @@ export class PaymentChannelClient {
     });
   }
 
+  async initialize() {
+    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+    await this.initializeHubComms();
+  }
+
   async enable() {
     log.info('enabling payment channel client');
-    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+
     await this.channelClient.provider.enable();
-    this.initializeHubComms();
+
     log.info('payment channel client enabled');
-    // TODO: This should probably not be long term behavior
-    const existingBudget = await this.getBudget();
-    if (_.isEmpty(existingBudget) && FUNDING_STRATEGY !== 'Direct') {
-      await this.createBudget(INITIAL_BUDGET_AMOUNT);
-    }
   }
 
   private initializeHubComms() {

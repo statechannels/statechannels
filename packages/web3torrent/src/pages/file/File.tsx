@@ -120,8 +120,6 @@ const File: React.FC<Props> = props => {
               setLoading(true);
               setErrorLabel('');
               try {
-                // TODO: Put real values here
-                // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 await download(torrent.magnetURI);
                 setTorrent(
                   getTorrentUI(web3Torrent, {
