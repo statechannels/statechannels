@@ -6,7 +6,7 @@ name: End to End Testing (Direct Funding)
 # events but only for the master branch
 on:
   push:
-    branches: [master, george/dappeteer3]
+    branches: [master, george/headful-puppeteer-ci]
   pull_request:
     branches: [master]
 
