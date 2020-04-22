@@ -273,7 +273,7 @@ export class ChainWatcher implements Chain {
   }
 
   public get selectedAddress(): string | null {
-    this.mySelectedAddress = this.mySelectedAddress || window.ethereum.selectedAddress;
+    this.mySelectedAddress = (this.mySelectedAddress || window.ethereum?.selectedAddress) ?? null;
     return this.mySelectedAddress;
   }
 
