@@ -33,11 +33,12 @@ jobs:
           node-version: '10.16.3'
       - name: Install Dependencies
         run: yarn
-      - name: Launch Apps For Direct Funding
-        run: |
-            (cd packages/devtools && yarn start:shared-ganache) & 
-            (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start) &
-            (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start) &
+      - name: Launch shared-ganache
+        run: (cd packages/devtools && yarn start:shared-ganache) & 
+      - name: Launch web3Torrent
+        run: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start) &
+      - name: Launch xstate-wallet 
+        run: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start) &
       - uses: ./.github/actions/
         with:
           args: yarn test:e2e
