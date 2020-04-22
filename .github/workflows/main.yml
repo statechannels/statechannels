@@ -1,0 +1,40 @@
+# This is a basic workflow to help you get started with Actions
+
+name: End to End Testing (Direct Funding)
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [master, george/dappeteer3]
+  pull_request:
+    branches: [master]
+
+jobs:
+  e2e-test:
+    name: End to End Tests
+    runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+      FIREBASE_PREFIX: ${{ github.ref }}
+      REACT_APP_FUNDING_STRATEGY: Direct
+      USE_GANACHE_DEPLOYMENT_CACHE: true
+      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
+      GANACHE_PORT: 8545
+      NODE_ENV: test
+      LOG_DESTINATION: pino.log
+      BROWSER_LOG_DESTINATION: browser.log
+      REACT_APP_LOG_DESTINATION: pino.log
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+      USE_DAPPETEER: true
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.16.3'
+      - name: Install Dependencies
+        run: yarn
+      - uses: ./.github/actions/
+        with:
+          args: yarn test:e2e
+

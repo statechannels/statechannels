@@ -1,0 +1,13 @@
+# action.yml
+name: headfulteer
+description: 'headful puppeteer'
+inputs:
+  command:  # id of input
+    description: 'command to run'
+    required: true
+    default: yarn test:e2e
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.command}}
