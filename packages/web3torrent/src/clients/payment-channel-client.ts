@@ -261,11 +261,11 @@ export class PaymentChannelClient {
 
       this.channelClient.channelState
         .pipe(
-          map((result: ChannelResult) => convertToChannelState(result)),
+          map(convertToChannelState),
           takeWhile((latestChannelState: ChannelState) => !readyToPay(latestChannelState), true),
           filter(readyToPay)
         )
-        .subscribe(channelState => resolve(channelState));
+        .subscribe(resolve);
     });
 
     const {payerBalance} = channelState;
