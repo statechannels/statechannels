@@ -38,7 +38,7 @@ jobs:
             (cd packages/devtools && yarn start:shared-ganache) & 
             (cd packages/web3torrent && yarn start) &
             (cd packages/xstate-wallet && yarn start) &
-      - uses: actions/headfulteer
+      - uses: ./actions/
         with:
           args: yarn test:e2e
 
