@@ -102,7 +102,7 @@ test('newObjectiveFeed', async () => {
   expect(outputs).toEqual([objective]);
 });
 
-describe.skip('createChannel', () => {
+describe('createChannel', () => {
   it('returns a ChannelStoreEntry', async () => {
     const store = await aStore();
 
