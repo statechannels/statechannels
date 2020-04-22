@@ -160,7 +160,6 @@ export interface DBBackend {
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
   setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
-  addChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
   getChannel(key: string): Promise<ChannelStoredData | undefined>;
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
