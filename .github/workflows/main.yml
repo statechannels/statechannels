@@ -36,8 +36,8 @@ jobs:
       - name: Launch Apps For Direct Funding
         run: |
             (cd packages/devtools && yarn start:shared-ganache) & 
-            (cd packages/web3torrent && yarn start) &
-            (cd packages/xstate-wallet && yarn start) &
+            (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start) &
+            (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start) &
       - uses: ./actions/
         with:
           args: yarn test:e2e
