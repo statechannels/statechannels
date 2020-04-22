@@ -13,7 +13,7 @@
     "ethers": "4.0.45",
     "firebase": "7.11.0",
     "fp-ts": "2.5.3",
-    "pino": "6.1.1",
+    "pino": "6.2.0",
     "rxfire": "3.11.2",
     "rxjs": "6.5.4"
   },
@@ -25,7 +25,7 @@
     "@types/jest": "25.1.0",
     "@types/lodash": "4.14.149",
     "@types/nodemon": "1.19.0",
-    "@types/pino": "5.17.0",
+    "@types/pino": "6.0.0",
     "@types/prettier": "1.19.0",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
