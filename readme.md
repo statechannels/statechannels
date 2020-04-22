@@ -36,7 +36,6 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [e2e-tests](./packages/e2e-tests) : End-to-end browser tests of all packages with puppeteer
 - [devtools](./packages/devtools) : Developer tooling
-- [embedded-wallet](./packages/embedded-wallet) : Allows DApps to integrate with statechannels system
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
 - [rps](./packages/rps) : Rock paper scissors DApp

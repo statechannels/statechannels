@@ -1,7 +1,5 @@
 # 🔌 Channel Provider
 
-This package contains a browser-based loader for the [Embedded Wallet](../embedded-wallet).
-
 It exposes a global object called `channelProvider` that implements the [EIP 1193](https://github.com/ryanio/EIPs/blob/master/EIPS/eip-1193.md) standard.
 
 In the near future, it'll feature-detect if a wallet such as MetaMask has state channels support. If it does, the package does nothing; if it doesn't, it'll plug in the Embedded Wallet into a dApp.
@@ -20,7 +18,7 @@ Then, enable the provider, passing on an URL to where the Wallet UI hosted.
 > Right now, we need this because of the usage of the `.postMessage()` API + CORS requirements._
 
 ```js
-window.channelProvider.mountWalletComponent('http://sc-embedded-wallet.netlify.com');
+window.channelProvider.mountWalletComponent('http://xstate-wallet.statechannels.org');
 ```
 
 In order for the wallet connection to be useful, you'll want to enable it by calling `.enable()`. This method tells the wallet to establish a connection with the user's Web3 provider.

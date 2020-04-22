@@ -5,14 +5,8 @@ git fetch origin --quiet
 case $TARGET_PACKAGE in
 
     web3torrent)
-        echo "Checking for changes across web3torrent, embedded-wallet and channel-provider packages..."
-        git diff --quiet origin/master HEAD -- ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
-        status=$?
-        ;;
-
-    embedded-wallet)
-        echo "Checking for changes across web3torrent, embedded-wallet and channel-provider packages..."
-        git diff --quiet origin/master HEAD -- ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
+        echo "Checking for changes across web3torrent and channel-provider packages..."
+        git diff --quiet origin/master HEAD -- ./packages/web3torrent ./packages/channel-provider
         status=$?
         ;;
 
