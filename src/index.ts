@@ -1,7 +1,6 @@
 import {ChannelWallet} from './channel-wallet';
 import {MessagingService} from './messaging';
 import {ChainWatcher} from './chain';
-import {IndexedDBBackend} from './store/indexedDB-backend';
 import {MemoryBackend} from './store/memory-backend';
 import {XstateStore} from './store';
 import * as constants from './constants';
@@ -9,12 +8,13 @@ import Url from 'url-parse';
 import './render';
 
 import {logger} from './logger';
+import {Backend} from './store/dexie-backend';
 const log = logger.info.bind(logger);
 
 (async function() {
   const chain = new ChainWatcher();
 
-  const backend = constants.USE_INDEXED_DB ? new IndexedDBBackend() : new MemoryBackend();
+  const backend = constants.USE_INDEXED_DB ? new Backend() : new MemoryBackend();
   const store = new XstateStore(chain, backend);
 
   await store.initialize([], constants.CLEAR_STORAGE_ON_START);
