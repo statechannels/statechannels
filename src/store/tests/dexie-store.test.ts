@@ -50,7 +50,7 @@ const aStore = async (noPrivateKeys = false) => {
   return store;
 };
 
-describe.skip('getAddress', () => {
+describe('getAddress', () => {
   it('returns an address', async () => {
     const store = await aStore();
     const address = await store.getAddress();

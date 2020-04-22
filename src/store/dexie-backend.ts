@@ -2,7 +2,10 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
+
 // FIXME: Perhaps this should be required by jest before running tests?
+// Or, accept explicit references to the fake indexedDB
+// https://github.com/dumbmatter/fakeIndexedDB#with-dexie-and-other-indexeddb-api-wrappers
 if (process.env.NODE_ENV === 'test') require('fake-indexeddb/auto');
 import Dexie from 'dexie';
 
@@ -49,7 +52,7 @@ export class Backend implements DBBackend {
     this._db.version(1).stores({
       [ObjectStores.channels]: 'channelId',
       [ObjectStores.nonces]: 'value',
-      [ObjectStores.privateKeys]: 'signingAddress',
+      [ObjectStores.privateKeys]: '',
       [ObjectStores.ledgers]: 'peerParticipantId',
       [ObjectStores.budgets]: 'applicationSite'
     });
@@ -81,9 +84,11 @@ export class Backend implements DBBackend {
     }
     return nonces;
   }
+
   public async privateKeys() {
     return this.getAll(ObjectStores.privateKeys);
   }
+
   public async ledgers() {
     return this.getAll(ObjectStores.ledgers);
   }
@@ -134,8 +139,8 @@ export class Backend implements DBBackend {
 
   // Individual Setters
 
-  public async setPrivateKey(key: string, value: string) {
-    const pksPutted = await this.put(ObjectStores.privateKeys, value, key);
+  public async setPrivateKey(signingAddress: string, privateKey: string) {
+    const pksPutted = await this.put(ObjectStores.privateKeys, privateKey, signingAddress);
     return pksPutted;
   }
   public async setChannel(key: string, value: ChannelStoredData) {
@@ -181,7 +186,7 @@ export class Backend implements DBBackend {
    * @param asArray if true, the result object, is transformed to an array
    */
   private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
-    return this._db.transaction('r', this._db[storeName], () => this._db[storeName].where({}));
+    return _.mapValues(_.keyBy(await this._db[storeName].toArray(), 'key'), 'value');
   }
 
   /**
@@ -218,9 +223,7 @@ export class Backend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
-    return this._db.transaction('rw', this._db[storeName], () => {
-      // FIXME
-    });
+    return this._db[storeName].put({key, value}, key);
   }
 
   /**

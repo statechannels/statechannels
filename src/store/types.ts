@@ -149,6 +149,8 @@ export type ChannelStoredData = {
 };
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
+  // TODO: Perhaps the backend API should look more like this?
+  // privateKeys(): Promise<Record<string, {signingAddress: string; privateKey: string} | undefined>>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
