@@ -13,9 +13,6 @@ import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 
 Enzyme.configure({adapter: new Adapter()});
 
-// this mock was making the entire test fail, and doesn't looks to be used anywhere
-// jest.mock('@statechannels/channel-client');
-
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
   let torrentFile: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentAddInput]>;
