@@ -59,7 +59,7 @@ describe('getAddress', () => {
   });
 });
 
-describe.skip('channelUpdatedFeed', () => {
+describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
     const outputs: ChannelStoreEntry[] = [];
@@ -82,7 +82,7 @@ describe.skip('channelUpdatedFeed', () => {
   });
 });
 
-test('newObjectiveFeed', async () => {
+test.skip('newObjectiveFeed', async () => {
   const objective: Objective = {
     type: 'OpenChannel',
     participants: [],

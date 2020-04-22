@@ -50,8 +50,8 @@ export class Backend implements DBBackend {
   private async create(databaseName: string) {
     this._db = new Dexie(databaseName);
     this._db.version(1).stores({
-      [ObjectStores.channels]: 'channelId',
-      [ObjectStores.nonces]: 'value',
+      [ObjectStores.channels]: '',
+      [ObjectStores.nonces]: '',
       [ObjectStores.privateKeys]: '',
       [ObjectStores.ledgers]: 'peerParticipantId',
       [ObjectStores.budgets]: 'applicationSite'
@@ -117,6 +117,9 @@ export class Backend implements DBBackend {
     return this.delete(ObjectStores.budgets, key);
   }
   public async getChannel(key: string) {
+    // FIXME: This is typed to return ChannelStoredData, but it actually
+    // returns ChannelStoreEntry.
+    // This happens all over the place.
     const channel = await this.get(ObjectStores.channels, key);
     return channel && ChannelStoreEntry.fromJson(channel);
   }
@@ -153,8 +156,9 @@ export class Backend implements DBBackend {
     return this.put(ObjectStores.ledgers, value, key);
   }
   public async setNonce(key: string, value: BigNumber) {
-    const savedNonce = await this.put(ObjectStores.nonces, value.toString(), key);
-    return new BigNumber(savedNonce);
+    await this.put(ObjectStores.nonces, value.toString(), key);
+
+    return await this._db[ObjectStores.nonces].get(key);
   }
   public async setObjective(key: number, value: Objective) {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
@@ -223,7 +227,9 @@ export class Backend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
-    return this._db[storeName].put({key, value}, key);
+    await this._db[storeName].put({key, value}, key);
+
+    return this._db[storeName].get(key);
   }
 
   /**
