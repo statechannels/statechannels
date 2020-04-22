@@ -171,24 +171,6 @@ export class IndexedDBBackend implements DBBackend {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
   }
 
-  /**
-   * Updates the objectives object store with new objectives.
-   * @param values objetives that may or may not be already in the object store.
-   * @returns the added objectives, if any
-   */
-  public async setReplaceObjectives(values: Objective[]) {
-    const _objectives: Objective[] = await this.getAll(ObjectStores.objectives, true);
-    const newObjectives: Objective[] = [];
-    values.forEach(objective => {
-      if (!_objectives.some(saved => _.isEqual(objective, saved))) {
-        _objectives.push(objective);
-        newObjectives.push(objective);
-      }
-    });
-    await this.setArray(ObjectStores.objectives, _objectives);
-    return newObjectives;
-  }
-
   // Private Internal Methods
 
   /**
@@ -255,25 +237,6 @@ export class IndexedDBBackend implements DBBackend {
       transaction.oncomplete = _ => {
         resolve(value);
       };
-    });
-  }
-
-  /**
-   * Replace an array with another
-   * @param storeName
-   * @param values
-   */
-  private async setArray(storeName: ObjectStores, values: any[]): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      store.clear();
-      values.forEach((value, index) => store.put(value, index));
-      transaction.onerror = _ => {
-        this.logError(transaction.error, 'setArray ' + storeName);
-        reject(transaction.error);
-      };
-      transaction.oncomplete = _ => resolve(values);
     });
   }
 
