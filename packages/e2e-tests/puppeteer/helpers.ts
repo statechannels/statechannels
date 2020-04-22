@@ -108,7 +108,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
     const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
     await page.evaluateOnNewDocument(web3JsFile);
     await page.evaluateOnNewDocument(`
-    window.web3 = new Web3("http://localhost:8547");
+    window.web3 = new Web3("http://localhost:8545");
     window.ethereum = window.web3.currentProvider;
     
     window.ethereum.enable = () => new Promise(r => {
