@@ -3,6 +3,7 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
+import {USE_DAPPETEER} from './constants';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
@@ -81,30 +82,105 @@ export async function waitForAndClickButton(
   }
 }
 
+class FakeMetaMask implements dappeteer.Dappeteer {
+  lock: () => Promise<void> = () => new Promise<void>(res => res());
+  unlock: (password: string) => Promise<void> = (password: string) =>
+    new Promise<void>(res => password && res());
+  addNetwork: (url: string) => Promise<void> = (url: string) =>
+    new Promise<void>(res => url && res());
+  importPK: (pk: string) => Promise<void> = (pk: string) => new Promise<void>(res => pk && res());
+  switchAccount: (accountNumber: number) => Promise<void> = (accountNumber: number) =>
+    new Promise<void>(res => accountNumber && res());
+  switchNetwork: (network: string) => Promise<void> = (network: string) =>
+    new Promise<void>(res => network && res());
+  confirmTransaction: (options: dappeteer.TransactionOptions) => Promise<void> = (
+    options: dappeteer.TransactionOptions
+  ) => new Promise<void>(res => options && res());
+  sign: () => Promise<void> = () => new Promise<void>(res => res());
+  approve: () => Promise<void> = () => new Promise<void>(res => res());
+}
+
+export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
+  if (!USE_DAPPETEER) {
+    // TODO condition on USE_DAPPETEER env var
+    // TODO: This is kinda ugly but it works
+    // We need to instantiate a web3 for the wallet so we import the web 3 script
+    // and then assign it on the window
+    const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
+    await page.evaluateOnNewDocument(web3JsFile);
+    await page.evaluateOnNewDocument(`
+    window.web3 = new Web3("http://localhost:8547");
+    window.ethereum = window.web3.currentProvider;
+    
+    window.ethereum.enable = () => new Promise(r => {
+      console.log("[puppeteer] window.ethereum.enable() was called");
+      web3.eth.getAccounts().then(lst => {
+        web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
+        window.ethereum.selectedAddress = web3.eth.defaultAccount;
+        r([window.ethereum.selectedAddress]);
+    });      
+    });
+    window.ethereum.networkVersion = 9001;
+    window.ethereum.on = () => {};
+  `);
+  }
+}
+
 export async function setUpBrowser(
   headless: boolean,
   slowMo?: number
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
-  const browser = await dappeteer.launch(puppeteer, {
-    executablePath: process.env.PUPPETEER_EXEC_PATH, // https://github.com/marketplace/actions/puppeteer-headful
-    headless,
-    slowMo,
-    //, Needed to allow both windows to execute JS at the same time
-    ignoreDefaultArgs: [
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
-    ],
-    args: [
-      // Needed to inject web3.js code into wallet iframe
-      // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
-      '--disable-features=site-per-process',
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage'
-    ]
-  });
-  const metamask = await dappeteer.getMetamask(browser);
+  let browser: Browser;
+  let metamask: dappeteer.Dappeteer;
+  if (!USE_DAPPETEER) {
+    // TODO condition on USE_DAPPETEER env var
+    browser = await puppeteer.launch({
+      headless,
+      slowMo,
+      devtools: !headless,
+      // Keep code here for convenience... if you want to use redux-dev-tools
+      // then download and unzip the release from Github and specify the location.
+      // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases
+      // args: [
+      //   '--disable-extensions-except=/Users/liam/Downloads/redux-dev-tools',
+      //   '--load-extension=/Users/liam/Downloads/redux-dev-tools'
+      // ],
+      //, Needed to allow both windows to execute JS at the same time
+      ignoreDefaultArgs: [
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ],
+      args: [
+        // Needed to inject web3.js code into wallet iframe
+        // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
+        '--disable-features=site-per-process'
+      ]
+    });
+    metamask = new FakeMetaMask();
+  } else {
+    browser = await dappeteer.launch(puppeteer, {
+      executablePath: process.env.PUPPETEER_EXEC_PATH, // https://github.com/marketplace/actions/puppeteer-headful
+      headless,
+      slowMo,
+      //, Needed to allow both windows to execute JS at the same time
+      ignoreDefaultArgs: [
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ],
+      args: [
+        // Needed to inject web3.js code into wallet iframe
+        // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
+        '--disable-features=site-per-process',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ]
+    });
+    metamask = await dappeteer.getMetamask(browser);
+  }
+
   await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
   // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
   await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'

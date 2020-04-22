@@ -11,7 +11,8 @@ import {
   waitForClosingChannel,
   waitForNthState,
   waitAndApproveDeposit,
-  waitAndApproveDepositWithHub
+  waitAndApproveDepositWithHub,
+  setupFakeWeb3
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -46,8 +47,11 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log('Loading dapps');
     await setupLogging(web3tTabA, 0, 'seed-download', true);
     await setupLogging(web3tTabB, 1, 'seed-download', true);
+    await setupFakeWeb3(web3tTabA, 0);
+    await setupFakeWeb3(web3tTabB, 0);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+
     await web3tTabA.bringToFront();
   });
 

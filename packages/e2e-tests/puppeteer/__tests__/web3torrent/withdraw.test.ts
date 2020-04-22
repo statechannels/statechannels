@@ -6,7 +6,8 @@ import {
   waitForBudgetEntry,
   withdrawAndWait,
   waitForEmptyBudget,
-  setupLogging
+  setupLogging,
+  setupFakeWeb3
 } from '../../helpers';
 import {JEST_TIMEOUT, USES_VIRTUAL_FUNDING, HEADLESS} from '../../constants';
 import {Browser, Page} from 'puppeteer';
@@ -31,6 +32,7 @@ describe('withdrawal from a ledger channel', () => {
 
     console.log('Loading dapps');
     await setupLogging(web3tTabA, 0, 'withdraw', true);
+    await setupFakeWeb3(web3tTabA, 0);
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
   });

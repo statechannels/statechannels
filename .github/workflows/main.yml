@@ -26,6 +26,7 @@ jobs:
       BROWSER_LOG_DESTINATION: browser.log
       REACT_APP_LOG_DESTINATION: pino.log
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+      USE_DAPPETEER: true
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v1
