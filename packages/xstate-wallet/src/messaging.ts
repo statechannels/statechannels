@@ -164,7 +164,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetWalletInformation':
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
-          selectedAddress: this.store.chain.selectedAddress,
+          selectedAddress: this.store.chain.selectedAddress ?? null,
           walletVersion: WALLET_VERSION
         });
         break;
