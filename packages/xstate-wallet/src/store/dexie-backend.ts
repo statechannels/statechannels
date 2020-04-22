@@ -2,9 +2,9 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
-import {logger} from '../logger';
-import {ADD_LOGS} from '../constants';
-const log = logger.info.bind(logger);
+// FIXME: Perhaps this should be required by jest before running tests?
+if (process.env.NODE_ENV === 'test') require('fake-indexeddb/auto');
+import Dexie from 'dexie';
 
 enum ObjectStores {
   channels = 'channels',
@@ -17,7 +17,7 @@ enum ObjectStores {
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
-  private _db: any;
+  private _db: Dexie;
 
   constructor() {
     if (!indexedDB) {
@@ -45,39 +45,20 @@ export class Backend implements DBBackend {
   }
 
   private async create(databaseName: string) {
-    return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(databaseName, 1);
-
-      request.onupgradeneeded = event => {
-        const db = (event.target as any).result;
-        db.createObjectStore(ObjectStores.channels, {unique: true});
-        db.createObjectStore(ObjectStores.objectives, {unique: true});
-        db.createObjectStore(ObjectStores.nonces, {unique: true});
-        db.createObjectStore(ObjectStores.privateKeys, {unique: true});
-        db.createObjectStore(ObjectStores.ledgers, {unique: true});
-        db.createObjectStore(ObjectStores.budgets, {unique: true});
-      };
-
-      request.onerror = err => reject(err);
-      request.onsuccess = () => {
-        this._db = request.result;
-        resolve(request.result);
-      };
+    this._db = new Dexie(databaseName);
+    this._db.version(1).stores({
+      [ObjectStores.channels]: 'channelId',
+      [ObjectStores.nonces]: 'value',
+      [ObjectStores.privateKeys]: 'signingAddress',
+      [ObjectStores.ledgers]: 'peerParticipantId',
+      [ObjectStores.budgets]: 'applicationSite'
     });
+
+    return this._db.open();
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readwrite')
-        .objectStore(storeName)
-        .clear();
-      request.onerror = _ => {
-        this.logError(request.error, 'get ' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = _ => resolve(storeName);
-    });
+    return 'TODO'; // FIXME
   }
 
   // Generic Getters
@@ -200,26 +181,7 @@ export class Backend implements DBBackend {
    * @param asArray if true, the result object, is transformed to an array
    */
   private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readwrite')
-        .objectStore(storeName)
-        .openCursor();
-      request.onerror = _ => {
-        this.logError(request.error, 'getAll ' + storeName);
-        reject(request.error);
-      };
-      const results = {};
-      request.onsuccess = event => {
-        const cursor = event.target && (event.target as any).result;
-        if (cursor) {
-          results[cursor.primaryKey] = cursor.value;
-          cursor.continue();
-        } else {
-          resolve(asArray ? Object.values(results) : results);
-        }
-      };
-    });
+    return this._db.transaction('r', this._db[storeName], () => this._db[storeName].where({}));
   }
 
   /**
@@ -228,17 +190,7 @@ export class Backend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readonly')
-        .objectStore(storeName)
-        .get(key);
-      request.onerror = _ => {
-        this.logError(request.error, 'get ' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = _ => resolve(request.result);
-    });
+    return this._db.transaction('r', this._db[storeName], () => this._db[storeName].get(key));
   }
 
   /**
@@ -254,20 +206,8 @@ export class Backend implements DBBackend {
     key: string | number,
     silentOverwriteError: boolean
   ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const request = transaction.objectStore(storeName).add(value, key);
-      transaction.onerror = _ => {
-        if (silentOverwriteError) {
-          resolve(value);
-        } else {
-          this.logError(request.error, 'add ' + storeName);
-          reject(request.error);
-        }
-      };
-      transaction.oncomplete = _ => {
-        resolve(value);
-      };
+    return this._db.transaction('rw', this._db[storeName], () => {
+      // FIXME
     });
   }
 
@@ -278,16 +218,8 @@ export class Backend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const request = transaction.objectStore(storeName).put(value, key);
-      transaction.onerror = _ => {
-        this.logError(request.error, 'put ' + storeName);
-        reject(request.error);
-      };
-      transaction.oncomplete = _ => {
-        resolve(value);
-      };
+    return this._db.transaction('rw', this._db[storeName], () => {
+      // FIXME
     });
   }
 
@@ -297,17 +229,10 @@ export class Backend implements DBBackend {
    * @param values
    */
   private async setArray(storeName: ObjectStores, values: any[]): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      store.clear();
-      values.forEach((value, index) => store.put(value, index));
-      transaction.onerror = _ => {
-        this.logError(transaction.error, 'setArray ' + storeName);
-        reject(transaction.error);
-      };
-      transaction.oncomplete = _ => resolve(values);
-    });
+    return this._db.transaction('rw', this._db[storeName], () =>
+      // FIXME
+      []
+    );
   }
 
   /**
@@ -318,41 +243,8 @@ export class Backend implements DBBackend {
    * @returns true on success, false on fail.
    */
   private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const store = this._db.transaction([storeName], 'readwrite').objectStore(storeName);
-      const request = store.openCursor(key);
-      request.onerror = _ => {
-        this.logError(request.error, 'delete (not found)' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = event => {
-        const cursor = event.target && (event.target as any).result;
-        const record = cursor && cursor.value;
-        ADD_LOGS && log('%s - %s', typeof record, typeof cursor);
-        if (!cursor) {
-          console.error(`Record of ${storeName} with key: ${key} not found`);
-          resolve(false);
-        } else {
-          const reqDelete = store.delete(key);
-          reqDelete.onsuccess = _ => resolve(true);
-          reqDelete.onerror = _ => {
-            this.logError(reqDelete.error, 'delete ' + storeName);
-            reject(reqDelete.error);
-          };
-        }
-      };
+    return this._db.transaction('rw', this._db[storeName], () => {
+      // FIXME
     });
-  }
-
-  /**
-   * Formats and parses errors thrown
-   * @param error
-   * @param context function/situation of the error
-   */
-  private logError(error, context: string): void {
-    logger.error(
-      `Error - IndexedDB${context ? ' - ' + context : ''}`,
-      JSON.stringify(error, ['message', 'arguments', 'type', 'name', 'target'])
-    );
   }
 }
