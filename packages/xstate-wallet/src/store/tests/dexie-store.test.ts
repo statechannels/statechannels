@@ -50,7 +50,7 @@ const aStore = async (noPrivateKeys = false) => {
   return store;
 };
 
-describe('getAddress', () => {
+describe.skip('getAddress', () => {
   it('returns an address', async () => {
     const store = await aStore();
     const address = await store.getAddress();
@@ -59,7 +59,7 @@ describe('getAddress', () => {
   });
 });
 
-describe('channelUpdatedFeed', () => {
+describe.skip('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
     const outputs: ChannelStoreEntry[] = [];
@@ -102,7 +102,7 @@ test('newObjectiveFeed', async () => {
   expect(outputs).toEqual([objective]);
 });
 
-describe('createChannel', () => {
+describe.skip('createChannel', () => {
   it('returns a ChannelStoreEntry', async () => {
     const store = await aStore();
 
@@ -136,7 +136,7 @@ describe('createChannel', () => {
   });
 });
 
-describe('pushMessage', () => {
+describe.skip('pushMessage', () => {
   it('stores states', async () => {
     const store = await aStore();
     await store.createChannel(
@@ -160,7 +160,7 @@ describe('pushMessage', () => {
   });
 });
 
-describe('getBudget', () => {
+describe.skip('getBudget', () => {
   it('returns an address', async () => {
     const store = await aStore();
     const budget: SiteBudget = {
