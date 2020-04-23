@@ -6,7 +6,6 @@ import {Guid} from 'guid-typescript';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {Wallet} from 'ethers';
 import * as _ from 'lodash';
-import AsyncLock from 'async-lock';
 
 import {Chain, FakeChain} from '../chain';
 import {NETWORK_ID, HUB} from '../constants';
@@ -458,73 +457,74 @@ export class XstateStore implements Store {
     return new ChannelStoreEntry(data);
   }
 
-  private budgetLock = new AsyncLock();
-
-  public async createBudget(budget: SiteBudget): Promise<void> {
-    await this.budgetLock.acquire(budget.domain, async release => {
+  public createBudget = (budget: SiteBudget) =>
+    this.backend.transaction('readwrite', [ObjectStores.budgets], async tx => {
       const existingBudget = await this.backend.getBudget(budget.domain);
       if (existingBudget) {
-        release();
-        throw new Error(Errors.budgetAlreadyExists);
+        logger.error(Errors.budgetAlreadyExists);
+        tx.abort();
       }
+
       await this.backend.setBudget(budget.domain, budget);
-      release();
     });
-  }
 
-  public async clearBudget(site): Promise<void> {
-    this.backend.deleteBudget(site);
-  }
+  public clearBudget = site =>
+    this.backend.transaction('readwrite', [ObjectStores.budgets], () =>
+      this.backend.deleteBudget(site)
+    );
 
-  public async releaseFunds(
+  public releaseFunds = (
     assetHolderAddress: string,
     ledgerChannelId: string,
     targetChannelId: string
-  ) {
-    const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
-    const {outcome} = supported;
-    if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.budgets, ObjectStores.channels, ObjectStores.privateKeys],
+      async () => {
+        const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
+        const {outcome} = supported;
+        if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
 
-    return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
-      const currentBudget = await this.getBudget(applicationSite);
+        const currentBudget = await this.getBudget(applicationSite);
 
-      const assetBudget = currentBudget?.forAsset[assetHolderAddress];
+        const assetBudget = currentBudget?.forAsset[assetHolderAddress];
 
-      if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
+        if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
 
-      const channelBudget = assetBudget.channels[targetChannelId];
-      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
-      const playerAddress = await this.getAddress();
+        const channelBudget = assetBudget.channels[targetChannelId];
+        if (!channelBudget) throw new Error(Errors.channelNotInBudget);
+        const playerAddress = await this.getAddress();
 
-      const playerDestination = participants.find(p => p.signingAddress === playerAddress)
-        ?.destination;
-      if (!playerDestination) {
-        throw new Error(Errors.cannotFindDestination);
+        const playerDestination = participants.find(p => p.signingAddress === playerAddress)
+          ?.destination;
+        if (!playerDestination) {
+          throw new Error(Errors.cannotFindDestination);
+        }
+        // Simply set the budget to the current ledger outcome
+        assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
+        assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
+
+        // Delete the funds assigned to the channel
+        delete assetBudget.channels[targetChannelId];
+
+        const result = await this.backend.setBudget(applicationSite, currentBudget);
+        return result;
       }
-      // Simply set the budget to the current ledger outcome
-      assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
-      assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
+    );
 
-      // Delete the funds assigned to the channel
-      delete assetBudget.channels[targetChannelId];
-
-      const result = await this.backend.setBudget(applicationSite, currentBudget);
-      release();
-      return result;
-    });
-  }
-
-  public async reserveFunds(
+  public reserveFunds = (
     assetHolderAddress: string,
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
-  ): Promise<SiteBudget> {
-    const entry = await this.getEntry(channelId);
-    const site = entry.applicationSite;
-    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
-
-    return await this.budgetLock
-      .acquire<SiteBudget>(site, async release => {
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.budgets, ObjectStores.channels],
+      async () => {
+        const entry = await this.getEntry(channelId);
+        const site = entry.applicationSite;
+        if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
         const currentBudget = await this.backend.getBudget(site);
 
         // TODO?: Create a new budget if one doesn't exist
@@ -548,15 +548,10 @@ export class XstateStore implements Store {
           }
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);
-        release();
 
         return currentBudget;
-      })
-      .catch(e => {
-        console.error(e);
-        throw e;
-      });
-  }
+      }
+    );
 }
 
 export function supportedStateFeed(store: Store, channelId: string) {
