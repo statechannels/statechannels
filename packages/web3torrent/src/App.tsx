@@ -1,5 +1,5 @@
 import ConnectionBanner from '@rimble/connection-banner';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {Route, Switch, BrowserRouter} from 'react-router-dom';
 import './App.scss';
 import {LayoutFooter, LayoutHeader} from './components/layout';
@@ -10,17 +10,19 @@ import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
-import {web3torrent} from './clients/web3torrent-client';
+import {InitializationContext} from './contexts/initialization-context';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
     window.ethereum ? Number(window.ethereum.networkVersion) : undefined
   );
 
-  const [initialized, setInitialized] = useState(false);
+  const {initialize, isInitialized} = useContext(InitializationContext);
   useEffect(() => {
-    web3torrent.paymentChannelClient.initialize().then(() => setInitialized(true));
-  }, [initialized]);
+    if (!isInitialized) {
+      initialize();
+    }
+  });
 
   useEffect(() => {
     if (window.ethereum) {
@@ -33,7 +35,7 @@ const App: React.FC = () => {
     return () => ({});
   }, []);
 
-  const ready = currentNetwork === requiredNetwork && initialized;
+  const ready = currentNetwork === requiredNetwork && isInitialized;
 
   return (
     <BrowserRouter>

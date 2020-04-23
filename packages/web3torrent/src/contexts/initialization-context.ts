@@ -7,8 +7,10 @@ export const InitializationContext = React.createContext<
 >(undefined);
 export function useInitializationContext() {
   const {paymentChannelClient} = web3torrent;
+
   const [isInitialized, setInitialized] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+
   const initialize = () => {
     if (!isInitialized && !isInitializing) {
       setIsInitializing(true);
