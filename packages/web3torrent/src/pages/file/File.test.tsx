@@ -13,8 +13,6 @@ import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 
 Enzyme.configure({adapter: new Adapter()});
 
-jest.mock('@statechannels/channel-client');
-
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
   let torrentFile: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentAddInput]>;

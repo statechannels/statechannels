@@ -16,6 +16,7 @@ import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import _ from 'lodash';
+import {map, filter, first} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
@@ -72,7 +73,7 @@ export class PaymentChannelClient {
   }
 
   constructor(private readonly channelClient: ChannelClientInterface) {
-    this.channelClient.onChannelUpdated(channelResult => {
+    this.channelClient.channelState.subscribe(channelResult => {
       this.updateChannelCache(convertToChannelState(channelResult));
     });
 
@@ -251,23 +252,15 @@ export class PaymentChannelClient {
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const channelState: ChannelState = await new Promise(resolve => {
-      const readyToPay = (state: ChannelState | undefined) =>
-        state &&
-        state.status === 'running' &&
-        state.payer === this.mySigningAddress &&
-        state.turnNum.mod(2).eq(Index.Payer);
+    const readyToPay = (state: ChannelState | undefined) =>
+      state &&
+      state.status === 'running' &&
+      state.payer === this.mySigningAddress &&
+      state.turnNum.mod(2).eq(Index.Payer);
 
-      const currentState = this.channelCache[channelId];
-      if (readyToPay(currentState)) resolve(currentState);
-
-      const unsubscribeListener = this.channelClient.onChannelUpdated(cu => {
-        if (readyToPay(convertToChannelState(cu))) {
-          unsubscribeListener();
-          resolve(convertToChannelState(cu));
-        }
-      });
-    });
+    const channelState: ChannelState = await this.channelClient.channelState
+      .pipe(map(convertToChannelState), filter(readyToPay), first())
+      .toPromise();
 
     const {payerBalance} = channelState;
     if (bigNumberify(payerBalance).lt(amount)) {
