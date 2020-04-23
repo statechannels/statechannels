@@ -9,8 +9,7 @@ import {
   HUB,
   FIREBASE_PREFIX,
   fireBaseConfig,
-  FUNDING_STRATEGY,
-  INITIAL_BUDGET_AMOUNT
+  FUNDING_STRATEGY
 } from '../constants';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
