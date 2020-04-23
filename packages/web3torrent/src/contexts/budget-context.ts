@@ -9,7 +9,7 @@ export const BudgetContext = React.createContext<ReturnType<typeof useBudgetCont
 export function useBudgetContext({initializationContext}) {
   const {paymentChannelClient} = web3torrent;
 
-  const [fetching, setFetching] = useState(true);
+  const [loading, setFetching] = useState(true);
 
   const {initialize, isInitialized, isInitializing} = initializationContext;
 
@@ -43,5 +43,5 @@ export function useBudgetContext({initializationContext}) {
     setFetching(false);
   };
 
-  return {budget: paymentChannelClient.budgetCache, fetching, createBudget, closeBudget};
+  return {budget: paymentChannelClient.budgetCache, loading, createBudget, closeBudget};
 }
