@@ -39,6 +39,6 @@
     "lint:write": "yarn lint:check --fix",
     "prepare": "rm -rf lib && yarn build",
     "test": "jest",
-    "test:ci": "jest"
+    "test:ci": "jest --runInBand"
   }
 }

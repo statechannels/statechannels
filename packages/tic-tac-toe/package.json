@@ -180,7 +180,7 @@
     "start:ember": "ember serve",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "run-s test:contracts test:ember",
-    "test:ci": "yarn test:ci:contracts",
+    "test:ci": "yarn test:ci:contracts --runInBand",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",
     "test:ember": "ember test",
