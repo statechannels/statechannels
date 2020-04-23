@@ -2,9 +2,8 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
-import {logger} from '../logger';
-import {ADD_LOGS} from '../constants';
-const log = logger.info.bind(logger);
+
+import Dexie from 'dexie';
 
 enum ObjectStores {
   channels = 'channels',
@@ -16,8 +15,8 @@ enum ObjectStores {
 }
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
-export class IndexedDBBackend implements DBBackend {
-  private _db: any;
+export class Backend implements DBBackend {
+  private _db: Dexie;
 
   constructor() {
     if (!indexedDB) {
@@ -45,39 +44,20 @@ export class IndexedDBBackend implements DBBackend {
   }
 
   private async create(databaseName: string) {
-    return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(databaseName, 1);
-
-      request.onupgradeneeded = event => {
-        const db = (event.target as any).result;
-        db.createObjectStore(ObjectStores.channels, {unique: true});
-        db.createObjectStore(ObjectStores.objectives, {unique: true});
-        db.createObjectStore(ObjectStores.nonces, {unique: true});
-        db.createObjectStore(ObjectStores.privateKeys, {unique: true});
-        db.createObjectStore(ObjectStores.ledgers, {unique: true});
-        db.createObjectStore(ObjectStores.budgets, {unique: true});
-      };
-
-      request.onerror = err => reject(err);
-      request.onsuccess = () => {
-        this._db = request.result;
-        resolve(request.result);
-      };
+    this._db = new Dexie(databaseName, {indexedDB});
+    this._db.version(1).stores({
+      [ObjectStores.channels]: '',
+      [ObjectStores.nonces]: '',
+      [ObjectStores.privateKeys]: '',
+      [ObjectStores.ledgers]: '',
+      [ObjectStores.budgets]: ''
     });
+
+    return this._db.open();
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readwrite')
-        .objectStore(storeName)
-        .clear();
-      request.onerror = _ => {
-        this.logError(request.error, 'get ' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = _ => resolve(storeName);
-    });
+    return this._db[storeName]?.clear();
   }
 
   // Generic Getters
@@ -100,9 +80,11 @@ export class IndexedDBBackend implements DBBackend {
     }
     return nonces;
   }
+
   public async privateKeys() {
     return this.getAll(ObjectStores.privateKeys);
   }
+
   public async ledgers() {
     return this.getAll(ObjectStores.ledgers);
   }
@@ -130,7 +112,11 @@ export class IndexedDBBackend implements DBBackend {
   public async deleteBudget(key: string) {
     return this.delete(ObjectStores.budgets, key);
   }
+
   public async getChannel(key: string) {
+    // TODO: This is typed to return ChannelStoredData, but it actually
+    // returns ChannelStoreEntry.
+    // This happens all over the place.
     const channel = await this.get(ObjectStores.channels, key);
     return channel && ChannelStoreEntry.fromJson(channel);
   }
@@ -153,9 +139,8 @@ export class IndexedDBBackend implements DBBackend {
 
   // Individual Setters
 
-  public async setPrivateKey(key: string, value: string) {
-    const pksPutted = await this.put(ObjectStores.privateKeys, value, key);
-    return pksPutted;
+  public async setPrivateKey(signingAddress: string, privateKey: string) {
+    return this.put(ObjectStores.privateKeys, privateKey, signingAddress);
   }
   public async setChannel(key: string, value: ChannelStoredData) {
     return this.put(ObjectStores.channels, value, key);
@@ -164,8 +149,9 @@ export class IndexedDBBackend implements DBBackend {
     return this.put(ObjectStores.ledgers, value, key);
   }
   public async setNonce(key: string, value: BigNumber) {
-    const savedNonce = await this.put(ObjectStores.nonces, value.toString(), key);
-    return new BigNumber(savedNonce);
+    await this.put(ObjectStores.nonces, value.toString(), key);
+
+    return await this._db[ObjectStores.nonces].get(key);
   }
   public async setObjective(key: number, value: Objective) {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
@@ -179,26 +165,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param asArray if true, the result object, is transformed to an array
    */
   private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readwrite')
-        .objectStore(storeName)
-        .openCursor();
-      request.onerror = _ => {
-        this.logError(request.error, 'getAll ' + storeName);
-        reject(request.error);
-      };
-      const results = {};
-      request.onsuccess = event => {
-        const cursor = event.target && (event.target as any).result;
-        if (cursor) {
-          results[cursor.primaryKey] = cursor.value;
-          cursor.continue();
-        } else {
-          resolve(asArray ? Object.values(results) : results);
-        }
-      };
-    });
+    return _.mapValues(_.keyBy(await this._db[storeName].toArray(), 'key'), 'value');
   }
 
   /**
@@ -207,17 +174,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const request = this._db
-        .transaction([storeName], 'readonly')
-        .objectStore(storeName)
-        .get(key);
-      request.onerror = _ => {
-        this.logError(request.error, 'get ' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = _ => resolve(request.result);
-    });
+    return (await this._db[storeName].get(key))?.value;
   }
 
   /**
@@ -227,17 +184,9 @@ export class IndexedDBBackend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction([storeName], 'readwrite');
-      const request = transaction.objectStore(storeName).put(value, key);
-      transaction.onerror = _ => {
-        this.logError(request.error, 'put ' + storeName);
-        reject(request.error);
-      };
-      transaction.oncomplete = _ => {
-        resolve(value);
-      };
-    });
+    await this._db[storeName].put({key, value}, key);
+
+    return this._db[storeName].get(key);
   }
 
   /**
@@ -248,41 +197,6 @@ export class IndexedDBBackend implements DBBackend {
    * @returns true on success, false on fail.
    */
   private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const store = this._db.transaction([storeName], 'readwrite').objectStore(storeName);
-      const request = store.openCursor(key);
-      request.onerror = _ => {
-        this.logError(request.error, 'delete (not found)' + storeName);
-        reject(request.error);
-      };
-      request.onsuccess = event => {
-        const cursor = event.target && (event.target as any).result;
-        const record = cursor && cursor.value;
-        ADD_LOGS && log('%s - %s', typeof record, typeof cursor);
-        if (!cursor) {
-          console.error(`Record of ${storeName} with key: ${key} not found`);
-          resolve(false);
-        } else {
-          const reqDelete = store.delete(key);
-          reqDelete.onsuccess = _ => resolve(true);
-          reqDelete.onerror = _ => {
-            this.logError(reqDelete.error, 'delete ' + storeName);
-            reject(reqDelete.error);
-          };
-        }
-      };
-    });
-  }
-
-  /**
-   * Formats and parses errors thrown
-   * @param error
-   * @param context function/situation of the error
-   */
-  private logError(error, context: string): void {
-    logger.error(
-      `Error - IndexedDB${context ? ' - ' + context : ''}`,
-      JSON.stringify(error, ['message', 'arguments', 'type', 'name', 'target'])
-    );
+    return this._db[storeName].delete(key);
   }
 }
