@@ -1,10 +1,9 @@
 import {BigNumber} from 'ethers/utils';
 
-import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
+import {Objective, DBBackend, SiteBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
 
 export class MemoryBackend implements DBBackend {
-  public transaction: any; // FIXME
   private _channels: Record<string, ChannelStoredData | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, string | undefined> = {};
@@ -111,5 +110,9 @@ export class MemoryBackend implements DBBackend {
 
   public async getObjective(key: number) {
     return this._objectives[key];
+  }
+
+  public async transaction<T>(_mode: TXMode, _stores: ObjectStores[], cb: (tx: any) => Promise<T>) {
+    return cb({abort: () => null});
   }
 }
