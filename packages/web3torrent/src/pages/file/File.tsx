@@ -15,7 +15,7 @@ import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {BudgetContext} from '../../contexts/budget-context';
 import {ChannelContext} from '../../contexts/channel-context';
-import {TorrentContext} from '../../contexts/torrent-context';
+import {TorrentClientContext} from '../../contexts/torrent-context';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -46,7 +46,7 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
-  const {getTorrentUI, download} = useContext(TorrentContext);
+  const {getTorrentUI, download} = useContext(TorrentClientContext);
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
     getTorrentUI({
       infoHash,

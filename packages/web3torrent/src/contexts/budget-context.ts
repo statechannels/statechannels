@@ -1,46 +1,56 @@
-import {web3torrent} from '../clients/web3torrent-client';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 
 import React from 'react';
+import {Web3TorrentClientContextInterface} from './w3t-client-context';
 
 export const BudgetContext = React.createContext<ReturnType<typeof useBudgetContext>>(undefined);
+interface Props {
+  web3TorrentClientContext: Web3TorrentClientContextInterface;
+}
+export function useBudgetContext({web3TorrentClientContext}: Props) {
+  const [loading, setLoading] = useState(true);
 
-export function useBudgetContext({initializationContext}) {
-  const {paymentChannelClient} = web3torrent;
-
-  const [loading, setFetching] = useState(true);
-
-  const {initialize, isInitialized, isInitializing} = initializationContext;
+  const {initialize, initializationStatus} = web3TorrentClientContext;
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (initializationStatus === 'Not Initialized') {
       initialize();
     }
   });
 
   useEffect(() => {
     const getAndSetBudget = async () => {
+      const {paymentChannelClient} = web3TorrentClientContext.getContext();
       await paymentChannelClient.getBudget();
-      setFetching(false);
+      setLoading(false);
     };
-    if (isInitialized) {
+    if (initializationStatus === 'Initialized') {
       getAndSetBudget();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitialized, isInitializing]);
+  }, [initializationStatus]);
 
+  if (initializationStatus !== 'Initialized') {
+    return {budget: undefined, loading, createBudget: undefined, closeBudget: undefined};
+  } else {
+    return constructContext(web3TorrentClientContext, loading, setLoading);
+  }
+}
+
+function constructContext(web3TorrentClientContext, loading, setLoading) {
+  const {paymentChannelClient} = web3TorrentClientContext.getContext();
   const createBudget = async () => {
-    setFetching(true);
+    setLoading(true);
     await paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
 
-    setFetching(false);
+    setLoading(false);
   };
   const closeBudget = async () => {
-    setFetching(true);
+    setLoading(true);
     await paymentChannelClient.closeAndWithdraw();
 
-    setFetching(false);
+    setLoading(false);
   };
 
   return {budget: paymentChannelClient.budgetCache, loading, createBudget, closeBudget};

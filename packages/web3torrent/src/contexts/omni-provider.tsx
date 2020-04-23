@@ -1,21 +1,21 @@
 import {BudgetContext, useBudgetContext} from './budget-context';
-import {InitializationContext, useInitializationContext} from './initialization-context';
+import {Web3TorrentClientContext, useWeb3TorrentClientContext} from './w3t-client-context';
 import React from 'react';
 import {ChannelContext, useChannelContext} from './channel-context';
-import {TorrentContext, useTorrentContext} from './torrent-context';
+import {TorrentClientContext, useTorrentClientContext} from './torrent-context';
 
 export const OmniProvider: React.FC = ({children}) => {
-  const initializationContext = useInitializationContext();
+  const web3TorrentClientContext = useWeb3TorrentClientContext();
   // TODO: Probably a more elegant way of doing this
   return (
-    <InitializationContext.Provider value={initializationContext}>
-      <TorrentContext.Provider value={useTorrentContext({initializationContext})}>
-        <ChannelContext.Provider value={useChannelContext({initializationContext})}>
-          <BudgetContext.Provider value={useBudgetContext({initializationContext})}>
+    <Web3TorrentClientContext.Provider value={web3TorrentClientContext}>
+      <TorrentClientContext.Provider value={useTorrentClientContext({web3TorrentClientContext})}>
+        <ChannelContext.Provider value={useChannelContext({web3TorrentClientContext})}>
+          <BudgetContext.Provider value={useBudgetContext({web3TorrentClientContext})}>
             {children}
           </BudgetContext.Provider>
         </ChannelContext.Provider>
-      </TorrentContext.Provider>
-    </InitializationContext.Provider>
+      </TorrentClientContext.Provider>
+    </Web3TorrentClientContext.Provider>
   );
 };

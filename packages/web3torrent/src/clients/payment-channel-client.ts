@@ -1,7 +1,7 @@
 import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
-import {ChannelClient} from '@statechannels/channel-client';
+
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 import {
@@ -349,10 +349,6 @@ export class PaymentChannelClient {
     return this.budgetCache || {};
   }
 }
-
-export const paymentChannelClient = new PaymentChannelClient(
-  new ChannelClient(window.channelProvider)
-);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {

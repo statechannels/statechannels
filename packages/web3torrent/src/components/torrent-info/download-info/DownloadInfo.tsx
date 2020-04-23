@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import prettier from 'prettier-bytes';
-import React from 'react';
-import {cancel} from '../../../clients/web3torrent-client';
+import React, {useContext} from 'react';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {ChannelsList} from '../channels-list/ChannelsList';
 import {TorrentUI} from '../../../types';
+import {TorrentClientContext} from '../../../contexts/torrent-context';
 
 export type DownloadInfoProps = {
   torrent: TorrentUI;
@@ -22,7 +22,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
   );
-
+  const {cancel} = useContext(TorrentClientContext);
   const displayProgress = !(torrent.done || torrent.paused);
   return (
     <>

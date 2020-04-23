@@ -1,16 +1,18 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {useHistory} from 'react-router-dom';
-import {upload} from '../../clients/web3torrent-client';
+
 import {generateURL} from '../../utils/url';
 import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {getUserFriendlyError} from '../../utils/error';
 import {Flash} from 'rimble-ui';
+import {TorrentClientContext} from '../../contexts/torrent-context';
 
 const Upload: React.FC<{ready: boolean}> = ({ready}) => {
   const history = useHistory();
   const [showSpinner, setSpinner] = useState<boolean>(false);
   const [errorLabel, setErrorLabel] = useState('');
+  const {upload} = useContext(TorrentClientContext);
   return (
     <section className="section fill">
       <div className="jumbotron-upload">

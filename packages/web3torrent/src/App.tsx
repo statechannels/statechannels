@@ -10,19 +10,14 @@ import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
-import {InitializationContext} from './contexts/initialization-context';
+import {Web3TorrentClientContext} from './contexts/w3t-client-context';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
     window.ethereum ? Number(window.ethereum.networkVersion) : undefined
   );
 
-  const {initialize, isInitialized} = useContext(InitializationContext);
-  useEffect(() => {
-    if (!isInitialized) {
-      initialize();
-    }
-  });
+  const {initializationStatus} = useContext(Web3TorrentClientContext);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -35,7 +30,7 @@ const App: React.FC = () => {
     return () => ({});
   }, []);
 
-  const ready = currentNetwork === requiredNetwork && isInitialized;
+  const ready = currentNetwork === requiredNetwork && initializationStatus === 'Initialized';
 
   return (
     <BrowserRouter>
