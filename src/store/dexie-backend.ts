@@ -53,8 +53,6 @@ export class Backend implements DBBackend {
       [ObjectStores.ledgers]: '',
       [ObjectStores.budgets]: ''
     });
-
-    return this._db.open();
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
