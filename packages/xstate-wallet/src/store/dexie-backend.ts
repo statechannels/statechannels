@@ -1,18 +1,16 @@
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
-import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
+import {
+  Objective,
+  DBBackend,
+  SiteBudget,
+  ChannelStoredData,
+  AssetBudget,
+  ObjectStores
+} from './types';
 import * as _ from 'lodash';
 
 import Dexie from 'dexie';
-
-enum ObjectStores {
-  channels = 'channels',
-  objectives = 'objectives',
-  nonces = 'nonces',
-  privateKeys = 'privateKeys',
-  ledgers = 'ledgers',
-  budgets = 'budgets'
-}
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
