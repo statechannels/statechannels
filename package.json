@@ -73,7 +73,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "npx webpack --config ./webpack-build.config.js",
+    "build": "webpack --config ./webpack-build.config.js",
     "build:ci": "yarn build",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
