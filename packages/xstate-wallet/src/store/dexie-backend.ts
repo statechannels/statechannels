@@ -6,15 +6,16 @@ import {
   SiteBudget,
   ChannelStoredData,
   AssetBudget,
-  ObjectStores
+  ObjectStores,
+  TXMode
 } from './types';
 import * as _ from 'lodash';
 
-import Dexie from 'dexie';
+import {Transaction, Dexie, TransactionMode} from 'dexie';
+import {unreachable} from '../utils';
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
-  public transaction: any; // FIXME
   private _db: Dexie;
 
   constructor() {
@@ -154,6 +155,29 @@ export class Backend implements DBBackend {
   }
   public async setObjective(key: number, value: Objective) {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
+  }
+
+  public async transaction<T, S extends ObjectStores>(
+    mode: TXMode,
+    stores: S[],
+    cb: (tx: Transaction) => Promise<T>
+  ) {
+    let dexieMode: TransactionMode;
+    switch (mode) {
+      case 'readwrite':
+        dexieMode = 'rw';
+        break;
+      case 'readonly':
+        dexieMode = 'r';
+        break;
+      default:
+        return unreachable(mode);
+    }
+
+    // FIXME: Add schema to database to make this type safe
+    const dexieStores = stores.map((store: S) => this._db[(store as unknown) as string]);
+
+    return this._db.transaction(dexieMode, dexieStores, cb);
   }
 
   // Private Internal Methods
