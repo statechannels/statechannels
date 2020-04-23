@@ -62,13 +62,14 @@ describe('getAddress', () => {
 describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
-    const outputs: ChannelStoreEntry[] = [];
-    store.channelUpdatedFeed(channelId).subscribe(x => {
-      outputs.push(x);
-    });
-    await store.pushMessage({signedStates});
+    return new Promise(resolve => {
+      store.channelUpdatedFeed(channelId).subscribe(x => {
+        expect(x.latest).toMatchObject(state);
+        resolve();
+      });
 
-    expect(outputs[0].latest).toMatchObject(state);
+      store.pushMessage({signedStates});
+    });
   });
 
   test("it doesn't fire if the channelId doesn't match", async () => {
