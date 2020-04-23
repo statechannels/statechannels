@@ -7,8 +7,9 @@ import TttChannelClientService from '../services/ttt-channel-client';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
 import {Message} from '@statechannels/client-api-schema';
 import MessageModel from '../models/message';
-import {ChannelState} from '../core/channel-state';
+import {ChannelState, inChannelProposed} from '../core/channel-state';
 import {AppData} from '../core/app-data';
+import CurrentGameService, {Player} from '../services/current-game';
 
 const {WALLET_URL} = ENV;
 
@@ -24,6 +25,7 @@ function sanitizeMessageForFirebase(message: MessageModel): MessageModel {
 
 export default class ApplicationRoute extends Route {
   @service tttChannelClient!: TttChannelClientService;
+  @service currentGame!: CurrentGameService;
 
   beforeModel(transition: Transition): void {
     super.beforeModel(transition);
@@ -47,7 +49,13 @@ export default class ApplicationRoute extends Route {
     });
 
     this.tttChannelClient.onChannelUpdated((channelState: ChannelState<AppData>) => {
-      console.log(channelState);
+      if (this.currentGame.getPlayer() === Player.B) {
+        if (inChannelProposed(channelState)) {
+          this.tttChannelClient.joinChannel(channelState.channelId);
+          console.log('Joining game as Player B');
+        }
+      }
+      console.log('ChannelState Received from onChannelUpdated:', channelState);
     });
   }
 }
