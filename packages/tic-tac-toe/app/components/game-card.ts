@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import makeBlockie from 'ethereum-blockies-base64';
 import {action} from '@ember/object';
 import ChallengeModel from '../models/challenge';
-import CurrentGameService from '../services/current-game';
+import CurrentGameService, {Player} from '../services/current-game';
 import {inject as service} from '@ember/service';
 import UserService from '../services/user';
 import TttChannelClientService from '../services/ttt-channel-client';
@@ -30,6 +30,7 @@ export default class GameCardComponent extends Component<GameCardComponentArgs> 
     game.isPublic = false;
     await game.save();
     this.currentGame.setGame(game);
+    this.currentGame.setPlayer(Player.A);
 
     const openingBalance = bigNumberify(game.stake)
       .mul(5)
