@@ -171,3 +171,12 @@ export interface DBBackend {
   setObjective(key: number, value: Objective): Promise<Objective>;
   getObjective(key: number): Promise<Objective | undefined>;
 }
+
+export const enum ObjectStores {
+  channels = 'channels',
+  objectives = 'objectives',
+  nonces = 'nonces',
+  privateKeys = 'privateKeys',
+  ledgers = 'ledgers',
+  budgets = 'budgets'
+}
