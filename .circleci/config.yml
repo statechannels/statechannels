@@ -229,7 +229,7 @@ jobs:
       - run:
           command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
           background: true
-      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test:ci rps)
+      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test rps)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
