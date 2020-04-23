@@ -295,7 +295,8 @@ export class ChainWatcher implements Chain {
   }
 
   public get selectedAddress(): string | null {
-    return this.mySelectedAddress || null;
+    this.mySelectedAddress = (this.mySelectedAddress || window.ethereum?.selectedAddress) ?? null;
+    return this.mySelectedAddress;
   }
 
   public get ethereumIsEnabled(): boolean {
