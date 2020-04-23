@@ -14,6 +14,7 @@ import Dexie from 'dexie';
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
+  public transaction: any; // FIXME
   private _db: Dexie;
 
   constructor() {

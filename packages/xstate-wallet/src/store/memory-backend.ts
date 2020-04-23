@@ -4,6 +4,7 @@ import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
 import * as _ from 'lodash';
 
 export class MemoryBackend implements DBBackend {
+  public transaction: any; // FIXME
   private _channels: Record<string, ChannelStoredData | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, string | undefined> = {};

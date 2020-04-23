@@ -149,8 +149,9 @@ export type ChannelStoredData = {
 };
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
+
   // TODO: Perhaps the backend API should look more like this?
-  // privateKeys(): Promise<Record<string, {signingAddress: string; privateKey: string} | undefined>>;
+  // privateKeys(): Promise<Array<{signingAddress: string; privateKey: string}>>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
@@ -159,18 +160,54 @@ export interface DBBackend {
 
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
+
   setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
   getChannel(key: string): Promise<ChannelStoredData | undefined>;
+
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
   deleteBudget(key: string): Promise<void>;
+
   setLedger(key: string, value: string): Promise<string>;
   getLedger(key: string): Promise<string | undefined>;
+
   setNonce(key: string, value: BigNumber): Promise<BigNumber>;
   getNonce(key: string): Promise<BigNumber | undefined>;
+
   setObjective(key: number, value: Objective): Promise<Objective>;
   getObjective(key: number): Promise<Objective | undefined>;
+
+  /**
+   * Starts an async database transaction.
+   *
+   * When mode is 'readwrite', acquires a lock on each store listed in stores param.
+   *
+   * dexie backend rejects with 'NotFoundError: TableX not part of transaction', if cb
+   * attempts to use table not listed by stores param.
+   *
+   * Rejects if tx.abort() is called.
+   *
+   * @param mode
+   * @param stores array of ObjectStore names usd in cb
+   * @param cb callback to execute within transaction.
+   * @returns promise resolving to return value of cb
+   */
+  transaction<T, S extends ObjectStores>(
+    mode: 'readonly' | 'readwrite',
+    stores: S[],
+    cb: (tx: Transaction) => Promise<T>
+  ): Promise<T>;
 }
+
+export type Transaction = {
+  abort(): Promise<void>;
+  // TODO: We could expose a store function on the transaction and
+  // potentially do away with the individual getters on the backend interface
+  // EG:
+  // store<S extends Stores>(s: S): ObjectStore<S>;
+  // Or, we could just expose direct properties, like
+  // channels(): Table<ChannelRecord>
+};
 
 export const enum ObjectStores {
   channels = 'channels',
