@@ -25,7 +25,8 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables
+  StateVariables,
+  ObjectStores
 } from './types';
 
 interface DirectFunding {
@@ -226,20 +227,18 @@ export class XstateStore implements Store {
   }
 
   public setFunding = (channelId: string, funding: Funding) =>
-    this.withLock(channelId, () => this._setFunding(channelId, funding));
-
-  private async _setFunding(channelId: string, funding: Funding): Promise<void> {
-    const channelData = await this.backend.getChannel(channelId);
-    if (!channelData) {
-      throw new Error(`No channel for ${channelId}`);
-    }
-    const channelEntry = new ChannelStoreEntry(channelData);
-    if (channelEntry.funding) {
-      throw `Channel ${channelId} already funded`;
-    }
-    channelEntry.setFunding(funding);
-    await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
-  }
+    this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
+      const channelData = await this.backend.getChannel(channelId);
+      if (!channelData) {
+        throw new Error(`No channel for ${channelId}`);
+      }
+      const channelEntry = new ChannelStoreEntry(channelData);
+      if (channelEntry.funding) {
+        throw `Channel ${channelId} already funded`;
+      }
+      channelEntry.setFunding(funding);
+      await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
+    });
 
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
     const lock = this._channelLocks[channelId];
@@ -288,7 +287,7 @@ export class XstateStore implements Store {
   }
 
   public setApplicationSite = (channelId: string, applicationSite: string) =>
-    this.withLock(channelId, async () => {
+    this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const entry = await this.getEntry(channelId);
 
       if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
@@ -296,21 +295,24 @@ export class XstateStore implements Store {
       await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
     });
 
-  public setLedger = (ledgerId: string) => this.withLock(ledgerId, () => this._setLedger(ledgerId));
-
-  private async _setLedger(ledgerId: string) {
-    const data = await this.backend.getChannel(ledgerId);
-    if (!data) {
-      throw new Error(`No channel found with channel id ${ledgerId}`);
-    }
-    const entry = new ChannelStoreEntry(data);
-    // This is not on the Store interface itself -- it is useful to set up a test store
-    await this.backend.setChannel(entry.channelId, entry.data());
-    const address = await this.getAddress();
-    const peerId = entry.participants.find(p => p.signingAddress !== address);
-    if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
-    else throw 'No peer';
-  }
+  public setLedger = (ledgerId: string) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.ledgers, ObjectStores.channels],
+      async () => {
+        const data = await this.backend.getChannel(ledgerId);
+        if (!data) {
+          throw new Error(`No channel found with channel id ${ledgerId}`);
+        }
+        const entry = new ChannelStoreEntry(data);
+        // This is not on the Store interface itself -- it is useful to set up a test store
+        await this.backend.setChannel(entry.channelId, entry.data());
+        const address = await this.getAddress();
+        const peerId = entry.participants.find(p => p.signingAddress !== address);
+        if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
+        else throw 'No peer';
+      }
+    );
 
   public async createChannel(
     participants: Participant[],
@@ -371,30 +373,32 @@ export class XstateStore implements Store {
   }
 
   public signAndAddState = (channelId: string, stateVars: StateVariables) =>
-    this.withLock(channelId, () => this._signAndAddState(channelId, stateVars));
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.channels, ObjectStores.privateKeys],
+      async () => {
+        const channelData = await this.backend.getChannel(channelId);
+        if (!channelData) {
+          throw new Error('Channel not found');
+        }
+        const channelStorage = new ChannelStoreEntry(channelData);
 
-  private async _signAndAddState(channelId: string, stateVars: StateVariables) {
-    const channelData = await this.backend.getChannel(channelId);
-    if (!channelData) {
-      throw new Error('Channel not found');
-    }
-    const channelStorage = new ChannelStoreEntry(channelData);
+        const {participants} = channelStorage;
+        const myAddress = participants[channelStorage.myIndex].signingAddress;
+        const privateKey = await this.backend.getPrivateKey(myAddress);
 
-    const {participants} = channelStorage;
-    const myAddress = participants[channelStorage.myIndex].signingAddress;
-    const privateKey = await this.backend.getPrivateKey(myAddress);
-
-    if (!privateKey) {
-      throw new Error('No longer have private key');
-    }
-    const signedState = channelStorage.signAndAdd(
-      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
-      privateKey
+        if (!privateKey) {
+          throw new Error('No longer have private key');
+        }
+        const signedState = channelStorage.signAndAdd(
+          _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
+          privateKey
+        );
+        await this.backend.setChannel(channelId, channelStorage.data());
+        this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+        this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+      }
     );
-    await this.backend.setChannel(channelId, channelStorage.data());
-    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
-    this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-  }
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
@@ -406,32 +410,24 @@ export class XstateStore implements Store {
     }
   }
 
-  private channelLock = new AsyncLock();
-  private async withLock<T>(channelId: string, fn: (...args: any[]) => T | Promise<T>): Promise<T> {
-    return await this.channelLock.acquire(channelId, async release => {
-      try {
-        return await fn();
-      } finally {
-        release();
-      }
-    });
-  }
-
   public addState = (state: SignedState) =>
-    this.withLock(calculateChannelId(state), () => this._addState(state));
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
+      async () => {
+        const channelId = calculateChannelId(state);
+        const channelData =
+          (await this.backend.getChannel(channelId)) ||
+          (await this.initializeChannel(state)).data();
+        const memoryChannelStorage = new ChannelStoreEntry(channelData);
+        // TODO: This is kind of awkward
+        state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
 
-  private async _addState(state: SignedState): Promise<ChannelStoreEntry> {
-    const channelId = calculateChannelId(state);
-    const channelData =
-      (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state)).data();
-    const memoryChannelStorage = new ChannelStoreEntry(channelData);
-    // TODO: This is kind of awkward
-    state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
-
-    await this.backend.setChannel(channelId, memoryChannelStorage.data());
-    this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
-    return memoryChannelStorage;
-  }
+        await this.backend.setChannel(channelId, memoryChannelStorage.data());
+        this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
+        return memoryChannelStorage;
+      }
+    );
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
