@@ -9,7 +9,7 @@ import {Contract} from 'ethers';
 import {Zero, One} from 'ethers/constants';
 import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
 import {Observable, fromEvent, from, merge} from 'rxjs';
-import {filter, map, flatMap} from 'rxjs/operators';
+import {filter, map, flatMap, finalize} from 'rxjs/operators';
 
 import EventEmitter = require('eventemitter3');
 
@@ -17,6 +17,7 @@ import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/st
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import {BaseProvider} from 'ethers/providers';
 
 const EthAssetHolderInterface = new Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -62,6 +63,9 @@ type Updated = ChannelChainInfo & {channelId: string};
 type ChallengeRegistered = {channelId: string; challengeState: State; challengeExpiry: BigNumber};
 // type ChallengeCleared = {channelId: string};
 // type Concluded = {channelId: string};
+
+const ETHERS_REGULAR_POLLING_INTERVAL = 4000;
+const ETHERS_QUICK_POLLING_INTERVAL = 50;
 
 export class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
@@ -235,6 +239,24 @@ export class ChainWatcher implements Chain {
   private _assetHolders: Contract[];
   private mySelectedAddress: string | null;
 
+  private enableQuickPolling() {
+    if (this._adjudicator) {
+      (this._adjudicator.provider as BaseProvider).pollingInterval = ETHERS_QUICK_POLLING_INTERVAL;
+    }
+    this._assetHolders.forEach(
+      a => ((a.provider as BaseProvider).pollingInterval = ETHERS_QUICK_POLLING_INTERVAL)
+    );
+  }
+  private disableQuickPolling() {
+    if (this._adjudicator) {
+      (this._adjudicator
+        .provider as BaseProvider).pollingInterval = ETHERS_REGULAR_POLLING_INTERVAL;
+    }
+    this._assetHolders.forEach(
+      a => ((a.provider as BaseProvider).pollingInterval = ETHERS_REGULAR_POLLING_INTERVAL)
+    );
+  }
+
   public async initialize() {
     const provider = getProvider();
     const signer = provider.getSigner();
@@ -370,7 +392,10 @@ export class ChainWatcher implements Chain {
     if (!this._assetHolders[0] && !this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
-
+    // Ethers.JS has a default polling interval of 4 seconds which can be a bit long
+    // When someone subscribes to the chainUpdatedFeed we lower the poll value
+    // so the events are detected quicker
+    this.enableQuickPolling();
     const first = from(this.getChainInfo(channelId));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
@@ -404,7 +429,12 @@ export class ChainWatcher implements Chain {
       map(({chainInfo}) => ({channelId, ...chainInfo}))
     );
 
-    return merge(first, depositEvents, assetTransferEvents);
+    return merge(first, depositEvents, assetTransferEvents).pipe(
+      finalize(() => {
+        // Once the observable is done we can reset the polling to the 4 second default
+        this.disableQuickPolling();
+      })
+    );
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
