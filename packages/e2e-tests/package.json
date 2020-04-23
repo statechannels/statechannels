@@ -42,7 +42,6 @@
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
     "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
-    "test:ci": "yarn run test",
     "test:show": "HEADLESS=false yarn run test",
     "test:e2e": "sh ./scripts/e2e.sh"
   }

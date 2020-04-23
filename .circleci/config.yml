@@ -260,7 +260,7 @@ jobs:
       - run:
           command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
-      - run: (cd packages/e2e-tests && yarn test:ci puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -355,7 +355,7 @@ jobs:
       - run:
           command: (cd packages/simple-hub && yarn run wait-on ../../.ganache-deployments && yarn hub:watch)
           background: true
-      - run: (cd packages/e2e-tests && yarn test:ci puppeteer/__tests__/web3torrent/)
+      - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
