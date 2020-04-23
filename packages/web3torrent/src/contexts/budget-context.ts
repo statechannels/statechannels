@@ -11,7 +11,7 @@ export function useBudgetContext({initializationContext}) {
 
   const [fetching, setFetching] = useState(true);
 
-  const {initialize, isInitialized} = initializationContext;
+  const {initialize, isInitialized, isInitializing} = initializationContext;
 
   useEffect(() => {
     if (!isInitialized) {
@@ -22,13 +22,13 @@ export function useBudgetContext({initializationContext}) {
   useEffect(() => {
     const getAndSetBudget = async () => {
       await paymentChannelClient.getBudget();
-
       setFetching(false);
     };
-
-    getAndSetBudget();
+    if (isInitialized) {
+      getAndSetBudget();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitialized]);
+  }, [isInitialized, isInitializing]);
 
   const createBudget = async () => {
     setFetching(true);
