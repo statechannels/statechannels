@@ -189,18 +189,18 @@ export interface DBBackend {
    *
    * @param mode
    * @param stores array of ObjectStore names usd in cb
-   * @param cb callback to execute within transaction.
+   * @param cb callback to execute within transaction scope
    * @returns promise resolving to return value of cb
    */
   transaction<T, S extends ObjectStores>(
-    mode: 'readonly' | 'readwrite',
+    mode: TXMode,
     stores: S[],
     cb: (tx: Transaction) => Promise<T>
   ): Promise<T>;
 }
 
 export type Transaction = {
-  abort(): Promise<void>;
+  abort(): void;
   // TODO: We could expose a store function on the transaction and
   // potentially do away with the individual getters on the backend interface
   // EG:
@@ -208,6 +208,8 @@ export type Transaction = {
   // Or, we could just expose direct properties, like
   // channels(): Table<ChannelRecord>
 };
+
+export type TXMode = 'readonly' | 'readwrite';
 
 export const enum ObjectStores {
   channels = 'channels',
