@@ -1,6 +1,5 @@
 import React, {useContext} from 'react';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {Web3TorrentContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
@@ -43,8 +42,6 @@ export const Budgets: React.FC<Props> = props => {
 };
 
 const CurrentBudget: React.FC<Props> = props => {
-
-  
   const {budget, fetching, createBudget} = useContext(BudgetContext);
   const budgetExists = !!budget && !_.isEmpty(budget);
   console.log(budget);

@@ -1,12 +1,12 @@
 import React, {useState, useContext, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
-import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
+
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
 import {Status, TorrentUI} from '../../types';
 import {useQuery} from '../../utils/url';
-import {getTorrentUI} from '../../utils/torrent-status-checker';
+
 import './File.scss';
 import {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
@@ -15,6 +15,7 @@ import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {BudgetContext} from '../../contexts/budget-context';
 import {ChannelContext} from '../../contexts/channel-context';
+import {TorrentContext} from '../../contexts/torrent-context';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -37,7 +38,6 @@ interface Props {
 }
 
 const File: React.FC<Props> = props => {
-  const web3Torrent = useContext(Web3TorrentContext);
   const {infoHash} = useParams();
   const queryParams = useQuery();
   const [loading, setLoading] = useState(false);
@@ -46,8 +46,9 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
+  const {getTorrentUI, download} = useContext(TorrentContext);
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
-    getTorrentUI(web3Torrent, {
+    getTorrentUI({
       infoHash,
       name: torrentName,
       length: torrentLength
@@ -70,7 +71,7 @@ const File: React.FC<Props> = props => {
       const cancelId = setTimeout(
         () =>
           setTorrent(
-            getTorrentUI(web3Torrent, {
+            getTorrentUI({
               infoHash,
               name: torrentName,
               length: torrentLength
@@ -81,7 +82,7 @@ const File: React.FC<Props> = props => {
       return () => clearTimeout(cancelId);
     }
     return undefined;
-  }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
+  }, [torrent, infoHash, torrentName, torrentLength, getTorrentUI]);
 
   const {channelState, mySigningAddress: me} = useContext(ChannelContext);
   const {budget} = useContext(BudgetContext);
@@ -116,7 +117,7 @@ const File: React.FC<Props> = props => {
               try {
                 await download(torrent.magnetURI);
                 setTorrent(
-                  getTorrentUI(web3Torrent, {
+                  getTorrentUI({
                     infoHash,
                     name: torrentName,
                     length: torrentLength

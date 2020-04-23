@@ -1,6 +1,4 @@
 import React, {useContext} from 'react';
-import {SiteBudget} from '@statechannels/client-api-schema';
-import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
