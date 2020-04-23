@@ -8,6 +8,7 @@ import {
   FundingStrategy
 } from '@statechannels/client-api-schema';
 import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
+import {ReplaySubject} from 'rxjs';
 
 export type UnsubscribeFunction = () => void;
 
@@ -22,7 +23,7 @@ export interface ChannelClientInterface {
   onBudgetUpdated: (callback: (result: SiteBudget) => void) => UnsubscribeFunction;
 
   provider: ChannelProviderInterface;
-
+  channelState: ReplaySubject<ChannelResult>;
   walletVersion?: string;
   signingAddress?: string;
   selectedAddress?: string;

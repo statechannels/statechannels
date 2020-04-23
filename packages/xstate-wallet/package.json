@@ -11,6 +11,7 @@
     "@statechannels/wire-format": "0.0.1",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
+    "dexie": "^2.0.4",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",
     "filter-async-rxjs-pipe": "0.1.5",
@@ -72,7 +73,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "npx webpack --config ./webpack-build.config.js",
+    "build": "webpack --config ./webpack-build.config.js",
     "build:ci": "yarn build",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
@@ -80,8 +81,8 @@
     "start": "node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
-    "test": "npx jest -c ./config/jest/jest.config.js",
-    "test:ci": "yarn test --ci && yarn test:with-chain",
-    "test:with-chain": "npx jest --runInBand -c ./config/jest/jest.with-chain.config.js --detectOpenHandles"
+    "test": "jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
+    "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js"
   }
 }

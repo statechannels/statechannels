@@ -16,10 +16,12 @@ import {
 } from '@statechannels/client-api-schema';
 import {HUB} from './constants';
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
+import {ReplaySubject} from 'rxjs';
 
 type TokenAllocations = Allocation[];
 
 export class ChannelClient implements ChannelClientInterface {
+  channelState: ReplaySubject<ChannelResult>;
   get signingAddress(): string | undefined {
     return this.provider.signingAddress;
   }
@@ -32,7 +34,10 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.walletVersion;
   }
 
-  constructor(readonly provider: ChannelProviderInterface) {}
+  constructor(readonly provider: ChannelProviderInterface) {
+    this.channelState = new ReplaySubject(1);
+    this.provider.on('ChannelUpdated', result => this.channelState.next(result));
+  }
 
   onMessageQueued(
     callback: (result: MessageQueuedNotification['params']) => void
