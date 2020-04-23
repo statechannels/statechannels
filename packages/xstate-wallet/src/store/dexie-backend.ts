@@ -143,9 +143,11 @@ export class Backend implements DBBackend {
   public async setPrivateKey(signingAddress: string, privateKey: string) {
     return this.put(ObjectStores.privateKeys, privateKey, signingAddress);
   }
+
   public async setChannel(key: string, value: ChannelStoredData) {
     return this.put(ObjectStores.channels, value, key);
   }
+
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
@@ -175,8 +177,7 @@ export class Backend implements DBBackend {
         return unreachable(mode);
     }
 
-    // FIXME: Add schema to database to make this type safe
-    const dexieStores = stores.map((store: S) => this._db[(store as unknown) as string]);
+    const dexieStores = stores.map((store: S) => this._db[store as string]);
 
     return this._db.transaction(dexieMode, dexieStores, cb);
   }
