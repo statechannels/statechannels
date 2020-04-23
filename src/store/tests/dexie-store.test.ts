@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
 import {XstateStore} from '../store';
-import {State, Objective, SiteBudget, AssetBudget} from '../types';
+import {State, Objective, SiteBudget, AssetBudget, ObjectStores} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, createSignatureEntry} from '../state-utils';
@@ -182,5 +182,76 @@ describe('getBudget', () => {
     const {availableReceiveCapacity, availableSendCapacity} = storedBudget?.forAsset
       .ETH as AssetBudget;
     expect(availableReceiveCapacity.add(availableSendCapacity).eq(15)).toBeTruthy();
+  });
+});
+
+const getBackend = (store: XstateStore) => (store as any).backend as Backend;
+
+describe.skip('transactions', () => {
+  // FIXME:
+  // These tests generally pass, but something is going wrong with the
+  // expectations on promise rejections
+  // expect(...).rejects.toThrow('someMessage')
+  // will fail if 'someMessage' is incorrect, but if it is correct, then
+  // 1. the test passes
+  // 2. either jest or dexie warns about an unhandled rejection
+  let backend: Backend;
+  beforeEach(async () => {
+    backend = getBackend(await aStore());
+  });
+
+  it('works', async () => {
+    const result = await backend.transaction('readwrite', [ObjectStores.ledgers], async () => {
+      await backend.setLedger('foo', 'bar');
+
+      return await backend.getLedger('foo');
+    });
+
+    expect(result).toEqual('bar');
+  });
+
+  it('throws when writing during a readwrite transaction', async () =>
+    // FIXME: this warns
+    //  console.warn ../../node_modules/dexie/dist/dexie.js:1267
+    // Unhandled rejection: ReadOnlyError: Transaction is readonly
+    expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        async () => await backend.setLedger('foo', 'bar')
+      )
+    ).rejects.toThrow('Transaction is readonly'));
+
+  it('throws when accessing stores not whitelisted', async () =>
+    expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        async () => await backend.getPrivateKey('foo')
+      )
+    ).rejects.toThrow('NotFoundError:'));
+
+  it('throws when aborted', async () =>
+    expect(
+      backend.transaction('readonly', [ObjectStores.ledgers], async tx => {
+        tx.abort();
+
+        return;
+      })
+    ).rejects.toThrow('Transaction committed too early.'));
+
+  it('throws when awaiting an external async call', async () => {
+    // FIXME: this passes when run in isolation,
+    // but fails otherwise
+    await expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        () =>
+          new Promise(resolve => {
+            setTimeout(resolve, 100);
+          })
+      )
+    ).rejects.toThrow('Transaction committed too early.');
   });
 });
