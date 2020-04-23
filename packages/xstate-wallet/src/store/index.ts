@@ -52,6 +52,8 @@ export function isGuarantees(funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
 export enum Errors {
+  channelMissing = 'No channel found with id.',
+  channelFunded = 'Channel already funded.',
   channelLocked = 'Channel is locked',
   noBudget = 'No budget exists for site. ',
   noAssetBudget = "This site's budget does contain this asset",
