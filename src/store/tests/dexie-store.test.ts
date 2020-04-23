@@ -188,7 +188,7 @@ describe('getBudget', () => {
 
 const getBackend = (store: XstateStore) => (store as any).backend as Backend;
 
-describe.skip('transactions', () => {
+describe('transactions', () => {
   // TODO:
   // These tests generally pass, but something is going wrong with the
   // expectations on promise rejections
@@ -196,6 +196,13 @@ describe.skip('transactions', () => {
   // will fail if 'someMessage' is incorrect, but if it is correct, then
   // 1. the test passes
   // 2. either jest or dexie warns about an unhandled rejection
+  let warner;
+  beforeAll(() => {
+    warner = console.warn;
+    console.warn = () => console.error('Suppressing fire');
+  });
+  afterAll(() => (console.warn = warner.bind(console)));
+
   let backend: Backend;
   beforeEach(async () => {
     backend = getBackend(await aStore());
@@ -212,9 +219,6 @@ describe.skip('transactions', () => {
   });
 
   it('throws when writing during a readwrite transaction', async () =>
-    // TODO: this warns
-    //  console.warn ../../node_modules/dexie/dist/dexie.js:1267
-    // Unhandled rejection: ReadOnlyError: Transaction is readonly
     expect(
       backend.transaction(
         'readonly',
@@ -232,7 +236,7 @@ describe.skip('transactions', () => {
       )
     ).rejects.toThrow('NotFoundError:'));
 
-  it('throws when aborted', async () =>
+  it('throws when aborted', () =>
     expect(
       backend.transaction('readonly', [ObjectStores.ledgers], async tx => {
         tx.abort();
@@ -241,10 +245,8 @@ describe.skip('transactions', () => {
       })
     ).rejects.toThrow('Transaction committed too early.'));
 
-  it('throws when awaiting an external async call', async () => {
-    // TODO: this passes when run in isolation,
-    // but fails otherwise
-    await expect(
+  it('throws when awaiting an external async call', () =>
+    expect(
       backend.transaction(
         'readonly',
         [ObjectStores.ledgers],
@@ -253,6 +255,5 @@ describe.skip('transactions', () => {
             setTimeout(resolve, 100);
           })
       )
-    ).rejects.toThrow('Transaction committed too early.');
-  });
+    ).rejects.toThrow('Transaction committed too early.'));
 });
