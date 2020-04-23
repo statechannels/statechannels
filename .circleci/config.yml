@@ -241,21 +241,9 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      # For multiple
-      NODE_ENV: test
-      # For shared-ganache
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
-      # For simple-hub
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
+      SC_ENV: circle-integration-w3t
       # For web3torrent
-      REACT_APP_FUNDING_STRATEGY: Direct
-      REACT_APP_LOG_DESTINATION: pino.log
-      # for xstate-wallet
-      LOG_DESTINATION: pino.log
-      # For e2e-test
-      BROWSER_LOG_DESTINATION: browser.log
+      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
     steps:
       - checkout
       - puppeteer/install
@@ -270,7 +258,7 @@ jobs:
           command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent/)
       - store_artifacts:
@@ -343,23 +331,11 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      # For multiple
-      NODE_ENV: development
-      # For shared-ganache
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
       # For simple-hub
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
       # For web3torrent
       REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      REACT_APP_FUNDING_STRATEGY: Virtual
-      REACT_APP_LOG_DESTINATION: pino.log
-      # for xstate-wallet
-      ADD_LOGS: true
-      LOG_DESTINATION: pino.log
-      # For e2e-test
-      BROWSER_LOG_DESTINATION: browser.log
+      SC_ENV: circle-integration-w3t-with-hub
     steps:
       - checkout
       - puppeteer/install

@@ -30,7 +30,7 @@ const {deploy} = require('../deployment/deploy');
 configureEnvVariables();
 
 void (async () => {
-  const {deployer} = await setupGanache();
+  const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
   const deployedArtifacts = await deploy(deployer);
 
   // We must edit .env.local since there is no easy programmatic way to inject

@@ -77,7 +77,7 @@ void (async () => {
     process.exit(1);
   }
 
-  const {deployer} = await setupGanache();
+  const {deployer} = await setupGanache(process.env.RPS_DEPLOYER_ACCOUNT_INDEX);
   const deployedArtifacts = await deploy(deployer);
 
   process.env = {...process.env, ...deployedArtifacts};

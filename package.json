@@ -3,7 +3,7 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.22",
+    "@statechannels/devtools": "0.1.23",
     "@types/prettier": "1.19.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
@@ -49,9 +49,9 @@
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
     "run:w3t": "lerna run start --scope=**/web3torrent",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
-    "test": "lerna run --stream --concurrency 8 test",
-    "test:ci": "lerna run  test:ci --stream --no-sort --include-dependents",
-    "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
+    "test": "lerna run test --stream --concurrency 8",
+    "test:ci": "lerna run test:ci --stream --no-sort --include-dependents",
+    "test:ci:incremental": "yarn test:ci --concurrency 3 --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent "
   },
   "workspaces": [

@@ -11,7 +11,7 @@
   "dependencies": {
     "@rimble/connection-banner": "1.2.3",
     "@statechannels/channel-client": "0.0.1",
-    "@statechannels/devtools": "0.1.22",
+    "@statechannels/devtools": "0.1.23",
     "bencode": "2.0.1",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",

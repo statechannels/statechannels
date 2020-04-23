@@ -59,7 +59,9 @@ async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> 
   return server;
 }
 
-export const setupGanache = async (): Promise<SharedReturnType | IndividualReturnType> => {
+export const setupGanache = async (
+  deployerAccountIndex: number
+): Promise<SharedReturnType | IndividualReturnType> => {
   const useShared = process.env.USE_GANACHE_DEPLOYMENT_CACHE === 'true';
   const port = Number(process.env.GANACHE_PORT || 8545);
 
@@ -108,7 +110,6 @@ export const setupGanache = async (): Promise<SharedReturnType | IndividualRetur
     }
     say(`Using the deployments cache at ${deploymentsFile}.`);
 
-    const deployerAccountIndex = Number(process.env.DEPLOYER_ACCOUNT_INDEX || 0);
     const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
 
     type = 'shared';

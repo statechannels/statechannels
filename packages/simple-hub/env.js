@@ -9,7 +9,27 @@ const fs = require('fs');
 const path = require('path');
 
 function configureEnvVariables(monorepo = true) {
+  // State Channel Environment
+  // Intended usage is a single file in monorepo root defining configuration for multiple packages
+  const SC_ENV = process.env.SC_ENV;
+  if (SC_ENV) {
+    const scEnvFile = path.join('../..', '.env.' + SC_ENV);
+    if (!fs.existsSync(scEnvFile)) {
+      throw new Error(`.env.${SC_ENV} must exist in the monorepo root`);
+    }
+
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    require('dotenv-expand')(
+      require('dotenv').config({
+        path: scEnvFile
+      })
+    );
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    return;
+  }
+
   const NODE_ENV = process.env.NODE_ENV;
+
   if (!NODE_ENV) {
     throw new Error('The NODE_ENV environment variable is required but was not specified.');
   }
