@@ -57,16 +57,16 @@
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "hub:start:dev": "NODE_ENV=development ts-node ./start-dev-server.ts",
     "hub:start:prod": "NODE_ENV=production ts-node ./src/server.ts",
-    "hub:test": "npx jest --runInBand -c ./jest/jest.config.js",
+    "hub:test": "jest --runInBand -c ./jest/jest.config.js",
     "hub:watch": "NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
-    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
-    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
+    "prettier:check": "prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "yarn hub:test"
+    "test:ci": "yarn hub:test --runInBand"
   }
 }
