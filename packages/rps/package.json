@@ -208,7 +208,7 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:ci:app": "yarn test:app --all --ci --runInBand  --bail",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
+    "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",
     "test:prepare": "yarn clearContracts && yarn contracts:compile"
   }
 }
