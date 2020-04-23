@@ -74,12 +74,6 @@ export class MemoryBackend implements DBBackend {
     this._channels[key] = value;
     return value;
   }
-  public async addChannel(key: string, value: ChannelStoredData) {
-    if (!this._channels[key]) {
-      this._channels[key] = value;
-    }
-    return value;
-  }
 
   public async getChannel(key: string) {
     if (!this._channels[key]) {
@@ -112,17 +106,6 @@ export class MemoryBackend implements DBBackend {
   public async setObjective(key: number, value: Objective) {
     this._objectives[key] = value;
     return value;
-  }
-
-  public async setReplaceObjectives(values: Objective[]) {
-    const newObjectives: Objective[] = [];
-    values.forEach(objective => {
-      if (!this._objectives.some(saved => _.isEqual(objective, saved))) {
-        this._objectives.push(objective);
-        newObjectives.push(objective);
-      }
-    });
-    return newObjectives;
   }
 
   public async getObjective(key: number) {
