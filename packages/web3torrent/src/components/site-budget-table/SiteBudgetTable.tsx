@@ -5,6 +5,7 @@ import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
 import {Web3TorrentContext} from '../../clients/web3torrent-client';
+import {useBudget} from '../../hooks/use-budget';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -35,6 +36,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
   const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
+  const {closeBudget} = useBudget();
   return (
     <Web3TorrentContext.Consumer>
       {web3Torrent => {
@@ -51,12 +53,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
               <tbody>
                 <tr className="budget-info">
                   <td className="budget-button">
-                    <button
-                      id="budget-withdraw"
-                      onClick={async () => {
-                        web3Torrent.paymentChannelClient.closeAndWithdraw();
-                      }}
-                    >
+                    <button id="budget-withdraw" onClick={closeBudget}>
                       Withdraw
                     </button>
                   </td>

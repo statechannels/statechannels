@@ -5,14 +5,14 @@ import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 import {defaultTrackers, INITIAL_BUDGET_AMOUNT} from '../constants';
 import _ from 'lodash';
-paymentChannelClient.initialize();
+
 export const web3torrent = new WebTorrentPaidStreamingClient({
   paymentChannelClient: paymentChannelClient,
   tracker: {announce: defaultTrackers}
 });
 
 export const Web3TorrentContext = React.createContext(web3torrent);
-export const budgetCacheContext = React.createContext(web3torrent.paymentChannelClient.budgetCache);
+
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 
 const doesBudgetExist = async (): Promise<boolean> => {

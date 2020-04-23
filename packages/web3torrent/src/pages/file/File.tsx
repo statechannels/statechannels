@@ -13,6 +13,7 @@ import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
+import {useBudget} from '../../hooks/use-budget';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -81,13 +82,12 @@ const File: React.FC<Props> = props => {
     return undefined;
   }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
 
-  const {channelCache, budgetCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
+  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
+
+  const {budget} = useBudget();
   // TODO: We shouldn't have to check all these different conditions
   const showBudget =
-    !!budgetCache &&
-    !_.isEmpty(budgetCache) &&
-    !!budgetCache.budgets &&
-    budgetCache.budgets.length > 0;
+    !!budget && !_.isEmpty(budget) && !!budget.budgets && budget.budgets.length > 0;
 
   return (
     <section className="section fill download">
@@ -104,11 +104,7 @@ const File: React.FC<Props> = props => {
         )}
       <br />
       {showBudget && (
-        <SiteBudgetTable
-          budgetCache={budgetCache}
-          channelCache={channelCache}
-          mySigningAddress={me}
-        />
+        <SiteBudgetTable budgetCache={budget} channelCache={channelCache} mySigningAddress={me} />
       )}
       {torrent.status === Status.Idle && (
         <>
