@@ -11,7 +11,7 @@
     "@statechannels/wire-format": "0.0.1",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
-    "dexie": "^2.0.4",
+    "dexie": "^3.0.0-rc.7",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",
     "filter-async-rxjs-pipe": "0.1.5",
