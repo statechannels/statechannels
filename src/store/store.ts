@@ -181,8 +181,7 @@ export class XstateStore implements Store {
     );
 
     const currentEntry = from(this.backend.getChannel(channelId)).pipe(
-      filter<ChannelStoredData>(c => !!c),
-      map(c => new ChannelStoreEntry(c))
+      filter<ChannelStoreEntry>(c => !!c)
     );
 
     return merge(currentEntry, newEntries);
@@ -228,13 +227,8 @@ export class XstateStore implements Store {
 
   public setFunding = (channelId: string, funding: Funding) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
-      const channelData = await this.backend.getChannel(channelId);
-      if (!channelData) {
-        logger.error('Channel %s not found', channelId);
-        throw Error(Errors.channelMissing);
-      }
+      const channelEntry = await this.getEntry(channelId);
 
-      const channelEntry = new ChannelStoreEntry(channelData);
       if (channelEntry.funding) {
         logger.error({funding: channelEntry.funding}, 'Channel %s already funded', channelId);
         throw Error(Errors.channelFunded);
@@ -304,11 +298,8 @@ export class XstateStore implements Store {
       'readwrite',
       [ObjectStores.ledgers, ObjectStores.channels],
       async () => {
-        const data = await this.backend.getChannel(ledgerId);
-        if (!data) {
-          throw new Error(`No channel found with channel id ${ledgerId}`);
-        }
-        const entry = new ChannelStoreEntry(data);
+        const entry = await this.getEntry(ledgerId);
+
         // This is not on the Store interface itself -- it is useful to set up a test store
         await this.backend.setChannel(entry.channelId, entry.data());
         const address = await this.getAddress();
@@ -381,24 +372,20 @@ export class XstateStore implements Store {
       'readwrite',
       [ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
-        const channelData = await this.backend.getChannel(channelId);
-        if (!channelData) {
-          throw new Error('Channel not found');
-        }
-        const channelStorage = new ChannelStoreEntry(channelData);
+        const entry = await this.getEntry(channelId);
 
-        const {participants} = channelStorage;
-        const myAddress = participants[channelStorage.myIndex].signingAddress;
+        const {participants} = entry;
+        const myAddress = participants[entry.myIndex].signingAddress;
         const privateKey = await this.backend.getPrivateKey(myAddress);
 
         if (!privateKey) {
           throw new Error('No longer have private key');
         }
-        const signedState = channelStorage.signAndAdd(
+        const signedState = entry.signAndAdd(
           _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
           privateKey
         );
-        await this.backend.setChannel(channelId, channelStorage.data());
+        await this.backend.setChannel(channelId, entry.data());
         this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
       }
@@ -420,10 +407,8 @@ export class XstateStore implements Store {
       [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
       async () => {
         const channelId = calculateChannelId(state);
-        const channelData =
-          (await this.backend.getChannel(channelId)) ||
-          (await this.initializeChannel(state)).data();
-        const memoryChannelStorage = new ChannelStoreEntry(channelData);
+        const memoryChannelStorage =
+          (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
         // TODO: This is kind of awkward
         state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
 
@@ -449,12 +434,13 @@ export class XstateStore implements Store {
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    const data = await this.backend.getChannel(channelId);
-    if (!data) {
-      throw Error('Channel id not found');
+    const entry = await this.backend.getChannel(channelId);
+    if (!entry) {
+      logger.error('Channel %s not found', channelId);
+      throw Error(Errors.channelMissing);
     }
 
-    return new ChannelStoreEntry(data);
+    return entry;
   }
 
   public createBudget = (budget: SiteBudget) =>

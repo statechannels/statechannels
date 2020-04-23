@@ -1,7 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 import {Funding} from './store';
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
-import {SignatureEntry} from './channel-store-entry';
+import {SignatureEntry, ChannelStoreEntry} from './channel-store-entry';
 
 export interface SiteBudget {
   domain: string;
@@ -162,7 +162,7 @@ export interface DBBackend {
   getPrivateKey(key: string): Promise<string | undefined>;
 
   setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
-  getChannel(key: string): Promise<ChannelStoredData | undefined>;
+  getChannel(key: string): Promise<ChannelStoreEntry | undefined>;
 
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
