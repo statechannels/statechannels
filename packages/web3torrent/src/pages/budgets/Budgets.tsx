@@ -1,14 +1,11 @@
 import React, {useContext, useState, useEffect} from 'react';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {
-  Web3TorrentContext,
-  web3torrent,
-  budgetCacheContext
-} from '../../clients/web3torrent-client';
+import {Web3TorrentContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
 import {INITIAL_BUDGET_AMOUNT} from '../../constants';
+import {useBudget} from '../../hooks/use-budget';
 
 interface Props {
   ready: boolean;
@@ -48,37 +45,19 @@ export const Budgets: React.FC<Props> = props => {
 
 const CurrentBudget: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
-  const budgetCache = useContext(budgetCacheContext);
+
   const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
-  const [budgetFetched, setBudgetFetched] = useState(false);
-
-  useEffect(() => {
-    web3Torrent.paymentChannelClient.getBudget().then(() => {
-      console.log(web3Torrent.paymentChannelClient.budgetCache);
-      console.log(budgetCache);
-      setBudgetFetched(true);
-    });
-  });
-  const budgetExists = !!budgetCache && !_.isEmpty(budgetCache);
-  console.log(budgetExists);
-  console.log(budgetCache);
-
-  const createBudget = async () => {
-    await web3Torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
-  };
+  const {budget, loading, createBudget} = useBudget();
+  const budgetExists = !!budget && !_.isEmpty(budget);
 
   return (
     <section className="section fill download">
       <h1>Your current budget</h1>
-      {!budgetFetched && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
-      {budgetFetched && budgetExists && (
-        <SiteBudgetTable
-          budgetCache={budgetCache}
-          channelCache={channelCache}
-          mySigningAddress={me}
-        />
+      {loading && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
+      {!loading && budgetExists && (
+        <SiteBudgetTable budgetCache={budget} channelCache={channelCache} mySigningAddress={me} />
       )}
-      {budgetFetched && !budgetExists && (
+      {!loading && !budgetExists && (
         <div>
           <div>You don't have a budget yet!</div>
           <FormButton name="create-budget" disabled={!props.ready} onClick={createBudget}>
