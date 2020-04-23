@@ -152,21 +152,21 @@ export class XstateStore implements Store {
     }
   }
 
-  public async initialize(privateKeys?: string[], cleanSlate = false) {
+  public initialize = async (privateKeys?: string[], cleanSlate = false) => {
     await this.backend.initialize(cleanSlate);
 
-    if (privateKeys && privateKeys.length > 0) {
-      // load existing keys
-      privateKeys.forEach(async key => {
-        const wallet = new Wallet(key);
-        await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
-      });
-    } else if (!(await this.getAddress())) {
-      // generate the first private key
-      const wallet = Wallet.createRandom();
-      await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
-    }
-  }
+    await this.backend.transaction('readwrite', [ObjectStores.privateKeys], async () => {
+      if (!privateKeys?.length && !(await this.getAddress())) {
+        // generate the first private key
+        const {privateKey} = Wallet.createRandom();
+        privateKeys = [privateKey];
+      }
+
+      await Promise.all(
+        privateKeys?.map(pk => this.backend.setPrivateKey(new Wallet(pk).address, pk)) || []
+      );
+    });
+  };
 
   public async getBudget(site: string): Promise<SiteBudget | undefined> {
     return this.backend.getBudget(site);
@@ -198,32 +198,37 @@ export class XstateStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(
+  private initializeChannel = (
     state: State,
     applicationSite?: string
-  ): Promise<ChannelStoreEntry> {
-    const addresses = state.participants.map(x => x.signingAddress);
-    const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-    if (myIndex === -1) {
-      throw new Error("Couldn't find the signing key for any participant in wallet.");
-    }
+  ): Promise<ChannelStoreEntry> =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
+      async () => {
+        const addresses = state.participants.map(x => x.signingAddress);
+        const privateKeys = await this.backend.privateKeys();
+        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+        if (myIndex === -1) {
+          throw new Error("Couldn't find the signing key for any participant in wallet.");
+        }
 
-    const channelId = calculateChannelId(state);
+        const channelId = calculateChannelId(state);
 
-    // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
-    await this.setNonce(addresses, state.channelNonce);
+        // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
+        await this.setNonce(addresses, state.channelNonce);
 
-    const data: ChannelStoredData = {
-      channelConstants: state,
-      stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
-      myIndex,
-      funding: undefined,
-      applicationSite
-    };
-    await this.backend.setChannel(channelId, data);
-    return new ChannelStoreEntry(data);
-  }
+        const data: ChannelStoredData = {
+          channelConstants: state,
+          stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
+          myIndex,
+          funding: undefined,
+          applicationSite
+        };
+        await this.backend.setChannel(channelId, data);
+        return new ChannelStoreEntry(data);
+      }
+    );
 
   public setFunding = (channelId: string, funding: Funding) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
@@ -309,42 +314,47 @@ export class XstateStore implements Store {
       }
     );
 
-  public async createChannel(
+  public createChannel = (
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero,
     applicationSite?: string
-  ): Promise<ChannelStoreEntry> {
-    const addresses = participants.map(x => x.signingAddress);
-    const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-    if (myIndex === -1) {
-      throw new Error("Couldn't find the signing key for any participant in wallet.");
-    }
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
+      async () => {
+        const addresses = participants.map(x => x.signingAddress);
+        const privateKeys = await this.backend.privateKeys();
+        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+        if (myIndex === -1) {
+          throw new Error("Couldn't find the signing key for any participant in wallet.");
+        }
 
-    const channelNonce = (await this.getNonce(addresses)).add(1);
-    const chainId = NETWORK_ID;
+        const channelNonce = (await this.getNonce(addresses)).add(1);
+        const chainId = NETWORK_ID;
 
-    const entry = await this.initializeChannel(
-      {
-        chainId,
-        challengeDuration,
-        channelNonce,
-        participants,
-        appDefinition,
-        ...stateVars
-      },
-      applicationSite
+        const entry = await this.initializeChannel(
+          {
+            chainId,
+            challengeDuration,
+            channelNonce,
+            participants,
+            appDefinition,
+            ...stateVars
+          },
+          applicationSite
+        );
+        // sign the state, store the channel
+        await this.signAndAddState(
+          entry.channelId,
+          _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
+        );
+
+        return entry;
+      }
     );
-    // sign the state, store the channel
-    await this.signAndAddState(
-      entry.channelId,
-      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
-    );
-
-    return entry;
-  }
   private async getNonce(addresses: string[]): Promise<BigNumber> {
     const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
     return nonce || bigNumberify(-1);
@@ -411,7 +421,6 @@ export class XstateStore implements Store {
           (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
         // TODO: This is kind of awkward
         state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
-
         await this.backend.setChannel(channelId, memoryChannelStorage.data());
         this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
         return memoryChannelStorage;
@@ -424,13 +433,8 @@ export class XstateStore implements Store {
   }
 
   async pushMessage(message: Message) {
-    const {signedStates, objectives} = message;
-    if (signedStates) {
-      // todo: check sig
-      // todo: check the channel involves me
-      await Promise.all(signedStates.map(signedState => this.addState(signedState)));
-    }
-    objectives?.map(o => this.addObjective(o, false));
+    await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
+    message.objectives?.map(o => this.addObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
