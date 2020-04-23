@@ -2,20 +2,21 @@ import {web3torrent} from '../clients/web3torrent-client';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 import {SiteBudget} from '@statechannels/client-api-schema';
-import {useChannelClient} from './use-channel-client';
+import {useChannelClientContext} from './channel-context';
 
-export function useBudget() {
+export type BudgetContext = ReturnType<typeof useBudgetContext>;
+
+export function useBudgetContext({channelClientContext}) {
   const {paymentChannelClient} = web3torrent;
 
   const [budget, setBudget] = useState<SiteBudget | undefined>(undefined);
   const [fetching, setFetching] = useState(true);
 
-  const {initialize, isInitialized} = useChannelClient();
+  const {initialize, isInitialized} = useChannelClientContext();
   initialize();
   useEffect(() => {
     const getAndSetBudget = async () => {
       const budget = await paymentChannelClient.getBudget();
-      console.log(budget);
       setBudget(budget);
       setFetching(false);
     };

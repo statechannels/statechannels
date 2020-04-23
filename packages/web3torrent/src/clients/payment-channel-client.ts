@@ -342,13 +342,11 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(): Promise<SiteBudget | {}> {
-    const result = await this.channelClient.closeAndWithdraw(
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    // TODO: Returns success:true
+    await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
 
-    this.budgetCache = _.isEmpty(result) ? undefined : result;
-    return this.budgetCache;
+    this.budgetCache = undefined;
+    return this.budgetCache || {};
   }
 }
 

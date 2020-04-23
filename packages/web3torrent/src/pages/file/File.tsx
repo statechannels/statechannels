@@ -13,7 +13,7 @@ import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
-import {useBudget} from '../../hooks/use-budget';
+import {GlobalContext} from '../../contexts/global-context';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -84,7 +84,7 @@ const File: React.FC<Props> = props => {
 
   const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
 
-  const {budget} = useBudget();
+  const {budget} = useContext(GlobalContext).budgets;
   // TODO: We shouldn't have to check all these different conditions
   const showBudget =
     !!budget && !_.isEmpty(budget) && !!budget.budgets && budget.budgets.length > 0;

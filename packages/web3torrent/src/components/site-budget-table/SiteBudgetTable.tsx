@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {SiteBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
 import {Web3TorrentContext} from '../../clients/web3torrent-client';
-import {useBudget} from '../../hooks/use-budget';
+import {GlobalContext} from '../../contexts/global-context';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -36,7 +36,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
   const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
-  const {closeBudget} = useBudget();
+  const {closeBudget} = useContext(GlobalContext).budgets;
   return (
     <Web3TorrentContext.Consumer>
       {web3Torrent => {
