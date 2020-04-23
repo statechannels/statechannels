@@ -188,7 +188,7 @@ describe('getBudget', () => {
 const getBackend = (store: XstateStore) => (store as any).backend as Backend;
 
 describe.skip('transactions', () => {
-  // FIXME:
+  // TODO:
   // These tests generally pass, but something is going wrong with the
   // expectations on promise rejections
   // expect(...).rejects.toThrow('someMessage')
@@ -211,7 +211,7 @@ describe.skip('transactions', () => {
   });
 
   it('throws when writing during a readwrite transaction', async () =>
-    // FIXME: this warns
+    // TODO: this warns
     //  console.warn ../../node_modules/dexie/dist/dexie.js:1267
     // Unhandled rejection: ReadOnlyError: Transaction is readonly
     expect(
@@ -241,7 +241,7 @@ describe.skip('transactions', () => {
     ).rejects.toThrow('Transaction committed too early.'));
 
   it('throws when awaiting an external async call', async () => {
-    // FIXME: this passes when run in isolation,
+    // TODO: this passes when run in isolation,
     // but fails otherwise
     await expect(
       backend.transaction(
