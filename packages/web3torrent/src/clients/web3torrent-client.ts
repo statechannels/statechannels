@@ -1,4 +1,3 @@
-import React from 'react';
 import {WebTorrentAddInput, WebTorrentSeedInput, ExtendedTorrent} from '../library/types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status} from '../types';
@@ -10,8 +9,6 @@ export const web3torrent = new WebTorrentPaidStreamingClient({
   paymentChannelClient: paymentChannelClient,
   tracker: {announce: defaultTrackers}
 });
-
-export const Web3TorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 

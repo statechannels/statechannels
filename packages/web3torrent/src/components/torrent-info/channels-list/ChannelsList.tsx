@@ -3,11 +3,12 @@ import prettier from 'prettier-bytes';
 import React, {useContext} from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
-import {Web3TorrentContext} from '../../../clients/web3torrent-client';
+
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
+import {ChannelContext} from '../../../contexts/channel-context';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -76,7 +77,7 @@ function channelIdToTableRow(
 }
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, participantType}) => {
-  const context = useContext(Web3TorrentContext);
+  const {challengeChannel} = useContext(ChannelContext);
   const channelsInfo = _.keys(channels).sort(
     (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
   );
@@ -96,13 +97,7 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, part
         )}
         <tbody>
           {channelsInfo.map(id =>
-            channelIdToTableRow(
-              id,
-              channels,
-              torrent,
-              participantType,
-              context.paymentChannelClient.challengeChannel
-            )
+            channelIdToTableRow(id, channels, torrent, participantType, challengeChannel)
           )}
         </tbody>
       </table>

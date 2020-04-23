@@ -17,6 +17,7 @@ export function useChannelContext({initializationContext}) {
 
   return {
     channelState: paymentChannelClient.channelCache,
-    mySigningAddress: paymentChannelClient.mySigningAddress
+    mySigningAddress: paymentChannelClient.mySigningAddress,
+    challengeChannel: paymentChannelClient.challengeChannel
   };
 }
