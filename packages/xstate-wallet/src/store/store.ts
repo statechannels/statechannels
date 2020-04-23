@@ -6,7 +6,6 @@ import {Guid} from 'guid-typescript';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {Wallet} from 'ethers';
 import * as _ from 'lodash';
-import AsyncLock from 'async-lock';
 
 import {Chain, FakeChain} from '../chain';
 import {NETWORK_ID, HUB} from '../constants';
@@ -25,8 +24,10 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables
+  StateVariables,
+  ObjectStores
 } from './types';
+import {logger} from '../logger';
 
 interface DirectFunding {
   type: 'Direct';
@@ -151,21 +152,21 @@ export class XstateStore implements Store {
     }
   }
 
-  public async initialize(privateKeys?: string[], cleanSlate = false) {
+  public initialize = async (privateKeys?: string[], cleanSlate = false) => {
     await this.backend.initialize(cleanSlate);
 
-    if (privateKeys && privateKeys.length > 0) {
-      // load existing keys
-      privateKeys.forEach(async key => {
-        const wallet = new Wallet(key);
-        await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
-      });
-    } else if (!(await this.getAddress())) {
-      // generate the first private key
-      const wallet = Wallet.createRandom();
-      await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
-    }
-  }
+    await this.backend.transaction('readwrite', [ObjectStores.privateKeys], async () => {
+      if (!privateKeys?.length && !(await this.getAddress())) {
+        // generate the first private key
+        const {privateKey} = Wallet.createRandom();
+        privateKeys = [privateKey];
+      }
+
+      await Promise.all(
+        privateKeys?.map(pk => this.backend.setPrivateKey(new Wallet(pk).address, pk)) || []
+      );
+    });
+  };
 
   public async getBudget(site: string): Promise<SiteBudget | undefined> {
     return this.backend.getBudget(site);
@@ -180,8 +181,7 @@ export class XstateStore implements Store {
     );
 
     const currentEntry = from(this.backend.getChannel(channelId)).pipe(
-      filter<ChannelStoredData>(c => !!c),
-      map(c => new ChannelStoreEntry(c))
+      filter<ChannelStoreEntry>(c => !!c)
     );
 
     return merge(currentEntry, newEntries);
@@ -198,48 +198,50 @@ export class XstateStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(
+  private initializeChannel = (
     state: State,
     applicationSite?: string
-  ): Promise<ChannelStoreEntry> {
-    const addresses = state.participants.map(x => x.signingAddress);
-    const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-    if (myIndex === -1) {
-      throw new Error("Couldn't find the signing key for any participant in wallet.");
-    }
+  ): Promise<ChannelStoreEntry> =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
+      async () => {
+        const addresses = state.participants.map(x => x.signingAddress);
+        const privateKeys = await this.backend.privateKeys();
+        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+        if (myIndex === -1) {
+          throw new Error("Couldn't find the signing key for any participant in wallet.");
+        }
 
-    const channelId = calculateChannelId(state);
+        const channelId = calculateChannelId(state);
 
-    // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
-    await this.setNonce(addresses, state.channelNonce);
+        // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
+        await this.setNonce(addresses, state.channelNonce);
 
-    const data: ChannelStoredData = {
-      channelConstants: state,
-      stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
-      myIndex,
-      funding: undefined,
-      applicationSite
-    };
-    await this.backend.setChannel(channelId, data);
-    return new ChannelStoreEntry(data);
-  }
+        const data: ChannelStoredData = {
+          channelConstants: state,
+          stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
+          myIndex,
+          funding: undefined,
+          applicationSite
+        };
+        await this.backend.setChannel(channelId, data);
+        return new ChannelStoreEntry(data);
+      }
+    );
 
   public setFunding = (channelId: string, funding: Funding) =>
-    this.withLock(channelId, () => this._setFunding(channelId, funding));
+    this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
+      const channelEntry = await this.getEntry(channelId);
 
-  private async _setFunding(channelId: string, funding: Funding): Promise<void> {
-    const channelData = await this.backend.getChannel(channelId);
-    if (!channelData) {
-      throw new Error(`No channel for ${channelId}`);
-    }
-    const channelEntry = new ChannelStoreEntry(channelData);
-    if (channelEntry.funding) {
-      throw `Channel ${channelId} already funded`;
-    }
-    channelEntry.setFunding(funding);
-    await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
-  }
+      if (channelEntry.funding) {
+        logger.error({funding: channelEntry.funding}, 'Channel %s already funded', channelId);
+        throw Error(Errors.channelFunded);
+      }
+      channelEntry.setFunding(funding);
+
+      await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
+    });
 
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
     const lock = this._channelLocks[channelId];
@@ -288,7 +290,7 @@ export class XstateStore implements Store {
   }
 
   public setApplicationSite = (channelId: string, applicationSite: string) =>
-    this.withLock(channelId, async () => {
+    this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const entry = await this.getEntry(channelId);
 
       if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
@@ -296,58 +298,63 @@ export class XstateStore implements Store {
       await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
     });
 
-  public setLedger = (ledgerId: string) => this.withLock(ledgerId, () => this._setLedger(ledgerId));
+  public setLedger = (ledgerId: string) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.ledgers, ObjectStores.channels],
+      async () => {
+        const entry = await this.getEntry(ledgerId);
 
-  private async _setLedger(ledgerId: string) {
-    const data = await this.backend.getChannel(ledgerId);
-    if (!data) {
-      throw new Error(`No channel found with channel id ${ledgerId}`);
-    }
-    const entry = new ChannelStoreEntry(data);
-    // This is not on the Store interface itself -- it is useful to set up a test store
-    await this.backend.setChannel(entry.channelId, entry.data());
-    const address = await this.getAddress();
-    const peerId = entry.participants.find(p => p.signingAddress !== address);
-    if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
-    else throw 'No peer';
-  }
+        // This is not on the Store interface itself -- it is useful to set up a test store
+        await this.backend.setChannel(entry.channelId, entry.data());
+        const address = await this.getAddress();
+        const peerId = entry.participants.find(p => p.signingAddress !== address);
+        if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
+        else throw 'No peer';
+      }
+    );
 
-  public async createChannel(
+  public createChannel = (
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero,
     applicationSite?: string
-  ): Promise<ChannelStoreEntry> {
-    const addresses = participants.map(x => x.signingAddress);
-    const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-    if (myIndex === -1) {
-      throw new Error("Couldn't find the signing key for any participant in wallet.");
-    }
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
+      async () => {
+        const addresses = participants.map(x => x.signingAddress);
+        const privateKeys = await this.backend.privateKeys();
+        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+        if (myIndex === -1) {
+          throw new Error("Couldn't find the signing key for any participant in wallet.");
+        }
 
-    const channelNonce = (await this.getNonce(addresses)).add(1);
-    const chainId = NETWORK_ID;
+        const channelNonce = (await this.getNonce(addresses)).add(1);
+        const chainId = NETWORK_ID;
 
-    const entry = await this.initializeChannel(
-      {
-        chainId,
-        challengeDuration,
-        channelNonce,
-        participants,
-        appDefinition,
-        ...stateVars
-      },
-      applicationSite
+        const entry = await this.initializeChannel(
+          {
+            chainId,
+            challengeDuration,
+            channelNonce,
+            participants,
+            appDefinition,
+            ...stateVars
+          },
+          applicationSite
+        );
+        // sign the state, store the channel
+        await this.signAndAddState(
+          entry.channelId,
+          _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
+        );
+
+        return entry;
+      }
     );
-    // sign the state, store the channel
-    await this.signAndAddState(
-      entry.channelId,
-      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
-    );
-
-    return entry;
-  }
   private async getNonce(addresses: string[]): Promise<BigNumber> {
     const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
     return nonce || bigNumberify(-1);
@@ -371,30 +378,28 @@ export class XstateStore implements Store {
   }
 
   public signAndAddState = (channelId: string, stateVars: StateVariables) =>
-    this.withLock(channelId, () => this._signAndAddState(channelId, stateVars));
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.channels, ObjectStores.privateKeys],
+      async () => {
+        const entry = await this.getEntry(channelId);
 
-  private async _signAndAddState(channelId: string, stateVars: StateVariables) {
-    const channelData = await this.backend.getChannel(channelId);
-    if (!channelData) {
-      throw new Error('Channel not found');
-    }
-    const channelStorage = new ChannelStoreEntry(channelData);
+        const {participants} = entry;
+        const myAddress = participants[entry.myIndex].signingAddress;
+        const privateKey = await this.backend.getPrivateKey(myAddress);
 
-    const {participants} = channelStorage;
-    const myAddress = participants[channelStorage.myIndex].signingAddress;
-    const privateKey = await this.backend.getPrivateKey(myAddress);
-
-    if (!privateKey) {
-      throw new Error('No longer have private key');
-    }
-    const signedState = channelStorage.signAndAdd(
-      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
-      privateKey
+        if (!privateKey) {
+          throw new Error('No longer have private key');
+        }
+        const signedState = entry.signAndAdd(
+          _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
+          privateKey
+        );
+        await this.backend.setChannel(channelId, entry.data());
+        this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+        this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+      }
     );
-    await this.backend.setChannel(channelId, channelStorage.data());
-    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
-    this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-  }
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
@@ -406,32 +411,21 @@ export class XstateStore implements Store {
     }
   }
 
-  private channelLock = new AsyncLock();
-  private async withLock<T>(channelId: string, fn: (...args: any[]) => T | Promise<T>): Promise<T> {
-    return await this.channelLock.acquire(channelId, async release => {
-      try {
-        return await fn();
-      } finally {
-        release();
-      }
-    });
-  }
-
   public addState = (state: SignedState) =>
-    this.withLock(calculateChannelId(state), () => this._addState(state));
-
-  private async _addState(state: SignedState): Promise<ChannelStoreEntry> {
-    const channelId = calculateChannelId(state);
-    const channelData =
-      (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state)).data();
-    const memoryChannelStorage = new ChannelStoreEntry(channelData);
-    // TODO: This is kind of awkward
-    state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
-
-    await this.backend.setChannel(channelId, memoryChannelStorage.data());
-    this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
-    return memoryChannelStorage;
-  }
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
+      async () => {
+        const channelId = calculateChannelId(state);
+        const memoryChannelStorage =
+          (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
+        // TODO: This is kind of awkward
+        state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
+        await this.backend.setChannel(channelId, memoryChannelStorage.data());
+        this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
+        return memoryChannelStorage;
+      }
+    );
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
@@ -439,91 +433,88 @@ export class XstateStore implements Store {
   }
 
   async pushMessage(message: Message) {
-    const {signedStates, objectives} = message;
-    if (signedStates) {
-      // todo: check sig
-      // todo: check the channel involves me
-      await Promise.all(signedStates.map(signedState => this.addState(signedState)));
-    }
-    objectives?.map(o => this.addObjective(o, false));
+    await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
+    message.objectives?.map(o => this.addObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    const data = await this.backend.getChannel(channelId);
-    if (!data) {
-      throw Error('Channel id not found');
+    const entry = await this.backend.getChannel(channelId);
+    if (!entry) {
+      logger.error('Channel %s not found', channelId);
+      throw Error(Errors.channelMissing);
     }
 
-    return new ChannelStoreEntry(data);
+    return entry;
   }
 
-  private budgetLock = new AsyncLock();
-
-  public async createBudget(budget: SiteBudget): Promise<void> {
-    await this.budgetLock.acquire(budget.domain, async release => {
+  public createBudget = (budget: SiteBudget) =>
+    this.backend.transaction('readwrite', [ObjectStores.budgets], async tx => {
       const existingBudget = await this.backend.getBudget(budget.domain);
       if (existingBudget) {
-        release();
-        throw new Error(Errors.budgetAlreadyExists);
+        logger.error(Errors.budgetAlreadyExists);
+        tx.abort();
       }
+
       await this.backend.setBudget(budget.domain, budget);
-      release();
     });
-  }
 
-  public async clearBudget(site): Promise<void> {
-    this.backend.deleteBudget(site);
-  }
+  public clearBudget = site =>
+    this.backend.transaction('readwrite', [ObjectStores.budgets], () =>
+      this.backend.deleteBudget(site)
+    );
 
-  public async releaseFunds(
+  public releaseFunds = (
     assetHolderAddress: string,
     ledgerChannelId: string,
     targetChannelId: string
-  ) {
-    const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
-    const {outcome} = supported;
-    if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.budgets, ObjectStores.channels, ObjectStores.privateKeys],
+      async () => {
+        const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
+        const {outcome} = supported;
+        if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
 
-    return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
-      const currentBudget = await this.getBudget(applicationSite);
+        const currentBudget = await this.getBudget(applicationSite);
 
-      const assetBudget = currentBudget?.forAsset[assetHolderAddress];
+        const assetBudget = currentBudget?.forAsset[assetHolderAddress];
 
-      if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
+        if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
 
-      const channelBudget = assetBudget.channels[targetChannelId];
-      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
-      const playerAddress = await this.getAddress();
+        const channelBudget = assetBudget.channels[targetChannelId];
+        if (!channelBudget) throw new Error(Errors.channelNotInBudget);
+        const playerAddress = await this.getAddress();
 
-      const playerDestination = participants.find(p => p.signingAddress === playerAddress)
-        ?.destination;
-      if (!playerDestination) {
-        throw new Error(Errors.cannotFindDestination);
+        const playerDestination = participants.find(p => p.signingAddress === playerAddress)
+          ?.destination;
+        if (!playerDestination) {
+          throw new Error(Errors.cannotFindDestination);
+        }
+        // Simply set the budget to the current ledger outcome
+        assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
+        assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
+
+        // Delete the funds assigned to the channel
+        delete assetBudget.channels[targetChannelId];
+
+        const result = await this.backend.setBudget(applicationSite, currentBudget);
+        return result;
       }
-      // Simply set the budget to the current ledger outcome
-      assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
-      assetBudget.availableReceiveCapacity = getAllocationAmount(outcome, HUB.destination);
+    );
 
-      // Delete the funds assigned to the channel
-      delete assetBudget.channels[targetChannelId];
-
-      const result = await this.backend.setBudget(applicationSite, currentBudget);
-      release();
-      return result;
-    });
-  }
-
-  public async reserveFunds(
+  public reserveFunds = (
     assetHolderAddress: string,
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
-  ): Promise<SiteBudget> {
-    const entry = await this.getEntry(channelId);
-    const site = entry.applicationSite;
-    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
-
-    return await this.budgetLock
-      .acquire<SiteBudget>(site, async release => {
+  ) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.budgets, ObjectStores.channels],
+      async () => {
+        const entry = await this.getEntry(channelId);
+        const site = entry.applicationSite;
+        if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
         const currentBudget = await this.backend.getBudget(site);
 
         // TODO?: Create a new budget if one doesn't exist
@@ -547,15 +538,10 @@ export class XstateStore implements Store {
           }
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);
-        release();
 
         return currentBudget;
-      })
-      .catch(e => {
-        console.error(e);
-        throw e;
-      });
-  }
+      }
+    );
 }
 
 export function supportedStateFeed(store: Store, channelId: string) {

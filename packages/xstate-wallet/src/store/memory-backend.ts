@@ -1,7 +1,8 @@
 import {BigNumber} from 'ethers/utils';
 
-import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
+import {Objective, DBBackend, SiteBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
+import {ChannelStoreEntry} from './channel-store-entry';
 
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
@@ -76,10 +77,9 @@ export class MemoryBackend implements DBBackend {
   }
 
   public async getChannel(key: string) {
-    if (!this._channels[key]) {
-      return;
-    }
-    return this._channels[key];
+    const data = this._channels[key];
+    if (!data) return;
+    else return new ChannelStoreEntry(data);
   }
 
   public async setLedger(key: string, value: string) {
@@ -110,5 +110,9 @@ export class MemoryBackend implements DBBackend {
 
   public async getObjective(key: number) {
     return this._objectives[key];
+  }
+
+  public async transaction<T>(_mode: TXMode, _stores: ObjectStores[], cb: (tx: any) => Promise<T>) {
+    return cb({abort: () => null});
   }
 }

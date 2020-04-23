@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
 import {XstateStore} from '../store';
-import {State, Objective, SiteBudget, AssetBudget} from '../types';
+import {State, Objective, SiteBudget, AssetBudget, ObjectStores} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, createSignatureEntry} from '../state-utils';
@@ -62,13 +62,14 @@ describe('getAddress', () => {
 describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
-    const outputs: ChannelStoreEntry[] = [];
-    store.channelUpdatedFeed(channelId).subscribe(x => {
-      outputs.push(x);
-    });
-    await store.pushMessage({signedStates});
+    return new Promise(resolve => {
+      store.channelUpdatedFeed(channelId).subscribe(x => {
+        expect(x.latest).toMatchObject(state);
+        resolve();
+      });
 
-    expect(outputs[0].latest).toMatchObject(state);
+      store.pushMessage({signedStates});
+    });
   });
 
   test("it doesn't fire if the channelId doesn't match", async () => {
@@ -183,4 +184,76 @@ describe('getBudget', () => {
       .ETH as AssetBudget;
     expect(availableReceiveCapacity.add(availableSendCapacity).eq(15)).toBeTruthy();
   });
+});
+
+const getBackend = (store: XstateStore) => (store as any).backend as Backend;
+
+describe('transactions', () => {
+  // TODO:
+  // These tests generally pass, but something is going wrong with the
+  // expectations on promise rejections
+  // expect(...).rejects.toThrow('someMessage')
+  // will fail if 'someMessage' is incorrect, but if it is correct, then
+  // 1. the test passes
+  // 2. either jest or dexie warns about an unhandled rejection
+  let warner;
+  beforeAll(() => {
+    warner = console.warn;
+    console.warn = () => console.error('Suppressing fire');
+  });
+  afterAll(() => (console.warn = warner.bind(console)));
+
+  let backend: Backend;
+  beforeEach(async () => {
+    backend = getBackend(await aStore());
+  });
+
+  it('works', async () => {
+    const result = await backend.transaction('readwrite', [ObjectStores.ledgers], async () => {
+      await backend.setLedger('foo', 'bar');
+
+      return await backend.getLedger('foo');
+    });
+
+    expect(result).toEqual('bar');
+  });
+
+  it('throws when writing during a readwrite transaction', async () =>
+    expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        async () => await backend.setLedger('foo', 'bar')
+      )
+    ).rejects.toThrow('Transaction is readonly'));
+
+  it('throws when accessing stores not whitelisted', async () =>
+    expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        async () => await backend.getPrivateKey('foo')
+      )
+    ).rejects.toThrow('NotFoundError:'));
+
+  it('throws when aborted', () =>
+    expect(
+      backend.transaction('readonly', [ObjectStores.ledgers], async tx => {
+        tx.abort();
+
+        return;
+      })
+    ).rejects.toThrow('Transaction committed too early.'));
+
+  it('throws when awaiting an external async call', () =>
+    expect(
+      backend.transaction(
+        'readonly',
+        [ObjectStores.ledgers],
+        () =>
+          new Promise(resolve => {
+            setTimeout(resolve, 100);
+          })
+      )
+    ).rejects.toThrow('Transaction committed too early.'));
 });

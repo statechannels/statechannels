@@ -1,18 +1,19 @@
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
-import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
+import {
+  Objective,
+  DBBackend,
+  SiteBudget,
+  ChannelStoredData,
+  AssetBudget,
+  ObjectStores,
+  TXMode
+} from './types';
 import * as _ from 'lodash';
 
-import Dexie from 'dexie';
-
-enum ObjectStores {
-  channels = 'channels',
-  objectives = 'objectives',
-  nonces = 'nonces',
-  privateKeys = 'privateKeys',
-  ledgers = 'ledgers',
-  budgets = 'budgets'
-}
+import {Transaction, Dexie, TransactionMode} from 'dexie';
+import {unreachable} from '../utils';
+import {logger} from '../logger';
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
@@ -52,8 +53,6 @@ export class Backend implements DBBackend {
       [ObjectStores.ledgers]: '',
       [ObjectStores.budgets]: ''
     });
-
-    return this._db.open();
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
@@ -142,9 +141,11 @@ export class Backend implements DBBackend {
   public async setPrivateKey(signingAddress: string, privateKey: string) {
     return this.put(ObjectStores.privateKeys, privateKey, signingAddress);
   }
+
   public async setChannel(key: string, value: ChannelStoredData) {
     return this.put(ObjectStores.channels, value, key);
   }
+
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
@@ -155,6 +156,28 @@ export class Backend implements DBBackend {
   }
   public async setObjective(key: number, value: Objective) {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
+  }
+
+  public async transaction<T, S extends ObjectStores>(
+    mode: TXMode,
+    stores: S[],
+    cb: (tx: Transaction) => Promise<T>
+  ) {
+    let dexieMode: TransactionMode;
+    switch (mode) {
+      case 'readwrite':
+        dexieMode = 'rw';
+        break;
+      case 'readonly':
+        dexieMode = 'r';
+        break;
+      default:
+        return unreachable(mode);
+    }
+
+    const dexieStores = stores.map((store: S) => this._db[store as string]);
+
+    return this._db.transaction(dexieMode, dexieStores, cb);
   }
 
   // Private Internal Methods
@@ -174,7 +197,14 @@ export class Backend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    return (await this._db[storeName].get(key))?.value;
+    try {
+      return (await this._db[storeName].get(key))?.value;
+    } catch (e) {
+      if (/NotFoundError:/.test(e.message)) {
+        logger.error('Attempting invalid access to store %s', storeName);
+      }
+      throw e;
+    }
   }
 
   /**
