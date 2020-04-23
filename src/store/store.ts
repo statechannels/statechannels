@@ -28,6 +28,7 @@ import {
   StateVariables,
   ObjectStores
 } from './types';
+import {logger} from '../logger';
 
 interface DirectFunding {
   type: 'Direct';
@@ -230,13 +231,17 @@ export class XstateStore implements Store {
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const channelData = await this.backend.getChannel(channelId);
       if (!channelData) {
-        throw new Error(`No channel for ${channelId}`);
+        logger.error('Channel %s not found', channelId);
+        throw Error(Errors.channelMissing);
       }
+
       const channelEntry = new ChannelStoreEntry(channelData);
       if (channelEntry.funding) {
-        throw `Channel ${channelId} already funded`;
+        logger.error({funding: channelEntry.funding}, 'Channel %s already funded', channelId);
+        throw Error(Errors.channelFunded);
       }
       channelEntry.setFunding(funding);
+
       await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
     });
 
