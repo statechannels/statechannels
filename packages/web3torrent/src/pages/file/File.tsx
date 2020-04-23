@@ -13,7 +13,8 @@ import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
-import {GlobalContext} from '../../contexts/global-context';
+import {BudgetContext} from '../../contexts/budget-context';
+import {ChannelContext} from '../../contexts/channel-context';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -82,9 +83,8 @@ const File: React.FC<Props> = props => {
     return undefined;
   }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
 
-  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
-
-  const {budget} = useContext(GlobalContext).budgets;
+  const {channelState, mySigningAddress: me} = useContext(ChannelContext);
+  const {budget} = useContext(BudgetContext);
   // TODO: We shouldn't have to check all these different conditions
   const showBudget =
     !!budget && !_.isEmpty(budget) && !!budget.budgets && budget.budgets.length > 0;
@@ -94,7 +94,7 @@ const File: React.FC<Props> = props => {
       <div className="jumbotron-upload">
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
-      <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+      <TorrentInfo torrent={torrent} channelCache={channelState} mySigningAddress={me} />
       {warning &&
         ((!torrent.uploaded && torrent.status === Status.Seeding) ||
           torrent.status === Status.Idle) && (
@@ -103,9 +103,7 @@ const File: React.FC<Props> = props => {
           </div>
         )}
       <br />
-      {showBudget && (
-        <SiteBudgetTable budgetCache={budget} channelCache={channelCache} mySigningAddress={me} />
-      )}
+      {showBudget && <SiteBudgetTable />}
       {torrent.status === Status.Idle && (
         <>
           <FormButton

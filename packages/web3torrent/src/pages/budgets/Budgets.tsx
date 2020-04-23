@@ -4,7 +4,7 @@ import {Web3TorrentContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
-import {GlobalContext} from '../../contexts/global-context';
+import {BudgetContext} from '../../contexts/budget-context';
 
 interface Props {
   ready: boolean;
@@ -43,19 +43,16 @@ export const Budgets: React.FC<Props> = props => {
 };
 
 const CurrentBudget: React.FC<Props> = props => {
-  const web3Torrent = useContext(Web3TorrentContext);
 
-  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
-  const {budget, fetching, createBudget} = useContext(GlobalContext).budgets;
+  
+  const {budget, fetching, createBudget} = useContext(BudgetContext);
   const budgetExists = !!budget && !_.isEmpty(budget);
   console.log(budget);
   return (
     <section className="section fill download">
       <h1>Your current budget</h1>
       {fetching && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
-      {!fetching && budgetExists && (
-        <SiteBudgetTable budgetCache={budget} channelCache={channelCache} mySigningAddress={me} />
-      )}
+      {!fetching && budgetExists && <SiteBudgetTable />}
       {!fetching && !budgetExists && (
         <div>
           <div>You don't have a budget yet!</div>
