@@ -116,7 +116,7 @@
     "start:tracker": "node tracker/index.js",
     "start:tracker-logs-on": "DEBUG='web3torrent:tracker' yarn start",
     "storybook": "start-storybook -s ./public -p 4568",
-    "test": "npx jest -c ./config/jest/jest.config.js",
+    "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "CI=true yarn test --runInBand --ci --all --forceExit",
     "test:coverage": "yarn test --coverage"
   }

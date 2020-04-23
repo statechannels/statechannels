@@ -189,7 +189,7 @@
   "scripts": {
     "build": "run-s build:typescript build:webpack",
     "build:ci": "run-s build:typescript contracts:compile",
-    "build:typescript": "npx tsc -b",
+    "build:typescript": "tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "contracts:compile": "node ./bin/compile.js",
     "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
