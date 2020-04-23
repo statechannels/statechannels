@@ -13,6 +13,7 @@ import * as _ from 'lodash';
 
 import {Transaction, Dexie, TransactionMode} from 'dexie';
 import {unreachable} from '../utils';
+import {logger} from '../logger';
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
@@ -197,7 +198,14 @@ export class Backend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    return (await this._db[storeName].get(key))?.value;
+    try {
+      return (await this._db[storeName].get(key))?.value;
+    } catch (e) {
+      if (/NotFoundError:/.test(e.message)) {
+        logger.error('Attempting invalid access to store %s', storeName);
+      }
+      throw e;
+    }
   }
 
   /**
