@@ -104,16 +104,6 @@ commands:
           path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
           destination: click.error.png
 
-  upload_e2e_output:
-    description: 'Upload e2e browser output'
-    parameters:
-      job:
-        type: string
-    steps:
-      - store_artifacts:
-          path: /home/circleci/project/packages/e2e-tests/browserOutput.log
-          destination: << parameters.job >>-browserOutput.log
-
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -263,6 +253,8 @@ jobs:
           path: /tmp/withdraw.pino.log
       - store_artifacts:
           path: /tmp/withdraw.browser.log
+      - store_artifacts:
+          path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots:
@@ -353,6 +345,8 @@ jobs:
           path: /tmp/withdraw.pino.log
       - store_artifacts:
           path: /tmp/withdraw.browser.log
+      - store_artifacts:
+          path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots:

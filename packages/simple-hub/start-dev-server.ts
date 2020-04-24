@@ -4,6 +4,7 @@ import FirebaseServer from 'firebase-server';
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from './deployment/deploy';
 import {startServer} from './src/server';
+import {log} from './src/logger';
 
 async function setupGanacheAndContracts() {
   const {deployer} = await setupGanache(Number(process.env.SIMPLE_HUB_DEPLOYER_ACCOUNT_INDEX));
@@ -13,18 +14,26 @@ async function setupGanacheAndContracts() {
 }
 
 async function startLocalFirebaseServer() {
+  const firebaseLog = log.child({context: 'firebase'});
+  firebaseLog.info('Starting server');
   const server = new FirebaseServer(5555, 'localhost');
+  firebaseLog.info('Started');
 
-  const closeServer = async () => await server.close();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const closeServer = (msg: string) => async (err?: any) => {
+    firebaseLog.info({err}, 'Closing server: %s', msg);
+    await server.close();
+    firebaseLog.info('Closed');
+  };
 
-  process.on('SIGINT', closeServer);
-  process.on('SIGTERM', closeServer);
+  process.on('SIGINT', closeServer('SIGINT'));
+  process.on('SIGTERM', closeServer('SIGTERM'));
   process.on('uncaughtException', async e => {
-    await closeServer();
+    await closeServer('uncaughtException')(e);
     throw e;
   });
-  process.on('exit', closeServer);
-  process.on('unhandledRejection', closeServer);
+  process.on('exit', closeServer('exit'));
+  process.on('unhandledRejection', closeServer('unhandledRejection'));
 }
 
 async function start() {
