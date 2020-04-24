@@ -5,6 +5,7 @@ import {TorrentPeers} from '../../../library/types';
 import {TorrentUI} from '../../../types';
 import {createMockTorrentUI, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
 import {UploadInfo, UploadInfoProps} from './UploadInfo';
+import {MockContextProvider} from '../../../library/testing/mock-context-provider';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -24,7 +25,9 @@ const mockUploadInfo = (noPeers = false): MockUploadInfo => {
   });
 
   const uploadInfoWrapper = mount(
-    <UploadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
+    <MockContextProvider>
+      <UploadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
+    </MockContextProvider>
   );
 
   return {

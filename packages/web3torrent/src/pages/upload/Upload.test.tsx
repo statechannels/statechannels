@@ -3,38 +3,40 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {WebTorrentSeedInput, ExtendedTorrent} from '../../library/types';
 import {Status} from '../../types';
-import * as Web3TorrentClient from './../../clients/web3torrent-client';
+
 import Upload from './Upload';
 import {mockMetamask} from '../../library/testing/test-utils';
 import {createMockExtendedTorrent} from '../../utils/test-utils';
+import {
+  mockTorrentClientContext,
+  MockContextProvider
+} from '../../library/testing/mock-context-provider';
 Enzyme.configure({adapter: new Adapter()});
 
 const mockTorrent = createMockExtendedTorrent();
 
 describe('<Upload />', () => {
   let component: Enzyme.ReactWrapper;
-  let torrentUpload: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentSeedInput]>;
+
   beforeAll(() => {
     mockMetamask();
   });
 
   beforeEach(() => {
-    torrentUpload = jest
-      .spyOn(Web3TorrentClient, 'upload')
+    mockTorrentClientContext.upload = jest
+      .fn()
       .mockImplementation(_pD => Promise.resolve({...mockTorrent, status: Status.Seeding}));
+
     component = mount(
       <Router>
-        <Upload ready={true} />
+        <MockContextProvider>
+          <Upload ready={true} />
+        </MockContextProvider>
       </Router>
     );
 
     jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    Web3TorrentClient.web3torrent.destroy();
   });
 
   it('should render an Upload button', () => {
@@ -49,6 +51,6 @@ describe('<Upload />', () => {
         }
       });
     });
-    expect(torrentUpload).toHaveBeenCalled();
+    expect(mockTorrentClientContext.upload).toHaveBeenCalled();
   });
 });

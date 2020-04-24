@@ -7,31 +7,31 @@ import {WebTorrentAddInput, ExtendedTorrent} from '../../library/types';
 import {TorrentStaticData} from '../../types';
 import {testSelector, createMockExtendedTorrent, createMockTorrentUI} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
-import * as Web3TorrentClient from './../../clients/web3torrent-client';
+
 import File from './File';
-import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
+import {
+  mockTorrentClientContext,
+  MockContextProvider
+} from '../../library/testing/mock-context-provider';
 
 Enzyme.configure({adapter: new Adapter()});
 
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
-  let torrentFile: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {
-    torrentFile = jest
-      .spyOn(Web3TorrentClient, 'download')
-      .mockImplementation(_pD => Promise.resolve(createMockExtendedTorrent()));
-
+    mockTorrentClientContext.upload = _pD => Promise.resolve(createMockExtendedTorrent());
+    mockTorrentClientContext.getTorrentUI = jest
+      .fn()
+      .mockImplementation(() => createMockTorrentUI());
     component = mount(
       <Router>
-        <File ready={true} />
+        <MockContextProvider>
+          <File ready={true} />
+        </MockContextProvider>
       </Router>
     );
     jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    Web3TorrentClient.web3torrent.destroy();
   });
 
   it('should render an download button', () => {
@@ -49,12 +49,6 @@ describe('<File />', () => {
   // });
 
   it('should run checker function if the File Button is clicked', async () => {
-    const torrentStatusChecker = jest
-      .spyOn(TorrentStatus, 'getTorrentUI')
-      .mockImplementation((_w3t: WebTorrentPaidStreamingClient, _staticData: TorrentStaticData) =>
-        createMockTorrentUI()
-      );
-
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');
     });
@@ -63,6 +57,6 @@ describe('<File />', () => {
       jest.runOnlyPendingTimers();
     });
 
-    expect(torrentStatusChecker).toHaveBeenCalled();
+    expect(mockTorrentClientContext.getTorrentUI).toHaveBeenCalled();
   });
 });

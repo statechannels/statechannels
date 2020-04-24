@@ -1,12 +1,21 @@
-import {web3torrent} from '../clients/web3torrent-client';
 import {Status, TorrentStaticData} from '../types';
 import {createMockTorrentUI, infoHash, createMockExtendedTorrent, pseAccount} from './test-utils';
 import {getFormattedETA, getStatus, getTorrentUI} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
-import {getStaticTorrentUI} from '../constants';
+import {getStaticTorrentUI, defaultTrackers} from '../constants';
 import {ExtendedTorrent} from '../library/types';
 import WebTorrent from 'webtorrent';
 
+import {PaymentChannelClient} from '../clients/payment-channel-client';
+import {ChannelClient} from '@statechannels/channel-client';
+import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
+
+// TODO: These tests probably don't need to go against a live torrent client
+const paymentChannelClient = new PaymentChannelClient(new ChannelClient(window.channelProvider));
+const w3tClient = new WebTorrentPaidStreamingClient({
+  paymentChannelClient,
+  tracker: {announce: defaultTrackers}
+});
 describe('Torrent Status Checker', () => {
   let torrent: ExtendedTorrent;
 
@@ -16,20 +25,20 @@ describe('Torrent Status Checker', () => {
 
   beforeAll(() => {
     mockMetamask();
-    web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
+    w3tClient.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
   });
   beforeEach(() => {
     torrent = createMockExtendedTorrent();
   });
   afterAll(() => {
-    web3torrent.destroy();
+    w3tClient.destroy();
   });
 
   describe('Main function', () => {
     it('should return a torrent with a status of Idle when the torrent is not live', () => {
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
+      const getSpy = jest.spyOn(w3tClient, 'get').mockImplementation(() => undefined);
 
-      const result = getTorrentUI(web3torrent, staticData);
+      const result = getTorrentUI(w3tClient, staticData);
 
       expect(getSpy).toHaveBeenCalledWith(infoHash);
       expect(result).toEqual(getStaticTorrentUI(staticData.infoHash));
@@ -50,12 +59,12 @@ describe('Torrent Status Checker', () => {
         paused: undefined
       };
 
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => ({
+      const getSpy = jest.spyOn(w3tClient, 'get').mockImplementation(() => ({
         ...torrent,
         ...inProgressTorrent
       }));
 
-      const result = getTorrentUI(web3torrent, staticData);
+      const result = getTorrentUI(w3tClient, staticData);
       const expectedResult = {
         ...torrent,
         ...inProgressTorrent,
@@ -107,13 +116,13 @@ describe('Torrent Status Checker', () => {
         expect(
           getStatus(
             {
-              createdBy: web3torrent.pseAccount,
+              createdBy: w3tClient.pseAccount,
               uploadSpeed: 1000,
               downloadSpeed: 0,
               progress: 50,
               done: false
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            w3tClient.pseAccount
           )
         ).toEqual(Status.Seeding);
       });
@@ -127,7 +136,7 @@ describe('Torrent Status Checker', () => {
               progress: 100,
               done: true
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            w3tClient.pseAccount
           )
         ).toEqual(Status.Completed);
       });
@@ -136,7 +145,7 @@ describe('Torrent Status Checker', () => {
         expect(
           getStatus(
             {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            w3tClient.pseAccount
           )
         ).toEqual(Status.Connecting);
       });
@@ -150,7 +159,7 @@ describe('Torrent Status Checker', () => {
               progress: 10,
               done: false
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            w3tClient.pseAccount
           )
         ).toEqual(Status.Downloading);
       });

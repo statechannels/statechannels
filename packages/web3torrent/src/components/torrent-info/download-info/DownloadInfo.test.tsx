@@ -2,12 +2,16 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentFile} from 'webtorrent';
-import * as Web3TorrentClient from '../../../clients/web3torrent-client';
+
 import {TorrentUI} from '../../../types';
 import {createMockTorrentUI} from '../../../utils/test-utils';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
 import {DownloadInfo, DownloadInfoProps} from './DownloadInfo';
 import {ProgressBar, ProgressBarProps} from './progress-bar/ProgressBar';
+import {
+  mockTorrentClientContext,
+  MockContextProvider
+} from '../../../library/testing/mock-context-provider';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -23,7 +27,9 @@ type MockDownloadInfo = {
 const mockDownloadInfo = (torrentProps?: Partial<TorrentUI>): MockDownloadInfo => {
   const torrent = createMockTorrentUI(torrentProps);
   const downloadInfoWrapper = mount(
-    <DownloadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
+    <MockContextProvider>
+      <DownloadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
+    </MockContextProvider>
   );
 
   return {
@@ -73,18 +79,12 @@ describe('<DownloadInfo />', () => {
   });
 
   it('can call Web3TorrentClient.cancel() when clicking the Cancel button', () => {
-    const removeSpy = jest
-      .spyOn(Web3TorrentClient, 'cancel')
-      .mockImplementation(async (_?: string) => {
-        /* nothing to see here */
-      });
-
     const {cancelButton} = downloadInfo;
 
     cancelButton.simulate('click');
-    expect(removeSpy).toHaveBeenCalledWith(downloadInfo.torrentProps.infoHash);
-
-    removeSpy.mockRestore();
+    expect(mockTorrentClientContext.cancel).toHaveBeenCalledWith(
+      downloadInfo.torrentProps.infoHash
+    );
   });
 
   it('hides the cancel button when finished', () => {
