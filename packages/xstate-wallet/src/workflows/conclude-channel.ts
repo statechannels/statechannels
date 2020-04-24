@@ -91,12 +91,11 @@ const observeFundsWithdrawal = (store: Store) => context =>
   );
 
 const submitWithdrawTransaction = (store: Store) => async context => {
-  // TODO: Should we just fetch this once and store on the context
-  const ledgerEntry = await store.getLedger(context.opponent.participantId);
-  if (!ledgerEntry.isFinalized) {
-    throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
+  const channelEntry = await store.getEntry(context.channelId);
+  if (!channelEntry.isFinalized) {
+    throw new Error(`Channel ${context.channelId} is not finalized`);
   }
-  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
+  await store.chain.finalizeAndWithdraw(channelEntry.support);
 };
 
 const withdrawing = {
