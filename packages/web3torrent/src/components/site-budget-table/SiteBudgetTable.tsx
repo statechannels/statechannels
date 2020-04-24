@@ -49,12 +49,10 @@ export const SiteBudgetTable: React.FC = () => {
               </button>
             </td>
             <td className="budget-number">
-              {' '}
-              {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
+              {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}
             </td>
             <td className="budget-number">
-              {' '}
-              {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
+              {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}
             </td>
           </tr>
         </tbody>

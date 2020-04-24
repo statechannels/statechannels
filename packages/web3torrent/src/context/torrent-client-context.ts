@@ -1,5 +1,3 @@
-import {useEffect} from 'react';
-
 import React from 'react';
 import {getTorrentUI} from '../utils/torrent-status-checker';
 import {WebTorrentAddInput, ExtendedTorrent, WebTorrentSeedInput} from '../library/types';
