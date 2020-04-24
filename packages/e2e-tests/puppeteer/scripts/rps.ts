@@ -111,28 +111,30 @@ export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
 }
 
 export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
-  const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
+  // const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
 
     await waitForAndClickButton(page, page.mainFrame(), '#resign');
     await waitForAndClickButton(page, walletIFrame, '#yes');
 
-    if (virtual) {
-      await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
-      await waitForAndClickButton(page, walletIFrame, '#ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#exit');
-      // App & Wallet left in a 'clean' no-game state
-    } else {
-      await waitForAndClickButton(page, walletIFrame, '#ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#exit');
-      // App & Wallet left in a 'clean' no-game state
-    }
+    // unsupported for now
+    // if (virtual) {
+    //   await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+    //   await waitForAndClickButton(page, walletIFrame, '#ok');
+    //   await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+    //   await waitForAndClickButton(page, page.mainFrame(), '#exit');
+    //   // App & Wallet left in a 'clean' no-game state
+    // } else {
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#exit');
+    // App & Wallet left in a 'clean' no-game state
+    // }
   }
 
   async function playerA(page: Page): Promise<void> {
+    await page.waitFor(1000);
     await playMove(page, 'rock');
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, walletIFrame, '#yes');
