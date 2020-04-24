@@ -236,8 +236,6 @@ jobs:
       - image: circleci/node:10.16.3-browsers
     environment:
       SC_ENV: circle-integration-w3t
-      # For web3torrent
-      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
     steps:
       - checkout
       - puppeteer/install
@@ -281,7 +279,6 @@ jobs:
           # Note that the DB is hub_wallet_${NODE_ENV} and we use development for this job
           POSTGRES_DB: hub_wallet_development
     environment:
-      FIREBASE_PREFIX: << pipeline.git.branch >>-2
       USE_VIRTUAL_FUNDING: 'TRUE'
       HUB_DB_NAME: hub_wallet_development
       # The development environment mimics integration environment
@@ -325,10 +322,6 @@ jobs:
     docker:
       - image: circleci/node:10.16.3-browsers
     environment:
-      # For simple-hub
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      # For web3torrent
-      REACT_APP_FIREBASE_PREFIX: << pipeline.git.branch >>-1
       SC_ENV: circle-integration-w3t-with-hub
     steps:
       - checkout
