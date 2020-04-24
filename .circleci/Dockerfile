@@ -16,13 +16,8 @@ RUN apt-get install -y \
     tar \
     zlib1g-dev
 
-# add ethereum ppa
-RUN add-apt-repository ppa:ethereum/ethereum
-RUN apt-get update
-
-# there doesn't appear to be any way to specify solc version num
-# https://launchpad.net/~ethereum/+archive/ubuntu/ethereum/+packages?field.name_filter=solc&field.status_filter=published&field.series_filter=
-RUN apt-get install solc --allow-unauthenticated -y
+RUN curl -o /usr/bin/solc -fL https://github.com/ethereum/solidity/releases/download/v0.6.6/solc-static-linux \
+    && chmod u+x /usr/bin/solc
 
 # install node 10.x and yarn 1.17.3
 RUN npm install -g yarn@1.17.3
