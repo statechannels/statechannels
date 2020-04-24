@@ -1,10 +1,10 @@
-import {Machine, StateNodeConfig} from 'xstate';
+import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
 import {Store} from '../store';
-import {VirtualDefundingAsLeaf} from '.';
+import {VirtualDefundingAsLeaf, SupportState} from '.';
 import {getDataAndInvoke} from '../utils';
-
-import {map, first} from 'rxjs/operators';
+import {map, first, filter} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
+import {ChannelChainInfo} from '../chain';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -56,6 +56,8 @@ const getRole = (store: Store) => (ctx: Init) => async cb => {
   else cb('AmLeaf');
 };
 
+const supportState = (store: Store) => SupportState.machine(store);
+
 const virtualDefunding = {
   initial: 'gettingRole',
   states: {
@@ -73,13 +75,52 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const withdraw = (store: Store) => async (ctx: Init) => {
-  // NOOP
+enum Services {
+  submitWithdrawTransaction = 'submitWithdrawTransaction',
+  observeFundsWithdrawal = 'observeFundsWithdrawal'
+}
+
+interface FundsWithdrawn {
+  type: 'FUNDS_WITHDRAWN';
+}
+
+const observeFundsWithdrawal = (store: Store) => context =>
+  store.chain.chainUpdatedFeed(context.channelId).pipe(
+    filter(c => c.amount.eq(0)),
+    map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
+  );
+
+const submitWithdrawTransaction = (store: Store) => async context => {
+  // TODO: Should we just fetch this once and store on the context
+  const ledgerEntry = await store.getLedger(context.opponent.participantId);
+  if (!ledgerEntry.isFinalized) {
+    throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
+  }
+  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
-// TODO: Probably display UI for withdrawing when implemented
-const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
+const withdrawing = {
+  initial: 'submitTransaction',
+  invoke: {
+    id: 'observeChain',
+    src: Services.observeFundsWithdrawal
+  },
+  states: {
+    submitTransaction: {
+      invoke: {
+        id: 'submitTransaction',
+        src: Services.submitWithdrawTransaction,
+        onDone: {
+          target: 'waitMining',
+          actions: assign({
+            transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+          })
+        }
+      }
+    },
+    waitMining: {}
+  }
+};
 
 export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
@@ -97,9 +138,11 @@ const services = (store: Store) => ({
   signFinalState: signFinalState(store),
   waitForConclusionProof: waitForConclusionProof(store),
   getFunding: getFunding(store),
-  withdraw: withdraw(store),
+  supportState: supportState(store),
   getRole: getRole(store),
-  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
+  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store),
+  submitWithdrawTransaction: submitWithdrawTransaction(store),
+  observeFundsWithdrawal: observeFundsWithdrawal(store)
 });
 
 const options = (store: Store) => ({
