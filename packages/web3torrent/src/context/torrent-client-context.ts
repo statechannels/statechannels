@@ -23,7 +23,7 @@ export function useTorrentClientContext({
   const doesBudgetExist = async (): Promise<boolean> => {
     const {paymentChannelClient} = w3tClient;
     const budget = await paymentChannelClient.getBudget();
-    return !!budget && !_.isEmpty(budget);
+    return budget && !_.isEmpty(budget);
   };
   const torrentNamer = (input: WebTorrentSeedInput) => {
     if ((input as FileList).length && (input as FileList).length > 1) {

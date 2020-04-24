@@ -27,7 +27,7 @@ export const Budgets: React.FC<Props> = props => {
 const CurrentBudget: React.FC<Props> = props => {
   const {budget, loading: budgetLoading, createBudget} = useContext(BudgetContext);
 
-  const budgetExists = !!budget && !_.isEmpty(budget);
+  const budgetExists = budget && !_.isEmpty(budget);
 
   return (
     <section className="section fill budget">
