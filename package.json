@@ -23,7 +23,7 @@
     "react-dom": "16.12.0",
     "rxjs": "6.5.4",
     "url-parse": "1.4.7",
-    "xstate": "4.8.0"
+    "xstate": "4.9.1"
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
