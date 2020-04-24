@@ -12,28 +12,11 @@ interface Props {
 export const Budgets: React.FC<Props> = props => {
   return (
     <div>
-      <section className="section fill download">
+      <section className="section fill budget">
         <h1>What are budgets?</h1>
         <p>
-          <strong>How do I pay for the download?</strong>
-          <br />
-          When you click "Start Download", you'll be asked to allocate an amount of ETH so
-          Web3Torrent can collect payments on your behalf and transfer those funds to peers who have
-          pieces of the file . Unlike other systems, the payment is not upfront; instead, you pay as
-          you download.
-        </p>
-        <p>
-          <strong>Is it safe?</strong>
-          <br />
-          Web3Torrent operates with budgets; therefore, the app will <b>never</b> use any funds
-          outside whatever amount you allocate when starting the download. Also, Web3Torrent is
-          powered by{' '}
-          <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
-            State Channels
-          </a>
-          , a technique that reduces fees for blockchain users, allowing them to transact with each
-          other on faster-than-on-chain operating times. This technology enables a private,
-          efficient and secure environment for transactions.
+          A budget represents the funds the application is managing on your behalf. These funds can
+          be used to download files using Web3Torrent.
         </p>
       </section>
       <CurrentBudget ready={props.ready} />
@@ -43,10 +26,11 @@ export const Budgets: React.FC<Props> = props => {
 
 const CurrentBudget: React.FC<Props> = props => {
   const {budget, loading: budgetLoading, createBudget} = useContext(BudgetContext);
+
   const budgetExists = !!budget && !_.isEmpty(budget);
 
   return (
-    <section className="section fill download">
+    <section className="section fill budget">
       <h1>Your current budget</h1>
       {budgetLoading && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
       {!budgetLoading && budgetExists && <SiteBudgetTable />}
