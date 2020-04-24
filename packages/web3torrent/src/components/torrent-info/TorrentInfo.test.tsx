@@ -10,12 +10,8 @@ import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
 import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
 import {mockMetamask} from '../../library/testing/test-utils';
-import {ChannelContext} from '../../context/channel-context';
-import {
-  mockChannelContext,
-  mockTorrentClientContext,
-  MockContextProvider
-} from '../../library/testing/mock-context-provider';
+
+import {MockContextProvider} from '../../library/testing/mock-context-provider';
 import {TorrentClientContext} from '../../context/torrent-client-context';
 
 Enzyme.configure({adapter: new Adapter()});
