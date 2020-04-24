@@ -108,12 +108,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  async cancel(torrentInfoHash: string, callback?: (err: Error | string) => void) {
+  async cancel(infoHash: string, callback?: (err: Error | string) => void) {
     log.info('> Peer cancels download. Pausing torrents');
-    const torrent = this.torrents.find(t => t.infoHash === torrentInfoHash);
+    const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       await this.closeDownloadingChannels(torrent);
-      torrent.destroy();
+      this.remove(infoHash, callback);
+    } else {
+      callback(new Error('No torrent found'));
     }
   }
 

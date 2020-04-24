@@ -53,7 +53,7 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
 
 export const cancel = (torrentId: string = '') => {
   return new Promise((resolve, reject) =>
-    web3torrent.remove(torrentId, err => {
+    web3torrent.cancel(torrentId, err => {
       if (err) {
         reject(err);
       } else {
