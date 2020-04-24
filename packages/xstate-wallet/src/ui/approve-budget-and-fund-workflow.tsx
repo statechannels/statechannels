@@ -81,7 +81,9 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Please approve the transaction in metamask</Text>
+      <Text textAlign="center" id="please-approve-transaction">
+        Please approve the transaction in metamask
+      </Text>
     </Flex>
   );
 

@@ -2,22 +2,28 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING} from '../../constants';
+import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING, USE_DAPPETEER} from '../../constants';
 
 import {
   setUpBrowser,
-  loadDapp,
+  setupLogging,
   waitAndOpenChannel,
   waitForClosingChannel,
-  waitForNthState
+  waitForNthState,
+  waitAndApproveDeposit,
+  waitAndApproveDepositWithHub,
+  setupFakeWeb3
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
 
 let browserA: Browser;
 let browserB: Browser;
+let metamaskA: Dappeteer;
+let metamaskB: Dappeteer;
 let web3tTabA: Page;
 let web3tTabB: Page;
 let tabs: [Page, Page];
@@ -27,38 +33,48 @@ describe('Web3-Torrent Integration Tests', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
-    browserA = await setUpBrowser(HEADLESS, 100);
-    browserB = await setUpBrowser(HEADLESS, 100);
+    const setupAPromise = setUpBrowser(HEADLESS, 0);
+    const setupBPromise = setUpBrowser(HEADLESS, 0);
+    ({browser: browserA, metamask: metamaskA} = await setupAPromise);
+    ({browser: browserB, metamask: metamaskB} = await setupBPromise);
 
     console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
+
     tabs = [web3tTabA, web3tTabB];
 
     console.log('Loading dapps');
-    await loadDapp(web3tTabA, 0, 'seed-download', true);
-    await loadDapp(web3tTabB, 1, 'seed-download', true);
+    await setupLogging(web3tTabA, 0, 'seed-download', true);
+    await setupLogging(web3tTabB, 1, 'seed-download', true);
+    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
+    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, 0);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+
+    await web3tTabA.bringToFront();
   });
 
   afterAll(async () => {
-    if (HEADLESS) {
-      await Promise.all(
-        [browserA, browserB].map(async browser => browser && (await browser.close()))
-      );
-    }
+    await Promise.all(
+      [browserA, browserB].map(async browser => browser && (await browser.close()))
+    );
   });
 
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
-    const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING);
+    const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
 
     console.log('B starts downloading...');
-    await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING);
+    await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING, metamaskB);
 
     console.log('Waiting for open channels');
-    await Promise.all(tabs.map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
+    await Promise.all([web3tTabA].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
+    // only works if done in series.... not sure why
+    await Promise.all([web3tTabB].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
+
+    if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
+    else waitAndApproveDeposit(web3tTabB, metamaskB);
 
     // Let the download continue for some time
     console.log('Downloading');

@@ -70,7 +70,7 @@ function* gameSagaRun(client: RPSChannelClient) {
 
   switch (localState.type) {
     case 'Setup.NeedAddress':
-      yield call([window.channelProvider, 'enable']);
+      // yield call([window.channelProvider, 'enable']); // no longer need this
       yield put(
         a.gotAddressFromWallet(
           window.channelProvider.signingAddress,
