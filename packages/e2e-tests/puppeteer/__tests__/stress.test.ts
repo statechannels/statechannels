@@ -110,11 +110,14 @@ describe('Two files, three seeders, three leechers', () => {
   const forEach = async <T>(data: Data<T>, cb: (obj: T, label: Label) => any) =>
     await Promise.all(peers.map(async label => await cb(data[label], label)));
 
-  const browsers: Data<Browser> = {} as Data<Browser>;
+  const browsers: Data<{browser: Browser; metamask: Dappeteer}> = {} as Data<{
+    browser: Browser;
+    metamask: Dappeteer;
+  }>;
   const tabs: Data<Page> = {} as Data<Page>;
   afterAll(async () => {
     if (HEADLESS) {
-      await forEach(browsers, async browser => browser && (await browser.close()));
+      await forEach(browsers, async ({browser}) => browser && (await browser.close()));
     }
   });
 
@@ -125,35 +128,34 @@ describe('Two files, three seeders, three leechers', () => {
     await assignEachLabel(browsers, () => setUpBrowser(HEADLESS, 100));
 
     console.log('Waiting on pages');
-    await assignEachLabel(tabs, async label => (await browsers[label].pages())[0]);
+    await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
 
     const logPageOutput = (role: Label) => (msg: any) =>
       // use console.error so we can redirect STDERR to a file
       console.error(`${role}: `, msg.text());
     forEach(tabs, (tab, label) => tab.on('console', logPageOutput(label)));
 
-    console.log('Loading dapps');
-    let i = 0;
-    await forEach(tabs, async tab => await loadDapp(tab, i++, true));
-
     console.log('S1, SL upload the same file');
-    const [file] = [tabs.S1, tabs.SL].map(async tab => {
+    const [file] = [Label.S1, Label.SL].map(async label => {
+      const tab = tabs[label];
+      const {metamask} = browsers[label];
       await tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
-      return await uploadFile(tab, Files.F1, USES_VIRTUAL_FUNDING);
+      return await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask, Files.F1);
     });
 
     console.log('L1 starts downloading F1');
-    await startDownload(tabs.L1, await file, USES_VIRTUAL_FUNDING);
+    await startDownload(tabs.L1, await file, USES_VIRTUAL_FUNDING, browsers.L1.metamask);
 
     console.log('S2 uploads F2');
     let file2: string;
     {
       const tab = tabs.S2;
+      const {metamask} = browsers.S2;
       await tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
-      [file2] = await uploadFile(tab, Files.F1, USES_VIRTUAL_FUNDING);
+      [file2] = await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask, Files.F1);
     }
 
     console.log('L2 starts downloading F2');
-    await startDownload(tabs.L2, file2, USES_VIRTUAL_FUNDING);
+    await startDownload(tabs.L2, file2, USES_VIRTUAL_FUNDING, browsers.L2.metamask);
   });
 });
