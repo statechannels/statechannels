@@ -298,12 +298,10 @@ export class Store {
           applicationSite
         );
         // sign the state, store the channel
-        await this.signAndAddState(
+        return this.signAndAddState(
           entry.channelId,
           _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
         );
-
-        return entry;
       }
     );
   private async getNonce(addresses: string[]): Promise<BigNumber> {
