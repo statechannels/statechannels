@@ -1,5 +1,5 @@
 #!/bin/sh
-set -euf -o pipefail
+set -euf
 BASEDIR=$(dirname "$0")
 
 docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f "$BASEDIR"/simple-hub.dockerfile "$BASEDIR"/../../..

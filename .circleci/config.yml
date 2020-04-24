@@ -1,8 +1,9 @@
 version: 2.1
 
 orbs:
-  slack: circleci/slack@3.4.1
+  docker: circleci/docker@1.0.1
   puppeteer: threetreeslight/puppeteer@0.1.2
+  slack: circleci/slack@3.4.1
 
 default_env_vars: &default_env_vars
   HUB_DB_HOST: localhost
@@ -330,3 +331,17 @@ workflows:
           filters:
             branches:
               only: master
+      - docker/publish:
+          after_build:
+            - run: heroku container:release -a simple-hub-staging simple-hub
+          before_build:
+            - run: curl https://cli-assets.heroku.com/install.sh | sh
+            # - run: heroku container:login
+          dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
+          docker-password: HEROKU_API_KEY
+          docker-username: HEROKU_USERNAME
+          image: registry.heroku.com/simple-hub-staging/simple-hub
+          registry: registry.heroku.com
+          filters:
+            branches:
+              only: release-prod #deploy-web3torrent-xstate-wallet
