@@ -2,44 +2,28 @@ import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 
 import React from 'react';
-import {Web3TorrentClientContextInterface} from './w3t-client-context';
+
+import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 
 export const BudgetContext = React.createContext<ReturnType<typeof useBudgetContext>>(undefined);
 interface Props {
-  web3TorrentClientContext: Web3TorrentClientContextInterface;
+  w3tClient: WebTorrentPaidStreamingClient;
 }
-export function useBudgetContext({web3TorrentClientContext}: Props) {
+export function useBudgetContext({w3tClient}: Props) {
   const [loading, setLoading] = useState(true);
-
-  const {initialize, initializationStatus} = web3TorrentClientContext;
-
-  useEffect(() => {
-    if (initializationStatus === 'Not Initialized') {
-      initialize();
-    }
-  });
 
   useEffect(() => {
     const getAndSetBudget = async () => {
-      const {paymentChannelClient} = web3TorrentClientContext.getContext();
+      const {paymentChannelClient} = w3tClient;
       await paymentChannelClient.getBudget();
       setLoading(false);
     };
-    if (initializationStatus === 'Initialized') {
+    if (w3tClient) {
       getAndSetBudget();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initializationStatus]);
+  });
 
-  if (initializationStatus !== 'Initialized') {
-    return {budget: undefined, loading, createBudget: undefined, closeBudget: undefined};
-  } else {
-    return constructContext(web3TorrentClientContext, loading, setLoading);
-  }
-}
-
-function constructContext(web3TorrentClientContext, loading, setLoading) {
-  const {paymentChannelClient} = web3TorrentClientContext.getContext();
+  const {paymentChannelClient} = w3tClient;
   const createBudget = async () => {
     setLoading(true);
     await paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);

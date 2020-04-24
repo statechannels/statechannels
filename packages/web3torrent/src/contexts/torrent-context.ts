@@ -3,10 +3,11 @@ import {useEffect} from 'react';
 import React from 'react';
 import {getTorrentUI} from '../utils/torrent-status-checker';
 import {WebTorrentAddInput, ExtendedTorrent, WebTorrentSeedInput} from '../library/types';
-import {Web3TorrentClientContextInterface} from './w3t-client-context';
+
 import _ from 'lodash';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {Status, TorrentUI, TorrentStaticData} from '../types';
+import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 
 export interface TorrentClientContextInterface {
   download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent>;
@@ -16,31 +17,14 @@ export interface TorrentClientContextInterface {
 }
 export const TorrentClientContext = React.createContext<TorrentClientContextInterface>(undefined);
 interface Props {
-  web3TorrentClientContext: Web3TorrentClientContextInterface;
+  w3tClient: WebTorrentPaidStreamingClient;
 }
 export function useTorrentClientContext({
-  web3TorrentClientContext
+  w3tClient
 }: Props): TorrentClientContextInterface | undefined {
-  const {initialize, initializationStatus} = web3TorrentClientContext;
-
-  useEffect(() => {
-    if (initializationStatus === 'Not Initialized') {
-      initialize();
-    }
-  });
-
-  if (initializationStatus !== 'Initialized') {
-    return undefined;
-  } else {
-    return constructContext(web3TorrentClientContext);
-  }
-}
-
-function constructContext(web3TorrentClientContext) {
-  const web3torrent = web3TorrentClientContext.getContext();
-
   const doesBudgetExist = async (): Promise<boolean> => {
-    const budget = await web3torrent.paymentChannelClient.getBudget();
+    const {paymentChannelClient} = w3tClient;
+    const budget = await paymentChannelClient.getBudget();
     return !!budget && !_.isEmpty(budget);
   };
   const torrentNamer = (input: WebTorrentSeedInput) => {
@@ -51,27 +35,25 @@ function constructContext(web3TorrentClientContext) {
   };
 
   const download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent> = async torrentData => {
-    await web3torrent.enable();
+    await w3tClient.enable();
     if (!(await doesBudgetExist())) {
-      await web3torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+      await w3tClient.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
     }
 
     return new Promise((resolve, reject) =>
-      web3torrent.add(torrentData, (torrent: any) =>
-        resolve({...torrent, status: Status.Connecting})
-      )
+      w3tClient.add(torrentData, (torrent: any) => resolve({...torrent, status: Status.Connecting}))
     );
   };
 
   const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = async input => {
-    await web3torrent.enable();
+    await w3tClient.enable();
     // TODO: This only checks if a budget exists, not if we have enough funds in it
     if (!(await doesBudgetExist())) {
-      await web3torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+      await w3tClient.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
     }
 
     return new Promise((resolve, reject) =>
-      web3torrent.seed(input, {...torrentNamer(input)}, (torrent: any) => {
+      w3tClient.seed(input, {...torrentNamer(input)}, (torrent: any) => {
         resolve({
           ...torrent,
           status: Status.Seeding,
@@ -83,7 +65,7 @@ function constructContext(web3TorrentClientContext) {
 
   const cancel = (id: string = ''): Promise<string> => {
     return new Promise((resolve, reject) =>
-      web3torrent.cancel(id, err => {
+      w3tClient.cancel(id, err => {
         if (err) {
           reject(err);
         } else {
@@ -96,6 +78,6 @@ function constructContext(web3TorrentClientContext) {
     download,
     upload,
     cancel,
-    getTorrentUI: data => getTorrentUI(web3torrent, data)
+    getTorrentUI: data => getTorrentUI(w3tClient, data)
   };
 }

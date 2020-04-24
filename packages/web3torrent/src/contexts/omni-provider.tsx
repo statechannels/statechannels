@@ -1,21 +1,35 @@
 import {BudgetContext, useBudgetContext} from './budget-context';
-import {Web3TorrentClientContext, useWeb3TorrentClientContext} from './w3t-client-context';
+import {
+  useClientInitializationContext,
+  ClientInitializationContext
+} from './client-initialization-context';
 import React from 'react';
 import {ChannelContext, useChannelContext} from './channel-context';
 import {TorrentClientContext, useTorrentClientContext} from './torrent-context';
+import {ChannelClient} from '@statechannels/channel-client';
+import {PaymentChannelClient} from '../clients/payment-channel-client';
+import {defaultTrackers} from '../constants';
+import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 
 export const OmniProvider: React.FC = ({children}) => {
-  const web3TorrentClientContext = useWeb3TorrentClientContext();
-  // TODO: Probably a more elegant way of doing this
+  const paymentChannelClient = new PaymentChannelClient(new ChannelClient(window.channelProvider));
+  const w3tClient = new WebTorrentPaidStreamingClient({
+    paymentChannelClient,
+    tracker: {announce: defaultTrackers}
+  });
+
+  const web3TorrentClientContext = useClientInitializationContext({w3tClient});
+  const torrentClientContext = useTorrentClientContext({w3tClient});
+  const channelContext = useChannelContext({w3tClient});
+  const budgetContext = useBudgetContext({w3tClient});
+
   return (
-    <Web3TorrentClientContext.Provider value={web3TorrentClientContext}>
-      <TorrentClientContext.Provider value={useTorrentClientContext({web3TorrentClientContext})}>
-        <ChannelContext.Provider value={useChannelContext({web3TorrentClientContext})}>
-          <BudgetContext.Provider value={useBudgetContext({web3TorrentClientContext})}>
-            {children}
-          </BudgetContext.Provider>
+    <ClientInitializationContext.Provider value={web3TorrentClientContext}>
+      <TorrentClientContext.Provider value={torrentClientContext}>
+        <ChannelContext.Provider value={channelContext}>
+          <BudgetContext.Provider value={budgetContext}>{children}</BudgetContext.Provider>
         </ChannelContext.Provider>
       </TorrentClientContext.Provider>
-    </Web3TorrentClientContext.Provider>
+    </ClientInitializationContext.Provider>
   );
 };
