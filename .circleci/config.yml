@@ -333,10 +333,11 @@ workflows:
               only: master
       - docker/publish:
           after_build:
+            - run: docker push registry.heroku.com/simple-hub-staging/simple-hub
             - run: heroku container:release -a simple-hub-staging simple-hub
           before_build:
             - run: curl https://cli-assets.heroku.com/install.sh | sh
-            # - run: heroku container:login
+          deploy: false
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
           docker-password: HEROKU_API_KEY
           docker-username: HEROKU_USERNAME
@@ -344,4 +345,5 @@ workflows:
           registry: registry.heroku.com
           filters:
             branches:
+              #todo: switch before creating a PR
               only: release-prod #deploy-web3torrent-xstate-wallet
