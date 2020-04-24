@@ -14,7 +14,7 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import _ from 'lodash';
+
 import {map, filter, first} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
