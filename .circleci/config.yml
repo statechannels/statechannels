@@ -206,13 +206,7 @@ jobs:
     docker:
       - image: circleci/node:10.16.3-browsers
     environment:
-      FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      USE_VIRTUAL_FUNDING: 'FALSE'
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8545
-      NODE_ENV: test
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+      SC_ENV: circle-integration-rps
     steps:
       - checkout
       - puppeteer/install
