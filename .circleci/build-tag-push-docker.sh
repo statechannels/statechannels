@@ -1,5 +1,5 @@
 #!/bin/sh
 set -euf -o pipefail
 
-docker build -t counterfactual/statechannels:latest .
-docker push counterfactual/statechannels:latest
+docker build -t counterfactual/statechannels:${1} .
+docker push counterfactual/statechannels:${1}
