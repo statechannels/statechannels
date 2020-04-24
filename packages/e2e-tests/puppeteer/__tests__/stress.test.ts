@@ -48,7 +48,7 @@ describe('One file, two seeders, one leecher', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
 
     console.log('Opening browsers');
-    await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 100));
+    await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 0));
 
     console.log('Waiting on pages');
     await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
