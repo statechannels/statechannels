@@ -331,11 +331,6 @@ export class Store {
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const entry = await this.getEntry(channelId);
 
-        if (entry.isSupportedByMe && entry.latestSignedByMe.turnNum.gte(stateVars.turnNum)) {
-          logger.error({entry: entry.data(), stateVars});
-          throw Error(Errors.staleState);
-        }
-
         const {participants} = entry;
         const myAddress = participants[entry.myIndex].signingAddress;
         const privateKey = await this.backend.getPrivateKey(myAddress);
