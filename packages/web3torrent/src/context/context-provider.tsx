@@ -5,13 +5,13 @@ import {
 } from './client-initialization-context';
 import React from 'react';
 import {ChannelContext, useChannelContext} from './channel-context';
-import {TorrentClientContext, useTorrentClientContext} from './torrent-context';
+import {TorrentClientContext, useTorrentClientContext} from './torrent-client-context';
 import {ChannelClient} from '@statechannels/channel-client';
 import {PaymentChannelClient} from '../clients/payment-channel-client';
 import {defaultTrackers} from '../constants';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 
-export const OmniProvider: React.FC = ({children}) => {
+export const ContextProvider: React.FC = ({children}) => {
   const paymentChannelClient = new PaymentChannelClient(new ChannelClient(window.channelProvider));
   const w3tClient = new WebTorrentPaidStreamingClient({
     paymentChannelClient,

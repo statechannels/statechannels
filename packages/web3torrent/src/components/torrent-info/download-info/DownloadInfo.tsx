@@ -6,7 +6,7 @@ import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {ChannelsList} from '../channels-list/ChannelsList';
 import {TorrentUI} from '../../../types';
-import {TorrentClientContext} from '../../../contexts/torrent-context';
+import {TorrentClientContext} from '../../../context/torrent-client-context';
 
 export type DownloadInfoProps = {
   torrent: TorrentUI;

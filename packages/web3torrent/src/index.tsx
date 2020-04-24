@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-import {OmniProvider} from './contexts/omni-provider';
+import {ContextProvider} from './context/context-provider';
 
 ReactDOM.render(
-  <OmniProvider>
+  <ContextProvider>
     <App />
-  </OmniProvider>,
+  </ContextProvider>,
   document.getElementById('root')
 );

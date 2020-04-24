@@ -3,8 +3,8 @@ import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
 
-import {ChannelContext} from '../../contexts/channel-context';
-import {BudgetContext} from '../../contexts/budget-context';
+import {ChannelContext} from '../../context/channel-context';
+import {BudgetContext} from '../../context/budget-context';
 
 const bigNumberify = utils.bigNumberify;
 

@@ -10,7 +10,7 @@ import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
-import {ClientInitializationContext} from './contexts/client-initialization-context';
+import {ClientInitializationContext} from './context/client-initialization-context';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(

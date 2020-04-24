@@ -8,7 +8,7 @@ import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
-import {ChannelContext} from '../../../contexts/channel-context';
+import {ChannelContext} from '../../../context/channel-context';
 
 type UploadInfoProps = {
   torrent: TorrentUI;

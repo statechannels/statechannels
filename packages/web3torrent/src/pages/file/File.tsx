@@ -13,9 +13,9 @@ import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
-import {BudgetContext} from '../../contexts/budget-context';
-import {ChannelContext} from '../../contexts/channel-context';
-import {TorrentClientContext} from '../../contexts/torrent-context';
+import {BudgetContext} from '../../context/budget-context';
+import {ChannelContext} from '../../context/channel-context';
+import {TorrentClientContext} from '../../context/torrent-client-context';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);

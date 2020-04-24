@@ -1,5 +1,3 @@
-import {useEffect} from 'react';
-
 import React from 'react';
 
 import {ChannelState} from '../clients/payment-channel-client';

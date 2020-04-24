@@ -3,7 +3,7 @@ import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTabl
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
-import {BudgetContext} from '../../contexts/budget-context';
+import {BudgetContext} from '../../context/budget-context';
 
 interface Props {
   ready: boolean;

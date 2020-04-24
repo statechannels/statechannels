@@ -6,7 +6,7 @@ import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {getUserFriendlyError} from '../../utils/error';
 import {Flash} from 'rimble-ui';
-import {TorrentClientContext} from '../../contexts/torrent-context';
+import {TorrentClientContext} from '../../context/torrent-client-context';
 
 const Upload: React.FC<{ready: boolean}> = ({ready}) => {
   const history = useHistory();
