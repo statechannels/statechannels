@@ -197,6 +197,11 @@ export class ChannelStoreEntry {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
+    if (this.isSupportedByMe && this.latestSignedByMe.turnNum.gte(stateVars.turnNum)) {
+      logger.error({entry: this.data(), stateVars});
+      throw Error(Errors.staleState);
+    }
+
     const state = {...stateVars, ...this.channelConstants};
 
     const signatureEntry = createSignatureEntry(state, privateKey);
@@ -245,7 +250,7 @@ export class ChannelStoreEntry {
     const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
 
     if (multipleSignedByMe) {
-      logger.error({groupedByTurnNum});
+      logger.error({entry: this.data()});
 
       throw Error(Errors.staleState);
     }
