@@ -252,7 +252,7 @@ export class ChannelStoreEntry {
     if (multipleSignedByMe) {
       logger.error({entry: this.data()});
 
-      throw Error(Errors.staleState);
+      throw Error(Errors.multipleSignedStates);
     }
 
     const {signedStates} = this;
