@@ -15,6 +15,8 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {logger} from '../logger';
 
 import {Funding} from './store';
+import {Errors} from '.';
+import {logger} from '../logger';
 export interface SignatureEntry {
   signature: string;
   signer: string;
@@ -164,8 +166,12 @@ export class ChannelStoreEntry {
     return !!this._latestSupportedByMe;
   }
 
+  private get _signedByMe() {
+    return this.signedStates.filter(s => this.mySignature(s, s.signatures));
+  }
+
   private get _latestSupportedByMe() {
-    return this.signedStates.find(s => this.mySignature(s, s.signatures));
+    return this._signedByMe.find(() => true);
   }
 
   get latestSignedByMe() {
@@ -229,7 +235,28 @@ export class ChannelStoreEntry {
 
     this.clearOldStates();
 
+    this.checkInvariants();
+
     return this.state(entry);
+  }
+
+  private checkInvariants() {
+    const groupedByTurnNum = _.groupBy(this._signedByMe, s => s.turnNum.toString());
+    const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
+
+    if (multipleSignedByMe) {
+      logger.error({groupedByTurnNum});
+
+      throw Error(Errors.staleState);
+    }
+
+    const {signedStates} = this;
+    const turnNums = _.map(signedStates, s => s.turnNum.toHexString());
+
+    if (!isReverseSorted(turnNums)) {
+      logger.error({signedStates: _.map(signedStates, s => s.turnNum.toHexString())});
+      throw Error(Errors.notSorted);
+    }
   }
 
   private state(stateVars: SignedStateVariables): SignedState {
@@ -339,4 +366,14 @@ export class ChannelStoreEntry {
       return outcome;
     }
   }
+}
+
+function isReverseSorted(arr) {
+  const len = arr.length - 1;
+  for (let i = 0; i < len; ++i) {
+    if (arr[i] < arr[i + 1]) {
+      return false;
+    }
+  }
+  return true;
 }
