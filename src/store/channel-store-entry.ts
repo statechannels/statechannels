@@ -281,6 +281,8 @@ export class ChannelStoreEntry {
       // Take everything after that
       this.stateVariables = this.stateVariables.slice(supportIndex);
     }
+
+    this.stateVariables = _.reverse(_.sortBy(this.stateVariables, s => s.turnNum.toHexString()));
   }
 
   private nParticipants(): number {
