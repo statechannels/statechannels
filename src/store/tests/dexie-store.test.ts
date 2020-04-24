@@ -137,6 +137,27 @@ describe('createChannel', () => {
   });
 });
 
+describe('signAndAdd', () => {
+  it('returns void when successful', async () => {
+    const store = await aStore();
+
+    const entry = await store.createChannel(
+      participants,
+      challengeDuration,
+      stateVars,
+      appDefinition
+    );
+
+    const {channelId, latest} = entry;
+
+    const turnNum = latest.turnNum.add(5);
+    await store.signAndAddState(channelId, {...latest, turnNum});
+
+    const newEntry = await store.getEntry(channelId);
+    expect(newEntry.latestSignedByMe.turnNum.toString()).toMatch(turnNum.toString());
+  });
+});
+
 describe('pushMessage', () => {
   it('stores states', async () => {
     const store = await aStore();
