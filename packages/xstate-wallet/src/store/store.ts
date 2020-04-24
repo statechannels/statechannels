@@ -345,16 +345,15 @@ export class Store {
           privateKey
         );
         await this.backend.setChannel(channelId, entry.data());
-        return {
-          entry: await this.getEntry(channelId),
-          signedState
-        };
+        return {entry, signedState};
       })
       .then(({entry, signedState}) => {
         // These events trigger callbacks that should not run within the transaction scope
         // See https://github.com/dfahlander/Dexie.js/issues/1029
         this._eventEmitter.emit('channelUpdated', entry);
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+
+        return entry;
       });
 
   async addObjective(objective: Objective, addToOutbox = true) {
