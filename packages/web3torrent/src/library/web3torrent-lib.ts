@@ -112,7 +112,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info('> Peer cancels download. Pausing torrents');
     const torrent = this.torrents.find(t => t.infoHash === torrentInfoHash);
     if (torrent) {
-      torrent.pause();
+      await this.closeDownloadingChannels(torrent);
+      torrent.destroy();
     }
   }
 
