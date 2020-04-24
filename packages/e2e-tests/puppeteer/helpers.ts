@@ -130,7 +130,6 @@ export async function setUpBrowser(
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;
   if (!USE_DAPPETEER) {
-    // TODO condition on USE_DAPPETEER env var
     browser = await puppeteer.launch({
       headless,
       slowMo,
