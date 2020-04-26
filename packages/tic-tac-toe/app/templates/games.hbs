@@ -9,7 +9,7 @@
           <span class="mr-2">
             Ropsten
           </span>
-          {{svg-jar "check"}}
+          {{svg-jar 'check'}}
         </div>
       </div>
     </div>
@@ -38,7 +38,7 @@
 {{outlet}}
 <nav class="container flex justify-end fixed bottom-0 pb-2">
   <div class="flex flex-col items-end">
-    {{svg-jar "state-channels" class="w-32"}}
+    {{svg-jar 'state-channels' class='w-32'}}
     <small class="text-muted">
       Something not working? Email us at
       <a href="mailto:oops@statechannels.org">
@@ -47,3 +47,10 @@
     </small>
   </div>
 </nav>
+<div class="hidden">
+  {{#each this.model as |message|}}
+    <span {{did-insert (fn this.onMessage message)}}>
+      {{message.recipient}}
+    </span>
+  {{/each}}
+</div>

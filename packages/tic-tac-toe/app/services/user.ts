@@ -5,8 +5,8 @@ import TttChannelClientService from './ttt-channel-client';
 
 export default class UserService extends Service {
   @service tttChannelClient!: TttChannelClientService;
-  @tracked walletAddress!: string;
-  @tracked userAddress!: string;
+  @tracked address!: string;
+  @tracked outcomeAddress!: string;
   @tracked username!: string;
 
   public get isInitialized(): boolean {
@@ -20,8 +20,8 @@ export default class UserService extends Service {
 
   private async requestAddresses(): Promise<void> {
     await window.channelProvider.enable();
-    this.walletAddress = window.channelProvider.signingAddress as string;
-    this.userAddress = window.channelProvider.selectedAddress as string;
+    this.address = window.channelProvider.signingAddress as string;
+    this.outcomeAddress = window.channelProvider.selectedAddress as string;
   }
 }
 
