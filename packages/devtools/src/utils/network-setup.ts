@@ -27,8 +27,8 @@ export async function getNetworkId() {
   return (await ganacheProvider.getNetwork()).chainId;
 }
 
-export function getNetworkName(networkId: number) {
-  switch (networkId) {
+export function getNetworkName(networkId: string | number) {
+  switch (Number(networkId)) {
     case 1:
       return 'live';
     case 3:
