@@ -18,13 +18,13 @@ export const ContextProvider: React.FC = ({children}) => {
     tracker: {announce: defaultTrackers}
   });
 
-  const web3TorrentClientContext = useClientInitializationContext({w3tClient});
+  const initializationContext = useClientInitializationContext({w3tClient});
   const torrentClientContext = useTorrentClientContext({w3tClient});
   const channelContext = useChannelContext({w3tClient});
-  const budgetContext = useBudgetContext({w3tClient});
+  const budgetContext = useBudgetContext({w3tClient, initializationContext});
 
   return (
-    <ClientInitializationContext.Provider value={web3TorrentClientContext}>
+    <ClientInitializationContext.Provider value={initializationContext}>
       <TorrentClientContext.Provider value={torrentClientContext}>
         <ChannelContext.Provider value={channelContext}>
           <BudgetContext.Provider value={budgetContext}>{children}</BudgetContext.Provider>

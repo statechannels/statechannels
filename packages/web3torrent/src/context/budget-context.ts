@@ -4,15 +4,19 @@ import {useState, useEffect} from 'react';
 import React from 'react';
 
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
+import {ClientInitializationContextInterface} from './client-initialization-context';
 
 export const BudgetContext = React.createContext<ReturnType<typeof useBudgetContext>>(undefined);
 interface Props {
   w3tClient: WebTorrentPaidStreamingClient;
+  initializationContext: ClientInitializationContextInterface;
 }
-export function useBudgetContext({w3tClient}: Props) {
+export function useBudgetContext({w3tClient, initializationContext}: Props) {
   const [loading, setLoading] = useState(true);
   const [doInitialFetch, setDoInitialFetch] = useState(true);
   const [budget, setBudget] = useState(undefined);
+  const {initializationStatus} = initializationContext;
+  console.log(initializationStatus);
   useEffect(() => {
     const getAndSetBudget = async () => {
       const {paymentChannelClient} = w3tClient;
@@ -22,7 +26,7 @@ export function useBudgetContext({w3tClient}: Props) {
       setLoading(false);
       setDoInitialFetch(false);
     };
-    if (doInitialFetch) {
+    if (doInitialFetch && initializationStatus === 'Initialized') {
       getAndSetBudget();
     }
   });
