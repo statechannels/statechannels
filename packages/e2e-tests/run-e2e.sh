@@ -21,9 +21,8 @@ yarn run wait-on -d 5000 http://localhost:3000 http://localhost:3055
 yarn test $1
 code=$?
 
-kill -9 $ganache
-kill -9 $wallet
-kill -9 $app
-kill -9 $hub
-kill -9 -$$
+kill $ganache
+kill $wallet
+kill $app
+kill $hub
 exit $code
