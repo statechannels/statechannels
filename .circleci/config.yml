@@ -355,6 +355,7 @@ workflows:
           registry: registry.heroku.com
           tag: latest
           use-remote-docker: true
+          working_directory: /home/circleci/project
           filters:
             branches:
               #todo: switch before creating a PR
