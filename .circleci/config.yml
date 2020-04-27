@@ -350,7 +350,7 @@ workflows:
           executor:
             image: circleci/node
             name: docker/docker
-            tag: 10.16
+            tag: '10.16'
           image: simple-hub-staging/simple-hub
           registry: registry.heroku.com
           tag: latest
