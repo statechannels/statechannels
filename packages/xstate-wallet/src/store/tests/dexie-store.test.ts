@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-disabled-tests */
-import {XstateStore} from '../store';
+import {Store} from '../store';
 import {State, Objective, SiteBudget, AssetBudget, ObjectStores} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
@@ -44,7 +44,7 @@ const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
 const aStore = async (noPrivateKeys = false) => {
-  const store = new XstateStore(undefined, new Backend());
+  const store = new Store(undefined, new Backend());
   const privateKeys = noPrivateKeys ? undefined : [aPrivateKey];
   await store.initialize(privateKeys, true);
   return store;
@@ -186,7 +186,7 @@ describe('getBudget', () => {
   });
 });
 
-const getBackend = (store: XstateStore) => (store as any).backend as Backend;
+const getBackend = (store: Store) => (store as any).backend as Backend;
 
 describe('transactions', () => {
   // TODO:

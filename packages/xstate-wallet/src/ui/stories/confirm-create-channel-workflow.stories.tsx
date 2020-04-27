@@ -9,9 +9,9 @@ import {bigNumberify} from 'ethers/utils';
 import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
-import {XstateStore} from '../../store';
+import {Store} from '../../store';
 
-const store = new XstateStore();
+const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 
 const alice: Participant = {

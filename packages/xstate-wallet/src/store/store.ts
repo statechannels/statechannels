@@ -135,7 +135,7 @@ export type ChannelLock = {
   lock?: Guid;
 };
 
-export class XstateStore implements StoreInterface {
+export class Store implements StoreInterface {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();

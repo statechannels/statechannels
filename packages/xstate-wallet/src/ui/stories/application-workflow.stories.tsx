@@ -6,10 +6,10 @@ import {renderComponentInFrontOfApp} from './helpers';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import React from 'react';
 import {ApplicationWorkflow} from '../application-workflow';
-import {XstateStore} from '../../store';
+import {Store} from '../../store';
 import {Application} from '../../workflows';
 
-const store = new XstateStore();
+const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 const testContext: Application.WorkflowContext = {

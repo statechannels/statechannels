@@ -1,7 +1,7 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {XstateStore} from '../../store';
+import {Store} from '../../store';
 import {StateVariables, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
@@ -29,7 +29,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       applicationSite: 'localhost'
     };
 
-    const store = new XstateStore();
+    const store = new Store();
     await store.initialize([wallet1.privateKey]);
     const messagingService = new MessagingService(store);
 
@@ -83,7 +83,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
       requestId: 5
     };
 
-    const store = new XstateStore();
+    const store = new Store();
     await store.initialize();
     const messagingService = new MessagingService(store);
 
@@ -136,7 +136,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
 });
 
 it('raises an channel updated action when the channel is updated', async () => {
-  const store = new XstateStore();
+  const store = new Store();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const mockOptions = {
@@ -163,7 +163,7 @@ it('raises an channel updated action when the channel is updated', async () => {
 });
 
 it('starts concluding when requested', async () => {
-  const store = new XstateStore();
+  const store = new Store();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
@@ -197,7 +197,7 @@ it('starts concluding when requested', async () => {
 });
 
 it('starts challenging when requested', async () => {
-  const store = new XstateStore();
+  const store = new Store();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
@@ -231,7 +231,7 @@ it('starts challenging when requested', async () => {
 });
 
 it('starts concluding when receiving a final state', async () => {
-  const store = new XstateStore();
+  const store = new Store();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<Application.WorkflowServices> = {

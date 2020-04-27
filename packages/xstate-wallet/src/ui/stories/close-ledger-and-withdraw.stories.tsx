@@ -7,7 +7,7 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
-import {XstateStore, SiteBudget} from '../../store';
+import {Store, SiteBudget} from '../../store';
 import React from 'react';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
@@ -15,7 +15,7 @@ import {Participant} from '../../store/types';
 import {parseEther} from 'ethers/utils';
 import {ethBudget} from '../../utils';
 
-const store = new XstateStore();
+const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 

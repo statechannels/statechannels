@@ -2,7 +2,7 @@ import {StoreInterface} from './store';
 import {filter, map} from 'rxjs/operators';
 import {StateVariables} from './types';
 
-export {StoreInterface, XstateStore} from './store';
+export {StoreInterface, Store} from './store';
 export * from './types';
 
 // TODO: Move to somewhere better?

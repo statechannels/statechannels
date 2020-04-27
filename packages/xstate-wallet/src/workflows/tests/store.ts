@@ -2,10 +2,10 @@ import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
-import {XstateStore, Funding, StoreInterface} from '../../store';
+import {Store, Funding} from '../../store';
 import {SigningKey} from 'ethers/utils';
 
-export class TestStore extends XstateStore implements StoreInterface {
+export class TestStore extends Store {
   public _channelLocks: Record<string, Guid>;
   public get dbBackend() {
     return this.backend;
