@@ -1,27 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "module": "commonjs",
-    "target": "es2017",
-    "noImplicitAny": false,
-    "rootDir": "src",
-    "outDir": "lib",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "strict": false
-  },
+  "extends": "./tsconfig.prod.json",
   "references": [
     {
       "path": "../devtools"
-    },
-    {
-      "path": "../nitro-protocol"
-    },
-    {
-      "path": "../wire-format"
     }
-  ],
-  "include": ["./src"],
-  "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
+  ]
 }
