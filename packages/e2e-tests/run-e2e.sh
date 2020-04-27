@@ -9,5 +9,6 @@ yarn hub:watch &
 cd ../e2e-tests
 yarn test $1
 code=$?
+kill -- $$
 kill -9 -$$
 exit $code
