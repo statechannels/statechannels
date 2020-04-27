@@ -341,7 +341,7 @@ workflows:
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
           docker-password: HEROKU_API_KEY
           docker-username: HEROKU_USERNAME
-          image: registry.heroku.com/simple-hub-staging/simple-hub
+          image: simple-hub-staging/simple-hub
           registry: registry.heroku.com
           filters:
             branches:
