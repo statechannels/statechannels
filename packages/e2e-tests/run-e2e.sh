@@ -25,4 +25,5 @@ kill $ganache
 kill $wallet
 kill $app
 kill $hub
+killall node
 exit $code
