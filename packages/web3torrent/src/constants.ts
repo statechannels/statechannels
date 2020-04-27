@@ -174,7 +174,7 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 export const FUNDING_STRATEGY =
   process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
-export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('10').toHexString(), 32);
+export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('0.001').toHexString(), 32);
 
 export const LOG_DESTINATION = process.env.REACT_APP_LOG_DESTINATION;
 export const ADD_LOGS = !!LOG_DESTINATION;
