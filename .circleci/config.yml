@@ -344,7 +344,7 @@ workflows:
           docker-username: HEROKU_USERNAME
           image: simple-hub-staging/simple-hub
           registry: registry.heroku.com
-          tag:
+          tag: latest
           filters:
             branches:
               #todo: switch before creating a PR
