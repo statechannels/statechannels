@@ -15099,7 +15099,7 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-end-of-stream@^1.0.0, end-of-stream@^1.1.0, end-of-stream@^1.4.1:
+end-of-stream@1.4.1, end-of-stream@^1.0.0, end-of-stream@^1.1.0, end-of-stream@^1.4.1:
   version "1.4.1"
   resolved "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.4.1.tgz#ed29634d19baba463b6ce6b80a37213eab71ec43"
   integrity sha512-1MkrZNvWTKCaigbn+W15elq2BB/L22nqrSY5DKlo3X6+vclJm8Bb5djXJBmEX6fS3+zCh/F4VBK5Z2KxJt4s2Q==
@@ -27974,6 +27974,11 @@ react-draggable@^4.0.3:
   dependencies:
     classnames "^2.2.5"
     prop-types "^15.6.0"
+
+react-driftjs@^1.1.10:
+  version "1.1.10"
+  resolved "https://registry.npmjs.org/react-driftjs/-/react-driftjs-1.1.10.tgz#5f1490cbb408b5cdacc1f77740c5079030204ed0"
+  integrity sha512-gip7yv3dmX617KtDLIVQwmsWTRdJ6PoHLokQ4GTixRFzsbbSt+U/Ds5IUQLfToqMueJ2CyI6wqJ0WqqHWoe+1Q==
 
 react-element-to-jsx-string@^14.0.2:
   version "14.3.1"
