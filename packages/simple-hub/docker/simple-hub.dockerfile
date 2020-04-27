@@ -28,11 +28,15 @@ RUN yarn add --ignore-scripts dotenv dotenv-expand
 
 # COPY SOURCE
 WORKDIR /statechannels/monorepo
+COPY ./tsconfig.json ./
+COPY .env.* ./
 COPY ./packages/nitro-protocol/ packages/nitro-protocol/
 COPY ./packages/wire-format/ packages/wire-format/
 COPY ./packages/simple-hub/ packages/simple-hub/
+COPY ./packages/jest-gas-reporter/ packages/jest-gas-reporter/
 
 WORKDIR /statechannels/monorepo/packages/simple-hub
+RUN yarn build:prod
 
 # docker-entrypoint.sh starts a shell that execs the list of arguments in CMD
 # This works around the following heroku constraint:
