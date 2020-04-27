@@ -16,7 +16,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
@@ -226,7 +226,7 @@ const generateConfig = (
 });
 
 export const workflow = (
-  store: Store,
+  store: StoreInterface,
   messagingService: MessagingServiceInterface,
   context?: Init
 ) => {

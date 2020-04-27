@@ -4,7 +4,7 @@ import {add, checkThat, isSimpleEthAllocation} from '../../utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
-import {Store, SignedState} from '../../store';
+import {SignedState} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
@@ -95,7 +95,7 @@ describe('success', () => {
   test('happy path', async () => {
     const _chain = new FakeChain();
     _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
-    [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
+    [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
 
     const aService = interpret(machine(aStore).withContext(context));
 

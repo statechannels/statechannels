@@ -10,7 +10,7 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '../store';
+import {StoreInterface, supportedStateFeed} from '../store';
 import {SupportState, LedgerFunding} from '.';
 import {
   checkThat,
@@ -50,7 +50,9 @@ type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 type WithObjectiveData = WithDeductions & {guarantorChannelId: string; ledgerId: string};
 
-const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
+const getFundGuarantorObjective = (store: StoreInterface) => async (
+  ctx: Init
+): Promise<FundGuarantor> => {
   const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
@@ -107,7 +109,7 @@ const enum Services {
   updateJointChannelFunding = 'updateJointChannelFunding'
 }
 
-const waitForSupportedGuarantorState = (store: Store) => async (ctx: WithObjectiveData) =>
+const waitForSupportedGuarantorState = (store: StoreInterface) => async (ctx: WithObjectiveData) =>
   store
     .channelUpdatedFeed(ctx.guarantorChannelId)
     .pipe(
@@ -177,7 +179,7 @@ export const config: StateNodeConfig<Init, any, any> = {
   // until a seemingly random number of project changes
 };
 
-export const waitForFirstJointState = (store: Store) => ({
+export const waitForFirstJointState = (store: StoreInterface) => ({
   jointChannelId
 }: Init): Promise<SupportState.Init> =>
   store
@@ -207,7 +209,7 @@ export const waitForFirstJointState = (store: Store) => ({
     )
     .toPromise();
 
-export const jointChannelUpdate = (store: Store) => ({
+export const jointChannelUpdate = (store: StoreInterface) => ({
   jointChannelId,
   targetChannelId
 }: Init): Promise<SupportState.Init> =>
@@ -227,7 +229,7 @@ export const jointChannelUpdate = (store: Store) => ({
     )
     .toPromise();
 
-const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
+const getDeductions = (store: StoreInterface) => async (ctx: Init): Promise<Deductions> => {
   const {latestSignedByMe: latestSupportedByMe, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
@@ -244,13 +246,13 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   };
 };
 
-const updateJointChannelFunding = (store: Store) => async (ctx: WithObjectiveData) => {
+const updateJointChannelFunding = (store: StoreInterface) => async (ctx: WithObjectiveData) => {
   const {jointChannelId, guarantorChannelId} = ctx;
   await store.setFunding(jointChannelId, {type: 'Guarantee', guarantorChannelId});
 };
 
 export const options = (
-  store: Store
+  store: StoreInterface
 ): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
   const actions: Record<Actions, any> = {
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
@@ -278,4 +280,4 @@ export const options = (
   return {actions, services};
 };
 
-export const machine = (store: Store) => Machine(config, options(store));
+export const machine = (store: StoreInterface) => Machine(config, options(store));

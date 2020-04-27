@@ -11,7 +11,7 @@ import {
   ActionTypes
 } from 'xstate';
 import {SimpleAllocation, Objective, Participant, StateVariables} from '../store/types';
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
@@ -89,7 +89,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
 };
 
 const initializeChannel = (
-  store: Store
+  store: StoreInterface
 ): WorkflowServices['initializeChannel'] => async context => {
   const stateVars: StateVariables = {
     outcome: context.initialOutcome,
@@ -103,7 +103,9 @@ const initializeChannel = (
   return entry.channelId;
 };
 
-const createObjective = (store: Store): WorkflowServices['createObjective'] => async context => {
+const createObjective = (
+  store: StoreInterface
+): WorkflowServices['createObjective'] => async context => {
   const objective: Objective = {
     type: 'FundLedger',
     participants: context.participants,
@@ -111,13 +113,15 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
   };
   return store.addObjective(objective);
 };
-const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => async context => {
+const getPreFundState = (
+  store: StoreInterface
+): WorkflowServices['getPreFundState'] => async context => {
   const {latestState} = await store.getEntry(context.ledgerId);
   return {state: latestState};
 };
 
 const getDepositingInfo = (
-  store: Store
+  store: StoreInterface
 ): WorkflowServices['getDepositingInfo'] => async context => {
   const {supported, myIndex} = await store.getEntry(context.ledgerId);
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
@@ -128,7 +132,7 @@ const getDepositingInfo = (
 };
 
 export const options = (
-  store: Store
+  store: StoreInterface
 ): {actions: WorkflowActions; services: WorkflowServices; guards: WorkflowGuards} => ({
   actions: {
     assignChannelId: assign({
@@ -154,7 +158,7 @@ export const mockGuards: WorkflowGuards = {
 
 export const mockOptions = {guards: mockGuards};
 
-export const createAndFundLedgerWorkflow = (store: Store, context: WorkflowContext) =>
+export const createAndFundLedgerWorkflow = (store: StoreInterface, context: WorkflowContext) =>
   Machine(config)
     .withConfig(options(store))
     .withContext(context);

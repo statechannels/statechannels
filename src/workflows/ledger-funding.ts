@@ -3,7 +3,7 @@ import {filter, first, map} from 'rxjs/operators';
 import {ChannelLock} from '../store/store';
 
 import {SupportState} from '.';
-import {Store, Errors as StoreErrors, Funding} from '../store';
+import {StoreInterface, Errors as StoreErrors, Funding} from '../store';
 import {
   allocateToTarget,
   isSimpleEthAllocation,
@@ -49,7 +49,7 @@ const fundingTarget = getDataAndInvoke(
   'releasingLock'
 );
 
-const checkTarget = (store: Store) => async (ctx: Init) => {
+const checkTarget = (store: StoreInterface) => async (ctx: Init) => {
   const {isSupported} = await store.getEntry(ctx.targetChannelId);
   if (!isSupported) throw Error(Errors.unSupportedTargetChannel + ctx.targetChannelId);
 };
@@ -78,7 +78,7 @@ export const config: MachineConfig<any, any, any> = {
   }
 };
 
-const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
+const acquireLock = (store: StoreInterface) => async (ctx: Init): Promise<ChannelLock> => {
   try {
     return await store.acquireChannelLock(ctx.ledgerChannelId);
   } catch (e) {
@@ -95,11 +95,13 @@ const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> =>
 };
 
 type WithLock = Init & {lock: ChannelLock};
-const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
+const releaseLock = (store: StoreInterface) => async (ctx: WithLock): Promise<void> => {
   await store.releaseChannelLock(ctx.lock);
 };
 
-const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
+const getTargetOutcome = (store: StoreInterface) => async (
+  ctx: Init
+): Promise<SupportState.Init> => {
   // TODO: Switch to feed
   const {targetChannelId, ledgerChannelId, deductions} = ctx;
   const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
@@ -132,12 +134,15 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   };
 };
 
-const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId}: Init) => {
+const updateFunding = (store: StoreInterface) => async ({
+  targetChannelId,
+  ledgerChannelId
+}: Init) => {
   const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
   await store.setFunding(targetChannelId, funding);
 };
 
-const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
+const services = (store: StoreInterface): Record<Services, ServiceConfig<Init>> => ({
   checkTarget: checkTarget(store),
   getTargetOutcome: getTargetOutcome(store),
   updateFunding: updateFunding(store),
@@ -150,6 +155,6 @@ const actions = {
   escalateError: escalate(({error}) => ({type: 'FAILURE', error}))
 };
 
-const options = (store: Store) => ({services: services(store), actions});
+const options = (store: StoreInterface) => ({services: services(store), actions});
 
-export const machine = (store: Store) => Machine(config, options(store));
+export const machine = (store: StoreInterface) => Machine(config, options(store));

@@ -1,6 +1,6 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
 import {filter, map} from 'rxjs/operators';
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
 import {State} from '../store/types';
 
@@ -37,7 +37,7 @@ type Options = {
   actions: {spawnObserver: AssignAction<HasChannelId, any>};
 };
 
-const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
+const sendState = (store: StoreInterface) => async ({state, channelId}: HasChannelId) => {
   const entry = await store.getEntry(channelId);
   const {isSupportedByMe, isSupported} = entry;
   // TODO: Should these safety checks be performed in the store?
@@ -57,14 +57,14 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
   }
 };
 
-const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) =>
+const notifyWhenSupported = (store: StoreInterface, {state, channelId}: HasChannelId) =>
   store.channelUpdatedFeed(channelId).pipe(
     filter(({isSupported}) => isSupported),
     filter(({supported}) => statesEqual(state, supported)),
     map(() => 'SUPPORTED')
   );
 
-const options = (store: Store): Options => ({
+const options = (store: StoreInterface): Options => ({
   services: {
     sendState: sendState(store)
   },
@@ -76,4 +76,4 @@ const options = (store: Store): Options => ({
   }
 });
 
-export const machine = (store: Store) => Machine(config, options(store));
+export const machine = (store: StoreInterface) => Machine(config, options(store));

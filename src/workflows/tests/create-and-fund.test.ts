@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine} from '../create-and-fund';
 
-import {Store} from '../../store';
+import {StoreInterface} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
@@ -108,7 +108,8 @@ beforeEach(async () => {
 });
 
 test('it uses direct funding when told', async () => {
-  const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
+  const connectToStore = (store: StoreInterface) =>
+    interpret(machine(store).withContext(context)).start();
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -142,7 +143,7 @@ test('it uses virtual funding when enabled', async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const [aService, bService] = [aStore, bStore].map((store: Store) =>
+  const [aService, bService] = [aStore, bStore].map((store: StoreInterface) =>
     interpret(machine(store).withContext({...context, funding: 'Virtual'})).start()
   );
 

@@ -1,5 +1,5 @@
 import {Machine, StateNodeConfig} from 'xstate';
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {SupportState, VirtualDefundingAsLeaf} from '.';
 import {getDataAndInvoke} from '../utils';
 
@@ -12,7 +12,7 @@ const WORKFLOW = 'conclude-channel';
 
 export type Init = {channelId: string};
 
-const finalState = (store: Store) => async (context: Init): Promise<SupportState.Init> => {
+const finalState = (store: StoreInterface) => async (context: Init): Promise<SupportState.Init> => {
   const {sortedStates, latestSignedByMe, latest} = await store.getEntry(context.channelId);
 
   const latestFinalState: State | undefined = sortedStates.filter(s => s.isFinal)[0];
@@ -31,7 +31,7 @@ const finalState = (store: Store) => async (context: Init): Promise<SupportState
   return {state: {...latestSignedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
 };
 
-const supportState = (store: Store) => SupportState.machine(store);
+const supportState = (store: StoreInterface) => SupportState.machine(store);
 
 const concludeChannel = getDataAndInvoke<Init>(
   {src: finalState.name},
@@ -39,7 +39,7 @@ const concludeChannel = getDataAndInvoke<Init>(
   'determineFundingType'
 );
 
-const getFunding = (store: Store) => (ctx: Init) =>
+const getFunding = (store: StoreInterface) => (ctx: Init) =>
   store.channelUpdatedFeed(ctx.channelId).pipe(
     map(({funding}) => {
       switch (funding?.type) {
@@ -60,7 +60,7 @@ const determineFundingType = {
   }
 };
 
-const getRole = (store: Store) => (ctx: Init) => async cb => {
+const getRole = (store: StoreInterface) => (ctx: Init) => async cb => {
   const {myIndex} = await store.getEntry(ctx.channelId);
   if (myIndex === ParticipantIdx.Hub) cb('AmHub');
   else cb('AmLeaf');
@@ -83,7 +83,7 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
-const withdraw = (store: Store) => async (ctx: Init) => {
+const withdraw = (store: StoreInterface) => async (ctx: Init) => {
   // NOOP
 };
 
@@ -101,7 +101,7 @@ export const config: StateNodeConfig<Init, any, any> = {
   }
 };
 
-const services = (store: Store) => ({
+const services = (store: StoreInterface) => ({
   finalState: finalState(store),
   getFunding: getFunding(store),
   supportState: supportState(store),
@@ -110,7 +110,7 @@ const services = (store: Store) => ({
   virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
 });
 
-const options = (store: Store) => ({
+const options = (store: StoreInterface) => ({
   services: services(store)
 });
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: StoreInterface) => Machine(config).withConfig(options(store));

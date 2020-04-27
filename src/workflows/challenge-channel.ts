@@ -12,7 +12,7 @@ import {map} from 'rxjs/operators';
 import {Zero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
 
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {ChannelChainInfo} from '../chain';
 
 export interface Initial {
@@ -81,13 +81,13 @@ const challengeFinalized: Guard<Initial, ChainEvent> = {
   predicate: (context, {finalized}) => finalized
 };
 
-const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial) => {
+const submitChallengeTransaction = (store: StoreInterface) => async ({channelId}: Initial) => {
   const {support, myAddress} = await store.getEntry(channelId);
   const privateKey = await store.getPrivateKey(myAddress);
   return await store.chain.challenge(support, privateKey);
 };
 
-const observeOnChainChannelStorage = (store: Store, channelId: string) =>
+const observeOnChainChannelStorage = (store: StoreInterface, channelId: string) =>
   store.chain.chainUpdatedFeed(channelId).pipe(
     map<ChannelChainInfo, ChainEvent>(({finalized, channelStorage}) => ({
       type: 'CHAIN_EVENT',
@@ -101,7 +101,7 @@ const setTransactionId = assign<Context, DoneInvokeEvent<string>>({
 });
 
 export const machine = (
-  store: Store,
+  store: StoreInterface,
   context: Initial
 ): StateMachine<Context, Schema, Event, Typestate> =>
   createMachine<Context, Event, Typestate>({
