@@ -96,7 +96,7 @@
     "webtorrent/end-of-stream": "1.4.1"
   },
   "scripts": {
-    "build": "react-scripts build",
+    "build": "node ./scripts/build.js",
     "build-and-release:tracker": "./tracker/build-push-release.sh",
     "build:ci": "run-s contracts:compile build",
     "build:typescript": "tsc -b .",

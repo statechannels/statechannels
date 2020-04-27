@@ -11,8 +11,8 @@ export default class GamesWaitingController extends Controller {
 
   @task(function*(this: GamesWaitingController) {
     yield timeout(2000);
-    console.log('Assume that the game was accepted');
-    this.transitionToRoute('game');
+    console.log('Game was changed. Lets createChannel');
+    // this.transitionToRoute('game');
   })
   protected goToGame!: Task<void, () => {}>;
 }

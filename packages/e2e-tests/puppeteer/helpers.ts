@@ -178,8 +178,11 @@ export async function setUpBrowser(
     });
     metamask = await dappeteer.getMetamask(browser);
     await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
-    // await metamask.addNetwork('http://localhost:8547'); // does not seem to work
-    await metamask.switchNetwork('localhost'); // defaults to 8545. In production, replace with 'ropsten'
+
+    // Because of the implementation of switchNetwork not allowing for
+    // custom host & ports (see https://github.com/decentraland/dappeteer/blob/7720a675d2d0c4fa10e93d33426b984cc391d4c3/src/index.ts#L149)
+    // our only option is "localhost", which defaults to 8545
+    await metamask.switchNetwork('localhost'); // In production, replace with 'ropsten'
   }
 
   return {browser, metamask};

@@ -1,6 +1,6 @@
-<div class="container flex flex-col items-center pt-8" {{did-insert (perform this.goToGame)}}>
+<div class="container flex flex-col items-center pt-8" {{did-update (perform this.goToGame) this.model.playerAName}}>
   <h2 class="text-3xl font-bold mb-2">
-    Waiting for someone to join your game for 0.1 ETH each.
+    Waiting for someone to join your game for {{format-ether this.model.stake}} ETH each.
   </h2>
   <button
     type="button"

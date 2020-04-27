@@ -4,17 +4,26 @@ import {action} from '@ember/object';
 import {inject as service} from '@ember/service';
 import DS from 'ember-data';
 import UserService from '@statechannels/tic-tac-toe/services/user';
+import CurrentGameService, {Player} from '@statechannels/tic-tac-toe/services/current-game';
+import ChallengeModel from '@statechannels/tic-tac-toe/models/challenge';
 import makeBlockie from 'ethereum-blockies-base64';
+
+const {parseEther} = ethers.utils;
 
 export default class GamesIndexController extends Controller {
   @service store!: DS.Store;
   @service user!: UserService;
+  @service currentGame!: CurrentGameService;
 
   @tracked buyInAmount = 0.001;
   @tracked showCreateGameModal = false;
 
   get blockieSrc(): string {
-    return makeBlockie(this.user.userAddress ?? '0');
+    return makeBlockie(this.user.outcomeAddress ?? '0');
+  }
+
+  get publicGames(): ChallengeModel[] {
+    return this.model.filterBy('isPublic', true);
   }
 
   @action
@@ -22,18 +31,24 @@ export default class GamesIndexController extends Controller {
     event.preventDefault();
     console.log('Create New Game');
     this.showCreateGameModal = false;
+
     const myPublicOpenGame = {
-      address: this.user.userAddress,
-      outcomeAddress: this.user.walletAddress,
+      address: this.user.address,
+      outcomeAddress: this.user.outcomeAddress,
       name: this.user.username,
-      stake: this.buyInAmount.toString(),
+      stake: parseEther(this.buyInAmount.toString()).toString(),
       createdAt: new Date().getTime(),
       isPublic: true,
       playerAName: 'unknown',
       playerAOutcomeAddress: 'unknown'
-    };
+    } as ChallengeModel;
+
     const newGame = this.store.createRecord('challenge', myPublicOpenGame);
     await newGame.save();
+
+    this.currentGame.setGame(newGame);
+    this.currentGame.setPlayer(Player.B);
+
     this.transitionToRoute('games.waiting');
   }
 }
