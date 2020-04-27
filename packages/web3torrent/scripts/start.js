@@ -6,18 +6,18 @@ const fs = require('fs');
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
-let ganacheServer;
-let devServer;
+let devServer; // TODO annotate type
+let trackerServer; // TODO annotate type
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
 process.on('unhandledRejection', err => {
-  if (ganacheServer) {
-    ganacheServer.close();
-  }
   if (devServer) {
-    devServer.close();
+    devServer.kill();
+  }
+  if (trackerServer) {
+    trackerServer.kill();
   }
   throw err;
 });
@@ -30,6 +30,23 @@ const {deploy} = require('../deployment/deploy');
 configureEnvVariables();
 
 void (async () => {
+  process.on('SIGINT', () => {
+    if (devServer) {
+      devServer.kill();
+    }
+    if (trackerServer) {
+      trackerServer.kill();
+    }
+  });
+  process.on('SIGTERM', () => {
+    if (devServer) {
+      devServer.kill();
+    }
+    if (trackerServer) {
+      trackerServer.kill();
+    }
+  });
+
   const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
   const deployedArtifacts = await deploy(deployer);
 
