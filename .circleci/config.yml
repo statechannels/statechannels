@@ -333,7 +333,7 @@ workflows:
               only: master
       - docker/publish:
           after_build:
-            - run: heroku container login
+            - run: heroku container:login
             - run: docker push registry.heroku.com/simple-hub-staging/simple-hub
             - run: heroku container:release -a simple-hub-staging simple-hub
           before_build:
@@ -344,6 +344,7 @@ workflows:
           docker-username: HEROKU_USERNAME
           image: simple-hub-staging/simple-hub
           registry: registry.heroku.com
+          tag:
           filters:
             branches:
               #todo: switch before creating a PR
