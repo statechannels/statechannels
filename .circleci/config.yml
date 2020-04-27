@@ -348,9 +348,9 @@ workflows:
           docker-password: HEROKU_API_KEY
           docker-username: HEROKU_USERNAME
           executor:
-            image: counterfactual/statechannels
+            image: circleci/node
             name: docker/docker
-            tag: 0.6.1
+            tag: 10.16
           image: simple-hub-staging/simple-hub
           registry: registry.heroku.com
           tag: latest
