@@ -340,7 +340,7 @@ workflows:
             - run: heroku container:release -a simple-hub-staging simple-hub
           before_build:
             - attach_workspace:
-                at: /home/circleci/project
+                at: /root/project
             - run: curl https://cli-assets.heroku.com/install.sh | sh
             - run: cd packages/simple-hub && yarn build:prod
           deploy: false
@@ -355,7 +355,6 @@ workflows:
           registry: registry.heroku.com
           tag: latest
           use-remote-docker: true
-          working_directory: /home/circleci/project
           filters:
             branches:
               #todo: switch before creating a PR
