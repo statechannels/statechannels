@@ -8,11 +8,11 @@ import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
 import {SiteBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
-import {XstateStore} from '../../store';
+import {Store} from '../../store';
 import {ethBudget} from '../../utils';
 import {bigNumberify, parseEther} from 'ethers/utils';
 
-const store = new XstateStore();
+const store = new Store();
 
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
