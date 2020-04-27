@@ -6,6 +6,7 @@ WORKDIR /statechannels/monorepo
 #
 # - That ./packages/simple-hub has been built, so a lib directory exists
 # - That ./packages/nitro-protocol has been built, so the .json artifacts exist
+# - That ./packages/wire-format has been built, so a lib directory exists
 
 # INSTALL DEPENDENCIES
 COPY ./package.json /statechannels/monorepo
