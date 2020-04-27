@@ -6,6 +6,8 @@ import React from 'react';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {ClientInitializationContextInterface} from './client-initialization-context';
 
+export type BudgetContextInterface = ReturnType<typeof useBudgetContext>;
+
 export const BudgetContext = React.createContext<ReturnType<typeof useBudgetContext>>(undefined);
 interface Props {
   w3tClient: WebTorrentPaidStreamingClient;

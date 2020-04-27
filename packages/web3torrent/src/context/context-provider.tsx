@@ -19,10 +19,10 @@ export const ContextProvider: React.FC = ({children}) => {
   });
 
   const initializationContext = useClientInitializationContext({w3tClient});
-  const torrentClientContext = useTorrentClientContext({w3tClient});
+
   const channelContext = useChannelContext({w3tClient});
   const budgetContext = useBudgetContext({w3tClient, initializationContext});
-
+  const torrentClientContext = useTorrentClientContext({w3tClient, budgetContext});
   return (
     <ClientInitializationContext.Provider value={initializationContext}>
       <TorrentClientContext.Provider value={torrentClientContext}>

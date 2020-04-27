@@ -3,9 +3,10 @@ import {getTorrentUI} from '../utils/torrent-status-checker';
 import {WebTorrentAddInput, ExtendedTorrent, WebTorrentSeedInput} from '../library/types';
 
 import _ from 'lodash';
-import {INITIAL_BUDGET_AMOUNT} from '../constants';
+
 import {Status, TorrentUI, TorrentStaticData} from '../types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
+import {BudgetContextInterface} from './budget-context';
 
 export interface TorrentClientContextInterface {
   download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent>;
@@ -16,13 +17,14 @@ export interface TorrentClientContextInterface {
 export const TorrentClientContext = React.createContext<TorrentClientContextInterface>(undefined);
 interface Props {
   w3tClient: WebTorrentPaidStreamingClient;
+  budgetContext: BudgetContextInterface;
 }
 export function useTorrentClientContext({
-  w3tClient
+  w3tClient,
+  budgetContext
 }: Props): TorrentClientContextInterface | undefined {
   const doesBudgetExist = async (): Promise<boolean> => {
-    const {paymentChannelClient} = w3tClient;
-    const budget = await paymentChannelClient.getBudget();
+    const {budget} = await budgetContext;
     return budget && !_.isEmpty(budget);
   };
   const torrentNamer = (input: WebTorrentSeedInput) => {
@@ -35,7 +37,7 @@ export function useTorrentClientContext({
   const download: (torrent: WebTorrentAddInput) => Promise<ExtendedTorrent> = async torrentData => {
     await w3tClient.enable();
     if (!(await doesBudgetExist())) {
-      await w3tClient.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+      await budgetContext.createBudget();
     }
 
     return new Promise((resolve, reject) =>
@@ -47,7 +49,7 @@ export function useTorrentClientContext({
     await w3tClient.enable();
     // TODO: This only checks if a budget exists, not if we have enough funds in it
     if (!(await doesBudgetExist())) {
-      await w3tClient.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+      await budgetContext.createBudget();
     }
 
     return new Promise((resolve, reject) =>
