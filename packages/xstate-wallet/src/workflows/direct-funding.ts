@@ -13,7 +13,7 @@ import {
   simpleEthAllocation,
   checkThat
 } from '../utils';
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
 
 const WORKFLOW = 'direct-funding';
@@ -77,7 +77,7 @@ type Services = {
 
 type Options = {services: Services};
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: StoreInterface, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
     const {supported: supportedState} = await store.getEntry(ctx.channelId);
 

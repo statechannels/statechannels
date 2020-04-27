@@ -76,7 +76,7 @@ interface InternalEvents {
   addToOutbox: [Message];
   lockUpdated: [ChannelLock];
 }
-export interface Store {
+export interface StoreInterface {
   // Feeds
   objectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
@@ -135,7 +135,7 @@ export type ChannelLock = {
   lock?: Guid;
 };
 
-export class XstateStore implements Store {
+export class XstateStore implements StoreInterface {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
@@ -544,7 +544,7 @@ export class XstateStore implements Store {
     );
 }
 
-export function supportedStateFeed(store: Store, channelId: string) {
+export function supportedStateFeed(store: StoreInterface, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
     filter(e => e.isSupported),
     map(({supported}) => ({state: supported}))

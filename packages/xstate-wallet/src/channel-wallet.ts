@@ -1,4 +1,4 @@
-import {Store} from './store';
+import {StoreInterface} from './store';
 import {MessagingServiceInterface} from './messaging';
 
 import ReactDOM from 'react-dom';
@@ -26,7 +26,7 @@ export class ChannelWallet {
   public workflows: Workflow[];
 
   constructor(
-    private store: Store,
+    private store: StoreInterface,
     private messagingService: MessagingServiceInterface,
     public id?: string
   ) {

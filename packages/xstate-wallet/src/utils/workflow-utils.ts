@@ -10,7 +10,7 @@ import {
   ActionFunction,
   ActionFunctionMap
 } from 'xstate';
-import {Store} from '../store';
+import {StoreInterface} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 
 // export interface WorkflowStateSchema<T extends {value:any; context:any}> {
@@ -33,18 +33,19 @@ export function createMockGuard(guardName: string): GuardPredicate<any, any> {
 // Some machine factories require a context, and some don't
 // Sort this out.
 export type MachineFactory<I, E extends EventObject> = (
-  store: Store,
+  store: StoreInterface,
   context?: I
 ) => StateMachine<I, any, E>;
 
-type Options = (store: Store) => any;
+type Options = (store: StoreInterface) => any;
 type Config<T> = MachineConfig<T, any, any>;
 export const connectToStore: <T>(config: Config<T>, options: Options) => MachineFactory<T, any> = <
   T
 >(
   config: Config<T>,
   options: Options
-) => (store: Store, context?: T | undefined) => Machine(config).withConfig(options(store), context);
+) => (store: StoreInterface, context?: T | undefined) =>
+  Machine(config).withConfig(options(store), context);
 
 /*
 Since machines typically  don't have sync access to a store, we invoke a promise to get the
