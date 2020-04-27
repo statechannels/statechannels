@@ -43,6 +43,8 @@
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
     "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
     "test:show": "HEADLESS=false yarn run test",
-    "test:e2e": "sh ./scripts/e2e.sh"
+    "test:e2e:rps": "SC_ENV=circle-integration-rps sh ./run-e2e.sh rps",
+    "test:e2e:w3t": "SC_ENV=circle-integration-w3t sh ./run-e2e.sh web3torrent",
+    "test:e2e:w3t-with-hub": "SC_ENV=circle-integration-w3t-with-hub sh ./run-e2e.sh web3torrent"
   }
 }
