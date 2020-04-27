@@ -52,15 +52,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.outcomeAddress = opts.outcomeAddress;
   }
 
-  async enable() {
+  async init() {
     if (!this.pseAccount || !this.outcomeAddress) {
-      await this.paymentChannelClient.enable();
+      await this.paymentChannelClient.init();
       this.pseAccount = this.paymentChannelClient.mySigningAddress;
       log.info('set pseAccount to sc-wallet signing address: %s', this.pseAccount);
       this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
       log.info('set outcomeAddress to sc-wallet web3 wallet address: %s', this.outcomeAddress);
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
     }
+  }
+
+  async enable() {
+    await this.paymentChannelClient.enable();
   }
 
   async disable() {
@@ -74,8 +78,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     optionsOrCallback?: TorrentOptions | TorrentCallback,
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
-    this.ensureEnabled();
-
     const options =
       typeof optionsOrCallback === 'function'
         ? {createdBy: this.pseAccount, announce: defaultTrackers}

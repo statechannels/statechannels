@@ -53,6 +53,13 @@ const File: React.FC<Props> = props => {
   );
 
   useEffect(() => {
+    const initResult = async () => {
+      await web3Torrent.init();
+    };
+    initResult();
+  }, [web3Torrent]);
+
+  useEffect(() => {
     const testResult = async () => {
       const torrentCheckResult = await checkTorrent(infoHash);
       setWarning(torrentCheckResult);
