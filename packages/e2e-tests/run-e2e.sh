@@ -4,7 +4,10 @@ cd ../$1 && yarn run wait-on ../../.ganache-deployments/ganache-deployments-8545
 yarn start &
 cd ../xstate-wallet
 yarn start &
+cd ../simple-hub
+yarn hub:watch &
 cd ../e2e-tests
 yarn test $1
-rm -rf ../../.ganache-deployments
+code=$?
 kill -- -$$
+exit $code
