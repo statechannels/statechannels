@@ -279,6 +279,9 @@ export class ChannelStoreEntry {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
+
+    // TODO: Add some sort of data validator here
+
     const {channelConstants, funding, myIndex, applicationSite} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
