@@ -247,7 +247,8 @@ export class Store {
   public setLedger = (ledgerId: string) =>
     this.backend.transaction(
       'readwrite',
-      [ObjectStores.ledgers, ObjectStores.channels],
+      // FIXME: Needs a unit test -- was missing privateKeys store
+      [ObjectStores.ledgers, ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
         const entry = await this.getEntry(ledgerId);
 
