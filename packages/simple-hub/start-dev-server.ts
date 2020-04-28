@@ -1,16 +1,18 @@
 import './env'; // Note: importing this module has the side effect of modifying env vars
 
 import FirebaseServer from 'firebase-server';
-import {setupGanache} from '@statechannels/devtools';
+import {setupGanache, getNetworkName} from '@statechannels/devtools';
 import {deploy} from './deployment/deploy';
 import {startServer} from './src/server';
 import {log} from './src/logger';
 
 async function setupGanacheAndContracts() {
-  const {deployer} = await setupGanache(Number(process.env.SIMPLE_HUB_DEPLOYER_ACCOUNT_INDEX));
-  const deployedArtifacts = await deploy(deployer);
+  if (getNetworkName(process.env.CHAIN_NETWORK_ID) === 'development') {
+    const {deployer} = await setupGanache(Number(process.env.SIMPLE_HUB_DEPLOYER_ACCOUNT_INDEX));
+    const deployedArtifacts = await deploy(deployer);
 
-  process.env = {...process.env, ...deployedArtifacts};
+    process.env = {...process.env, ...deployedArtifacts};
+  }
 }
 
 async function startLocalFirebaseServer() {

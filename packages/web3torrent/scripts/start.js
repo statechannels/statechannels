@@ -27,20 +27,25 @@ const {getNetworkName, setupGanache, configureEnvVariables} = require('@statecha
 const {deploy} = require('../deployment/deploy');
 
 // Ensure environment variables are read.
-configureEnvVariables();
+configureEnvVariables(true);
 
 void (async () => {
-  const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
-  const deployedArtifacts = await deploy(deployer);
+  const networkName = getNetworkName(process.env.CHAIN_NETWORK_ID);
+
+  let data = '# NOTE: This file is auto-generated. Use .env.development.local for custom values\n';
+
+  if (networkName === 'development') {
+    const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
+    const deployedArtifacts = await deploy(deployer);
+    for (const artifactName in deployedArtifacts) {
+      data += `REACT_APP_${artifactName} = ${deployedArtifacts[artifactName]}\n`;
+    }
+  }
+
+  data += `REACT_APP_TARGET_NETWORK = ${networkName}\n`;
 
   // We must edit .env.local since there is no easy programmatic way to inject
   // environment variables into the react-scripts start command.
-
-  let data = '# NOTE: This file is auto-generated. Use .env.development.local for custom values\n';
-  for (const artifactName in deployedArtifacts) {
-    data += `REACT_APP_${artifactName} = ${deployedArtifacts[artifactName]}\n`;
-  }
-  data += `REACT_APP_TARGET_NETWORK = ${getNetworkName(process.env.CHAIN_NETWORK_ID)}\n`;
   fs.writeFile('.env.local', data, err => {
     if (err) throw err;
   });

@@ -73,7 +73,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Waiting for hub to deposit</Text>
+      <Text textAlign="center">Waiting for hub to deposit. You will deposit next.</Text>
     </Flex>
   );
 
