@@ -29,7 +29,7 @@ const CurrentBudget: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
 
   const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
-  const {budget, loading, createBudget, closeBudget} = useBudget();
+  const {budget, loading, createBudget, closeBudget} = useBudget(props);
   const budgetExists = !!budget && !_.isEmpty(budget);
 
   return (
