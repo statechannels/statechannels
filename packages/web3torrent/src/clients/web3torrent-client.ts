@@ -3,7 +3,7 @@ import {WebTorrentAddInput, WebTorrentSeedInput, ExtendedTorrent} from '../libra
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
-import {defaultTrackers, INITIAL_BUDGET_AMOUNT} from '../constants';
+import {defaultTrackers, INITIAL_BUDGET_AMOUNT, FUNDING_STRATEGY} from '../constants';
 import _ from 'lodash';
 
 export const web3torrent = new WebTorrentPaidStreamingClient({
@@ -24,7 +24,7 @@ export const download: (
   torrent: WebTorrentAddInput
 ) => Promise<ExtendedTorrent> = async torrentData => {
   await web3torrent.enable();
-  if (!(await doesBudgetExist())) {
+  if (FUNDING_STRATEGY !== 'Direct' && !(await doesBudgetExist())) {
     await web3torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
   }
 
@@ -36,7 +36,7 @@ export const download: (
 export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = async input => {
   await web3torrent.enable();
   // TODO: This only checks if a budget exists, not if we have enough funds in it
-  if (!(await doesBudgetExist())) {
+  if (FUNDING_STRATEGY !== 'Direct' && !(await doesBudgetExist())) {
     await web3torrent.paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
   }
 
