@@ -53,7 +53,6 @@
   "private": true,
   "scripts": {
     "build": "tsc -b .",
-    "build:prod": "tsc -p tsconfig.prod.json",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "hub:start:dev": "NODE_ENV=development ts-node ./start-dev-server.ts",
     "hub:start:prod": "NODE_ENV=production ts-node ./src/server.ts",
