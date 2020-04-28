@@ -330,10 +330,8 @@ export class Store {
   }
 
   public signAndAddState = (channelId: string, stateVars: StateVariables) =>
-    this.backend.transaction(
-      'readwrite',
-      [ObjectStores.channels, ObjectStores.privateKeys],
-      async () => {
+    this.backend
+      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const entry = await this.getEntry(channelId);
 
         const {participants} = entry;
@@ -348,10 +346,15 @@ export class Store {
           privateKey
         );
         await this.backend.setChannel(channelId, entry.data());
-        this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+        return {
+          entry: await this.getEntry(channelId),
+          signedState
+        };
+      })
+      .then(({entry, signedState}) => {
+        this._eventEmitter.emit('channelUpdated', entry);
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-      }
-    );
+      });
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
@@ -364,20 +367,21 @@ export class Store {
   }
 
   public addState = (state: SignedState) =>
-    this.backend.transaction(
-      'readwrite',
-      [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
-      async () => {
-        const channelId = calculateChannelId(state);
-        const memoryChannelStorage =
-          (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
-        // TODO: This is kind of awkward
-        state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
-        await this.backend.setChannel(channelId, memoryChannelStorage.data());
-        this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
-        return memoryChannelStorage;
-      }
-    );
+    this.backend
+      .transaction(
+        'readwrite',
+        [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
+        async () => {
+          const channelId = calculateChannelId(state);
+          const memoryChannelStorage =
+            (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
+          // TODO: This is kind of awkward
+          state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
+          await this.backend.setChannel(channelId, memoryChannelStorage.data());
+          return memoryChannelStorage;
+        }
+      )
+      .then(entry => this._eventEmitter.emit('channelUpdated', entry));
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
