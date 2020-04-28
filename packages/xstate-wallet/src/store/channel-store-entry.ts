@@ -274,7 +274,7 @@ export class ChannelStoreEntry {
     };
   }
 
-  static fromJson(data) {
+  static fromJson(data): ChannelStoreEntry {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
