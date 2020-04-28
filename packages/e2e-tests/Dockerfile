@@ -25,6 +25,7 @@ RUN  apt-get update \
 
 RUN  git clone -b $BRANCH --single-branch https://github.com/statechannels/monorepo.git monorepo
 WORKDIR /monorepo
+ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json
 RUN  git pull 
 RUN  yarn
 
