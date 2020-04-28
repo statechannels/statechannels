@@ -49,6 +49,7 @@ export function configureEnvVariables(monorepo = true): void {
   }
 
   // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+  // NOTE: dotenv joins paths with cwd https://www.npmjs.com/package/dotenv#path
   let dotenvFiles = [
     `.env.${NODE_ENV}.local`,
     // Don't include `.env.local` for `test` environment

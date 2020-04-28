@@ -1,14 +1,12 @@
-'use strict';
-
 // FIXME: To remove @statechannels/hub's dependency on @statechannels/devtools,
 // this file is a carbon copy of the file that exports configureEnvVariables in devtools.
 
 // const {configureEnvVariables} = require('@statechannels/devtools');
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-function configureEnvVariables(monorepo = true) {
+function configureEnvVariables(monorepo = true): void {
   // State Channel Environment
   // Intended usage is a single file in monorepo root defining configuration for multiple packages
   const SC_ENV = process.env.SC_ENV;
@@ -45,11 +43,11 @@ function configureEnvVariables(monorepo = true) {
     NODE_ENV !== 'test' && `.env.local`,
     `.env.${NODE_ENV}`,
     '.env'
-  ].filter(x => !!x);
+  ].filter((x): x is string => !!x);
 
   if (monorepo) {
     const monorepoDotenvFiles = dotenvFiles.slice(0);
-    dotenvFiles.forEach(dotenvFile => {
+    dotenvFiles.forEach((dotenvFile: string) => {
       monorepoDotenvFiles.push(path.join('../..', dotenvFile));
     });
     dotenvFiles = monorepoDotenvFiles;
@@ -60,7 +58,7 @@ function configureEnvVariables(monorepo = true) {
   // that have already been set.  Variable expansion is supported in .env files.
   // https://github.com/motdotla/dotenv
   // https://github.com/motdotla/dotenv-expand
-  dotenvFiles.forEach(dotenvFile => {
+  dotenvFiles.forEach((dotenvFile: string) => {
     if (fs.existsSync(dotenvFile)) {
       // Need to refactor away from this
       /* eslint-disable @typescript-eslint/no-var-requires */
