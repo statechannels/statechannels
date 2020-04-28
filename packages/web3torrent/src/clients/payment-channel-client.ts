@@ -14,7 +14,6 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import _ from 'lodash';
 import {map, filter, first} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
@@ -342,12 +341,9 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(): Promise<SiteBudget | {}> {
-    const result = await this.channelClient.closeAndWithdraw(
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
 
-    this.budgetCache = _.isEmpty(result) ? undefined : result;
+    this.budgetCache = undefined;
     return this.budgetCache;
   }
 }

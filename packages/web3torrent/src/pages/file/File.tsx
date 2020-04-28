@@ -84,7 +84,7 @@ const File: React.FC<Props> = props => {
 
   const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
 
-  const {budget} = useBudget();
+  const {budget, closeBudget} = useBudget();
   // TODO: We shouldn't have to check all these different conditions
   const showBudget =
     !!budget && !_.isEmpty(budget) && !!budget.budgets && budget.budgets.length > 0;
@@ -104,7 +104,12 @@ const File: React.FC<Props> = props => {
         )}
       <br />
       {showBudget && (
-        <SiteBudgetTable budgetCache={budget} channelCache={channelCache} mySigningAddress={me} />
+        <SiteBudgetTable
+          budgetCache={budget}
+          channelCache={channelCache}
+          mySigningAddress={me}
+          withdraw={closeBudget}
+        />
       )}
       {torrent.status === Status.Idle && (
         <>
