@@ -26,4 +26,5 @@ kill $wallet
 kill $app
 kill $hub
 killall node
+rm -rf ../../.ganache-deployments
 exit $code
