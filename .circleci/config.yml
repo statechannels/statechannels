@@ -56,6 +56,30 @@ restore_lib: &restore_lib
     # Restore from the most recently cached version of lib, using a partial key match
     key: v3-lib-cache-
 
+hub_deploy: &hub_deploy
+  after_build:
+    - run: heroku container:login
+    - run: docker push registry.heroku.com/simple-hub-staging/simple-hub
+    - run: heroku container:release -a simple-hub-staging simple-hub
+  before_build:
+    - attach_workspace:
+        at: /home/circleci/project
+    - run: curl https://cli-assets.heroku.com/install.sh | sh
+    - run: cd packages/simple-hub && yarn build:prod
+  deploy: false
+  dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
+  docker-password: HEROKU_API_KEY
+  docker-username: HEROKU_USERNAME
+  executor:
+    image: circleci/node
+    name: docker/docker
+    tag: '10.16'
+  image: simple-hub-staging/simple-hub
+  name: hub_deploy
+  registry: registry.heroku.com
+  tag: latest
+  use-remote-docker: true
+
 commands:
   log_stats:
     description: 'Log stats '
@@ -332,29 +356,9 @@ workflows:
             branches:
               only: master
       - docker/publish:
+          <<: *hub_deploy
           requires:
             - prepare
-          after_build:
-            - run: heroku container:login
-            - run: docker push registry.heroku.com/simple-hub-staging/simple-hub
-            - run: heroku container:release -a simple-hub-staging simple-hub
-          before_build:
-            - attach_workspace:
-                at: /home/circleci/project
-            - run: curl https://cli-assets.heroku.com/install.sh | sh
-            - run: cd packages/simple-hub && yarn build:prod
-          deploy: false
-          dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
-          docker-password: HEROKU_API_KEY
-          docker-username: HEROKU_USERNAME
-          executor:
-            image: circleci/node
-            name: docker/docker
-            tag: '10.16'
-          image: simple-hub-staging/simple-hub
-          registry: registry.heroku.com
-          tag: latest
-          use-remote-docker: true
           filters:
             branches:
               #todo: switch before creating a PR
