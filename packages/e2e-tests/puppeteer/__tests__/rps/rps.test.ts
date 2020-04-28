@@ -2,10 +2,10 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, setupLogging, waitAndApproveMetaMask, setupFakeWeb3} from '../helpers';
-import {login, startFundAndPlaySingleMove} from '../scripts/rps';
+import {setUpBrowser, setupLogging, waitAndApproveMetaMask, setupFakeWeb3} from '../../helpers';
+import {login, startFundAndPlaySingleMove} from '../../scripts/rps';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER} from '../constants';
+import {USE_DAPPETEER} from '../../constants';
 
 jest.setTimeout(200_000);
 
