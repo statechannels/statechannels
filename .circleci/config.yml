@@ -65,7 +65,7 @@ hub_deploy: &hub_deploy
     - attach_workspace:
         at: /home/circleci/project
     - run: curl https://cli-assets.heroku.com/install.sh | sh
-    - run: cd packages/simple-hub && yarn build:prod
+    - run: cd packages/simple-hub && yarn build
   deploy: false
   dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
   docker-password: HEROKU_API_KEY
