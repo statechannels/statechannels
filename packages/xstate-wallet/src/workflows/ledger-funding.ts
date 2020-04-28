@@ -99,9 +99,7 @@ const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
   await store.releaseChannelLock(ctx.lock);
 };
 
-const getTargetOutcome = (store: Store) => async (
-  ctx: Init
-): Promise<SupportState.Init> => {
+const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
   // TODO: Switch to feed
   const {targetChannelId, ledgerChannelId, deductions} = ctx;
   const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
@@ -134,10 +132,7 @@ const getTargetOutcome = (store: Store) => async (
   };
 };
 
-const updateFunding = (store: Store) => async ({
-  targetChannelId,
-  ledgerChannelId
-}: Init) => {
+const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId}: Init) => {
   const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
   await store.setFunding(targetChannelId, funding);
 };

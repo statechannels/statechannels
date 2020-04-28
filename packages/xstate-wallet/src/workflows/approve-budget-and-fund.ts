@@ -213,9 +213,7 @@ const createBudget = (store: Store) => async (context: Initial): Promise<void> =
   // create budget
   await store.createBudget(context.budget);
 };
-const createLedger = (store: Store) => async (
-  context: Initial
-): Promise<LedgerInitRetVal> => {
+const createLedger = (store: Store) => async (context: Initial): Promise<LedgerInitRetVal> => {
   // create ledger
   const initialOutcome = convertPendingBudgetToAllocation(context);
   const participants = [context.player, context.hub];
@@ -297,10 +295,7 @@ const calculateDepositInfo = (context: Context) => {
   return {depositAt, totalAfterDeposit, fundedAt};
 };
 
-const notifyWhenPreFSSupported = (store: Store) => ({
-  ledgerState,
-  ledgerId
-}: LedgerExists) =>
+const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: LedgerExists) =>
   store
     .channelUpdatedFeed(ledgerId)
     .pipe(

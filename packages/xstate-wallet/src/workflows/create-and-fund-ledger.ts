@@ -103,9 +103,7 @@ const initializeChannel = (
   return entry.channelId;
 };
 
-const createObjective = (
-  store: Store
-): WorkflowServices['createObjective'] => async context => {
+const createObjective = (store: Store): WorkflowServices['createObjective'] => async context => {
   const objective: Objective = {
     type: 'FundLedger',
     participants: context.participants,
@@ -113,9 +111,7 @@ const createObjective = (
   };
   return store.addObjective(objective);
 };
-const getPreFundState = (
-  store: Store
-): WorkflowServices['getPreFundState'] => async context => {
+const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => async context => {
   const {latestState} = await store.getEntry(context.ledgerId);
   return {state: latestState};
 };

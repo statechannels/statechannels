@@ -50,9 +50,7 @@ type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 type WithObjectiveData = WithDeductions & {guarantorChannelId: string; ledgerId: string};
 
-const getFundGuarantorObjective = (store: Store) => async (
-  ctx: Init
-): Promise<FundGuarantor> => {
+const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
   const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;

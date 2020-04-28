@@ -44,8 +44,7 @@ export const connectToStore: <T>(config: Config<T>, options: Options) => Machine
 >(
   config: Config<T>,
   options: Options
-) => (store: Store, context?: T | undefined) =>
-  Machine(config).withConfig(options(store), context);
+) => (store: Store, context?: T | undefined) => Machine(config).withConfig(options(store), context);
 
 /*
 Since machines typically  don't have sync access to a store, we invoke a promise to get the

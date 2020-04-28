@@ -108,8 +108,7 @@ beforeEach(async () => {
 });
 
 test('it uses direct funding when told', async () => {
-  const connectToStore = (store: Store) =>
-    interpret(machine(store).withContext(context)).start();
+  const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
