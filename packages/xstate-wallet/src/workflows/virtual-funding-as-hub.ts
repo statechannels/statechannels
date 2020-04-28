@@ -120,7 +120,7 @@ export const config: MachineConfig<Init, any, any> = {
       },
       onDone: States.fundTargetChannel
     }
-  } as any // TODO: This is to deal with some flickering compilation issues.
+  }
 };
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
