@@ -72,4 +72,4 @@ function configureEnvVariables(monorepo = true): void {
   });
 }
 
-configureEnvVariables(true);
+configureEnvVariables();
