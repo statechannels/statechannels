@@ -32,7 +32,7 @@ import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-mess
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
-import {StoreInterface} from './store';
+import {Store} from './store';
 
 type ChannelRequest =
   | ChallengeChannelRequest
@@ -77,7 +77,7 @@ export interface MessagingServiceInterface {
 export class MessagingService implements MessagingServiceInterface {
   private eventEmitter = new EventEmitter<InternalEvents>();
 
-  constructor(private store: StoreInterface) {
+  constructor(private store: Store) {
     this.eventEmitter = new EventEmitter();
   }
 
@@ -223,7 +223,7 @@ export function convertToInternalParticipant(participant: {
 }
 async function convertToInternalEvent(
   request: ChannelRequest,
-  store: StoreInterface,
+  store: Store,
   domain: string
 ): Promise<AppRequestEvent> {
   switch (request.method) {

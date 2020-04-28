@@ -4,7 +4,7 @@ import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
 import {OutcomeIdx} from './virtual-funding-as-leaf';
 import {checkThat, getDataAndInvoke, isSimpleEthAllocation, add} from '../utils';
 
-import {isGuarantees, isIndirectFunding, StoreInterface} from '../store';
+import {isGuarantees, isIndirectFunding, Store} from '../store';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 import {map, filter, tap, first} from 'rxjs/operators';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
@@ -21,7 +21,7 @@ const enum Leaf {
   B = 1
 }
 
-const checkChannelsService = (store: StoreInterface) => async ({
+const checkChannelsService = (store: Store) => async ({
   jointChannelId
 }: Init): Promise<ChannelIds> => {
   const {funding: jointFunding} = await store.getEntry(jointChannelId);
@@ -41,7 +41,7 @@ const checkChannels: StateNodeConfig<ChannelsSet, any, any> = {
   exit: assign<ChannelsSet>((_: Init, {data}: DoneInvokeEvent<ChannelIds>) => data)
 };
 
-const finalJointChannelUpdate = (store: StoreInterface) => async ({
+const finalJointChannelUpdate = (store: Store) => async ({
   jointChannelId
 }: ChannelsSet): Promise<SupportState.Init> =>
   store
@@ -76,7 +76,7 @@ const defundTarget: StateNodeConfig<any, any, any> = getDataAndInvoke(
   'defundGuarantors'
 );
 
-const defundGuarantor = (leaf: Leaf, store: StoreInterface) => async ({
+const defundGuarantor = (leaf: Leaf, store: Store) => async ({
   guarantorChannelIds,
   jointChannelId,
   ledgerChannelIds
@@ -94,14 +94,14 @@ const defundGuarantor = (leaf: Leaf, store: StoreInterface) => async ({
     targetChannelId
   });
 };
-const defundLeftGuarantor = (store: StoreInterface) => async (
+const defundLeftGuarantor = (store: Store) => async (
   ctx: ChannelsSet
 ): Promise<SupportState.Init> => defundGuarantor(0, store)(ctx);
-const defundRightGuarantor = (store: StoreInterface) => async (
+const defundRightGuarantor = (store: Store) => async (
   ctx: ChannelsSet
 ): Promise<SupportState.Init> => defundGuarantor(0, store)(ctx);
 
-const supportState = (store: StoreInterface) => SupportState.machine(store);
+const supportState = (store: Store) => SupportState.machine(store);
 
 const defundGuarantors: StateNodeConfig<any, any, any> = {
   type: 'parallel',
@@ -124,7 +124,7 @@ export const config: StateNodeConfig<any, any, any> = {
   }
 };
 
-const options = (store: StoreInterface) => ({
+const options = (store: Store) => ({
   services: {
     checkChannelsService: checkChannelsService(store),
     defundLeftGuarantor: defundLeftGuarantor(store),
@@ -134,4 +134,4 @@ const options = (store: StoreInterface) => ({
   }
 });
 
-export const machine = (store: StoreInterface) => Machine(config).withConfig(options(store));
+export const machine = (store: Store) => Machine(config).withConfig(options(store));

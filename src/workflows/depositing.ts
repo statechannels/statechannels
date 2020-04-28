@@ -1,6 +1,6 @@
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
-import {StoreInterface} from '../store';
+import {Store} from '../store';
 import {map, filter} from 'rxjs/operators';
 import {MachineFactory, exists} from '../utils';
 import {ChannelChainInfo} from '../chain';
@@ -26,7 +26,7 @@ export const config: MachineConfig<Init, any, any> = {
 };
 type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BigNumber};
 
-export const machine: MachineFactory<Init, any> = (store: StoreInterface) => {
+export const machine: MachineFactory<Init, any> = (store: Store) => {
   const subscribeDepositEvent = (ctx: Init) =>
     store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo: ChannelChainInfo): 'FUNDED' | SafeToDeposit | undefined => {

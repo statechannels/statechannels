@@ -11,7 +11,7 @@ import {
   assign
 } from 'xstate';
 import {MessagingServiceInterface} from '../messaging';
-import {StoreInterface} from '../store';
+import {Store} from '../store';
 import {WALLET_VERSION} from '../constants';
 
 interface UserApproves {
@@ -83,7 +83,7 @@ const generateConfig = (
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
 
 export const ethereumEnableWorkflow = (
-  store: StoreInterface,
+  store: Store,
   messagingService: MessagingServiceInterface,
   context: WorkflowContext
 ): WorkflowMachine => {

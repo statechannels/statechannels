@@ -16,7 +16,7 @@ import {
   CommonActions
 } from '../utils';
 import {SupportState} from '.';
-import {StoreInterface, SiteBudget} from '../store';
+import {Store, SiteBudget} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
@@ -167,7 +167,7 @@ export const config: MachineConfig<WorkflowContext, any, WorkflowEvent> = {
   }
 };
 
-const constructFinalState = (store: StoreInterface) => async ({opponent: hub}) => {
+const constructFinalState = (store: Store) => async ({opponent: hub}) => {
   const {latestSignedByMe: latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
 
   // If we've received a new final state that matches our outcome we support that
@@ -188,7 +188,7 @@ const constructFinalState = (store: StoreInterface) => async ({opponent: hub}) =
   };
 };
 
-const submitWithdrawTransaction = (store: StoreInterface) => async context => {
+const submitWithdrawTransaction = (store: Store) => async context => {
   // TODO: Should we just fetch this once and store on the context
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
   if (!ledgerEntry.isFinalized) {
@@ -197,7 +197,7 @@ const submitWithdrawTransaction = (store: StoreInterface) => async context => {
   await store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
-const createObjective = (store: StoreInterface) => async context => {
+const createObjective = (store: Store) => async context => {
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
 
   const objective: Objective = {
@@ -208,27 +208,27 @@ const createObjective = (store: StoreInterface) => async context => {
   await store.addObjective(objective);
   return objective;
 };
-const observeFundsWithdrawal = (store: StoreInterface) => ({ledgerId}: LedgerExists) =>
+const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
     filter(c => c.amount.eq(0)),
     map<ChannelChainInfo, FundsWithdrawn>(c => ({type: 'FUNDS_WITHDRAWN'}))
   );
 
-const clearBudget = (store: StoreInterface): ServiceConfig<Initial> => async context => {
+const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
   await store.clearBudget(context.site);
 };
 
-const fetchBudget = (store: StoreInterface): ServiceConfig<Initial> => async context =>
+const fetchBudget = (store: Store): ServiceConfig<Initial> => async context =>
   store.getBudget(context.site);
 
-const assignBudget = (store: StoreInterface): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
+const assignBudget = (store: Store): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
   assign((context, event) => ({
     ...context,
     budget: event.data
   }));
 
 const options = (
-  store: StoreInterface,
+  store: Store,
   messagingService: MessagingServiceInterface
 ): {services: WorkflowServices; actions: WorkflowActions} => ({
   services: {
@@ -257,7 +257,7 @@ const options = (
   }
 });
 export const workflow = (
-  store: StoreInterface,
+  store: Store,
   messagingService: MessagingServiceInterface,
   context: WorkflowContext
 ): StateMachine<WorkflowContext, any, WorkflowEvent, WorkflowTypeState> =>

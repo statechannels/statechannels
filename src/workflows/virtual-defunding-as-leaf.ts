@@ -5,7 +5,7 @@ import {SupportState} from '.';
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
 
-import {StoreInterface, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
+import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
 import {nextState} from '../store/state-utils';
 import _ from 'lodash';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
@@ -13,7 +13,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';
 
-const checkChannelsService = (store: StoreInterface) => async (ctx: Init): Promise<ChannelIds> => {
+const checkChannelsService = (store: Store) => async (ctx: Init): Promise<ChannelIds> => {
   const {funding: targetFunding} = await store.getEntry(ctx.targetChannelId);
   const {jointChannelId} = checkThat(targetFunding, isVirtualFunding);
 
@@ -40,7 +40,7 @@ const checkChannels: StateNodeConfig<ChannelsSet, any, any> = {
   exit: assign<ChannelsSet>((_: Init, {data}: DoneInvokeEvent<ChannelIds>) => data)
 };
 
-const finalTargetState = (store: StoreInterface) => async (
+const finalTargetState = (store: Store) => async (
   ctx: Init
 ): Promise<SupportState.Init> => {
   const {supported} = await store.getEntry(ctx.targetChannelId);
@@ -53,7 +53,7 @@ const closeTarget: StateNodeConfig<any, any, any> = getDataAndInvoke(
   'defundTarget'
 );
 
-const finalJointChannelUpdate = (store: StoreInterface) => async (
+const finalJointChannelUpdate = (store: Store) => async (
   ctx: ChannelsSet
 ): Promise<SupportState.Init> => {
   const {jointChannelId, targetChannelId} = ctx;
@@ -85,7 +85,7 @@ const defundTarget: StateNodeConfig<any, any, any> = _.merge(
   {exit: ['deleteTargetChannel']}
 );
 
-export const defundGuarantorInLedger = (store: StoreInterface) => async ({
+export const defundGuarantorInLedger = (store: Store) => async ({
   jointChannelId,
   ledgerId,
   guarantorChannelId,
@@ -127,10 +127,10 @@ const releaseFundsFromBudget: StateNodeConfig<any, any, any> = {
   }
 };
 
-const releaseFunds = (store: StoreInterface) => async (context: ChannelsSet) =>
+const releaseFunds = (store: Store) => async (context: ChannelsSet) =>
   store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.ledgerId, context.targetChannelId);
 
-const getApplicationSite = (store: StoreInterface) => async (context: ChannelsSet) => {
+const getApplicationSite = (store: Store) => async (context: ChannelsSet) => {
   const ledgerEntry = await store.getEntry(context.ledgerId);
   if (!ledgerEntry.applicationSite) {
     throw new Error(`No site set for ledger channel ${context.ledgerId}`);
@@ -161,7 +161,7 @@ const enum Services {
 }
 type WorkflowServices = Record<Services, ServiceConfig<any>>;
 
-const services = (store: StoreInterface): WorkflowServices => ({
+const services = (store: Store): WorkflowServices => ({
   checkChannelsService: checkChannelsService(store),
   defundGuarantorInLedger: defundGuarantorInLedger(store),
   finalJointChannelUpdate: finalJointChannelUpdate(store),
@@ -170,6 +170,6 @@ const services = (store: StoreInterface): WorkflowServices => ({
   releaseFunds: releaseFunds(store),
   getApplicationSite: getApplicationSite(store)
 });
-const options = (store: StoreInterface) => ({services: services(store)});
+const options = (store: Store) => ({services: services(store)});
 
-export const machine = (store: StoreInterface) => Machine(config).withConfig(options(store));
+export const machine = (store: Store) => Machine(config).withConfig(options(store));

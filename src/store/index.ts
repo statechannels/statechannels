@@ -1,12 +1,12 @@
-import {StoreInterface} from './store';
+import {Store} from './store';
 import {filter, map} from 'rxjs/operators';
 import {StateVariables} from './types';
 
-export {StoreInterface, Store} from './store';
+export {Store} from './store';
 export * from './types';
 
 // TODO: Move to somewhere better?
-export function supportedStateFeed(store: StoreInterface, channelId: string) {
+export function supportedStateFeed(store: Store, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
     filter(e => !!e.supported),
     map(e => ({state: {...(e.supported as StateVariables), ...e.channelConstants}}))

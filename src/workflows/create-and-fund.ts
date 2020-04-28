@@ -18,7 +18,7 @@ import {
   checkThat,
   getDataAndInvoke
 } from '../utils';
-import {StoreInterface} from '../store';
+import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
@@ -56,7 +56,7 @@ const direct: StateNodeConfig<any, any, any> = {
   onDone: 'postFundSetup'
 };
 
-const triggerObjective = (store: StoreInterface) => async (ctx: Init): Promise<void> => {
+const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   const {channelConstants, supported: supportedState, myIndex} = await store.getEntry(
     ctx.channelId
   );
@@ -98,7 +98,7 @@ const assignJointChannelId = assign<any>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
 
-const reserveFunds = (store: StoreInterface) => async (context, event) => {
+const reserveFunds = (store: Store) => async (context, event) => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
   const playerAddress = await store.getAddress();
@@ -151,7 +151,7 @@ export const config: MachineConfig<Init, any, any> = {
   }
 };
 
-export const services = (store: StoreInterface) => ({
+export const services = (store: Store) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
   virtualFunding: VirtualFundingAsLeaf.machine(store),
@@ -166,7 +166,7 @@ export const services = (store: StoreInterface) => ({
 
 type Service = keyof ReturnType<typeof services>;
 
-const options = (store: StoreInterface) => ({
+const options = (store: Store) => ({
   services: services(store),
   actions: {
     triggerObjective: triggerObjective(store),
@@ -174,9 +174,9 @@ const options = (store: StoreInterface) => ({
   }
 });
 
-export const machine = (store: StoreInterface) => Machine(config).withConfig(options(store));
+export const machine = (store: Store) => Machine(config).withConfig(options(store));
 
-const getObjective = (store: StoreInterface) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
+const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
   store.objectiveFeed
     .pipe(
       filter(isVirtuallyFund),
@@ -202,7 +202,7 @@ In the 2-party case,
   since 4 needs to be signed by me
 - if I am player B, then I would sign state 3 using advanceChannel anyway
 */
-const getPreFundSetup = (store: StoreInterface) => (ctx: Init): Promise<SupportState.Init> =>
+const getPreFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Init> =>
   store
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
@@ -213,7 +213,7 @@ const getPreFundSetup = (store: StoreInterface) => (ctx: Init): Promise<SupportS
     )
     .toPromise();
 
-const getPostFundSetup = (store: StoreInterface) => (ctx: Init): Promise<SupportState.Init> =>
+const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Init> =>
   store
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
@@ -224,7 +224,7 @@ const getPostFundSetup = (store: StoreInterface) => (ctx: Init): Promise<Support
     )
     .toPromise();
 
-const getDepositingInfo = (store: StoreInterface) => async ({
+const getDepositingInfo = (store: Store) => async ({
   channelId
 }: Init): Promise<Depositing.Init> => {
   const {supported: supportedState, myIndex} = await store.getEntry(channelId);
@@ -244,9 +244,9 @@ const getDepositingInfo = (store: StoreInterface) => async ({
   throw Error(`Could not find an allocation for participant id ${myIndex}`);
 };
 
-const setFundingToDirect = (store: StoreInterface) => async (ctx: Init) =>
+const setFundingToDirect = (store: Store) => async (ctx: Init) =>
   await store.setFunding(ctx.channelId, {type: 'Direct'});
 
-const setFundingToVirtual = (store: StoreInterface) => async (ctx: VirtualFundingComplete) => {
+const setFundingToVirtual = (store: Store) => async (ctx: VirtualFundingComplete) => {
   await store.setFunding(ctx.channelId, {type: 'Virtual', jointChannelId: ctx.jointChannelId});
 };
