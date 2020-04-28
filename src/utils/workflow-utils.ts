@@ -79,6 +79,7 @@ export const assignError = assign({
   error: (_, event: DoneInvokeEvent<Error>) => event.data.message
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const debugAction = (c, e, {state}) => {
   // eslint-disable-next-line no-debugger
   debugger;
@@ -94,7 +95,7 @@ export const hideUI = (
 
 export const sendUserDeclinedResponse = (
   messageService: MessagingServiceInterface
-): ActionFunction<any, any> => (context, _) => {
+): ActionFunction<any, any> => context => {
   if (!context.requestId) {
     throw new Error(`No request id in context ${JSON.stringify(context)}`);
   }
@@ -106,7 +107,7 @@ export const sendUserDeclinedResponse = (
 
 export const sendGenericResponse = (
   messageService: MessagingServiceInterface
-): ActionFunction<any, any> => (context, _) => {
+): ActionFunction<any, any> => context => {
   if (!context.requestId) {
     throw new Error(`No request id in context ${JSON.stringify(context)}`);
   }

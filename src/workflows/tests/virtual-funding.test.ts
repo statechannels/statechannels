@@ -3,7 +3,6 @@ import waitForExpect from 'wait-for-expect';
 
 import {SimpleHub} from './simple-hub';
 import {bigNumberify} from 'ethers/utils';
-import _ from 'lodash';
 import {firstState, createSignatureEntry, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';

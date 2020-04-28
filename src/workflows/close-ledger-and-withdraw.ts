@@ -211,7 +211,7 @@ const createObjective = (store: Store) => async context => {
 const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
     filter(c => c.amount.eq(0)),
-    map<ChannelChainInfo, FundsWithdrawn>(c => ({type: 'FUNDS_WITHDRAWN'}))
+    map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
   );
 
 const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
@@ -221,7 +221,7 @@ const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
 const fetchBudget = (store: Store): ServiceConfig<Initial> => async context =>
   store.getBudget(context.site);
 
-const assignBudget = (store: Store): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
+const assignBudget = (): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
   assign((context, event) => ({
     ...context,
     budget: event.data
@@ -242,7 +242,7 @@ const options = (
   },
   actions: {
     ...commonWorkflowActions(messagingService),
-    assignBudget: assignBudget(store),
+    assignBudget: assignBudget(),
     setTransactionId: assign({
       transactionId: (context, event: DoneInvokeEvent<string>) => event.data
     }),

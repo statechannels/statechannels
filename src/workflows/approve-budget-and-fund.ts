@@ -10,7 +10,6 @@ import {
 } from 'xstate';
 import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
 
-import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
