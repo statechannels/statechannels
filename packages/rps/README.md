@@ -24,7 +24,7 @@ that you have already cloned the monorepo, and run `yarn install` from the root 
    AUTO_OPPONENT=B yarn start
    ```
 3. In your browser, you will need to set up your ethereum wallet to connect to the
-   ganache network that you started in step 1. The default for ganache is currently localhost:8547.
+   ganache network that you started in step 1. The default for ganache is currently localhost:8545.
 
 ### About the auto-player and auto-opponent
 
