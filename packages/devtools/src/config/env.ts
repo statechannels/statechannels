@@ -27,8 +27,9 @@ export function configureEnvVariables(monorepo = true): void {
   const SC_ENV = process.env.SC_ENV;
   if (SC_ENV) {
     const scEnvFile = path.join('../..', '.env.' + SC_ENV);
-    if (!fs.existsSync(scEnvFile)) {
-      throw new Error(`.env.${SC_ENV} must exist in the monorepo root`);
+    const scEnvFileFullPath = path.join(process.cwd(), scEnvFile);
+    if (!fs.existsSync(scEnvFileFullPath)) {
+      throw new Error(`${scEnvFileFullPath} must exist in the monorepo root`);
     }
 
     /* eslint-disable @typescript-eslint/no-var-requires */

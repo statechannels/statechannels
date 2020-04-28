@@ -19,6 +19,7 @@ import {map as fpMap, fold} from 'fp-ts/lib/Either';
 import {cHubParticipantId, cFirebasePrefix} from './constants';
 
 export async function startServer() {
+  console.log(process.cwd());
   fbObservable()
     .pipe(
       map(({snapshotKey, message}) => ({

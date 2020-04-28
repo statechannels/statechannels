@@ -44,4 +44,4 @@ WORKDIR /statechannels/monorepo/packages/simple-hub
 # To interactively debug the container:
 # docker run -it registry.heroku.com/simple-hub-staging/simple-hub:latest bash
 ENTRYPOINT ["docker/docker-entrypoint.sh"]
-CMD ["node", "./lib/server.js"]
+CMD ["node", "./lib/src/server.js"]
