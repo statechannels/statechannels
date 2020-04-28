@@ -224,9 +224,7 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
     )
     .toPromise();
 
-const getDepositingInfo = (store: Store) => async ({
-  channelId
-}: Init): Promise<Depositing.Init> => {
+const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<Depositing.Init> => {
   const {supported: supportedState, myIndex} = await store.getEntry(channelId);
   const {allocationItems} = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
