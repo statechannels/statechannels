@@ -6,7 +6,8 @@ import {
   ChannelStoredData,
   SignedStateWithHash,
   SignedStateVarsWithHash,
-  StateVariablesWithHash
+  StateVariablesWithHash,
+  Outcome
 } from './types';
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
@@ -314,7 +315,7 @@ export class ChannelStoreEntry {
   private static toggleBigNumberOutcome(
     outcome,
     parserFunction: (data: string | BigNumber) => BigNumber | string
-  ) {
+  ): Outcome {
     if (outcome.allocationItems) {
       return {
         ...outcome,
