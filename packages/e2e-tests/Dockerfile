@@ -4,12 +4,6 @@ ARG BRANCH=sp/headfull-docker-george
 # this allows us to make an image with whatever branch we want
 # using --build-arg BRANCH=name_of_the_branch
 # e.g. docker build -t dapp --build-arg BRANCH=master .
-LABEL "com.github.actions.name"="Puppeteer Headful"
-LABEL "com.github.actions.description"="A GitHub Action / Docker image for Puppeteer, the Headful Chrome Node API"
-LABEL "com.github.actions.icon"="layout"
-LABEL "com.github.actions.color"="blue"
-
-LABEL "maintainer"="State Channels"
 
 RUN  apt-get update \
      # See https://crbug.com/795759
@@ -28,7 +22,6 @@ WORKDIR /monorepo
 ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json
 RUN  git pull 
 RUN  yarn
-
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
