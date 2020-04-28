@@ -65,7 +65,6 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
-    "release:hub-w3t-wallet": "./docker/build-push-release.sh",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test:ci": "yarn hub:test --runInBand"
   }
