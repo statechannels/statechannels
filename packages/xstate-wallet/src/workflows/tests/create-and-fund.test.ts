@@ -5,7 +5,7 @@ import {Init, machine} from '../create-and-fund';
 
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
-import _ from 'lodash';
+
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';

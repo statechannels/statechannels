@@ -6,7 +6,8 @@ import {
   ChannelStoredData,
   SignedStateWithHash,
   SignedStateVarsWithHash,
-  StateVariablesWithHash
+  StateVariablesWithHash,
+  Outcome
 } from './types';
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
@@ -273,11 +274,14 @@ export class ChannelStoreEntry {
     };
   }
 
-  static fromJson(data) {
+  static fromJson(data): ChannelStoreEntry {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
+
+    // TODO: Add some sort of data validator here
+
     const {channelConstants, funding, myIndex, applicationSite} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
@@ -295,7 +299,7 @@ export class ChannelStoreEntry {
   private static prepareStateVariables(
     stateVariables, // TODO: Make this typesafe!
     parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
-  ) {
+  ): Array<SignedStateWithHash> {
     for (const state of stateVariables) {
       if (state.turnNum) {
         state.turnNum = parserFunction(state.turnNum);
@@ -314,7 +318,7 @@ export class ChannelStoreEntry {
   private static toggleBigNumberOutcome(
     outcome,
     parserFunction: (data: string | BigNumber) => BigNumber | string
-  ) {
+  ): Outcome {
     if (outcome.allocationItems) {
       return {
         ...outcome,

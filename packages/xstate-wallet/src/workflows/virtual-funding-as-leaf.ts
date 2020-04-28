@@ -26,7 +26,6 @@ import {FundGuarantor, AllocationItem} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
-import _ from 'lodash';
 
 import {escalate} from '../actions';
 
@@ -172,9 +171,7 @@ export const config: StateNodeConfig<Init, any, any> = {
     failure: {
       entry: [assignError, escalate(({error}: any) => ({type: 'FAILURE', error}))]
     }
-  } as any // TODO: This is to deal with some flickering compilation issues.
-  // It is hard to debug, since once the compile error goes away, it does not come back
-  // until a seemingly random number of project changes
+  }
 };
 
 export const waitForFirstJointState = (store: Store) => ({

@@ -7,10 +7,7 @@ const generalRules = {
 const leftoverTsLintRules = {
   '@typescript-eslint/no-explicit-any': 'off',
   '@typescript-eslint/explicit-function-return-type': 'off',
-  '@typescript-eslint/no-use-before-define': 'off',
-  // TODO: Get rid of this, there are just a small number of cases
-  '@typescript-eslint/no-unused-vars': 'off',
-  '@typescript-eslint/ban-ts-ignore': 'off'
+  '@typescript-eslint/no-use-before-define': 'off'
 };
 
 module.exports = {

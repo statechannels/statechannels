@@ -87,7 +87,7 @@ const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> =>
         .pipe(
           filter(s => s.channelId === ctx.ledgerChannelId),
           first(s => !s.lock),
-          map(async s => await store.acquireChannelLock(ctx.ledgerChannelId))
+          map(async () => await store.acquireChannelLock(ctx.ledgerChannelId))
         )
         .toPromise();
     } else throw e;

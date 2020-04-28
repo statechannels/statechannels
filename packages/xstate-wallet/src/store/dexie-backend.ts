@@ -66,7 +66,7 @@ export class Backend implements DBBackend {
   }
 
   public async objectives() {
-    return this.getAll(ObjectStores.objectives, true);
+    return this.getAll(ObjectStores.objectives);
   }
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
@@ -187,7 +187,7 @@ export class Backend implements DBBackend {
    * @param storeName
    * @param asArray if true, the result object, is transformed to an array
    */
-  private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
+  private async getAll(storeName: ObjectStores): Promise<any> {
     return _.mapValues(_.keyBy(await this._db[storeName].toArray(), 'key'), 'value');
   }
 
