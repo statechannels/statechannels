@@ -413,23 +413,6 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
-    // FIXME: ethers events do not have .off for some reason
-    // const timeoutEvents = fromEvent(this._adjudicator?.provider, 'block').pipe(
-    //   flatMap(async (blockNumber: number) => {
-    //     const chainInfo = await this.getChainInfo(channelId);
-    //     return {blockNumber, chainInfo};
-    //   }),
-    //   filter(
-    //     ({
-    //       blockNumber,
-    //       chainInfo: {
-    //         channelStorage: {finalizesAt}
-    //       }
-    //     }) => finalizesAt.gt(0) && finalizesAt.lte(blockNumber)
-    //   ),
-    //   map(({chainInfo}) => ({channelId, ...chainInfo}))
-    // );
-
     return merge(first, depositEvents, assetTransferEvents).pipe(
       finalize(() => {
         // Once the observable is done we can reset the polling to the 4 second default
