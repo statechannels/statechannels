@@ -1,4 +1,5 @@
 const generalRules = {
+  'no-process-env': 'error',
   'no-case-declarations': 'off',
   'no-undef': 'off' // Shouldn't need this, tsc takes care of it
 };
@@ -44,5 +45,22 @@ module.exports = {
       }
     ],
     'arrow-body-style': 'error'
-  }
+  },
+
+  overrides: [
+    // process.env allowed in tests
+    {
+      files: ['*.test.ts'],
+      rules: {
+        'no-process-env': 'off'
+      }
+    },
+    // process.env allowed in src/config.js
+    {
+      files: ['src/config.ts'],
+      rules: {
+        'no-process-env': 'off'
+      }
+    }
+  ]
 };

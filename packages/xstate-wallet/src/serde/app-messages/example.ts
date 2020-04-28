@@ -1,8 +1,9 @@
 import {Allocations} from '@statechannels/client-api-schema';
 import {SimpleAllocation, MixedAllocation} from '../../store/types';
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
-import {ETH_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {makeDestination} from '../../utils';
+import {ETH_TOKEN} from '../../constants';
 
 export const externalEthAllocation: Allocations = [
   {

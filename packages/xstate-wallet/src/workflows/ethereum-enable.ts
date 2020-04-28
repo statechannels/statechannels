@@ -12,7 +12,7 @@ import {
 } from 'xstate';
 import {MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
-import {WALLET_VERSION} from '../constants';
+import {WALLET_VERSION} from '../config';
 
 interface UserApproves {
   type: 'USER_APPROVES_ENABLE';

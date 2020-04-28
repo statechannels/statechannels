@@ -14,7 +14,7 @@ import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 import {TestStore} from './store';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;

@@ -14,7 +14,7 @@ import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workf
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 import {serializeChannelEntry} from './serde/app-messages/serialize';
-import {ADD_LOGS} from './constants';
+import {ADD_LOGS} from './config';
 import {logger} from './logger';
 
 export interface Workflow {
