@@ -361,5 +361,4 @@ workflows:
             - prepare
           filters:
             branches:
-              #todo: switch before creating a PR
-              only: release-prod #deploy-web3torrent-xstate-wallet
+              only: deploy-web3torrent-xstate-wallet
