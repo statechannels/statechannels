@@ -340,7 +340,7 @@ workflows:
             - run: heroku container:release -a simple-hub-staging simple-hub
           before_build:
             - attach_workspace:
-                at: /root/project
+                at: /home/circleci/project
             - run: curl https://cli-assets.heroku.com/install.sh | sh
             - run: cd packages/simple-hub && yarn build:prod
           deploy: false
