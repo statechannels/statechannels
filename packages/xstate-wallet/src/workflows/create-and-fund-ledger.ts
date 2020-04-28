@@ -11,7 +11,7 @@ import {
   ActionTypes
 } from 'xstate';
 import {SimpleAllocation, Objective, Participant, StateVariables} from '../store/types';
-import {StoreInterface} from '../store';
+import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
@@ -89,7 +89,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
 };
 
 const initializeChannel = (
-  store: StoreInterface
+  store: Store
 ): WorkflowServices['initializeChannel'] => async context => {
   const stateVars: StateVariables = {
     outcome: context.initialOutcome,
@@ -104,7 +104,7 @@ const initializeChannel = (
 };
 
 const createObjective = (
-  store: StoreInterface
+  store: Store
 ): WorkflowServices['createObjective'] => async context => {
   const objective: Objective = {
     type: 'FundLedger',
@@ -114,14 +114,14 @@ const createObjective = (
   return store.addObjective(objective);
 };
 const getPreFundState = (
-  store: StoreInterface
+  store: Store
 ): WorkflowServices['getPreFundState'] => async context => {
   const {latestState} = await store.getEntry(context.ledgerId);
   return {state: latestState};
 };
 
 const getDepositingInfo = (
-  store: StoreInterface
+  store: Store
 ): WorkflowServices['getDepositingInfo'] => async context => {
   const {supported, myIndex} = await store.getEntry(context.ledgerId);
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
@@ -132,7 +132,7 @@ const getDepositingInfo = (
 };
 
 export const options = (
-  store: StoreInterface
+  store: Store
 ): {actions: WorkflowActions; services: WorkflowServices; guards: WorkflowGuards} => ({
   actions: {
     assignChannelId: assign({
@@ -158,7 +158,7 @@ export const mockGuards: WorkflowGuards = {
 
 export const mockOptions = {guards: mockGuards};
 
-export const createAndFundLedgerWorkflow = (store: StoreInterface, context: WorkflowContext) =>
+export const createAndFundLedgerWorkflow = (store: Store, context: WorkflowContext) =>
   Machine(config)
     .withConfig(options(store))
     .withContext(context);

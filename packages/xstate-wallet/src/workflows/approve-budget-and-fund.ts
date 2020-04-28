@@ -12,7 +12,7 @@ import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/t
 
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {StoreInterface, State as ChannelState} from '../store';
+import {Store, State as ChannelState} from '../store';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {
   checkThat,
@@ -105,7 +105,7 @@ export interface Schema extends StateSchema<Context> {
 }
 
 export const machine = (
-  store: StoreInterface,
+  store: Store,
   messagingService: MessagingServiceInterface,
   context: Initial
 ): StateMachine<Context, Schema, Event, Typestate> =>
@@ -209,11 +209,11 @@ interface LedgerInitRetVal {
   ledgerId: string;
   ledgerState: ChannelState;
 }
-const createBudget = (store: StoreInterface) => async (context: Initial): Promise<void> => {
+const createBudget = (store: Store) => async (context: Initial): Promise<void> => {
   // create budget
   await store.createBudget(context.budget);
 };
-const createLedger = (store: StoreInterface) => async (
+const createLedger = (store: Store) => async (
   context: Initial
 ): Promise<LedgerInitRetVal> => {
   // create ledger
@@ -297,7 +297,7 @@ const calculateDepositInfo = (context: Context) => {
   return {depositAt, totalAfterDeposit, fundedAt};
 };
 
-const notifyWhenPreFSSupported = (store: StoreInterface) => ({
+const notifyWhenPreFSSupported = (store: Store) => ({
   ledgerState,
   ledgerId
 }: LedgerExists) =>
@@ -311,7 +311,7 @@ const notifyWhenPreFSSupported = (store: StoreInterface) => ({
     )
     .toPromise();
 
-const observeLedgerOnChainBalance = (store: StoreInterface) => ({ledgerId}: LedgerExists) =>
+const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
     map<ChannelChainInfo, ChainEvent>(({amount: balance, blockNum}) => ({
       type: 'CHAIN_EVENT',
@@ -357,7 +357,7 @@ const setTransactionId = assign<Context, DoneInvokeEvent<string>>({
   transactionId: (context, event) => event.data
 });
 
-const submitDepositTransaction = (store: StoreInterface) => async (
+const submitDepositTransaction = (store: Store) => async (
   ctx: LedgerExists & Deposit & Chain
 ): Promise<string | undefined> => {
   const amount = ctx.totalAfterDeposit.sub(ctx.ledgerTotal);

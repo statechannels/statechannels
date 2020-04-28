@@ -12,7 +12,7 @@ import {
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {StoreInterface, State} from '../store';
+import {Store, State} from '../store';
 import {LedgerFunding, VirtualFundingAsLeaf, SupportState} from '.';
 import {checkThat, isSimpleEthAllocation} from '../utils';
 
@@ -123,7 +123,7 @@ export const config: MachineConfig<Init, any, any> = {
   } as any // TODO: This is to deal with some flickering compilation issues.
 };
 
-const getDeductions = (store: StoreInterface) => async (ctx: Init): Promise<Deductions> => {
+const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
   const entry = await store.getEntry(ctx.jointChannelId);
   const {latestSignedByMe: latestSupportedByMe} = entry;
   const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
@@ -146,7 +146,7 @@ const getDeductions = (store: StoreInterface) => async (ctx: Init): Promise<Dedu
   };
 };
 
-const watchObjectives = (store: StoreInterface) => (ctx: Init): Observable<Objective> =>
+const watchObjectives = (store: Store) => (ctx: Init): Observable<Objective> =>
   store.objectiveFeed.pipe(
     filter(isFundGuarantor),
     filter(o => o.data.jointChannelId === ctx.jointChannelId),
@@ -168,7 +168,7 @@ const watchObjectives = (store: StoreInterface) => (ctx: Init): Observable<Objec
     })
   );
 
-export const options = (store: StoreInterface): Partial<MachineOptions<Init, TEvent>> => {
+export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
     watchObjectives: assign<any>({watcher: (ctx: Init) => spawn(watchObjectives(store)(ctx))}),
     [Actions.assignDeductions]: assign({
@@ -188,4 +188,4 @@ export const options = (store: StoreInterface): Partial<MachineOptions<Init, TEv
   return {actions, services};
 };
 
-export const machine = (store: StoreInterface) => Machine(config, options(store));
+export const machine = (store: Store) => Machine(config, options(store));

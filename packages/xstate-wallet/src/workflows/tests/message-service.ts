@@ -1,4 +1,4 @@
-import {StoreInterface} from '../../store';
+import {Store} from '../../store';
 import _ from 'lodash';
 import {exists} from '../../utils';
 import {ADD_LOGS} from '../../constants';
@@ -6,7 +6,7 @@ import {logger} from '../../logger';
 const log = logger.info.bind(logger);
 
 export function subscribeToMessages(
-  stores: Record<string, Pick<StoreInterface, 'pushMessage' | 'outboxFeed' | 'getAddress'>>
+  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>
 ) {
   Object.keys(stores).map(participantId => {
     const store = stores[participantId];
