@@ -193,8 +193,9 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
         }
       ];
     case 'MixedAllocation':
-      // FIXME: is this a typo?
-      return outcome.simpleAllocations.map(() => convertToNitroOutcome[0]);
+      // TODO: Update NitroOutcome to support multiple asset holders
+      console.log('NOTE: MixedAllocation is using 0th-indexed allocation only');
+      return outcome.simpleAllocations.map(convertToNitroOutcome)[0];
   }
 }
 
