@@ -35,6 +35,8 @@ COPY ./packages/nitro-protocol/ packages/nitro-protocol/
 COPY ./packages/wire-format/ packages/wire-format/
 COPY ./packages/simple-hub/ packages/simple-hub/
 
+WORKDIR /statechannels/monorepo/packages/simple-hub
+
 # docker-entrypoint.sh starts a shell that execs the list of arguments in CMD
 # This works around the following heroku constraint:
 # https://devcenter.heroku.com/articles/container-registry-and-runtime#dockerfile-commands-and-runtime
