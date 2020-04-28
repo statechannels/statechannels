@@ -2,7 +2,7 @@ import {ChannelWallet} from './channel-wallet';
 import {MessagingService} from './messaging';
 import {ChainWatcher} from './chain';
 import {MemoryBackend} from './store/memory-backend';
-import {XstateStore} from './store';
+import {Store} from './store';
 import * as constants from './constants';
 import Url from 'url-parse';
 import './render';
@@ -15,7 +15,7 @@ const log = logger.info.bind(logger);
   const chain = new ChainWatcher();
 
   const backend = constants.USE_INDEXED_DB ? new Backend() : new MemoryBackend();
-  const store = new XstateStore(chain, backend);
+  const store = new Store(chain, backend);
 
   await store.initialize([], constants.CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);

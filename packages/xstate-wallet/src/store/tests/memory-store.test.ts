@@ -6,7 +6,7 @@ import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
 import {Wallet} from 'ethers';
-import {XstateStore} from './../store';
+import {Store} from './../store';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -42,7 +42,7 @@ const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
 const aStore = async (noPrivateKeys = false) => {
-  const store = new XstateStore(undefined, new Backend());
+  const store = new Store(undefined, new Backend());
   const privateKeys = noPrivateKeys ? undefined : [aPrivateKey];
   await store.initialize(privateKeys, true);
   return store;
