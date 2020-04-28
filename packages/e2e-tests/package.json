@@ -41,6 +41,7 @@
     "precommit": "lint-staged --quiet",
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
+    "puppeteer:dev:minimal-dapp": "NODE_ENV=development HEADLESS=false USE_DAPPETEER=true ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/minimal-dapp.ts",
     "test": "jest",
     "test:show": "HEADLESS=false yarn run test",
     "test:e2e:rps": "SC_ENV=circle-integration-rps sh ./run-e2e.sh rps",
