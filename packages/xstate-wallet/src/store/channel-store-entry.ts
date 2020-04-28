@@ -295,7 +295,7 @@ export class ChannelStoreEntry {
   private static prepareStateVariables(
     stateVariables, // TODO: Make this typesafe!
     parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
-  ) {
+  ): Array<SignedStateWithHash> {
     for (const state of stateVariables) {
       if (state.turnNum) {
         state.turnNum = parserFunction(state.turnNum);
