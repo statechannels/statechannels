@@ -352,6 +352,8 @@ export class Store {
         };
       })
       .then(({entry, signedState}) => {
+        // These events trigger callbacks that should not run within the transaction scope
+        // See https://github.com/dfahlander/Dexie.js/issues/1029
         this._eventEmitter.emit('channelUpdated', entry);
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
       });
@@ -381,6 +383,8 @@ export class Store {
           return memoryChannelStorage;
         }
       )
+      // This event triggers callbacks that should not run within the transaction scope
+      // See https://github.com/dfahlander/Dexie.js/issues/1029
       .then(entry => this._eventEmitter.emit('channelUpdated', entry));
 
   public async getAddress(): Promise<string> {
