@@ -227,13 +227,18 @@ export class Store {
     );
   }
 
-  public async getLedger(peerId: string) {
-    const ledgerId = await this.backend.getLedger(peerId);
+  public getLedger = async (peerId: string) =>
+    this.backend.transaction(
+      'readonly',
+      [ObjectStores.ledgers, ObjectStores.channels],
+      async () => {
+        const ledgerId = await this.backend.getLedger(peerId);
 
-    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
+        if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
-    return await this.getEntry(ledgerId);
-  }
+        return await this.getEntry(ledgerId);
+      }
+    );
 
   public setApplicationSite = (channelId: string, applicationSite: string) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
