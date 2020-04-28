@@ -1,5 +1,9 @@
 FROM node:10.16.3
 
+ARG BRANCH=sp/headfull-docker
+# this allows us to make an image with whatever branch we want
+# using --build-arg BRANCH=name_of_the_branch
+# e.g. docker build -t dapp --build-arg BRANCH=master .
 LABEL "com.github.actions.name"="Puppeteer Headful"
 LABEL "com.github.actions.description"="A GitHub Action / Docker image for Puppeteer, the Headful Chrome Node API"
 LABEL "com.github.actions.icon"="layout"
@@ -17,11 +21,12 @@ RUN  apt-get update \
      && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
      && apt-get update \
      && apt-get install -y google-chrome-stable --no-install-recommends \
-     && rm -rf /var/lib/apt/lists/* \
-     && git clone -b george/headful-puppeteer-ci --single-branch https://github.com/statechannels/monorepo.git monorepo \
-     && cd monorepo \
-     && git pull \
-     && yarn
+     && rm -rf /var/lib/apt/lists/*
+
+RUN  git clone -b $BRANCH --single-branch https://github.com/statechannels/monorepo.git monorepo
+WORKDIR /monorepo
+RUN  git pull 
+RUN  yarn
 
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
