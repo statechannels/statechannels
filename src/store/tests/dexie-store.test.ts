@@ -186,6 +186,16 @@ describe('getBudget', () => {
   });
 });
 
+describe('setLedger', () => {
+  it('works', async () => {
+    const store = await aStore();
+
+    await store.addState(signedState);
+    await store.setLedger(channelId);
+    expect((await store.getLedger(participants[1].participantId)).channelId).toEqual(channelId);
+  });
+});
+
 const getBackend = (store: Store) => (store as any).backend as Backend;
 
 describe('transactions', () => {
