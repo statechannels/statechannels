@@ -11,10 +11,7 @@ import {
 } from './types';
 import * as _ from 'lodash';
 
-// eslint-disable-next-line import/no-duplicates
-import Dexie from 'dexie';
-// eslint-disable-next-line import/no-duplicates
-import {Transaction, TransactionMode} from 'dexie';
+import Dexie, {Transaction, TransactionMode} from 'dexie';
 
 import {unreachable} from '../utils';
 import {logger} from '../logger';
