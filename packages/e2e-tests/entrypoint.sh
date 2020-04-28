@@ -1,14 +1,13 @@
 #!/bin/sh
 
-# Startup Xvfb
-Xvfb -ac :99 -screen 0 1280x1024x16 > /dev/null 2>&1 &
-
 # Export some variables
 export DISPLAY=:99.0
 export PUPPETEER_EXEC_PATH="google-chrome-stable"
 
-#!/bin/sh
-cd packages/e2e-tests
+# Startup Xvfb
+Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1 &
 
+cd packages/e2e-tests
+# LOG_DESTINATION='console' yarn test:e2e:w3t
 set -e
 exec "$@"
