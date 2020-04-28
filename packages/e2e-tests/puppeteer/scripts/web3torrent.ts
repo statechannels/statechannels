@@ -53,7 +53,7 @@ export async function uploadFile(
   }
 
   const downloadLinkSelector = '#download-link';
-  await page.waitForSelector(downloadLinkSelector);
+  await page.waitForSelector(downloadLinkSelector, {timeout: 60000}); // wait for my tx, which could be slow if on a real blockchain
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
 
   return downloadLink ? downloadLink : '';
