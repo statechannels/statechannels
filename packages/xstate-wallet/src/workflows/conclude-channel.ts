@@ -83,6 +83,7 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const withdraw = (store: Store) => async (ctx: Init) => {
   // NOOP
 };

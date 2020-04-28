@@ -26,7 +26,6 @@ import {FundGuarantor, AllocationItem} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
-import _ from 'lodash';
 
 import {escalate} from '../actions';
 

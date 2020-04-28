@@ -97,14 +97,14 @@ export const ethereumEnableWorkflow = (
     hideUi: () => {
       messagingService.sendDisplayMessage('Hide');
     },
-    sendResponse: async (context: WorkflowContext, event) => {
+    sendResponse: async (context: WorkflowContext) => {
       messagingService.sendResponse(context.requestId, {
         signingAddress: await store.getAddress(),
         walletVersion: WALLET_VERSION,
         selectedAddress: context.enabledAddress as string
       });
     },
-    sendErrorResponse: (context: WorkflowContext, event) => {
+    sendErrorResponse: (context: WorkflowContext) => {
       messagingService.sendError(context.requestId, {code: 100, message: 'Ethereum Not Enabled'});
     }
   };

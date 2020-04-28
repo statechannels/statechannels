@@ -98,7 +98,7 @@ const assignJointChannelId = assign<any>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
 
-const reserveFunds = (store: Store) => async (context, event) => {
+const reserveFunds = (store: Store) => async context => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
   const playerAddress = await store.getAddress();

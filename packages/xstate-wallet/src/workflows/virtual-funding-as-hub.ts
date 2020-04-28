@@ -18,7 +18,6 @@ import {checkThat, isSimpleEthAllocation} from '../utils';
 
 import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
-import _ from 'lodash';
 import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';
 import {Observable} from 'rxjs';
 

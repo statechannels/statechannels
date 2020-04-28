@@ -108,7 +108,7 @@ export class FakeChain implements Chain {
     return 'fake-transaction-id';
   }
 
-  public async challenge(support: SignedState[], privateKey: string): Promise<string> {
+  public async challenge(support: SignedState[]): Promise<string> {
     const channelId = calculateChannelId(support[0]);
 
     const {turnNum, challengeDuration} = support[support.length - 1];
@@ -413,22 +413,22 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
-    // @ts-ignore -- FIXME: ethers events do not have .off for some reason
-    const timeoutEvents = fromEvent(this._adjudicator?.provider, 'block').pipe(
-      flatMap(async (blockNumber: number) => {
-        const chainInfo = await this.getChainInfo(channelId);
-        return {blockNumber, chainInfo};
-      }),
-      filter(
-        ({
-          blockNumber,
-          chainInfo: {
-            channelStorage: {finalizesAt}
-          }
-        }) => finalizesAt.gt(0) && finalizesAt.lte(blockNumber)
-      ),
-      map(({chainInfo}) => ({channelId, ...chainInfo}))
-    );
+    // FIXME: ethers events do not have .off for some reason
+    // const timeoutEvents = fromEvent(this._adjudicator?.provider, 'block').pipe(
+    //   flatMap(async (blockNumber: number) => {
+    //     const chainInfo = await this.getChainInfo(channelId);
+    //     return {blockNumber, chainInfo};
+    //   }),
+    //   filter(
+    //     ({
+    //       blockNumber,
+    //       chainInfo: {
+    //         channelStorage: {finalizesAt}
+    //       }
+    //     }) => finalizesAt.gt(0) && finalizesAt.lte(blockNumber)
+    //   ),
+    //   map(({chainInfo}) => ({channelId, ...chainInfo}))
+    // );
 
     return merge(first, depositEvents, assetTransferEvents).pipe(
       finalize(() => {

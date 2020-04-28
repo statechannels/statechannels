@@ -194,7 +194,7 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       ];
     case 'MixedAllocation':
       // FIXME: is this a typo?
-      return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
+      return outcome.simpleAllocations.map(() => convertToNitroOutcome[0]);
   }
 }
 

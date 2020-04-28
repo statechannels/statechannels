@@ -31,7 +31,6 @@ import {
   OpenEvent
 } from '../event-types';
 import {FundingStrategy} from '@statechannels/client-api-schema';
-import _ from 'lodash';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 
 export interface WorkflowContext {
@@ -252,7 +251,7 @@ export const workflow = (
       messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
     },
 
-    sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
+    sendCloseChannelResponse: async (context: ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
         messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
