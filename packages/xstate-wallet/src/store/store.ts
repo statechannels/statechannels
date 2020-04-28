@@ -227,13 +227,18 @@ export class Store {
     );
   }
 
-  public async getLedger(peerId: string) {
-    const ledgerId = await this.backend.getLedger(peerId);
+  public getLedger = async (peerId: string) =>
+    this.backend.transaction(
+      'readonly',
+      [ObjectStores.ledgers, ObjectStores.channels],
+      async () => {
+        const ledgerId = await this.backend.getLedger(peerId);
 
-    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
+        if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
-    return await this.getEntry(ledgerId);
-  }
+        return await this.getEntry(ledgerId);
+      }
+    );
 
   public setApplicationSite = (channelId: string, applicationSite: string) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
@@ -247,7 +252,7 @@ export class Store {
   public setLedger = (ledgerId: string) =>
     this.backend.transaction(
       'readwrite',
-      [ObjectStores.ledgers, ObjectStores.channels],
+      [ObjectStores.ledgers, ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
         const entry = await this.getEntry(ledgerId);
 
@@ -324,10 +329,8 @@ export class Store {
   }
 
   public signAndAddState = (channelId: string, stateVars: StateVariables) =>
-    this.backend.transaction(
-      'readwrite',
-      [ObjectStores.channels, ObjectStores.privateKeys],
-      async () => {
+    this.backend
+      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const entry = await this.getEntry(channelId);
 
         const {participants} = entry;
@@ -342,10 +345,17 @@ export class Store {
           privateKey
         );
         await this.backend.setChannel(channelId, entry.data());
-        this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+        return {
+          entry: await this.getEntry(channelId),
+          signedState
+        };
+      })
+      .then(({entry, signedState}) => {
+        // These events trigger callbacks that should not run within the transaction scope
+        // See https://github.com/dfahlander/Dexie.js/issues/1029
+        this._eventEmitter.emit('channelUpdated', entry);
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-      }
-    );
+      });
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
@@ -358,20 +368,23 @@ export class Store {
   }
 
   public addState = (state: SignedState) =>
-    this.backend.transaction(
-      'readwrite',
-      [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
-      async () => {
-        const channelId = calculateChannelId(state);
-        const memoryChannelStorage =
-          (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
-        // TODO: This is kind of awkward
-        state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
-        await this.backend.setChannel(channelId, memoryChannelStorage.data());
-        this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
-        return memoryChannelStorage;
-      }
-    );
+    this.backend
+      .transaction(
+        'readwrite',
+        [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
+        async () => {
+          const channelId = calculateChannelId(state);
+          const memoryChannelStorage =
+            (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
+          // TODO: This is kind of awkward
+          state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
+          await this.backend.setChannel(channelId, memoryChannelStorage.data());
+          return memoryChannelStorage;
+        }
+      )
+      // This event triggers callbacks that should not run within the transaction scope
+      // See https://github.com/dfahlander/Dexie.js/issues/1029
+      .then(entry => this._eventEmitter.emit('channelUpdated', entry));
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();

@@ -11,7 +11,8 @@ import {
 } from './types';
 import * as _ from 'lodash';
 
-import {Transaction, Dexie, TransactionMode} from 'dexie';
+import Dexie, {Transaction, TransactionMode} from 'dexie';
+
 import {unreachable} from '../utils';
 import {logger} from '../logger';
 
