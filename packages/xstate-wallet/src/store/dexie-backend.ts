@@ -66,7 +66,7 @@ export class Backend implements DBBackend {
   }
 
   public async objectives() {
-    return this.getAll(ObjectStores.objectives, true);
+    return this.getAll(ObjectStores.objectives);
   }
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
