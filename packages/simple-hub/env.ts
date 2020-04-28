@@ -14,11 +14,13 @@ function configureEnvVariables(monorepo = true) {
   const SC_ENV = process.env.SC_ENV;
   if (SC_ENV) {
     const scEnvFile = path.join('../..', '.env.' + SC_ENV);
-    if (!fs.existsSync(scEnvFile)) {
-      throw new Error(`.env.${SC_ENV} must exist in the monorepo root`);
+    const scEnvFileFullPath = path.join(process.cwd(), scEnvFile);
+    if (!fs.existsSync(scEnvFileFullPath)) {
+      throw new Error(`${scEnvFileFullPath} must exist in the monorepo root`);
     }
 
     /* eslint-disable @typescript-eslint/no-var-requires */
+    // NOTE: dotenv joins paths with cwd https://www.npmjs.com/package/dotenv#path
     require('dotenv-expand')(
       require('dotenv').config({
         path: scEnvFile
