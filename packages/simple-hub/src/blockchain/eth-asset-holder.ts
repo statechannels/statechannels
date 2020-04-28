@@ -42,12 +42,18 @@ export class Blockchain {
         return;
       }
 
+      log.info(
+        `submitting deposit transaction to eth asset holder with value: ${value
+          .sub(expectedHeld)
+          .toHexString()}`
+      );
       const tx = await Blockchain.ethAssetHolder.deposit(
         channelID,
         expectedHeld.toHexString(),
         value,
         {value: value.sub(expectedHeld)}
       );
+      log.info(`waiting for tx to be mined hash=${tx.hash}`);
       await tx.wait();
 
       const holdings = (await Blockchain.ethAssetHolder.holdings(channelID)).toHexString();
