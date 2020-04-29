@@ -10,6 +10,7 @@ import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
 import {Store} from '../../store';
+import {logger} from '../../logger';
 
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
@@ -40,11 +41,11 @@ if (config.states) {
     const machine = interpret<any, any, any>(workflow(testContext).withContext(testContext), {
       devTools: true
     }); // start a new interpreted machine for each story
-    machine.onEvent(event => console.log(event.type)).start(state);
+    machine.onEvent(event => logger.info(event.type)).start(state);
     storiesOf('Workflows / Confirm Create Channel', module).add(
       state.toString(),
       renderComponentInFrontOfApp(<ConfirmCreateChannel service={machine} />)
     );
-    machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
+    machine.stop(); // the machine will be stopped before it can be transitioned. This means the logger throws a warning that we sent an event to a stopped machine.
   });
 }
