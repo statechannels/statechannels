@@ -12,7 +12,9 @@ import {
   waitForNthState,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
-  setupFakeWeb3
+  setupFakeWeb3,
+  waitForWalletToBeHidden,
+  waitForClosedState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -60,7 +62,6 @@ describe('Web3-Torrent Integration Tests', () => {
       [browserA, browserB].map(async browser => browser && (await browser.close()))
     );
   });
-
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
     const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
@@ -87,7 +88,11 @@ describe('Web3-Torrent Integration Tests', () => {
     await Promise.all(tabs.map(waitForClosingChannel));
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await Promise.all([web3tTabA, web3tTabB].map(tab => tab.waitFor(1500)));
+    await Promise.all(tabs.map(tab => tab.waitFor(1500)));
+    // Wait for the wallet iframe to be hidden
+    await Promise.all(tabs.map(tab => waitForWalletToBeHidden(tab)));
+    // Wait for the close state channel update
+    await Promise.all(tabs.map(tab => waitForClosedState(tab)));
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
