@@ -17,6 +17,7 @@ import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/st
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import {logger} from './logger';
 
 const EthAssetHolderInterface = new Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -242,7 +243,7 @@ export class ChainWatcher implements Chain {
     this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
     this._assetHolders[0].on('Deposited', console.log);
     provider.on('block', blockNumber => {
-      console.log('New Block: ' + blockNumber);
+      logger.info('New Block: ' + blockNumber);
     });
     this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
 
@@ -262,12 +263,12 @@ export class ChainWatcher implements Chain {
         if (typeof this.selectedAddress === 'string') {
           return this.selectedAddress;
         } else {
-          console.error('Ethereum enabled but no selected address is defined');
+          logger.error('Ethereum enabled but no selected address is defined');
           return Promise.reject('Ethereum enabled but no selected address is defined');
         }
       } catch (error) {
         // Handle error. Likely the user rejected the login
-        console.error(error);
+        logger.error(error);
         return Promise.reject('user rejected in metamask');
       }
     } else {

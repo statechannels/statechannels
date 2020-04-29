@@ -22,7 +22,7 @@ export class Backend implements DBBackend {
 
   constructor() {
     if (!indexedDB) {
-      console.error("Your browser doesn't support a stable version of IndexedDB.");
+      logger.error("Your browser doesn't support a stable version of IndexedDB.");
     }
   }
   /**

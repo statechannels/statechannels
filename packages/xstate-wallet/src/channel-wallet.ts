@@ -101,7 +101,7 @@ export class ChannelWallet {
         } else {
           // TODO: To allow RPS to keep working we just warn about duplicate events
           // Eventually this could probably be an error
-          console.warn(
+          logger.warn(
             `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
           );
         }
