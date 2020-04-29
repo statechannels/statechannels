@@ -181,7 +181,7 @@ export class ChannelStoreEntry {
   }
 
   get latest() {
-    return {...this.channelConstants, ...this.signedStates[this.signedStates.length - 1]};
+    return {...this.channelConstants, ...this.signedStates[0]};
   }
 
   get latestState() {
