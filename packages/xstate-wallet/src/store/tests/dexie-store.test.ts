@@ -140,7 +140,7 @@ describe('createChannel', () => {
 
 describe('signAndAdd', () => {
   let entry: ChannelStoreEntry;
-  let store: XstateStore;
+  let store: Store;
   beforeEach(async () => {
     store = await aStore();
 
