@@ -110,6 +110,18 @@ export const setupGanache = async (
     }
     say(`Using the deployments cache at ${deploymentsFile}.`);
 
+    if (
+      !Number.isFinite(deployerAccountIndex) ||
+      deployerAccountIndex < 0 ||
+      deployerAccountIndex >= ETHERLIME_ACCOUNTS.length
+    ) {
+      throw Error(
+        `Invalid deployer account index ${deployerAccountIndex} : ${JSON.stringify(
+          ETHERLIME_ACCOUNTS
+        )}`
+      );
+    }
+
     const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
 
     type = 'shared';
