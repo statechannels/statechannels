@@ -1,12 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
-# Export some variables
-export DISPLAY=:99.0
-export PUPPETEER_EXEC_PATH="google-chrome-stable"
-
-# Startup Xvfb
-Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1 &
-
-cd packages/e2e-tests
-set -e
-exec "$@"
+if [[ $@ == *"bash"* ]]
+then
+  echo "Interactive console: "
+  set -e
+  exec "$@"
+else
+  Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1 & yarn test:e2e:w3t
+fi
