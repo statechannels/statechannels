@@ -23,6 +23,7 @@ import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {Wallet} from 'ethers';
 import {SignatureEntry} from './channel-store-entry';
+import {logger} from '../logger';
 
 function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
@@ -194,7 +195,7 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       ];
     case 'MixedAllocation':
       // TODO: Update NitroOutcome to support multiple asset holders
-      console.log('NOTE: MixedAllocation is using 0th-indexed allocation only');
+      logger.warn('NOTE: MixedAllocation is using 0th-indexed allocation only');
       return outcome.simpleAllocations.map(convertToNitroOutcome)[0];
   }
 }

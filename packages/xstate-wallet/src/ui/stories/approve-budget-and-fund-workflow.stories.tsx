@@ -11,6 +11,7 @@ import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {Store} from '../../store';
 import {ethBudget} from '../../utils';
 import {bigNumberify, parseEther} from 'ethers/utils';
+import {logger} from '../../logger';
 
 const store = new Store();
 
@@ -37,12 +38,12 @@ const hub: Participant = {
 const addStory = (name, value, context) => {
   const workflow = approveBudgetAndFundWorkflow(store, messagingService, context);
   const service = interpret(workflow, {devTools: true}); // start a new interpreted machine for each story
-  service.onEvent(event => console.log(event.type)).start(value);
+  service.onEvent(event => logger.info(event.type)).start(value);
   storiesOf('Workflows / Approve Budget And Fund', module).add(
     name,
     renderComponentInFrontOfApp(<ApproveBudgetAndFund service={service} />)
   );
-  service.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
+  service.stop(); // the machine will be stopped before it can be transitioned. This means the logger.info on L49 throws a warning that we sent an event to a stopped machine.
 };
 
 const testContext = {

@@ -12,6 +12,7 @@ import {
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
+import {logger} from '../logger';
 
 import {Funding} from './store';
 export interface SignatureEntry {
@@ -276,7 +277,7 @@ export class ChannelStoreEntry {
 
   static fromJson(data): ChannelStoreEntry {
     if (!data) {
-      console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
+      logger.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
 
