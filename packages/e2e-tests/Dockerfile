@@ -1,6 +1,6 @@
 FROM node:10.16.3
 
-ARG BRANCH=sp/headfull-docker-george
+ARG BRANCH=george/heaful-ci2
 # this allows us to make an image with whatever branch we want
 # using --build-arg BRANCH=name_of_the_branch
 # e.g. docker build -t dapp --build-arg BRANCH=master .
@@ -17,11 +17,18 @@ RUN  apt-get update \
      && apt-get install -y google-chrome-stable --no-install-recommends \
      && rm -rf /var/lib/apt/lists/*
 
+# RUN useradd -r -u 1001 appuser -m
+# USER appuser
+# RUN mkdir /home/appuser
+# WORKDIR /home/appuser
 RUN  git clone -b $BRANCH --single-branch https://github.com/statechannels/monorepo.git monorepo
 WORKDIR /monorepo
 ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json
 RUN  git pull 
 RUN  yarn
+# the following lines copy stuff into the image manually, so that we can try things without commiting and pushing
+# COPY .env.circle-integration-w3t /home/appuser/monorepo/.env.circle-integration-w3t
+# COPY ./puppeteer/helpers.ts /home/appuser/monorepo/packages/e2e-tests/puppeteer/helpers.ts
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
