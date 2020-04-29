@@ -25,7 +25,7 @@ WORKDIR /statechannels/monorepo
 RUN yarn --production --prefer-offline
 WORKDIR /statechannels/monorepo/packages/simple-hub
 # Run added dependencies because of configureEnvVariables
-RUN yarn add --ignore-scripts dotenv dotenv-expand
+RUN yarn add --ignore-scripts --ignore-optional dotenv dotenv-expand
 
 
 # COPY SOURCE

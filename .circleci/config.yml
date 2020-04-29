@@ -346,7 +346,7 @@ jobs:
       - run: curl https://cli-assets.heroku.com/install.sh | sh
       - run: heroku container:login
       - docker/build:
-          # cache_from: registry.heroku.com/simple-hub-staging/simple-hub:latest
+          cache_from: registry.heroku.com/simple-hub-staging/simple-hub:latest
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
           extra_build_args: --build-arg BUILDKIT_INLINE_CACHE=1
           image: registry.heroku.com/simple-hub-staging/simple-hub
