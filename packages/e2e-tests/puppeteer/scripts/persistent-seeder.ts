@@ -14,7 +14,7 @@ export async function persistentSeeder(): Promise<void> {
   await web3tTabA.goto('https://web3torrent.statechannels.org/upload', {waitUntil: 'load'});
   await web3tTabA.bringToFront();
 
-  const url = await uploadFile(web3tTabA, true, metamask);
+  const url = await uploadFile(web3tTabA, true, metamask, './nitro-protocol.pdf');
   console.log(`seeding: go to ${url}`);
 }
 
