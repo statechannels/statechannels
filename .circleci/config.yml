@@ -330,7 +330,7 @@ jobs:
     environment:
       USE_NATIVE_SOLC: true
     working_directory: /home/circleci/project
-    resource_class: medium
+    resource_class: large
     docker:
       - image: circleci/node:10.16
     steps:
@@ -341,7 +341,7 @@ jobs:
 
       - <<: *restore_dep
       - <<: *restore_lib
-      - run: yarn --frozen-lockfile --prod
+      - run: yarn --frozen-lockfile
       - run: curl https://cli-assets.heroku.com/install.sh | sh
 
       - docker/build:
