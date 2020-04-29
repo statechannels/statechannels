@@ -116,9 +116,7 @@ export const setupGanache = async (
       deployerAccountIndex >= ETHERLIME_ACCOUNTS.length
     ) {
       throw Error(
-        `Invalid deployer account index ${deployerAccountIndex} : ${JSON.stringify(
-          ETHERLIME_ACCOUNTS
-        )}`
+        `Invalid deployer account index ${deployerAccountIndex} : ${ETHERLIME_ACCOUNTS.length}`
       );
     }
 
