@@ -45,22 +45,31 @@ export class ChannelWallet {
         .pipe(take(1))
         .toPromise();
 
-      // Note that it's important to start the workflow first, before sending ChannelProposed.
-      // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
-      this.startWorkflow(
-        Application.workflow(this.store, this.messagingService, {
-          type: 'JOIN_CHANNEL',
-          fundingStrategy: objective.data.fundingStrategy,
-          channelId: objective.data.targetChannelId,
-          applicationSite: 'TODO' // FIXME
-        }),
-        this.calculateWorkflowId(objective)
-      );
+      // TODO: Currently receiving a duplicate JOIN_CHANNEL event
+      if (this.isWorkflowIdInUse(this.calculateWorkflowId(objective))) {
+        console.warn(
+          `There is already a workflow running with id ${this.calculateWorkflowId(
+            objective
+          )}, no new workflow will be spawned`
+        );
+      } else {
+        // Note that it's important to start the workflow first, before sending ChannelProposed.
+        // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
+        this.startWorkflow(
+          Application.workflow(this.store, this.messagingService, {
+            type: 'JOIN_CHANNEL',
+            fundingStrategy: objective.data.fundingStrategy,
+            channelId: objective.data.targetChannelId,
+            applicationSite: 'TODO' // FIXME
+          }),
+          this.calculateWorkflowId(objective)
+        );
 
-      this.messagingService.sendChannelNotification('ChannelProposed', {
-        ...(await serializeChannelEntry(channelEntry)),
-        fundingStrategy: objective.data.fundingStrategy
-      });
+        this.messagingService.sendChannelNotification('ChannelProposed', {
+          ...(await serializeChannelEntry(channelEntry)),
+          fundingStrategy: objective.data.fundingStrategy
+        });
+      }
     });
 
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));

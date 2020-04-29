@@ -9,13 +9,11 @@ import {
   HUB,
   FIREBASE_PREFIX,
   fireBaseConfig,
-  FUNDING_STRATEGY,
-  INITIAL_BUDGET_AMOUNT
+  FUNDING_STRATEGY
 } from '../constants';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import _ from 'lodash';
 import {map, filter, first} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
@@ -82,17 +80,17 @@ export class PaymentChannelClient {
     });
   }
 
+  async initialize() {
+    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+    await this.initializeHubComms();
+  }
+
   async enable() {
     log.info('enabling payment channel client');
-    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+
     await this.channelClient.provider.enable();
-    this.initializeHubComms();
+
     log.info('payment channel client enabled');
-    // TODO: This should probably not be long term behavior
-    const existingBudget = await this.getBudget();
-    if (_.isEmpty(existingBudget) && FUNDING_STRATEGY !== 'Direct') {
-      await this.createBudget(INITIAL_BUDGET_AMOUNT);
-    }
   }
 
   private initializeHubComms() {
@@ -343,12 +341,9 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(): Promise<SiteBudget | {}> {
-    const result = await this.channelClient.closeAndWithdraw(
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
 
-    this.budgetCache = _.isEmpty(result) ? undefined : result;
+    this.budgetCache = undefined;
     return this.budgetCache;
   }
 }

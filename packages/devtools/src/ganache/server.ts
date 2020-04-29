@@ -24,7 +24,8 @@ export class GanacheServer {
     gasPrice = 1
   ) {
     log.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
-
+    const showVerboseOutput = process.env.SHOW_VERBOSE_GANACHE_OUTPUT === 'true';
+    const showOutput = showVerboseOutput || process.env.SHOW_GANACHE_OUTPUT == 'true';
     this.fundedPrivateKey = accounts[0].privateKey;
 
     const oneMillion = ethers.utils.parseEther('1000000');
@@ -32,7 +33,8 @@ export class GanacheServer {
     const opts = [
       [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
-      [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]
+      [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
+      showVerboseOutput ? ['--verbose'] : []
     ]
       .reduce((a, b) => a.concat(b))
       .join(' ');
@@ -40,7 +42,7 @@ export class GanacheServer {
     const cmd = `ganache-cli ${opts}`;
 
     this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
-    if (process.env.SHOW_GANACHE_OUTPUT === 'true') {
+    if (showOutput) {
       this.server.stdout.on('data', data => {
         log.info(data.toString());
       });

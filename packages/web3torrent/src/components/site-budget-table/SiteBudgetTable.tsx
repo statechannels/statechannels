@@ -4,7 +4,6 @@ import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
-import {Web3TorrentContext} from '../../clients/web3torrent-client';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -12,10 +11,11 @@ export type SiteBudgetTableProps = {
   channelCache: Record<string, ChannelState>;
   budgetCache: SiteBudget;
   mySigningAddress: string;
+  withdraw: () => void;
 };
 
 export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
-  const {budgetCache, channelCache, mySigningAddress} = props;
+  const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
@@ -35,45 +35,35 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
   const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
+
   return (
-    <Web3TorrentContext.Consumer>
-      {web3Torrent => {
-        return (
-          <>
-            <table className="site-budget-table">
-              <thead>
-                <tr className="budget-info">
-                  <td className="budget-button">Wallet Action</td>
-                  <td className="budget-number"> Spent / Budget </td>
-                  <td className="budget-number"> Earned / Budget </td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="budget-info">
-                  <td className="budget-button">
-                    <button
-                      id="budget-withdraw"
-                      onClick={async () => {
-                        web3Torrent.paymentChannelClient.closeAndWithdraw();
-                      }}
-                    >
-                      Withdraw
-                    </button>
-                  </td>
-                  <td className="budget-number">
-                    {' '}
-                    {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
-                  </td>
-                  <td className="budget-number">
-                    {' '}
-                    {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </>
-        );
-      }}
-    </Web3TorrentContext.Consumer>
+    <>
+      <table className="site-budget-table">
+        <thead>
+          <tr className="budget-info">
+            <td className="budget-button">Wallet Action</td>
+            <td className="budget-number"> Spent / Budget </td>
+            <td className="budget-number"> Earned / Budget </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="budget-info">
+            <td className="budget-button">
+              <button id="budget-withdraw" onClick={withdraw}>
+                Withdraw
+              </button>
+            </td>
+            <td className="budget-number">
+              {' '}
+              {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
+            </td>
+            <td className="budget-number">
+              {' '}
+              {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </>
   );
 };
