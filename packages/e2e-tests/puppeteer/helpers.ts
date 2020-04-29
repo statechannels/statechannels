@@ -3,7 +3,7 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {USE_DAPPETEER} from './constants';
+import {USE_DAPPETEER, DAPPETEER_PK, TARGET_NETWORK} from './constants';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
@@ -177,12 +177,12 @@ export async function setUpBrowser(
       ]
     });
     metamask = await dappeteer.getMetamask(browser);
-    await metamask.importPK('0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'); // etherlime account 0
+    !!DAPPETEER_PK && (await metamask.importPK(DAPPETEER_PK));
 
     // Because of the implementation of switchNetwork not allowing for
     // custom host & ports (see https://github.com/decentraland/dappeteer/blob/7720a675d2d0c4fa10e93d33426b984cc391d4c3/src/index.ts#L149)
-    // our only option is "localhost", which defaults to 8545
-    await metamask.switchNetwork('localhost'); // In production, replace with 'ropsten'
+    // our only options are "localhost" (which defaults to 8545) or a public network such as 'ropsten'
+    await metamask.switchNetwork(TARGET_NETWORK);
   }
 
   return {browser, metamask};
@@ -226,7 +226,7 @@ export async function waitAndApproveDepositWithHub(
 ): Promise<void> {
   console.log('Making deposit with hub');
   const walletIFrame = page.frames()[1];
-  await walletIFrame.waitForSelector('#please-approve-transaction');
+  await walletIFrame.waitForSelector('#please-approve-transaction', {timeout: 60000}); // longer timeout here because blockchain is slow
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
 }
