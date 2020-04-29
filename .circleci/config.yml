@@ -327,8 +327,6 @@ jobs:
       - notify_slack
 
   release-hub:
-    environment:
-      USE_NATIVE_SOLC: true
     working_directory: /home/circleci/project
     resource_class: large
     docker:
