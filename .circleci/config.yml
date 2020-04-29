@@ -334,7 +334,8 @@ jobs:
     docker:
       - image: circleci/node:10.16
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
       - checkout
       - attach_workspace:
           at: /home/circleci/project
