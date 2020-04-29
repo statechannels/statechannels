@@ -25,7 +25,7 @@ const {getNetworkName, setupGanache, configureEnvVariables} = require('@statecha
 const {deploy} = require('../deployment/deploy');
 
 // Ensure environment variables are read.
-configureEnvVariables(true);
+configureEnvVariables();
 
 void (async () => {
   process.on('SIGINT', () => {

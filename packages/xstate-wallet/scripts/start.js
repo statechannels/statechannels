@@ -18,7 +18,7 @@ process.on('unhandledRejection', err => {
 // Ensure environment variables are read.
 const {configureEnvVariables} = require('@statechannels/devtools');
 
-configureEnvVariables(true);
+configureEnvVariables();
 
 const chalk = require('chalk');
 const webpack = require('webpack');

@@ -21,7 +21,7 @@ export function getEnvBool(name: string, throwIfMissing = true): boolean {
   }
 }
 
-export function configureEnvVariables(monorepo = true): void {
+export function configureEnvVariables(): void {
   // State Channel Environment
   // Intended usage is a single file in monorepo root defining configuration for multiple packages
   const SC_ENV = process.env.SC_ENV;
@@ -60,13 +60,13 @@ export function configureEnvVariables(monorepo = true): void {
     '.env'
   ].filter((x): x is string => !!x);
 
-  if (monorepo) {
-    const monorepoDotenvFiles = dotenvFiles.slice(0);
-    dotenvFiles.forEach((dotenvFile: string) => {
-      monorepoDotenvFiles.push(path.join('../..', dotenvFile));
-    });
-    dotenvFiles = monorepoDotenvFiles;
-  }
+  const monorepoDotenvFiles = dotenvFiles.slice(0);
+
+  dotenvFiles.forEach((dotenvFile: string) => {
+    monorepoDotenvFiles.push(path.join('../..', dotenvFile));
+  });
+
+  dotenvFiles = monorepoDotenvFiles;
 
   // Load environment variables from .env* files. Suppress warnings using silent
   // if this file is missing. dotenv will never modify any environment variables
