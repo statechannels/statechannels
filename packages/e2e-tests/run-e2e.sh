@@ -26,5 +26,7 @@ kill $wallet
 kill $app
 kill $hub
 killall node
-rm -rf ../../.ganache-deployments
+if test -f "../../.ganache-deployments/ganache-deployments-8545.json"; then
+  rm ../../.ganache-deployments/ganache-deployments-8545.json
+fi
 exit $code
