@@ -1,0 +1,11 @@
+# Note: context for building the docker container is the root of the monorepo
+# Ignore all first, then add back directories that are needed.
+*
+
+!.env.* 
+!./package.json
+!./packages/nitro-protocol
+!./packages/simple-hub/
+!./packages/wire-format
+
+**/node_modules

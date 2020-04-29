@@ -327,6 +327,8 @@ jobs:
       - notify_slack
 
   release-hub:
+    environment:
+      DOCKER_BUILDKIT: 1
     working_directory: /home/circleci/project
     resource_class: large
     docker:
