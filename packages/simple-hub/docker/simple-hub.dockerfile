@@ -9,7 +9,7 @@ WORKDIR /statechannels/monorepo
 # - That ./packages/wire-format has been built, so a lib directory exists
 
 # INSTALL DEPENDENCIES
-COPY ./package.json /statechannels/monorepo
+COPY ./package.json /statechannels/monorepo/
 COPY ./packages/nitro-protocol/package.json packages/nitro-protocol/
 COPY ./packages/simple-hub/package.json packages/simple-hub/
 COPY ./packages/wire-format/package.json packages/wire-format/
