@@ -346,7 +346,7 @@ jobs:
 
       - docker/build:
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
-          image: simple-hub-staging/simple-hub
+          image: registry.heroku.com/simple-hub-staging/simple-hub
           tag: latest
       - run: heroku container:login
       - docker/push:
