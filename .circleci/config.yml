@@ -231,7 +231,7 @@ jobs:
           file: integration-test-web3torrent-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn test:e2e:wrt)
+      - run: (cd packages/e2e-tests && yarn test:e2e:w3t)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
