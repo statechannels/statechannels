@@ -206,8 +206,6 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
-    environment:
-      SC_ENV: circle-integration-rps
     steps:
       - checkout
       - puppeteer/install
@@ -215,7 +213,7 @@ jobs:
           file: integration-test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && sh ./run-e2e.sh rps)
+      - run: (cd packages/e2e-tests && yarn test:e2e:rps)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
@@ -226,8 +224,6 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
-    environment:
-      SC_ENV: circle-integration-w3t
     steps:
       - checkout
       - puppeteer/install
@@ -235,7 +231,7 @@ jobs:
           file: integration-test-web3torrent-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && sh ./run-e2e.sh web3torrent)
+      - run: (cd packages/e2e-tests && yarn test:e2e:wrt)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -258,8 +254,6 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
-    environment:
-      SC_ENV: circle-integration-w3t-with-hub
     steps:
       - checkout
       - puppeteer/install
@@ -267,7 +261,7 @@ jobs:
           file: integration-test-web3torrent-with-hub-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && sh ./run-e2e.sh web3torrent)
+      - run: (cd packages/e2e-tests && yarn test:e2e:w3t-with-hub)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
