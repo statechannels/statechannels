@@ -12,7 +12,6 @@ import {
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {logger} from '../logger';
 
 import {Funding} from './store';
 import {Errors} from '.';
