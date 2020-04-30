@@ -123,18 +123,12 @@ commands:
           mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
           only_for_branches: 'master'
 
-  install_chromium:
-    # Install latest chrome dev package, which installs the necessary libs to
-    # make the bundled version of Chromium that Puppeteer installs work.
-    description: 'Install chrome dev package and xvfb'
+  install_xvfb:
+    description: 'Install display server'
     steps:
       - run: sudo apt-get update # See https://crbug.com/795759
       - run: sudo apt-get install -yq libgconf-2-4
       - run: sudo apt-get install -y wget xvfb --no-install-recommends
-      - run: sudo wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-      - run: sudo apt-get install -y google-chrome-stable --no-install-recommends
-      - run: sudo rm -rf /var/lib/apt/lists/*
 
   run_xvfb:
     description: 'Run display server'
