@@ -3,7 +3,7 @@ import {interpret} from 'xstate';
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 
-import {CHALLENGE_DURATION, NETWORK_ID} from '../../constants';
+import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../../config';
 import {FakeChain} from '../../chain';
 import {machine as challengeMachine} from '../challenge-channel';
 import {Player} from '../../integration-tests/helpers';
@@ -56,7 +56,7 @@ beforeEach(async () => {
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
-    chainId: NETWORK_ID,
+    chainId: CHAIN_NETWORK_ID,
     channelNonce: bigNumberify(0),
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]

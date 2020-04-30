@@ -13,7 +13,7 @@ import {
 import {SimpleAllocation, Objective, Participant, StateVariables} from '../store/types';
 import {Store} from '../store';
 import {SupportState} from '.';
-import {CHALLENGE_DURATION} from '../constants';
+import {CHALLENGE_DURATION} from '../config';
 import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {getDataAndInvoke, checkThat, isSimpleEthAllocation, add} from '../utils';

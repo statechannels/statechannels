@@ -3,7 +3,7 @@ import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helper
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
-import {CHALLENGE_DURATION} from '../constants';
+import {CHALLENGE_DURATION} from '../config';
 import {simpleEthAllocation} from '../utils';
 import {bigNumberify} from 'ethers/utils';
 import {isCloseLedger, CloseLedger} from '../store/types';

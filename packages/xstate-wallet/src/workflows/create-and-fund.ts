@@ -21,7 +21,7 @@ import {
 import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';

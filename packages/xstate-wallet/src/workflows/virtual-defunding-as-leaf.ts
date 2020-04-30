@@ -8,7 +8,7 @@ import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from '
 import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
 import {nextState} from '../store/state-utils';
 import _ from 'lodash';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';

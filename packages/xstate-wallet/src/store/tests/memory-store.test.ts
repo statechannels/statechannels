@@ -2,7 +2,7 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import {calculateChannelId, createSignatureEntry} from './../state-utils';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
+import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
 import {Wallet} from 'ethers';
@@ -24,7 +24,7 @@ const outcome = simpleEthAllocation([
 const turnNum = bigNumberify(4);
 const appData = '0xabc';
 const isFinal = false;
-const chainId = NETWORK_ID;
+const chainId = CHAIN_NETWORK_ID;
 const participants = [
   {participantId: 'a', destination: aDestination, signingAddress: aAddress},
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}

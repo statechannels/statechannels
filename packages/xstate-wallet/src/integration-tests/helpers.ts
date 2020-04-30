@@ -18,10 +18,12 @@ import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
-import {ETH_TOKEN, ADD_LOGS} from '../constants';
+import {ADD_LOGS} from '../config';
 import {makeDestination} from '../utils';
 import {hexZeroPad} from 'ethers/utils';
 import {logger} from '../logger';
+import {ETH_TOKEN} from '../constants';
+
 const log = logger.info.bind(logger);
 
 export class Player {

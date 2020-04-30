@@ -6,7 +6,7 @@ import {
   Allocation,
   Destination
 } from '../store/types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';

@@ -2,7 +2,7 @@ import {ChainWatcher, ChannelChainInfo} from '../chain';
 import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
 import {Contract, providers} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {Machine, interpret, Interpreter} from 'xstate';
 import {map} from 'rxjs/operators';
 import {Store} from '../store';
