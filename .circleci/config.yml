@@ -128,19 +128,20 @@ commands:
     # make the bundled version of Chromium that Puppeteer installs work.
     description: 'Install chrome dev package and xvfb'
     steps:
-      - run: apt-get update # See https://crbug.com/795759
-      - run: apt-get install -yq libgconf-2-4
-      - run: apt-get install -y wget xvfb --no-install-recommends
-      - run: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-      - run: sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-      - run: apt-get install -y google-chrome-stable --no-install-recommends
-      - run: rm -rf /var/lib/apt/lists/*
+      - run: sudo apt-get update # See https://crbug.com/795759
+      - run: sudo apt-get install -yq libgconf-2-4
+      - run: sudo apt-get install -y wget xvfb --no-install-recommends
+      - run: sudo wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+      - run: sudo apt-get install -y google-chrome-stable --no-install-recommends
+      - run: sudo rm -rf /var/lib/apt/lists/*
 
   run_xvfb:
     description: 'Run display server'
     steps:
-      - run: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
-      - background: true
+      - run:
+          command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
+          background: true
 
 jobs:
   prepare:
@@ -229,6 +230,9 @@ jobs:
     steps:
       - install_chromium
       - run_xvfb
+      - checkout
+      # - run: yarn # local testing only
+      #  using circleci cli (cannot run workflows, only individual jobs)
       - log_stats:
           file: integration-test-stats
       - attach_workspace:
@@ -249,6 +253,7 @@ jobs:
     steps:
       - install_chromium
       - run_xvfb
+      - checkout
       - log_stats:
           file: integration-test-web3torrent-stats
       - attach_workspace:
@@ -281,6 +286,7 @@ jobs:
     steps:
       - install_chromium
       - run_xvfb
+      - checkout
       - log_stats:
           file: integration-test-web3torrent-with-hub-stats
       - attach_workspace:
