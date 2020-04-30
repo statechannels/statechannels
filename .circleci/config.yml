@@ -375,6 +375,8 @@ workflows:
             branches:
               only: master
       - release-netlify-production:
+          requires:
+            - prepare
           filters:
             branches:
               # todo: switch back before creating a PR
