@@ -56,9 +56,9 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    // await Promise.all(
-    //   [browserA, browserB].map(async browser => browser && (await browser.close()))
-    // );
+    await Promise.all(
+      [browserA, browserB].map(async browser => browser && (await browser.close()))
+    );
   });
 
   it('allows peers to start torrenting', async () => {
