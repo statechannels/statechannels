@@ -255,7 +255,7 @@ export class ChannelStoreEntry {
     }
 
     const {signedStates} = this;
-    const turnNums = _.map(signedStates, s => s.turnNum.toHexString());
+    const turnNums = _.map(signedStates, s => parseInt(s.turnNum.toHexString(), 16));
 
     if (!isReverseSorted(turnNums)) {
       logger.error({signedStates: _.map(signedStates, s => s.turnNum.toHexString())});
@@ -281,7 +281,9 @@ export class ChannelStoreEntry {
       this.stateVariables = this.stateVariables.slice(supportIndex);
     }
 
-    this.stateVariables = _.reverse(_.sortBy(this.stateVariables, s => s.turnNum.toHexString()));
+    this.stateVariables = _.reverse(
+      _.sortBy(this.stateVariables, s => parseInt(s.turnNum.toHexString(), 16))
+    );
   }
 
   private nParticipants(): number {
