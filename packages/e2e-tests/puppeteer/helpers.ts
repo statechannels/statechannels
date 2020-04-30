@@ -66,7 +66,8 @@ export async function waitForAndClickButton(
   selector: string
 ): Promise<void> {
   try {
-    await frame.waitForSelector(selector);
+    // We only want to click on a button if it  is visible to the user
+    await frame.waitForSelector(selector, {visible: true});
   } catch (error) {
     console.error(
       'frame.waitForSelector(' + selector + ') failed on frame ' + (await frame.title())
