@@ -268,6 +268,9 @@ export class ChannelStoreEntry {
   }
 
   private clearOldStates() {
+    this.stateVariables = _.reverse(
+      _.sortBy(this.stateVariables, s => parseInt(s.turnNum.toHexString(), 16))
+    );
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
@@ -277,13 +280,9 @@ export class ChannelStoreEntry {
       const supportIndex = this.stateVariables.findIndex(
         sv => sv.stateHash === firstSupportStateHash
       );
-      // Take everything after that
-      this.stateVariables = this.stateVariables.slice(supportIndex);
+      // Take everything before that
+      this.stateVariables = this.stateVariables.slice(0, supportIndex + 1);
     }
-
-    this.stateVariables = _.reverse(
-      _.sortBy(this.stateVariables, s => parseInt(s.turnNum.toHexString(), 16))
-    );
   }
 
   private nParticipants(): number {
