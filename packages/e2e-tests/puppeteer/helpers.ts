@@ -3,7 +3,8 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {USE_DAPPETEER, DAPPETEER_PK, TARGET_NETWORK} from './constants';
+import {USE_DAPPETEER, TARGET_NETWORK} from './constants';
+import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
@@ -65,7 +66,8 @@ export async function waitForAndClickButton(
   selector: string
 ): Promise<void> {
   try {
-    await frame.waitForSelector(selector);
+    // We only want to click on a button if it  is visible to the user
+    await frame.waitForSelector(selector, {visible: true});
   } catch (error) {
     console.error(
       'frame.waitForSelector(' + selector + ') failed on frame ' + (await frame.title())
@@ -127,6 +129,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
 
 export async function setUpBrowser(
   headless: boolean,
+  etherlimeAccountIndex?: number,
   slowMo?: number
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
@@ -177,7 +180,12 @@ export async function setUpBrowser(
       ]
     });
     metamask = await dappeteer.getMetamask(browser);
-    !!DAPPETEER_PK && (await metamask.importPK(DAPPETEER_PK));
+
+    if (etherlimeAccountIndex && TARGET_NETWORK === 'localhost') {
+      // if targeting ropsten, use dappeteer default account for now
+      await metamask.importPK(ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey);
+      console.log(`imported ${ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey}`);
+    }
 
     // Because of the implementation of switchNetwork not allowing for
     // custom host & ports (see https://github.com/decentraland/dappeteer/blob/7720a675d2d0c4fa10e93d33426b984cc391d4c3/src/index.ts#L149)
