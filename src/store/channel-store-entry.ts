@@ -129,7 +129,7 @@ export class ChannelStoreEntry {
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
     let previousState;
 
-    for (const signedState of this.signedStates.reverse()) {
+    for (const signedState of this.signedStates) {
       // If there is not a valid transition we know there cannot be a valid support
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
