@@ -162,7 +162,7 @@ const File: React.FC<Props> = props => {
               efficient and secure environment for transactions.
             </p>
             <p>
-              <strong>Why are people having trouble connecting?</strong>
+              <strong>Why can't I connect to a peer?</strong>
               <br />
               It's possible that your browser is blocking connections to our tracker, or to peers.
               Please disable any extensions which force HTTPS or potentially limit the WebRTC
