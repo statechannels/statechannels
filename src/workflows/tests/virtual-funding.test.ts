@@ -26,6 +26,7 @@ import {FakeChain} from '../../chain';
 import {TestStore} from './store';
 
 jest.setTimeout(20000);
+
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);

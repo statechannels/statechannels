@@ -12,10 +12,10 @@ import {
   SiteBudget,
   AssetBudget
 } from '../../store/types';
-import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
-import {makeDestination} from '../../utils';
+import {makeDestination, assetHolderAddress} from '../../utils';
 
 export function deserializeBudgetRequest(
   budgetRequest: AppBudgetRequest,

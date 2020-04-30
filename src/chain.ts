@@ -16,7 +16,7 @@ import EventEmitter = require('eventemitter3');
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
-import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
 
 const EthAssetHolderInterface = new Interface(

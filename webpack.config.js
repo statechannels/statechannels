@@ -56,7 +56,6 @@ module.exports = {
       'NITRO_ADJUDICATOR_ADDRESS',
       'HUB_ADDRESS',
       'CHAIN_NETWORK_ID',
-      'ADD_LOGS',
       'LOG_DESTINATION',
       'USE_INDEXED_DB',
       'CLEAR_STORAGE_ON_START'

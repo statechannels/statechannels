@@ -14,7 +14,7 @@ import {AddressZero} from 'ethers/constants';
 import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {TestStore} from './store';
 import {Guid} from 'guid-typescript';
 

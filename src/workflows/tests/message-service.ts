@@ -1,7 +1,7 @@
 import {Store} from '../../store';
 import _ from 'lodash';
 import {exists} from '../../utils';
-import {ADD_LOGS} from '../../constants';
+import {ADD_LOGS} from '../../config';
 import {logger} from '../../logger';
 const log = logger.info.bind(logger);
 

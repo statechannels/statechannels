@@ -4,7 +4,7 @@ import {
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {SiteBudget} from '../store/types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers/utils';
 import {unreachable} from '../utils';
 import {Interpreter} from 'xstate';

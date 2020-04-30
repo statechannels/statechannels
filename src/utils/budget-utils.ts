@@ -1,5 +1,5 @@
 import {SiteBudget, AssetBudget} from '../store/types';
-import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {checkThat, exists} from './helpers';

@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {Participant, State, SiteBudget} from '../../store/types';
 import {BigNumberish, bigNumberify, BigNumber} from 'ethers/utils';
-import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 
 export const wallet1 = new ethers.Wallet(
