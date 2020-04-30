@@ -302,7 +302,7 @@ jobs:
           file: netlify-stats
       - notify_slack
 
-  release-hub:
+  release-production-hub:
     working_directory: /home/circleci/project
     resource_class: large
     docker:
@@ -360,7 +360,7 @@ workflows:
           filters:
             branches:
               only: master
-      - release-hub:
+      - release-production-hub:
           filters:
             branches:
               only: deploy-web3torrent-xstate-wallet
