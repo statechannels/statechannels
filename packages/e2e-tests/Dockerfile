@@ -1,6 +1,6 @@
 FROM node:10.16.3
 
-ARG BRANCH=george/headful-ci2
+ARG BRANCH=sp/headful
 # this allows us to make an image with whatever branch we want
 # using --build-arg BRANCH=name_of_the_branch
 # e.g. docker build -t dapp --build-arg BRANCH=master .
