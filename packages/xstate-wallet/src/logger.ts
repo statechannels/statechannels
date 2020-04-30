@@ -1,8 +1,10 @@
 import pino from 'pino';
-import {LOG_DESTINATION, ADD_LOGS} from './constants';
+
+import {LOG_DESTINATION, ADD_LOGS, NODE_ENV} from './config';
 
 // TODO: Is there a better way to determine if we're in a browser context?
-const IS_BROWSER_CONTEXT = process.env.NODE_ENV !== 'test';
+const IS_BROWSER_CONTEXT = NODE_ENV !== 'test';
+
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
 const LOG_TO_FILE = ADD_LOGS && !LOG_TO_CONSOLE;
 

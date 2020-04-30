@@ -31,7 +31,8 @@ import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 
 import {bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
+import {CHALLENGE_DURATION, WALLET_VERSION, CHAIN_NETWORK_ID} from './config';
+
 import {Store} from './store';
 
 type ChannelRequest =
@@ -283,7 +284,7 @@ async function convertToInternalEvent(
         participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
         challengeDuration: bigNumberify(CHALLENGE_DURATION),
-        chainId: NETWORK_ID,
+        chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
         applicationSite: domain
       };

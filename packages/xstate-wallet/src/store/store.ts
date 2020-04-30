@@ -8,7 +8,7 @@ import {Wallet} from 'ethers';
 import * as _ from 'lodash';
 
 import {Chain, FakeChain} from '../chain';
-import {NETWORK_ID, HUB} from '../constants';
+import {CHAIN_NETWORK_ID, HUB} from '../config';
 import {checkThat, isSimpleEthAllocation} from '../utils';
 
 import {calculateChannelId, hashState} from './state-utils';
@@ -284,7 +284,7 @@ export class Store {
         }
 
         const channelNonce = (await this.getNonce(addresses)).add(1);
-        const chainId = NETWORK_ID;
+        const chainId = CHAIN_NETWORK_ID;
 
         const entry = await this.initializeChannel(
           {

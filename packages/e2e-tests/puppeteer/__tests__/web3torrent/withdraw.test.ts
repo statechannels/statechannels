@@ -25,7 +25,7 @@ describe('withdrawal from a ledger channel', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browser');
 
-    ({browser, metamask} = await setUpBrowser(HEADLESS, 0));
+    ({browser, metamask} = await setUpBrowser(HEADLESS, 2, 0));
 
     console.log('Waiting on pages');
     web3tTabA = (await browser.pages())[0];

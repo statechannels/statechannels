@@ -24,13 +24,15 @@ import {
   budget
 } from './data';
 import {subscribeToMessages} from './message-service';
-import * as constants from '../../constants';
-import {FakeChain} from '../../chain';
-import {SimpleHub} from './simple-hub';
 
+import {FakeChain} from '../../chain';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
+
+import {SimpleHub} from './simple-hub';
 import {TestStore} from './store';
 
 jest.setTimeout(20000);
+
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -60,7 +62,7 @@ const totalAmount = amounts.reduce((a, b) => a.add(b));
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
-  assetHolderAddress: constants.ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   allocationItems: [0, 1].map(i => ({
     destination: destinations[i],
     amount: amounts[i]
@@ -103,7 +105,7 @@ beforeEach(async () => {
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore,
-    [constants.HUB.participantId]: hubStore
+    [HUB.participantId]: hubStore
   });
 });
 
@@ -160,11 +162,11 @@ test('it uses virtual funding when enabled', async () => {
   // Verify the budgets are allocated to the channel
   const aBudget = await aStore.getBudget(TEST_SITE);
   const aChannelAmount =
-    aBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    aBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
   const bBudget = await bStore.getBudget(TEST_SITE);
   const bChannelAmount =
-    bBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    bBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 });

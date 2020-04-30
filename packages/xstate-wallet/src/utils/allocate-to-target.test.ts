@@ -1,12 +1,14 @@
+import {bigNumberify} from 'ethers/utils';
+
+import {AllocationItem} from '../store/types';
+
 import {
   Errors,
   allocateToTarget,
   simpleEthAllocation,
   simpleTokenAllocation,
   makeDestination
-} from './utils';
-import {AllocationItem} from './store/types';
-import {bigNumberify} from 'ethers/utils';
+} from '.';
 
 const one = bigNumberify(1);
 const two = bigNumberify(2);

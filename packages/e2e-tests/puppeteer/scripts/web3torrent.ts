@@ -14,7 +14,7 @@ import {
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
 
-function prepareUploadFile(path: string): void {
+function prepareStubUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(1000000);
   const buf = Buffer.from(content);
   fs.writeFile(path, buf, err => {
@@ -28,18 +28,18 @@ function prepareUploadFile(path: string): void {
 export async function uploadFile(
   page: Page,
   handleBudgetPrompt: boolean,
-  metamask: Dappeteer
+  metamask: Dappeteer,
+  filePath?: string
 ): Promise<string> {
   await page.waitForSelector('input[type=file]');
 
-  // Generate a /tmp file with deterministic data for upload testing
-  const fileToUpload = '/tmp/web3torrent-tests-stub';
-  prepareUploadFile(fileToUpload);
+  // By default, generate a /tmp stub file with deterministic data for upload testing
+  !filePath && (filePath = '/tmp/web3torrent-tests-stub') && prepareStubUploadFile(filePath);
 
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.
   const inputUploadHandle = await page.$('input[type=file]');
-  await inputUploadHandle!.uploadFile(fileToUpload);
+  await inputUploadHandle!.uploadFile(filePath);
   await inputUploadHandle!.evaluate(upload => {
     // eslint-disable-next-line no-undef
     upload.dispatchEvent(new Event('change', {bubbles: true}));

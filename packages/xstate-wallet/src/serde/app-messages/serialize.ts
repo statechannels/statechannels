@@ -15,9 +15,9 @@ import {
   AssetBudget,
   isAllocation
 } from '../../store/types';
-import {tokenAddress} from '../../constants';
+
 import {AddressZero} from 'ethers/constants';
-import {checkThat, exists, formatAmount} from '../../utils';
+import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
 import {bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
