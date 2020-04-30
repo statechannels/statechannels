@@ -148,6 +148,7 @@ jobs:
           file: build-stats
       - attach_workspace:
           at: /home/circleci/project
+      - run: yarn lint:check
       - run:
           name: build
           command: |
