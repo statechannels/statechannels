@@ -4,7 +4,7 @@ cd ../devtools
 yarn start:shared-ganache & 
 ganache=$!
 
-cd ../$1 && yarn run wait-on ../../.ganache-deployments/ganache-deployments-8545.json
+cd ../$1 && yarn run wait-on ../../.ganache-deployments/ganache-deployments-8545.json && sleep 2
 yarn start &
 app=$!
 
