@@ -373,10 +373,9 @@ workflows:
             - prepare
           filters:
             branches:
-              # todo: switch back before creating a PR
-              only: release-production #deploy-web3torrent-xstate-wallet
+              only: deploy
 
       - release-hub-production:
           filters:
             branches:
-              only: deploy-web3torrent-xstate-wallet
+              only: deploy
