@@ -165,7 +165,7 @@ export async function setUpBrowser(
     );
     browser = await dappeteer.launch(puppeteer, {
       executablePath: process.env.PUPPETEER_EXEC_PATH, // https://github.com/marketplace/actions/puppeteer-headful
-      headless: true,
+      headless: false,
       slowMo,
       //, Needed to allow both windows to execute JS at the same time
       ignoreDefaultArgs: [
