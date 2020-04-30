@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@1.0.1
-  puppeteer: threetreeslight/puppeteer@0.1.2
   slack: circleci/slack@3.4.1
 
 defaults: &defaults
@@ -124,6 +123,25 @@ commands:
           mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
           only_for_branches: 'master'
 
+  install_chromium:
+    # Install latest chrome dev package, which installs the necessary libs to
+    # make the bundled version of Chromium that Puppeteer installs work.
+    description: 'Install chrome dev package and xvfb'
+    steps:
+      - run: apt-get update # See https://crbug.com/795759
+      - run: apt-get install -yq libgconf-2-4
+      - run: apt-get install -y wget xvfb --no-install-recommends
+      - run: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+      - run: sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+      - run: apt-get install -y google-chrome-stable --no-install-recommends
+      - run: rm -rf /var/lib/apt/lists/*
+
+  run_xvfb:
+    description: 'Run display server'
+    steps:
+      - run: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
+      - background: true
+
 jobs:
   prepare:
     <<: *defaults
@@ -209,8 +227,8 @@ jobs:
     environment:
       SC_ENV: circle-integration-rps
     steps:
-      - checkout
-      - puppeteer/install
+      - install_chromium
+      - run_xvfb
       - log_stats:
           file: integration-test-stats
       - attach_workspace:
@@ -229,8 +247,8 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t
     steps:
-      - checkout
-      - puppeteer/install
+      - install_chromium
+      - run_xvfb
       - log_stats:
           file: integration-test-web3torrent-stats
       - attach_workspace:
@@ -261,8 +279,8 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - checkout
-      - puppeteer/install
+      - install_chromium
+      - run_xvfb
       - log_stats:
           file: integration-test-web3torrent-with-hub-stats
       - attach_workspace:
