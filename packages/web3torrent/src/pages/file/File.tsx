@@ -161,6 +161,13 @@ const File: React.FC<Props> = props => {
               each other on faster-than-on-chain operating times. This technology enables a private,
               efficient and secure environment for transactions.
             </p>
+            <p>
+              <strong>Why are people having trouble connecting?</strong>
+              <br />
+              It's possible that your browser is blocking connections to our tracker, or to peers.
+              Please disable any extensions which force HTTPS or potentially limit the WebRTC
+              protocol.
+            </p>
           </div>
         </>
       )}

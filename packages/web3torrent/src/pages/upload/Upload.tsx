@@ -63,6 +63,12 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
           Use the "Share Link" button or copy this browser tab's URL, and send that address to
           whomever you want to share the file with.
         </p>
+        <p>
+          <strong>Why are people having trouble connecting?</strong>
+          <br />
+          It's possible that your browser is blocking connections to our tracker, or to peers.
+          Please disable any extensions which force HTTPS or potentially limit the WebRTC protocol.
+        </p>
       </div>
     </section>
   );
