@@ -6,6 +6,9 @@ APP=$1
 E2E_ROOT=$(pwd)
 PACKAGES=$E2E_ROOT/..
 
+# Kill child processes if I receive SIGINT, SIGTERM or EXIT
+trap 'trap - SIGTERM && kill 0' SIGINT SIGTERM EXIT
+
 
 cd $PACKAGES/devtools
 yarn start:shared-ganache | tee $E2E_ROOT/shared-ganache.log & 
@@ -24,15 +27,10 @@ yarn hub:watch | tee $E2E_ROOT/hub.log &
 hub=$!
 
 cd ../e2e-tests
-yarn run wait-on -d 5000 http://localhost:3000 http://localhost:3055
+yarn run wait-on -d 5000 -t 60000 http://localhost:3000 http://localhost:3055
 yarn test $APP
 code=$?
 
-kill $ganache
-kill $wallet
-kill $app
-kill $hub
-killall node
 if test -f "../../.ganache-deployments/ganache-deployments-8545.json"; then
   rm ../../.ganache-deployments/ganache-deployments-8545.json
 fi
