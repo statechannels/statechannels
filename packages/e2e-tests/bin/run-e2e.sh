@@ -9,6 +9,8 @@ WAIT_ON_INTERVAL=5000
 WAIT_ON_DELAY=5000
 
 cleanup() {
+  # Ignore signals while shutting down
+  trap '' INT TERM EXIT
   if [[ -z services ]]
   then
     echo Warning: services undefined: $services
@@ -27,15 +29,25 @@ cleanup() {
     - check ps -f | grep $services for other services
     - use 'killall node' to kill all background node processes (AT YOUR OWN RISK)
     "
-    kill -9 $services
-    wait
+    kill $services || true
+  fi
+}
+
+jestExit() {
+  trap '' INT TERM EXIT
+  if [[ -z exit_status ]]
+  then
+    echo "No exit status. Exiting with status 1"
+    exit 1
+  else
+    echo "Exiting with status $exit_status"
+    exit $exit_status
   fi
 }
 
 # Kill child processes if I receive SIGINT, SIGTERM
-# We manually call cleanup after the test runs in order to preserve
-# the test exit code (important for circle)
 trap 'cleanup' SIGINT SIGTERM
+trap 'jestExit' EXIT
 
 yarn start-servers $APP &
 services=$!
@@ -43,8 +55,6 @@ echo Services running at PID $services
 
 yarn run wait-on -d $WAIT_ON_DELAY -t $WAIT_ON_TIMEOUT -i $WAIT_ON_INTERVAL http://localhost:3000 http://localhost:3055
 
-yarn test $APP --runInBand
+yarn test $APP --runInBand --bail 
 exit_status=$?
-
 cleanup
-exit $exit_status

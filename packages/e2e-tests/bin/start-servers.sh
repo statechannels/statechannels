@@ -24,7 +24,7 @@ cleanup() {
 # does not immediately terminate, even if I send the KILL signal (kill 0 -9)
 # It seems to wait for compilation to succeed, and then terminates, which can
 # take ~30s on my machine.
-trap "trap - SIGTERM && cleanup && kill 0" SIGINT SIGTERM EXIT
+trap "cleanup && kill -INT 0 && wait" SIGINT SIGTERM EXIT
 
 if test -f $GANACHE_DEPLOYMENTS; then
   echo $GANACHE_DEPLOYMENTS exists. Perhaps Ganache is running on port $PORT
