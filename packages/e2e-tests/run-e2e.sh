@@ -2,25 +2,30 @@
 set -e
 set -u
 
-cd ../devtools
-yarn start:shared-ganache & 
+APP=$1
+E2E_ROOT=$(pwd)
+PACKAGES=$E2E_ROOT/..
+
+
+cd $PACKAGES/devtools
+yarn start:shared-ganache | tee $E2E_ROOT/shared-ganache.log & 
 ganache=$!
 
-cd ../$1 && yarn run wait-on ../../.ganache-deployments/ganache-deployments-8545.json
-yarn start &
+cd $PACKAGES/$APP && yarn run wait-on ../../.ganache-deployments/ganache-deployments-8545.json
+yarn start | tee $E2E_ROOT/app.log &
 app=$!
 
 cd ../xstate-wallet
-yarn start &
+yarn start | tee $E2E_ROOT/xstate-wallet.log &
 wallet=$!
 
 cd ../simple-hub
-yarn hub:watch &
+yarn hub:watch | tee $E2E_ROOT/hub.log &
 hub=$!
 
 cd ../e2e-tests
 yarn run wait-on -d 5000 http://localhost:3000 http://localhost:3055
-yarn test $1
+yarn test $APP
 code=$?
 
 kill $ganache
