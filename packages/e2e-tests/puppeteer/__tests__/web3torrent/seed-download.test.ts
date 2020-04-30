@@ -33,8 +33,8 @@ describe('Web3-Torrent Integration Tests', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
-    const setupAPromise = setUpBrowser(HEADLESS, 0, 0);
-    const setupBPromise = setUpBrowser(HEADLESS, 1, 0);
+    const setupAPromise = setUpBrowser(HEADLESS, 4, 0);
+    const setupBPromise = setUpBrowser(HEADLESS, 5, 0);
     ({browser: browserA, metamask: metamaskA} = await setupAPromise);
     ({browser: browserB, metamask: metamaskB} = await setupBPromise);
 
