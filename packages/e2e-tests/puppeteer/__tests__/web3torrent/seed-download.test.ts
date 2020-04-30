@@ -33,8 +33,8 @@ describe('Web3-Torrent Integration Tests', () => {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
-    const setupAPromise = setUpBrowser(HEADLESS, 0);
-    const setupBPromise = setUpBrowser(HEADLESS, 0);
+    const setupAPromise = setUpBrowser(HEADLESS, 0, 0);
+    const setupBPromise = setUpBrowser(HEADLESS, 1, 0);
     ({browser: browserA, metamask: metamaskA} = await setupAPromise);
     ({browser: browserB, metamask: metamaskB} = await setupBPromise);
 
@@ -56,9 +56,9 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await Promise.all(
-      [browserA, browserB].map(async browser => browser && (await browser.close()))
-    );
+    // await Promise.all(
+    //   [browserA, browserB].map(async browser => browser && (await browser.close()))
+    // );
   });
 
   it('allows peers to start torrenting', async () => {

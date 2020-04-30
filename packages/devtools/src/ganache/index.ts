@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
-// import {ETHERLIME_ACCOUNTS} from '../constants';
 import {JsonRpcProvider} from 'ethers/providers';
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account} from '../types';
