@@ -27,7 +27,7 @@ yarn hub:watch | tee $E2E_ROOT/hub.log &
 hub=$!
 
 cd ../e2e-tests
-yarn run wait-on -d 5000 -t 60000 http://localhost:3000 http://localhost:3055
+yarn run wait-on -d 5000 http://localhost:3000 http://localhost:3055
 yarn test $APP
 code=$?
 
