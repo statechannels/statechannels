@@ -312,6 +312,8 @@ jobs:
       - checkout
       - <<: *restore_dep
       - <<: *restore_lib
+      - run: rm -rf app-wallet-interface channel-provider channel-client \
+          client-api-schema e2e-tests rps tic-tac-toe web3torrent xstate-wallet patches/emberfire+3.0.0-rc.6.patch
       - run: yarn --frozen-lockfile
       - run: curl https://cli-assets.heroku.com/install.sh | sh
       - run: heroku container:login
