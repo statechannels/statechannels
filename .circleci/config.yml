@@ -146,8 +146,8 @@ jobs:
       - checkout
       - log_stats:
           file: build-stats
-     working_directory: /home/circleci/project
-      - run: yarn lint:check
+      - attach_workspace:
+          at: /home/circleci/project
       - run:
           name: build
           command: |
@@ -309,9 +309,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - attach_workspace:
-          at: /home/circleci/project
-
       - <<: *restore_dep
       - <<: *restore_lib
       - run: yarn --frozen-lockfile
