@@ -313,7 +313,7 @@ export const workflow = (
     })),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
-        const existingState = await (await store.getEntry(event.channelId)).latest;
+        const existingState = (await store.getEntry(event.channelId)).latest;
         const newState = {
           ...existingState,
           turnNum: existingState.turnNum.add(1),
