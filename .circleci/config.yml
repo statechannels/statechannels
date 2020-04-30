@@ -202,7 +202,7 @@ jobs:
       - notify_slack
 
   integration-test-rps:
-    resource_class: medium
+    resource_class: large
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
