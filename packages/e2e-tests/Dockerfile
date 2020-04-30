@@ -31,6 +31,10 @@ RUN  yarn
 # COPY ./puppeteer/helpers.ts /home/appuser/monorepo/packages/e2e-tests/puppeteer/helpers.ts
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV DISPLAY :99.0
+ENV PUPPETEER_EXEC_PATH google-chrome-stable
+
+WORKDIR /monorepo/packages/e2e-tests
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
