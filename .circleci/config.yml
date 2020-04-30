@@ -146,8 +146,7 @@ jobs:
       - checkout
       - log_stats:
           file: build-stats
-      - attach_workspace:
-          at: /home/circleci/project
+     working_directory: /home/circleci/project
       - run: yarn lint:check
       - run:
           name: build
@@ -364,4 +363,4 @@ workflows:
       - release-hub:
           filters:
             branches:
-              only: deploy-web3torrent-xstate-wallet
+              only: simple-hub-release2 #deploy-web3torrent-xstate-wallet
