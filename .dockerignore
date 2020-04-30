@@ -1,0 +1,14 @@
+# A copy of packages/simple-hub/docker/simple-hub.dockerfile.dockerignore 
+# circleci uses a docker version that does not support buildkit
+# .gitignore must be located at the root of the context and have a generic name
+
+# Ignore all first, then add back directories that are needed.
+*
+
+!.env.* 
+!./package.json
+!./packages/nitro-protocol
+!./packages/simple-hub/
+!./packages/wire-format
+
+**/node_modules

@@ -327,15 +327,11 @@ jobs:
       - notify_slack
 
   release-hub:
-    environment:
-      DOCKER_BUILDKIT: 1
     working_directory: /home/circleci/project
     resource_class: large
     docker:
       - image: circleci/node:10.16
     steps:
-      - setup_remote_docker:
-          version: 18.09.3
       - checkout
       - attach_workspace:
           at: /home/circleci/project
@@ -348,7 +344,6 @@ jobs:
       - docker/build:
           cache_from: registry.heroku.com/simple-hub-staging/simple-hub:latest
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
-          extra_build_args: --build-arg BUILDKIT_INLINE_CACHE=1
           image: registry.heroku.com/simple-hub-staging/simple-hub
           tag: latest
       - docker/push:
