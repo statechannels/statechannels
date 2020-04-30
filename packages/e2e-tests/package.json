@@ -42,7 +42,6 @@
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
     "persistent-seeder": "SC_ENV=persistent-seeder ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/persistent-seeder.ts",
-    "test:persistent-seeder": "SC_ENV=persistent-seeder jest persistent-seeder",
     "test": "jest",
     "test:show": "HEADLESS=false yarn run test",
     "test:e2e:rps": "SC_ENV=circle-integration-rps sh ./run-e2e.sh rps",
