@@ -17,10 +17,6 @@ RUN  apt-get update \
      && apt-get install -y google-chrome-stable --no-install-recommends \
      && rm -rf /var/lib/apt/lists/*
 
-# RUN useradd -r -u 1001 appuser -m
-# USER appuser
-# RUN mkdir /home/appuser
-# WORKDIR /home/appuser
 RUN  git clone -b $BRANCH --single-branch https://github.com/statechannels/monorepo.git monorepo
 WORKDIR /monorepo
 ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json

@@ -75,13 +75,6 @@ export const EmptyTorrentUI: TorrentUI = {
 
 // Pre Seeded Constants (by StateChannels team)
 const preSeededTorrents: Array<Pick<TorrentUI, 'name' | 'length' | 'infoHash' | 'magnetURI'>> = [
-  // {
-  //   name: 'Sintel.mp4',
-  //   length: 129241752,
-  //   infoHash: 'c53da4fa28aa2edc1faa91861cce38527414d874',
-  //   magnetURI:
-  //     'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
-  // },
   {
     name: 'nitro-protocol.mp4',
     length: 403507,
