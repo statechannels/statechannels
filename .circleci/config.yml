@@ -272,7 +272,7 @@ jobs:
       - upload_e2e_screenshots:
           job: integration-test-with-hub
 
-  release-incremental:
+  release-pull-request:
     <<: *defaults
     steps:
       - checkout
@@ -282,7 +282,7 @@ jobs:
       - run: yarn release:netlify:incremental
       - notify_slack
 
-  release:
+  release-master:
     <<: *defaults
     steps:
       - checkout
@@ -296,7 +296,21 @@ jobs:
           file: netlify-stats
       - notify_slack
 
-  release-production-hub:
+  release-netlify-production:
+    <<: *defaults
+    steps:
+      - checkout
+      - log_stats:
+          file: netlify-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:netlify:production
+      - run: yarn release:netlify:production
+      - upload_logs:
+          file: netlify-stats
+      - notify_slack
+
+  release-hub-production:
     working_directory: /home/circleci/project
     resource_class: large
     docker:
@@ -342,19 +356,25 @@ workflows:
       - integration-test-web3torrent-with-hub:
           requires:
             - prepare
-      - release-incremental:
+      - release-pull-request:
           requires:
             - prepare
           filters:
             branches:
               ignore: master
-      - release:
+      - release-master:
           requires:
             - prepare
           filters:
             branches:
               only: master
-      - release-production-hub:
+      - release-netlify-production:
+          filters:
+            branches:
+              # todo: switch back before creating a PR
+              only: release-production #deploy-web3torrent-xstate-wallet
+
+      - release-hub-production:
           filters:
             branches:
               only: deploy-web3torrent-xstate-wallet
