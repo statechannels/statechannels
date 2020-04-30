@@ -1,6 +1,6 @@
 FROM node:10.16.3
 
-ARG BRANCH=sp/headfull-docker-george
+ARG BRANCH=sp/headful
 # this allows us to make an image with whatever branch we want
 # using --build-arg BRANCH=name_of_the_branch
 # e.g. docker build -t dapp --build-arg BRANCH=master .
@@ -22,8 +22,15 @@ WORKDIR /monorepo
 ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json
 RUN  git pull 
 RUN  yarn
+# the following lines copy stuff into the image manually, so that we can try things without commiting and pushing
+# COPY .env.circle-integration-w3t /home/appuser/monorepo/.env.circle-integration-w3t
+# COPY ./puppeteer/helpers.ts /home/appuser/monorepo/packages/e2e-tests/puppeteer/helpers.ts
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV DISPLAY :99.0
+ENV PUPPETEER_EXEC_PATH google-chrome-stable
+
+WORKDIR /monorepo/packages/e2e-tests
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
