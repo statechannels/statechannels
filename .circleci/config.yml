@@ -124,11 +124,10 @@ commands:
           only_for_branches: 'master'
 
   install_xvfb:
-    description: 'Install display server'
+    description: 'Install display server' # See https://crbug.com/795759
     steps:
-      - run: sudo apt-get update # See https://crbug.com/795759
-      - run: sudo apt-get install -yq libgconf-2-4
-      - run: sudo apt-get install -y wget xvfb --no-install-recommends
+      - run:
+          command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
 
   run_xvfb:
     description: 'Run display server'
@@ -222,7 +221,7 @@ jobs:
     environment:
       SC_ENV: circle-integration-rps
     steps:
-      - install_chromium
+      - install_xvfb
       - run_xvfb
       - checkout
       # - run: yarn # local testing only
@@ -245,7 +244,7 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t
     steps:
-      - install_chromium
+      - install_xvfb
       - run_xvfb
       - checkout
       - log_stats:
@@ -278,7 +277,7 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - install_chromium
+      - install_xvfb
       - run_xvfb
       - checkout
       - log_stats:
