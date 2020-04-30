@@ -388,5 +388,4 @@ workflows:
       - release-hub:
           filters:
             branches:
-              # Switch back before creating PR
-              only: simple-hub-release #deploy-web3torrent-xstate-wallet
+              only: deploy-web3torrent-xstate-wallet
