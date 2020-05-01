@@ -38,7 +38,7 @@ export function configureEnvVariables(): void {
         path: scEnvFile
       })
     );
-    console.log('The following env vars were set:');
+    console.log('The following env vars were loaded to process.env:');
     console.log(result);
     /* eslint-enable @typescript-eslint/no-var-requires */
     return;
