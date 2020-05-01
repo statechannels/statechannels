@@ -19,7 +19,7 @@ import {createMockGuard, unreachable} from '../utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -241,12 +241,17 @@ export const workflow = (
 
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
     store.channelUpdatedFeed(channelId).pipe(
-      map(storeEntry => ({
-        type: 'CHANNEL_UPDATED',
-        storeEntry,
-        // TODO: Shouldn't use number here
-        supportedTurnNum: storeEntry.isSupported ? storeEntry.supported.turnNum.toNumber() : 0
-      })),
+      map(storeEntry => {
+        const supportedTurnNum = storeEntry.isSupported
+          ? storeEntry.supported.turnNum.toHexString()
+          : '0x0';
+        return {
+          type: 'CHANNEL_UPDATED',
+          storeEntry,
+          // toHexString may or may not return a padded string so we always pad to make sure the distinct check works
+          supportedTurnNum: hexZeroPad(supportedTurnNum, 32)
+        };
+      }),
       distinctUntilKeyChanged('supportedTurnNum'),
       map(e => ({
         type: 'CHANNEL_UPDATED',
