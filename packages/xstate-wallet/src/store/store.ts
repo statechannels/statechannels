@@ -359,7 +359,7 @@ export class Store {
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
-    if (!_.includes(objectives, objective)) {
+    if (!_.find(objectives, o => _.isEqual(o, objective))) {
       // TODO: Should setObjective take a key??
       this.objectives.push(objective);
       addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
