@@ -388,16 +388,15 @@ workflows:
           filters:
             branches:
               only: deploy
+
   scheduled-release:
-    #triggers:
-    #  - schedule:
-    #      cron: '0 0 * * *'
-    #      filters:
-    #        branches:
-    #          only:
-    #            - master
-    jobs:
-      - push-master-to-deploy:
+    triggers:
+      - schedule:
+          # Run once a day at midnight UTC
+          cron: '31 0 * * *'
           filters:
             branches:
-              only: scheduled-release
+              only:
+                - scheduled-release
+    jobs:
+      - push-master-to-deploy
