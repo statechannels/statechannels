@@ -5,6 +5,7 @@
     "module": "commonjs",
     "target": "es2017",
     "noImplicitAny": false,
+    "rootDir": ".",
     "outDir": "lib",
     "esModuleInterop": true,
     "resolveJsonModule": true,

@@ -9,7 +9,7 @@ WORKDIR /statechannels/monorepo
 # - That ./packages/wire-format has been built, so a lib directory exists
 
 # INSTALL DEPENDENCIES
-COPY ./package.json /statechannels/monorepo
+COPY ./package.json /statechannels/monorepo/
 COPY ./packages/nitro-protocol/package.json packages/nitro-protocol/
 COPY ./packages/simple-hub/package.json packages/simple-hub/
 COPY ./packages/wire-format/package.json packages/wire-format/
@@ -20,12 +20,12 @@ RUN sed -ie "/@statechannels\/jest-gas-reporter/d" package.json
 RUN sed -ie "/@statechannels\/devtools/d" **/*/package.json
 RUN sed -ie "/@statechannels\/jest-gas-reporter/d" **/*/package.json
 
-WORKDIR /statechannels/monorepo
 # Install production dependencies for simple-hub
+COPY ./yarn.lock /statechannels/monorepo/
 RUN yarn --production --prefer-offline
 WORKDIR /statechannels/monorepo/packages/simple-hub
 # Run added dependencies because of configureEnvVariables
-RUN yarn add --ignore-scripts dotenv dotenv-expand
+RUN yarn add --ignore-scripts --ignore-optional dotenv dotenv-expand
 
 
 # COPY SOURCE
