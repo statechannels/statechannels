@@ -344,6 +344,7 @@ jobs:
     steps:
       - checkout
       - run: git checkout deploy && git rebase origin/master && git push origin deploy
+      - notify_slack
 
 workflows:
   statechannels:
