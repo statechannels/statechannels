@@ -23,10 +23,6 @@ RUN sed -ie "/@statechannels\/jest-gas-reporter/d" **/*/package.json
 # Install production dependencies for simple-hub
 COPY ./yarn.lock /statechannels/monorepo/
 RUN yarn --production --prefer-offline
-WORKDIR /statechannels/monorepo/packages/simple-hub
-# Run added dependencies because of configureEnvVariables
-RUN yarn add --ignore-scripts --ignore-optional dotenv dotenv-expand
-
 
 # COPY SOURCE
 WORKDIR /statechannels/monorepo
