@@ -1,0 +1,18 @@
+# A .dockerignore symlink to this file exists in the monorepo root
+# circleci uses a docker version that does not support buildkit.
+# .dockerignore must be located at the root of the context and have a generic name.
+# https://github.com/statechannels/monorepo/issues/1615 tracks the buildkit issue.
+
+# Note: context for building the docker container is the root of the monorepo
+# Ignore all first, then add back directories that are needed.
+*
+
+!.env.*
+!./yarn.lock
+!./*.json
+!./packages/devtools
+!./packages/e2e-tests
+!./packages/channel-provider
+!./packages/client-api-schema
+
+**/node_modules
