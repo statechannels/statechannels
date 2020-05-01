@@ -190,16 +190,27 @@ export class ChannelWallet {
   }
 }
 
+const alreadyLogging = {};
+const key = (v, id) => `${JSON.stringify(v)}-${id}`;
+
+const transitionLogger = logger.child({module: 'wallet'});
+const log = transitionLogger.info.bind(transitionLogger);
+
 export function logTransition(state: State<any, any, any, any>, event, id?: string): void {
+  const k = key(state.value, id);
+  if (alreadyLogging[k]) return;
+  alreadyLogging[k] = true;
+
   const to = state.value;
   if (!state.history) {
-    logger.info('%s - STARTED %o TRANSITIONED TO %o', id, state.configuration[0].id, to);
+    log({id, workflow: state.configuration[0].id, to}, 'WORKFLOW STARTED');
   } else {
     const from = state.history.value;
     const eventType = event.type ? event.type : event;
 
-    logger.info('%s - TRANSITION FROM %o EVENT %s TO %o', id, from, eventType, to);
+    log({id, from, eventType, to}, 'WORKFLOW TRANSITION');
   }
+
   Object.keys(state.children).forEach(k => {
     const child = state.children[k];
 
