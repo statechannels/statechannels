@@ -33,11 +33,13 @@ export function configureEnvVariables(): void {
     }
 
     /* eslint-disable @typescript-eslint/no-var-requires */
-    require('dotenv-expand')(
+    const result = require('dotenv-expand')(
       require('dotenv').config({
         path: scEnvFile
       })
     );
+    console.log('The following env vars were set:');
+    console.log(result);
     /* eslint-enable @typescript-eslint/no-var-requires */
     return;
   }
