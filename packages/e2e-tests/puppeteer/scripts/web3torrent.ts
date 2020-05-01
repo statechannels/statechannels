@@ -93,7 +93,7 @@ export async function cancelDownload(page: Page): Promise<void> {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browser');
 
-    const {browser, metamask} = await setUpBrowser(false, 0);
+    const {browser, metamask} = await setUpBrowser(false, 6, 0);
 
     console.log('Waiting on pages');
     const web3tTabA = (await browser.pages())[0];
@@ -107,9 +107,5 @@ export async function cancelDownload(page: Page): Promise<void> {
     await uploadFile(web3tTabA, true, metamask);
 
     await waitForBudgetEntry(web3tTabA);
-
-    await withdrawAndWait(web3tTabA, metamask);
-
-    await waitForEmptyBudget(web3tTabA);
   }
 })();
