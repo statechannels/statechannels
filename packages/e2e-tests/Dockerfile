@@ -2,11 +2,9 @@ FROM node:10.16.3
 
 ARG BRANCH=master
 # this allows us to make an image with whatever branch we want
-# using --build-arg BRANCH=name_of_the_branch
 # e.g. docker build -t dapp --build-arg BRANCH=master .
 
 RUN  apt-get update \
-     # See https://crbug.com/795759
      && apt-get install -yq libgconf-2-4 \
      && apt-get install -y wget xvfb --no-install-recommends \
      && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
@@ -20,7 +18,8 @@ WORKDIR /monorepo
 ADD https://api.github.com/repos/statechannels/monorepo/git/refs/heads/$BRANCH version.json
 RUN  git pull 
 RUN  yarn
-# the following lines copy stuff into the image manually, so that we can try things without commiting and pushing
+
+# the following lines can be used to copy local files into the image, without commiting and pushing into github
 # COPY .env.circle-integration-w3t /home/appuser/monorepo/.env.circle-integration-w3t
 # COPY ./puppeteer/helpers.ts /home/appuser/monorepo/packages/e2e-tests/puppeteer/helpers.ts
 
