@@ -93,8 +93,8 @@ it('is idempoent when concluding twice', async () => {
 
   // Inject service.stop() when A concludes and  A restarts concluding
 
-  interpret(concludeChannelMachine(aStore)).start();
-  interpret(concludeChannelMachine(bStore)).start();
+  interpret(concludeChannelMachine(aStore).withContext(context)).start();
+  interpret(concludeChannelMachine(bStore).withContext(context)).start();
 
   // Assert expected states
 });
