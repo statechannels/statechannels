@@ -241,17 +241,13 @@ export const workflow = (
 
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
     store.channelUpdatedFeed(channelId).pipe(
-      map(storeEntry => {
-        const supportedTurnNum = storeEntry.isSupported
-          ? storeEntry.supported.turnNum.toHexString()
-          : '0x0';
-        return {
-          type: 'CHANNEL_UPDATED',
-          storeEntry,
-          // toHexString may or may not return a padded string so we always pad to make sure the distinct check works
-          supportedTurnNum: hexZeroPad(supportedTurnNum, 32)
-        };
-      }),
+      filter(storeEntry => storeEntry.isSupported),
+      map(storeEntry => ({
+        type: 'CHANNEL_UPDATED',
+        storeEntry,
+        // toHexString may or may not return a padded string so we always pad to make sure the distinct check works
+        supportedTurnNum: hexZeroPad(storeEntry.supported.turnNum.toHexString(), 32)
+      })),
       distinctUntilKeyChanged('supportedTurnNum'),
       map(e => ({
         type: 'CHANNEL_UPDATED',
