@@ -61,6 +61,16 @@ const allSignState = (state: State) => ({
 
 let chain: FakeChain;
 
+const runUntilSuccess = async machine => {
+  const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
+  const [aService, bService] = [aStore, bStore].map(runMachine);
+
+  await waitForExpect(async () => {
+    expect(bService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
+};
+
 beforeEach(async () => {
   chain = new FakeChain();
   aStore = new TestStore(chain);
@@ -82,27 +92,20 @@ beforeEach(async () => {
   });
 });
 
-it('is idempoent when concluding twice', async () => {
+it('reaches the same amount when running conclude twice', async () => {
   // Let A and B create and fund channel
-  const connectToStore = (store: Store) => interpret(createMachine(store).withContext(context)).start();
-  const [aService, bService] = [aStore, bStore].map(connectToStore);
-
-  await waitForExpect(async () => {
-    expect(bService.state.value).toEqual('success');
-    expect(aService.state.value).toEqual('success');
-  }, EXPECT_TIMEOUT);
+  await runUntilSuccess(createMachine);
 
   // Both conclude the channel
-  const connectToStore2 = (store: Store) => interpret(concludeMachine(store).withContext(context)).start();
-  const [aService2, bService2] = [aStore, bStore].map(connectToStore2);
+  await runUntilSuccess(concludeMachine);
+  const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
+  const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
-  await waitForExpect(async () => {
-    expect(bService2.state.value).toEqual('success');
-    expect(aService2.state.value).toEqual('success');
-  }, EXPECT_TIMEOUT);
+  // Run conclude again
+  await runUntilSuccess(concludeMachine);
+  const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
+  const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
-  // Inject service.stop() when A concludes and  A restarts concluding
-
-  // Assert expected states
-  expect((await aStore.chain.getChainInfo(targetChannelId)).amount).toMatchObject(bigNumberify(0));
+  expect(amountA2).toMatchObject(amountA1);
+  expect(amountB2).toMatchObject(amountB1);
 });
