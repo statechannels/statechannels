@@ -26,6 +26,8 @@ async function startLocalFirebaseServer() {
     firebaseLog.info({err}, 'Closing server: %s', msg);
     await server.close();
     firebaseLog.info('Closed');
+
+    process.exit();
   };
 
   process.on('SIGINT', closeServer('SIGINT'));

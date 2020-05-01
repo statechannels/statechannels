@@ -44,8 +44,10 @@
     "persistent-seeder": "SC_ENV=persistent-seeder ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/persistent-seeder.ts",
     "test": "jest",
     "test:show": "HEADLESS=false yarn run test",
-    "test:e2e:rps": "SC_ENV=circle-integration-rps sh ./run-e2e.sh rps",
-    "test:e2e:w3t": "SC_ENV=circle-integration-w3t sh ./run-e2e.sh web3torrent",
-    "test:e2e:w3t-with-hub": "SC_ENV=circle-integration-w3t-with-hub sh ./run-e2e.sh web3torrent"
+    "start-servers": "./bin/start-servers.sh",
+    "test:e2e": "./bin/run-e2e.sh",
+    "test:e2e:rps": "SC_ENV=circle-integration-rps yarn test:e2e rps",
+    "test:e2e:w3t": "SC_ENV=circle-integration-w3t yarn test:e2e web3torrent",
+    "test:e2e:w3t-with-hub": "SC_ENV=circle-integration-w3t-with-hub yarn test:e2e web3torrent"
   }
 }
