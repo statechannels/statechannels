@@ -393,10 +393,10 @@ workflows:
     triggers:
       - schedule:
           # Run once a day at midnight UTC
-          cron: '31 0 * * *'
+          cron: '0 0 * * *'
           filters:
             branches:
               only:
-                - scheduled-release
+                - master
     jobs:
       - push-master-to-deploy
