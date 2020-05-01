@@ -17,7 +17,7 @@ cleanup() {
   else
     echo Killing $services
     # I'm not 100% sure that this will always work.
-    # However, having a background process running shouldn'g cause a circle failure
+    # However, having a background process running shouldn't cause a circle failure
     # so it should work "well enough" for integration tests on circle.
     # On local machines, it seems preferable to warn users that they may need to manually
     # clean up processes
