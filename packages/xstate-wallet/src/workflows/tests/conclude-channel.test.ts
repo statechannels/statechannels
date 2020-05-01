@@ -37,17 +37,8 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
-const ledgerChannel: ChannelConstants = {
-  channelNonce: bigNumberify(1),
-  chainId,
-  challengeDuration,
-  participants,
-  appDefinition
-};
-
 const destinations = participants.map(p => p.destination);
 const amounts = [bigNumberify(7), bigNumberify(5)];
-const totalAmount = amounts.reduce((a, b) => a.add(b));
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
@@ -57,9 +48,6 @@ const allocation: Outcome = {
     amount: amounts[i]
   }))
 };
-
-const ledgerAmounts = amounts.map(a => a.add(2));
-const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
 const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
@@ -85,10 +73,6 @@ beforeEach(async () => {
     await store.createEntry(allSignState(firstState(allocation, targetChannel)), {
       applicationSite: TEST_SITE
     });
-    const ledgerEntry = await store.createEntry(
-      allSignState(firstState(allocation, ledgerChannel))
-    );
-    await store.setLedgerByEntry(ledgerEntry);
   });
 
   subscribeToMessages({
