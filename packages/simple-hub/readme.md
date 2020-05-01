@@ -47,7 +47,7 @@ yarn test:ci
 
 Heroku runs a production version of the build `docker/simple-hub.dockerfile`. To deploy:
 
-- The preferred method is to use the [deploy-web3torrent-xstate-wallet](https://github.com/statechannels/monorepo/tree/deploy-web3torrent-xstate-wallet) branch. Push the desired commit to the branch, and the `release-hub` CicrcleCI job will build and release the hub.
+- The preferred method is to use the [deploy](https://github.com/statechannels/monorepo/tree/deploy) branch. Push the desired commit to the branch, and the `release-hub` CicrcleCI job will build and release the hub.
 - The manual way is to run `docker/build-push-release.sh`. The key point to take in is that this relies on pre-transpiled monorepo packages (nitro-protocol, wire-format, and simple-hub). If the transpiled directories are out of date or contain development changes, the deploy script will push those to the production heroku. The safest way to use the build script is to:
   1. Remove the build directories for all monorepo packages that the hub uses. These are typically named `build` or `lib`.
   1. Run `yarn` in monorepo root. This will rebuild all monorepo packages via `yarn prepare` automatically triggered by `yarn`.
