@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, distinctUntilKeyChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
@@ -240,9 +240,19 @@ export const workflow = (
     );
 
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
-    store
-      .channelUpdatedFeed(channelId)
-      .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
+    store.channelUpdatedFeed(channelId).pipe(
+      map(storeEntry => ({
+        type: 'CHANNEL_UPDATED',
+        storeEntry,
+        // TODO: Shouldn't use number here
+        supportedTurnNum: storeEntry.isSupported ? storeEntry.supported.turnNum.toNumber() : 0
+      })),
+      distinctUntilKeyChanged('supportedTurnNum'),
+      map(e => ({
+        type: 'CHANNEL_UPDATED',
+        storeEntry: e.storeEntry
+      }))
+    );
 
   const actions: WorkflowActions = {
     sendCloseChannelResponse: async (context: ChannelIdExists) => {
