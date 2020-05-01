@@ -29,16 +29,15 @@ export async function uploadFile(
   metamask: Dappeteer,
   filePath?: string
 ): Promise<string> {
-  await page.waitForSelector('input[type=file]');
+  // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
+  // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.')
+  const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
 
   // By default, generate a /tmp stub file with deterministic data for upload testing
   !filePath && (filePath = '/tmp/web3torrent-tests-stub') && prepareStubUploadFile(filePath);
 
-  // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
-  // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.
-  const inputUploadHandle = await page.$('input[type=file]');
-  await inputUploadHandle!.uploadFile(filePath);
-  await inputUploadHandle!.evaluate(upload => {
+  await inputUploadHandle.uploadFile(filePath);
+  await inputUploadHandle.evaluate(upload => {
     // eslint-disable-next-line no-undef
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
