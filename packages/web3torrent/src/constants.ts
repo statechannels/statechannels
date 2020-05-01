@@ -37,7 +37,7 @@ export const HUB = {
 };
 export const FIREBASE_PREFIX = process.env.REACT_APP_FIREBASE_PREFIX;
 export const fireBaseConfig =
-  process.env.NODE_ENV === 'test'
+  process.env.REACT_APP_FUNDING_STRATEGY !== 'Virtual'
     ? undefined
     : {
         apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
