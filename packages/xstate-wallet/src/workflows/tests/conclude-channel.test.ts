@@ -1,7 +1,8 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {Init, machine as createMachine} from '../create-and-fund';
+import {Init, machine as createChannel} from '../create-and-fund';
+import {machine as concludeChannel} from '../conclude-channel';
 
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
@@ -9,7 +10,6 @@ import {bigNumberify} from 'ethers/utils';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
-import {machine as concludeMachine} from '../conclude-channel';
 
 import {wallet1, wallet2, participants, wallet3, TEST_SITE} from './data';
 import {subscribeToMessages} from './message-service';
@@ -94,15 +94,15 @@ beforeEach(async () => {
 
 it('reaches the same amount when running conclude twice', async () => {
   // Let A and B create and fund channel
-  await runUntilSuccess(createMachine);
+  await runUntilSuccess(createChannel);
 
   // Both conclude the channel
-  await runUntilSuccess(concludeMachine);
+  await runUntilSuccess(concludeChannel);
   const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
   // Run conclude again
-  await runUntilSuccess(concludeMachine);
+  await runUntilSuccess(concludeChannel);
   const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
