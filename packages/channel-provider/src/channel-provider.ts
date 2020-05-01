@@ -12,8 +12,10 @@ import {
 } from './types';
 import {UIService} from './ui-service';
 import {NotificationType, Notification} from '@statechannels/client-api-schema';
+import {logger} from './logger';
 
 class ChannelProvider implements ChannelProviderInterface {
+  protected mounted = false;
   protected readonly events: EventEmitter<EventType>;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
@@ -44,6 +46,15 @@ class ChannelProvider implements ChannelProviderInterface {
   });
 
   async mountWalletComponent(url?: string) {
+    if (this.mounted) {
+      logger.warn(
+        'The channel provider has already been mounted ignoring call to mountWalletComponent'
+      );
+      return;
+    }
+
+    this.mounted = true;
+
     window.addEventListener('message', this.onMessage.bind(this));
     if (url) {
       this.url = url;
