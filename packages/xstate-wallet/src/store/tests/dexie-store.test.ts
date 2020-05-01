@@ -8,6 +8,7 @@ import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
+import {Errors} from '..';
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -134,6 +135,47 @@ describe('createChannel', () => {
     ).rejects.toMatchObject({
       message: "Couldn't find the signing key for any participant in wallet."
     });
+  });
+});
+
+describe('signAndAdd', () => {
+  let entry: ChannelStoreEntry;
+  let store: Store;
+  beforeEach(async () => {
+    store = await aStore();
+
+    entry = await store.createChannel(participants, challengeDuration, stateVars, appDefinition);
+  });
+  it('returns the new entry when successful', async () => {
+    const {channelId, latest} = entry;
+
+    const turnNum = latest.turnNum.add(5);
+    const newEntry = await store.signAndAddState(channelId, {...latest, turnNum});
+
+    expect(newEntry.latestSignedByMe.turnNum.toString()).toMatch(turnNum.toString());
+  });
+
+  it('reverts if the state is stale', async () => {
+    const {channelId, latest} = entry;
+    const expectStateTurnNums = async turnNums =>
+      expect((await store.getEntry(channelId)).sortedStates.map(s => s.turnNum.toNumber())).toEqual(
+        turnNums
+      );
+
+    await expectStateTurnNums([latest.turnNum.toNumber()]);
+
+    const turnNum = latest.turnNum.add(5);
+    const {latestSignedByMe} = await store.signAndAddState(channelId, {...latest, turnNum});
+    await expectStateTurnNums([turnNum.toNumber(), latest.turnNum.toNumber()]);
+
+    const staleTurnNum = latestSignedByMe.turnNum.sub(2);
+
+    await expect(store.signAndAddState(channelId, latest)).rejects.toThrow(Errors.staleState);
+    await expect(
+      store.signAndAddState(channelId, {...latest, turnNum: staleTurnNum})
+    ).rejects.toThrow(Errors.staleState);
+
+    await expectStateTurnNums([turnNum.toNumber(), latest.turnNum.toNumber()]);
   });
 });
 

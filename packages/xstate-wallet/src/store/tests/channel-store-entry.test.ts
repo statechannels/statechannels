@@ -13,8 +13,8 @@ describe('isSupported', () => {
     const firstSupportState = {...appState(0), stateHash: hashState(appState(0))};
     const secondSupportState = {...appState(3), stateHash: hashState(appState(3))};
     const stateVariables = [
-      signState(firstSupportState, [wallet1.privateKey]),
-      signState(secondSupportState, [wallet2.privateKey])
+      signState(secondSupportState, [wallet2.privateKey]),
+      signState(firstSupportState, [wallet1.privateKey])
     ];
     const channelStoreData: ChannelStoredData = {
       stateVariables,
@@ -32,8 +32,8 @@ describe('isSupported', () => {
     const secondSupportState = {...appState(1), stateHash: hashState(appState(1))};
     const channelStoreData: ChannelStoredData = {
       stateVariables: [
-        signState(firstSupportState, [wallet1.privateKey]),
-        signState(secondSupportState, [wallet2.privateKey])
+        signState(secondSupportState, [wallet2.privateKey]),
+        signState(firstSupportState, [wallet1.privateKey])
       ],
       channelConstants: firstSupportState,
       myIndex: 0,
@@ -64,9 +64,9 @@ describe('isSupported', () => {
     const secondSupportState = {...appState(1), stateHash: hashState(appState(1))};
     const thirdUnsupportedState = {...appState(3), stateHash: hashState(appState(3))};
     const stateVariables = [
-      signState(firstSupportState, [wallet1.privateKey]),
+      signState(thirdUnsupportedState, [wallet1.privateKey]),
       signState(secondSupportState, [wallet2.privateKey]),
-      signState(thirdUnsupportedState, [wallet1.privateKey])
+      signState(firstSupportState, [wallet1.privateKey])
     ];
 
     const channelStoreData: ChannelStoredData = {

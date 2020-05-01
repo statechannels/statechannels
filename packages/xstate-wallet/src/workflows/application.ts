@@ -13,13 +13,13 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, distinctUntilKeyChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -63,7 +63,6 @@ type WorkflowGuards = Guards<
 >;
 
 export interface WorkflowActions {
-  sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
   sendChallengeChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendCloseChannelResponse: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
@@ -74,7 +73,7 @@ export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
   spawnObservers: AssignAction<ChannelIdExists, any>;
-  updateStoreWithPlayerState: Action<WorkflowContext, PlayerStateUpdate>;
+  updateStoreAndSendResponse: Action<WorkflowContext, PlayerStateUpdate>;
 }
 
 export type WorkflowEvent =
@@ -183,7 +182,7 @@ const generateConfig = (
         SPAWN_OBSERVERS: {actions: actions.spawnObservers},
         PLAYER_STATE_UPDATE: {
           target: 'running',
-          actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
+          actions: [actions.updateStoreAndSendResponse]
         },
         CHANNEL_UPDATED: [
           {target: 'closing', cond: guards.channelClosing},
@@ -241,16 +240,22 @@ export const workflow = (
     );
 
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
-    store
-      .channelUpdatedFeed(channelId)
-      .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
+    store.channelUpdatedFeed(channelId).pipe(
+      filter(storeEntry => storeEntry.isSupported),
+      map(storeEntry => ({
+        type: 'CHANNEL_UPDATED',
+        storeEntry,
+        // toHexString may or may not return a padded string so we always pad to make sure the distinct check works
+        supportedTurnNum: hexZeroPad(storeEntry.supported.turnNum.toHexString(), 32)
+      })),
+      distinctUntilKeyChanged('supportedTurnNum'),
+      map(e => ({
+        type: 'CHANNEL_UPDATED',
+        storeEntry: e.storeEntry
+      }))
+    );
 
   const actions: WorkflowActions = {
-    sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
-      const entry = await store.getEntry(context.channelId);
-      messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
-    },
-
     sendCloseChannelResponse: async (context: ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
@@ -311,16 +316,19 @@ export const workflow = (
     assignRequestId: assign((context, event: JoinChannelEvent | PlayerRequestConclude) => ({
       requestId: event.requestId
     })),
-    updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
+    updateStoreAndSendResponse: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
+      // TODO: This should probably be done in a service and we should handle the failure cases
+      // For now we update the store and then send the response in one action so the response has the latest state
       if (context.channelId === event.channelId) {
-        const existingState = await (await store.getEntry(event.channelId)).latest;
+        const existingState = (await store.getEntry(event.channelId)).latest;
         const newState = {
           ...existingState,
           turnNum: existingState.turnNum.add(1),
           appData: event.appData,
           outcome: event.outcome
         };
-        await store.signAndAddState(event.channelId, newState);
+        const entry = await store.signAndAddState(event.channelId, newState);
+        await messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
       }
     }
   };
@@ -412,11 +420,10 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   sendChallengeChannelResponse: 'sendChallengeChannelResponse',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
-  sendUpdateChannelResponse: 'sendUpdateChannelResponse',
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
-  updateStoreWithPlayerState: 'updateStoreWithPlayerState',
+  updateStoreAndSendResponse: 'updateStoreAndSendResponse',
   assignRequestId: 'assignRequestId'
 };
 

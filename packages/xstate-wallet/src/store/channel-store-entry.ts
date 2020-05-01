@@ -12,9 +12,10 @@ import {
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {logger} from '../logger';
 
 import {Funding} from './store';
+import {Errors} from '.';
+import {logger} from '../logger';
 export interface SignatureEntry {
   signature: string;
   signer: string;
@@ -128,7 +129,7 @@ export class ChannelStoreEntry {
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
     let previousState;
 
-    for (const signedState of this.signedStates.reverse()) {
+    for (const signedState of this.signedStates) {
       // If there is not a valid transition we know there cannot be a valid support
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
@@ -164,8 +165,12 @@ export class ChannelStoreEntry {
     return !!this._latestSupportedByMe;
   }
 
+  private get _signedByMe() {
+    return this.signedStates.filter(s => this.mySignature(s, s.signatures));
+  }
+
   private get _latestSupportedByMe() {
-    return this.signedStates.find(s => this.mySignature(s, s.signatures));
+    return this._signedByMe.find(() => true);
   }
 
   get latestSignedByMe() {
@@ -175,7 +180,7 @@ export class ChannelStoreEntry {
   }
 
   get latest() {
-    return {...this.channelConstants, ...this.signedStates[this.signedStates.length - 1]};
+    return {...this.channelConstants, ...this.signedStates[0]};
   }
 
   get latestState() {
@@ -191,6 +196,11 @@ export class ChannelStoreEntry {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
+    if (this.isSupportedByMe && this.latestSignedByMe.turnNum.gte(stateVars.turnNum)) {
+      logger.error({entry: this.data(), stateVars});
+      throw Error(Errors.staleState);
+    }
+
     const state = {...stateVars, ...this.channelConstants};
 
     const signatureEntry = createSignatureEntry(state, privateKey);
@@ -229,7 +239,28 @@ export class ChannelStoreEntry {
 
     this.clearOldStates();
 
+    this.checkInvariants();
+
     return this.state(entry);
+  }
+
+  private checkInvariants() {
+    const groupedByTurnNum = _.groupBy(this._signedByMe, s => s.turnNum.toString());
+    const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
+
+    if (multipleSignedByMe) {
+      logger.error({entry: this.data()});
+
+      throw Error(Errors.multipleSignedStates);
+    }
+
+    const {signedStates} = this;
+    const turnNums = _.map(signedStates, s => parseInt(s.turnNum.toHexString(), 16));
+
+    if (!isReverseSorted(turnNums)) {
+      logger.error({signedStates: _.map(signedStates, s => s.turnNum.toHexString())});
+      throw Error(Errors.notSorted);
+    }
   }
 
   private state(stateVars: SignedStateVariables): SignedState {
@@ -237,6 +268,9 @@ export class ChannelStoreEntry {
   }
 
   private clearOldStates() {
+    this.stateVariables = _.reverse(
+      _.sortBy(this.stateVariables, s => parseInt(s.turnNum.toHexString(), 16))
+    );
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
@@ -246,8 +280,8 @@ export class ChannelStoreEntry {
       const supportIndex = this.stateVariables.findIndex(
         sv => sv.stateHash === firstSupportStateHash
       );
-      // Take everything after that
-      this.stateVariables = this.stateVariables.slice(supportIndex);
+      // Take everything before that
+      this.stateVariables = this.stateVariables.slice(0, supportIndex + 1);
     }
   }
 
@@ -339,4 +373,14 @@ export class ChannelStoreEntry {
       return outcome;
     }
   }
+}
+
+function isReverseSorted(arr) {
+  const len = arr.length - 1;
+  for (let i = 0; i < len; ++i) {
+    if (arr[i] < arr[i + 1]) {
+      return false;
+    }
+  }
+  return true;
 }

@@ -51,10 +51,7 @@ export class ChannelClient implements ChannelClientInterface {
   onChannelUpdated(
     callback: (result: ChannelUpdatedNotification['params']) => void
   ): UnsubscribeFunction {
-    this.provider.on('ChannelUpdated', callback);
-    return (): void => {
-      this.provider.off('ChannelUpdated', callback);
-    };
+    return this.channelState.subscribe(callback).unsubscribe;
   }
 
   onChannelProposed(

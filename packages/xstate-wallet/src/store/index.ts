@@ -52,6 +52,9 @@ export function isGuarantees(funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
 export enum Errors {
+  notSorted = 'states not sorted',
+  multipleSignedStates = 'Store signed multiple states for a single turn',
+  staleState = 'Attempting to sign a stale state',
   channelMissing = 'No channel found with id.',
   channelFunded = 'Channel already funded.',
   channelLocked = 'Channel is locked',
