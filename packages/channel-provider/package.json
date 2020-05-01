@@ -27,6 +27,7 @@
     "@types/jest": "25.1.0",
     "@types/node": "13.5.1",
     "@types/prettier": "1.19.0",
+    "@types/webpack": "4.41.5",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
@@ -40,8 +41,8 @@
     "ts-jest": "25.0.0",
     "ts-loader": "6.2.1",
     "typescript": "3.7.5",
-    "webpack-cli": "3.3.9",
-    "webpack": "4.41.5"
+    "webpack": "4.41.5",
+    "webpack-cli": "3.3.9"
   },
   "jest": {
     "roots": [
