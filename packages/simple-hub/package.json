@@ -10,6 +10,8 @@
     "@statechannels/nitro-protocol": "0.0.1",
     "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
+    "dotenv": "8.2.0",
+    "dotenv-expand": "5.1.0",
     "ethers": "4.0.45",
     "firebase": "7.11.0",
     "fp-ts": "2.5.3",
