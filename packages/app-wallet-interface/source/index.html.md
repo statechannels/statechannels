@@ -642,7 +642,7 @@ In particular, this means that
 - otherwise unsupported
 - out-of-date
 
-states will not trigger this notification.
+states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification.
 
 ```json
 {
