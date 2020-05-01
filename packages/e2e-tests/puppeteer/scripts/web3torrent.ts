@@ -8,8 +8,6 @@ import {
   setUpBrowser,
   setupLogging,
   waitForBudgetEntry,
-  withdrawAndWait,
-  waitForEmptyBudget,
   waitAndApproveDepositWithHub
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
