@@ -1,4 +1,3 @@
-import debug from 'debug';
 import {JsonRpcRequest} from './types';
 import {logger} from './logger';
 
