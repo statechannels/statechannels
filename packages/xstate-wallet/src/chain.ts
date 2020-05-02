@@ -231,6 +231,8 @@ export class FakeChain implements Chain {
   }
 }
 
+const chainLogger = logger.child({module: 'chain'});
+
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
@@ -241,10 +243,10 @@ export class ChainWatcher implements Chain {
     const signer = provider.getSigner();
 
     this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
-    this._assetHolders[0].on('Deposited', logger.info);
-    provider.on('block', blockNumber => {
-      logger.info('New Block: ' + blockNumber);
-    });
+    this._assetHolders[0].on('Deposited', (...event) =>
+      chainLogger.info({...event}, 'Deposited event')
+    );
+    provider.on('block', blockNumber => chainLogger.info({blockNumber}, 'New Block'));
     this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
 
     if (this.ethereumIsEnabled) {
