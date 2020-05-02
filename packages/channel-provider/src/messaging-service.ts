@@ -1,7 +1,6 @@
 import debug from 'debug';
 import {JsonRpcRequest} from './types';
-
-const log = debug('channel-provider:messaging');
+import {logger} from './logger';
 
 export interface MessagingServiceOptions {
   timeoutMs?: number;
@@ -28,22 +27,22 @@ export class MessagingService {
   send(target: Window, message: JsonRpcRequest, corsUrl: string) {
     this.attempts += 1;
 
-    log('Sending message: %o (attempt #%o)', message, this.attempts);
+    logger.info({message}, 'Sending message (attempt %s)', this.attempts);
     target.postMessage(message, corsUrl);
-    log('Sent message: %o', message);
+    logger.info({message}, 'Sent message:');
 
     if (this.timeoutMs >= 0) {
       this.timeoutListener = setTimeout(() => {
         if (this.attempts < this.maxRetries) {
-          log('Request %o timed out after %o ms, retrying', message, this.timeoutMs);
+          logger.info({message}, 'Request timed out after %o ms, retrying', this.timeoutMs);
           this.send(target, message, corsUrl);
         } else {
-          log(
-            'Request %o timed out after %o attempts; is the wallet unreachable?',
-            message,
+          logger.info(
+            {message},
+            'Request timed out after %o attempts; is the wallet unreachable?',
             this.attempts
           );
-          console.warn(`Request timed out after ${this.attempts} attempts`, message);
+          logger.warn({message}, `Request timed out after ${this.attempts} attempts`);
         }
       }, this.timeoutMs);
     }
@@ -58,7 +57,7 @@ export class MessagingService {
     // Some tests rely on being able to supply the id on the message
     // We should not allow this in production, as we cannot guarantee unique
     // message ids.
-    if (message.id) console.error('message id should not be defined');
+    if (message.id) logger.error('message id should not be defined');
 
     // message IDs should be unique
     message.id = message.id || this.requestNumber++;
@@ -69,14 +68,14 @@ export class MessagingService {
         this.createListenerForMessage(message, resolve, reject, callback)
       );
 
-      log('Requesting: %o', message);
+      logger.info({message}, 'Requesting:');
 
       this.send(target, message as JsonRpcRequest, this.url);
     });
   }
 
   acknowledge() {
-    log('ACK signal received');
+    logger.info('ACK signal received');
 
     if (this.timeoutListener) {
       clearTimeout(this.timeoutListener);
@@ -98,7 +97,7 @@ export class MessagingService {
         }
         this.acknowledge();
         window.removeEventListener('message', listener);
-        log('Received response: %o', event.data);
+        logger.info({response: event.data}, 'Received response: %o');
         resolve(event.data.result);
       } else if (event.data.error) {
         reject(event.data.error);
