@@ -241,7 +241,7 @@ export class ChainWatcher implements Chain {
     const signer = provider.getSigner();
 
     this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
-    this._assetHolders[0].on('Deposited', console.log);
+    this._assetHolders[0].on('Deposited', logger.info);
     provider.on('block', blockNumber => {
       logger.info('New Block: ' + blockNumber);
     });
