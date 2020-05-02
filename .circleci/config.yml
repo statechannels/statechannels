@@ -418,7 +418,7 @@ workflows:
       - deploy-persistent-seeder:
           filters:
             branches:
-              only: deploy-persistent
+              only: sp/deploy-persistent
 
   scheduled-release:
     triggers:
