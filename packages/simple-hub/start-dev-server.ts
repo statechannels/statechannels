@@ -1,4 +1,4 @@
-import './env'; // Note: importing this module has the side effect of modifying env vars
+import './env';
 
 import FirebaseServer from 'firebase-server';
 import {setupGanache, getNetworkName} from '@statechannels/devtools';
