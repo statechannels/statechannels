@@ -8,11 +8,12 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForClosingChannel,
   waitForNthState,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
-  setupFakeWeb3
+  setupFakeWeb3,
+  waitForWalletToBeHidden,
+  waitForClosedState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -60,7 +61,6 @@ describe('Web3-Torrent Integration Tests', () => {
       [browserA, browserB].map(async browser => browser && (await browser.close()))
     );
   });
-
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
     const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
@@ -83,12 +83,19 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
 
-    console.log('Waiting for channels to close');
-    await Promise.all(tabs.map(waitForClosingChannel));
+    // TODO: Verify withdrawal for direct funding once it's implemented
+    // see https://github.com/statechannels/monorepo/issues/1546
 
+    // Ensure the wallet is not visible
+    await Promise.all(tabs.map(tab => waitForWalletToBeHidden(tab)));
+    // Wait for the close state channel update
+    // TODO: It looks like direct funding is not properly sending a closed state
+    // see https://github.com/statechannels/monorepo/issues/1649
+    if (USES_VIRTUAL_FUNDING) {
+      await Promise.all(tabs.map(tab => waitForClosedState(tab)));
+    }
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await Promise.all([web3tTabA, web3tTabB].map(tab => tab.waitFor(1500)));
-
+    await Promise.all(tabs.map(tab => tab.waitFor(1500)));
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);

@@ -88,6 +88,7 @@ const withdraw = (store: Store) => async (ctx: Init) => {
   // NOOP
 };
 
+// TODO: Probably display UI for withdrawing when implemented
 const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
 
 export const config: StateNodeConfig<Init, any, any> = {

@@ -195,8 +195,7 @@ const generateConfig = (
 
     //This could handled by another workflow instead of the application workflow
     closing: {
-      entry: [actions.displayUi, actions.assignRequestId],
-      exit: actions.hideUi,
+      entry: [actions.assignRequestId],
       invoke: {
         id: 'closing-protocol',
         src: 'invokeClosingProtocol',
