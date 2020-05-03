@@ -262,7 +262,7 @@ export class PaymentChannelClient {
 
     const {payerBalance} = channelState;
     if (bigNumberify(payerBalance).lt(amount)) {
-      console.error('Insufficient fund to make a payment. Closing channel.');
+      logger.error('Insufficient fund to make a payment. Closing channel.');
       await this.closeChannel(channelId);
       return;
     }

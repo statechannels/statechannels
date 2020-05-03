@@ -17,6 +17,7 @@ import {
   State as NitroState
 } from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
+import {log} from '../../logger';
 
 interface AllocationItem {
   destination: string;
@@ -264,7 +265,7 @@ function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       ];
     case 'MixedAllocation':
       // TODO: Update NitroOutcome to support multiple asset holders
-      console.log('NOTE: MixedAllocation is using 0th-indexed allocation only');
+      log.log('NOTE: MixedAllocation is using 0th-indexed allocation only');
       return outcome.simpleAllocations.map(convertToNitroOutcome)[0];
   }
 }

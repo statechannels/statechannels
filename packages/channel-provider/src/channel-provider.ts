@@ -62,10 +62,10 @@ class ChannelProvider implements ChannelProviderInterface {
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
     await this.ui.mount();
-    console.info('Application successfully mounted Wallet iFrame inside DOM.');
-    console.info('Waiting for wallet ping...');
+    logger.info('Application successfully mounted Wallet iFrame inside DOM.');
+    logger.info('Waiting for wallet ping...');
     await this.walletReady;
-    console.info('Wallet ready to receive requests');
+    logger.info('Wallet ready to receive requests');
     const {signingAddress, selectedAddress, walletVersion} = await this.send({
       method: 'GetWalletInformation',
       params: {}
