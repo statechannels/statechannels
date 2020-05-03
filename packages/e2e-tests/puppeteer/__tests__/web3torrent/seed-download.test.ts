@@ -8,7 +8,6 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForClosingChannel,
   waitForNthState,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
@@ -83,10 +82,11 @@ describe('Web3-Torrent Integration Tests', () => {
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
-    console.log('Waiting for channels to close');
-    await Promise.all(tabs.map(waitForClosingChannel));
 
-    // Wait for the wallet iframe to be hidden
+    // TODO: Verify withdrawal for direct funding once it's implemented
+    // see https://github.com/statechannels/monorepo/issues/1546
+
+    // Ensure the wallet is not visible
     await Promise.all(tabs.map(tab => waitForWalletToBeHidden(tab)));
     // Wait for the close state channel update
     await Promise.all(tabs.map(tab => waitForClosedState(tab)));
