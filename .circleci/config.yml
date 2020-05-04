@@ -332,15 +332,15 @@ jobs:
       - run: curl https://cli-assets.heroku.com/install.sh | sh
       - run: heroku container:login
       - docker/build:
-          cache_from: registry.heroku.com/simple-hub-staging/simple-hub:latest
+          cache_from: registry.heroku.com/simple-hub-production/simple-hub:latest
           dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
-          image: registry.heroku.com/simple-hub-staging/simple-hub
+          image: registry.heroku.com/simple-hub-production/simple-hub
           tag: latest
       - docker/push:
-          image: simple-hub-staging/simple-hub
+          image: simple-hub-production/simple-hub
           registry: registry.heroku.com
           tag: latest
-      - run: heroku container:release -a simple-hub-staging simple-hub
+      - run: heroku container:release -a simple-hub-production simple-hub
 
   e2e-test-w3t-production:
     resource_class: large
