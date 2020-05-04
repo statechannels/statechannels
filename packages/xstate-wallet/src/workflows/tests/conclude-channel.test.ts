@@ -102,23 +102,23 @@ it('reaches the same state when running conclude twice', async () => {
   const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
   // store entries should have been udpated to finalized state
-  const aEntry1 = await aStore.getEntry(targetChannelId);
-  const bEntry1 = await bStore.getEntry(targetChannelId);
-  expect(aEntry1.isFinalized).toBe(true);
-  expect(bEntry1.isFinalized).toBe(true);
+  const entryA1 = await aStore.getEntry(targetChannelId);
+  const entryB1 = await bStore.getEntry(targetChannelId);
+  expect(entryA1.isFinalized).toBe(true);
+  expect(entryB1.isFinalized).toBe(true);
 
   // Conclude again
   await runUntilSuccess(concludeChannel);
   const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
-  const aEntry2 = await aStore.getEntry(targetChannelId);
-  const bEntry2 = await bStore.getEntry(targetChannelId);
+  const entryA2 = await aStore.getEntry(targetChannelId);
+  const entryB2 = await bStore.getEntry(targetChannelId);
 
   expect(amountA2).toMatchObject(amountA1);
   expect(amountB2).toMatchObject(amountB1);
 
   // No change to the store entires, meaning that turnNum, etc. remain the same
-  expect(aEntry1).toMatchObject(aEntry2);
-  expect(bEntry1).toMatchObject(bEntry2);
+  expect(entryA1).toMatchObject(entryA2);
+  expect(entryB1).toMatchObject(entryB2);
 });
