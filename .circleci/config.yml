@@ -352,7 +352,10 @@ jobs:
 workflows:
   statechannels:
     jobs:
-      - prepare
+      - prepare:
+          filters:
+            branches:
+              ignore: deploy
 
       - build:
           requires:
