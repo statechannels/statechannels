@@ -30,7 +30,10 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther('1000000');
 
+    const blockTime = 30; // simulate 15s blocktime of a real chain, plus a little extra to account for slower MM polling when not on localhost:8545
+
     const opts = [
+      [`--blockTime ${blockTime}`],
       [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
       [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
