@@ -45,7 +45,7 @@
     "solc": "0.6.0",
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "ts-jest": "25.0.0",
-    "ts-node": "8.6.2",
+    "ts-node": "8.9.1",
     "typescript": "3.7.5",
     "write-json-file": "4.2.0"
   },
