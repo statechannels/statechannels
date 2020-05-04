@@ -351,15 +351,15 @@ jobs:
       - run: curl https://cli-assets.heroku.com/install.sh | sh
       - run: heroku container:login
       - docker/build:
-          cache_from: registry.heroku.com/persistent-seeder-staging/persistent-seeder:latest
-          dockerfile: packages/e2e-tests/persistent-seeder-deployment/persistent-seeder.dockerfile
-          image: registry.heroku.com/persistent-seeder-staging/persistent-seeder
+          cache_from: registry.heroku.com/persistent-seeder-production/persistent-seeder:latest
+          dockerfile: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
+          image: registry.heroku.com/persistent-seeder-production/persistent-seeder
           tag: latest
       - docker/push:
-          image: persistent-seeder-staging/persistent-seeder
+          image: persistent-seeder-production/persistent-seeder
           registry: registry.heroku.com
           tag: latest
-      - run: heroku container:release -a persistent-seeder-staging persistent-seeder
+      - run: heroku container:release -a persistent-seeder-production persistent-seeder
       
   push-master-to-deploy:
     working_directory: /home/circleci/project
@@ -418,7 +418,7 @@ workflows:
       - deploy-persistent-seeder:
           filters:
             branches:
-              only: deploy
+              only: sp/deploy-persistent
 
   scheduled-release:
     triggers:
