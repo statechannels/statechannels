@@ -9,7 +9,13 @@ import {
   setupLogging,
   setupFakeWeb3
 } from '../../helpers';
-import {JEST_TIMEOUT, USES_VIRTUAL_FUNDING, HEADLESS, USE_DAPPETEER} from '../../constants';
+import {
+  JEST_TIMEOUT,
+  USES_VIRTUAL_FUNDING,
+  HEADLESS,
+  USE_DAPPETEER,
+  WEB3TORRENT_URL
+} from '../../constants';
 import {Browser, Page} from 'puppeteer';
 import {uploadFile} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
@@ -33,7 +39,7 @@ describe('withdrawal from a ledger channel', () => {
     console.log('Loading dapps');
     await setupLogging(web3tTabA, 0, 'withdraw', true);
     if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
-    await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
   });
 

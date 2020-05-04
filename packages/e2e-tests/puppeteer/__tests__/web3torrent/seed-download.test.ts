@@ -2,7 +2,15 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING, USE_DAPPETEER} from '../../constants';
+
+// importing from '../../constants' will also run devtools configureEnvVariables
+import {
+  JEST_TIMEOUT,
+  HEADLESS,
+  USES_VIRTUAL_FUNDING,
+  USE_DAPPETEER,
+  WEB3TORRENT_URL
+} from '../../constants';
 
 import {
   setUpBrowser,
@@ -31,7 +39,6 @@ let tabs: [Page, Page];
 
 describe('Web3-Torrent Integration Tests', () => {
   beforeAll(async () => {
-    // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
     const setupAPromise = setUpBrowser(HEADLESS, 4, 0);
@@ -51,7 +58,7 @@ describe('Web3-Torrent Integration Tests', () => {
     if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
     if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, 0);
 
-    await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
 
     await web3tTabA.bringToFront();
   });
