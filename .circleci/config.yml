@@ -359,35 +359,35 @@ workflows:
             - prepare
           filters:
             branches:
-              ignore: liam/noprepare
+              ignore: deploy
 
       - test:
           requires:
             - prepare
           filters:
             branches:
-              ignore: liam/noprepare
+              ignore: deploy
 
       - integration-test-rps:
           requires:
             - prepare
           filters:
             branches:
-              ignore: liam/noprepare
+              ignore: deploy
 
       - integration-test-web3torrent:
           requires:
             - prepare
           filters:
             branches:
-              ignore: liam/noprepare
+              ignore: deploy
 
       - integration-test-web3torrent-with-hub:
           requires:
             - prepare
           filters:
             branches:
-              ignore: liam/noprepare
+              ignore: deploy
 
       - release-pull-request:
           requires:
