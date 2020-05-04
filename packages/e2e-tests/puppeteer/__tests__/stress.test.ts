@@ -4,10 +4,18 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
+import {
+  setUpBrowser,
+  waitAndOpenChannel,
+  waitForClosingChannel,
+  setupLogging,
+  setupFakeWeb3,
+  waitForNthState
+} from '../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
+import {USE_DAPPETEER} from '../constants';
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -37,7 +45,6 @@ describe('One file, two seeders, one leecher', () => {
     metamask: Dappeteer;
   }>;
   const tabs: Data<Page> = {} as Data<Page>;
-  const metamasks: Data<Dappeteer> = {} as Data<Dappeteer>;
   afterAll(async () => {
     if (HEADLESS) {
       await forEach(browsers, async ({browser}) => browser && (await browser.close()));
@@ -49,34 +56,41 @@ describe('One file, two seeders, one leecher', () => {
 
     console.log('Opening browsers');
     await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 0));
+    console.error(typeof browsers.A.metamask);
 
     console.log('Waiting on pages');
     await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
 
-    const logPageOutput = (role: Label) => (msg: any) =>
-      // use console.error so we can redirect STDERR to a file
-      console.error(`${role}: `, msg.text());
-    forEach(tabs, (tab, label) => tab.on('console', logPageOutput(label)));
-
-    await tabs.A.goto('http://localhost:3000/file/new', {waitUntil: 'load'});
-
-    console.log('A, B upload the same file');
-    const [file] = [Label.A, Label.B].map(async label => {
-      const tab = tabs[label];
-      const {metamask} = browsers[label];
-      await tab.goto('http://localhost:3000/file/new', {waitUntil: 'load'});
-      return await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask);
+    console.log('Setting up logs');
+    let i = 0;
+    await forEach(tabs, async tab => {
+      const idx = i++;
+      await setupLogging(tab, idx, 'stress', true);
+      !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
     });
 
-    console.log('B starts downloading...');
-    await startDownload(tabs.B, await file, USES_VIRTUAL_FUNDING, metamasks.B);
+    console.log('A, B upload the same file');
+    const [file] = await Promise.all(
+      [Label.A, Label.B].map(async label => {
+        const tab = tabs[label];
+        const {metamask} = browsers[label];
+        console.log('Going to URL');
+        await tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+        console.log('Uploading file');
+
+        return await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask);
+      })
+    );
+
+    console.log('C starts downloading...');
+    await startDownload(tabs.C, file, USES_VIRTUAL_FUNDING, browsers.C.metamask);
 
     console.log('Waiting for open channels');
     await forEach(tabs, waitAndOpenChannel(USES_VIRTUAL_FUNDING));
 
-    // Let the download cointinue for some time
+    // Let the download continue for some time
     console.log('Downloading');
-    await tabs.C.waitFor(1000);
+    await waitForNthState(tabs.C, 10);
 
     console.log('C cancels download');
     await cancelDownload(tabs.C);
