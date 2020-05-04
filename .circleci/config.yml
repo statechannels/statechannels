@@ -417,7 +417,8 @@ workflows:
 
       - e2e-test-w3t-production:
           # for testing only
-          # requires:
+          requires:
+            - prepare
           #   - release-hub-production
           #   - release-netlify-production
           filters:
