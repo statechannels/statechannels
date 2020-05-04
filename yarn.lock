@@ -13854,10 +13854,10 @@ detective@^5.2.0:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-dexie@^3.0.0-rc.7:
-  version "3.0.0-rc.7"
-  resolved "https://registry.npmjs.org/dexie/-/dexie-3.0.0-rc.7.tgz#9b522e303520853023d7fcb681f9f0202cabac01"
-  integrity sha512-3NoWIJ0hGakUbBZPrqnCpmPUIy93tttpun4u+iTlwkMbLnnhCjIr3LmgR8Dq9UopJA2LkWmCJ2tCC7C1ps4YQA==
+dexie@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/dexie/-/dexie-3.0.0.tgz#6f468fa30b5c53343bbbfb1659ddede202e1a67c"
+  integrity sha512-wOS7Og4NzXYG2OZPkzmgNTR+WSocu3O6bQSU22s30g3I2g32By/tbaTMoCVFKd55p+oTlxZY8YAMkhJs4vj0sw==
 
 dezalgo@^1.0.0:
   version "1.0.3"
