@@ -352,38 +352,59 @@ jobs:
 workflows:
   statechannels:
     jobs:
-      - prepare:
-          filters:
-            branches:
-              ignore: deploy
+      - prepare
 
       - build:
           requires:
             - prepare
+          filters:
+            branches:
+              ignore: liam/noprepare
+
       - test:
           requires:
             - prepare
+          filters:
+            branches:
+              ignore: liam/noprepare
+
       - integration-test-rps:
           requires:
             - prepare
+          filters:
+            branches:
+              ignore: liam/noprepare
+
       - integration-test-web3torrent:
           requires:
             - prepare
+          filters:
+            branches:
+              ignore: liam/noprepare
+
       - integration-test-web3torrent-with-hub:
           requires:
             - prepare
+          filters:
+            branches:
+              ignore: liam/noprepare
+
       - release-pull-request:
           requires:
             - prepare
           filters:
             branches:
-              ignore: master
+              ignore:
+                - master
+                - deploy
+
       - release-master:
           requires:
             - prepare
           filters:
             branches:
               only: master
+
       - release-netlify-production:
           requires:
             - prepare
