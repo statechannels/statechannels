@@ -43,6 +43,6 @@ cd $PACKAGES/xstate-wallet
 yarn start | tee $E2E_ROOT/xstate-wallet.log &
 
 cd $PACKAGES/simple-hub
-yarn hub:watch | tee $E2E_ROOT/hub.log &
+yarn hub:start:dev | tee $E2E_ROOT/hub.log &
 
 wait
