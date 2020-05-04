@@ -31,7 +31,7 @@ export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
 export const HUB_DESTINATION = (process.env.HUB_DESTINATION ||
-  '0x000000000000000000000000aaaa84838319627Fa056fC3FC29ab94d479B8502') as Destination;
+  hexZeroPad(HUB_ADDRESS, 32)) as Destination;
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 
