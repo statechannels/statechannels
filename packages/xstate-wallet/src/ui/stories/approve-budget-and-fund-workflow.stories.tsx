@@ -18,7 +18,7 @@ const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
-const budget: SiteBudget = ethBudget('rps.statechannels.org', {
+const budget: SiteBudget = ethBudget('web3torrent.statechannels.org', {
   availableReceiveCapacity: parseEther('0.05'),
   availableSendCapacity: parseEther('0.05')
 });
@@ -71,7 +71,8 @@ const contextWaitMining = {...contextSubmitTransaction, transactionId: 'transact
 const contextWaitFullyFunded = {...contextWaitTurn, ledgerTotal: bigNumberify(10)};
 
 addStory('waitForUserApproval', 'waitForUserApproval', testContext);
-addStory('createBudgetAndLedger', 'createBudgetAndLedger', testContext);
+addStory('createLedger', 'createLedger', testContext);
+addStory('createBudget', 'createBudget', testContext);
 addStory('waitForPreFS', 'waitForPreFS', contextWithLedger);
 addStory('deposit.init', {deposit: 'init'}, contextWithDeposit);
 addStory('deposit.waitTurn', {deposit: 'waitTurn'}, contextWaitTurn);
