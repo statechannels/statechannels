@@ -10,13 +10,14 @@ WORKDIR /statechannels/monorepo
 
 # INSTALL DEPENDENCIES
 COPY ./package.json /statechannels/monorepo/
-COPY ./packages/devtools/package.json packages/devtools/
 COPY ./packages/nitro-protocol/package.json packages/nitro-protocol/
 COPY ./packages/simple-hub/package.json packages/simple-hub/
 COPY ./packages/wire-format/package.json packages/wire-format/
 
 # Remove the devtools and jest-gas-reporter devDependencies from package.json files (avoid resolution)
+RUN sed -ie "/@statechannels\/devtools/d" package.json
 RUN sed -ie "/@statechannels\/jest-gas-reporter/d" package.json
+RUN sed -ie "/@statechannels\/devtools/d" **/*/package.json
 RUN sed -ie "/@statechannels\/jest-gas-reporter/d" **/*/package.json
 
 # Install production dependencies for simple-hub
@@ -26,7 +27,6 @@ RUN yarn --production --prefer-offline
 # COPY SOURCE
 WORKDIR /statechannels/monorepo
 COPY .env.* ./
-COPY ./packages/devtools/ packages/devtools/
 COPY ./packages/nitro-protocol/ packages/nitro-protocol/
 COPY ./packages/simple-hub/ packages/simple-hub/
 COPY ./packages/wire-format/ packages/wire-format/
