@@ -38,6 +38,6 @@ WORKDIR /statechannels/monorepo/packages/simple-hub
 # https://devcenter.heroku.com/articles/container-registry-and-runtime#dockerfile-commands-and-runtime
 #   CMD will always be executed by a shell ... to execute single binaries or use images without a shell please use ENTRYPOINT
 # To interactively debug the container:
-# docker run -it registry.heroku.com/simple-hub-staging/simple-hub:latest bash
+# docker run -it registry.heroku.com/simple-hub-production/simple-hub:latest bash
 ENTRYPOINT ["docker/docker-entrypoint.sh"]
 CMD ["node", "./lib/src/server.js"]
