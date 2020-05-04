@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-function configureEnvVariables(monorepo = true): void {
+function configureEnvVariables(): void {
   // State Channel Environment
   // Intended usage is a single file in monorepo root defining configuration for multiple packages
   const SC_ENV = process.env.SC_ENV;
@@ -18,12 +18,13 @@ function configureEnvVariables(monorepo = true): void {
     }
 
     /* eslint-disable @typescript-eslint/no-var-requires */
-    // NOTE: dotenv joins paths with cwd https://www.npmjs.com/package/dotenv#path
-    require('dotenv-expand')(
+    const result = require('dotenv-expand')(
       require('dotenv').config({
         path: scEnvFile
       })
     );
+    console.log('The following env vars were loaded to process.env:');
+    console.log(result);
     /* eslint-enable @typescript-eslint/no-var-requires */
     return;
   }
@@ -35,6 +36,7 @@ function configureEnvVariables(monorepo = true): void {
   }
 
   // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+  // NOTE: dotenv joins paths with cwd https://www.npmjs.com/package/dotenv#path
   let dotenvFiles = [
     `.env.${NODE_ENV}.local`,
     // Don't include `.env.local` for `test` environment
@@ -45,13 +47,13 @@ function configureEnvVariables(monorepo = true): void {
     '.env'
   ].filter((x): x is string => !!x);
 
-  if (monorepo) {
-    const monorepoDotenvFiles = dotenvFiles.slice(0);
-    dotenvFiles.forEach((dotenvFile: string) => {
-      monorepoDotenvFiles.push(path.join('../..', dotenvFile));
-    });
-    dotenvFiles = monorepoDotenvFiles;
-  }
+  const monorepoDotenvFiles = dotenvFiles.slice(0);
+
+  dotenvFiles.forEach((dotenvFile: string) => {
+    monorepoDotenvFiles.push(path.join('../..', dotenvFile));
+  });
+
+  dotenvFiles = monorepoDotenvFiles;
 
   // Load environment variables from .env* files. Suppress warnings using silent
   // if this file is missing. dotenv will never modify any environment variables
