@@ -342,6 +342,25 @@ jobs:
           tag: latest
       - run: heroku container:release -a simple-hub-staging simple-hub
 
+  e2e-test-w3t-production:
+    resource_class: large
+    working_directory: /home/circleci/project
+    docker:
+      - image: circleci/node:10.16.3-browsers
+    environment:
+      SC_ENV: production-ropsten
+    steps:
+      - install_xvfb
+      - run_xvfb
+      - checkout
+      - log_stats:
+          file: e2e-test-w3t-production-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: (cd packages/e2e-tests && yarn jest web3torrent)
+      - upload_logs:
+          file: e2e-test-w3t-production-stats
+
   push-master-to-deploy:
     working_directory: /home/circleci/project
     resource_class: small
@@ -392,6 +411,15 @@ workflows:
               only: deploy
 
       - release-hub-production:
+          filters:
+            branches:
+              only: deploy
+
+      - e2e-test-w3t-production:
+          requires:
+            - prepare
+            - release-hub-production
+            - release-netlify-production
           filters:
             branches:
               only: deploy

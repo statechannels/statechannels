@@ -1,5 +1,6 @@
 import {setUpBrowser, setupLogging} from '../helpers';
 import {uploadFile} from './web3torrent';
+import {WEB3TORRENT_URL} from '../constants';
 
 export async function persistentSeeder(): Promise<void> {
   console.log('Opening browser');
@@ -11,7 +12,7 @@ export async function persistentSeeder(): Promise<void> {
   console.log('Setting up logging...');
   await setupLogging(web3tTabA, 0, 'minimal-dapp', true);
 
-  await web3tTabA.goto('https://web3torrent.statechannels.org/upload', {waitUntil: 'load'});
+  await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
   await web3tTabA.bringToFront();
 
   const url = await uploadFile(web3tTabA, true, metamask, './nitro-protocol.pdf');
