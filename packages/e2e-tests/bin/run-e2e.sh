@@ -35,7 +35,7 @@ cleanup() {
 
 jestExit() {
   trap '' INT TERM EXIT
-  if [[ -z exit_status ]]
+  if [[ -z $exit_status ]]
   then
     echo "No exit status. Exiting with status 1"
     exit 1
