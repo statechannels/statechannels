@@ -416,16 +416,13 @@ workflows:
               only: deploy
 
       - e2e-test-w3t-production:
-          # for testing only
           requires:
             - prepare
-          #   - release-hub-production
-          #   - release-netlify-production
+            - release-hub-production
+            - release-netlify-production
           filters:
             branches:
-              # for testing
-              # only: deploy
-              only: george/deploy-test-circle
+              only: deploy
 
   scheduled-release:
     triggers:
