@@ -97,9 +97,9 @@ describe('Web3-Torrent Integration Tests', () => {
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await Promise.all(tabs.map(tab => tab.waitFor(1500)));
     console.log('Checking exchanged amount between downloader and uploader...');
-    const earnedColumn = await web3tTabA.$('td.earned');
+    const earnedColumn = await web3tTabA.waitForSelector('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
-    const paidColumn = await web3tTabB.$('td.paid');
+    const paidColumn = await web3tTabB.waitForSelector('td.paid');
     const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
     expect(paid).toEqual(`-${earned}`);
   });
