@@ -9,7 +9,8 @@ import {
   HEADLESS,
   USES_VIRTUAL_FUNDING,
   USE_DAPPETEER,
-  APP_URL as WEB3TORRENT_URL
+  APP_URL as WEB3TORRENT_URL,
+  CLOSE_BROWSERS
 } from '../../constants';
 
 import {
@@ -64,9 +65,10 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await Promise.all(
-      [browserA, browserB].map(async browser => browser && (await browser.close()))
-    );
+    CLOSE_BROWSERS &&
+      (await Promise.all(
+        [browserA, browserB].map(async browser => browser && (await browser.close()))
+      ));
   });
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
