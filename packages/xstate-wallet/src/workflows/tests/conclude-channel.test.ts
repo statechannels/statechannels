@@ -92,7 +92,7 @@ beforeEach(async () => {
   });
 });
 
-it('reaches the state when running conclude twice', async () => {
+it('reaches the same state when running conclude twice', async () => {
   // Let A and B create and fund channel
   await runUntilSuccess(createChannel);
 
