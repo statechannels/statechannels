@@ -299,6 +299,8 @@ jobs:
   release-netlify-production:
     <<: *defaults
     resource_class: large
+    environment:
+      SC_ENV: production-ropsten
     steps:
       - checkout
       - log_stats:
