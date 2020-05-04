@@ -92,7 +92,7 @@ beforeEach(async () => {
   });
 });
 
-it('reaches the same amount when running conclude twice', async () => {
+it('reaches the state when running conclude twice', async () => {
   // Let A and B create and fund channel
   await runUntilSuccess(createChannel);
 
@@ -101,11 +101,24 @@ it('reaches the same amount when running conclude twice', async () => {
   const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
-  // Run conclude again
+  // store entries should have been udpated to finalized state
+  const aEntry1 = await aStore.getEntry(targetChannelId);
+  const bEntry1 = await bStore.getEntry(targetChannelId);
+  expect(aEntry1.isFinalized).toBe(true);
+  expect(bEntry1.isFinalized).toBe(true);
+
+  // Conclude again
   await runUntilSuccess(concludeChannel);
   const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
+  const aEntry2 = await aStore.getEntry(targetChannelId);
+  const bEntry2 = await bStore.getEntry(targetChannelId);
+
   expect(amountA2).toMatchObject(amountA1);
   expect(amountB2).toMatchObject(amountB1);
+
+  // No change to the store entires, meaning that turnNum, etc. remain the same
+  expect(aEntry1).toMatchObject(aEntry2);
+  expect(bEntry1).toMatchObject(bEntry2);
 });
