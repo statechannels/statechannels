@@ -7,8 +7,7 @@ import {
   firstState,
   signState
 } from '../xstate-wallet-internals';
-import {bigNumberify} from 'ethers/utils';
-import {ethers} from 'ethers';
+import {ethers, BigNumber} from 'ethers';
 import {
   cHubChannelPK,
   cHubChannelSigningAddress,
@@ -47,11 +46,11 @@ const second: Participant = {
 export const participants: [Participant, Participant, Participant] = [first, hub, second];
 
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const channel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: BigNumber.from(0),
   chainId,
   challengeDuration,
   participants: _.slice(0, 2, participants),
@@ -59,7 +58,7 @@ const channel: ChannelConstants = {
 };
 
 const channel3: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: BigNumber.from(0),
   chainId,
   challengeDuration,
   participants,
@@ -71,7 +70,7 @@ const destinations = [
   participants[0].destination,
   participants[2].destination
 ];
-const amounts = [bigNumberify(7), bigNumberify(5), bigNumberify(3)];
+const amounts = [BigNumber.from(7), BigNumber.from(5), BigNumber.from(3)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,

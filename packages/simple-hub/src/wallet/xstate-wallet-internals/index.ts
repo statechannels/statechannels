@@ -1,4 +1,4 @@
-import {bigNumberify, joinSignature, BigNumber} from 'ethers/utils';
+import {joinSignature} from 'ethers/utils';
 import {
   SignedState as SignedStateWire,
   Message as WireMessage,
@@ -16,7 +16,7 @@ import {
   Outcome as NitroOutcome,
   State as NitroState
 } from '@statechannels/nitro-protocol';
-import {ethers} from 'ethers';
+import {ethers, BigNumber} from 'ethers';
 import {log} from '../../logger';
 
 interface AllocationItem {
@@ -125,9 +125,9 @@ function deserializeState(state: SignedStateWire): SignedState {
 
   return {
     ...stateWithoutChannelId,
-    challengeDuration: bigNumberify(state.challengeDuration),
-    channelNonce: bigNumberify(state.channelNonce),
-    turnNum: bigNumberify(state.turnNum),
+    challengeDuration: BigNumber.from(state.challengeDuration),
+    channelNonce: BigNumber.from(state.channelNonce),
+    turnNum: BigNumber.from(state.turnNum),
     outcome: deserializeOutcome(state.outcome)
   };
 }
@@ -171,7 +171,7 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination, amount: bigNumberify(amount)};
+  return {destination, amount: BigNumber.from(amount)};
 }
 
 function serializeOutcome(outcome: Outcome): OutcomeWire {
@@ -310,7 +310,7 @@ export const firstState = (
 ): State => ({
   appData: appData || '0x',
   isFinal: false,
-  turnNum: bigNumberify(0),
+  turnNum: BigNumber.from(0),
   chainId: chainId || '0x01',
   channelNonce,
   challengeDuration,

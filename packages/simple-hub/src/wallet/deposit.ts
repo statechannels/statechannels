@@ -6,8 +6,7 @@ import {
   SimpleAllocation,
   makeDestination
 } from './xstate-wallet-internals';
-import {ethers} from 'ethers';
-import {BigNumber} from 'ethers/utils';
+import {ethers, BigNumber} from 'ethers';
 import {cHubChainDestination} from '../constants';
 import _ from 'lodash/fp';
 

@@ -1,13 +1,14 @@
 import AsyncLock from 'async-lock';
-import {Contract, ContractFactory, ethers, providers} from 'ethers';
-import {BigNumber} from 'ethers/utils';
+import {Contract, ContractFactory, ethers, providers, BigNumber} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
 import {log} from '../logger';
+import {NonceManager} from '@ethersproject/experimental';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(cHubChainPK, provider);
+const nonceManager = new NonceManager(walletWithProvider);
 let ethAssetHolder: Contract = null;
 
 const lock = new AsyncLock();
@@ -65,7 +66,7 @@ export async function createEthAssetHolder() {
   try {
     ethAssetHolderFactory = await ContractFactory.fromSolidity(
       ContractArtifacts.EthAssetHolderArtifact,
-      walletWithProvider
+      nonceManager
     );
   } catch (err) {
     if (err.message.match('bytecode must be a valid hex string')) {
