@@ -4,6 +4,7 @@ import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
+import {TransactionResponse} from 'ethers/providers';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -49,10 +50,18 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
       {value: value.sub(expectedHeld).toHexString()},
       'submitting deposit transaction to eth asset holder'
     );
-    const tx = await ethAssetHolder.deposit(channelID, expectedHeld.toHexString(), value, {
-      value: value.sub(expectedHeld)
-    });
-    log.info({transaction: {hash: tx.hash, nonce: tx.nonce}}, 'waiting for tx to be mined');
+    const tx: TransactionResponse = await ethAssetHolder.deposit(
+      channelID,
+      expectedHeld.toHexString(),
+      value,
+      {
+        value: value.sub(expectedHeld)
+      }
+    );
+    log.info(
+      {transaction: {hash: tx.hash, nonce: tx.nonce, from: tx.from}},
+      'waiting for tx to be mined'
+    );
     await tx.wait();
 
     const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
