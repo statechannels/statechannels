@@ -192,7 +192,6 @@ it('starts concluding when requested', async () => {
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('closing');
     expect(services.invokeClosingProtocol).toHaveBeenCalled();
-    expect(service.state.actions.map(a => a.type)).toContain('displayUi');
   }, 2000);
 });
 

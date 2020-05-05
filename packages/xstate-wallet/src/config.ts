@@ -30,6 +30,9 @@ export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADD
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
+export const HUB_DESTINATION = (process.env.HUB_DESTINATION ||
+  hexZeroPad(HUB_ADDRESS, 32)) as Destination;
+
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 
 export const NITRO_ADJUDICATOR_ADDRESS: string =
@@ -43,7 +46,7 @@ export const CHALLENGE_DURATION = bigNumberify(process.env.CHALLENGE_DURATION ||
 export const ADD_LOGS = !!LOG_DESTINATION;
 
 export const HUB = {
-  destination: hexZeroPad(HUB_ADDRESS, 32) as Destination,
+  destination: HUB_DESTINATION,
   signingAddress: HUB_ADDRESS,
   participantId: 'firebase:simple-hub'
 };

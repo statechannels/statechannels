@@ -17,14 +17,16 @@ export async function makeDeposits(
     amountToDeposit: BigNumber;
   }[]
 ) {
-  log.info('Depositing');
+  log.info(`makeDeposit: attempting to make ${depositsToMake.length} deposits`);
   await Promise.all(
     depositsToMake.map(depositToMake => {
-      log.info(`depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`);
+      log.info(
+        `makeDeposit: depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`
+      );
       return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
     })
   );
-  log.info('Deposited');
+  log.info(`makeDepost: making ${depositsToMake.length} deposits`);
 }
 export class Blockchain {
   static ethAssetHolder: Contract;

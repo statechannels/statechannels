@@ -9,7 +9,7 @@ E2E_ROOT=$PACKAGES/e2e-tests
 PORT=8545
 GANACHE_DEPLOYMENTS=$MONOREPO_ROOT/.ganache-deployments/ganache-deployments-$PORT.json
 
-WAIT_ON_TIMEOUT=60000
+WAIT_ON_TIMEOUT=120000
 WAIT_ON_INTERVAL=5000
 WAIT_ON_DELAY=5000
 
@@ -43,6 +43,6 @@ cd $PACKAGES/xstate-wallet
 yarn start | tee $E2E_ROOT/xstate-wallet.log &
 
 cd $PACKAGES/simple-hub
-yarn hub:watch | tee $E2E_ROOT/hub.log &
+yarn hub:start:dev | tee $E2E_ROOT/hub.log &
 
 wait

@@ -8,6 +8,16 @@ import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
+export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
+  const walletIframe = page.frames()[1];
+  await walletIframe.waitForSelector(':root', {visible: true});
+};
+
+export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
+  const walletIframe = page.frames()[1];
+  await walletIframe.waitForSelector(':root', {hidden: true});
+};
+
 export async function setupLogging(
   page: Page,
   ganacheAccountIndex: number,
@@ -41,6 +51,7 @@ export async function setupLogging(
   };
   const isXstateWalletLog = isPinoLog('xstate-wallet');
   const isWeb3torrentLog = isPinoLog('web3torrent');
+  const isChannelProviderLog = isPinoLog('channel-provider');
   const withGanacheIndex = (text: string): string =>
     JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
 
@@ -50,7 +61,8 @@ export async function setupLogging(
     }
 
     const text = msg.text();
-    if (isXstateWalletLog(text) || isWeb3torrentLog(text)) pinoLog.write(withGanacheIndex(text));
+    if (isXstateWalletLog(text) || isWeb3torrentLog(text) || isChannelProviderLog(text))
+      pinoLog.write(withGanacheIndex(text));
     else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
   });
 }
@@ -211,7 +223,6 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
   console.log('Approving budget');
 
   const approveBudgetButton = '.approve-budget-button';
-
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
 }
@@ -317,8 +328,12 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
 export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
   return doneWhen(page, `parseInt(channelStatus.turnNum) >= ${n}`);
 };
+export const waitForClosedState = async (page: Page): Promise<void> => {
+  return doneWhen(page, `channelStatus.status === 'closed'`);
+};
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
+  await waitForWalletToBeDisplayed(page);
   const closingText = 'div.application-workflow-prompt > h2';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
