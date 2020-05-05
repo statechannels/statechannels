@@ -116,7 +116,7 @@ const reserveFunds = (store: Store) => async context => {
 type VirtualFundingComplete = Init & {jointChannelId: string};
 const virtual: StateNodeConfig<Init, any, any> = {
   initial: 'reserveFunds',
-  entry: [triggerObjective.name],
+  entry: ['triggerObjective'],
   states: {
     reserveFunds: {invoke: {src: 'reserveFunds', onDone: 'virtualFunding'}},
     virtualFunding: getDataAndInvoke<Init, Service>(
