@@ -367,7 +367,6 @@ jobs:
       - <<: *restore_dep
       - <<: *restore_lib
       - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
-      - run: yarn --frozen-lockfile
       - build_push_release:
           dockerfilePath: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
