@@ -108,6 +108,12 @@ describe('Web3-Torrent Integration Tests', () => {
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
     const paidColumn = await web3tTabB.waitForSelector('td.paid');
     const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
+    const transferredColumn = await web3tTabB.waitForSelector('td.transferred');
+    const transferred = await web3tTabB.evaluate(e => e.textContent, transferredColumn);
+    console.log(`paid = ${paid}`);
+    console.log(`transferred = ${transferred}`);
+    expect(transferred).not.toEqual(`0 B`);
+    expect(paid).not.toEqual(`-0 wei`);
     expect(paid).toEqual(`-${earned}`);
   });
 });
