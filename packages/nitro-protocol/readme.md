@@ -99,3 +99,5 @@ To get started:
 4. Run `yarn start`
 
 See https://docusaurus.io/docs/en/installation for more information.
+
+NB: you may run into difficulty running `docgen / solidoc` if you have the native solc compiler installed at the incorrect version number. You may refer to the circle `config.yml` at the monorepo root to check which version is being used as a part of our continuous integration.
