@@ -36,13 +36,15 @@ class Footer extends React.Component {
             )}
           </a>
           <div>
-            <h5>Docs</h5>
-            <a href={this.docUrl('state-channels/overview')}>Overview</a>
+            <h5>
+              <a href={this.docUrl('state-channels/overview')}>Docs</a>
+            </h5>
             <a href={this.docUrl('forcemove-and-nitro/account-topology')}>Account Topology</a>
           </div>
           <div>
-            <h5>API</h5>
-            <a href={this.docUrl('api/contract-inheritance')}>Contract inheritance</a>
+            <h5>
+              <a href={this.docUrl('api/contract-inheritance')}>API</a>
+            </h5>
             <a href={this.docUrl('natspec/ForceMove')}>ForceMove</a>
             <a href={this.docUrl('natspec/AssetHolder')}>AssetHolder</a>
           </div>
@@ -78,7 +80,6 @@ class Footer extends React.Component {
             </a>
           </div>
         </section>
-
         <section className="copyright">{this.props.config.copyright}</section>
       </footer>
     );
