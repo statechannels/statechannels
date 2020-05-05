@@ -100,6 +100,17 @@ export abstract class PaidStreamingExtension implements Extension {
     }
   }
 
+  statusSync() {
+    setTimeout(() => {
+      this.executeExtensionCommand(PaidStreamingExtensionNotices.STATUS, {
+        pseOutcomeAddress: this.pseAddress,
+        peerOutcomeAddress: this.peerOutcomeAddress,
+        pseChannelId: this.pseChannelId,
+        peerChannelId: this.peerChannelId
+      });
+    }, 0);
+  }
+
   start() {
     if (this.isForceChoking) {
       this.isForceChoking = false;
@@ -133,7 +144,7 @@ export abstract class PaidStreamingExtension implements Extension {
       const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');
       this.messageHandler(jsonData);
     } catch (err) {
-      log.error({err}, 'onMessage decoding');
+      log.error(err, 'onMessage decoding');
       return;
     }
   }
@@ -142,6 +153,9 @@ export abstract class PaidStreamingExtension implements Extension {
     switch (command) {
       case PaidStreamingExtensionNotices.ACK:
         return;
+      case PaidStreamingExtensionNotices.STATUS:
+        log.info(`STATUS received from ${this.peerAccount}`);
+        break;
       case PaidStreamingExtensionNotices.START:
         log.info(`START received from ${this.peerAccount}`);
         this.isBeingChoked = false;
