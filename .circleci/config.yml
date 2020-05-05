@@ -111,6 +111,30 @@ commands:
       - run:
           command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
           background: true
+  
+  build_push_release:
+    description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
+    parameters:
+      dockerfile_path:
+        type: string
+      pipeline:
+        type: string
+      app:
+        type: string
+    steps:
+      - run: curl https://cli-assets.heroku.com/install.sh | sh
+      - run: heroku container:login
+      - docker/build:
+          cache_from: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>:latest
+          dockerfile: << parameters.dockerfile_path >>
+          image: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>
+          tag: latest
+      - docker/push:
+          image: << parameters.app >>/<< parameters.pipeline >>
+          registry: registry.heroku.com
+          tag: latest
+      - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
+
 
 jobs:
   prepare:
@@ -327,19 +351,27 @@ jobs:
           rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf app-wallet-interface channel-provider
           channel-client client-api-schema e2e-tests rps tic-tac-toe web3torrent xstate-wallet
       - run: yarn --frozen-lockfile
-      - run: curl https://cli-assets.heroku.com/install.sh | sh
-      - run: heroku container:login
-      - docker/build:
-          cache_from: registry.heroku.com/simple-hub-staging/simple-hub:latest
-          dockerfile: packages/simple-hub/docker/simple-hub.dockerfile
-          image: registry.heroku.com/simple-hub-staging/simple-hub
-          tag: latest
-      - docker/push:
-          image: simple-hub-staging/simple-hub
-          registry: registry.heroku.com
-          tag: latest
-      - run: heroku container:release -a simple-hub-staging simple-hub
-
+      - build_push_release:
+          dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
+          pipeline: simple-hub
+          app: simple-hub-staging
+   
+  deploy-persistent-seeder:
+    working_directory: /home/circleci/project
+    resource_class: large
+    docker:
+      - image: circleci/node:10.16.3-browsers
+    steps:
+      - setup_remote_docker
+      - checkout
+      - <<: *restore_dep
+      - <<: *restore_lib
+      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
+      - build_push_release:
+          dockerfile_path: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
+          pipeline: persistent-seeder
+          app: persistent-seeder-production
+          
   e2e-test-w3t-production:
     resource_class: large
     working_directory: /home/circleci/project
@@ -409,6 +441,11 @@ workflows:
               only: deploy
 
       - release-hub-production:
+          filters:
+            branches:
+              only: deploy
+              
+      - deploy-persistent-seeder:
           filters:
             branches:
               only: deploy
