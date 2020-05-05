@@ -50,15 +50,11 @@ describe('One file, two seeders, one leecher', () => {
     metamask: Dappeteer;
   }>;
   const tabs: Data<Page> = {} as Data<Page>;
-  afterAll(async () => {
-    if (CLOSE_BROWSERS) {
-      await forEach(browsers, async ({browser}) => browser && (await browser.close()));
-    }
-  });
+  afterAll(
+    async () => CLOSE_BROWSERS && (await forEach(browsers, async ({browser}) => browser.close()))
+  );
 
   it('allows peers to start torrenting', async () => {
-    // 100ms sloMo avoids some undiagnosed race conditions
-
     console.log('Opening browsers');
     await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 0));
 
@@ -107,7 +103,8 @@ describe('One file, two seeders, one leecher', () => {
   });
 });
 
-describe('Two files, three seeders, three leechers', () => {
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Two files, three seeders, three leechers', () => {
   const enum Label {
     S1 = 'S1',
     S2 = 'S2',
