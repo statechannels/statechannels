@@ -51,9 +51,7 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     const tx = await ethAssetHolder.deposit(channelID, expectedHeld.toHexString(), value, {
       value: value.sub(expectedHeld)
     });
-    log.info(
-    {transaction: {hash: tx.hash, nonce: tx.nonce}},
-    'waiting for tx to be mined');
+    log.info({transaction: {hash: tx.hash, nonce: tx.nonce}}, 'waiting for tx to be mined');
     await tx.wait();
 
     const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
