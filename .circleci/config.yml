@@ -448,7 +448,7 @@ workflows:
       - deploy-persistent-seeder:
           filters:
             branches:
-              only: sp/deploy-persistent
+              only: deploy
 
       - e2e-test-w3t-production:
           requires:
