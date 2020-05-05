@@ -115,7 +115,7 @@ commands:
   build_push_release:
     description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
     parameters:
-      dockerfilePath:
+      dockerfile_path:
         type: string
       pipeline:
         type: string
@@ -126,7 +126,7 @@ commands:
       - run: heroku container:login
       - docker/build:
           cache_from: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>:latest
-          dockerfile: << parameters.dockerfilePath >>
+          dockerfile: << parameters.dockerfile_path >>
           image: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>
           tag: latest
       - docker/push:
@@ -352,7 +352,7 @@ jobs:
           channel-client client-api-schema e2e-tests rps tic-tac-toe web3torrent xstate-wallet
       - run: yarn --frozen-lockfile
       - build_push_release:
-          dockerfilePath: packages/simple-hub/docker/simple-hub.dockerfile
+          dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
           pipeline: simple-hub
           app: simple-hub-staging
    
@@ -368,7 +368,7 @@ jobs:
       - <<: *restore_lib
       - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
       - build_push_release:
-          dockerfilePath: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
+          dockerfile_path: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
           app: persistent-seeder-production
           
