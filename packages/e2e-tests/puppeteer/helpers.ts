@@ -3,7 +3,7 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {USE_DAPPETEER, TARGET_NETWORK} from './constants';
+import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT} from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
@@ -216,7 +216,9 @@ export async function waitForBudgetEntry(page: Page): Promise<void> {
 
 export async function waitForEmptyBudget(page: Page): Promise<void> {
   // eslint-disable-next-line no-undef
-  await page.waitForFunction(() => !document.querySelector('.site-budget-table'));
+  await page.waitForFunction(() => !document.querySelector('.site-budget-table'), {
+    timeout: TX_WAIT_TIMEOUT
+  }); // wait for my tx, which could be slow if on a real blockchain);
 }
 
 export async function waitAndApproveBudget(page: Page): Promise<void> {
@@ -247,7 +249,7 @@ export async function waitAndApproveDepositWithHub(
 ): Promise<void> {
   console.log('Making deposit with hub');
   const walletIFrame = page.frames()[1];
-  await walletIFrame.waitForSelector('#please-approve-transaction', {timeout: 60000}); // longer timeout here because blockchain is slow
+  await walletIFrame.waitForSelector('#please-approve-transaction', {timeout: TX_WAIT_TIMEOUT}); // longer timeout here because blockchain is slow
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
 }
