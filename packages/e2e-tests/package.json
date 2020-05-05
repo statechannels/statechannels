@@ -44,7 +44,7 @@
     "precommit": "lint-staged --quiet",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
-    "test": "jest",
+    "test": "jest --bail --runInBand",
     "test:show": "HEADLESS=false yarn run test"
   }
 }
