@@ -105,13 +105,23 @@ commands:
       - run:
           command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
 
+  start_servers:
+    description: 'Starting servers'
+    parameters:
+      app:
+        type: string
+    steps:
+      - run:
+          command: yarn start-servers << parameters.app >>
+          background: true
+
   run_xvfb:
     description: 'Run display server'
     steps:
       - run:
           command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
           background: true
-  
+
   build_push_release:
     description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
     parameters:
@@ -134,7 +144,6 @@ commands:
           registry: registry.heroku.com
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
-
 
 jobs:
   prepare:
@@ -228,7 +237,9 @@ jobs:
           file: integration-test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn test:e2e:rps)
+      - start_servers:
+          app: rps
+      - run: (cd packages/e2e-tests && yarn test rps)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
@@ -239,6 +250,8 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
+    environment:
+      SC_ENV: circle-integration-w3t
     steps:
       - install_xvfb
       - run_xvfb
@@ -247,7 +260,9 @@ jobs:
           file: integration-test-web3torrent-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn test:e2e:w3t)
+      - start_servers:
+          app: web3torrent
+      - run: (cd packages/e2e-tests && yarn test web3torrent)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -270,6 +285,8 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
+    environment:
+      SC_ENV: circle-integration-w3t-with-hub
     steps:
       - install_xvfb
       - run_xvfb
@@ -278,7 +295,9 @@ jobs:
           file: integration-test-web3torrent-with-hub-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn test:e2e:w3t-with-hub)
+      - start_servers:
+          app: web3torrent
+      - run: (cd packages/e2e-tests && yarn test web3torrent)
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
@@ -355,7 +374,7 @@ jobs:
           dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
           pipeline: simple-hub
           app: simple-hub-staging
-   
+
   deploy-persistent-seeder:
     working_directory: /home/circleci/project
     resource_class: large
@@ -371,7 +390,7 @@ jobs:
           dockerfile_path: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
           app: persistent-seeder-production
-          
+
   e2e-test-w3t-production:
     resource_class: large
     working_directory: /home/circleci/project
@@ -444,7 +463,7 @@ workflows:
           filters:
             branches:
               only: deploy
-              
+
       - deploy-persistent-seeder:
           filters:
             branches:
