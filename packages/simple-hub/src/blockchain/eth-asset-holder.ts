@@ -45,9 +45,8 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     }
 
     log.info(
-      `submitting deposit transaction to eth asset holder with value: ${value
-        .sub(expectedHeld)
-        .toHexString()}`
+      {value: value.sub(expectedHeld).toHexString()},
+      'submitting deposit transaction to eth asset holder'
     );
     const tx = await ethAssetHolder.deposit(channelID, expectedHeld.toHexString(), value, {
       value: value.sub(expectedHeld)
