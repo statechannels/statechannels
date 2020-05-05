@@ -111,6 +111,30 @@ commands:
       - run:
           command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
           background: true
+  
+  build_push_release:
+    description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
+    parameters:
+      dockerfilePath:
+        type: string
+      pipeline:
+        type: string
+      app:
+        type: string
+    steps:
+      - run: curl https://cli-assets.heroku.com/install.sh | sh
+      - run: heroku container:login
+      - docker/build:
+          cache_from: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>:latest
+          dockerfile: << parameters.dockerfilePath >>
+          image: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>
+          tag: latest
+      - docker/push:
+          image: << parameters.app >>/<< parameters.pipeline >>
+          registry: registry.heroku.com
+          tag: latest
+      - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
+
 
 jobs:
   prepare:
@@ -335,7 +359,7 @@ jobs:
           registry: registry.heroku.com
           tag: latest
       - run: heroku container:release -a simple-hub-staging simple-hub
-      
+   
   deploy-persistent-seeder:
     working_directory: /home/circleci/project
     resource_class: large
@@ -348,18 +372,10 @@ jobs:
       - <<: *restore_lib
       - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
       - run: yarn --frozen-lockfile
-      - run: curl https://cli-assets.heroku.com/install.sh | sh
-      - run: heroku container:login
-      - docker/build:
-          cache_from: registry.heroku.com/persistent-seeder-production/persistent-seeder:latest
-          dockerfile: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
-          image: registry.heroku.com/persistent-seeder-production/persistent-seeder
-          tag: latest
-      - docker/push:
-          image: persistent-seeder-production/persistent-seeder
-          registry: registry.heroku.com
-          tag: latest
-      - run: heroku container:release -a persistent-seeder-production persistent-seeder
+      - build_push_release:
+          dockerfilePath: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
+          pipeline: persistent-seeder
+          app: persistent-seeder-production
       
   push-master-to-deploy:
     working_directory: /home/circleci/project
