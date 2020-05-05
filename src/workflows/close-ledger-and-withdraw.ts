@@ -194,7 +194,7 @@ const submitWithdrawTransaction = (store: Store) => async context => {
   if (!ledgerEntry.isFinalized) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
-  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
+  return store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
 const createObjective = (store: Store) => async context => {

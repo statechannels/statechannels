@@ -301,9 +301,9 @@ export class ChainWatcher implements Chain {
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
     };
+
     const response = await signer.sendTransaction(transactionRequest);
-    const transaction = await response.wait();
-    return transaction.transactionHash;
+    return response.hash;
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
@@ -335,8 +335,7 @@ export class ChainWatcher implements Chain {
       value: amount
     };
     const response = await signer.sendTransaction(transactionRequest);
-    const transaction = await response.wait();
-    return transaction.transactionHash;
+    return response.hash;
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {

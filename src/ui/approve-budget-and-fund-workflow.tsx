@@ -91,8 +91,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Text pb={2}>Waiting for your transaction to be mined.</Text>
 
       <Text>
-        Click <Link href={`https://etherscan.io/tx/${transactionId}`}>here</Link> to follow the
-        progress on etherscan.
+        Click{' '}
+        <Link target="_blank" href={`https://ropsten.etherscan.io/tx/${transactionId}`}>
+          here
+        </Link>{' '}
+        to follow the progress on etherscan.
       </Text>
     </Flex>
   );
