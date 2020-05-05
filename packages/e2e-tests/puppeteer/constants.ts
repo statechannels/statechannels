@@ -8,3 +8,4 @@ export const TARGET_NETWORK = process.env.TARGET_NETWORK ? process.env.TARGET_NE
 export const WEB3TORRENT_URL = process.env.WEB3TORRENT_URL
   ? process.env.WEB3TORRENT_URL
   : 'http://localhost:3000';
+export const TX_WAIT_TIMEOUT = process.env.TARGET_NETWORK === 'ropsten' ? 90000 : 30000;
