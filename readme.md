@@ -107,25 +107,20 @@ blockchain when running and testing locally.
 
 #### Running locally
 
-When running locally, it's often important to have the packages pointing to the same contracts
-on the same local blockchain.
+Run
 
-When started via `yarn start` the `rps`, `wallet`, and `hub` packages will:
+```
+SC_ENV=virtual-funding yarn start-servers $APP
+```
 
-1. Check for a "shared ganache" instance running at the `SHARED_GANACHE_PORT`, as defined
-   in their `.env` file. (This is currently set the same for all packages.) This shared
-   ganache instance can be started by running `yarn start:shared-ganache` from any of the
-   packages.
-2. If the shared ganache instance is found, they will deploy contracts to this instance, and
-   make the addresses available in the application via `process.ENV`. Details of the deployed
-   contract will also be stored in the `monorepo/ganache-deployments.json` file, so that
-   if another project attempts to deploy another contract with the same args and bytecode,
-   the address of the existing contract will be returned instead.
-3. If no shared ganache instance is found, the package will start their own ganache instance,
-   which won't be shared with any other package.
+where `APP` is either `web3torrent` or `rps`.
+This will start a ganache instance on port 8545, and subsequently start servers for
 
-TL;DR: to share deployed contracts between packages in development, you **must start a shared
-ganache server** with `yarn start:shared-ganache`.
+- the wallet
+- the app
+- the simple-hub (used for virtual-funding)
+
+These servers use a common set of contracts deployed against the shared ganache instance.
 
 ## Community
 
