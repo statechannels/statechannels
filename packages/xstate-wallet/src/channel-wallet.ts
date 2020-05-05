@@ -47,7 +47,7 @@ export class ChannelWallet {
 
       // TODO: Currently receiving a duplicate JOIN_CHANNEL event
       if (this.isWorkflowIdInUse(this.calculateWorkflowId(objective))) {
-        console.warn(
+        logger.warn(
           `There is already a workflow running with id ${this.calculateWorkflowId(
             objective
           )}, no new workflow will be spawned`

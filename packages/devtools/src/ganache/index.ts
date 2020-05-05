@@ -59,7 +59,7 @@ async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> 
 }
 
 export const setupGanache = async (
-  deployerAccountIndex: number
+  deployerAccountIndex: number | string
 ): Promise<SharedReturnType | IndividualReturnType> => {
   const useShared = process.env.USE_GANACHE_DEPLOYMENT_CACHE === 'true';
   const port = Number(process.env.GANACHE_PORT || 8545);
@@ -108,6 +108,14 @@ export const setupGanache = async (
       throw Error(`Deployments cache doesn't exist`);
     }
     say(`Using the deployments cache at ${deploymentsFile}.`);
+
+    deployerAccountIndex = Number(deployerAccountIndex);
+    if (!Number.isFinite(deployerAccountIndex))
+      throw new Error(`Invalid deployerAccountIndex ${deployerAccountIndex}`);
+    if (deployerAccountIndex < 0 || deployerAccountIndex >= ETHERLIME_ACCOUNTS.length)
+      throw new Error(
+        `deployerAccountIndex ${deployerAccountIndex} out of range [0,${ETHERLIME_ACCOUNTS.length}]`
+      );
 
     const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
 

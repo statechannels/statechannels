@@ -4,7 +4,7 @@ set -u
 
 APP=$1
 
-WAIT_ON_TIMEOUT=60000
+WAIT_ON_TIMEOUT=120000
 WAIT_ON_INTERVAL=5000
 WAIT_ON_DELAY=5000
 
@@ -35,7 +35,7 @@ cleanup() {
 
 jestExit() {
   trap '' INT TERM EXIT
-  if [[ -z exit_status ]]
+  if [[ -z $exit_status ]]
   then
     echo "No exit status. Exiting with status 1"
     exit 1

@@ -2,17 +2,26 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
-import {JEST_TIMEOUT, HEADLESS, USES_VIRTUAL_FUNDING, USE_DAPPETEER} from '../../constants';
+
+// importing from '../../constants' will also run devtools configureEnvVariables
+import {
+  JEST_TIMEOUT,
+  HEADLESS,
+  USES_VIRTUAL_FUNDING,
+  USE_DAPPETEER,
+  WEB3TORRENT_URL
+} from '../../constants';
 
 import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForClosingChannel,
   waitForNthState,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
-  setupFakeWeb3
+  setupFakeWeb3,
+  waitForWalletToBeHidden,
+  waitForClosedState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -30,7 +39,6 @@ let tabs: [Page, Page];
 
 describe('Web3-Torrent Integration Tests', () => {
   beforeAll(async () => {
-    // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browsers');
 
     const setupAPromise = setUpBrowser(HEADLESS, 4, 0);
@@ -50,7 +58,7 @@ describe('Web3-Torrent Integration Tests', () => {
     if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
     if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, 0);
 
-    await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
 
     await web3tTabA.bringToFront();
   });
@@ -60,7 +68,6 @@ describe('Web3-Torrent Integration Tests', () => {
       [browserA, browserB].map(async browser => browser && (await browser.close()))
     );
   });
-
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
     const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
@@ -83,16 +90,23 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
 
-    console.log('Waiting for channels to close');
-    await Promise.all(tabs.map(waitForClosingChannel));
+    // TODO: Verify withdrawal for direct funding once it's implemented
+    // see https://github.com/statechannels/monorepo/issues/1546
 
+    // Ensure the wallet is not visible
+    await Promise.all(tabs.map(tab => waitForWalletToBeHidden(tab)));
+    // Wait for the close state channel update
+    // TODO: It looks like direct funding is not properly sending a closed state
+    // see https://github.com/statechannels/monorepo/issues/1649
+    if (USES_VIRTUAL_FUNDING) {
+      await Promise.all(tabs.map(tab => waitForClosedState(tab)));
+    }
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await Promise.all([web3tTabA, web3tTabB].map(tab => tab.waitFor(1500)));
-
+    await Promise.all(tabs.map(tab => tab.waitFor(1500)));
     console.log('Checking exchanged amount between downloader and uploader...');
-    const earnedColumn = await web3tTabA.$('td.earned');
+    const earnedColumn = await web3tTabA.waitForSelector('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
-    const paidColumn = await web3tTabB.$('td.paid');
+    const paidColumn = await web3tTabB.waitForSelector('td.paid');
     const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
     expect(paid).toEqual(`-${earned}`);
   });

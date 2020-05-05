@@ -1,6 +1,7 @@
 import {MessagingService} from '../src/messaging-service';
 import {JsonRpcRequest, JsonRpcResponse} from '../src/types';
 import {UIService} from '../src/ui-service';
+import {logger} from '../src/logger';
 
 type MessageResponse = {isFooBar: boolean};
 
@@ -72,7 +73,7 @@ describe('MessagingService', () => {
     target.onmessage = () => ({});
 
     const sendSpy = jest.spyOn(messagingService, 'send');
-    const warnSpy = jest.spyOn(console, 'warn');
+    const warnSpy = jest.spyOn(logger, 'warn');
 
     jest.useFakeTimers();
     messagingService.send(target, request, '*');
@@ -82,7 +83,7 @@ describe('MessagingService', () => {
 
     jest.useRealTimers();
 
-    expect(warnSpy).toHaveBeenCalledWith('Request timed out after 5 attempts', request);
+    expect(warnSpy).toHaveBeenCalledWith({message: request}, 'Request timed out after 5 attempts');
   });
 
   it('should request and respond', async () => {
