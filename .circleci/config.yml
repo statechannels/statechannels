@@ -227,6 +227,8 @@ jobs:
     working_directory: /home/circleci/project
     docker:
       - image: circleci/node:10.16.3-browsers
+    environment:
+      SC_ENV: circle-integration-rps
     steps:
       - install_xvfb
       - run_xvfb
