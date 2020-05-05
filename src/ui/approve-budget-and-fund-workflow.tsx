@@ -18,11 +18,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
   const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
     <Flex alignItems="left" flexDirection="column">
-      <Heading textAlign="center" mb={0}>
+      <Heading textAlign="center" mb={2}>
         App Budget
-      </Heading>
-      <Heading textAlign="center" as="h4" mt={0} mb={2}>
-        {budget.domain}
       </Heading>
 
       <Text fontSize={1} pb={2}>
