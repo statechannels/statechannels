@@ -5,6 +5,7 @@ import {cHubChainPK} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
 import {TransactionResponse} from 'ethers/providers';
+import _ from 'lodash';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -32,41 +33,39 @@ export async function makeDeposits(
   log.info(`makeDepost: making ${depositsToMake.length} deposits`);
 }
 
-async function fund(channelID: string, value: BigNumber): Promise<string> {
+async function fund(channelID: string, targetValue: BigNumber): Promise<string> {
   // We lock to avoid this issue: https://github.com/ethers-io/ethers.js/issues/363
   // When ethers.js attempts to run multiple transactions around the same time it results in an error
   // due to the nonce getting out of sync.
   // To avoid this we only allow deposit transactions to happen serially.
   return lock.acquire('depositing', async release => {
-    if (!ethAssetHolder) ethAssetHolder = await createEthAssetHolder();
+    try {
+      if (!ethAssetHolder) ethAssetHolder = await createEthAssetHolder();
 
-    const expectedHeld: BigNumber = await ethAssetHolder.holdings(channelID);
-    if (expectedHeld.gte(value)) {
-      release();
-      return;
-    }
-
-    log.info(
-      {value: value.sub(expectedHeld).toHexString()},
-      'submitting deposit transaction to eth asset holder'
-    );
-    const tx: TransactionResponse = await ethAssetHolder.deposit(
-      channelID,
-      expectedHeld.toHexString(),
-      value,
-      {
-        value: value.sub(expectedHeld)
+      const expectedHeld: BigNumber = await ethAssetHolder.holdings(channelID);
+      if (expectedHeld.gte(targetValue)) {
+        return;
       }
-    );
-    log.info(
-      {transaction: {hash: tx.hash, nonce: tx.nonce, from: tx.from}},
-      'waiting for tx to be mined'
-    );
-    await tx.wait();
 
-    const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
-    release();
-    return holdings;
+      const value = targetValue.sub(expectedHeld).toHexString();
+
+      log.info({value}, 'submitting deposit transaction to eth asset holder');
+      const tx: TransactionResponse = await ethAssetHolder.deposit(
+        channelID,
+        expectedHeld.toHexString(),
+        value,
+        {value}
+      );
+      log.info({transaction: _.pick(tx, 'nonce', 'hash', 'from')}, 'waiting for tx to be mined');
+      await tx.wait();
+
+      const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
+      return holdings;
+    } catch (error) {
+      log.error({error}, 'Deposit failed');
+    } finally {
+      release();
+    }
   });
 }
 
