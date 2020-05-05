@@ -1,4 +1,4 @@
-import {joinSignature} from 'ethers/utils';
+import {joinSignature, hexZeroPad} from 'ethers/utils';
 import {
   SignedState as SignedStateWire,
   Message as WireMessage,
@@ -18,6 +18,10 @@ import {
 } from '@statechannels/nitro-protocol';
 import {ethers, BigNumber} from 'ethers';
 import {log} from '../../logger';
+
+function bnToPaddedHexString(bn: BigNumber, padding = 32): string {
+  return hexZeroPad(bn.toHexString(), padding);
+}
 
 interface AllocationItem {
   destination: string;
@@ -201,15 +205,15 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire
 
 function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
   const {destination, amount} = allocationItem;
-  return {destination, amount: amount.toHexString()};
+  return {destination, amount: bnToPaddedHexString(amount)};
 }
 
 function serializeState(state: SignedState): SignedStateWire {
   return {
     ...state,
-    challengeDuration: state.challengeDuration.toHexString(),
-    channelNonce: state.channelNonce.toHexString(),
-    turnNum: state.turnNum.toHexString(),
+    challengeDuration: bnToPaddedHexString(state.challengeDuration),
+    channelNonce: bnToPaddedHexString(state.channelNonce),
+    turnNum: bnToPaddedHexString(state.turnNum),
     outcome: serializeOutcome(state.outcome),
     channelId: calculateChannelId(state)
   };
