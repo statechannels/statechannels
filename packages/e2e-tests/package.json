@@ -44,7 +44,6 @@
     "precommit": "lint-staged --quiet",
     "puppeteer:dev:rps": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/rps.ts",
     "puppeteer:dev:web3torrent": "ts-node -O '{\"module\":\"commonjs\",\"noUnusedLocals\":false}' ./puppeteer/scripts/web3torrent.ts",
-    "start-servers": "./bin/start-servers.sh",
     "test": "jest",
     "test:e2e": "./bin/run-e2e.sh",
     "test:e2e:rps": "SC_ENV=circle-integration-rps yarn test:e2e rps",
