@@ -7,15 +7,20 @@ import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 import {
   setUpBrowser,
   waitAndOpenChannel,
-  waitForClosingChannel,
   setupLogging,
   setupFakeWeb3,
-  waitForNthState
+  waitForNthState,
+  waitForClosedState
 } from '../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
+import {
+  uploadFile,
+  prepareStubUploadFile,
+  startDownload,
+  cancelDownload
+} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER} from '../constants';
+import {USE_DAPPETEER, CLOSE_BROWSERS} from '../constants';
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -46,7 +51,7 @@ describe('One file, two seeders, one leecher', () => {
   }>;
   const tabs: Data<Page> = {} as Data<Page>;
   afterAll(async () => {
-    if (HEADLESS) {
+    if (CLOSE_BROWSERS) {
       await forEach(browsers, async ({browser}) => browser && (await browser.close()));
     }
   });
@@ -56,7 +61,6 @@ describe('One file, two seeders, one leecher', () => {
 
     console.log('Opening browsers');
     await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 0));
-    console.error(typeof browsers.A.metamask);
 
     console.log('Waiting on pages');
     await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
@@ -69,6 +73,10 @@ describe('One file, two seeders, one leecher', () => {
       !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
     });
 
+    console.log('Preparing stub file');
+    const filePath = '/tmp/web3t-stub';
+    prepareStubUploadFile(filePath, 10000000);
+
     console.log('A, B upload the same file');
     const [file] = await Promise.all(
       [Label.A, Label.B].map(async label => {
@@ -78,7 +86,7 @@ describe('One file, two seeders, one leecher', () => {
         await tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
         console.log('Uploading file');
 
-        return await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask);
+        return await uploadFile(tab, USES_VIRTUAL_FUNDING, metamask, filePath);
       })
     );
 
@@ -88,15 +96,14 @@ describe('One file, two seeders, one leecher', () => {
     console.log('Waiting for open channels');
     await forEach(tabs, waitAndOpenChannel(USES_VIRTUAL_FUNDING));
 
-    // Let the download continue for some time
     console.log('Downloading');
-    await waitForNthState(tabs.C, 10);
+    await forEach(tabs, tab => waitForNthState(tab, 10));
 
     console.log('C cancels download');
     await cancelDownload(tabs.C);
 
     console.log('Waiting for channels to close');
-    await forEach(tabs, waitForClosingChannel);
+    await forEach(tabs, waitForClosedState);
   });
 });
 
