@@ -442,10 +442,9 @@ Possible response to a `Channel Proposed` event.
 
 ### Errors
 
-| Code | Message            | Meaning                                                                               |
-| ---- | ------------------ | ------------------------------------------------------------------------------------- |
-|      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |                            |
-
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |  |
 
 ## Close Channel
 
@@ -624,11 +623,26 @@ App should respond by either calling `JoinChannel`, or TODO.
 
 ## Channel Updated
 
-Triggered when a channel update occurs by any means, including:
+Triggered when any of the following occurs:
 
-- Messages received from another participant
-- Changes to the state of the blockchain (e.g funding or challenges)
-- Changes triggered by the current app via `updateState` etc.
+- A state is received via `updateChannel`
+- A state is received from another participant via `pushMessage`
+- Changes to the state of the blockchain are detected (e.g funding or challenges)
+
+In the first two cases, this notification is only triggered when the wallet verifies that the state causes the 'top state' to change.
+
+The 'top state' is the state drawn from the set of **supported** states that has the highest turn number.
+
+(We have glossed over / left undefined what happens in the case where there is more than one top state).
+
+In particular, this means that
+
+- incorrectly formatted
+- incorrectly signed
+- otherwise unsupported
+- out-of-date
+
+states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification.
 
 ```json
 {
