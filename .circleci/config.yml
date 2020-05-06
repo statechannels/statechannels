@@ -378,7 +378,7 @@ jobs:
           app: simple-hub-production
       - slack/status:
           # notify-deployments
-          channel: 0125NB072B
+          channel: C0125NB072B
           failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
           success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
 
