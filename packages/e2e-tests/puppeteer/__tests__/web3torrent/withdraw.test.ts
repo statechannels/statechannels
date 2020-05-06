@@ -14,7 +14,7 @@ import {
   USES_VIRTUAL_FUNDING,
   HEADLESS,
   USE_DAPPETEER,
-  WEB3TORRENT_URL
+  APP_URL as WEB3TORRENT_URL
 } from '../../constants';
 import {Browser, Page} from 'puppeteer';
 import {uploadFile} from '../../scripts/web3torrent';
