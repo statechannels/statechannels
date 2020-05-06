@@ -1,6 +1,6 @@
 import {setUpBrowser, setupLogging} from '../helpers';
 import {uploadFile} from './web3torrent';
-import {WEB3TORRENT_URL} from '../constants';
+import {APP_URL as WEB3TORRENT_URL} from '../constants';
 
 export async function persistentSeeder(): Promise<void> {
   console.log('Opening browser');
