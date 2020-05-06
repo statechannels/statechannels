@@ -44,7 +44,6 @@ export default class GamesIndexController extends Controller {
     } as ChallengeModel;
 
     const newGame = this.store.createRecord('challenge', myPublicOpenGame);
-    await newGame.save();
 
     this.currentGame.setGame(newGame);
     this.currentGame.setPlayer(Player.B);
