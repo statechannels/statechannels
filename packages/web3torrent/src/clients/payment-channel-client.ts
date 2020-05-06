@@ -325,7 +325,6 @@ export class PaymentChannelClient {
   }
 
   async createBudget(amount: string) {
-    await this.enable();
     const playerDestinationAddress = this.channelClient.selectedAddress;
     this.budgetCache = await this.channelClient.approveBudgetAndFund(
       amount,
