@@ -16,6 +16,15 @@ import Dexie, {Transaction, TransactionMode} from 'dexie';
 import {unreachable} from '../utils';
 import {logger} from '../logger';
 
+const STORES: ObjectStores[] = [
+  ObjectStores.budgets,
+  ObjectStores.channels,
+  ObjectStores.ledgers,
+  ObjectStores.nonces,
+  ObjectStores.objectives,
+  ObjectStores.privateKeys
+];
+
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class Backend implements DBBackend {
   private _db: Dexie;
@@ -32,28 +41,20 @@ export class Backend implements DBBackend {
    */
   public async initialize(cleanSlate = false, databaseName = 'xstateWallet') {
     const createdDB = await this.create(databaseName);
-    if (cleanSlate) {
-      await Promise.all([
-        this.clear(ObjectStores.channels),
-        this.clear(ObjectStores.objectives),
-        this.clear(ObjectStores.nonces),
-        this.clear(ObjectStores.privateKeys),
-        this.clear(ObjectStores.ledgers),
-        this.clear(ObjectStores.budgets)
-      ]);
-    }
+
+    if (cleanSlate) await Promise.all(STORES.map(this.clear.bind(this)));
+
     return createdDB;
   }
 
   private async create(databaseName: string) {
     this._db = new Dexie(databaseName, {indexedDB});
-    this._db.version(1).stores({
-      [ObjectStores.channels]: '',
-      [ObjectStores.nonces]: '',
-      [ObjectStores.privateKeys]: '',
-      [ObjectStores.ledgers]: '',
-      [ObjectStores.budgets]: ''
-    });
+    this._db.version(1).stores(
+      _.reduce(
+        STORES.map(s => ({[s]: ''})),
+        _.merge
+      )
+    );
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
@@ -176,9 +177,12 @@ export class Backend implements DBBackend {
         return unreachable(mode);
     }
 
-    const dexieStores = stores.map((store: S) => this._db[store as string]);
-
-    return this._db.transaction(dexieMode, dexieStores, cb);
+    try {
+      return await this._db.transaction(dexieMode, stores, cb);
+    } catch (error) {
+      logger.error({error: error.message ?? error, store: await this.dump()}, 'Transaction error');
+      throw error;
+    }
   }
 
   // Private Internal Methods
@@ -229,5 +233,14 @@ export class Backend implements DBBackend {
    */
   private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
     return this._db[storeName].delete(key);
+  }
+
+  private async dump() {
+    return this._db.transaction('r!', STORES, async () =>
+      _.reduce(
+        await Promise.all(STORES.map(store => ({[store]: this._db.table(store).toArray()}))),
+        _.merge
+      )
+    );
   }
 }
