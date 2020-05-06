@@ -2523,7 +2523,7 @@
     "@ethersproject/properties" ">=5.0.0-beta.131"
     "@ethersproject/transactions" ">=5.0.0-beta.128"
 
-"@ethersproject/experimental@^5.0.0-beta.140":
+"@ethersproject/experimental@5.0.0-beta.140":
   version "5.0.0-beta.140"
   resolved "https://registry.npmjs.org/@ethersproject/experimental/-/experimental-5.0.0-beta.140.tgz#727cc77634b0a6f66260b0580a27ce46d0e84e0a"
   integrity sha512-a03L0kQi0sAMNRplrI3siQM8Uf20NROKHMTYTlGWMUDzzEc3JGaJ2/CLksdlahNYZXpHoGsBejtELaFMOEgSfA==

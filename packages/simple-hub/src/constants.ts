@@ -1,5 +1,4 @@
-import {ethers} from 'ethers';
-import {hexZeroPad} from 'ethers/utils';
+import {ethers, utils} from 'ethers';
 
 export const cFirebasePrefix = process.env.FIREBASE_PREFIX || 'default-prefix';
 
@@ -13,7 +12,7 @@ export const cHubChannelSigningAddress = new ethers.Wallet(cHubChannelPK).addres
 export const cHubChainPK =
   process.env.HUB_CHAIN_PK || '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8';
 
-export const cHubChainDestination = hexZeroPad(new ethers.Wallet(cHubChannelPK).address, 32);
+export const cHubChainDestination = utils.hexZeroPad(new ethers.Wallet(cHubChannelPK).address, 32);
 
 export const cHubParticipantId = process.env.HUB_PARTICIPANT_ID || 'firebase:simple-hub';
 

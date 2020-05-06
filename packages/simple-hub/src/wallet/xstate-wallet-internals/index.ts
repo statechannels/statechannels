@@ -1,4 +1,4 @@
-import {joinSignature, hexZeroPad} from 'ethers/utils';
+import {utils, BigNumber} from 'ethers';
 import {
   SignedState as SignedStateWire,
   Message as WireMessage,
@@ -16,11 +16,11 @@ import {
   Outcome as NitroOutcome,
   State as NitroState
 } from '@statechannels/nitro-protocol';
-import {ethers, BigNumber} from 'ethers';
+
 import {log} from '../../logger';
 
 function bnToPaddedHexString(bn: BigNumber, padding = 32): string {
-  return hexZeroPad(bn.toHexString(), padding);
+  return utils.hexZeroPad(bn.toHexString(), padding);
 }
 
 interface AllocationItem {
@@ -304,7 +304,7 @@ function toNitroState(state: State): NitroState {
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return joinSignature(signature);
+  return utils.joinSignature(signature);
 }
 
 export const firstState = (
@@ -325,7 +325,7 @@ export const firstState = (
 
 export function makeDestination(addressOrDestination: string): string {
   if (addressOrDestination.length === 42) {
-    return ethers.utils.hexZeroPad(ethers.utils.getAddress(addressOrDestination), 32);
+    return utils.hexZeroPad(utils.getAddress(addressOrDestination), 32);
   } else if (addressOrDestination.length === 66) {
     return addressOrDestination;
   } else {

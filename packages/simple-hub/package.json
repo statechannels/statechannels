@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "author": "",
   "dependencies": {
-    "@ethersproject/experimental": "^5.0.0-beta.140",
+    "@ethersproject/experimental": "5.0.0-beta.140",
     "@firebase/app": "0.5.2",
     "@firebase/database": "0.5.19",
     "@sentry/node": "5.13.2",
