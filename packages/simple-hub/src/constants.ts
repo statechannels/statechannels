@@ -15,7 +15,7 @@ if (!process.env.HUB_CHAIN_PK) {
 }
 export const cHubChainPK = process.env.HUB_CHAIN_PK;
 
-export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChannelPK).address, 32);
+export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChainPK).address, 32);
 
 export const cHubParticipantId = process.env.HUB_PARTICIPANT_ID || 'firebase:simple-hub';
 
