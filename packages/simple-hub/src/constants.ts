@@ -13,8 +13,7 @@ export const cHubChannelSigningAddress = new Wallet(cHubChannelPK).address;
 if (!process.env.HUB_CHAIN_PK) {
   throw new Error('HUB_CHAIN_PK environment variable must be defined');
 }
-export const cHubChainPK =
-  process.env.HUB_CHAIN_PK || '0x187bb12e927c1652377405f81d93ce948a593f7d66cfba383ee761858b05921a';
+export const cHubChainPK = process.env.HUB_CHAIN_PK;
 
 export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChannelPK).address, 32);
 
