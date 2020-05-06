@@ -3,7 +3,7 @@ set -e
 set -u
 
 APP=$1
-MONOREPO_ROOT=$(cd ../../ && pwd)
+MONOREPO_ROOT=$(pwd)
 PACKAGES=$MONOREPO_ROOT/packages
 E2E_ROOT=$PACKAGES/e2e-tests
 PORT=8545

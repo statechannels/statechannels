@@ -5,13 +5,15 @@
   "devDependencies": {
     "@statechannels/devtools": "0.1.23",
     "@types/prettier": "1.19.0",
+    "@types/wait-on": "4.0.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
     "netlify-cli": "2.30.0",
     "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.5"
+    "typescript": "3.7.5",
+    "wait-on": "4.0.0"
   },
   "engines": {
     "yarn": "^1.17.0",
@@ -50,6 +52,7 @@
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
     "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod",
     "run:w3t": "lerna run start --scope=**/web3torrent",
+    "start-servers": "./bin/start-servers.sh",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "lerna run test --stream --concurrency 8",
     "test:ci": "lerna run test:ci --stream --no-sort --include-dependents",

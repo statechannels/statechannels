@@ -4,5 +4,6 @@ module.exports = {
   testMatch: ['<rootDir>/puppeteer/**/?(*.)test.ts?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
-  }
+  },
+  globalSetup: '<rootDir>/jest.setup.ts'
 };
