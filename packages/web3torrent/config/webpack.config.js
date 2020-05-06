@@ -309,13 +309,7 @@ module.exports = function(webpackEnv) {
         // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
         // please link the files into your node_modules/ and let module-resolution kick in.
         // Make sure your source files are compiled, as they will not be processed in any way.
-        new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
-        gitRevisionPlugin,
-        new webpack.DefinePlugin({
-          VERSION: JSON.stringify(gitRevisionPlugin.version()),
-          COMMITHASH: JSON.stringify(gitRevisionPlugin.commithash()),
-          BRANCH: JSON.stringify(gitRevisionPlugin.branch())
-        })
+        new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])
       ]
     },
     resolveLoader: {
@@ -506,6 +500,8 @@ module.exports = function(webpackEnv) {
       ]
     },
     plugins: [
+      gitRevisionPlugin,
+
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(
@@ -554,7 +550,12 @@ module.exports = function(webpackEnv) {
       // It is absolutely essential that NODE_ENV is set to production
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
-      new webpack.DefinePlugin(stringifiedEnv),
+      new webpack.DefinePlugin({
+        ...stringifiedEnv,
+        VERSION: JSON.stringify(gitRevisionPlugin.version()),
+        COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+        BRANCH: JSON.stringify(gitRevisionPlugin.branch())
+      }),
       // This is necessary to emit hot updates (currently CSS only):
       isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
       // Watcher doesn't work well if you mistype casing in a path so we use
