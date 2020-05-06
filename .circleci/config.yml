@@ -94,7 +94,7 @@ commands:
     description: 'Notify slack '
     steps:
       - slack/status:
-          failure_message: 'A $CIRCLE_JOB job has failed on "${CIRCLE_BRANCH}"!'
+          failure_message: 'A $CIRCLE_JOB job has failed on $CIRCLE_BRANCH!'
           fail_only: true
           mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
           only_for_branches: 'master'
