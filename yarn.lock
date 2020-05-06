@@ -6902,6 +6902,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/git-revision-webpack-plugin@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/@types/git-revision-webpack-plugin/-/git-revision-webpack-plugin-3.0.0.tgz#3eea6f68ff9dfa82fc1040bf70f67096181e30d4"
+  integrity sha512-WpeHN/O78FZpZaFbG8Yexaa8jI3ZibK1DAAZbPz3fWwbYj6d+FXbcQ/luXNBJIZZ6pQyhGJQaDh1K2kFZU3izA==
+  dependencies:
+    "@types/webpack" "*"
+
 "@types/glob@*", "@types/glob@^7.1.1":
   version "7.1.1"
   resolved "https://registry.npmjs.org/@types/glob/-/glob-7.1.1.tgz#aa59a1c6e3fbc421e07ccd31a944c30eba521575"
@@ -19065,6 +19072,11 @@ git-repo-version@^1.0.2:
   integrity sha512-OPtwtHx9E8/rTMcWT+BU6GNj6Kq/O40bHJZaZAGy+pN2RXGmeKcfr0ix4M+SQuFY8vl5L/wfPSGOAtvUT/e3Qg==
   dependencies:
     git-repo-info "^1.4.1"
+
+git-revision-webpack-plugin@3.0.6:
+  version "3.0.6"
+  resolved "https://registry.npmjs.org/git-revision-webpack-plugin/-/git-revision-webpack-plugin-3.0.6.tgz#5dd6c6829fae05b405059dea6195b23875d69d4d"
+  integrity sha512-vW/9dBahGbpKPcccy3xKkHgdWoH/cAPPc3lQw+3edl7b4j29JfNGVrja0a1d8ZoRe4nTN8GCPrF9aBErDnzx5Q==
 
 git-semver-tags@^2.0.3:
   version "2.0.3"
