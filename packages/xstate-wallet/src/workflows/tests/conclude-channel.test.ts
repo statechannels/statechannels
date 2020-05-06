@@ -7,12 +7,7 @@ import {machine as concludeChannel} from '../conclude-channel';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 
-import {
-  firstState,
-  calculateChannelId,
-  createSignatureEntry,
-  outcomesEqual
-} from '../../store/state-utils';
+import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 
@@ -243,6 +238,6 @@ it('reaches the same state when running conclude twice for virtual funding', asy
   expect(amountA2).toMatchObject(amountA1);
   expect(amountB2).toMatchObject(amountB1);
 
-  expect(outcomesEqual(entryA1.latestState.outcome, entryA2.latestState.outcome)).toBe(true);
-  expect(outcomesEqual(entryB1.latestState.outcome, entryB2.latestState.outcome)).toBe(true);
+  expect(entryA1).toMatchObject(entryA2);
+  expect(entryB1).toMatchObject(entryB2);
 });
