@@ -93,14 +93,16 @@ let chain: FakeChain;
 
 const runUntilSuccess = async (machine, direct = true) => {
   const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
-  const [aService, bService] = [aStore, bStore].map(runMachine);
-
+  const services = [aStore, bStore].map(runMachine);
   const targetState = direct ? 'success' : {virtualDefunding: 'asLeaf'};
 
-  await waitForExpect(async () => {
-    expect(bService.state.value).toEqual(targetState);
-    expect(aService.state.value).toEqual(targetState);
-  }, EXPECT_TIMEOUT);
+  await Promise.all(
+    services.map(
+      service =>
+        new Promise(resolve =>
+          service.onTransition(state => state.matches(targetState) && resolve())
+        )
+  ));
 };
 
 const createLedgerChannels = async () => {
