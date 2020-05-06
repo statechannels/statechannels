@@ -97,7 +97,7 @@ commands:
           failure_message: 'A $CIRCLE_JOB job has failed on $CIRCLE_BRANCH!'
           fail_only: true
           mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
-          only_for_branches: 'master'
+          only_for_branches: 'master,deploy'
 
   install_xvfb:
     description: 'Install display server' # See https://crbug.com/795759
