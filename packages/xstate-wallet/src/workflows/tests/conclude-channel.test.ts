@@ -191,6 +191,33 @@ it('reaches the same state when running conclude twice for direct funding', asyn
   expect(entryB1).toMatchObject(entryB2);
 });
 
+it('can conclude again when A crashes during the first conclude attempt', async () => {
+  // Let A and B create and fund channel
+  await runUntilSuccess(createChannel);
+
+  // Simulate A crashes before withdrawing
+  const aMachine = interpret(concludeChannel(aStore).withContext(context))
+    .onTransition(state => {
+      if (state.value === 'withdrawing') {
+        aMachine.stop();
+      }
+    })
+    .start();
+
+  const entryA1 = await aStore.getEntry(targetChannelId);
+  expect(entryA1.isFinalized).toBe(false);
+
+  // A starts again
+  await new Promise(resolve =>
+    interpret(concludeChannel(aStore).withContext(context))
+      .start()
+      .onTransition(state => state.matches('success') && resolve())
+  );
+
+  const entryA2 = await aStore.getEntry(targetChannelId);
+  expect(entryA2.isFinalized).toBe(true);
+});
+
 it('reaches the same state when running conclude twice for virtual funding', async () => {
   await createLedgerChannels();
 
