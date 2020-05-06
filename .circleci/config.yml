@@ -469,8 +469,7 @@ workflows:
       - release-hub-production:
           filters:
             branches:
-              # todo: change back before creating a PR
-              only: release-hub-slack #deploy
+              only: deploy
 
       - release-persistent-seeder:
           filters:
