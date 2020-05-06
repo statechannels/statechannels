@@ -8,8 +8,11 @@ export const cHubChannelPK =
 // '0xaaaa84838319627Fa056fC3FC29ab94d479B8502'
 export const cHubChannelSigningAddress = new Wallet(cHubChannelPK).address;
 
-// This account is provided eth in @statechannels/devtools/utils/startGanache.js
+// This account is provided eth in @statechannels/devtools/src/constants.ts
 // The corresponding address is 0x8199de05654e9afa5C081BcE38F140082C9a7733
+if (!process.env.HUB_CHAIN_PK) {
+  throw new Error('HUB_CHAIN_PK environment variable must be defined');
+}
 export const cHubChainPK =
   process.env.HUB_CHAIN_PK || '0x187bb12e927c1652377405f81d93ce948a593f7d66cfba383ee761858b05921a';
 

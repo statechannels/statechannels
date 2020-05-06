@@ -1,5 +1,6 @@
 import {AddressZero} from 'ethers/constants';
-import {hexZeroPad, bigNumberify} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
+import {Wallet} from 'ethers';
 import {Destination} from './store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -30,10 +31,11 @@ export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADD
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
-// This account corresponds to 0x187bb12e927c1652377405f81d93ce948a593f7d66cfba383ee761858b05921a
-// That key is provided eth in @statechannels/devtools/utils/startGanache.js
+if (!process.env.HUB_DESTINATION && !process.env.HUB_CHAIN_PK) {
+  throw new Error('HUB_DESTINATION or HUB_CHAIN_PK environment variable must be defined');
+}
 export const HUB_DESTINATION = (process.env.HUB_DESTINATION ||
-  hexZeroPad('0x8199de05654e9afa5c081bce38f140082c9a7733', 32)) as Destination;
+  new Wallet(process.env.HUB_CHAIN_PK as string).address) as Destination;
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 
