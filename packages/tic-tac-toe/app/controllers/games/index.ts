@@ -23,7 +23,7 @@ export default class GamesIndexController extends Controller {
   }
 
   get publicGames(): ChallengeModel[] {
-    return this.model.filterBy('isPublic', true);
+    return this.model.filterBy('isPublic', true).filterBy('isDeleted', false);
   }
 
   @action
