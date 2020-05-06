@@ -1,6 +1,5 @@
 import {AddressZero} from 'ethers/constants';
 import {bigNumberify} from 'ethers/utils';
-import {Wallet} from 'ethers';
 import {Destination} from './store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -31,11 +30,10 @@ export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADD
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
-if (!process.env.HUB_DESTINATION && !process.env.HUB_CHAIN_PK) {
-  throw new Error('HUB_DESTINATION or HUB_CHAIN_PK environment variable must be defined');
+if (!process.env.HUB_DESTINATION) {
+  throw new Error('HUB_DESTINATION environment variable must be defined');
 }
-export const HUB_DESTINATION = (process.env.HUB_DESTINATION ||
-  new Wallet(process.env.HUB_CHAIN_PK as string).address) as Destination;
+export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 
