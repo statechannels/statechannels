@@ -26,7 +26,8 @@ const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const eslint = require('eslint');
-
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const gitRevisionPlugin = new GitRevisionPlugin();
 const postcssNormalize = require('postcss-normalize');
 
 const appPackageJson = require(paths.appPackageJson);
@@ -308,7 +309,13 @@ module.exports = function(webpackEnv) {
         // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
         // please link the files into your node_modules/ and let module-resolution kick in.
         // Make sure your source files are compiled, as they will not be processed in any way.
-        new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])
+        new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+        gitRevisionPlugin,
+        new webpack.DefinePlugin({
+          VERSION: JSON.stringify(gitRevisionPlugin.version()),
+          COMMITHASH: JSON.stringify(gitRevisionPlugin.commithash()),
+          BRANCH: JSON.stringify(gitRevisionPlugin.branch())
+        })
       ]
     },
     resolveLoader: {
