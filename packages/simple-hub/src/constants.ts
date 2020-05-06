@@ -9,6 +9,7 @@ export const cHubChannelPK =
 export const cHubChannelSigningAddress = new Wallet(cHubChannelPK).address;
 
 // This account is provided eth in @statechannels/devtools/utils/startGanache.js
+// The corresponding address is 0x8199de05654e9afa5C081BcE38F140082C9a7733
 export const cHubChainPK =
   process.env.HUB_CHAIN_PK || '0x187bb12e927c1652377405f81d93ce948a593f7d66cfba383ee761858b05921a';
 
