@@ -56,7 +56,6 @@ module.exports = {
       'CLEAR_STORAGE_ON_START',
       'ETH_ASSET_HOLDER_ADDRESS',
       'HUB_ADDRESS',
-      'HUB_CHAIN_PK',
       'HUB_DESTINATION',
       'LOG_DESTINATION',
       'NITRO_ADJUDICATOR_ADDRESS',
