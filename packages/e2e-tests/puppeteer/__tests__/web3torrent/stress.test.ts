@@ -39,15 +39,17 @@ describe('One file, three leechers, one seeder', () => {
   const leechers: Label[] = [Label.B, Label.C, Label.D];
   const labels: Label[] = leechers.concat([Label.A]);
 
-  type T = {browser: Browser; metamask: Dappeteer; tab: Page};
-  type Actors = Record<Label, T>;
+  type Actor = {browser: Browser; metamask: Dappeteer; tab: Page};
+  type Actors = Record<Label, Actor>;
   const actors: Actors = {} as Actors;
 
   const assignEachLabel = (cb: (label: Label) => any) =>
     Promise.all(labels.map(async label => (actors[label] = await cb(label))));
 
-  const forEachActor = async (cb: (obj: T, label: Label) => any, labelsToMap: Label[] = labels) =>
-    await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
+  const forEachActor = async (
+    cb: (obj: Actor, label: Label) => any,
+    labelsToMap: Label[] = labels
+  ) => await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
   afterAll(
     async () => CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()))
