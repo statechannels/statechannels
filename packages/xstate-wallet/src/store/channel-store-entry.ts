@@ -197,7 +197,7 @@ export class ChannelStoreEntry {
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     if (this.isSupportedByMe && this.latestSignedByMe.turnNum.gte(stateVars.turnNum)) {
-      logger.error({entry: this.data(), stateVars});
+      logger.error({entry: this.data(), stateVars}, Errors.staleState);
       throw Error(Errors.staleState);
     }
 
