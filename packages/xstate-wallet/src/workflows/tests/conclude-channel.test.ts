@@ -86,6 +86,34 @@ const allSignState = (state: State) => ({
 
 let chain: FakeChain;
 
+const createLedgerChannels = async () => {
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  let signatures = [wallet1, wallet3].map(({privateKey}) =>
+    createSignatureEntry(state, privateKey)
+  );
+  await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
+  await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
+  chain.depositSync(ledgerId, '0', depositAmount);
+  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
+
+  const [aService, bService] = [aStore, bStore].map((store: Store) =>
+    interpret(createChannel(store).withContext({...context, funding: 'Virtual'})).start()
+  );
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('success');
+    expect(bService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
+};
+
 const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
   const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
   const services = [aStore, bStore].map(runMachine);
@@ -129,32 +157,31 @@ const concludeTwiceAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
   expect(entryB1).toMatchObject(entryB2);
 };
 
-const createLedgerChannels = async () => {
-  let state = ledgerState([first, third], ledgerAmounts);
-  let ledgerId = calculateChannelId(state);
-  let signatures = [wallet1, wallet3].map(({privateKey}) =>
-    createSignatureEntry(state, privateKey)
+const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
+  const crashState = fundingType == 'Direct' ? 'withdrawing' : {virtualDefunding: 'gettingRole'};
+  const successState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
+
+  // Simulate A crashes before withdrawing
+  const aMachine = interpret(concludeChannel(aStore).withContext(context))
+    .onTransition(state => {
+      if (state.value === crashState) {
+        aMachine.stop();
+      }
+    })
+    .start();
+
+  const entryA1 = await aStore.getEntry(targetChannelId);
+  expect(entryA1.isFinalized).toBe(false);
+
+  // A concludes again
+  await new Promise(resolve =>
+    interpret(concludeChannel(aStore).withContext(context))
+      .start()
+      .onTransition(state => state.matches(successState) && resolve())
   );
-  await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
-  await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
-  chain.depositSync(ledgerId, '0', depositAmount);
-  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
-  state = ledgerState([second, third], ledgerAmounts);
-  ledgerId = calculateChannelId(state);
-  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
-
-  chain.depositSync(ledgerId, '0', depositAmount);
-  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
-
-  const [aService, bService] = [aStore, bStore].map((store: Store) =>
-    interpret(createChannel(store).withContext({...context, funding: 'Virtual'})).start()
-  );
-
-  await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('success');
-    expect(bService.state.value).toEqual('success');
-  }, EXPECT_TIMEOUT);
+  const entryA2 = await aStore.getEntry(targetChannelId);
+  expect(entryA2.isFinalized).toBe(true);
 };
 
 beforeEach(async () => {
@@ -184,42 +211,31 @@ beforeEach(async () => {
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('reaches the same state when running conclude twice for direct funding', async () => {
+it('reaches the same state when running conclude twice using direct funding', async () => {
   await runUntilSuccess(createChannel, 'Direct');
 
   await concludeTwiceAndAssert('Direct');
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('reaches the same state when running conclude twice for virtual funding', async () => {
+it('reaches the same state when running conclude twice using virtual funding', async () => {
   await createLedgerChannels();
 
   await concludeTwiceAndAssert('Virtual');
 });
 
-it('can conclude again when A crashes during the first conclude attempt', async () => {
+// eslint-disable-next-line jest/expect-expect
+it('can conclude again when A crashes during the first conclude attempt using direct funding', async () => {
   // Let A and B create and fund channel
   await runUntilSuccess(createChannel, 'Direct');
 
-  // Simulate A crashes before withdrawing
-  const aMachine = interpret(concludeChannel(aStore).withContext(context))
-    .onTransition(state => {
-      if (state.value === 'withdrawing') {
-        aMachine.stop();
-      }
-    })
-    .start();
+  await concludeAfterCrashAndAssert('Direct');
+});
 
-  const entryA1 = await aStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(false);
+// eslint-disable-next-line jest/expect-expect
+it('can conclude again when A crashes during the first conclude attempt using virtual funding', async () => {
+  // Let A and B create and fund channel
+  await createLedgerChannels();
 
-  // A starts again
-  await new Promise(resolve =>
-    interpret(concludeChannel(aStore).withContext(context))
-      .start()
-      .onTransition(state => state.matches('success') && resolve())
-  );
-
-  const entryA2 = await aStore.getEntry(targetChannelId);
-  expect(entryA2.isFinalized).toBe(true);
+  await concludeAfterCrashAndAssert('Virtual');
 });
