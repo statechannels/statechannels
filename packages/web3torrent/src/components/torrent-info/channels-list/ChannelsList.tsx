@@ -47,7 +47,7 @@ function channelIdToTableRow(
   }
 
   let dataTransferred: string;
-  const peerAccount = channel[participantType];
+  const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
