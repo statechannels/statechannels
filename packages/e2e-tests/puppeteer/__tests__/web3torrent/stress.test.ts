@@ -63,7 +63,7 @@ describe('One file, three leechers, one seeder', () => {
     await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
 
     console.log('Setting up logs');
-    let i = 0;
+    let i = 1;
     await forEach(tabs, async tab => {
       const idx = ++i;
       await setupLogging(tab, idx, 'stress', true);
