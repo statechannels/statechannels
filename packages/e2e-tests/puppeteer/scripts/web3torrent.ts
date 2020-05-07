@@ -16,6 +16,7 @@ export function prepareStubUploadFile(
   path = '/tmp/web3torrent-tests-stub',
   repeats = 1000000
 ): void {
+  console.log('Preparing stub file');
   const content = 'web3torrent\n'.repeat(repeats);
   const buf = Buffer.from(content);
   fs.writeFileSync(path, buf);
