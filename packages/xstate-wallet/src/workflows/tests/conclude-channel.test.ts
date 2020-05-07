@@ -86,7 +86,7 @@ const allSignState = (state: State) => ({
 
 let chain: FakeChain;
 
-const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual' = 'Direct') => {
+const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
   const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
   const services = [aStore, bStore].map(runMachine);
   const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
@@ -99,6 +99,34 @@ const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual' = 'Dir
         )
     )
   );
+};
+
+const concludeTwiceAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
+  // Both conclude the channel
+  await runUntilSuccess(concludeChannel, fundingType);
+  const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
+  const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
+
+  // store entries should have been udpated to finalized state
+  const entryA1 = await aStore.getEntry(targetChannelId);
+  const entryB1 = await bStore.getEntry(targetChannelId);
+  expect(entryA1.isFinalized).toBe(true);
+  expect(entryB1.isFinalized).toBe(true);
+
+  // Conclude again
+  await runUntilSuccess(concludeChannel, fundingType);
+  const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
+  const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
+
+  const entryA2 = await aStore.getEntry(targetChannelId);
+  const entryB2 = await bStore.getEntry(targetChannelId);
+
+  expect(amountA2).toMatchObject(amountA1);
+  expect(amountB2).toMatchObject(amountB1);
+
+  // No change to the store entires, meaning that turnNum, etc. remain the same
+  expect(entryA1).toMatchObject(entryA2);
+  expect(entryB1).toMatchObject(entryB2);
 };
 
 const createLedgerChannels = async () => {
@@ -155,40 +183,23 @@ beforeEach(async () => {
   });
 });
 
+// eslint-disable-next-line jest/expect-expect
 it('reaches the same state when running conclude twice for direct funding', async () => {
-  // Let A and B create and fund channel
-  await runUntilSuccess(createChannel);
+  await runUntilSuccess(createChannel, 'Direct');
 
-  // Both conclude the channel
-  await runUntilSuccess(concludeChannel);
-  const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
-  const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
+  await concludeTwiceAndAssert('Direct');
+});
 
-  // store entries should have been udpated to finalized state
-  const entryA1 = await aStore.getEntry(targetChannelId);
-  const entryB1 = await bStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(true);
-  expect(entryB1.isFinalized).toBe(true);
+// eslint-disable-next-line jest/expect-expect
+it('reaches the same state when running conclude twice for virtual funding', async () => {
+  await createLedgerChannels();
 
-  // Conclude again
-  await runUntilSuccess(concludeChannel);
-  const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
-  const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
-
-  const entryA2 = await aStore.getEntry(targetChannelId);
-  const entryB2 = await bStore.getEntry(targetChannelId);
-
-  expect(amountA2).toMatchObject(amountA1);
-  expect(amountB2).toMatchObject(amountB1);
-
-  // No change to the store entires, meaning that turnNum, etc. remain the same
-  expect(entryA1).toMatchObject(entryA2);
-  expect(entryB1).toMatchObject(entryB2);
+  await concludeTwiceAndAssert('Virtual');
 });
 
 it('can conclude again when A crashes during the first conclude attempt', async () => {
   // Let A and B create and fund channel
-  await runUntilSuccess(createChannel);
+  await runUntilSuccess(createChannel, 'Direct');
 
   // Simulate A crashes before withdrawing
   const aMachine = interpret(concludeChannel(aStore).withContext(context))
@@ -211,33 +222,4 @@ it('can conclude again when A crashes during the first conclude attempt', async 
 
   const entryA2 = await aStore.getEntry(targetChannelId);
   expect(entryA2.isFinalized).toBe(true);
-});
-
-it('reaches the same state when running conclude twice for virtual funding', async () => {
-  await createLedgerChannels();
-
-  // Both conclude the channel
-  await runUntilSuccess(concludeChannel, 'Virtual');
-  const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
-  const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
-
-  // store entries should have been udpated to finalized state
-  const entryA1 = await aStore.getEntry(targetChannelId);
-  const entryB1 = await bStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(true);
-  expect(entryB1.isFinalized).toBe(true);
-
-  // Conclude again
-  await runUntilSuccess(concludeChannel, 'Virtual');
-  const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
-  const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
-
-  const entryA2 = await aStore.getEntry(targetChannelId);
-  const entryB2 = await bStore.getEntry(targetChannelId);
-
-  expect(amountA2).toMatchObject(amountA1);
-  expect(amountB2).toMatchObject(amountB1);
-
-  expect(entryA1).toMatchObject(entryA2);
-  expect(entryB1).toMatchObject(entryB2);
 });
