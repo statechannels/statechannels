@@ -24,3 +24,10 @@
   </div>
   <div class="flex-1"></div>
 </section>
+<div class="hidden">
+  {{#each this.model as |message|}}
+    <span {{did-insert (fn this.onMessage message)}}>
+      {{message.recipient}}
+    </span>
+  {{/each}}
+</div>
