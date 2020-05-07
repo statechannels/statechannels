@@ -86,16 +86,16 @@ const allSignState = (state: State) => ({
 
 let chain: FakeChain;
 
-const runUntilSuccess = async (machine, fundingType: 'direct' | 'virtual' = 'direct') => {
+const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual' = 'Direct') => {
   const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
   const services = [aStore, bStore].map(runMachine);
-  const targetState = fundingType == 'direct' ? 'success' : {virtualDefunding: 'asLeaf'};
+  const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
 
   await Promise.all(
     services.map(
       service =>
         new Promise(resolve =>
-          service.onTransition(state => state.matches(targetState) && resolve())
+          service.onTransition(state => state.matches(targetState) && service.stop() && resolve())
         )
     )
   );
@@ -217,7 +217,7 @@ it('reaches the same state when running conclude twice for virtual funding', asy
   await createLedgerChannels();
 
   // Both conclude the channel
-  await runUntilSuccess(concludeChannel, 'virtual');
+  await runUntilSuccess(concludeChannel, 'Virtual');
   const amountA1 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB1 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
@@ -228,7 +228,7 @@ it('reaches the same state when running conclude twice for virtual funding', asy
   expect(entryB1.isFinalized).toBe(true);
 
   // Conclude again
-  await runUntilSuccess(concludeChannel, 'virtual');
+  await runUntilSuccess(concludeChannel, 'Virtual');
   const amountA2 = (await aStore.chain.getChainInfo(targetChannelId)).amount;
   const amountB2 = (await bStore.chain.getChainInfo(targetChannelId)).amount;
 
