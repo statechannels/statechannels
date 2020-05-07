@@ -323,6 +323,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (torrent.paused) {
+            await this.paymentChannelClient.getLatestPaymentReceipt();
             // We currently treat pausing torrent as canceling downloads
             await this.closeDownloadingChannels(torrent);
           } else if (!torrent.done) {
@@ -340,8 +341,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
+      await this.paymentChannelClient.getLatestPaymentReceipt();
       log.info('<< Torrent DONE!');
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
+
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
     });
