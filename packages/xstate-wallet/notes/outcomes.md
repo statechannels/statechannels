@@ -50,7 +50,7 @@ When the wallet is asked to sign a state `s'`, the wallet should ensure that one
 ### Notes
 
 - The wallet should _never_ change the outcome from a guarantee to an allocation.
-- Currently, the wallet onyl supports eth.
+- Currently, the wallet only supports eth.
   - It may soon support channels with other (ERC20) tokens, but only one token.
   - It will eventually support channels with multiple tokens. In this case, (only?) application channels may have a "mixed" outcome
 
