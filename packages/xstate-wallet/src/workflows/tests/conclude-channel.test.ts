@@ -1,5 +1,4 @@
 import {interpret} from 'xstate';
-import waitForExpect from 'wait-for-expect';
 
 import {Init, machine as createChannel} from '../create-and-fund';
 import {machine as concludeChannel} from '../conclude-channel';
@@ -35,8 +34,6 @@ import {SimpleHub} from './simple-hub';
 import {TestStore} from './store';
 
 jest.setTimeout(20000);
-
-const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
@@ -104,14 +101,18 @@ const createLedgerChannels = async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const [aService, bService] = [aStore, bStore].map((store: Store) =>
+  const services = [aStore, bStore].map((store: Store) =>
     interpret(createChannel(store).withContext({...context, funding: 'Virtual'})).start()
   );
 
-  await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('success');
-    expect(bService.state.value).toEqual('success');
-  }, EXPECT_TIMEOUT);
+  await Promise.all(
+    services.map(
+      service =>
+        new Promise(resolve =>
+          service.onTransition(state => state.matches('success') && service.stop() && resolve())
+        )
+    )
+  );
 };
 
 const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
@@ -211,21 +212,21 @@ beforeEach(async () => {
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('reaches the same state when running conclude twice using direct funding', async () => {
+it('concludes correctly when concluding twice using direct funding', async () => {
   await runUntilSuccess(createChannel, 'Direct');
 
   await concludeTwiceAndAssert('Direct');
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('reaches the same state when running conclude twice using virtual funding', async () => {
+it('concludes correctly when concluding twice using virtual funding', async () => {
   await createLedgerChannels();
 
   await concludeTwiceAndAssert('Virtual');
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('can conclude again when A crashes during the first conclude attempt using direct funding', async () => {
+it('concludes correctly when A crashes during the first conclude using direct funding', async () => {
   // Let A and B create and fund channel
   await runUntilSuccess(createChannel, 'Direct');
 
@@ -233,7 +234,7 @@ it('can conclude again when A crashes during the first conclude attempt using di
 });
 
 // eslint-disable-next-line jest/expect-expect
-it('can conclude again when A crashes during the first conclude attempt using virtual funding', async () => {
+it('concludes correctly when A crashes during the first conclude using virtual funding', async () => {
   // Let A and B create and fund channel
   await createLedgerChannels();
 
