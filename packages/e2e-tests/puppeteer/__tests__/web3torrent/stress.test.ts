@@ -38,37 +38,36 @@ describe('One file, three leechers, one seeder', () => {
 
   const leechers: Label[] = [Label.B, Label.C, Label.D];
   const labels: Label[] = leechers.concat([Label.A]);
-  type Data<T> = Record<Label, T>;
 
-  const assignEachLabel = <T>(data: Data<T>, cb: (label: Label) => any) =>
+  type T = {browser: Browser; metamask: Dappeteer; tab: Page};
+  type Actors = Record<Label, T>;
+  const actors: Actors = {} as Actors;
+
+  const assignEachLabel = (data: Actors, cb: (label: Label) => any) =>
     Promise.all(labels.map(async label => (data[label] = await cb(label))));
 
-  const forEach = async <T>(data: Data<T>, cb: (obj: T, label: Label) => any) =>
+  const forEach = async (data: Actors, cb: (obj: T, label: Label) => any) =>
     await Promise.all(labels.map(async label => await cb(data[label], label)));
 
-  const browsers: Data<{browser: Browser; metamask: Dappeteer}> = {} as Data<{
-    browser: Browser;
-    metamask: Dappeteer;
-  }>;
-  const tabs: Data<Page> = {} as Data<Page>;
   afterAll(
-    async () => CLOSE_BROWSERS && (await forEach(browsers, async ({browser}) => browser.close()))
+    async () => CLOSE_BROWSERS && (await forEach(actors, async ({browser}) => browser.close()))
   );
 
   it('allows peers to start torrenting', async () => {
+    let i = 0;
     console.log('Opening browsers');
-    await assignEachLabel(browsers, async () => await setUpBrowser(HEADLESS, 0));
-
-    console.log('Waiting on pages');
-    await assignEachLabel(tabs, async label => (await browsers[label].browser.pages())[0]);
-
-    console.log('Setting up logs');
-    let i = 1;
-    await forEach(tabs, async tab => {
+    await assignEachLabel(actors, async () => {
       const idx = ++i;
+      const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
+      const tab = (await browser.pages())[0];
+
       await setupLogging(tab, idx, 'stress', true);
       !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
+
+      return {browser, tab, metamask};
     });
+
+    console.error(Object.keys(actors));
 
     console.log('Preparing stub file');
     const filePath = '/tmp/web3t-stub';
@@ -76,30 +75,29 @@ describe('One file, three leechers, one seeder', () => {
 
     console.log('A uploads the file');
     console.log('Going to URL');
-    await tabs.A.goto('http://localhost:3000/upload', {waitUntil: 'load'});
+    await actors.A.tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
     console.log('Uploading file');
-    const file = await uploadFile(tabs.A, USES_VIRTUAL_FUNDING, browsers.A.metamask, filePath);
+    const file = await uploadFile(actors.A.tab, USES_VIRTUAL_FUNDING, actors.A.metamask, filePath);
 
     console.log('B, C, D start downloading...');
     await Promise.all(
       leechers.map(async label => {
-        const tab = tabs[label];
-        const {metamask} = browsers[label];
+        const {tab, metamask} = actors[label];
         await startDownload(tab, file, USES_VIRTUAL_FUNDING, metamask);
       })
     );
 
     console.log('Waiting for open channels');
-    await forEach(tabs, waitAndOpenChannel(USES_VIRTUAL_FUNDING));
+    await forEach(actors, ({tab}) => waitAndOpenChannel(USES_VIRTUAL_FUNDING)(tab));
 
     console.log('Downloading');
-    await forEach(tabs, tab => waitForNthState(tab, 10));
+    await forEach(actors, ({tab}) => waitForNthState(tab, 10));
 
     console.log('C cancels download');
-    await cancelDownload(tabs.C);
+    await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
-    await forEach(tabs, waitForClosedState);
+    await forEach(actors, ({tab}) => waitForClosedState(tab));
   });
 });
 
