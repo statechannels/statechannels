@@ -47,7 +47,7 @@ function channelIdToTableRow(
   }
 
   let dataTransferred: string;
-  const peerAccount = channel[participantType];
+
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
@@ -61,7 +61,7 @@ function channelIdToTableRow(
     <tr className="peerInfo" key={channelId}>
       <td className="channel">{channelButton}</td>
       <td className="channel-id">{channelId}</td>
-      <td className="peer-id">{peerAccount}</td>
+      <td className="peer-id">{wire.paidStreamingExtension.peerAccount}</td>
       <td className="transferred">
         {dataTransferred}
         <i className={isBeneficiary ? 'up' : 'down'}></i>
