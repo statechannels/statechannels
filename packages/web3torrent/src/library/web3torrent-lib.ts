@@ -395,6 +395,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async makePayment(torrent: PaidStreamingTorrent, wire: PaidStreamingWire) {
     if (torrent.paused) {
       log.info('Torrent Paused - makePayment early exit', torrent);
+      return;
     }
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
     let amountToPay = BUFFER_REFILL_RATE.sub(
