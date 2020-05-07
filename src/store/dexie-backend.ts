@@ -163,7 +163,7 @@ export class Backend implements DBBackend {
   public async transaction<T, S extends ObjectStores>(
     mode: TXMode,
     stores: S[],
-    cb: (tx: Transaction) => Promise<T>
+    callback: (tx: Transaction) => Promise<T>
   ) {
     let dexieMode: TransactionMode;
     switch (mode) {
@@ -178,9 +178,16 @@ export class Backend implements DBBackend {
     }
 
     try {
-      return await this._db.transaction(dexieMode, stores, cb);
+      return await this._db.transaction(dexieMode, stores, callback);
     } catch (error) {
-      logger.error({error: error.message ?? error, store: await this.dump()}, 'Transaction error');
+      logger.error(
+        {
+          error: error.message ?? error,
+          store: await this.dump(),
+          callback: callback.toString().slice(0, 200) + '...}'
+        },
+        'Transaction error'
+      );
       throw error;
     }
   }
