@@ -381,7 +381,7 @@ export class ChainWatcher implements Chain {
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    if (!this._assetHolders[0] && !this._adjudicator) {
+    if (!this._assetHolders || !this._assetHolders[0] || !this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
 
