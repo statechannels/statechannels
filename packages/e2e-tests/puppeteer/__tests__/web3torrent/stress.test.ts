@@ -43,20 +43,20 @@ describe('One file, three leechers, one seeder', () => {
   type Actors = Record<Label, T>;
   const actors: Actors = {} as Actors;
 
-  const assignEachLabel = (data: Actors, cb: (label: Label) => any) =>
-    Promise.all(labels.map(async label => (data[label] = await cb(label))));
+  const assignEachLabel = (cb: (label: Label) => any) =>
+    Promise.all(labels.map(async label => (actors[label] = await cb(label))));
 
-  const forEach = async (data: Actors, cb: (obj: T, label: Label) => any) =>
-    await Promise.all(labels.map(async label => await cb(data[label], label)));
+  const forEachActor = async (cb: (obj: T, label: Label) => any, labelsToMap: Label[] = labels) =>
+    await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
   afterAll(
-    async () => CLOSE_BROWSERS && (await forEach(actors, async ({browser}) => browser.close()))
+    async () => CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()))
   );
 
   it('allows peers to start torrenting', async () => {
     let i = 0;
     console.log('Opening browsers');
-    await assignEachLabel(actors, async () => {
+    await assignEachLabel(async () => {
       const idx = ++i;
       const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
       const tab = (await browser.pages())[0];
@@ -80,24 +80,22 @@ describe('One file, three leechers, one seeder', () => {
     const file = await uploadFile(actors.A.tab, USES_VIRTUAL_FUNDING, actors.A.metamask, filePath);
 
     console.log('B, C, D start downloading...');
-    await Promise.all(
-      leechers.map(async label => {
-        const {tab, metamask} = actors[label];
-        await startDownload(tab, file, USES_VIRTUAL_FUNDING, metamask);
-      })
+    await forEachActor(
+      async ({tab, metamask}) => await startDownload(tab, file, USES_VIRTUAL_FUNDING, metamask),
+      leechers
     );
 
     console.log('Waiting for open channels');
-    await forEach(actors, ({tab}) => waitAndOpenChannel(USES_VIRTUAL_FUNDING)(tab));
+    await forEachActor(({tab}) => waitAndOpenChannel(USES_VIRTUAL_FUNDING)(tab));
 
     console.log('Downloading');
-    await forEach(actors, ({tab}) => waitForNthState(tab, 10));
+    await forEachActor(({tab}) => waitForNthState(tab, 10));
 
     console.log('C cancels download');
     await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
-    await forEach(actors, ({tab}) => waitForClosedState(tab));
+    await forEachActor(({tab}) => waitForClosedState(tab));
   });
 });
 
