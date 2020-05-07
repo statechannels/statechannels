@@ -1,7 +1,6 @@
 import {Status, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
-console.log(process.env);
 
 export const VERSION = process.env.VERSION;
 
