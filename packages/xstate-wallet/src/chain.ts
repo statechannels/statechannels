@@ -238,9 +238,9 @@ export class ChainWatcher implements Chain {
   private mySelectedAddress: string | null;
   private provider: ReturnType<typeof getProvider>;
   private get signer() {
-    if (typeof this.selectedAddress !== 'string') throw 'Ethereum not enabled';
+    if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
 
-    return this.provider.getSigner(this.selectedAddress);
+    return this.provider.getSigner(this.selectedAddress as string);
   }
 
   public async initialize() {
@@ -248,11 +248,12 @@ export class ChainWatcher implements Chain {
 
     this.provider.on('block', blockNumber => chainLogger.info({blockNumber}, 'New Block'));
 
-    if (this.ethereumIsEnabled) this.configureContracts();
+    this.configureContracts();
   }
 
   private configureContracts() {
-    this.mySelectedAddress = window.ethereum.selectedAddress;
+    if (!this.ethereumIsEnabled) return;
+
     this._assetHolders = [
       new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, this.signer)
     ]; // TODO allow for other asset holders, for now we use slot 0 only
@@ -274,15 +275,16 @@ export class ChainWatcher implements Chain {
     if (window.ethereum) {
       try {
         this.mySelectedAddress = (await window.ethereum.enable())[0];
-        if (typeof this.selectedAddress === 'string') {
+        if (this.ethereumIsEnabled) {
           this.configureContracts();
-          return this.selectedAddress;
+          return this.selectedAddress as string;
         } else {
-          logger.error('Ethereum enabled but no selected address is defined');
-          return Promise.reject('Ethereum enabled but no selected address is defined');
+          const error = 'Ethereum enabled but no selected address is defined';
+          logger.error(error);
+          return Promise.reject(error);
         }
       } catch (error) {
-        // Handle error. Likely the user rejected the login
+        // TODO: Handle error. Likely the user rejected the login
         logger.error(error);
         return Promise.reject('user rejected in metamask');
       }
@@ -292,17 +294,11 @@ export class ChainWatcher implements Chain {
   }
 
   public get selectedAddress(): string | null {
-    this.mySelectedAddress = (this.mySelectedAddress || window.ethereum?.selectedAddress) ?? null;
     return this.mySelectedAddress;
   }
 
   public get ethereumIsEnabled(): boolean {
-    if (window.ethereum) {
-      // window.ethereum.selectedAddress will be null if ethereum has not been enabled
-      return !!window.ethereum.selectedAddress;
-    } else {
-      return false;
-    }
+    return typeof this.selectedAddress === 'string';
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<string | undefined> {
