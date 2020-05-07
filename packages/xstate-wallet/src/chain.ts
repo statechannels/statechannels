@@ -68,7 +68,6 @@ export class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
-    // TODO: Remove?
     updated: [Updated];
     // TODO: Add AssetHolder events
     challengeRegistered: [ChallengeRegistered];
