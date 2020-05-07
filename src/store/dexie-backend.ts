@@ -238,7 +238,9 @@ export class Backend implements DBBackend {
   private async dump() {
     return this._db.transaction('r!', STORES, async () =>
       _.reduce(
-        await Promise.all(STORES.map(store => ({[store]: this._db.table(store).toArray()}))),
+        await Promise.all(
+          STORES.map(async store => ({[store]: await this._db.table(store).toArray()}))
+        ),
         _.merge
       )
     );
