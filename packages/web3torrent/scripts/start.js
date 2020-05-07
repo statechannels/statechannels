@@ -80,28 +80,14 @@ void (async () => {
     }
   });
 
-  // We must edit .env.local since there is no easy programmatic way to inject
-  // environment variables into the react-scripts start command.
-  const networkName = getNetworkName(process.env.CHAIN_NETWORK_ID);
+  process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 
-  let data = '# NOTE: This file is auto-generated. Use .env.development.local for custom values\n';
-
-  if (networkName === 'development') {
-    const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
+  if (process.env.TARGET_NETWORK === 'development') {
+    // Add contract addresses to process.env if running ganache
+    const {deployer} = await await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
     const deployedArtifacts = await deploy(deployer);
-    for (const artifactName in deployedArtifacts) {
-      data += `REACT_APP_${artifactName} = ${deployedArtifacts[artifactName]}\n`;
-    }
+    process.env = {...process.env, ...deployedArtifacts};
   }
-
-  data += `REACT_APP_TARGET_NETWORK = ${networkName}\n`;
-
-  // We must edit .env.local since there is no easy programmatic way to inject
-  // environment variables into the react-scripts start command.
-  fs.writeFile('.env.local', data, err => {
-    if (err) throw err;
-  });
-
   const isInteractive = process.stdout.isTTY;
 
   const {checkBrowsers} = require('react-dev-utils/browsersHelper');
