@@ -376,8 +376,13 @@ jobs:
           dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
           pipeline: simple-hub
           app: simple-hub-production
+      - slack/status:
+          # notify-deployments
+          channel: C0125NB072B
+          failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
+          success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
 
-  deploy-persistent-seeder:
+  release-persistent-seeder:
     working_directory: /home/circleci/project
     resource_class: large
     docker:
@@ -467,7 +472,7 @@ workflows:
             branches:
               only: deploy
 
-      - deploy-persistent-seeder:
+      - release-persistent-seeder:
           filters:
             branches:
               only: deploy
