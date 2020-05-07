@@ -1,6 +1,7 @@
 import {Status, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
+console.log(process.env);
 
 export const WEI_PER_BYTE = utils.bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
