@@ -54,10 +54,10 @@ describe('One file, three leechers, one seeder', () => {
   );
 
   it('allows peers to start torrenting', async () => {
-    let i = 0;
+    let i = 1;
     console.log('Opening browsers');
     await assignEachLabel(async () => {
-      const idx = ++i;
+      const idx = i++;
       const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
       const tab = (await browser.pages())[0];
 
