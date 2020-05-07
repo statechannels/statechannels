@@ -9,7 +9,7 @@ import {
   HEADLESS,
   USES_VIRTUAL_FUNDING,
   USE_DAPPETEER,
-  WEB3TORRENT_URL
+  APP_URL as WEB3TORRENT_URL
 } from '../../constants';
 
 import {

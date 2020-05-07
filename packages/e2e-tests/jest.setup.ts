@@ -1,7 +1,8 @@
 import waitOn from 'wait-on';
+import {APP_URL, WALLET_URL} from './puppeteer/constants';
 
 export default async (): Promise<void> => {
-  const resources = ['http://localhost:3000', 'http://localhost:3055'];
+  const resources = [APP_URL, WALLET_URL];
   const opts = {resources, delay: 5000, interval: 2000, timeout: 120000};
   try {
     console.log('Waiting for servers');
