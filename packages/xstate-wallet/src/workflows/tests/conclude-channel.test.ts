@@ -76,7 +76,7 @@ const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 let aStore: TestStore;
 let bStore: TestStore;
 
-const allSignState = (state: State) => ({
+const allSignedState = (state: State) => ({
   ...state,
   signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
@@ -194,12 +194,12 @@ beforeEach(async () => {
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
-    await store.createEntry(allSignState(firstState(allocation, targetChannel)), {
+    await store.createEntry(allSignedState(firstState(allocation, targetChannel)), {
       applicationSite: TEST_SITE
     });
 
     const ledgerEntry = await store.createEntry(
-      allSignState(firstState(allocation, ledgerChannel))
+      allSignedState(firstState(allocation, ledgerChannel))
     );
     await store.setLedgerByEntry(ledgerEntry);
   });
