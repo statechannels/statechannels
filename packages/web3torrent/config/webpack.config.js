@@ -67,6 +67,26 @@ module.exports = function(webpackEnv) {
   // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
   const publicUrl = isEnvProduction ? publicPath.slice(0, -1) : isEnvDevelopment && '';
 
+  // This is based on what CRA was doing
+  const rawEnv = Object.keys(process.env)
+    .filter(key => {
+      return /^REACT_APP_/i.test(key) || /_ADDRESS$/i.test(key);
+    })
+    .reduce(
+      (env, key) => {
+        env[key] = process.env[key];
+        return env;
+      },
+      {
+        PUBLIC_URL: publicUrl
+      }
+    );
+  const stringifiedEnv = {
+    'process.env': Object.keys(rawEnv).reduce((env, key) => {
+      env[key] = JSON.stringify(rawEnv[key]);
+      return env;
+    }, {})
+  };
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {
     const loaders = [
@@ -515,12 +535,19 @@ module.exports = function(webpackEnv) {
       // This gives some necessary context to module not found errors, such as
       // the requesting resource.
       new ModuleNotFoundPlugin(paths.appPath),
+      // Makes some environment variables available in index.html.
+      // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
+      // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+      // In production, it will be an empty string unless you specify "homepage"
+      // in `package.json`, in which case it will be the pathname of that URL.
+      // In development, this will be an empty string.
+      new InterpolateHtmlPlugin(HtmlWebpackPlugin, {PUBLIC_URL: publicUrl, ...rawEnv}),
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
       // It is absolutely essential that NODE_ENV is set to production
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
-      new webpack.DefinePlugin(process.env),
+      new webpack.DefinePlugin(stringifiedEnv),
       // This is necessary to emit hot updates (currently CSS only):
       isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
       // Watcher doesn't work well if you mistype casing in a path so we use

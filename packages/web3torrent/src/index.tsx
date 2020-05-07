@@ -4,7 +4,7 @@ import Drift from 'react-driftjs';
 
 import App from './App';
 import {web3torrent, Web3TorrentContext} from './clients/web3torrent-client';
-
+console.log(process.env);
 ReactDOM.render(
   <Web3TorrentContext.Provider value={web3torrent}>
     <App />

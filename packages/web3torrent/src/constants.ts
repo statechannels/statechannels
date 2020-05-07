@@ -163,9 +163,8 @@ export const mockChannels: Array<Partial<ChannelState>> = [
 ];
 
 let SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS: string;
-if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
-  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS =
-    process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+if (process.env.SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS = process.env.SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 } else {
   throw new Error('Contract address not defined');
 }
