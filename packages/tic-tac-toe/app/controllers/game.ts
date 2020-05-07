@@ -61,35 +61,14 @@ export default class GameController extends Controller {
     this.channelUpdates.subscribeToMessages(
       updatesId,
       (channelState: ChannelState.ChannelState<AppData>) => {
-        if (this.currentGame.getPlayer() === Player.B) {
-          if (ChannelState.isRunning(channelState)) {
-            if (ChannelState.inXPlaying(channelState)) {
-              this.player = 'o';
-              this.Xs = channelState.appData.Xs;
-              this.Os = channelState.appData.Os;
-              console.log('Moving from xPlaying -> oPlaying');
-            }
-            if (ChannelState.inOPlaying(channelState)) {
-              this.player = 'x';
-              this.Xs = channelState.appData.Xs;
-              this.Os = channelState.appData.Os;
-              console.log('Moving from oPlaying -> xPlaying');
-            }
+        if (ChannelState.isRunning(channelState)) {
+          if (ChannelState.inXPlaying(channelState)) {
+            this.updateBoard('o', channelState.appData.Xs, channelState.appData.Os);
+            console.log('Moving from xPlaying -> oPlaying');
           }
-        } else {
-          if (ChannelState.isRunning(channelState)) {
-            if (ChannelState.inXPlaying(channelState)) {
-              this.player = 'o';
-              this.Xs = channelState.appData.Xs;
-              this.Os = channelState.appData.Os;
-              console.log('Moving from xPlaying -> oPlaying');
-            }
-            if (ChannelState.inOPlaying(channelState)) {
-              this.player = 'x';
-              this.Xs = channelState.appData.Xs;
-              this.Os = channelState.appData.Os;
-              console.log('Moving from oPlaying -> xPlaying');
-            }
+          if (ChannelState.inOPlaying(channelState)) {
+            this.updateBoard('x', channelState.appData.Xs, channelState.appData.Os);
+            console.log('Moving from oPlaying -> xPlaying');
           }
         }
       }
@@ -104,45 +83,11 @@ export default class GameController extends Controller {
 
     if (this.player == 'x') {
       this.Xs |= 1 << index;
-      const currentChannelState = this.currentGame.getChannelState();
-      const xPlayingState: AppData = {
-        type: 'xPlaying',
-        stake: this.currentGame.getGame().stake,
-        Xs: this.Xs,
-        Os: this.Os
-      };
-
-      this.tttChannelClient.updateChannel(
-        currentChannelState.channelId,
-        currentChannelState.aAddress,
-        currentChannelState.bAddress,
-        currentChannelState.aBal,
-        currentChannelState.bBal,
-        xPlayingState,
-        currentChannelState.aOutcomeAddress,
-        currentChannelState.bOutcomeAddress
-      );
+      this.setTileInChannel('xPlaying');
       console.log('Setting X on board');
     } else {
       this.Os |= 1 << index;
-      const currentChannelState = this.currentGame.getChannelState();
-      const oPlayingState: AppData = {
-        type: 'oPlaying',
-        stake: this.currentGame.getGame().stake,
-        Xs: this.Xs,
-        Os: this.Os
-      };
-
-      this.tttChannelClient.updateChannel(
-        currentChannelState.channelId,
-        currentChannelState.aAddress,
-        currentChannelState.bAddress,
-        currentChannelState.aBal,
-        currentChannelState.bBal,
-        oPlayingState,
-        currentChannelState.aOutcomeAddress,
-        currentChannelState.bOutcomeAddress
-      );
+      this.setTileInChannel('oPlaying');
       console.log('Setting O on board');
     }
   }
@@ -162,6 +107,32 @@ export default class GameController extends Controller {
       data: message.data
     };
     this.tttChannelClient.pushMessage(clientMessage);
+  }
+
+  private setTileInChannel(type: 'start' | 'xPlaying' | 'oPlaying' | 'draw' | 'victory'): void {
+    const currentChannelState = this.currentGame.getChannelState();
+    const appAttrs: AppData = {
+      type,
+      stake: this.currentGame.getGame().stake,
+      Xs: this.Xs,
+      Os: this.Os
+    };
+    this.tttChannelClient.updateChannel(
+      currentChannelState.channelId,
+      currentChannelState.aAddress,
+      currentChannelState.bAddress,
+      currentChannelState.aBal,
+      currentChannelState.bBal,
+      appAttrs,
+      currentChannelState.aOutcomeAddress,
+      currentChannelState.bOutcomeAddress
+    );
+  }
+
+  private updateBoard(player: string, Xs: number, Os: number): void {
+    this.player = player;
+    this.Xs = Xs;
+    this.Os = Os;
   }
 }
 
