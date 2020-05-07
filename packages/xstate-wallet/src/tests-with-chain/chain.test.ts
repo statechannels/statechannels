@@ -64,8 +64,8 @@ const mockMachine = Machine({
 });
 
 beforeAll(async () => {
-  (window as any).ethereum = {selectedAddress: '0xfec44e15328B7d1d8885a8226b0858964358F1D6'};
-  (chain as any).configureContracts();
+  (window as any).ethereum = {enable: () => ['0xfec44e15328B7d1d8885a8226b0858964358F1D6']};
+  chain.ethereumEnable();
 
   const signer = await provider.getSigner('0x28bF45680cA598708E5cDACc1414FCAc04a3F1ed');
   ETHAssetHolder = new Contract(
