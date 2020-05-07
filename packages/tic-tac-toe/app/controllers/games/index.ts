@@ -23,7 +23,7 @@ export default class GamesIndexController extends Controller {
   }
 
   get publicGames(): ChallengeModel[] {
-    return this.model.filterBy('isPublic', true);
+    return this.model.filterBy('isPublic', true).filterBy('isDeleted', false);
   }
 
   @action
@@ -44,7 +44,6 @@ export default class GamesIndexController extends Controller {
     } as ChallengeModel;
 
     const newGame = this.store.createRecord('challenge', myPublicOpenGame);
-    await newGame.save();
 
     this.currentGame.setGame(newGame);
     this.currentGame.setPlayer(Player.B);

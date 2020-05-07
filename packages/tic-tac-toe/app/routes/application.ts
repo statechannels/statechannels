@@ -7,9 +7,10 @@ import TttChannelClientService from '../services/ttt-channel-client';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
 import {Message} from '@statechannels/client-api-schema';
 import MessageModel from '../models/message';
-import {ChannelState, inChannelProposed} from '../core/channel-state';
+import * as ChannelState from '../core/channel-state';
 import {AppData} from '../core/app-data';
 import CurrentGameService, {Player} from '../services/current-game';
+import ChannelUpdatesService from '../services/channel-updates';
 
 const {WALLET_URL} = ENV;
 
@@ -26,6 +27,7 @@ function sanitizeMessageForFirebase(message: MessageModel): MessageModel {
 export default class ApplicationRoute extends Route {
   @service tttChannelClient!: TttChannelClientService;
   @service currentGame!: CurrentGameService;
+  @service channelUpdates!: ChannelUpdatesService;
 
   beforeModel(transition: Transition): void {
     super.beforeModel(transition);
@@ -48,14 +50,35 @@ export default class ApplicationRoute extends Route {
       newMessage.save();
     });
 
-    this.tttChannelClient.onChannelUpdated((channelState: ChannelState<AppData>) => {
-      if (this.currentGame.getPlayer() === Player.B) {
-        if (inChannelProposed(channelState)) {
-          this.tttChannelClient.joinChannel(channelState.channelId);
-          console.log('Joining game as Player B');
+    this.channelUpdates.setup();
+
+    const updatesId = Date.now();
+    this.channelUpdates.subscribeToMessages(
+      updatesId,
+      (channelState: ChannelState.ChannelState<AppData>) => {
+        console.log('OnChannelUpdate from application');
+        if (this.currentGame.getPlayer() === Player.B) {
+          if (ChannelState.inChannelProposed(channelState)) {
+            this.currentGame.setChannelState(channelState);
+            this.tttChannelClient.joinChannel(channelState.channelId);
+            console.log('Joining game as Player B');
+          } else if (ChannelState.isRunning(channelState)) {
+            if (ChannelState.inStart(channelState)) {
+              this.currentGame.setChannelState(channelState);
+              this.channelUpdates.unsubscribeFromMessages(updatesId);
+              this.transitionTo('game');
+            }
+          }
+        } else {
+          if (ChannelState.isRunning(channelState)) {
+            if (ChannelState.inStart(channelState)) {
+              this.currentGame.setChannelState(channelState);
+              this.channelUpdates.unsubscribeFromMessages(updatesId);
+              this.transitionTo('game');
+            }
+          }
         }
       }
-      console.log('ChannelState Received from onChannelUpdated:', channelState);
-    });
+    );
   }
 }

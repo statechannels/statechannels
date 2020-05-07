@@ -1,20 +1,21 @@
 import Controller from '@ember/controller';
 import {action} from '@ember/object';
-import {task, timeout, Task} from 'ember-concurrency';
+import {inject as service} from '@ember/service';
+import CurrentGameService from '@statechannels/tic-tac-toe/services/current-game';
+import {later} from '@ember/runloop';
 
 export default class GamesWaitingController extends Controller {
+  @service currentGame!: CurrentGameService;
+
   @action
   protected cancelNewGame(): void {
     console.log('Cancel New Game');
+    this.currentGame.getGame().deleteRecord();
+
+    // Firebase has issues with deleting and saving within the same run loop
+    later(() => this.currentGame.getGame().save(), 1000);
     this.transitionToRoute('games');
   }
-
-  @task(function*(this: GamesWaitingController) {
-    yield timeout(2000);
-    console.log('Game was changed. Lets createChannel');
-    // this.transitionToRoute('game');
-  })
-  protected goToGame!: Task<void, () => {}>;
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your controllers.
