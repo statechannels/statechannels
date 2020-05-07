@@ -23,7 +23,7 @@ This is explained in detail in the [nitro paper](https://magmo.com/nitro-protoco
 - For simple allocations, `amount` is _transferred_ to `destination`
   - In case the channel is _underfunded_ -- the holdings are less than the sum of `amount` over the allocation items -- allocation items are prioritized by their order
 - For simple guarantees, funds are transferred according to the outcome of the `targetChannelId`
-  - :warning: If the target channel does not have a simple allocation outcome, things will will break.
+  - :warning: If the target channel does not have a simple allocation outcome, things will break.
   - In case the guarantor channell is _underfunded_ -- the holdings are less than the sum of `amount` over the allocation items of `guarantee.targetChannelId` -- allocation items are prioritized by the order in `guarantee.destinations`
   - In practice, guarantor channels are _all_ underfunded
     - they only cover a portion of the allocations of the target channel
