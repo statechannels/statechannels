@@ -551,10 +551,13 @@ module.exports = function(webpackEnv) {
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
       new webpack.DefinePlugin({
-        ...stringifiedEnv,
-        VERSION: JSON.stringify(gitRevisionPlugin.version()),
-        COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
-        BRANCH: JSON.stringify(gitRevisionPlugin.branch())
+        // This is a bit messy, we should clean this up
+        ['process.env']: {
+          ...stringifiedEnv['process.env'],
+          VERSION: JSON.stringify(gitRevisionPlugin.version()),
+          COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+          BRANCH: JSON.stringify(gitRevisionPlugin.branch())
+        }
       }),
       // This is necessary to emit hot updates (currently CSS only):
       isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
