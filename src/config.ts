@@ -1,5 +1,5 @@
 import {AddressZero} from 'ethers/constants';
-import {hexZeroPad, bigNumberify} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import {Destination} from './store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -30,8 +30,10 @@ export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADD
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
-export const HUB_DESTINATION = (process.env.HUB_DESTINATION ||
-  hexZeroPad(HUB_ADDRESS, 32)) as Destination;
+if (!process.env.HUB_DESTINATION) {
+  throw new Error('HUB_DESTINATION environment variable must be defined');
+}
+export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 
