@@ -8,7 +8,7 @@ import {createMockTorrentUI, createMockTorrentPeers} from '../../utils/test-util
 import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
-import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
+import {PeerSpeedInfo, PeerSpeedInfoProps} from './peer-speed-info/PeerSpeedInfo';
 import {mockMetamask} from '../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
@@ -24,7 +24,7 @@ type MockTorrentInfo = {
   fileCostElement: ReactWrapper;
   magnetLinkButtonElement: ReactWrapper<{}>;
   downloadInfoElement: ReactWrapper<DownloadInfoProps>;
-  uploadInfoElement: ReactWrapper<UploadInfoProps>;
+  PeerSpeedInfoElement: ReactWrapper<PeerSpeedInfoProps>;
 };
 
 const mockTorrentInfo = (torrentProps?: Partial<TorrentUI>): MockTorrentInfo => {
@@ -45,7 +45,7 @@ const mockTorrentInfo = (torrentProps?: Partial<TorrentUI>): MockTorrentInfo => 
     fileCostElement: torrentInfoWrapper.find('.fileCost'),
     magnetLinkButtonElement: torrentInfoWrapper.find(MagnetLinkButton),
     downloadInfoElement: torrentInfoWrapper.find(DownloadInfo),
-    uploadInfoElement: torrentInfoWrapper.find(UploadInfo)
+    PeerSpeedInfoElement: torrentInfoWrapper.find(PeerSpeedInfo)
   };
 };
 
@@ -69,7 +69,7 @@ describe('<TorrentInfo />', () => {
       fileStatusElement,
       magnetLinkButtonElement,
       sectionElement,
-      uploadInfoElement,
+      PeerSpeedInfoElement,
       torrent
     } = torrentInfo;
 
@@ -101,15 +101,18 @@ describe('<TorrentInfo />', () => {
   });
 
   it('can show the DownloadInfo component when the status allows it', () => {
-    const {downloadInfoElement, uploadInfoElement} = mockTorrentInfo({status: Status.Downloading});
-    expect(downloadInfoElement.exists()).toEqual(true);
+    expect(
+      mockTorrentInfo({
+        status: Status.Downloading
+      }).downloadInfoElement.exists()
+    ).toEqual(true);
   });
 
-  it("can show the UploadInfo component when the client is the torrent's author", () => {
-    const {downloadInfoElement, uploadInfoElement} = mockTorrentInfo({
+  it("can show the PeerSpeedInfo component when the client is the torrent's author", () => {
+    const {downloadInfoElement, PeerSpeedInfoElement} = mockTorrentInfo({
       status: Status.Seeding
     });
     expect(downloadInfoElement.exists()).toEqual(false);
-    expect(uploadInfoElement.exists()).toEqual(true);
+    expect(PeerSpeedInfoElement.exists()).toEqual(true);
   });
 });
