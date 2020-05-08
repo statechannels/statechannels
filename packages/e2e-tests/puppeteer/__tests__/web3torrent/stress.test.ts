@@ -11,16 +11,11 @@ import {
   setupFakeWeb3,
   waitForNthState,
   waitForClosedState
-} from '../helpers';
+} from '../../helpers';
 
-import {
-  uploadFile,
-  prepareStubUploadFile,
-  startDownload,
-  cancelDownload
-} from '../scripts/web3torrent';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER, CLOSE_BROWSERS} from '../constants';
+import {USE_DAPPETEER, CLOSE_BROWSERS} from '../../constants';
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -71,15 +66,11 @@ describe('One file, three leechers, one seeder', () => {
 
     console.error(Object.keys(actors));
 
-    console.log('Preparing stub file');
-    const filePath = '/tmp/web3t-stub';
-    prepareStubUploadFile(filePath, 1000000);
-
     console.log('A uploads the file');
     console.log('Going to URL');
     await actors.A.tab.goto('http://localhost:3000/upload', {waitUntil: 'load'});
     console.log('Uploading file');
-    const file = await uploadFile(actors.A.tab, USES_VIRTUAL_FUNDING, actors.A.metamask, filePath);
+    const file = await uploadFile(actors.A.tab, USES_VIRTUAL_FUNDING, actors.A.metamask);
 
     console.log('B, C, D start downloading...');
     await forEachActor(
