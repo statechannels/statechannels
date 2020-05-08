@@ -12,7 +12,7 @@ import {TorrentUI} from '../../../types';
 type UploadInfoProps = {
   torrent: TorrentUI;
   channels: Dictionary<ChannelState>;
-  participantType: 'payer' | 'beneficiary';
+  mySigningAddress: string;
 };
 
 function channelIdToTableRow(
@@ -75,11 +75,13 @@ function channelIdToTableRow(
   );
 }
 
-export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, participantType}) => {
+export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
   const context = useContext(Web3TorrentContext);
-  const channelsInfo = _.keys(channels).sort(
-    (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
-  );
+  const channelsInfo = _.keys(channels)
+    .filter(
+      id => channels[id].payer === mySigningAddress || channels[id].beneficiary === mySigningAddress
+    )
+    .sort((id1, id2) => Number(id1) - Number(id2));
   return (
     <section className="wires-list">
       <table className="wires-list-table">
@@ -95,12 +97,12 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, part
           </thead>
         )}
         <tbody>
-          {channelsInfo.map(id =>
+          {channelsInfo.map(key =>
             channelIdToTableRow(
-              id,
+              key,
               channels,
               torrent,
-              participantType,
+              channels[key].beneficiary === mySigningAddress ? 'beneficiary' : 'payer',
               context.paymentChannelClient.challengeChannel
             )
           )}

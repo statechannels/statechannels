@@ -4,9 +4,8 @@ import {storiesOf} from '@storybook/react';
 import React from 'react';
 import '../../../App.scss';
 import {TorrentUI} from '../../../types';
-import {UploadInfo} from './UploadInfo';
-import './UploadInfo.scss';
-import {ChannelState} from '../../../clients/payment-channel-client';
+import {PeerNetworkStats} from './PeerNetworkStats';
+import './PeerNetworkStats.scss';
 import {createMockTorrentPeers} from '../../../utils/test-utils';
 
 const a = '0xFb4A85D4bBf25e10Fc0Bed72f864dD1ead0006e7';
@@ -19,8 +18,8 @@ const c2 = '0xe10Fc0Bed72f864dD1ead0006e7Fb4A85D4bBf25e10Fc0Bed72Fb4A85D4bBf25';
 storiesOf('Web3Torrent', module)
   .addDecorator(withActions('click'))
   .addDecorator(withKnobs())
-  .add('UploadInfo', () => (
-    <UploadInfo
+  .add('PeerNetworkStats', () => (
+    <PeerNetworkStats
       torrent={
         ({
           numPeers: 2,
@@ -43,20 +42,5 @@ storiesOf('Web3Torrent', module)
           ]
         } as unknown) as TorrentUI
       }
-      channelCache={{
-        [c1]: {
-          channelId: c1,
-          beneficiary: a,
-          payer: d,
-          beneficiaryBalance: '0x13'
-        } as ChannelState,
-        [c2]: {
-          channelId: c2,
-          beneficiary: a,
-          payer: b,
-          beneficiaryBalance: '0x6'
-        } as ChannelState
-      }}
-      mySigningAddress={a}
-    ></UploadInfo>
+    ></PeerNetworkStats>
   ));

@@ -6,7 +6,6 @@ import '../../../App.scss';
 import {Status, TorrentUI} from '../../../types';
 import {DownloadInfo} from './DownloadInfo';
 import './DownloadInfo.scss';
-import {ChannelState} from '../../../clients/payment-channel-client';
 import {createMockTorrentPeers} from '../../../utils/test-utils';
 
 const a = '0xFb4A85D4bBf25e10Fc0Bed72f864dD1ead0006e7';
@@ -61,20 +60,5 @@ storiesOf('Web3Torrent', module)
           ]
         } as unknown) as TorrentUI
       }
-      channelCache={{
-        [c1]: {
-          channelId: c1,
-          beneficiary: d,
-          payer: b,
-          beneficiaryBalance: '0x13'
-        } as ChannelState,
-        [c2]: {
-          channelId: c2,
-          beneficiary: a,
-          payer: b,
-          beneficiaryBalance: '0x6'
-        } as ChannelState
-      }}
-      mySigningAddress={b}
     ></DownloadInfo>
   ));

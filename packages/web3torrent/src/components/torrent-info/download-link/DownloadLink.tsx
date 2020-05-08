@@ -9,14 +9,14 @@ export type DownloadLinkProps = {torrent: TorrentUI};
 export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   const [file, setFile] = useState({} as SavingData);
   useEffect(() => {
-    if (torrent.done) {
+    if (torrent.done && !torrent.originalSeed) {
       getFileSavingData(torrent.files, torrent.name).then(data => setFile(data));
     }
-  }, [torrent.done, torrent.files, torrent.name]);
+  }, [torrent.done, torrent.files, torrent.name, torrent.originalSeed]);
 
   return (
     <>
-      {torrent.done && (
+      {torrent.done && !torrent.originalSeed && (
         <a href={file.content} className="DownloadLink button" download={file.name || torrent.name}>
           Save Download
         </a>
