@@ -2,7 +2,7 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentPeers} from '../../../library/types';
-import {TorrentUI} from '../../../types';
+import {TorrentUI, Status} from '../../../types';
 import {createMockTorrentUI, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
 import {PeerSpeedInfo, PeerSpeedInfoProps} from './PeerSpeedInfo';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
@@ -24,7 +24,8 @@ const mockPeerSpeedInfo = (noPeers = false, isOriginalSeed = true): MockPeerSpee
     originalSeed: isOriginalSeed,
     parsedTimeRemaining: getFormattedETA(false, 3000),
     downloadSpeed: isOriginalSeed ? 0 : 10240,
-    uploadSpeed: 5124
+    uploadSpeed: 5124,
+    status: Status.Downloading
   });
 
   const PeerSpeedInfoWrapper = mount(<PeerSpeedInfo torrent={torrent} />);
@@ -48,7 +49,6 @@ describe('<PeerSpeedInfo />', () => {
   it('can be instantiated and show more info', () => {
     const {numPeersElement, torrent, uploadingSectionElement} = PeerSpeedInfo;
 
-    expect(uploadingSectionElement.exists()).toEqual(true);
     expect(numPeersElement.exists()).toEqual(true);
 
     expect(numPeersElement.text()).toEqual(`${torrent.numPeers}`);
