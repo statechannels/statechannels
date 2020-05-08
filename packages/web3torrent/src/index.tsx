@@ -1,3 +1,8 @@
+import * as Sentry from '@sentry/browser';
+if (process.env.NODE_ENV === 'production') {
+  Sentry.init({dsn: 'https://d8f6fb84518e4abe97a63dbb28b7cb27@o344922.ingest.sentry.io/5228838'});
+}
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Drift from 'react-driftjs';
