@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   docker: circleci/docker@1.0.1
   slack: circleci/slack@3.4.1
-  puppeteer: threetreeslight/puppeteer@0.1.2
 
 defaults: &defaults
   environment:
