@@ -61,5 +61,5 @@ You'll see a screen like this in your browser:
 ### Dev Notes
 
 - Because of [this issue](https://github.com/webtorrent/webtorrent/issues/1757) we require `end-of-stream` to be fixed at `1.4.1`.
-- To enable logging to the console, set `REACT_APP_LOG_DESTINATION=console`
-- To enable logging to a file when testing, set `REACT_APP_LOG_DESTINATION=someFilenameOtherThanConsole`
+- To enable logging to the console, set `LOG_DESTINATION=console`
+- To enable logging to a file when testing, set `LOG_DESTINATION=someFilenameOtherThanConsole`

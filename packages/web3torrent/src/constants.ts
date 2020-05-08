@@ -34,28 +34,28 @@ export function generateRandomPeerId() {
 // firebase setup
 export const HUB = {
   signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
-  outcomeAddress: process.env.REACT_APP_HUB_DESTINATION,
+  outcomeAddress: process.env.HUB_DESTINATION,
   participantId: 'firebase:simple-hub'
 };
-export const FIREBASE_PREFIX = process.env.REACT_APP_FIREBASE_PREFIX;
+export const FIREBASE_PREFIX = process.env.FIREBASE_PREFIX;
 export const fireBaseConfig =
-  process.env.REACT_APP_FUNDING_STRATEGY !== 'Virtual'
+  process.env.FUNDING_STRATEGY !== 'Virtual'
     ? undefined
     : {
-        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        databaseURL: process.env.REACT_APP_FIREBASE_URL
+        apiKey: process.env.FIREBASE_API_KEY,
+        databaseURL: process.env.FIREBASE_URL
       };
 
 // Tracker URLs
-const suffix = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL === 'https' ? 's' : '';
-const url = process.env.REACT_APP_TRACKER_URL;
+const suffix = process.env.TRACKER_URL_HTTP_PROTOCOL === 'https' ? 's' : '';
+const url = process.env.TRACKER_URL;
 export const defaultTrackers = [
   `http${suffix}://${url}/announce`,
   `udp://${url}`,
   `ws${suffix}://${url}`
 ];
 
-export const requiredNetwork = Number(process.env.REACT_APP_CHAIN_NETWORK_ID);
+export const requiredNetwork = Number(process.env.CHAIN_NETWORK_ID);
 
 export const EmptyTorrentUI: TorrentUI = {
   files: [],
@@ -172,16 +172,15 @@ if (process.env.SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
 }
 export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 
-export const FUNDING_STRATEGY =
-  process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
+export const FUNDING_STRATEGY = process.env.FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
 export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('0.001').toHexString(), 32);
 
-export const LOG_DESTINATION = process.env.REACT_APP_LOG_DESTINATION;
+export const LOG_DESTINATION = process.env.LOG_DESTINATION;
 export const ADD_LOGS = !!LOG_DESTINATION;
 
 // When logging, we default to 'info', as most logs happen at this level.
 // Some very large classes are serialized at the 'trace' level
 // We probably don't want these logged to the console, but strictly enabling this
 // in the browser might sometimes be helpful
-export const LOG_LEVEL = ADD_LOGS ? process.env.REACT_APP_LOG_LEVEL || 'info' : 'silent';
+export const LOG_LEVEL = ADD_LOGS ? process.env.LOG_LEVEL || 'info' : 'silent';
