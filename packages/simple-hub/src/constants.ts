@@ -8,11 +8,14 @@ export const cHubChannelPK =
 // '0xaaaa84838319627Fa056fC3FC29ab94d479B8502'
 export const cHubChannelSigningAddress = new Wallet(cHubChannelPK).address;
 
-// This account is provided eth in @statechannels/devtools/utils/startGanache.js
-export const cHubChainPK =
-  process.env.HUB_CHAIN_PK || '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8';
+// This account is provided eth in @statechannels/devtools/src/constants.ts
+// The corresponding address is 0x8199de05654e9afa5C081BcE38F140082C9a7733
+if (!process.env.HUB_CHAIN_PK) {
+  throw new Error('HUB_CHAIN_PK environment variable must be defined');
+}
+export const cHubChainPK = process.env.HUB_CHAIN_PK;
 
-export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChannelPK).address, 32);
+export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChainPK).address, 32);
 
 export const cHubParticipantId = process.env.HUB_PARTICIPANT_ID || 'firebase:simple-hub';
 

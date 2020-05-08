@@ -32,7 +32,7 @@ export function generateRandomPeerId() {
 // firebase setup
 export const HUB = {
   signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
-  outcomeAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
+  outcomeAddress: process.env.REACT_APP_HUB_DESTINATION,
   participantId: 'firebase:simple-hub'
 };
 export const FIREBASE_PREFIX = process.env.REACT_APP_FIREBASE_PREFIX;
