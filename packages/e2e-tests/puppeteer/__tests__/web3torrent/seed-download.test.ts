@@ -63,7 +63,7 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log('Loading dapps');
     await forEachTab(async (tab, idx) => {
       await setupLogging(tab, idx, 'seed-download', true);
-      if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, idx);
+      if (!USE_DAPPETEER) await setupFakeWeb3(tab, idx);
     });
 
     browsers = [browserA, browserB];
