@@ -11,16 +11,16 @@ import {
   setupFakeWeb3,
   waitForNthState,
   waitForClosedState
-} from '../../helpers';
+} from '../helpers';
 
 import {
   uploadFile,
   prepareStubUploadFile,
   startDownload,
   cancelDownload
-} from '../../scripts/web3torrent';
+} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER, CLOSE_BROWSERS} from '../../constants';
+import {USE_DAPPETEER, CLOSE_BROWSERS} from '../constants';
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
