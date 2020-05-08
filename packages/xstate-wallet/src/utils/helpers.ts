@@ -58,3 +58,32 @@ export function createDestination(address: string): string {
 export function formatAmount(amount: BigNumber): string {
   return hexZeroPad(hexlify(amount), 32);
 }
+
+export function arrayToRecord<T, K extends keyof T>(
+  array: Array<T>,
+  idProperty: K
+): Record<string | number, T> {
+  return array.reduce((obj, item) => {
+    obj[item[idProperty]] = item;
+    return obj;
+  }, {} as any);
+}
+
+export function recordToArray<T>(record: Record<string | number, T | undefined>): Array<T> {
+  return Object.keys(record)
+    .map(k => record[k])
+    .filter(e => e !== undefined) as Array<T>;
+}
+
+export function filterRecords<T>(
+  record: Record<string | number, T | undefined>,
+  condition: (entry: T | undefined) => boolean
+): Record<string | number, T> {
+  const filteredRecords = {};
+  Object.keys(record).forEach(k => {
+    if (condition(record[k])) {
+      filteredRecords[k] = record;
+    }
+  });
+  return filteredRecords;
+}

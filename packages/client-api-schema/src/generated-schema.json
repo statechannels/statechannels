@@ -826,6 +826,71 @@
       ],
       "type": "object"
     },
+    "GetChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "items": {
+            "$ref": "#/definitions/ChannelResult"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetChannelsRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetChannels"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "includeClosed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "includeClosed"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
     "GetStateParams": {
       "additionalProperties": false,
       "properties": {

@@ -238,6 +238,12 @@ describe('setLedger', () => {
   });
 });
 
+describe('getApplicationChannels', () => {
+  it('works', async () => {
+    
+  });
+});
+
 const getBackend = (store: Store) => (store as any).backend as Backend;
 
 describe('transactions', () => {

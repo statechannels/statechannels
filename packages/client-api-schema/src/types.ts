@@ -208,6 +208,9 @@ export interface TokenBudgetRequest {
   requestedSendCapacity: Uint256;
   requestedReceiveCapacity: Uint256;
 }
+
+export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {includeClosed?: boolean}>;
+export type GetChannelsResponse = JsonRpcResponse<Array<ChannelResult>>;
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
@@ -258,7 +261,8 @@ export type Request =
   | GetBudgetRequest
   | ApproveBudgetAndFundRequest
   | CloseChannelRequest
-  | CloseAndWithdrawRequest;
+  | CloseAndWithdrawRequest
+  | GetChannelsRequest;
 
 export type Response =
   | CreateChannelResponse
@@ -272,7 +276,8 @@ export type Response =
   | GetBudgetResponse
   | CloseChannelResponse
   | ApproveBudgetAndFundResponse
-  | CloseAndWithdrawResponse;
+  | CloseAndWithdrawResponse
+  | GetChannelsResponse;
 
 export type UserDeclinedErrorResponse = JsonRpcError<typeof UserDeclinedErrorCode, 'User declined'>;
 
