@@ -15,7 +15,8 @@ import {
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER, CLOSE_BROWSERS} from '../../constants';
+import {CLOSE_BROWSERS} from '../../constants';
+const USE_DAPPETEER = false;
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
