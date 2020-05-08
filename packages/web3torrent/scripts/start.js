@@ -1,4 +1,35 @@
+'use strict';
+
+// Do this as the first thing so that any code reading it knows the right env.
+process.env.BABEL_ENV = 'development';
+process.env.NODE_ENV = 'development';
+
+// Makes the script crash on unhandled rejections instead of silently
+// ignoring them. In the future, promise rejections that are not handled will
+// terminate the Node.js process with a non-zero exit code.
+process.on('unhandledRejection', err => {
+  throw err;
+});
+
 const fs = require('fs');
+const chalk = require('react-dev-utils/chalk');
+const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const clearConsole = require('react-dev-utils/clearConsole');
+const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
+const {
+  choosePort,
+  createCompiler,
+  prepareProxy,
+  prepareUrls
+} = require('react-dev-utils/WebpackDevServerUtils');
+const openBrowser = require('react-dev-utils/openBrowser');
+const paths = require('../config/paths');
+const configFactory = require('../config/webpack.config');
+const createDevServerConfig = require('../config/webpackDevServer.config');
+const {spawn} = require('child_process');
+const {getNetworkName, setupGanache, configureEnvVariables} = require('@statechannels/devtools');
+const {deploy} = require('../deployment/deploy');
 
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
@@ -12,7 +43,7 @@ let trackerServer;
 // terminate the Node.js process with a non-zero exit code.
 process.on('unhandledRejection', err => {
   if (devServer) {
-    devServer.kill();
+    devServer.close();
   }
   if (trackerServer) {
     trackerServer.kill();
@@ -20,17 +51,13 @@ process.on('unhandledRejection', err => {
   throw err;
 });
 
-const {spawn} = require('child_process');
-const {getNetworkName, setupGanache, configureEnvVariables} = require('@statechannels/devtools');
-const {deploy} = require('../deployment/deploy');
-
 // Ensure environment variables are read.
 configureEnvVariables();
 
 void (async () => {
   process.on('SIGINT', () => {
     if (devServer) {
-      devServer.kill();
+      devServer.close();
     }
     if (trackerServer) {
       trackerServer.kill();
@@ -38,7 +65,7 @@ void (async () => {
   });
   process.on('SIGTERM', () => {
     if (devServer) {
-      devServer.kill();
+      devServer.close();
     }
     if (trackerServer) {
       trackerServer.kill();
@@ -46,53 +73,58 @@ void (async () => {
   });
   process.on('exit', () => {
     if (devServer) {
-      devServer.kill();
+      devServer.close();
     }
     if (trackerServer) {
       trackerServer.kill();
     }
   });
 
-  // We must edit .env.local since there is no easy programmatic way to inject
-  // environment variables into the react-scripts start command.
-  const networkName = getNetworkName(process.env.CHAIN_NETWORK_ID);
+  process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 
-  let data = '# NOTE: This file is auto-generated. Use .env.development.local for custom values\n';
-
-  if (networkName === 'development') {
-    const {deployer} = await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
+  if (process.env.TARGET_NETWORK === 'development') {
+    // Add contract addresses to process.env if running ganache
+    const {deployer} = await await setupGanache(process.env.WEB3TORRENT_DEPLOYER_ACCOUNT_INDEX);
     const deployedArtifacts = await deploy(deployer);
-    for (const artifactName in deployedArtifacts) {
-      data += `REACT_APP_${artifactName} = ${deployedArtifacts[artifactName]}\n`;
-    }
+    process.env = {...process.env, ...deployedArtifacts};
   }
+  const isInteractive = process.stdout.isTTY;
 
-  data += `REACT_APP_TARGET_NETWORK = ${networkName}\n`;
-
-  // We must edit .env.local since there is no easy programmatic way to inject
-  // environment variables into the react-scripts start command.
-  fs.writeFile('.env.local', data, err => {
-    if (err) throw err;
+  const {checkBrowsers} = require('react-dev-utils/browsersHelper');
+  await checkBrowsers(paths.appPath, isInteractive);
+  const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
+  const HOST = process.env.HOST || '0.0.0.0';
+  const port = await choosePort(HOST, DEFAULT_PORT);
+  const config = configFactory('development');
+  const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+  const appName = require(paths.appPackageJson).name;
+  const useTypeScript = fs.existsSync(paths.appTsConfig);
+  const urls = prepareUrls(protocol, HOST, port);
+  const devSocket = {
+    warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
+    errors: errors => devServer.sockWrite(devServer.sockets, 'errors', errors)
+  };
+  // Create a webpack compiler that is configured with custom messages.
+  const compiler = createCompiler({
+    appName,
+    config,
+    devSocket,
+    urls,
+    useYarn: true,
+    useTypeScript,
+    webpack
+  });
+  // Load proxy config
+  const proxySetting = require(paths.appPackageJson).proxy;
+  const proxyConfig = prepareProxy(proxySetting, paths.appPublic);
+  // Serve webpack assets generated by the compiler over a web server.
+  const serverConfig = createDevServerConfig(proxyConfig, urls.lanUrlForConfig);
+  const devServer = new WebpackDevServer(compiler, serverConfig);
+  devServer.listen(port, HOST, error => {
+    console.error(error);
   });
 
-  const cmd = 'yarn';
-  const args = ['run', 'react-scripts', 'start'];
-
-  const devServer = spawn(cmd, args);
-
-  devServer.stdout.on('data', data => {
-    console.log(data.toString());
-  });
-
-  devServer.stderr.on('data', data => {
-    throw data.toString();
-  });
-
-  devServer.on('close', code => {
-    process.exit(code);
-  });
-
-  const trackerServer = spawn(cmd, ['run', 'start:tracker']);
+  const trackerServer = spawn('yarn', ['run', 'start:tracker']);
 
   trackerServer.stdout.on('data', data => {
     console.log(data.toString());

@@ -2,6 +2,8 @@ import {Status, TorrentUI} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
 
+export const VERSION = process.env.VERSION;
+
 export const WEI_PER_BYTE = utils.bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
 export const PEER_TRUST = 4; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
@@ -163,9 +165,8 @@ export const mockChannels: Array<Partial<ChannelState>> = [
 ];
 
 let SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS: string;
-if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
-  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS =
-    process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+if (process.env.SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS = process.env.SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 } else {
   throw new Error('Contract address not defined');
 }
