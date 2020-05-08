@@ -248,17 +248,19 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  // payer may use this method to make payments (if they have sufficient funds)
-  async makePayment(channelId: string, amount: string) {
-    const readyToPay = (state: ChannelState | undefined) =>
-      state &&
+  getLatestPaymentReceipt() {
+    const readyToPay = (state: ChannelState) =>
       state.status === 'running' &&
       state.payer === this.mySigningAddress &&
       state.turnNum.mod(2).eq(Index.Payer);
 
-    const channelState: ChannelState = await this.channelClient.channelState
+    return this.channelClient.channelState
       .pipe(map(convertToChannelState), filter(readyToPay), first())
       .toPromise();
+  }
+  // payer may use this method to make payments (if they have sufficient funds)
+  async makePayment(channelId: string, amount: string) {
+    const channelState: ChannelState = await this.getLatestPaymentReceipt();
 
     const {payerBalance} = channelState;
     if (bigNumberify(payerBalance).lt(amount)) {
@@ -325,11 +327,9 @@ export class PaymentChannelClient {
   }
 
   async createBudget(amount: string) {
-    const playerDestinationAddress = this.channelClient.selectedAddress;
     this.budgetCache = await this.channelClient.approveBudgetAndFund(
       amount,
       amount,
-      playerDestinationAddress,
       HUB.signingAddress,
       HUB.outcomeAddress
     );

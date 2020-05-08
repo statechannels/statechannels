@@ -135,7 +135,6 @@ export class ChannelClient implements ChannelClientInterface {
   async approveBudgetAndFund(
     receiveCapacity: string,
     sendCapacity: string,
-    _playerOutcomeAddress: string, // TODO: This is done by the wallet and not needed
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget> {

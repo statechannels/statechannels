@@ -235,7 +235,7 @@ const chainLogger = logger.child({module: 'chain'});
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  private mySelectedAddress: string | null;
+  private mySelectedAddress: string | null = window.ethereum?.selectedAddress ?? null;
   private provider: ReturnType<typeof getProvider>;
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');

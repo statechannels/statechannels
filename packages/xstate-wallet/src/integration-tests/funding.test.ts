@@ -26,7 +26,7 @@ it('allows for two wallets to fund an app', async () => {
   );
 
   hookUpMessaging(playerA, playerB);
-  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+  const channelId = '0x440b56b6c5b0adca1ee99e3926d1b123fd867566cfab5150479f9d5e9317fa1e';
 
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
   const isCreateChannelResponse = (m): m is CreateChannelResponse =>

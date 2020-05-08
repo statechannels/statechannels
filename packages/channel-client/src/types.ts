@@ -53,7 +53,6 @@ export interface ChannelClientInterface {
   approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
-    playerOutcomeAddress: string,
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget>;
