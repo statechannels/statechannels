@@ -52,6 +52,7 @@ export function isGuarantees(funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
 export enum Errors {
+  duplicateTurnNums = 'multiple states with same turn number',
   notSorted = 'states not sorted',
   multipleSignedStates = 'Store signed multiple states for a single turn',
   staleState = 'Attempting to sign a stale state',

@@ -34,10 +34,10 @@ export const third: Participant = HUB;
 export const participants: [Participant, Participant] = [first, second];
 export const threeParticipants: [Participant, Participant, Participant] = [first, second, third];
 
-export const appState = (n: BigNumberish): State => ({
+export const appState = (n: BigNumberish, isFinal = false): State => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
   appDefinition: '0x0000000000000000000000000000000000000000',
-  isFinal: false,
+  isFinal,
   turnNum: bigNumberify(n),
   outcome: simpleEthAllocation([
     {destination: first.destination, amount: bigNumberify(1)},
