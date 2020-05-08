@@ -22,7 +22,8 @@ import {
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   waitForWalletToBeHidden,
-  waitForClosedState
+  waitForClosedState,
+  takeScreenshot
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -68,7 +69,10 @@ describe('Web3-Torrent Integration Tests', () => {
     browsers = [browserA, browserB];
   });
 
-  afterAll(async () => await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close()));
+  afterAll(async () => {
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}.png`));
+    await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
+  });
 
   it('allows peers to start torrenting', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});

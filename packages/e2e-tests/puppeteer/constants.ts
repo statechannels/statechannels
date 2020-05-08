@@ -13,3 +13,5 @@ export const WALLET_URL = process.env.REACT_APP_WALLET_URL
   : 'http://localhost:3055';
 export const TX_WAIT_TIMEOUT = process.env.TARGET_NETWORK === 'ropsten' ? 90000 : 30000;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;
+
+export const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR;

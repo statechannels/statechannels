@@ -2,10 +2,16 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, setupLogging, waitAndApproveMetaMask, setupFakeWeb3} from '../../helpers';
+import {
+  setUpBrowser,
+  setupLogging,
+  waitAndApproveMetaMask,
+  setupFakeWeb3,
+  takeScreenshot
+} from '../../helpers';
 import {login, startFundAndPlaySingleMove} from '../../scripts/rps';
 import {Dappeteer} from 'dappeteer';
-import {USE_DAPPETEER} from '../../constants';
+import {USE_DAPPETEER, CLOSE_BROWSERS} from '../../constants';
 
 jest.setTimeout(200_000);
 
@@ -47,12 +53,10 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
   });
 
   afterAll(async () => {
-    if (browserA) {
-      await browserA.close();
-    }
-    if (browserB) {
-      await browserB.close();
-    }
+    await Promise.all(
+      [rpsTabA, rpsTabB].map(async (tab, idx) => takeScreenshot(tab, `rps.${idx}.png`))
+    );
+    await Promise.all([browserA, browserB].map(async b => CLOSE_BROWSERS && b && b.close()));
   });
 
   it('works', async () => {

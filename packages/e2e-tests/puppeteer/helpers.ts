@@ -3,8 +3,9 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT} from './constants';
+import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT, SCREENSHOT_DIR} from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {dir} from 'console';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
@@ -340,4 +341,11 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingText = 'div.application-workflow-prompt > h2';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
+}
+
+export async function takeScreenshot(tab: Page, file: string): Promise<void> {
+  if (typeof SCREENSHOT_DIR === 'string') {
+    if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR);
+    await tab.screenshot({path: path.join(SCREENSHOT_DIR, file)});
+  }
 }
