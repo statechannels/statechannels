@@ -333,12 +333,20 @@ export class PaymentChannelClient {
   }
 
   async createBudget(amount: string) {
-    this.budgetCache = await this.channelClient.approveBudgetAndFund(
-      amount,
-      amount,
-      HUB.signingAddress,
-      HUB.outcomeAddress
-    );
+    try {
+      this.budgetCache = await this.channelClient.approveBudgetAndFund(
+        amount,
+        amount,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+    } catch (e) {
+      if (e.message === 'User declined') {
+        return;
+      } else {
+        throw e;
+      }
+    }
   }
 
   async getBudget(): Promise<SiteBudget> {
