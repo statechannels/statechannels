@@ -134,7 +134,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrentInfoHash,
       peerAccount
     });
-    log.info({from: Object.keys(this.peersList)}, '<< unblockedPeer %s', peerAccount);
+    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer');
   }
 
   togglePeer(torrentInfoHash: string, peerAccount: string) {
@@ -162,7 +162,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
     wire.on(WireEvents.KEEP_ALIVE, () => {
-      log.info('wire keep-alive : %s', !torrent.done && wire.amChoking);
+      log.info({keepAlive: !torrent.done && wire.amChoking}, 'wire keep-alive');
       log.trace({torrent});
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
@@ -356,7 +356,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
-      log.error({err, torrent}, 'Torrent ERROR: ');
+      log.error({err, torrent}, 'Torrent ERROR');
       this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
     });
     torrent.usingPaidStreaming = true;
