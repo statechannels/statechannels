@@ -4,20 +4,20 @@ import React from 'react';
 import {TorrentPeers} from '../../../library/types';
 import {TorrentUI, Status} from '../../../types';
 import {createMockTorrentUI, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
-import {PeerSpeedInfo, PeerSpeedInfoProps} from './PeerSpeedInfo';
+import {PeerNetworkStats, PeerNetworkStatsProps} from './PeerNetworkStats';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
 
 Enzyme.configure({adapter: new Adapter()});
 
-type MockPeerSpeedInfo = {
+type MockPeerNetworkStats = {
   torrent: Partial<TorrentUI>;
   peers: TorrentPeers;
-  PeerSpeedInfoWrapper: ReactWrapper<PeerSpeedInfoProps>;
+  PeerNetworkStatsWrapper: ReactWrapper<PeerNetworkStatsProps>;
   uploadingSectionElement: ReactWrapper;
   numPeersElement: ReactWrapper;
 };
 
-const mockPeerSpeedInfo = (noPeers = false, isOriginalSeed = true): MockPeerSpeedInfo => {
+const mockPeerNetworkStats = (noPeers = false, isOriginalSeed = true): MockPeerNetworkStats => {
   const peers = noPeers ? {} : createMockTorrentPeers();
   const torrent = createMockTorrentUI({
     numPeers: Object.keys(peers).length,
@@ -28,26 +28,26 @@ const mockPeerSpeedInfo = (noPeers = false, isOriginalSeed = true): MockPeerSpee
     status: Status.Downloading
   });
 
-  const PeerSpeedInfoWrapper = mount(<PeerSpeedInfo torrent={torrent} />);
+  const PeerNetworkStatsWrapper = mount(<PeerNetworkStats torrent={torrent} />);
 
   return {
-    PeerSpeedInfoWrapper,
+    PeerNetworkStatsWrapper,
     torrent,
     peers,
-    uploadingSectionElement: PeerSpeedInfoWrapper.find('.peerSpeedInfo'),
-    numPeersElement: PeerSpeedInfoWrapper.find(testSelector('numPeers'))
+    uploadingSectionElement: PeerNetworkStatsWrapper.find('.PeerNetworkStats'),
+    numPeersElement: PeerNetworkStatsWrapper.find(testSelector('numPeers'))
   };
 };
 
-describe('<PeerSpeedInfo />', () => {
-  let PeerSpeedInfo: MockPeerSpeedInfo;
+describe('<PeerNetworkStats />', () => {
+  let PeerNetworkStats: MockPeerNetworkStats;
 
   beforeEach(() => {
-    PeerSpeedInfo = mockPeerSpeedInfo();
+    PeerNetworkStats = mockPeerNetworkStats();
   });
 
   it('can be instantiated and show more info', () => {
-    const {numPeersElement, torrent, uploadingSectionElement} = PeerSpeedInfo;
+    const {numPeersElement, torrent, uploadingSectionElement} = PeerNetworkStats;
 
     expect(numPeersElement.exists()).toEqual(true);
 
@@ -55,7 +55,7 @@ describe('<PeerSpeedInfo />', () => {
   });
 
   it('can show the correct peer an speed info', () => {
-    const {numPeersElement, torrent, uploadingSectionElement} = PeerSpeedInfo;
+    const {numPeersElement, torrent, uploadingSectionElement} = PeerNetworkStats;
 
     expect(uploadingSectionElement.exists()).toEqual(true);
     expect(numPeersElement.exists()).toEqual(true);

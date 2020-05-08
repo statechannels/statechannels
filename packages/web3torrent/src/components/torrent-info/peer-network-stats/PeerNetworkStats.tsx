@@ -1,13 +1,13 @@
 import React from 'react';
 import prettier from 'prettier-bytes';
-import './PeerSpeedInfo.scss';
+import './PeerNetworkStats.scss';
 import {TorrentUI, IdleStatuses} from '../../../types';
 
-export type PeerSpeedInfoProps = {torrent: TorrentUI};
+export type PeerNetworkStatsProps = {torrent: TorrentUI};
 
-const PeerSpeedInfo: React.FC<PeerSpeedInfoProps> = ({torrent}: PeerSpeedInfoProps) =>
+const PeerNetworkStats: React.FC<PeerNetworkStatsProps> = ({torrent}: PeerNetworkStatsProps) =>
   !IdleStatuses.includes(torrent.status) && (
-    <section className="peerSpeedInfo">
+    <section className="PeerNetworkStats">
       {!torrent.originalSeed && torrent.parsedTimeRemaining && torrent.parsedTimeRemaining + '. '}
       {prettier(torrent.done || !torrent.downloadSpeed ? 0 : torrent.downloadSpeed)}
       /s down, {prettier(!torrent.uploadSpeed ? 0 : torrent.uploadSpeed)}/s up
@@ -16,4 +16,4 @@ const PeerSpeedInfo: React.FC<PeerSpeedInfoProps> = ({torrent}: PeerSpeedInfoPro
     </section>
   );
 
-export {PeerSpeedInfo};
+export {PeerNetworkStats};

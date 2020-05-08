@@ -5,7 +5,7 @@ import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
-import {PeerSpeedInfo} from './peer-speed-info/PeerSpeedInfo';
+import {PeerNetworkStats} from './peer-network-stats/PeerNetworkStats';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
@@ -49,7 +49,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
       {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
         <DownloadInfo torrent={torrent} />
       )}
-      <PeerSpeedInfo torrent={torrent} />
+      <PeerNetworkStats torrent={torrent} />
       <DownloadLink torrent={torrent} />
       <ChannelsList torrent={torrent} channels={channelCache} mySigningAddress={mySigningAddress} />
     </>

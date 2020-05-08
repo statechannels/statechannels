@@ -4,8 +4,8 @@ import {storiesOf} from '@storybook/react';
 import React from 'react';
 import '../../../App.scss';
 import {TorrentUI} from '../../../types';
-import {PeerSpeedInfo} from './PeerSpeedInfo';
-import './PeerSpeedInfo.scss';
+import {PeerNetworkStats} from './PeerNetworkStats';
+import './PeerNetworkStats.scss';
 import {createMockTorrentPeers} from '../../../utils/test-utils';
 
 const a = '0xFb4A85D4bBf25e10Fc0Bed72f864dD1ead0006e7';
@@ -18,8 +18,8 @@ const c2 = '0xe10Fc0Bed72f864dD1ead0006e7Fb4A85D4bBf25e10Fc0Bed72Fb4A85D4bBf25';
 storiesOf('Web3Torrent', module)
   .addDecorator(withActions('click'))
   .addDecorator(withKnobs())
-  .add('PeerSpeedInfo', () => (
-    <PeerSpeedInfo
+  .add('PeerNetworkStats', () => (
+    <PeerNetworkStats
       torrent={
         ({
           numPeers: 2,
@@ -42,5 +42,5 @@ storiesOf('Web3Torrent', module)
           ]
         } as unknown) as TorrentUI
       }
-    ></PeerSpeedInfo>
+    ></PeerNetworkStats>
   ));
