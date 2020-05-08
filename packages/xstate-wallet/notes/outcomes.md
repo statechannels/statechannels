@@ -1,5 +1,7 @@
 # Outcomes
 
+## Data structures
+
 The wallet currently uses two types of outcomes.
 
 ```typescript
@@ -28,9 +30,39 @@ This is explained in detail in the [nitro paper](https://magmo.com/nitro-protoco
   - In practice, guarantor channels are _all_ underfunded
     - they only cover a portion of the allocations of the target channel
 
-# Updating outcomes
+### Note
 
-When the wallet is asked to sign a state `s'`, the wallet should ensure that one of four things is true:
+- Currently, the wallet only supports eth.
+  - It may soon support channels with other (ERC20) tokens, but only one token.
+  - It will eventually support channels with multiple tokens. In this case, (only?) application channels may have a "mixed" outcome
+
+```typescript
+interface MixedAllocation {
+  type: 'MixedAllocation';
+  simpleAllocations: SimpleAllocation[];
+}
+```
+
+## Finalizable outcomes
+
+An outcome `o` is _finalizable_ for a channel if there is some participant who can finalize the channel on chain with outcome `o`.
+
+An outcome `o` is _universally finalizable_ if it is finalizable for every participant in the channel.
+
+For "null apps", where no transitions are valid, outcomes are finalizable by `p` precisely when:
+A. `p` has a state `s`, signed by all participants
+B. There is no state `s'` with `s'.turnNum >= s.turnNum`
+
+"Null apps" have the advantage that `p` has total control over (B): `p` can simply refuse to sign any such state `s'` while they want `o` to be finalizable.
+
+To progress a channel, however, `p` may have to sign a state `s'` such that `s'.turnNum > s.turnNum` and `s'.outcome = o' !== o`.
+Until `p` gets a full set of signatures, neither `o` nor `o'` are finalizable by `p`.
+Therefore, `p` must be satisfied with both `o` and `o'` for a period of time.
+
+## Updating outcomes
+
+When the wallet is asked to _sign_ a state `s'`, the wallet may no longer have a finalizable outcome.
+Therefore, to protect funds, the wallet should ensure that one of four things is true:
 
 1. a) the wallet has not yet signed a state for that channel.
    b) outcome on `s'` is "suitable" for the channel's purpose.
@@ -50,13 +82,13 @@ When the wallet is asked to sign a state `s'`, the wallet should ensure that one
 ### Notes
 
 - The wallet should _never_ change the outcome from a guarantee to an allocation.
-- Currently, the wallet only supports eth.
-  - It may soon support channels with other (ERC20) tokens, but only one token.
-  - It will eventually support channels with multiple tokens. In this case, (only?) application channels may have a "mixed" outcome
 
-```typescript
-interface MixedAllocation {
-  type: 'MixedAllocation';
-  simpleAllocations: SimpleAllocation[];
-}
-```
+## Receiving states
+
+A wallet has no control over what states another participant signs.
+Therefore, it may receive arbitrary states at an arbitrary time.
+
+In theory, a wallet should keep every signed state and capitalize on mistakes of its peers.
+In practice, our wallet discards "stale" states -- those whose turn number is less than the latest supported turn number, unless it's a part of the support.
+This handles garbage collection for stale states, but does not determine what the wallet should do if it receives a random, newer state.
+That wallet behaviour is not yet determined.
