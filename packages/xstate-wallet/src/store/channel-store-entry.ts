@@ -259,7 +259,10 @@ export class ChannelStoreEntry {
 
     const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
     if (duplicateTurnNums) {
-      logger.error({signedStates: _.map(signedStates, s => s.turnNum.toHexString())});
+      logger.error(
+        {signedStates: _.map(signedStates, s => s.turnNum.toHexString())},
+        Errors.duplicateTurnNums
+      );
       throw Error(Errors.duplicateTurnNums);
     }
     if (!isReverseSorted(turnNums)) {
