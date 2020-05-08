@@ -80,16 +80,9 @@ commands:
 
   upload_e2e_screenshots:
     description: 'Upload e2e error screengrab '
-    parameters:
-      job:
-        type: string
     steps:
       - store_artifacts:
-          path: /home/circleci/project/packages/e2e-tests/e2e-wait.error.png
-          destination: wait.error.png
-      - store_artifacts:
-          path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
-          destination: click.error.png
+          path: /home/circleci/project/packages/e2e-tests/screenshots
 
   notify_slack:
     description: 'Notify slack '
@@ -245,8 +238,7 @@ jobs:
       - run: (cd packages/e2e-tests && yarn test rps)
       - upload_logs:
           file: integration-test-stats
-      - upload_e2e_screenshots:
-          job: integration-test
+      - upload_e2e_screenshots
 
   integration-test-web3torrent:
     resource_class: large
@@ -280,8 +272,7 @@ jobs:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-stats
-      - upload_e2e_screenshots:
-          job: integration-test-web3torrent
+      - upload_e2e_screenshots
 
   integration-test-web3torrent-with-hub:
     resource_class: large
@@ -315,8 +306,7 @@ jobs:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
-      - upload_e2e_screenshots:
-          job: integration-test-with-hub
+      - upload_e2e_screenshots
 
   release-pull-request:
     <<: *defaults

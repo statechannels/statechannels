@@ -7,14 +7,16 @@ import {
   withdrawAndWait,
   waitForEmptyBudget,
   setupLogging,
-  setupFakeWeb3
+  setupFakeWeb3,
+  takeScreenshot
 } from '../../helpers';
 import {
   JEST_TIMEOUT,
   USES_VIRTUAL_FUNDING,
   HEADLESS,
   USE_DAPPETEER,
-  APP_URL as WEB3TORRENT_URL
+  APP_URL as WEB3TORRENT_URL,
+  CLOSE_BROWSERS
 } from '../../constants';
 import {Browser, Page} from 'puppeteer';
 import {uploadFile} from '../../scripts/web3torrent';
@@ -44,9 +46,8 @@ describe('withdrawal from a ledger channel', () => {
   });
 
   afterAll(async () => {
-    if (browser) {
-      await browser.close();
-    }
+    await takeScreenshot(web3tTabA, 'withdraw.png');
+    CLOSE_BROWSERS && browser && (await browser.close());
   });
 
   itOrSkip('allows a player to withdraw funds from the ledger channel', async () => {
