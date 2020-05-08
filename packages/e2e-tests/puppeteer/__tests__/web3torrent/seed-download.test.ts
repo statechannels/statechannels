@@ -30,47 +30,50 @@ import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
 
-let browserA: Browser;
-let browserB: Browser;
 let metamaskA: Dappeteer;
 let metamaskB: Dappeteer;
 let web3tTabA: Page;
 let web3tTabB: Page;
+let browserA: Browser;
+let browserB: Browser;
 let tabs: [Page, Page];
+let browsers: [Browser, Browser];
+
+const forEachBrowser = <T>(cb: (value: Browser, index: number, array: Browser[]) => Promise<T>) =>
+  Promise.all(browsers.map(cb));
+const forEachTab = <T>(cb: (value: Page, index: number, array: Page[]) => Promise<T>) =>
+  Promise.all(tabs.map(cb));
 
 describe('Web3-Torrent Integration Tests', () => {
   beforeAll(async () => {
     console.log('Opening browsers');
 
-    const setupAPromise = setUpBrowser(HEADLESS, 4, 0);
-    const setupBPromise = setUpBrowser(HEADLESS, 5, 0);
-    ({browser: browserA, metamask: metamaskA} = await setupAPromise);
-    ({browser: browserB, metamask: metamaskB} = await setupBPromise);
+    [
+      {browser: browserA, metamask: metamaskA},
+      {browser: browserB, metamask: metamaskB}
+    ] = await Promise.all([4, 5].map(async idx => await setUpBrowser(HEADLESS, idx, 0)));
+
+    browsers = [browserA, browserB];
 
     console.log('Waiting on pages');
-    web3tTabA = (await browserA.pages())[0];
-    web3tTabB = (await browserB.pages())[0];
-
+    [web3tTabA, web3tTabB] = await forEachBrowser(async b => (await b.pages())[0]);
     tabs = [web3tTabA, web3tTabB];
 
     console.log('Loading dapps');
-    await setupLogging(web3tTabA, 0, 'seed-download', true);
-    await setupLogging(web3tTabB, 1, 'seed-download', true);
-    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 0);
-    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, 0);
+    await forEachTab(async (tab, idx) => {
+      await setupLogging(tab, idx, 'seed-download', true);
+      if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabB, idx);
+    });
 
-    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
-
-    await web3tTabA.bringToFront();
+    browsers = [browserA, browserB];
   });
 
-  afterAll(async () => {
-    CLOSE_BROWSERS &&
-      (await Promise.all(
-        [browserA, browserB].map(async browser => browser && (await browser.close()))
-      ));
-  });
+  afterAll(async () => await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close()));
+
   it('allows peers to start torrenting', async () => {
+    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
+    await web3tTabA.bringToFront();
+
     console.log('A uploads a file');
     const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
 
@@ -96,15 +99,18 @@ describe('Web3-Torrent Integration Tests', () => {
     // see https://github.com/statechannels/monorepo/issues/1546
 
     // Ensure the wallet is not visible
-    await Promise.all(tabs.map(tab => waitForWalletToBeHidden(tab)));
+    await forEachTab(waitForWalletToBeHidden);
+
     // Wait for the close state channel update
     // TODO: It looks like direct funding is not properly sending a closed state
     // see https://github.com/statechannels/monorepo/issues/1649
     if (USES_VIRTUAL_FUNDING) {
-      await Promise.all(tabs.map(tab => waitForClosedState(tab)));
+      await forEachTab(waitForClosedState);
     }
+
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await Promise.all(tabs.map(tab => tab.waitFor(1500)));
+    await forEachTab(tab => tab.waitFor(1500));
+
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
