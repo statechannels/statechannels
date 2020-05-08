@@ -89,8 +89,8 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log('Downloading');
     await waitForNthState(web3tTabB, 10);
 
-    // console.log('B cancels download');
-    // await cancelDownload(web3tTabB);
+    console.log('B cancels download');
+    await cancelDownload(web3tTabB);
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
