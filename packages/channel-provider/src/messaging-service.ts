@@ -96,7 +96,7 @@ export class MessagingService {
         }
         this.acknowledge();
         window.removeEventListener('message', listener);
-        logger.info({response: event.data}, 'Received response: %o');
+        logger.info({response: event.data}, 'Received response');
         resolve(event.data.result);
       } else if (event.data.error) {
         reject(event.data.error);
