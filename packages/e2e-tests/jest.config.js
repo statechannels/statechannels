@@ -5,5 +5,6 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  globalSetup: '<rootDir>/jest.setup.ts'
+  globalSetup: '<rootDir>/jest.setup.ts',
+  verbose: true
 };
