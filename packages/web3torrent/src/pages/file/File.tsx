@@ -111,7 +111,7 @@ const File: React.FC<Props> = props => {
           withdraw={closeBudget}
         />
       )}
-      {torrent.status === Status.Idle && (
+      {(torrent.status === Status.Idle || torrent.status === Status.Paused) && (
         <>
           <FormButton
             name="download"
