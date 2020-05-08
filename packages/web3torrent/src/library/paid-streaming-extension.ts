@@ -157,7 +157,7 @@ export abstract class PaidStreamingExtension implements Extension {
         if (data.recipient !== this.pseAccount) {
           return;
         }
-        log.info({data}, `MESSAGE received from ${this.peerAccount}: `);
+        log.info({data}, `MESSAGE received from ${this.peerAccount}`);
         break;
     }
     this.ack();
