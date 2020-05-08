@@ -84,9 +84,9 @@ describe('Web3-Torrent Integration Tests', () => {
     await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING, metamaskB);
 
     console.log('Waiting for open channels');
-    await Promise.all([web3tTabA].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
     // only works if done in series.... not sure why
-    await Promise.all([web3tTabB].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
+    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
+    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
 
     if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
     else waitAndApproveDeposit(web3tTabB, metamaskB);

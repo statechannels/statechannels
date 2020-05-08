@@ -317,17 +317,17 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
 ): Promise<void> => {
-  const promises = [doneWhen(page, `channelStatus.status === 'running'`)];
+  const opened = doneWhen(page, `channelStatus.status === 'running'`);
   if (!usingVirtualFunding) {
     console.log('Waiting for create channel button');
 
     const createChannelButton = 'div.application-workflow-prompt > div > button';
 
     const walletIFrame = page.frames()[1];
-    promises.push(waitForAndClickButton(page, walletIFrame, createChannelButton));
+    await waitForAndClickButton(page, walletIFrame, createChannelButton);
   }
 
-  await Promise.all(promises);
+  await opened;
 };
 export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
   return doneWhen(page, `parseInt(channelStatus.turnNum) >= ${n}`);
