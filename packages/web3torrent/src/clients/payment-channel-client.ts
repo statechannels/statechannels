@@ -170,7 +170,7 @@ export class PaymentChannelClient {
   }
 
   insertIntoChannelCache(channelState: ChannelState) {
-    this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
+    this.channelCache[channelState.channelId] = channelState;
   }
 
   updateChannelCache(channelState: ChannelState) {

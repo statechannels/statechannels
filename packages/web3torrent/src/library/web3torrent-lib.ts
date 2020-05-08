@@ -328,8 +328,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           if (torrent.paused) {
             await this.paymentChannelClient.getLatestPaymentReceipt();
             // We currently treat pausing torrent as canceling downloads
+            log.info({data}, 'Closing torrent');
             await this.closeDownloadingChannels(torrent);
           } else if (!torrent.done) {
+            log.info({data}, 'Making payment');
             await this.makePayment(torrent, wire);
           }
           break;
@@ -337,6 +339,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.MESSAGE:
+          log.info({data}, 'Message received');
           await this.paymentChannelClient.pushMessage(data);
           break;
       }

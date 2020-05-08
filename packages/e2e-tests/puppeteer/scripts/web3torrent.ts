@@ -27,14 +27,14 @@ export async function uploadFile(
   page: Page,
   handleBudgetPrompt: boolean,
   metamask: Dappeteer,
-  filePath?: string
+  filePath = '/tmp/web3torrent-tests-stub'
 ): Promise<string> {
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.')
   const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
 
   // By default, generate a /tmp stub file with deterministic data for upload testing
-  !filePath && (filePath = '/tmp/web3torrent-tests-stub') && prepareStubUploadFile(filePath);
+  prepareStubUploadFile(filePath);
 
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {

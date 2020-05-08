@@ -9,7 +9,8 @@ import {
   HEADLESS,
   USES_VIRTUAL_FUNDING,
   USE_DAPPETEER,
-  APP_URL as WEB3TORRENT_URL
+  APP_URL as WEB3TORRENT_URL,
+  CLOSE_BROWSERS
 } from '../../constants';
 
 import {
@@ -64,9 +65,10 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await Promise.all(
-      [browserA, browserB].map(async browser => browser && (await browser.close()))
-    );
+    CLOSE_BROWSERS &&
+      (await Promise.all(
+        [browserA, browserB].map(async browser => browser && (await browser.close()))
+      ));
   });
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
@@ -76,9 +78,9 @@ describe('Web3-Torrent Integration Tests', () => {
     await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING, metamaskB);
 
     console.log('Waiting for open channels');
-    await Promise.all([web3tTabA].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
     // only works if done in series.... not sure why
-    await Promise.all([web3tTabB].map(waitAndOpenChannel(USES_VIRTUAL_FUNDING)));
+    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
+    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
 
     if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
     else waitAndApproveDeposit(web3tTabB, metamaskB);

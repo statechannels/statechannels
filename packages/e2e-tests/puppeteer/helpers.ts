@@ -130,6 +130,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
       console.log("[puppeteer] window.ethereum.enable() was called");
       web3.eth.getAccounts().then(lst => {
         web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
+        console.log("Using address " + web3.eth.defaultAccount);
         window.ethereum.selectedAddress = web3.eth.defaultAccount;
         r([window.ethereum.selectedAddress]);
     });      
