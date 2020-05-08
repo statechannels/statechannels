@@ -61,8 +61,14 @@ const Welcome: React.FC<Props> = props => {
           , a JavaScript implementation of the BitTorrent protocol.
         </p>
       </div>
-      <h2>Download a sample file</h2>
-      <ShareList torrents={preseededTorrentsUI.filter(torrent => torrents[torrent.infoHash])} />
+      {preseededTorrentsUI.length > 0 && (
+        <div>
+          <h2>Download a sample file</h2>
+          <ShareList
+            torrents={preseededTorrentsUI.filter(torrent => torrents[torrent.infoHash])}
+          />{' '}
+        </div>
+      )}
       <h2>Or share a file</h2>
       <FormButton
         name="upload"
