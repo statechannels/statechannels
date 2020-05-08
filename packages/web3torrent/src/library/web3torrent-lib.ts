@@ -56,9 +56,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (!this.pseAccount || !this.outcomeAddress) {
       await this.paymentChannelClient.enable();
       this.pseAccount = this.paymentChannelClient.mySigningAddress;
-      log.info('set pseAccount to sc-wallet signing address: %s', this.pseAccount);
+      log.info({pseAccount: this.pseAccount}, 'set pseAccount to sc-wallet signing address');
       this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
-      log.info('set outcomeAddress to sc-wallet web3 wallet address: %s', this.outcomeAddress);
+      log.info(
+        {outcomeAddress: this.outcomeAddress},
+        'set outcomeAddress to sc-wallet web3 wallet address'
+      );
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
     }
   }
