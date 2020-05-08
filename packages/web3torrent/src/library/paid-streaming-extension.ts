@@ -133,7 +133,7 @@ export abstract class PaidStreamingExtension implements Extension {
       const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');
       this.messageHandler(jsonData);
     } catch (err) {
-      log.error(err, 'onMessage decoding');
+      log.error(err, 'onMessage decoding or handling');
       return;
     }
   }
