@@ -11,11 +11,11 @@ import {
   setupFakeWeb3,
   waitForNthState,
   waitForClosedState
-} from '../../helpers';
+} from '../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {CLOSE_BROWSERS} from '../../constants';
+import {CLOSE_BROWSERS} from '../constants';
 const USE_DAPPETEER = false;
 
 configureEnvVariables();
@@ -64,8 +64,6 @@ describe('One file, three leechers, one seeder', () => {
 
       return {browser, tab, metamask};
     });
-
-    console.error(Object.keys(actors));
 
     console.log('A uploads the file');
     console.log('Going to URL');
