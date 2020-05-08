@@ -5,7 +5,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT, SCREENSHOT_DIR} from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {dir} from 'console';
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
