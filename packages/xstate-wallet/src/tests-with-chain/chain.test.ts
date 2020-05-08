@@ -63,8 +63,11 @@ const mockMachine = Machine({
   }
 });
 
-beforeEach(async () => {
-  const signer = await provider.getSigner();
+beforeAll(async () => {
+  (window as any).ethereum = {enable: () => ['0xfec44e15328B7d1d8885a8226b0858964358F1D6']};
+  chain.ethereumEnable();
+
+  const signer = await provider.getSigner('0x28bF45680cA598708E5cDACc1414FCAc04a3F1ed');
   ETHAssetHolder = new Contract(
     ETH_ASSET_HOLDER_ADDRESS,
     ContractArtifacts.EthAssetHolderArtifact.abi,

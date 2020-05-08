@@ -68,7 +68,6 @@ export class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
-    // TODO: Remove?
     updated: [Updated];
     // TODO: Add AssetHolder events
     challengeRegistered: [ChallengeRegistered];
@@ -237,39 +236,55 @@ export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
   private mySelectedAddress: string | null;
+  private provider: ReturnType<typeof getProvider>;
+  private get signer() {
+    if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
+
+    return this.provider.getSigner(this.selectedAddress as string);
+  }
 
   public async initialize() {
-    const provider = getProvider();
-    const signer = provider.getSigner();
+    this.provider = getProvider();
 
-    this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
+    this.provider.on('block', blockNumber => chainLogger.info({blockNumber}, 'New Block'));
+
+    this.configureContracts();
+  }
+
+  private configureContracts() {
+    if (!this.ethereumIsEnabled) return;
+
+    this._assetHolders = [
+      new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, this.signer)
+    ]; // TODO allow for other asset holders, for now we use slot 0 only
     this._assetHolders[0].on('Deposited', (...event) =>
       chainLogger.info({...event}, 'Deposited event')
     );
-    provider.on('block', blockNumber => chainLogger.info({blockNumber}, 'New Block'));
-    this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
-
-    if (this.ethereumIsEnabled) {
-      this.mySelectedAddress = window.ethereum.selectedAddress;
-    }
+    this._adjudicator = new Contract(
+      NITRO_ADJUDICATOR_ADDRESS,
+      NitroAdjudicatorInterface,
+      this.signer
+    );
   }
 
   public async getBlockNumber() {
-    return bigNumberify(await (await getProvider()).getBlockNumber());
+    return bigNumberify(await this.provider.getBlockNumber());
   }
 
   public async ethereumEnable(): Promise<string> {
     if (window.ethereum) {
       try {
         this.mySelectedAddress = (await window.ethereum.enable())[0];
-        if (typeof this.selectedAddress === 'string') {
-          return this.selectedAddress;
+        if (this.ethereumIsEnabled) {
+          this.configureContracts();
+          return this.selectedAddress as string;
         } else {
-          logger.error('Ethereum enabled but no selected address is defined');
-          return Promise.reject('Ethereum enabled but no selected address is defined');
+          const error = 'Ethereum enabled but no selected address is defined';
+          logger.error(error);
+          return Promise.reject(error);
         }
       } catch (error) {
-        // Handle error. Likely the user rejected the login
+        // TODO: Handle error. Likely the user rejected the login
         logger.error(error);
         return Promise.reject('user rejected in metamask');
       }
@@ -279,22 +294,14 @@ export class ChainWatcher implements Chain {
   }
 
   public get selectedAddress(): string | null {
-    this.mySelectedAddress = (this.mySelectedAddress || window.ethereum?.selectedAddress) ?? null;
     return this.mySelectedAddress;
   }
 
   public get ethereumIsEnabled(): boolean {
-    if (window.ethereum) {
-      // window.ethereum.selectedAddress will be null if ethereum has not been enabled
-      return !!window.ethereum.selectedAddress;
-    } else {
-      return false;
-    }
+    return typeof this.selectedAddress === 'string';
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<string | undefined> {
-    const provider = getProvider();
-    const signer = provider.getSigner();
     const transactionRequest = {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
@@ -302,14 +309,12 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(transactionRequest);
     return response.hash;
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
-    const provider = getProvider();
-    const signer = provider.getSigner();
-    const response = await signer.sendTransaction({
+    const response = await this.signer.sendTransaction({
       ...Transactions.createForceMoveTransaction(
         // TODO: Code is assuming a doubly-signed state at the moment.
         toNitroSignedState(support[0]),
@@ -327,29 +332,27 @@ export class ChainWatcher implements Chain {
     expectedHeld: string,
     amount: string
   ): Promise<string | undefined> {
-    const provider = getProvider();
-    const signer = provider.getSigner();
     const transactionRequest = {
       ...createETHDepositTransaction(channelId, expectedHeld, amount),
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(transactionRequest);
+    chainLogger.info({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    const provider = getProvider();
     const ethAssetHolder = new Contract(
       ETH_ASSET_HOLDER_ADDRESS,
       EthAssetHolderInterface,
-      provider
+      this.provider
     );
 
     const nitroAdjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
       NitroAdjudicatorInterface,
-      provider
+      this.provider
     );
 
     const amount: BigNumber = await ethAssetHolder.holdings(channelId);
@@ -358,7 +361,7 @@ export class ChainWatcher implements Chain {
 
     const [turnNumRecord, finalizesAt] = result.map(bigNumberify);
 
-    const blockNum = bigNumberify(await provider.getBlockNumber());
+    const blockNum = bigNumberify(await this.provider.getBlockNumber());
 
     // TODO: Fetch other info
     return {
@@ -373,7 +376,7 @@ export class ChainWatcher implements Chain {
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    if (!this._assetHolders[0] && !this._adjudicator) {
+    if (!this._assetHolders || !this._assetHolders[0] || !this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
 
