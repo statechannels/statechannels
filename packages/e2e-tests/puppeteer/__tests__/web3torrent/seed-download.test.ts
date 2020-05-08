@@ -25,12 +25,7 @@ import {
   waitForClosedState
 } from '../../helpers';
 
-import {
-  uploadFile,
-  startDownload,
-  cancelDownload,
-  prepareStubUploadFile
-} from '../../scripts/web3torrent';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
@@ -76,7 +71,6 @@ describe('Web3-Torrent Integration Tests', () => {
       ));
   });
   it('allows peers to start torrenting', async () => {
-    prepareStubUploadFile();
     console.log('A uploads a file');
     const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
 

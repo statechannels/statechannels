@@ -174,8 +174,8 @@ export class PaymentChannelClient {
   }
 
   updateChannelCache(channelState: ChannelState) {
-    if (this.channelCache[channelState.channelId])
-      this.channelCache[channelState.channelId] = channelState;
+    this.channelCache[channelState.channelId] && // only update an existing key
+      (this.channelCache[channelState.channelId] = channelState);
   }
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback

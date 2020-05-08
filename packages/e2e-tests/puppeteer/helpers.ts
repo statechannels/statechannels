@@ -317,7 +317,6 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
 ): Promise<void> => {
-  const opened = doneWhen(page, `channelStatus.status === 'running'`);
   if (!usingVirtualFunding) {
     console.log('Waiting for create channel button');
 
@@ -325,9 +324,9 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
 
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, walletIFrame, createChannelButton);
+  } else {
+    return;
   }
-
-  await opened;
 };
 export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
   return doneWhen(page, `parseInt(channelStatus.turnNum) >= ${n}`);

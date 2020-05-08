@@ -12,14 +12,15 @@ import {
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
 
-export function prepareStubUploadFile(
-  path = '/tmp/web3torrent-tests-stub',
-  repeats = 1000000
-): void {
-  console.log('Preparing stub file');
-  const content = 'web3torrent\n'.repeat(repeats);
+function prepareStubUploadFile(path: string): void {
+  const content = 'web3torrent\n'.repeat(1000000);
   const buf = Buffer.from(content);
-  fs.writeFileSync(path, buf);
+  fs.writeFile(path, buf, err => {
+    if (err) {
+      console.log(err);
+      throw new Error('Failed to prepare the upload file');
+    }
+  });
 }
 
 export async function uploadFile(
@@ -31,6 +32,9 @@ export async function uploadFile(
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.')
   const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
+
+  // By default, generate a /tmp stub file with deterministic data for upload testing
+  prepareStubUploadFile(filePath);
 
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {
