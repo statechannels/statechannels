@@ -74,16 +74,3 @@ export function recordToArray<T>(record: Record<string | number, T | undefined>)
     .map(k => record[k])
     .filter(e => e !== undefined) as Array<T>;
 }
-
-export function filterRecords<T>(
-  record: Record<string | number, T | undefined>,
-  condition: (entry: T | undefined) => boolean
-): Record<string | number, T> {
-  const filteredRecords = {};
-  Object.keys(record).forEach(k => {
-    if (condition(record[k])) {
-      filteredRecords[k] = record;
-    }
-  });
-  return filteredRecords;
-}

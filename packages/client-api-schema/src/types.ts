@@ -210,7 +210,7 @@ export interface TokenBudgetRequest {
 }
 
 export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {includeClosed?: boolean}>;
-export type GetChannelsResponse = JsonRpcResponse<Array<ChannelResult>>;
+export type GetChannelsResponse = JsonRpcResponse<ChannelResult[]>;
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 

@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 
 import Dexie, {Transaction, TransactionMode} from 'dexie';
 
-import {unreachable, arrayToRecord} from '../utils';
+import {unreachable} from '../utils';
 import {logger} from '../logger';
 
 const STORES: ObjectStores[] = [
@@ -64,9 +64,15 @@ export class Backend implements DBBackend {
   // Generic Getters
 
   public async channels() {
-    const channelData = (await this.getAll(ObjectStores.channels, true)) as ChannelStoredData[];
-    const channelEntries = channelData.map(data => ChannelStoreEntry.fromJson(data));
-    return arrayToRecord(channelEntries, 'channelId');
+    const channelData = (await this.getAll(ObjectStores.channels, true)) as {
+      key: string;
+      value: ChannelStoredData;
+    }[];
+    const channels = {};
+    channelData.forEach(cd => {
+      channels[cd.key] = ChannelStoreEntry.fromJson(cd.value);
+    });
+    return channels;
   }
 
   public async objectives() {

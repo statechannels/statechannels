@@ -185,7 +185,10 @@ export class MessagingService implements MessagingServiceInterface {
           fromDomain,
           request.params.includeClosed
         );
-        await this.sendResponse(requestId, channelEntries.map(serializeChannelEntry));
+        const serializedChannelEntries = await Promise.all(
+          channelEntries.map(serializeChannelEntry)
+        );
+        await this.sendResponse(requestId, serializedChannelEntries);
 
         break;
       case 'ChallengeChannel':
