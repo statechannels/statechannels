@@ -287,12 +287,6 @@ export async function withdrawAndWait(page: Page, metamask: dappeteer.Dappeteer)
   await waitAndApproveWithdraw(page, metamask);
 }
 
-interface Window {
-  channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
-  done(): void;
-}
-declare let window: Window;
-
 let doneFuncCounter = 0;
 const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
