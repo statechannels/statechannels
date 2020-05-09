@@ -342,6 +342,7 @@ export class PaymentChannelClient {
       );
     } catch (e) {
       if (e.message === 'User declined') {
+        log.info('User declined budget creation');
         return;
       } else {
         throw e;
