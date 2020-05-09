@@ -2,6 +2,7 @@ import {ChannelStoreEntry} from '../channel-store-entry';
 import {ChannelStoredData} from '../types';
 import {appState, wallet1, wallet2} from '../../workflows/tests/data';
 import {hashState, createSignatureEntry} from '../state-utils';
+import {Errors} from '..';
 
 const signState = (state, privateKeys: string[]) => ({
   ...state,
@@ -80,4 +81,23 @@ describe('isSupported', () => {
     expect(entry.isSupported).toBe(true);
     expect(entry.supported).toMatchObject(secondSupportState);
   });
+});
+
+it('throws an error when trying to add a state with the same turn number', () => {
+  const initialState = {...appState(5, true), stateHash: hashState(appState(5, true))};
+  const duplicateTurnNumState = {...appState(5, false), stateHash: hashState(appState(5, false))};
+
+  const channelStoreData: ChannelStoredData = {
+    stateVariables: [signState(initialState, [wallet1.privateKey])],
+    channelConstants: initialState,
+    myIndex: 0,
+    funding: undefined,
+    applicationSite: 'localhost'
+  };
+  const entry = new ChannelStoreEntry(channelStoreData);
+  const duplicateTurnNumSignatureEntry = signState(duplicateTurnNumState, [wallet2.privateKey])
+    .signatures[0];
+  expect(() => entry.addState(duplicateTurnNumState, duplicateTurnNumSignatureEntry)).toThrow(
+    Errors.duplicateTurnNums
+  );
 });
