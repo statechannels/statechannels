@@ -265,8 +265,8 @@ export class Store {
       }
     );
 
-  public getApplicationChannels = (applicationSite: string, includeClosed = false) => {
-    return this.backend.transaction('readonly', [ObjectStores.channels], async () =>
+  public getApplicationChannels = (applicationSite: string, includeClosed = false) =>
+    this.backend.transaction('readonly', [ObjectStores.channels], async () =>
       recordToArray(await this.backend.channels()).filter(
         channel =>
           !!channel &&
@@ -275,7 +275,6 @@ export class Store {
           channel.channelConstants.appDefinition !== '0x0'
       )
     );
-  };
 
   public createChannel = (
     participants: Participant[],

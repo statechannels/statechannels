@@ -238,7 +238,6 @@ describe('setLedger', () => {
   });
 });
 
-
 const getBackend = (store: Store) => (store as any).backend as Backend;
 
 describe('transactions', () => {
