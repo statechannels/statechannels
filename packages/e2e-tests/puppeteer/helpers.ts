@@ -292,10 +292,12 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
   const cb = `cb${doneFuncCounter}`;
 
-  return new Promise(resolve =>
-    page.exposeFunction(doneFunc, resolve).then(() => {
-      page.evaluate(
-        `
+  return new Promise(
+    (resolve, reject) =>
+      setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
+      page.exposeFunction(doneFunc, resolve).then(() => {
+        page.evaluate(
+          `
           ${cb} = channelStatus => {
             if (${done}) {
               window.${doneFunc}('Done');
@@ -304,8 +306,8 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
           }
           window.channelProvider.on('ChannelUpdated', ${cb});
           `
-      );
-    })
+        );
+      })
   );
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
