@@ -826,32 +826,6 @@
       ],
       "type": "object"
     },
-    "GetChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "items": {
-            "$ref": "#/definitions/ChannelResult"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
     "GetChannelsRequest": {
       "additionalProperties": false,
       "properties": {
@@ -877,9 +851,6 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "includeClosed"
-          ],
           "type": "object"
         }
       },
@@ -888,6 +859,32 @@
         "jsonrpc",
         "method",
         "params"
+      ],
+      "type": "object"
+    },
+    "GetChannelsResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "items": {
+            "$ref": "#/definitions/ChannelResult"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
       ],
       "type": "object"
     },
@@ -1326,6 +1323,9 @@
         },
         {
           "$ref": "#/definitions/CloseAndWithdrawRequest"
+        },
+        {
+          "$ref": "#/definitions/GetChannelsRequest"
         }
       ]
     },
@@ -1366,6 +1366,9 @@
         },
         {
           "$ref": "#/definitions/CloseAndWithdrawResponse"
+        },
+        {
+          "$ref": "#/definitions/GetChannelsResponse"
         }
       ]
     },
