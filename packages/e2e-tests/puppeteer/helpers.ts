@@ -15,7 +15,7 @@ export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
 
 export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   const walletIframe = page.frames()[1];
-  await walletIframe.waitForSelector(':root', {hidden: true});
+  await walletIframe.waitForSelector(':root', {hidden: true, timeout: 30_000});
 };
 
 export async function setupLogging(
@@ -287,21 +287,17 @@ export async function withdrawAndWait(page: Page, metamask: dappeteer.Dappeteer)
   await waitAndApproveWithdraw(page, metamask);
 }
 
-interface Window {
-  channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
-  done(): void;
-}
-declare let window: Window;
-
 let doneFuncCounter = 0;
 const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
   const cb = `cb${doneFuncCounter}`;
 
-  return new Promise(resolve =>
-    page.exposeFunction(doneFunc, resolve).then(() => {
-      page.evaluate(
-        `
+  return new Promise(
+    (resolve, reject) =>
+      setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
+      page.exposeFunction(doneFunc, resolve).then(() => {
+        page.evaluate(
+          `
           ${cb} = channelStatus => {
             if (${done}) {
               window.${doneFunc}('Done');
@@ -310,8 +306,8 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
           }
           window.channelProvider.on('ChannelUpdated', ${cb});
           `
-      );
-    })
+        );
+      })
   );
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
