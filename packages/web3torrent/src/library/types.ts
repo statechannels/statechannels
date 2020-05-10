@@ -86,7 +86,6 @@ export type PaidStreamingExtensionNotice = {
 export type Wireish = Wire & PaidStreamingWire;
 export type PaidStreamingTorrent = ExtendedTorrent & {
   usingPaidStreaming: boolean;
-  destroyed?: boolean;
   on(event: TorrentEvents.WIRE, callback: (wire: PaidStreamingWire) => void): void;
   on(
     event: TorrentEvents.NOTICE,

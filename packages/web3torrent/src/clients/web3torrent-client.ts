@@ -51,14 +51,13 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
   );
 };
 
-export const cancel = (torrentId: string = '') => {
+export const cancel = (id: string = '') => {
   return new Promise((resolve, reject) =>
-    web3torrent.cancel(torrentId, err => {
+    web3torrent.cancel(id, err => {
       if (err) {
         reject(err);
       } else {
-        // TODO: clean up channel info
-        resolve(torrentId);
+        resolve(id);
       }
     })
   );
