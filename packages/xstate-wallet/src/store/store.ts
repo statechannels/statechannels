@@ -272,7 +272,7 @@ export class Store {
           !!channel &&
           channel.applicationSite === applicationSite &&
           (!channel.isFinalized || includeClosed) &&
-          channel.channelConstants.appDefinition !== '0x0'
+          !bigNumberify(channel.channelConstants.appDefinition).isZero()
       )
     );
 
