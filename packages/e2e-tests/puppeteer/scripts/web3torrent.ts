@@ -11,6 +11,7 @@ import {
   waitAndApproveDepositWithHub
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
+import {TX_WAIT_TIMEOUT} from '../constants';
 
 function prepareStubUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(1000000);
@@ -33,9 +34,10 @@ export async function uploadFile(
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.')
   const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
 
-  // By default, generate a /tmp stub file with deterministic data for upload testing
-  prepareStubUploadFile(filePath);
-
+  if (filePath === '/tmp/web3torrent-tests-stub') {
+    // By default, generate a /tmp stub file with deterministic data for upload testing
+    prepareStubUploadFile(filePath);
+  }
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {
     // eslint-disable-next-line no-undef
@@ -50,7 +52,7 @@ export async function uploadFile(
   }
 
   const downloadLinkSelector = '#download-link';
-  await page.waitForSelector(downloadLinkSelector, {timeout: 60000}); // wait for my tx, which could be slow if on a real blockchain
+  await page.waitForSelector(downloadLinkSelector, {timeout: TX_WAIT_TIMEOUT}); // wait for my tx, which could be slow if on a real blockchain
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
 
   return downloadLink ? downloadLink : '';
