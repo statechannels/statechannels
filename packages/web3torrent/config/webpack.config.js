@@ -71,7 +71,20 @@ module.exports = function(webpackEnv) {
   // This is based on what CRA was doing
   const rawEnv = Object.keys(process.env)
     .filter(key => {
-      return /^REACT_APP_/i.test(key) || /_ADDRESS$/i.test(key);
+      return [
+        'VERSION',
+        'CHAIN_NETWORK_ID',
+        'FAKE_CHANNEL_PROVIDER',
+        'FIREBASE_API_KEY',
+        'FIREBASE_PREFIX',
+        'FIREBASE_URL',
+        'FUNDING_STRATEGY',
+        'HUB_DESTINATION',
+        'LOG_LEVEL',
+        'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
+        'TRACKER_URL',
+        'TRACKER_URL_HTTP_PROTOCOL'
+      ].indexOf(key) > -1
     })
     .reduce(
       (env, key) => {
