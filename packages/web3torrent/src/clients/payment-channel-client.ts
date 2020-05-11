@@ -84,7 +84,9 @@ export class PaymentChannelClient {
   async initialize() {
     await this.channelClient.provider.mountWalletComponent(process.env.WALLET_URL);
     await this.initializeHubComms();
-    Sentry.setUser({signingAddress: this.channelClient.signingAddress});
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.setUser({id: this.channelClient.signingAddress});
+    }
   }
 
   async enable() {
