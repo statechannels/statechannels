@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map, distinctUntilChanged} from 'rxjs/operators';
+import {filter, map, distinctUntilChanged, tap, first} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
@@ -87,6 +87,7 @@ export type WorkflowEvent =
 export type WorkflowServices = {
   setApplicationSite(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
+  signFinalState: (context: ChannelIdExists) => Promise<any>;
   invokeClosingProtocol: (
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
@@ -96,6 +97,7 @@ export type WorkflowServices = {
   invokeCreateChannelAndFundProtocol: StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: CCC.WorkflowMachine;
 };
+
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     branchingOnFundingStrategy: {};
@@ -114,6 +116,19 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
 export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
+
+const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) =>
+  store
+    .channelUpdatedFeed(channelId)
+    .pipe(
+      filter(entry => entry.myTurn),
+      tap(async ({supported}) => {
+        const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
+        await store.signAndAddState(channelId, finalState);
+      }),
+      first()
+    )
+    .toPromise();
 
 const generateConfig = (
   actions: WorkflowActions,
@@ -188,9 +203,13 @@ const generateConfig = (
           {target: 'closing', cond: guards.channelClosing},
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
-        PLAYER_REQUEST_CONCLUDE: {target: 'closing'},
+        PLAYER_REQUEST_CONCLUDE: {target: 'signingFinalState'},
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
+    },
+
+    signingFinalState: {
+      invoke: {src: signFinalState.name, onDone: 'closing'}
     },
 
     //This could handled by another workflow instead of the application workflow
@@ -355,6 +374,8 @@ export const workflow = (
   const services: WorkflowServices = {
     setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
       await store.setApplicationSite(ctx.channelId, event.applicationSite),
+
+    signFinalState: signFinalState(store),
     createChannel: async (context: CreateInit) => {
       const {
         participants,
