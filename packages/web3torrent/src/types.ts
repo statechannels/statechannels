@@ -48,6 +48,7 @@ export interface TorrentStaticData {
 
 declare global {
   interface Window {
+    analytics: SegmentAnalytics.AnalyticsJS;
     channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
     ethereum: any;
   }
