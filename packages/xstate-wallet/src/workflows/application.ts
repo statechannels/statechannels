@@ -13,13 +13,13 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map, distinctUntilKeyChanged} from 'rxjs/operators';
+import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -241,16 +241,18 @@ export const workflow = (
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
+
+      distinctUntilChanged(
+        (entry1, entry2) =>
+          entry1.supported.turnNum.eq(entry2.supported.turnNum) &&
+          // TODO: Currently concluding is not limited to your turn
+          // so we need to check for an unsupported conclude state
+          entry1.latest.isFinal === entry2.latest.isFinal
+      ),
+
       map(storeEntry => ({
         type: 'CHANNEL_UPDATED',
-        storeEntry,
-        // toHexString may or may not return a padded string so we always pad to make sure the distinct check works
-        supportedTurnNum: hexZeroPad(storeEntry.supported.turnNum.toHexString(), 32)
-      })),
-      distinctUntilKeyChanged('supportedTurnNum'),
-      map(e => ({
-        type: 'CHANNEL_UPDATED',
-        storeEntry: e.storeEntry
+        storeEntry
       }))
     );
 

@@ -162,6 +162,8 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
   const crashState = fundingType == 'Direct' ? 'withdrawing' : {virtualDefunding: 'gettingRole'};
   const successState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
 
+  interpret(concludeChannel(bStore).withContext(context)).start();
+
   // Simulate A crashes before withdrawing
   const aMachine = interpret(concludeChannel(aStore).withContext(context))
     .onTransition(state => {
