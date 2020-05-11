@@ -5077,7 +5077,7 @@
     "@sentry/utils" "5.13.2"
     tslib "^1.9.3"
 
-"@sentry/browser@^5.15.5":
+"@sentry/browser@^5.12.1":
   version "5.15.5"
   resolved "https://registry.npmjs.org/@sentry/browser/-/browser-5.15.5.tgz#d9a51f1388581067b50d30ed9b1aed2cbb333a36"
   integrity sha512-rqDvjk/EvogfdbZ4TiEpxM/lwpPKmq23z9YKEO4q81+1SwJNua53H60dOk9HpRU8nOJ1g84TMKT2Ov8H7sqDWA==
