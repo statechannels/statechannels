@@ -3,8 +3,13 @@ import ReactDOM from 'react-dom';
 import * as Sentry from '@sentry/browser';
 import App from './App';
 
+import {VERSION} from './constants';
+
 if (process.env.NODE_ENV === 'production') {
-  Sentry.init({dsn: 'https://d8f6fb84518e4abe97a63dbb28b7cb27@o344922.ingest.sentry.io/5228838'});
+  Sentry.init({
+    dsn: 'https://d8f6fb84518e4abe97a63dbb28b7cb27@o344922.ingest.sentry.io/5228838',
+    release: 'web3torrent@' + VERSION
+  });
 }
 
 import Drift from 'react-driftjs';
