@@ -74,6 +74,7 @@ module.exports = function(webpackEnv) {
       return [
         'VERSION',
         'CHAIN_NETWORK_ID',
+        'DRIFT_CHATBOX_ID',
         'FAKE_CHANNEL_PROVIDER',
         'FIREBASE_API_KEY',
         'FIREBASE_PREFIX',
@@ -81,9 +82,12 @@ module.exports = function(webpackEnv) {
         'FUNDING_STRATEGY',
         'HUB_DESTINATION',
         'LOG_LEVEL',
+        'NODE_ENV',
         'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
+        'TARGET_NETWORK',
         'TRACKER_URL',
-        'TRACKER_URL_HTTP_PROTOCOL'
+        'TRACKER_URL_HTTP_PROTOCOL',
+        'WALLET_URL'
       ].indexOf(key) > -1
     })
     .reduce(
