@@ -61,7 +61,10 @@ module.exports = {
       'NITRO_ADJUDICATOR_ADDRESS',
       'USE_INDEXED_DB'
     ]),
-    new HtmlWebpackPlugin({template: './index-template.html'})
+    new HtmlWebpackPlugin({
+      template: './index-template.html',
+      favicon: './public/favicon.ico'
+    })
   ],
 
   resolve: {
