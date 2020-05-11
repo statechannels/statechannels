@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "author": "Alex Gap",
   "dependencies": {
+    "@sentry/browser": "^5.12.1",
     "@rimble/connection-banner": "1.2.3",
     "@rimble/utils": "1.2.3",
     "@statechannels/client-api-schema": "0.0.1",
