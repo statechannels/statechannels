@@ -416,7 +416,11 @@ jobs:
       - image: circleci/node:10.16
     steps:
       - checkout
-      - run: git checkout deploy && git rebase origin/master && git push origin deploy
+      - run: git config user.email circle@statechannels.org
+      - run: git config user.name Circle
+      - run: git checkout deploy
+      - run: git rebase origin/master
+      - run: git push origin deploy
       - notify_slack
 
 workflows:
