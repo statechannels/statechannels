@@ -32,6 +32,7 @@ import {
 } from '../event-types';
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
+import {CONCLUDE_TIMEOUT} from '../constants';
 
 export interface WorkflowContext {
   applicationSite: string;
@@ -209,7 +210,8 @@ const generateConfig = (
     },
 
     signingFinalState: {
-      invoke: {src: signFinalState.name, onDone: 'closing'}
+      invoke: {src: signFinalState.name, onDone: 'closing'},
+      after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
     //This could handled by another workflow instead of the application workflow
