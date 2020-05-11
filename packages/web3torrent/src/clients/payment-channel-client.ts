@@ -47,7 +47,7 @@ enum Index {
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
 
-if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
+if (process.env.FAKE_CHANNEL_PROVIDER === 'true') {
   window.channelProvider = new FakeChannelProvider();
 } else {
   // TODO: Replace with injection via other means than direct app import
@@ -81,7 +81,7 @@ export class PaymentChannelClient {
   }
 
   async initialize() {
-    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+    await this.channelClient.provider.mountWalletComponent(process.env.WALLET_URL);
     await this.initializeHubComms();
   }
 

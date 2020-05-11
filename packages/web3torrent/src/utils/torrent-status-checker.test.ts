@@ -38,7 +38,7 @@ describe('Torrent Status Checker', () => {
     });
 
     it("should return a torrent with a valid status if it's a live torrent", () => {
-      expect(process.env.REACT_APP_FAKE_CHANNEL_PROVIDER).toBe('true');
+      expect(process.env.FAKE_CHANNEL_PROVIDER).toBe('true');
       const inProgressTorrent: Partial<ExtendedTorrent> = {
         downloaded: 12891.3,
         uploaded: 0,
