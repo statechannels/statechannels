@@ -28,7 +28,7 @@ const finalState = (store: Store) => async (context: Init): Promise<SupportState
   }
 
   // Otherwise create a new final state
-  return {state: {...latestSignedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
+  return {state: {...latestSignedByMe, turnNum: latest.turnNum.add(10), isFinal: true}};
 };
 
 const supportState = (store: Store) => SupportState.machine(store);
