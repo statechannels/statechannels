@@ -120,7 +120,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async cancel(infoHash: string, callback?: (err?: Error | string) => void) {
-    log.info('> Peer cancels download. Remove Torrent, close PaymentChannels');
+    log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       await this.closeDownloadingChannels(torrent);
@@ -434,18 +434,22 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    * Close any channels that I am downloading from (that my peer opened)
    */
   protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
-    torrent.wires.forEach(async wire => {
-      const {peerChannelId} = wire.paidStreamingExtension;
-      if (peerChannelId) {
-        log.info(`About to close channel ${peerChannelId}`);
-        wire.paidStreamingExtension.peerChannelId = null;
-        await this.paymentChannelClient.closeChannel(peerChannelId);
-        // TODO: sometimes this 'closeChannel' call never resolves (the following log never shows up)
-        log.info('Peer PaymentChannel Closed', peerChannelId);
-      } else {
-        log.info(`Wire with peer ${wire.paidStreamingExtension.peerAccount} didn't had a channel`);
-      }
-    });
+    await Promise.all(
+      torrent.wires.map(async wire => {
+        const {peerChannelId} = wire.paidStreamingExtension;
+        if (peerChannelId) {
+          log.info(`About to close channel ${peerChannelId}`);
+          wire.paidStreamingExtension.peerChannelId = null;
+          await this.paymentChannelClient.closeChannel(peerChannelId);
+          // TODO: sometimes this 'closeChannel' call never resolves (the following log never shows up)
+          log.info('Peer PaymentChannel Closed', peerChannelId);
+        } else {
+          log.info(
+            `Wire with peer ${wire.paidStreamingExtension.peerAccount} didn't had a channel`
+          );
+        }
+      })
+    );
   }
 
   /**
