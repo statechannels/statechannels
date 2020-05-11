@@ -336,7 +336,6 @@ jobs:
     <<: *defaults
     resource_class: large
     environment:
-      GENERATE_SOURCEMAP: true
       SC_ENV: production-ropsten
     steps:
       - checkout
