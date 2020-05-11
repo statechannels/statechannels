@@ -19,7 +19,7 @@ function getBool(val: string | undefined): boolean {
 
 export const NODE_ENV: string = process.env.NODE_ENV as string;
 
-export const WALLET_VERSION: string = process.env.WALLET_VERSION || 'xstate-wallet@VersionTBD';
+export const VERSION: string = process.env.VERSION;
 
 export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';
 
