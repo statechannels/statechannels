@@ -116,10 +116,15 @@ const setupStores = async (entryState: SignedState) => {
   return [aStore, bStore];
 };
 
+const finalState = (outcome, targetChannel) => ({
+  ...firstState(outcome, targetChannel),
+  isFinal: true
+});
+
 describe('supportState machine is idempotent', () => {
   // eslint-disable-next-line jest/expect-expect
   it('concludes correctly when starting with all signed states', async () => {
-    const entryState = allSignedState(firstState(allocation, targetChannel));
+    const entryState = allSignedState(finalState(allocation, targetChannel));
 
     const stores = await setupStores(entryState);
 
@@ -129,7 +134,7 @@ describe('supportState machine is idempotent', () => {
 
   // eslint-disable-next-line jest/expect-expect
   it('concludes correctly when starting with A signed state only', async () => {
-    const entryState = ASignedStateOnly(firstState(allocation, targetChannel));
+    const entryState = ASignedStateOnly(finalState(allocation, targetChannel));
 
     const stores = await setupStores(entryState);
 
@@ -139,7 +144,7 @@ describe('supportState machine is idempotent', () => {
 
   // eslint-disable-next-line jest/expect-expect
   it('concludes correctly when starting with B signed state only', async () => {
-    const entryState = BSignedStateOnly(firstState(allocation, targetChannel));
+    const entryState = BSignedStateOnly(finalState(allocation, targetChannel));
 
     const stores = await setupStores(entryState);
 
@@ -149,7 +154,7 @@ describe('supportState machine is idempotent', () => {
 
   // eslint-disable-next-line jest/expect-expect
   it('concludes correctly when starting with no signed state', async () => {
-    const entryState = noSignedState(firstState(allocation, targetChannel));
+    const entryState = noSignedState(finalState(allocation, targetChannel));
 
     const stores = await setupStores(entryState);
 

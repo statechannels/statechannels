@@ -172,6 +172,12 @@ it('starts concluding when requested', async () => {
       new Promise(() => {
         /* mock */
       })
+    ),
+
+    signFinalState: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
     )
   };
   const actions: Partial<Application.WorkflowActions> = {
@@ -190,8 +196,8 @@ it('starts concluding when requested', async () => {
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('closing');
-    expect(services.invokeClosingProtocol).toHaveBeenCalled();
+    expect(service.state.value).toEqual('signingFinalState');
+    expect(services.signFinalState).toHaveBeenCalled();
   }, 2000);
 });
 
