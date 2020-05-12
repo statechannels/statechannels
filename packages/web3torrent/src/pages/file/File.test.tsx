@@ -8,6 +8,7 @@ import {TorrentStaticData} from '../../types';
 import {testSelector, createMockExtendedTorrent, createMockTorrentUI} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
+import {paymentChannelClient} from '../../clients/payment-channel-client';
 import File from './File';
 import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 
@@ -21,6 +22,8 @@ describe('<File />', () => {
     torrentFile = jest
       .spyOn(Web3TorrentClient, 'download')
       .mockImplementation(_pD => Promise.resolve(createMockExtendedTorrent()));
+
+    jest.spyOn(paymentChannelClient, 'getChannels').mockImplementation(() => Promise.resolve({}));
 
     component = mount(
       <Router>

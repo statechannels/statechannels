@@ -71,6 +71,10 @@ export class ChannelClient implements ChannelClientInterface {
       this.provider.off('BudgetUpdated', callback);
     };
   }
+  async getChannels(includeClosed: boolean): Promise<ChannelResult[]> {
+    return this.provider.send({method: 'GetChannels', params: {includeClosed}});
+  }
+
   async createChannel(
     participants: Participant[],
     allocations: TokenAllocations,

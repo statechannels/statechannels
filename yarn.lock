@@ -7519,6 +7519,11 @@
   resolved "https://registry.npmjs.org/@types/rsvp/-/rsvp-4.0.3.tgz#4a1223158453257bce09d42b9eef7cfa6d257482"
   integrity sha512-OpRwxbgx16nL/0/7ol0WoLLyLaMXBvtPOHjqLljnzAB/E7Qk1wtjytxgBhOTBMZvuLXnJUqfnjb4W/QclNFvSA==
 
+"@types/segment-analytics@0.0.32":
+  version "0.0.32"
+  resolved "https://registry.npmjs.org/@types/segment-analytics/-/segment-analytics-0.0.32.tgz#63e27737a81f6bd0fbecd86207afb92d12d85cca"
+  integrity sha512-p0SHnfHfZwemTeaISvu8WUXtw81A4AOU4GEr7B9S9jLx2iu/z/4aLT0flRJtHVusVAlMeJSdobn0uD/oR1sFEw==
+
 "@types/semver@7.1.0":
   version "7.1.0"
   resolved "https://registry.npmjs.org/@types/semver/-/semver-7.1.0.tgz#c8c630d4c18cd326beff77404887596f96408408"

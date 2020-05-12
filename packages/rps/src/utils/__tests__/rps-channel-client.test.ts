@@ -94,6 +94,7 @@ class MockChannelClient implements ChannelClientInterface {
   challengeChannel = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
+  getChannels = jest.fn();
   pushMessage(message) {
     return new Promise<any>(() => {
       /* */

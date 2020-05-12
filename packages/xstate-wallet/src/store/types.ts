@@ -156,7 +156,7 @@ export interface DBBackend {
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
   objectives(): Promise<Objective[]>;
-  channels(): Promise<Record<string, ChannelStoredData | undefined>>;
+  channels(): Promise<Record<string, ChannelStoreEntry | undefined>>;
 
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;

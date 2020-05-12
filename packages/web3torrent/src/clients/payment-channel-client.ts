@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
@@ -84,11 +83,6 @@ export class PaymentChannelClient {
   async initialize() {
     await this.channelClient.provider.mountWalletComponent(process.env.WALLET_URL);
     await this.initializeHubComms();
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.configureScope(scope => {
-        scope.setUser({id: this.channelClient.signingAddress});
-      });
-    }
   }
 
   async enable() {
@@ -280,7 +274,7 @@ export class PaymentChannelClient {
       channelState.beneficiary,
       channelState.payer,
       add(channelState.beneficiaryBalance, amount),
-      subract(payerBalance, amount),
+      subtract(payerBalance, amount),
       channelState.beneficiaryOutcomeAddress,
       channelState.payerOutcomeAddress
     );
@@ -348,6 +342,12 @@ export class PaymentChannelClient {
         throw e;
       }
     }
+  }
+
+  async getChannels(): Promise<Record<string, ChannelState | undefined>> {
+    const channelResults = await this.channelClient.getChannels(true);
+    channelResults.map(convertToChannelState).forEach(cr => (this.channelCache[cr.channelId] = cr));
+    return this.channelCache;
   }
 
   async getBudget(): Promise<SiteBudget> {
@@ -419,7 +419,7 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
   ];
 };
 
-const subract = (a: string, b: string) =>
+const subtract = (a: string, b: string) =>
   hexZeroPad(
     bigNumberify(a)
       .sub(bigNumberify(b))

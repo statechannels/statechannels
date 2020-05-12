@@ -14,6 +14,7 @@ import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {useBudget} from '../../hooks/use-budget';
+import {track} from '../../analytics';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -42,6 +43,7 @@ const File: React.FC<Props> = props => {
   const [loading, setLoading] = useState(false);
   const [errorLabel, setErrorLabel] = useState('');
   const [warning, setWarning] = useState('');
+  const [channels, setChannels] = useState(undefined);
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
@@ -81,9 +83,12 @@ const File: React.FC<Props> = props => {
     }
     return undefined;
   }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
-
-  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
-
+  useEffect(() => {
+    if (props.ready) {
+      web3Torrent.paymentChannelClient.getChannels().then(channels => setChannels(channels));
+    }
+  }, [props.ready, web3Torrent.paymentChannelClient]);
+  const {mySigningAddress: me} = web3Torrent.paymentChannelClient;
   const {budget, closeBudget} = useBudget(props);
   // TODO: We shouldn't have to check all these different conditions
   const showBudget =
@@ -94,7 +99,7 @@ const File: React.FC<Props> = props => {
       <div className="jumbotron-upload">
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
-      <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+      <TorrentInfo torrent={torrent} channelCache={channels} mySigningAddress={me} />
       {warning &&
         ((!torrent.uploaded && torrent.status === Status.Seeding) ||
           torrent.status === Status.Idle) && (
@@ -106,7 +111,7 @@ const File: React.FC<Props> = props => {
       {showBudget && (
         <SiteBudgetTable
           budgetCache={budget}
-          channelCache={channelCache}
+          channelCache={channels}
           mySigningAddress={me}
           withdraw={closeBudget}
         />
@@ -118,6 +123,12 @@ const File: React.FC<Props> = props => {
             spinner={loading}
             disabled={!props.ready || loading}
             onClick={async () => {
+              track('File Download Requested', {
+                infoHash,
+                magnetURI: torrent.magnetURI,
+                filename: torrentName,
+                filesize: torrentLength
+              });
               setLoading(true);
               setErrorLabel('');
               try {
