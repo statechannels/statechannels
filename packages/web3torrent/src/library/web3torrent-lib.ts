@@ -25,7 +25,7 @@ import {
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
-import {track} from '../analytics';
+import {identify} from '../analytics';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
@@ -64,8 +64,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         'set outcomeAddress to sc-wallet web3 wallet address'
       );
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
-      track('Enabled WebTorrentPaidStreamingClient', {
-        pseAccount: this.pseAccount,
+      identify(this.pseAccount, {
         outcomeAddress: this.outcomeAddress
       });
     }
