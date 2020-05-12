@@ -32,9 +32,11 @@ import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 
 import {SimpleHub} from './simple-hub';
 import {TestStore} from './store';
+import {MessagingService} from '../../messaging';
 
 jest.setTimeout(20000);
 
+const messagingService = new MessagingService(new TestStore());
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
 const appDefinition = AddressZero;
@@ -169,10 +171,10 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
   const crashState = fundingType == 'Direct' ? 'withdrawing' : {virtualDefunding: 'gettingRole'};
   const successState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
 
-  interpret(concludeChannel(bStore).withContext(context)).start();
+  interpret(concludeChannel(bStore, messagingService).withContext(context)).start();
 
   // Simulate A crashes before withdrawing
-  const aMachine = interpret(concludeChannel(aStore).withContext(context))
+  const aMachine = interpret(concludeChannel(aStore, messagingService).withContext(context))
     .onTransition(state => state.value === crashState && aMachine.stop())
     .start();
 
@@ -181,7 +183,7 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
 
   // A concludes again
   await resolveOnTransition(
-    interpret(concludeChannel(aStore).withContext(context)).start(),
+    interpret(concludeChannel(aStore, messagingService).withContext(context)).start(),
     state => state.matches(successState),
     `Did not hit success state ${successState}`
   );

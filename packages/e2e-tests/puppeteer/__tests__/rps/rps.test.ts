@@ -77,7 +77,7 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
     // console.log('B challenging...');
     // await bChallenges(rpsTabA, rpsTabB);
     console.log('B resigning...');
-    await bResigns(rpsTabA, rpsTabB);
+    await bResigns(rpsTabA, metamaskA, rpsTabB, metamaskB);
     console.log('starting second game...');
     return await startFundAndPlaySingleMove(rpsTabA, metamaskA, rpsTabB, metamaskB);
     // (ultimate and intermediate) test success implied by promises resolving

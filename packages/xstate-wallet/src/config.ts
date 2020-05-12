@@ -1,7 +1,6 @@
 import {AddressZero} from 'ethers/constants';
 import {bigNumberify} from 'ethers/utils';
 import {Destination} from './store';
-
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
   switch (val) {
