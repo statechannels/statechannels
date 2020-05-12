@@ -4,6 +4,12 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+
+const gitRevisionPlugin = new GitRevisionPlugin();
+
 module.exports = {
   mode: 'development',
   entry: './src/index.ts',
@@ -52,6 +58,7 @@ module.exports = {
   },
   // TODO: Generate a proper collection of allowed env variables
   plugins: [
+    gitRevisionPlugin,
     new webpack.EnvironmentPlugin([
       'CHAIN_NETWORK_ID',
       'CLEAR_STORAGE_ON_START',
@@ -65,6 +72,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './index-template.html',
       favicon: './public/favicon.ico'
+    }),
+    new webpack.DefinePlugin({
+      GIT_VERSION: JSON.stringify(gitRevisionPlugin.version()),
+      GIT_COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+      GIT_BRANCH: JSON.stringify(gitRevisionPlugin.branch())
     })
   ],
 
