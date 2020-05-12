@@ -74,14 +74,9 @@ module.exports = {
       favicon: './public/favicon.ico'
     }),
     new webpack.DefinePlugin({
-      // This is a bit messy, we should clean this up
-      ['process.env']: {
-        // eslint-disable-next-line
-        ...process.env,
-        VERSION: JSON.stringify(gitRevisionPlugin.version()),
-        COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
-        BRANCH: JSON.stringify(gitRevisionPlugin.branch())
-      }
+      GIT_VERSION: JSON.stringify(gitRevisionPlugin.version()),
+      GIT_COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+      GIT_BRANCH: JSON.stringify(gitRevisionPlugin.branch())
     })
   ],
 
