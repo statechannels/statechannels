@@ -30,7 +30,6 @@ describe('<File />', () => {
         <File ready={true} />
       </Router>
     );
-    jest.useFakeTimers();
   });
 
   afterAll(() => {
