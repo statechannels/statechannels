@@ -12,11 +12,17 @@ export enum ClientEvents {
 }
 
 export enum TorrentEvents {
-  WIRE = 'wire',
-  NOTICE = 'notice',
-  STOP = 'stop',
   DONE = 'done',
-  ERROR = 'error'
+  DOWNLOAD = 'download',
+  ERROR = 'error',
+  INFOHASH = 'infoHash',
+  NOTICE = 'notice',
+  NOPEERS = 'noPeers',
+  METADATA = 'metadata',
+  READY = 'ready',
+  UPLOAD = 'upload',
+  WARNING = 'warning',
+  WIRE = 'wire'
 }
 
 export enum TorrentTestResult {
