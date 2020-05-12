@@ -4,6 +4,7 @@ import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
+import {track} from '../../analytics';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -49,7 +50,13 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
         <tbody>
           <tr className="budget-info">
             <td className="budget-button">
-              <button id="budget-withdraw" onClick={withdraw}>
+              <button
+                id="budget-withdraw"
+                onClick={() => {
+                  track('Withdraw Initiated', {spendBudget, receiveBudget});
+                  withdraw();
+                }}
+              >
                 Withdraw
               </button>
             </td>

@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
@@ -84,11 +83,6 @@ export class PaymentChannelClient {
   async initialize() {
     await this.channelClient.provider.mountWalletComponent(process.env.WALLET_URL);
     await this.initializeHubComms();
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.configureScope(scope => {
-        scope.setUser({id: this.channelClient.signingAddress});
-      });
-    }
   }
 
   async enable() {

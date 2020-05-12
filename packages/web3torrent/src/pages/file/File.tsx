@@ -14,6 +14,7 @@ import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {useBudget} from '../../hooks/use-budget';
+import {track} from '../../analytics';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -122,6 +123,12 @@ const File: React.FC<Props> = props => {
             spinner={loading}
             disabled={!props.ready || loading}
             onClick={async () => {
+              track('File Download Requested', {
+                infoHash,
+                magnetURI: torrent.magnetURI,
+                filename: torrentName,
+                filesize: torrentLength
+              });
               setLoading(true);
               setErrorLabel('');
               try {

@@ -25,6 +25,7 @@ import {
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
+import {track} from '../analytics';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
@@ -63,11 +64,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         'set outcomeAddress to sc-wallet web3 wallet address'
       );
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
-      window.analytics && // TODO: Create wrapper so we don't need to do this check
-        window.analytics.track('Enabled WebTorrentPaidStreamingClient', {
-          pseAccount: this.pseAccount,
-          outcomeAddress: this.outcomeAddress
-        });
     }
   }
 
@@ -91,6 +87,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
     this.setupTorrent(torrent);
+
+    track('Torrent Starting Seeding', {
+      infoHash: torrent.infoHash,
+      magnetURI: torrent.magnetURI,
+      filename: torrent.name,
+      filesize: torrent.length
+    });
 
     return torrent;
   }
@@ -130,6 +133,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (torrent) {
       await this.closeDownloadingChannels(torrent);
       torrent.destroy(callback);
+      track('Torrent Cancelled', {
+        infoHash,
+        magnetURI: torrent.magnetURI,
+        filename: torrent.name,
+        filesize: torrent.length
+      });
     } else {
       return callback(new Error('No torrent found'));
     }
@@ -372,6 +381,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
+      track('Torrent Finished Downloading', {
+        infoHash: torrent.infoHash,
+        magnetURI: torrent.magnetURI,
+        filename: torrent.name,
+        filesize: torrent.length
+      });
     });
 
     torrent.on(TorrentEvents.ERROR, err => {

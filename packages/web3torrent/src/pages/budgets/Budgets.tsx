@@ -5,6 +5,7 @@ import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
 import {useBudget} from '../../hooks/use-budget';
+import {track} from '../../analytics';
 
 interface Props {
   ready: boolean;
@@ -47,7 +48,11 @@ const CurrentBudget: React.FC<Props> = props => {
       {!loading && !budgetExists && (
         <div>
           <div>You don't have a budget yet!</div>
-          <FormButton name="create-budget" disabled={!props.ready} onClick={createBudget}>
+          <FormButton
+            name="create-budget"
+            disabled={!props.ready}
+            onClick={() => createBudget() && track('Budget Requested', {})}
+          >
             Create a budget
           </FormButton>
         </div>
