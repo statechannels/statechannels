@@ -17,6 +17,7 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
+  waitForNthState,
   waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
@@ -26,7 +27,7 @@ import {
   takeScreenshot
 } from '../../helpers';
 
-import {uploadFile, startDownload} from '../../scripts/web3torrent';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
@@ -45,14 +46,14 @@ const forEachBrowser = <T>(cb: (value: Browser, index: number, array: Browser[])
 const forEachTab = <T>(cb: (value: Page, index: number, array: Page[]) => Promise<T>) =>
   Promise.all(tabs.map(cb));
 
-describe('Web3-Torrent Integration Tests', () => {
+describe('Optional Integration Tests', () => {
   beforeAll(async () => {
     console.log('Opening browsers');
 
     [
       {browser: browserA, metamask: metamaskA},
       {browser: browserB, metamask: metamaskB}
-    ] = await Promise.all([4, 5].map(async idx => await setUpBrowser(HEADLESS, idx, 0)));
+    ] = await Promise.all([6, 7].map(async idx => await setUpBrowser(HEADLESS, idx, 100)));
 
     browsers = [browserA, browserB];
 
@@ -74,7 +75,7 @@ describe('Web3-Torrent Integration Tests', () => {
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('Torrent a file - Complete download', async () => {
+  it('Optional - Torrent a file - Cancelling at State N°10', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
@@ -97,6 +98,10 @@ describe('Web3-Torrent Integration Tests', () => {
 
     // Let the download continue for some time
     console.log('Downloading');
+
+    await waitForNthState(web3tTabB, 10);
+    console.log('B cancels download');
+    await cancelDownload(web3tTabB);
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
