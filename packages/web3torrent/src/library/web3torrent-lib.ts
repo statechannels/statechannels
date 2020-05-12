@@ -417,16 +417,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
-<<<<<<< HEAD
       track('Torrent Finished Downloading', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
         filename: torrent.name,
         filesize: torrent.length
       });
-=======
       this.informListeners();
->>>>>>> web3torrent: remove the update timer
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
