@@ -266,11 +266,9 @@ export const workflow = (
       filter(storeEntry => storeEntry.isSupported),
 
       distinctUntilChanged(
-        (entry1, entry2) =>
-          entry1.supported.turnNum.eq(entry2.supported.turnNum) &&
-          // TODO: Currently concluding is not limited to your turn
-          // so we need to check for an unsupported conclude state
-          entry1.latest.isFinal === entry2.latest.isFinal
+        (entry1: ChannelStoreEntry, entry2: ChannelStoreEntry) =>
+          JSON.stringify(serializeChannelEntry(entry1)) ===
+          JSON.stringify(serializeChannelEntry(entry2))
       ),
 
       map(storeEntry => ({
