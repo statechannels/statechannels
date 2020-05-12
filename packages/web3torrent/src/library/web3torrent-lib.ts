@@ -63,6 +63,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         'set outcomeAddress to sc-wallet web3 wallet address'
       );
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
+      window.analytics && // TODO: Create wrapper so we don't need to do this check
+        window.analytics.track('Enabled WebTorrentPaidStreamingClient', {
+          pseAccount: this.pseAccount,
+          outcomeAddress: this.outcomeAddress
+        });
     }
   }
 
