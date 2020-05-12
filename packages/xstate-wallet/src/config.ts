@@ -17,9 +17,12 @@ function getBool(val: string | undefined): boolean {
   }
 }
 
-export const NODE_ENV: string = process.env.NODE_ENV as string;
+// From webpack DefinePlugin
+declare let GIT_VERSION: string;
+export const VERSION = GIT_VERSION;
 
-export const WALLET_VERSION: string = process.env.WALLET_VERSION || 'xstate-wallet@VersionTBD';
+// From process.env
+export const NODE_ENV: string = process.env.NODE_ENV as string;
 
 export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';
 
