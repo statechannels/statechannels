@@ -510,7 +510,13 @@ workflows:
       - integration-test-web3torrent:
           requires:
             - prepare
+      - integration-test-web3torrent-optional:
+          requires:
+            - prepare
       - integration-test-web3torrent-with-hub:
+          requires:
+            - prepare
+      - integration-test-web3torrent-with-hub-optional:
           requires:
             - prepare
       - release-pull-request:
