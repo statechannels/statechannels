@@ -115,17 +115,24 @@ const createLedgerChannels = async () => {
   );
 };
 
+const resolveOnTransition = (service, passCond, rejectString?: string) =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => reject(rejectString), 5_000);
+    service.onTransition(state => passCond(state) && service.stop() && resolve());
+  });
+
 const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
   const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
   const services = [aStore, bStore].map(runMachine);
   const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
 
   await Promise.all(
-    services.map(
-      service =>
-        new Promise(resolve =>
-          service.onTransition(state => state.matches(targetState) && service.stop() && resolve())
-        )
+    services.map(service =>
+      resolveOnTransition(
+        service,
+        state => state.matches(targetState),
+        `Did not hit target ${targetState}`
+      )
     )
   );
 };
@@ -166,21 +173,17 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
 
   // Simulate A crashes before withdrawing
   const aMachine = interpret(concludeChannel(aStore).withContext(context))
-    .onTransition(state => {
-      if (state.value === crashState) {
-        aMachine.stop();
-      }
-    })
+    .onTransition(state => state.value === crashState && aMachine.stop())
     .start();
 
   const entryA1 = await aStore.getEntry(targetChannelId);
   expect(entryA1.isFinalized).toBe(false);
 
   // A concludes again
-  await new Promise(resolve =>
-    interpret(concludeChannel(aStore).withContext(context))
-      .start()
-      .onTransition(state => state.matches(successState) && resolve())
+  await resolveOnTransition(
+    interpret(concludeChannel(aStore).withContext(context)).start(),
+    state => state.matches(successState),
+    `Did not hit success state ${successState}`
   );
 
   const entryA2 = await aStore.getEntry(targetChannelId);
@@ -213,9 +216,21 @@ beforeEach(async () => {
   });
 });
 
+async function signFinalState(finalizer: Store, other: Store) {
+  const targetChannelState = (await finalizer.getEntry(targetChannelId)).supported;
+  const {supported: finalState} = await finalizer.signAndAddState(targetChannelId, {
+    ...targetChannelState,
+    turnNum: targetChannelState.turnNum.add(1),
+    isFinal: true
+  });
+
+  await other.addState(finalState);
+}
+
 // eslint-disable-next-line jest/expect-expect
 it('concludes correctly when concluding twice using direct funding', async () => {
   await runUntilSuccess(createChannel, 'Direct');
+  await signFinalState(aStore, bStore);
 
   await concludeTwiceAndAssert('Direct');
 });
@@ -223,6 +238,7 @@ it('concludes correctly when concluding twice using direct funding', async () =>
 // eslint-disable-next-line jest/expect-expect
 it('concludes correctly when concluding twice using virtual funding', async () => {
   await createLedgerChannels();
+  await signFinalState(aStore, bStore);
 
   await concludeTwiceAndAssert('Virtual');
 });
@@ -231,6 +247,7 @@ it('concludes correctly when concluding twice using virtual funding', async () =
 it('concludes correctly when A crashes during the first conclude using direct funding', async () => {
   // Let A and B create and fund channel
   await runUntilSuccess(createChannel, 'Direct');
+  await signFinalState(aStore, bStore);
 
   await concludeAfterCrashAndAssert('Direct');
 });
@@ -239,6 +256,7 @@ it('concludes correctly when A crashes during the first conclude using direct fu
 it('concludes correctly when A crashes during the first conclude using virtual funding', async () => {
   // Let A and B create and fund channel
   await createLedgerChannels();
+  await signFinalState(aStore, bStore);
 
   await concludeAfterCrashAndAssert('Virtual');
 });
