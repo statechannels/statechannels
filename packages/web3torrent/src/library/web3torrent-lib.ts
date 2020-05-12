@@ -68,10 +68,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   removeListenerForUpdates(key: string) {
-    this.listenersForUpdates = {
-      ...this.listenersForUpdates,
-      [key]: undefined
+    const listenersForUpdatesCopy = {
+      ...this.listenersForUpdates
     };
+
+    delete listenersForUpdatesCopy[key];
+    this.listenersForUpdates = listenersForUpdatesCopy;
   }
 
   async enable() {
