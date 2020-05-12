@@ -64,6 +64,8 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     );
     await tx.wait();
 
+    log.info({transaction: {hash: tx.hash}}, 'Transaction mined');
+
     const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
     release();
     return holdings;
