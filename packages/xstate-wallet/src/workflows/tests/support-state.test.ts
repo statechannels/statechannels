@@ -91,8 +91,8 @@ const concludeAndAssert = async (stores: Array<TestStore>) => {
   // store entries should have been udpated to finalized state
   const entryA1 = await aStore.getEntry(targetChannelId);
   const entryB1 = await bStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(true);
-  expect(entryB1.isFinalized).toBe(true);
+  expect(entryA1.hasConclusionProof).toBe(true);
+  expect(entryB1.hasConclusionProof).toBe(true);
 };
 
 const setupStores = async (entryState: SignedState) => {

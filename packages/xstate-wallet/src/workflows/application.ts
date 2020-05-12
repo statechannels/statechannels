@@ -265,11 +265,7 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      distinctUntilChanged(
-        (entry1: ChannelStoreEntry, entry2: ChannelStoreEntry) =>
-          JSON.stringify(serializeChannelEntry(entry1)) ===
-          JSON.stringify(serializeChannelEntry(entry2))
-      ),
+      distinctUntilChanged((entry1, entry2) => false),
 
       map(storeEntry => ({
         type: 'CHANNEL_UPDATED',

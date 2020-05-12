@@ -20,7 +20,7 @@ const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void
 const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
   store
     .channelUpdatedFeed(channelId)
-    .pipe(first(({isFinalized}) => isFinalized))
+    .pipe(first(({hasConclusionProof}) => hasConclusionProof))
     .toPromise();
 
 const concludeChannel = getDataAndInvoke<Init>(
@@ -92,7 +92,7 @@ const observeFundsWithdrawal = (store: Store) => context =>
 
 const submitWithdrawTransaction = (store: Store) => async context => {
   const channelEntry = await store.getEntry(context.channelId);
-  if (!channelEntry.isFinalized) {
+  if (!channelEntry.hasConclusionProof) {
     throw new Error(`Channel ${context.channelId} is not finalized`);
   }
   await store.chain.finalizeAndWithdraw(channelEntry.support);

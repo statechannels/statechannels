@@ -93,7 +93,7 @@ export class ChannelStoreEntry {
     return !!this._supported;
   }
 
-  get isFinalized() {
+  get hasConclusionProof() {
     return this.isSupported && this.support.every(s => s.isFinal);
   }
 

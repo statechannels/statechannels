@@ -146,8 +146,8 @@ const concludeTwiceAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
   // store entries should have been udpated to finalized state
   const entryA1 = await aStore.getEntry(targetChannelId);
   const entryB1 = await bStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(true);
-  expect(entryB1.isFinalized).toBe(true);
+  expect(entryA1.hasConclusionProof).toBe(true);
+  expect(entryB1.hasConclusionProof).toBe(true);
 
   // Conclude again
   await runUntilSuccess(concludeChannel, fundingType);
@@ -177,7 +177,7 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
     .start();
 
   const entryA1 = await aStore.getEntry(targetChannelId);
-  expect(entryA1.isFinalized).toBe(false);
+  expect(entryA1.hasConclusionProof).toBe(false);
 
   // A concludes again
   await resolveOnTransition(
@@ -187,7 +187,7 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
   );
 
   const entryA2 = await aStore.getEntry(targetChannelId);
-  expect(entryA2.isFinalized).toBe(true);
+  expect(entryA2.hasConclusionProof).toBe(true);
 };
 
 beforeEach(async () => {
