@@ -13,8 +13,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "target": "es2015",
-    "types": ["@types/segment-analytics"]
+    "target": "es2015"
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }
