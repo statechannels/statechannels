@@ -3,6 +3,7 @@ import {getFileSavingData, SavingData} from '../../../utils/file-saver';
 
 import './DownloadLink.scss';
 import {TorrentUI} from '../../../types';
+import {track} from '../../../analytics';
 
 export type DownloadLinkProps = {torrent: TorrentUI};
 
@@ -14,10 +15,21 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
     }
   }, [torrent.done, torrent.files, torrent.name, torrent.originalSeed]);
 
+  const trackDownload = () => {
+    track("Clicked 'Save Download'", {
+      filename: file.name
+    });
+  };
+
   return (
     <>
       {torrent.done && !torrent.originalSeed && (
-        <a href={file.content} className="DownloadLink button" download={file.name || torrent.name}>
+        <a
+          href={file.content}
+          onClick={trackDownload}
+          className="DownloadLink button"
+          download={file.name || torrent.name}
+        >
           Save Download
         </a>
       )}
