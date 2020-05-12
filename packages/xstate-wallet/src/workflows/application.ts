@@ -265,7 +265,14 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      distinctUntilChanged((entry1, entry2) => false),
+      distinctUntilChanged(
+        (entry1, entry2) =>
+          entry1.supported.turnNum.eq(entry2.supported.turnNum) &&
+          // TODO: Currently concluding is not limited to your turn
+          // so we need to check for an unsupported conclude state
+          entry1.latest.isFinal === entry2.latest.isFinal &&
+          entry1.hasConclusionProof === entry2.hasConclusionProof
+      ),
 
       map(storeEntry => ({
         type: 'CHANNEL_UPDATED',
