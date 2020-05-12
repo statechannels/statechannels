@@ -1,21 +1,21 @@
 import React from 'react';
-import {SiteBudget} from '@statechannels/client-api-schema';
+import {DomainBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
-import './SiteBudgetTable.scss';
+import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
 
 const bigNumberify = utils.bigNumberify;
 
-export type SiteBudgetTableProps = {
+export type DomainBudgetTableProps = {
   channelCache: Record<string, ChannelState>;
-  budgetCache: SiteBudget;
+  budgetCache: DomainBudget;
   mySigningAddress: string;
   withdraw: () => void;
 };
 
-export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
+export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
@@ -39,7 +39,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
 
   return (
     <>
-      <table className="site-budget-table">
+      <table className="domain-budget-table">
         <thead>
           <tr className="budget-info">
             <td className="budget-button">Wallet Action</td>

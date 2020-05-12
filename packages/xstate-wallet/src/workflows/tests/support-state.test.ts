@@ -10,7 +10,7 @@ import {firstState, calculateChannelId, createSignatureEntry} from '../../store/
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 
-import {wallet1, wallet2, participants, TEST_SITE} from './data';
+import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
 
 import {subscribeToMessages} from './message-service';
 
@@ -102,10 +102,10 @@ const setupStores = async (entryState: SignedState) => {
   const bStore = new TestStore(chain);
   await bStore.initialize([wallet2.privateKey]);
   await aStore.createEntry(entryState, {
-    applicationSite: TEST_SITE
+    applicationDomain: TEST_APP_DOMAIN
   });
   await bStore.createEntry(entryState, {
-    applicationSite: TEST_SITE
+    applicationDomain: TEST_APP_DOMAIN
   });
 
   subscribeToMessages({

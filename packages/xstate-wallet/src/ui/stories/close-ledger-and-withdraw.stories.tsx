@@ -7,7 +7,7 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
-import {Store, SiteBudget} from '../../store';
+import {Store, DomainBudget} from '../../store';
 import React from 'react';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
@@ -32,7 +32,7 @@ const bob: Participant = {
   destination: '0xbd' as any
 };
 
-const budget: SiteBudget = ethBudget('rps.statechannels.org', {
+const budget: DomainBudget = ethBudget('rps.statechannels.org', {
   availableReceiveCapacity: parseEther('0.05'),
   availableSendCapacity: parseEther('0.05')
 });
@@ -41,7 +41,7 @@ const testContext: WorkflowContext = {
   opponent: bob,
   requestId: 123,
   ledgerId: 'ledger-id-123',
-  site: 'abc.com',
+  domain: 'abc.com',
   budget
 };
 

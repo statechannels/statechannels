@@ -22,7 +22,7 @@ describe('isSupported', () => {
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
     expect(entry.isSupported).toBe(false);
@@ -39,7 +39,7 @@ describe('isSupported', () => {
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
     expect(entry.isSupported).toBe(true);
@@ -54,7 +54,7 @@ describe('isSupported', () => {
       channelConstants: supportState,
       myIndex: 0,
       funding: undefined,
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
     expect(entry.isSupported).toBe(true);
@@ -75,7 +75,7 @@ describe('isSupported', () => {
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
     expect(entry.isSupported).toBe(true);
@@ -92,7 +92,7 @@ it('throws an error when trying to add a state with the same turn number', () =>
     channelConstants: initialState,
     myIndex: 0,
     funding: undefined,
-    applicationSite: 'localhost'
+    applicationDomain: 'localhost'
   };
   const entry = new ChannelStoreEntry(channelStoreData);
   const duplicateTurnNumSignatureEntry = signState(duplicateTurnNumState, [wallet2.privateKey])
