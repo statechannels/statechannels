@@ -18,6 +18,7 @@ import {
   setupLogging,
   waitAndOpenChannel,
   waitForNthState,
+  waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
@@ -26,7 +27,7 @@ import {
   takeScreenshot
 } from '../../helpers';
 
-import {uploadFile, startDownload} from '../../scripts/web3torrent';
+import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
@@ -74,59 +75,70 @@ describe('Web3-Torrent Integration Tests', () => {
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('allows peers to start torrenting', async () => {
-    await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
-    await web3tTabA.bringToFront();
+  test.each(['Completing the Download', 'Optional - Cancelling at State N°10'])(
+    'Torrent a file - %s',
+    async workFlow => {
+      await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
+      await web3tTabA.bringToFront();
 
-    console.log('A uploads a file');
-    const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
+      console.log('A uploads a file');
+      const url = await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamaskA);
 
-    console.log('B starts downloading...');
-    await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING, metamaskB);
+      console.log('B starts downloading...');
+      await startDownload(web3tTabB, url, USES_VIRTUAL_FUNDING, metamaskB);
 
-    console.log('Waiting for open channels');
-    // only works if done in series.... not sure why
-    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
-    await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
+      console.log('Waiting for open channels');
+      // only works if done in series.... not sure why
+      await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
+      await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
 
-    if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
-    else waitAndApproveDeposit(web3tTabB, metamaskB);
+      if (USES_VIRTUAL_FUNDING) {
+        await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
+      } else {
+        await waitAndApproveDeposit(web3tTabB, metamaskB);
+      }
 
-    // Let the download continue for some time
-    console.log('Downloading');
-    await waitForNthState(web3tTabB, 10);
+      // Let the download continue for some time
+      console.log('Downloading');
 
-    // TODO: Add back when cancelling is working
-    // console.log('B cancels download');
-    // await cancelDownload(web3tTabB);
+      if (workFlow === 'Cancelling at State N°10') {
+        await waitForNthState(web3tTabB, 10);
+        console.log('B cancels download');
+        await cancelDownload(web3tTabB);
+      }
+      // TODO: Verify withdrawal for direct funding once it's implemented
+      // see https://github.com/statechannels/monorepo/issues/1546
 
-    // TODO: Verify withdrawal for direct funding once it's implemented
-    // see https://github.com/statechannels/monorepo/issues/1546
+      console.log('Wait for the "Save Download" or "Restart Download" button to appear');
+      await waitForFinishedOrCanceledDownload(web3tTabB);
 
-    // Ensure the wallet is not visible
-    await forEachTab(waitForWalletToBeHidden);
+      console.log('Wait for Wallet to be hidden');
+      // Ensure the wallet is not visible
+      await forEachTab(waitForWalletToBeHidden);
 
-    // Wait for the close state channel update
-    // TODO: It looks like direct funding is not properly sending a closed state
-    // see https://github.com/statechannels/monorepo/issues/1649
-    if (USES_VIRTUAL_FUNDING) {
-      await forEachTab(waitForClosedState);
+      // Wait for the close state channel update
+      // TODO: It looks like direct funding is not properly sending a closed state
+      // see https://github.com/statechannels/monorepo/issues/1649
+      if (USES_VIRTUAL_FUNDING) {
+        console.log('Wait for State to be Closed');
+        await forEachTab(waitForClosedState);
+      }
+
+      // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
+      await forEachTab(tab => tab.waitFor(1500));
+
+      console.log('Checking exchanged amount between downloader and uploader...');
+      const earnedColumn = await web3tTabA.waitForSelector('td.earned');
+      const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
+      const paidColumn = await web3tTabB.waitForSelector('td.paid');
+      const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
+      const transferredColumn = await web3tTabB.waitForSelector('td.transferred');
+      const transferred = await web3tTabB.evaluate(e => e.textContent, transferredColumn);
+      console.log(`paid = ${paid}`);
+      console.log(`transferred = ${transferred}`);
+      expect(transferred).not.toEqual(`0 B`);
+      expect(paid).not.toEqual(`-0 wei`);
+      expect(paid).toEqual(`-${earned}`);
     }
-
-    // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await forEachTab(tab => tab.waitFor(1500));
-
-    console.log('Checking exchanged amount between downloader and uploader...');
-    const earnedColumn = await web3tTabA.waitForSelector('td.earned');
-    const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
-    const paidColumn = await web3tTabB.waitForSelector('td.paid');
-    const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
-    const transferredColumn = await web3tTabB.waitForSelector('td.transferred');
-    const transferred = await web3tTabB.evaluate(e => e.textContent, transferredColumn);
-    console.log(`paid = ${paid}`);
-    console.log(`transferred = ${transferred}`);
-    expect(transferred).not.toEqual(`0 B`);
-    expect(paid).not.toEqual(`-0 wei`);
-    expect(paid).toEqual(`-${earned}`);
-  });
+  );
 });
