@@ -1,27 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {Page} from 'puppeteer';
-import * as fs from 'fs';
 
 import {
-  waitAndApproveBudget,
-  waitAndApproveMetaMask,
+  prepareStubUploadFile,
   setUpBrowser,
   setupLogging,
+  waitAndApproveBudget,
+  waitAndApproveMetaMask,
   waitForBudgetEntry,
   waitAndApproveDepositWithHub
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
-
-function prepareStubUploadFile(path: string): void {
-  const content = 'web3torrent\n'.repeat(1000000);
-  const buf = Buffer.from(content);
-  fs.writeFile(path, buf, err => {
-    if (err) {
-      console.log(err);
-      throw new Error('Failed to prepare the upload file');
-    }
-  });
-}
 
 export async function uploadFile(
   page: Page,
@@ -33,8 +22,10 @@ export async function uploadFile(
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.')
   const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
 
-  // By default, generate a /tmp stub file with deterministic data for upload testing
-  prepareStubUploadFile(filePath);
+  if (filePath === '/tmp/web3torrent-tests-stub') {
+    // By default, generate a unique /tmp stub file with deterministic data for upload testing
+    await prepareStubUploadFile(filePath);
+  }
 
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {

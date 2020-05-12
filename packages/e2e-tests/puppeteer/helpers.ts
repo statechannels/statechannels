@@ -5,7 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT, SCREENSHOT_DIR} from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {promisify} from 'util';
 
+const writeFile = promisify(fs.writeFile);
 const logDistinguisherCache: Record<string, true | undefined> = {};
 
 export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
@@ -215,6 +217,10 @@ export async function waitForBudgetEntry(page: Page): Promise<void> {
   await page.waitForSelector('.site-budget-table > tbody > tr');
 }
 
+export async function waitForFinishedOrCanceledDownload(page: Page): Promise<void> {
+  await page.waitForSelector('#download-button, .DownloadLink');
+}
+
 export async function waitForEmptyBudget(page: Page): Promise<void> {
   // eslint-disable-next-line no-undef
   await page.waitForFunction(() => !document.querySelector('.site-budget-table'), {
@@ -314,7 +320,7 @@ export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
 ): Promise<void> => {
   if (!usingVirtualFunding) {
-    console.log('Waiting for create channel button');
+    console.log('Direct Funding: Waiting for create channel button');
 
     const createChannelButton = 'div.application-workflow-prompt > div > button';
 
@@ -336,6 +342,13 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   const closingText = 'div.application-workflow-prompt > h2';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
+}
+
+export async function prepareStubUploadFile(path: string): Promise<void> {
+  const uniqueContent = Date.now();
+  console.log(`Make Stub file with seed ${Date.now()}`);
+  const content = `web3torrent-${uniqueContent}\n`.repeat(500000);
+  await writeFile(path, Buffer.from(content));
 }
 
 export async function takeScreenshot(tab: Page, file: string): Promise<void> {
