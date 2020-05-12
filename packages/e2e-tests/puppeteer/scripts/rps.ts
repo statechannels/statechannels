@@ -118,7 +118,8 @@ export async function bResigns(
   metamaskB: Dappeteer
 ): Promise<boolean> {
   // const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
-  async function playerB(page: Page, metamask: Dappeteer): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function playerB(page: Page, _metamask: Dappeteer): Promise<void> {
     await waitForAndClickButton(page, page.mainFrame(), '#resign:not([disabled])');
     // unsupported for now
     // if (virtual) {
