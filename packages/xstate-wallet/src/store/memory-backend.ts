@@ -34,9 +34,13 @@ export class MemoryBackend implements DBBackend {
     return _.cloneDeep(this._objectives);
   }
   public async channels() {
-    const channels: Record<string, ChannelStoredData | undefined> = _.cloneDeep(this._channels);
+    const channelsData: Record<string, ChannelStoredData | undefined> = _.cloneDeep(this._channels);
+    const channels = {};
+    for (const channelId of Object.keys(channelsData)) {
+      channels[channelId] = new ChannelStoreEntry(channelsData[channelId] as ChannelStoredData);
+    }
 
-    return channels as Record<string, ChannelStoredData | undefined>;
+    return channels as Record<string, ChannelStoreEntry | undefined>;
   }
   public async nonces() {
     const nonces: Record<string, BigNumber | string | undefined> = this._nonces;

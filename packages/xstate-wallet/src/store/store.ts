@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
-import {checkThat, isSimpleEthAllocation} from '../utils';
+import {checkThat, isSimpleEthAllocation, recordToArray} from '../utils';
 
 import {calculateChannelId, hashState} from './state-utils';
 import {ChannelStoreEntry} from './channel-store-entry';
@@ -267,6 +267,17 @@ export class Store {
         if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
         else throw 'No peer';
       }
+    );
+
+  public getApplicationChannels = (applicationSite: string, includeClosed = false) =>
+    this.backend.transaction('readonly', [ObjectStores.channels], async () =>
+      recordToArray(await this.backend.channels()).filter(
+        channel =>
+          !!channel &&
+          channel.applicationSite === applicationSite &&
+          (!channel.isFinalized || includeClosed) &&
+          !bigNumberify(channel.channelConstants.appDefinition).isZero()
+      )
     );
 
   public createChannel = (

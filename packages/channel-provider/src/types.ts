@@ -23,7 +23,9 @@ import {
   GetBudgetRequest,
   ApproveBudgetAndFundResponse,
   ApproveBudgetAndFundRequest,
-  NotificationType
+  NotificationType,
+  GetChannelsRequest,
+  GetChannelsResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -85,6 +87,7 @@ export type MethodResponseType = {
   ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
   CloseAndWithdraw: any; // TODO: Add types
+  GetChannels: GetChannelsResponse['result'];
 };
 
 type Method =
@@ -99,7 +102,8 @@ type Method =
   | 'ChallengeChannel'
   | 'ApproveBudgetAndFund'
   | 'GetBudget'
-  | 'CloseAndWithdraw';
+  | 'CloseAndWithdraw'
+  | 'GetChannels';
 
 type Request = {params: RequestParams['params']}; // Replace with union type
 type Call<K extends Method, T extends Request> = {
@@ -119,7 +123,8 @@ export type MethodRequestType =
   | Call<'ChallengeChannel', ChallengeChannelRequest>
   | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
   | Call<'GetBudget', GetBudgetRequest>
-  | Call<'CloseAndWithdraw', any>;
+  | Call<'CloseAndWithdraw', any>
+  | Call<'GetChannels', GetChannelsRequest>;
 
 export interface EventType extends NotificationType {
   [id: string]: [unknown]; // guid

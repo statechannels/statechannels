@@ -58,6 +58,7 @@ export interface ChannelClientInterface {
   ): Promise<SiteBudget>;
   getBudget(hubAddress: string): Promise<SiteBudget>;
   closeAndWithdraw(hubAddress: string, hubDestination: string): Promise<SiteBudget>;
+  getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message];
