@@ -87,10 +87,10 @@ export async function serializeChannelEntry(
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
-    status = 'closing';
   } else if (channelEntry.hasConclusionProof) {
     status = 'closed';
+  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
+    status = 'closing';
   }
 
   return {
