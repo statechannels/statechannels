@@ -2,7 +2,7 @@ FROM circleci/node:10.16.3-browsers
 USER root
 ENV DISPLAY :99.0
 
-RUN  apt-get install -y xvfb
+RUN  apt-get install -y xvfb libudev-dev
 
 WORKDIR /statechannels/monorepo
 

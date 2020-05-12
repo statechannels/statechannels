@@ -98,8 +98,12 @@ export class Store {
     }
   }
 
-  public initialize = async (privateKeys?: string[], cleanSlate = false) => {
-    await this.backend.initialize(cleanSlate);
+  public initialize = async (
+    privateKeys?: string[],
+    cleanSlate = false,
+    dbName = 'xstatewallet'
+  ) => {
+    await this.backend.initialize(cleanSlate, dbName);
 
     await this.backend.transaction('readwrite', [ObjectStores.privateKeys], async () => {
       if (!privateKeys?.length && !(await this.getAddress())) {

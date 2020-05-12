@@ -3,6 +3,7 @@ import {ChannelState} from './clients/payment-channel-client';
 import {utils} from 'ethers';
 
 export const VERSION = process.env.VERSION;
+export const COMMIT_HASH = process.env.COMMIT_HASH;
 
 export const WEI_PER_BYTE = utils.bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
@@ -128,10 +129,10 @@ export const defaultTrackerOpts = {
 };
 
 export const testTorrent = {
-  name: 'Big Buck Bunny',
-  length: 276445467,
+  name: 'nitro-protocol.pdf',
+  length: 403507,
   magnetURI:
-    'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&xl=276445467'
+    'magnet:?xt=urn:btih:0ab7ca2523f6838a915f30d17ec1703b786c9e5d&dn=nitro-protocol.pdf&xl=403507'
 };
 
 export const mockCurrentUser = '0x8fd00f170fdf3772c5ebdcd90bf257316c69ba45';

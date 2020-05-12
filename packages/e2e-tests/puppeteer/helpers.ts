@@ -256,7 +256,11 @@ export async function waitAndApproveDepositWithHub(
 ): Promise<void> {
   console.log('Making deposit with hub');
   const walletIFrame = page.frames()[1];
-  await walletIFrame.waitForSelector('#please-approve-transaction', {timeout: TX_WAIT_TIMEOUT}); // longer timeout here because blockchain is slow
+  console.log('Waiting for #please-approve-transaction');
+  console.time('#please-approve-transaction');
+  await walletIFrame.waitForSelector('#please-approve-transaction', {timeout: TX_WAIT_TIMEOUT * 3}); // longer timeout here because blockchain is slow
+  console.timeEnd('#please-approve-transaction');
+
   await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
   await page.bringToFront();
 }

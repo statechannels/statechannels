@@ -11,6 +11,7 @@ import {
   waitAndApproveDepositWithHub
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
+import {TX_WAIT_TIMEOUT} from '../constants';
 
 export async function uploadFile(
   page: Page,
@@ -23,10 +24,9 @@ export async function uploadFile(
   const inputUploadHandle = await page.waitForSelector('input:not([disabled])[type=file]');
 
   if (filePath === '/tmp/web3torrent-tests-stub') {
-    // By default, generate a unique /tmp stub file with deterministic data for upload testing
-    await prepareStubUploadFile(filePath);
+    // By default, generate a /tmp stub file with deterministic data for upload testing
+    prepareStubUploadFile(filePath);
   }
-
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {
     // eslint-disable-next-line no-undef
@@ -41,7 +41,7 @@ export async function uploadFile(
   }
 
   const downloadLinkSelector = '#download-link';
-  await page.waitForSelector(downloadLinkSelector, {timeout: 60000}); // wait for my tx, which could be slow if on a real blockchain
+  await page.waitForSelector(downloadLinkSelector, {timeout: TX_WAIT_TIMEOUT}); // wait for my tx, which could be slow if on a real blockchain
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
 
   return downloadLink ? downloadLink : '';
