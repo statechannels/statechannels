@@ -64,7 +64,15 @@ export class Backend implements DBBackend {
   // Generic Getters
 
   public async channels() {
-    return this.getAll(ObjectStores.channels);
+    const channelData = (await this.getAll(ObjectStores.channels, true)) as {
+      key: string;
+      value: ChannelStoredData;
+    }[];
+    const channels = {};
+    channelData.forEach(cd => {
+      channels[cd.key] = ChannelStoreEntry.fromJson(cd.value);
+    });
+    return channels;
   }
 
   public async objectives() {
@@ -199,8 +207,10 @@ export class Backend implements DBBackend {
    * @param storeName
    * @param asArray if true, the result object, is transformed to an array
    */
-  private async getAll(storeName: ObjectStores): Promise<any> {
-    return _.mapValues(_.keyBy(await this._db[storeName].toArray(), 'key'), 'value');
+  private async getAll(storeName: ObjectStores, asArray = false): Promise<any> {
+    return asArray
+      ? this._db[storeName].toArray()
+      : _.mapValues(_.keyBy(await this._db[storeName].toArray(), 'key'), 'value');
   }
 
   /**

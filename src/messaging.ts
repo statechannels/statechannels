@@ -24,7 +24,7 @@ import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
 import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
 import {Message, SiteBudget, Participant} from './store/types';
-import {serializeSiteBudget} from './serde/app-messages/serialize';
+import {serializeSiteBudget, serializeChannelEntry} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
@@ -179,6 +179,17 @@ export class MessagingService implements MessagingServiceInterface {
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
+        break;
+      case 'GetChannels':
+        const channelEntries = await this.store.getApplicationChannels(
+          fromDomain,
+          request.params.includeClosed
+        );
+        const serializedChannelEntries = await Promise.all(
+          channelEntries.map(serializeChannelEntry)
+        );
+        await this.sendResponse(requestId, serializedChannelEntries);
+
         break;
       case 'ChallengeChannel':
       case 'CreateChannel':
