@@ -1,11 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {preseededTorrentsUI, defaultTrackerOpts} from '../../constants';
+import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
-import {Client} from 'bittorrent-tracker';
 import {logger} from '../../logger';
 
 const log = logger.child({module: 'welcome-page-tracker-client'});
@@ -16,30 +15,6 @@ interface Props {
 
 const Welcome: React.FC<Props> = props => {
   const history = useHistory();
-  const [trackerClient] = useState(new Client(defaultTrackerOpts));
-  const [torrents, setTorrents] = useState({
-    [preseededTorrentsUI[0].infoHash]: false
-  }); // do not display by default
-
-  useEffect(() => {
-    const updateIfSeederFound = data => {
-      log.info({data}, 'got an announce response from tracker: ');
-      if (data.complete > 0) {
-        // there are some seeders for this torrent
-        setTorrents({[preseededTorrentsUI[0].infoHash]: true});
-        // this torrent should be displayed
-        log.info(`Seeder found for ${preseededTorrentsUI[0].infoHash}`);
-      }
-      trackerClient.start();
-    };
-    trackerClient.on('update', updateIfSeederFound);
-
-    return () => {
-      trackerClient.off('update', updateIfSeederFound);
-      trackerClient.stop();
-      trackerClient.destroy();
-    };
-  }, [trackerClient]);
 
   return (
     <section className="section fill">
@@ -62,7 +37,7 @@ const Welcome: React.FC<Props> = props => {
         </p>
       </div>
       <h2>Download a sample file</h2>
-      <ShareList torrents={preseededTorrentsUI.filter(torrent => torrents[torrent.infoHash])} />
+      <ShareList torrents={preseededTorrentsUI} />
       <h2>Or share a file</h2>
       <FormButton
         name="upload"
