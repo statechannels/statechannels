@@ -38,6 +38,7 @@ interface Props {
 
 const File: React.FC<Props> = props => {
   const web3Torrent = useContext(Web3TorrentContext);
+
   const {infoHash} = useParams();
   const queryParams = useQuery();
   const [loading, setLoading] = useState(false);
@@ -64,30 +65,25 @@ const File: React.FC<Props> = props => {
     if (infoHash) {
       testResult();
     }
-  }, [infoHash]);
 
-  useEffect(() => {
-    if (torrent.status !== Status.Idle || !!torrent.originalSeed) {
-      const cancelId = setTimeout(
-        () =>
-          setTorrent(
-            getTorrentUI(web3Torrent, {
-              infoHash,
-              name: torrentName,
-              length: torrentLength
-            })
-          ),
-        1000
+    const onTorrentUpdate = () =>
+      setTorrent(
+        getTorrentUI(web3Torrent, {
+          infoHash,
+          name: torrentName,
+          length: torrentLength
+        })
       );
-      return () => clearTimeout(cancelId);
-    }
-    return undefined;
-  }, [torrent, infoHash, torrentName, torrentLength, web3Torrent]);
+    web3Torrent.addListenerForUpdates(infoHash, onTorrentUpdate);
+    return () => web3Torrent.removeListenerForUpdates(infoHash);
+  }, [infoHash, torrentLength, torrentName, web3Torrent]);
+
   useEffect(() => {
     if (props.ready) {
       web3Torrent.paymentChannelClient.getChannels().then(channels => setChannels(channels));
     }
   }, [props.ready, web3Torrent.paymentChannelClient]);
+
   const {mySigningAddress: me} = web3Torrent.paymentChannelClient;
   const {budget, closeBudget} = useBudget(props);
   // TODO: We shouldn't have to check all these different conditions
@@ -133,13 +129,6 @@ const File: React.FC<Props> = props => {
               setErrorLabel('');
               try {
                 await download(torrent.magnetURI);
-                setTorrent(
-                  getTorrentUI(web3Torrent, {
-                    infoHash,
-                    name: torrentName,
-                    length: torrentLength
-                  })
-                );
               } catch (error) {
                 setLoading(false);
                 setErrorLabel(getUserFriendlyError(error.code));

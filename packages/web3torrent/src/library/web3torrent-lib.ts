@@ -26,6 +26,7 @@ import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
 import {track} from '../analytics';
+import _ from 'lodash';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
@@ -44,6 +45,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   pseAccount: string;
   outcomeAddress: string;
+  listenersForUpdates: Record<string, () => void>;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
@@ -51,6 +53,25 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
+    this.listenersForUpdates = {};
+  }
+
+  informListeners() {
+    _.mapValues(this.listenersForUpdates, l => l());
+  }
+
+  addListenerForUpdates(key: string, listener: () => void) {
+    this.listenersForUpdates = {
+      ...this.listenersForUpdates,
+      [key]: listener
+    };
+  }
+
+  removeListenerForUpdates(key: string) {
+    this.listenersForUpdates = {
+      ...this.listenersForUpdates,
+      [key]: undefined
+    };
   }
 
   async enable() {
@@ -83,7 +104,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const options =
       typeof optionsOrCallback === 'function'
         ? {createdBy: this.pseAccount, announce: defaultTrackers}
-        : {createdBy: this.pseAccount, announce: defaultTrackers, ...optionsOrCallback};
+        : {
+            createdBy: this.pseAccount,
+            announce: defaultTrackers,
+            ...optionsOrCallback
+          };
 
     const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
     this.setupTorrent(torrent);
@@ -185,7 +210,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.trace({wire});
 
     wire.use(
-      paidStreamingExtension({pseAccount: this.pseAccount, outcomeAddress: this.outcomeAddress})
+      paidStreamingExtension({
+        pseAccount: this.pseAccount,
+        outcomeAddress: this.outcomeAddress
+      })
     );
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
@@ -195,6 +223,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
+      this.informListeners();
     });
 
     wire.paidStreamingExtension.on(
@@ -229,12 +258,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`);
           response(true);
         }
+        this.informListeners();
       }
     );
 
-    wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
-      torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
-    );
+    wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice => {
+      torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice);
+      this.informListeners();
+    });
 
     // If the wallet queues a message, send it across the wire
     this.paymentChannelClient.onMessageQueued((message: Message) => {
@@ -343,11 +374,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (torrent.usingPaidStreaming) {
       return torrent;
     }
-    torrent.on('infoHash', () => {
+    torrent.on(TorrentEvents.INFOHASH, () => {
       this.peersList = {...this.peersList, [torrent.infoHash]: {}};
+      this.informListeners();
     });
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
+      this.informListeners;
     });
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
@@ -372,6 +405,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           break;
       }
       this.emit(ClientEvents.TORRENT_NOTICE, {torrent, wire, command, data});
+      this.informListeners();
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
@@ -381,20 +415,32 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
+<<<<<<< HEAD
       track('Torrent Finished Downloading', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
         filename: torrent.name,
         filesize: torrent.length
       });
+=======
+      this.informListeners();
+>>>>>>> web3torrent: remove the update timer
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
       log.error({err, torrent}, 'Torrent ERROR');
       this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
+      this.informListeners();
     });
-    torrent.usingPaidStreaming = true;
 
+    torrent.on(TorrentEvents.DOWNLOAD, this.informListeners);
+    torrent.on(TorrentEvents.NOPEERS, this.informListeners);
+    torrent.on(TorrentEvents.METADATA, this.informListeners);
+    torrent.on(TorrentEvents.READY, this.informListeners);
+    torrent.on(TorrentEvents.UPLOAD, this.informListeners);
+    torrent.on(TorrentEvents.WARNING, this.informListeners);
+
+    torrent.usingPaidStreaming = true;
     return torrent;
   }
 
