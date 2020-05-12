@@ -10,6 +10,7 @@ module.exports = {
   devtool: 'inline-source-map',
   output: {
     filename: 'bundle.js',
+    sourceMapFilename: 'bundle.js.map',
     path: __dirname + '/build'
   },
   module: {
@@ -61,7 +62,10 @@ module.exports = {
       'NITRO_ADJUDICATOR_ADDRESS',
       'USE_INDEXED_DB'
     ]),
-    new HtmlWebpackPlugin({template: './index-template.html'})
+    new HtmlWebpackPlugin({
+      template: './index-template.html',
+      favicon: './public/favicon.ico'
+    })
   ],
 
   resolve: {
