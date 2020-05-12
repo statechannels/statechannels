@@ -39,7 +39,7 @@ export class Backend implements DBBackend {
    * @param cleanSlate if true, it clears all the object stores of data
    * @param databaseName (optional) useful maybe for multiple tenants in the same page?
    */
-  public async initialize(cleanSlate = false, databaseName = 'xstateWallet') {
+  public async initialize(cleanSlate: boolean, databaseName: string) {
     const createdDB = await this.create(databaseName);
 
     if (cleanSlate) await Promise.all(STORES.map(this.clear.bind(this)));
