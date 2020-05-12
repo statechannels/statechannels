@@ -404,7 +404,7 @@ jobs:
           file: e2e-test-w3t-production-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn jest web3torrent)
+      - run: (cd packages/e2e-tests && yarn jest web3torrent --runInBand --bail)
       - upload_logs:
           file: e2e-test-w3t-production-stats
       - notify_slack
