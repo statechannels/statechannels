@@ -25,7 +25,7 @@ export async function uploadFile(
 
   if (filePath === '/tmp/web3torrent-tests-stub') {
     // By default, generate a /tmp stub file with deterministic data for upload testing
-    prepareStubUploadFile(filePath);
+    await prepareStubUploadFile(filePath);
   }
   await inputUploadHandle.uploadFile(filePath);
   await inputUploadHandle.evaluate(upload => {
