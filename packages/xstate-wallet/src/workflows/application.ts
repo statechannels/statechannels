@@ -415,7 +415,7 @@ export const workflow = (
     },
 
     invokeClosingProtocol: (context: ChannelIdExists) =>
-      ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
+      ConcludeChannel.machine(store, messagingService).withContext({channelId: context.channelId}),
 
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
       ChallengeChannel.machine(store, {channelId}),

@@ -5,6 +5,7 @@ import {getDataAndInvoke} from '../utils';
 import {map, first, filter} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
 import {ChannelChainInfo} from '../chain';
+import {MessagingServiceInterface} from '../messaging';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -98,40 +99,50 @@ const submitWithdrawTransaction = (store: Store) => async context => {
   await store.chain.finalizeAndWithdraw(channelEntry.support);
 };
 
-const withdrawing = {
-  initial: 'submitTransaction',
-  invoke: {
-    id: 'observeChain',
-    src: Services.observeFundsWithdrawal
-  },
-  states: {
-    submitTransaction: {
-      invoke: {
-        id: 'submitTransaction',
-        src: Services.submitWithdrawTransaction,
-        onDone: {
-          target: 'waitMining',
-          actions: assign({
-            transactionId: (context, event: DoneInvokeEvent<string>) => event.data
-          })
-        }
-      }
+function withdrawing(messagingService: MessagingServiceInterface) {
+  return {
+    initial: 'submitTransaction',
+    invoke: {
+      id: 'observeChain',
+      src: Services.observeFundsWithdrawal
     },
-    waitMining: {}
-  }
-};
+    states: {
+      submitTransaction: {
+        entry: () => {
+          messagingService.sendDisplayMessage('Show');
+        },
+        exit: () => messagingService.sendDisplayMessage('Hide'),
+        invoke: {
+          id: 'submitTransaction',
+          src: Services.submitWithdrawTransaction,
+          onDone: {
+            target: 'waitMining',
+            actions: assign({
+              transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+            })
+          }
+        }
+      },
+      waitMining: {}
+    }
+  };
+}
 
-export const config: StateNodeConfig<Init, any, any> = {
-  key: WORKFLOW,
-  initial: 'concludeChannel',
-  states: {
-    concludeChannel,
-    determineFundingType,
-    virtualDefunding,
-    withdrawing,
-    success: {type: 'final'}
-  }
-};
+export function config(
+  messagingService: MessagingServiceInterface
+): StateNodeConfig<Init, any, any> {
+  return {
+    key: WORKFLOW,
+    initial: 'concludeChannel',
+    states: {
+      concludeChannel,
+      determineFundingType,
+      virtualDefunding,
+      withdrawing: withdrawing(messagingService),
+      success: {type: 'final'}
+    }
+  };
+}
 
 const services = (store: Store) => ({
   signFinalState: signFinalState(store),
@@ -147,4 +158,5 @@ const services = (store: Store) => ({
 const options = (store: Store) => ({
   services: services(store)
 });
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
+  Machine(config(messagingService)).withConfig(options(store));
