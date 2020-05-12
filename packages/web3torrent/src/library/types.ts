@@ -11,6 +11,7 @@ export enum ClientEvents {
   TORRENT_NOTICE = 'torrent_notice'
 }
 
+// The events are documented at https://webtorrent.io/docs
 export enum TorrentEvents {
   DONE = 'done',
   DOWNLOAD = 'download',
