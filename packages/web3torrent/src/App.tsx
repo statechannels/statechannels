@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import ConnectionBanner from '@rimble/connection-banner';
 import React, {useState, useEffect} from 'react';
 import {Route, Switch, BrowserRouter} from 'react-router-dom';
@@ -11,6 +12,7 @@ import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
 import {web3torrent} from './clients/web3torrent-client';
+import {identify} from './analytics';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
@@ -19,7 +21,17 @@ const App: React.FC = () => {
 
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
-    web3torrent.paymentChannelClient.initialize().then(() => setInitialized(true));
+    web3torrent.paymentChannelClient.initialize().then(() => {
+      setInitialized(true);
+      if (process.env.NODE_ENV === 'production') {
+        Sentry.configureScope(scope => {
+          scope.setUser({id: web3torrent.paymentChannelClient.mySigningAddress});
+        });
+        identify(web3torrent.paymentChannelClient.mySigningAddress, {
+          outcomeAddress: web3torrent.paymentChannelClient.myEthereumSelectedAddress
+        });
+      }
+    });
   }, [initialized]);
 
   useEffect(() => {

@@ -33,7 +33,7 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
               setErrorLabel('');
               try {
                 const {infoHash, length, name, magnetURI} = await upload(event.target.files);
-                track('Uploaded a File', {
+                track('File Uploaded', {
                   infoHash,
                   magnetURI,
                   filename: name,

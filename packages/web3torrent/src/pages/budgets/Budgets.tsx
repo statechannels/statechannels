@@ -51,7 +51,7 @@ const CurrentBudget: React.FC<Props> = props => {
           <FormButton
             name="create-budget"
             disabled={!props.ready}
-            onClick={() => createBudget() && track("Clicked 'Create a budget'", {})}
+            onClick={() => createBudget() && track('Budget Requested', {})}
           >
             Create a budget
           </FormButton>

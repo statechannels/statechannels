@@ -53,7 +53,7 @@ export const SiteBudgetTable: React.FC<SiteBudgetTableProps> = props => {
               <button
                 id="budget-withdraw"
                 onClick={() => {
-                  track("Clicked 'Withdraw'", {spendBudget, receiveBudget});
+                  track('Withdraw Initiated', {spendBudget, receiveBudget});
                   withdraw();
                 }}
               >
