@@ -20,7 +20,7 @@ const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void
 const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
   store
     .channelUpdatedFeed(channelId)
-    .pipe(first(({support}) => support.every(state => state.isFinal)))
+    .pipe(first(({isFinalized}) => isFinalized))
     .toPromise();
 
 const concludeChannel = getDataAndInvoke<Init>(

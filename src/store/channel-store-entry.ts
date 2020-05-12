@@ -94,7 +94,7 @@ export class ChannelStoreEntry {
   }
 
   get isFinalized() {
-    return this.isSupported && this.supported.isFinal;
+    return this.isSupported && this.support.every(s => s.isFinal);
   }
 
   get isChallenging() {
