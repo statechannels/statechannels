@@ -76,7 +76,8 @@ module.exports = {
     new webpack.DefinePlugin({
       // This is a bit messy, we should clean this up
       ['process.env']: {
-        ...stringifiedEnv['process.env'],
+        // eslint-disable-next-line
+        ...process.env,
         VERSION: JSON.stringify(gitRevisionPlugin.version()),
         COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
         BRANCH: JSON.stringify(gitRevisionPlugin.branch())
