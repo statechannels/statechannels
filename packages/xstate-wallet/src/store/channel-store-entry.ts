@@ -75,6 +75,13 @@ export class ChannelStoreEntry {
     return this.participants[this.myIndex].signingAddress;
   }
 
+  public get myTurn(): boolean {
+    return this.supported.turnNum
+      .add(1)
+      .mod(this.participants.length)
+      .eq(this.myIndex);
+  }
+
   private get signedStates(): Array<SignedStateWithHash> {
     return this.stateVariables.map(s => ({
       ...this.channelConstants,
@@ -87,7 +94,7 @@ export class ChannelStoreEntry {
   }
 
   get isFinalized() {
-    return this.isSupported && this.supported.isFinal;
+    return this.isSupported && this.support.every(s => s.isFinal);
   }
 
   get isChallenging() {

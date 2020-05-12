@@ -1,41 +1,31 @@
 import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
-import {SupportState, VirtualDefundingAsLeaf} from '.';
+import {VirtualDefundingAsLeaf} from '.';
 import {getDataAndInvoke} from '../utils';
 
-import {outcomesEqual} from '../store/state-utils';
-import {State} from '../store/types';
-import {map} from 'rxjs/operators';
+import {map, first} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
 
 const WORKFLOW = 'conclude-channel';
 
 export type Init = {channelId: string};
 
-const finalState = (store: Store) => async (context: Init): Promise<SupportState.Init> => {
-  const {sortedStates, latestSignedByMe, latest} = await store.getEntry(context.channelId);
-
-  const latestFinalState: State | undefined = sortedStates.filter(s => s.isFinal)[0];
-
-  // If we've received a new final state that matches our outcome we support that
-  if (outcomesEqual(latestSignedByMe.outcome, latestFinalState?.outcome)) {
-    return {state: latestFinalState};
-  }
-
-  // If we've supported a final state, send it
-  if (latestSignedByMe.isFinal) {
-    return {state: latestSignedByMe};
-  }
-
-  // Otherwise create a new final state
-  return {state: {...latestSignedByMe, turnNum: latest.turnNum.add(10), isFinal: true}};
+const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void> => {
+  const {supported, latestSignedByMe} = await store.getEntry(channelId);
+  if (!supported.isFinal) throw new Error('Supported state not final');
+  if (latestSignedByMe.turnNum.eq(supported.turnNum)) return; // already signed
+  await store.signAndAddState(channelId, supported);
 };
 
-const supportState = (store: Store) => SupportState.machine(store);
+const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
+  store
+    .channelUpdatedFeed(channelId)
+    .pipe(first(({isFinalized}) => isFinalized))
+    .toPromise();
 
 const concludeChannel = getDataAndInvoke<Init>(
-  {src: finalState.name},
-  {src: supportState.name},
+  {src: signFinalState.name},
+  {src: waitForConclusionProof.name},
   'determineFundingType'
 );
 
@@ -104,9 +94,9 @@ export const config: StateNodeConfig<Init, any, any> = {
 };
 
 const services = (store: Store) => ({
-  finalState: finalState(store),
+  signFinalState: signFinalState(store),
+  waitForConclusionProof: waitForConclusionProof(store),
   getFunding: getFunding(store),
-  supportState: supportState(store),
   withdraw: withdraw(store),
   getRole: getRole(store),
   virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)

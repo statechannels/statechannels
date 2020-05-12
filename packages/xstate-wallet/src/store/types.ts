@@ -148,7 +148,7 @@ export type ChannelStoredData = {
   myIndex: number;
 };
 export interface DBBackend {
-  initialize(cleanSlate?: boolean): Promise<any>;
+  initialize(cleanSlate: boolean, name: string): Promise<any>;
 
   // TODO: Perhaps the backend API should look more like this?
   // privateKeys(): Promise<Array<{signingAddress: string; privateKey: string}>>;

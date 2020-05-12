@@ -7,6 +7,9 @@ import {State, SignedState} from '../store/types';
 import {createSignatureEntry} from '../store/state-utils';
 import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
 import {AddressZero} from 'ethers/constants';
+require('fake-indexeddb/auto');
+import {Backend} from '../store/dexie-backend';
+
 jest.setTimeout(30000);
 
 test('concludes on their turn', async () => {
@@ -15,12 +18,14 @@ test('concludes on their turn', async () => {
   const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
-    fakeChain
+    fakeChain,
+    new Backend()
   );
   const playerB = await Player.createPlayer(
     '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
     'PlayerB',
-    fakeChain
+    fakeChain,
+    new Backend()
   );
   const outcome = simpleEthAllocation([
     {
