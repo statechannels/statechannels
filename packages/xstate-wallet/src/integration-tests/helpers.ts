@@ -1,7 +1,7 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers/wallet';
 import {ChannelWallet, logTransition} from '../channel-wallet';
-import {Participant} from '../store/types';
+import {Participant, DBBackend} from '../store/types';
 import {Chain} from '../chain';
 import {
   isNotification,
@@ -27,9 +27,19 @@ import {ETH_TOKEN} from '../constants';
 const log = logger.info.bind(logger);
 
 export class Player {
-  privateKey: string;
   get signingAddress() {
     return new Wallet(this.privateKey).address;
+  }
+
+  private constructor(
+    public privateKey: string,
+    private id: string,
+    chain: Chain,
+    backend?: DBBackend
+  ) {
+    this.store = new TestStore(chain, backend);
+    this.messagingService = new MessagingService(this.store);
+    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
   }
   store: TestStore;
   messagingService: MessagingServiceInterface;
@@ -91,16 +101,15 @@ export class Player {
   get participantId(): string {
     return this.signingAddress;
   }
-  private constructor(privateKey: string, private id: string, chain: Chain) {
-    this.privateKey = privateKey;
-    this.store = new TestStore(chain);
-    this.messagingService = new MessagingService(this.store);
-    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
-  }
 
-  static async createPlayer(privateKey: string, id: string, chain: Chain): Promise<Player> {
-    const player = new Player(privateKey, id, chain);
-    await player.store.initialize([privateKey]);
+  static async createPlayer(
+    privateKey: string,
+    id: string,
+    chain: Chain,
+    backend?: DBBackend
+  ): Promise<Player> {
+    const player = new Player(privateKey, id, chain, backend);
+    await player.store.initialize([privateKey], true, id);
     return player;
   }
 }
