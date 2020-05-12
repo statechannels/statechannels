@@ -71,9 +71,7 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
   };
 }
 
-export async function serializeChannelEntry(
-  channelEntry: ChannelStoreEntry
-): Promise<ChannelResult> {
+export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
   const {latest, channelId} = channelEntry;
   const {appData, turnNum, outcome} = latest;
   const {participants, appDefinition} = channelEntry.channelConstants;

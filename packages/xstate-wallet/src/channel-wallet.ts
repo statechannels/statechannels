@@ -66,7 +66,7 @@ export class ChannelWallet {
         );
 
         this.messagingService.sendChannelNotification('ChannelProposed', {
-          ...(await serializeChannelEntry(channelEntry)),
+          ...serializeChannelEntry(channelEntry),
           fundingStrategy: objective.data.fundingStrategy
         });
       }
