@@ -19,8 +19,9 @@ function channelIdToTableRow(
   channelId: string,
   channels: Dictionary<ChannelState>,
   torrent: TorrentUI,
-  participantType: 'payer' | 'beneficiary',
-  clickHandler: (string) => Promise<ChannelState>
+  participantType: 'payer' | 'beneficiary'
+  // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
+  // clickHandler: (string) => Promise<ChannelState>
 ) {
   let channelButton;
   const channel = channels[channelId];
@@ -37,13 +38,13 @@ function channelIdToTableRow(
   } else if (channel.status === 'challenging') {
     channelButton = <button disabled>Challenging</button>;
   } else {
-    channelButton = getPeerStatus(torrent, wire) ? (
-      <button disabled>Running</button>
-    ) : (
-      <button className="button-alt" onClick={() => clickHandler(channelId)}>
-        Challenge Channel
-      </button>
-    );
+    channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
+    // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
+    // (
+    //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
+    //     Challenge Channel
+    //   </button>
+    // );
   }
 
   let dataTransferred: string;
@@ -102,8 +103,9 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
               key,
               channels,
               torrent,
-              channels[key].beneficiary === mySigningAddress ? 'beneficiary' : 'payer',
-              context.paymentChannelClient.challengeChannel
+              channels[key].beneficiary === mySigningAddress ? 'beneficiary' : 'payer'
+              // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
+              // ,context.paymentChannelClient.challengeChannel
             )
           )}
         </tbody>
