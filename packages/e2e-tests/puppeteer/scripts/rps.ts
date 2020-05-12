@@ -7,7 +7,6 @@ import {
   waitAndApproveMetaMask,
   waitAndApproveDeposit
 } from '../helpers';
-import {getEnvBool} from '@statechannels/devtools';
 import {Dappeteer} from 'dappeteer';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
