@@ -57,15 +57,6 @@ const File: React.FC<Props> = props => {
   );
 
   useEffect(() => {
-    const testResult = async () => {
-      const torrentCheckResult = await checkTorrent(infoHash);
-      setWarning(torrentCheckResult);
-    };
-
-    if (infoHash) {
-      testResult();
-    }
-
     const onTorrentUpdate = () =>
       setTorrent(
         getTorrentUI(web3Torrent, {
@@ -77,6 +68,17 @@ const File: React.FC<Props> = props => {
     web3Torrent.addListenerForUpdates('file-component', onTorrentUpdate);
     return () => web3Torrent.removeListenerForUpdates('file-component');
   }, [infoHash, torrentLength, torrentName, web3Torrent]);
+
+  useEffect(() => {
+    const testResult = async () => {
+      const torrentCheckResult = await checkTorrent(infoHash);
+      setWarning(torrentCheckResult);
+    };
+
+    if (infoHash) {
+      testResult();
+    }
+  }, [infoHash]);
 
   useEffect(() => {
     if (props.ready) {
