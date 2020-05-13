@@ -201,6 +201,9 @@ module.exports = function(webpackEnv) {
       filename: isEnvProduction
         ? 'static/js/[name].[contenthash:8].js'
         : isEnvDevelopment && 'static/js/bundle.js',
+      sourceMapFilename: isEnvProduction
+        ? 'static/js/[name].[contenthash:8].map.js'
+        : isEnvDevelopment && 'static/js/bundle.map.js',
       // TODO: remove this when upgrading to webpack 5
       futureEmitAssets: true,
       // There are also additional JS chunk files if you use code splitting.
