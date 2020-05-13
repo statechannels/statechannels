@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map, distinctUntilChanged, tap, first} from 'rxjs/operators';
+import {filter, map, distinctUntilChanged, first} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
@@ -118,18 +118,20 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) =>
-  store
+const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) => {
+  // Wait until it's our turn
+  const ourTurnEntry = await store
     .channelUpdatedFeed(channelId)
     .pipe(
       filter(entry => entry.myTurn),
-      tap(async ({supported}) => {
-        const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
-        await store.signAndAddState(channelId, finalState);
-      }),
       first()
     )
     .toPromise();
+  // Sign a finalized state
+  const {supported} = ourTurnEntry;
+  const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
+  return store.signAndAddState(channelId, finalState);
+};
 
 const generateConfig = (
   actions: WorkflowActions,
