@@ -15,6 +15,9 @@ let browser: any = IS_BROWSER_CONTEXT
   ? {
       transmit: {
         send: (_: any, logEvent: any) =>
+          // The simplest way to give users/developers easy access to the logs in a single place is to
+          // make the application aware of all the pino logs via postMessage
+          // Then, the application can package up all the logs into a single file
           window.postMessage(
             {type: 'PINO_LOG', logEvent: JSON.parse(JSON.stringify({...logEvent, name}))},
             '*'
