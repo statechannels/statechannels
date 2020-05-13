@@ -97,7 +97,7 @@ export const enum States {
 
 const enum Services {
   getDeductions = 'getDeductions',
-  waitForSupportedGuarantorState = 'waitForSuppotedGuarantorState',
+  waitForSupportedGuarantorState = 'waitForSupportedGuarantorState',
   waitForFirstJointState = 'waitForFirstJointState',
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
@@ -262,7 +262,7 @@ export const options = (
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {
-    waitForSuppotedGuarantorState: waitForSupportedGuarantorState(store),
+    waitForSupportedGuarantorState: waitForSupportedGuarantorState(store),
     getDeductions: getDeductions(store),
     supportState: SupportState.machine(store),
     ledgerFunding: LedgerFunding.machine(store),
