@@ -13,7 +13,7 @@
     "@types/node": "13.5.1",
     "@types/prettier": "1.19.0",
     "@types/puppeteer": "2.0.1",
-    "@types/wait-on": "3.2.0",
+    "@types/wait-on": "4.0.0",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "dappeteer": "^1.0.0",
