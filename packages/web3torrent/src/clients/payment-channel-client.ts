@@ -344,6 +344,12 @@ export class PaymentChannelClient {
     }
   }
 
+  async getChannels(): Promise<Record<string, ChannelState | undefined>> {
+    const channelResults = await this.channelClient.getChannels(true);
+    channelResults.map(convertToChannelState).forEach(cr => (this.channelCache[cr.channelId] = cr));
+    return this.channelCache;
+  }
+
   async getBudget(): Promise<DomainBudget> {
     this.budgetCache = await this.channelClient.getBudget(HUB.signingAddress);
     return this.budgetCache;
