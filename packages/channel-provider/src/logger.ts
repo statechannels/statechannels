@@ -14,7 +14,7 @@ const serializeLogEvent = (o: any) => JSON.stringify({...o, name});
 let browser: any = IS_BROWSER_CONTEXT
   ? {
       transmit: {
-        send: (e: any, logEvent: any) =>
+        send: (_: any, logEvent: any) =>
           window.postMessage({type: 'PINO_LOG', logEvent: {...logEvent, name}}, '*')
       }
     }
