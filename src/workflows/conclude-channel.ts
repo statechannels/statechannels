@@ -1,10 +1,11 @@
-import {Machine, StateNodeConfig} from 'xstate';
+import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
 import {Store} from '../store';
-import {VirtualDefundingAsLeaf} from '.';
+import {VirtualDefundingAsLeaf, SupportState} from '.';
 import {getDataAndInvoke} from '../utils';
-
-import {map, first} from 'rxjs/operators';
+import {map, first, filter} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
+import {ChannelChainInfo} from '../chain';
+import {MessagingServiceInterface} from '../messaging';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -20,7 +21,7 @@ const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void
 const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
   store
     .channelUpdatedFeed(channelId)
-    .pipe(first(({isFinalized}) => isFinalized))
+    .pipe(first(({hasConclusionProof}) => hasConclusionProof))
     .toPromise();
 
 const concludeChannel = getDataAndInvoke<Init>(
@@ -56,6 +57,8 @@ const getRole = (store: Store) => (ctx: Init) => async cb => {
   else cb('AmLeaf');
 };
 
+const supportState = (store: Store) => SupportState.machine(store);
+
 const virtualDefunding = {
   initial: 'gettingRole',
   states: {
@@ -73,36 +76,87 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const withdraw = (store: Store) => async (ctx: Init) => {
-  // NOOP
-};
+enum Services {
+  submitWithdrawTransaction = 'submitWithdrawTransaction',
+  observeFundsWithdrawal = 'observeFundsWithdrawal'
+}
 
-// TODO: Probably display UI for withdrawing when implemented
-const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
+interface FundsWithdrawn {
+  type: 'FUNDS_WITHDRAWN';
+}
 
-export const config: StateNodeConfig<Init, any, any> = {
-  key: WORKFLOW,
-  initial: 'concludeChannel',
-  states: {
-    concludeChannel,
-    determineFundingType,
-    virtualDefunding,
-    withdrawing,
-    success: {type: 'final'}
+const observeFundsWithdrawal = (store: Store) => context =>
+  store.chain.chainUpdatedFeed(context.channelId).pipe(
+    filter(c => c.amount.eq(0)),
+    map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
+  );
+
+const submitWithdrawTransaction = (store: Store) => async context => {
+  const channelEntry = await store.getEntry(context.channelId);
+  if (!channelEntry.hasConclusionProof) {
+    throw new Error(`Channel ${context.channelId} is not finalized`);
   }
+  await store.chain.finalizeAndWithdraw(channelEntry.support);
 };
+
+function withdrawing(messagingService: MessagingServiceInterface) {
+  return {
+    initial: 'submitTransaction',
+    invoke: {
+      id: 'observeChain',
+      src: Services.observeFundsWithdrawal
+    },
+    states: {
+      submitTransaction: {
+        entry: () => {
+          messagingService.sendDisplayMessage('Show');
+        },
+        exit: () => messagingService.sendDisplayMessage('Hide'),
+        invoke: {
+          id: 'submitTransaction',
+          src: Services.submitWithdrawTransaction,
+          onDone: {
+            target: 'waitMining',
+            actions: assign({
+              transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+            })
+          }
+        }
+      },
+      waitMining: {}
+    }
+  };
+}
+
+export function config(
+  messagingService: MessagingServiceInterface
+): StateNodeConfig<Init, any, any> {
+  return {
+    key: WORKFLOW,
+    initial: 'concludeChannel',
+    states: {
+      concludeChannel,
+      determineFundingType,
+      virtualDefunding,
+      withdrawing: withdrawing(messagingService),
+      success: {type: 'final'}
+    }
+  };
+}
 
 const services = (store: Store) => ({
   signFinalState: signFinalState(store),
   waitForConclusionProof: waitForConclusionProof(store),
   getFunding: getFunding(store),
-  withdraw: withdraw(store),
+  supportState: supportState(store),
   getRole: getRole(store),
-  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
+  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store),
+  submitWithdrawTransaction: submitWithdrawTransaction(store),
+  observeFundsWithdrawal: observeFundsWithdrawal(store)
 });
 
 const options = (store: Store) => ({
   services: services(store)
 });
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
+  Machine(config(messagingService)).withConfig(options(store));
