@@ -270,12 +270,12 @@ export class Store {
       }
     );
 
-  public getApplicationChannels = (applicationSite: string, includeClosed = false) =>
+  public getApplicationChannels = (applicationDomain: string, includeClosed = false) =>
     this.backend.transaction('readonly', [ObjectStores.channels], async () =>
       recordToArray(await this.backend.channels()).filter(
         channel =>
           !!channel &&
-          channel.applicationSite === applicationSite &&
+          channel.applicationDomain === applicationDomain &&
           (!channel.isFinalized || includeClosed) &&
           !bigNumberify(channel.channelConstants.appDefinition).isZero()
       )
