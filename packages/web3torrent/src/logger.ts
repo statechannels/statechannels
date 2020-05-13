@@ -29,17 +29,38 @@ const getCircularReplacer = () => {
     return value;
   };
 };
+
+const serializeLogObject = o => JSON.stringify(o, getCircularReplacer()) + '\n';
+const transformLogEvent = logEvent => ({
+  // For some reason, the shape of logEvent and the shape that pino normally prints are different:
+  // - there is a `ts` property instead of a `timestamp` property
+  // - The `level` property is of shape {label: string, value: number}
+  // This transformation makes the resulting object parseable by pino-pretty
+  ..._.omit(logEvent, 'ts'),
+  level: logEvent.level.value,
+  time: logEvent.ts
+});
 class LogBlob {
   private parts = [];
   private _blob?: Blob;
+  constructor() {
+    window.addEventListener('message', event => {
+      if (event.data?.type === 'PINO_LOG') {
+        this.append(event.data.logEvent);
+      }
+    });
+  }
 
   append(part) {
-    this.parts.push(part);
+    this.parts.push(transformLogEvent(part));
     this._blob = undefined;
   }
 
   get blob() {
-    if (!this._blob) this._blob = new Blob(this.parts, {type: 'text/plain'});
+    if (!this._blob)
+      this._blob = new Blob(_.sortBy(this.parts, o => o.time).map(serializeLogObject), {
+        type: 'text/plain'
+      });
 
     return this._blob;
   }
@@ -47,35 +68,22 @@ class LogBlob {
 
 const logBlob = new LogBlob();
 
-const serializeLogEvent = o => JSON.stringify({...o, name}, getCircularReplacer());
-
+// So as to not overwrite the `name` property from xstate-wallet (and later, channel-provider),
+// we only call `addName` on objects that we know came from web3torrent.
+const addName = o => ({...o, name});
 let browser: any = IS_BROWSER_CONTEXT
-  ? {
-      transmit: {
-        send: (_logEvent, logEvent) =>
-          logBlob.append(
-            serializeLogEvent({
-              // For some reason, the shape of logEvent and the shape that pino normally prints are different:
-              // - there is a `ts` property instead of a `timestamp` property
-              // - The `level` property is of shape {label: string, value: number}
-              ..._.omit(logEvent, 'ts'),
-              level: logEvent.level.value,
-              time: logEvent.ts
-            }) + '\n'
-          )
-      }
-    }
+  ? {transmit: {send: (__, logEvent) => logBlob.append(addName(logEvent))}}
   : undefined;
 
 if (browser && LOG_TO_FILE) {
   // TODO: Use the logBlob instead of writing to the browser logs
-  browser = {...browser, write: o => console.log(serializeLogEvent(o))};
+  browser = {...browser, write: o => console.log(serializeLogObject(addName(o)))};
 }
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
 const level = LOG_LEVEL;
-const opts = {name, prettyPrint, browser, level};
+const opts = {prettyPrint, browser, level};
 
 export const logger = destination ? pino(opts, destination) : pino(opts);
 
