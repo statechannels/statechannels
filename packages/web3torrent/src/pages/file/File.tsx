@@ -8,7 +8,7 @@ import {Status, TorrentUI} from '../../types';
 import {useQuery} from '../../utils/url';
 import {getTorrentUI} from '../../utils/torrent-status-checker';
 import './File.scss';
-import {TorrentTestResult} from '../../library/web3torrent-lib';
+import WebTorrentPaidStreamingClient, {TorrentTestResult} from '../../library/web3torrent-lib';
 import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
@@ -65,8 +65,15 @@ const File: React.FC<Props> = props => {
           length: torrentLength
         })
       );
-    web3Torrent.addListener('stateUpdate' + infoHash, onTorrentUpdate);
-    return () => web3Torrent.removeListener('stateUpdate' + infoHash, onTorrentUpdate);
+    web3Torrent.addListener(
+      WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
+      onTorrentUpdate
+    );
+    return () =>
+      web3Torrent.removeListener(
+        WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
+        onTorrentUpdate
+      );
   }, [infoHash, torrentLength, torrentName, web3Torrent]);
 
   useEffect(() => {
