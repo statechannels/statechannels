@@ -19,7 +19,6 @@ save_dep: &save_dep
     key: v3-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
-      - ~/.cache/yarn
       - packages/channel-client/node_modules
       - packages/channel-provider/node_modules
       - packages/client-api-schema/node_modules
@@ -165,7 +164,7 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - <<: *restore_lib
-      - run: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
+      - run: yarn --frozen-lockfile
       - <<: *save_dep
       - <<: *save_lib
 
