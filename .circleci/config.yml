@@ -16,7 +16,7 @@ defaults: &defaults
 
 save_dep: &save_dep
   save_cache:
-    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/channel-client/node_modules
