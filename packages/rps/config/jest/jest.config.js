@@ -18,7 +18,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   testURL: 'http://localhost',
   transform: {
-    '^.+\\.(js|jsx|mjs)$': '<rootDir>/../../node_modules/babel-jest',
+    '^.+\\.(js|jsx|mjs)$': 'babel-jest',
     '^.+\\.tsx?$': 'ts-jest',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
     '^(?!.*\\.(js|jsx|mjs|css|json)$)': '<rootDir>/config/jest/fileTransform.js',
