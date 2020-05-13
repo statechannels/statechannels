@@ -16,7 +16,6 @@ import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {TestStore} from './store';
-import {Guid} from 'guid-typescript';
 
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -135,11 +134,7 @@ describe('success', () => {
     // Note: We need player B to block on the lock since technically
     // if player B signs state 1 then state 1 is supported and it won't block
     // waiting for player A
-    const status = await bStore.acquireChannelLock(context.ledgerChannelId);
-    expect(status).toEqual({
-      channelId: context.ledgerChannelId,
-      lock: expect.any(Guid)
-    });
+    const {release} = await bStore.acquireChannelLock(context.ledgerChannelId);
 
     [aService, bService].map(s => s.start());
 
@@ -151,16 +146,13 @@ describe('success', () => {
     aService.onTransition(s => {
       if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
         expect((s.context as any).lock).toBeDefined();
-        expect((s.context as any).lock).not.toEqual(status.lock);
       }
     });
-    await bStore.releaseChannelLock(status);
+    release();
 
     await waitForExpect(async () => {
       expect(aService.state.value).toEqual('success');
     }, EXPECT_TIMEOUT);
-
-    expect(bStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
   });
 });
 

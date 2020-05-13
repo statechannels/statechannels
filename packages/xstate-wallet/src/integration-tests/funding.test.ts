@@ -73,6 +73,6 @@ it('allows for two wallets to fund an app', async () => {
 
   [playerA, playerB].map(async player => {
     const entry = await player.store.getEntry(channelId);
-    expect(entry.applicationSite).toEqual('localhost');
+    expect(entry.applicationDomain).toEqual('localhost');
   });
 });

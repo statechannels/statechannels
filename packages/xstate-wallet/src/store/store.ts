@@ -2,10 +2,10 @@ import {AddressZero} from 'ethers/constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
-import {Guid} from 'guid-typescript';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {Wallet} from 'ethers';
 import * as _ from 'lodash';
+import AsyncLock from 'async-lock';
 
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
@@ -22,7 +22,7 @@ import {
   Objective,
   Participant,
   SignedState,
-  SiteBudget,
+  DomainBudget,
   State,
   StateVariables,
   ObjectStores
@@ -69,7 +69,6 @@ export function isGuarantees(funding: Funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
 
-const LOCK_TIMEOUT = 3000;
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
@@ -78,14 +77,13 @@ interface InternalEvents {
 }
 export type ChannelLock = {
   channelId: string;
-  lock?: Guid;
+  release: () => void;
 };
 
 export class Store {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
-  protected _channelLocks: Record<string, Guid | undefined> = {};
   private objectives: Objective[] = [];
 
   constructor(chain?: Chain, backend?: DBBackend) {
@@ -118,8 +116,8 @@ export class Store {
     });
   };
 
-  public async getBudget(site: string): Promise<SiteBudget | undefined> {
-    return this.backend.getBudget(site);
+  public async getBudget(domain: string): Promise<DomainBudget | undefined> {
+    return this.backend.getBudget(domain);
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -150,7 +148,7 @@ export class Store {
 
   private initializeChannel = (
     state: State,
-    applicationSite?: string
+    applicationDomain?: string
   ): Promise<ChannelStoreEntry> =>
     this.backend.transaction(
       'readwrite',
@@ -173,7 +171,7 @@ export class Store {
           stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
           myIndex,
           funding: undefined,
-          applicationSite
+          applicationDomain
         };
         await this.backend.setChannel(channelId, data);
         return new ChannelStoreEntry(data);
@@ -193,41 +191,11 @@ export class Store {
       await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
     });
 
+  private ledgerLock = new AsyncLock();
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
-    const lock = this._channelLocks[channelId];
-    if (lock) throw new Error(Errors.channelLocked);
-
-    const newStatus = {channelId, lock: Guid.create()};
-    this._channelLocks[channelId] = newStatus.lock;
-
-    setTimeout(async () => {
-      try {
-        await this.releaseChannelLock(newStatus);
-      } finally {
-        // NO OP
-      }
-    }, LOCK_TIMEOUT);
-    this._eventEmitter.emit('lockUpdated', newStatus);
-
-    return newStatus;
-  }
-
-  public async releaseChannelLock(status: ChannelLock): Promise<void> {
-    if (!status.lock) throw new Error('Invalid lock');
-
-    const {channelId, lock} = status;
-    const currentStatus = this._channelLocks[channelId];
-    if (!currentStatus) return;
-    if (!currentStatus.equals(lock)) throw new Error('Invalid lock');
-    const newStatus = {channelId, lock: undefined};
-    this._channelLocks[channelId] = undefined;
-    this._eventEmitter.emit('lockUpdated', newStatus);
-  }
-
-  public get lockFeed(): Observable<ChannelLock> {
-    return merge(
-      from(_.map(this._channelLocks, (lock: Guid, channelId) => ({lock, channelId}))),
-      fromEvent<ChannelLock>(this._eventEmitter, 'lockUpdated')
+    return new Promise(resolve =>
+      // TODO: Does this need a timeout?
+      this.ledgerLock.acquire(channelId, release => resolve({release, channelId}))
     );
   }
 
@@ -244,13 +212,14 @@ export class Store {
       }
     );
 
-  public setApplicationSite = (channelId: string, applicationSite: string) =>
+  public setapplicationDomain = (channelId: string, applicationDomain: string) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const entry = await this.getEntry(channelId);
 
-      if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
+      if (typeof entry.applicationDomain === 'string')
+        throw new Error(Errors.domainExistsOnChannel);
 
-      await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
+      await this.backend.setChannel(channelId, {...entry.data(), applicationDomain});
     });
 
   public setLedger = (ledgerId: string) =>
@@ -269,12 +238,12 @@ export class Store {
       }
     );
 
-  public getApplicationChannels = (applicationSite: string, includeClosed = false) =>
+  public getApplicationChannels = (applicationDomain: string, includeClosed = false) =>
     this.backend.transaction('readonly', [ObjectStores.channels], async () =>
       recordToArray(await this.backend.channels()).filter(
         channel =>
           !!channel &&
-          channel.applicationSite === applicationSite &&
+          channel.applicationDomain === applicationDomain &&
           (!channel.isFinalized || includeClosed) &&
           !bigNumberify(channel.channelConstants.appDefinition).isZero()
       )
@@ -285,7 +254,7 @@ export class Store {
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero,
-    applicationSite?: string
+    applicationDomain?: string
   ) =>
     this.backend.transaction(
       'readwrite',
@@ -310,7 +279,7 @@ export class Store {
             appDefinition,
             ...stateVars
           },
-          applicationSite
+          applicationDomain
         );
         // sign the state, store the channel
         return this.signAndAddState(
@@ -418,7 +387,7 @@ export class Store {
     return entry;
   }
 
-  public createBudget = (budget: SiteBudget) =>
+  public createBudget = (budget: DomainBudget) =>
     this.backend.transaction('readwrite', [ObjectStores.budgets], async tx => {
       const existingBudget = await this.backend.getBudget(budget.domain);
       if (existingBudget) {
@@ -429,9 +398,9 @@ export class Store {
       await this.backend.setBudget(budget.domain, budget);
     });
 
-  public clearBudget = site =>
+  public clearBudget = domain =>
     this.backend.transaction('readwrite', [ObjectStores.budgets], () =>
-      this.backend.deleteBudget(site)
+      this.backend.deleteBudget(domain)
     );
 
   public releaseFunds = (
@@ -443,11 +412,11 @@ export class Store {
       'readwrite',
       [ObjectStores.budgets, ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
-        const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
+        const {applicationDomain, supported, participants} = await this.getEntry(ledgerChannelId);
         const {outcome} = supported;
-        if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+        if (typeof applicationDomain !== 'string') throw new Error(Errors.noDomainForChannel);
 
-        const currentBudget = await this.getBudget(applicationSite);
+        const currentBudget = await this.getBudget(applicationDomain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
 
@@ -469,7 +438,7 @@ export class Store {
         // Delete the funds assigned to the channel
         delete assetBudget.channels[targetChannelId];
 
-        const result = await this.backend.setBudget(applicationSite, currentBudget);
+        const result = await this.backend.setBudget(applicationDomain, currentBudget);
         return result;
       }
     );
@@ -484,12 +453,13 @@ export class Store {
       [ObjectStores.budgets, ObjectStores.channels],
       async () => {
         const entry = await this.getEntry(channelId);
-        const site = entry.applicationSite;
-        if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
-        const currentBudget = await this.backend.getBudget(site);
+        const domain = entry.applicationDomain;
+        if (typeof domain !== 'string')
+          throw new Error(Errors.noDomainForChannel + ' ' + channelId);
+        const currentBudget = await this.backend.getBudget(domain);
 
         // TODO?: Create a new budget if one doesn't exist
-        if (!currentBudget) throw new Error(Errors.noBudget + site);
+        if (!currentBudget) throw new Error(Errors.noBudget + domain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
         if (!assetBudget) throw new Error(Errors.noAssetBudget);

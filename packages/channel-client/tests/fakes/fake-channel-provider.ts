@@ -19,7 +19,7 @@ import {
   GetStateParams,
   JoinChannelParams,
   PushMessageResult,
-  SiteBudget,
+  DomainBudget,
   UpdateChannelParams,
   Message
 } from '@statechannels/client-api-schema';
@@ -30,7 +30,7 @@ const bigNumberify = utils.bigNumberify;
 
 type ChannelId = string;
 
-const mockSiteBudget = {
+const mockDomainBudget = {
   hubAddress: 'mock.hub.com',
   domain: 'mock.web3torrent.com',
   budgets: [
@@ -62,7 +62,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   latestState: Record<ChannelId, ChannelResult> = {};
 
   // Replace mock with real initial budget
-  budget: SiteBudget = mockSiteBudget;
+  budget: DomainBudget = mockDomainBudget;
 
   async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
@@ -284,7 +284,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   protected notifyAppChannelUpdated(data: ChannelResult): void {
     this.events.emit('ChannelUpdated', data);
   }
-  protected notifyAppBudgetUpdated(data: SiteBudget): void {
+  protected notifyAppBudgetUpdated(data: DomainBudget): void {
     this.events.emit('BudgetUpdated', data);
   }
 
@@ -332,7 +332,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<SiteBudget> {
+  private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<DomainBudget> {
     // TODO: Does this need to be delayed?
     this.budget = {
       hubAddress: params.hub.signingAddress,
@@ -359,7 +359,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private async getBudget(_params: GetBudgetParams): Promise<SiteBudget> {
+  private async getBudget(_params: GetBudgetParams): Promise<DomainBudget> {
     return this.budget;
   }
 }

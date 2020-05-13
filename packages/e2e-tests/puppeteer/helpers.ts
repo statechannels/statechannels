@@ -212,12 +212,12 @@ export async function setUpBrowser(
 }
 
 export async function waitForBudgetEntry(page: Page): Promise<void> {
-  await page.waitForSelector('.site-budget-table > tbody > tr');
+  await page.waitForSelector('.domain-budget-table > tbody > tr');
 }
 
 export async function waitForEmptyBudget(page: Page): Promise<void> {
   // eslint-disable-next-line no-undef
-  await page.waitForFunction(() => !document.querySelector('.site-budget-table'), {
+  await page.waitForFunction(() => !document.querySelector('.domain-budget-table'), {
     timeout: TX_WAIT_TIMEOUT
   }); // wait for my tx, which could be slow if on a real blockchain);
 }

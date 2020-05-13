@@ -14,7 +14,7 @@ export class TestStore extends Store {
     signedState: SignedState,
     opts?: {
       funding?: Funding;
-      applicationSite?: string;
+      applicationDomain?: string;
       hasChallenge?: boolean;
     }
   ): Promise<ChannelStoreEntry> {
@@ -22,14 +22,14 @@ export class TestStore extends Store {
     const myIndex = signedState.participants
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
-    const {funding, applicationSite} = opts || {};
+    const {funding, applicationDomain} = opts || {};
     const stateHash = hashState(signedState);
     const entry = new ChannelStoreEntry({
       channelConstants: signedState,
       myIndex,
       stateVariables: [{...signedState, stateHash}],
       funding,
-      applicationSite
+      applicationDomain
     });
     await this.backend.setChannel(entry.channelId, entry.data());
 
