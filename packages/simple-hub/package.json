@@ -7,7 +7,7 @@
     "@ethersproject/experimental": "5.0.0-beta.140",
     "@firebase/app": "0.5.2",
     "@firebase/database": "0.5.19",
-    "@sentry/node": "5.13.2",
+    "@sentry/node": "5.15.5",
     "@statechannels/nitro-protocol": "0.0.1",
     "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
