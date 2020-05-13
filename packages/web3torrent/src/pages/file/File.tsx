@@ -65,8 +65,8 @@ const File: React.FC<Props> = props => {
           length: torrentLength
         })
       );
-    web3Torrent.addListenerForUpdates('file-component', onTorrentUpdate);
-    return () => web3Torrent.removeListenerForUpdates('file-component');
+    web3Torrent.addListener('stateUpdate' + infoHash, onTorrentUpdate);
+    return () => web3Torrent.removeListener('stateUpdate' + infoHash, onTorrentUpdate);
   }, [infoHash, torrentLength, torrentName, web3Torrent]);
 
   useEffect(() => {

@@ -45,7 +45,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   pseAccount: string;
   outcomeAddress: string;
-  listenersForUpdates: Record<string, () => void>;
+
+  static torrentUpdatedEventPrefix: string = 'torrentUpdated';
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
@@ -53,27 +54,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
-    this.listenersForUpdates = {};
-  }
-
-  informListeners() {
-    _.mapValues(this.listenersForUpdates, l => l());
-  }
-
-  addListenerForUpdates(key: string, listener: () => void) {
-    this.listenersForUpdates = {
-      ...this.listenersForUpdates,
-      [key]: listener
-    };
-  }
-
-  removeListenerForUpdates(key: string) {
-    const listenersForUpdatesCopy = {
-      ...this.listenersForUpdates
-    };
-
-    delete listenersForUpdatesCopy[key];
-    this.listenersForUpdates = listenersForUpdatesCopy;
   }
 
   async enable() {
@@ -225,7 +205,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
     wire.paidStreamingExtension.on(
@@ -260,13 +240,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`);
           response(true);
         }
-        this.informListeners();
+        this.emitTorrentUpdated(torrent.infoHash);
       }
     );
 
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice => {
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice);
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
     // If the wallet queues a message, send it across the wire
@@ -378,11 +358,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     torrent.on(TorrentEvents.INFOHASH, () => {
       this.peersList = {...this.peersList, [torrent.infoHash]: {}};
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
-      this.informListeners;
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
@@ -407,7 +387,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           break;
       }
       this.emit(ClientEvents.TORRENT_NOTICE, {torrent, wire, command, data});
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
@@ -423,21 +403,21 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         filename: torrent.name,
         filesize: torrent.length
       });
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
       log.error({err, torrent}, 'Torrent ERROR');
       this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
-      this.informListeners();
+      this.emitTorrentUpdated(torrent.infoHash);
     });
 
-    torrent.on(TorrentEvents.DOWNLOAD, this.informListeners);
-    torrent.on(TorrentEvents.NOPEERS, this.informListeners);
-    torrent.on(TorrentEvents.METADATA, this.informListeners);
-    torrent.on(TorrentEvents.READY, this.informListeners);
-    torrent.on(TorrentEvents.UPLOAD, this.informListeners);
-    torrent.on(TorrentEvents.WARNING, this.informListeners);
+    torrent.on(TorrentEvents.DOWNLOAD, () => this.emitTorrentUpdated(torrent.infoHash));
+    torrent.on(TorrentEvents.NOPEERS, () => this.emitTorrentUpdated(torrent.infoHash));
+    torrent.on(TorrentEvents.METADATA, () => this.emitTorrentUpdated(torrent.infoHash));
+    torrent.on(TorrentEvents.READY, () => this.emitTorrentUpdated(torrent.infoHash));
+    torrent.on(TorrentEvents.UPLOAD, () => this.emitTorrentUpdated(torrent.infoHash));
+    torrent.on(TorrentEvents.WARNING, () => this.emitTorrentUpdated(torrent.infoHash));
 
     torrent.usingPaidStreaming = true;
     return torrent;
@@ -530,5 +510,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.trace({pieces: torrent.pieces});
     wire.unchoke();
     (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
+  }
+
+  private emitTorrentUpdated(infoHash) {
+    this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));
+  }
+
+  public static torrentUpdatedEventName(infoHash) {
+    return this.torrentUpdatedEventPrefix + infoHash;
   }
 }
