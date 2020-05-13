@@ -152,7 +152,7 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - <<: *restore_lib
-      - run: yarn --frozen-lockfile
+      - run: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
       - <<: *save_dep
       - <<: *save_lib
 
