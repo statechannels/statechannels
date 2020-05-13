@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {Participant, State, SiteBudget} from '../../store/types';
+import {Participant, State, DomainBudget} from '../../store/types';
 import {BigNumberish, bigNumberify, BigNumber} from 'ethers/utils';
 import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
@@ -70,10 +70,10 @@ export const ledgerState = (
   appDefinition: '0x0000000000000000000000000000000000000000'
 });
 
-export const TEST_SITE = 'localhost';
-export const budget = (send: BigNumber, receive: BigNumber): SiteBudget => ({
+export const TEST_APP_DOMAIN = 'localhost';
+export const budget = (send: BigNumber, receive: BigNumber): DomainBudget => ({
   hubAddress: HUB_ADDRESS,
-  domain: TEST_SITE,
+  domain: TEST_APP_DOMAIN,
   forAsset: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,

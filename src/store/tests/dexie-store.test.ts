@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
 import {Store} from '../store';
-import {State, Objective, SiteBudget, AssetBudget, ObjectStores} from '../types';
+import {State, Objective, DomainBudget, AssetBudget, ObjectStores} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, createSignatureEntry} from '../state-utils';
@@ -206,7 +206,7 @@ describe('pushMessage', () => {
 describe('getBudget', () => {
   it('returns an address', async () => {
     const store = await aStore();
-    const budget: SiteBudget = {
+    const budget: DomainBudget = {
       domain: 'localhost',
       hubAddress: 'foo',
       forAsset: {

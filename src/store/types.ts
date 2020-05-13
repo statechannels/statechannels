@@ -3,7 +3,7 @@ import {Funding} from './store';
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
 import {SignatureEntry, ChannelStoreEntry} from './channel-store-entry';
 
-export interface SiteBudget {
+export interface DomainBudget {
   domain: string;
   hubAddress: string;
   forAsset: Record<string, AssetBudget | undefined>;
@@ -144,7 +144,7 @@ export type ChannelStoredData = {
     channelNonce: BigNumber | string;
   };
   funding: Funding | undefined;
-  applicationSite: string | undefined;
+  applicationDomain: string | undefined;
   myIndex: number;
 };
 export interface DBBackend {
@@ -164,8 +164,8 @@ export interface DBBackend {
   setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
   getChannel(key: string): Promise<ChannelStoreEntry | undefined>;
 
-  getBudget(key: string): Promise<SiteBudget | undefined>;
-  setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
+  getBudget(key: string): Promise<DomainBudget | undefined>;
+  setBudget(key: string, budget: DomainBudget): Promise<DomainBudget>;
   deleteBudget(key: string): Promise<void>;
 
   setLedger(key: string, value: string): Promise<string>;

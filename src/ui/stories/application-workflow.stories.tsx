@@ -15,7 +15,7 @@ const messagingService: MessagingServiceInterface = new MessagingService(store);
 const testContext: Application.WorkflowContext = {
   channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7',
   fundingStrategy: 'Direct',
-  applicationSite: 'localhost'
+  applicationDomain: 'localhost'
 };
 
 if (Application.config.states) {

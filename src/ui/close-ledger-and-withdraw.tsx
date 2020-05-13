@@ -7,7 +7,7 @@ import {formatEther} from 'ethers/utils';
 import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
-import {SiteBudget} from '../store';
+import {DomainBudget} from '../store';
 
 interface Props {
   service: CloseLedgerAndWithdrawService;
@@ -16,7 +16,7 @@ interface Props {
 export const CloseLedgerAndWithdraw = (props: Props) => {
   const [current, send] = useService(props.service);
 
-  const waitForUserApproval = ({waiting, budget}: {waiting: boolean; budget: SiteBudget}) => {
+  const waitForUserApproval = ({waiting, budget}: {waiting: boolean; budget: DomainBudget}) => {
     const {playerAmount} = getAmountsFromBudget(budget);
     return (
       <Flex alignItems="left" flexDirection="column">
