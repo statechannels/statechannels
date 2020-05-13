@@ -36,7 +36,6 @@ import {MessagingService} from '../../messaging';
 
 jest.setTimeout(20000);
 
-const messagingService = new MessagingService(new TestStore());
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
 const appDefinition = AddressZero;
@@ -124,16 +123,18 @@ const resolveOnTransition = (service, passCond, rejectString?: string) =>
   });
 
 const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
-  const runMachine = (store: Store) => interpret(machine(store).withContext(context)).start();
-  const services = [aStore, bStore].map(runMachine);
-  const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
+  const runMachine = (store: Store, messagingService) =>
+    interpret(machine(store, messagingService).withContext(context)).start();
+  const services = [runMachine(aStore, aMessagingService), runMachine(bStore, bMessagingService)];
+  const targetState =
+    fundingType == 'Direct' ? {withdrawing: 'submitTransaction'} : {virtualDefunding: 'asLeaf'};
 
   await Promise.all(
     services.map(service =>
       resolveOnTransition(
         service,
         state => state.matches(targetState),
-        `Did not hit target ${targetState}`
+        `Did not hit target ${JSON.stringify(targetState)}`
       )
     )
   );
@@ -169,12 +170,13 @@ const concludeTwiceAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
 
 const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
   const crashState = fundingType == 'Direct' ? 'withdrawing' : {virtualDefunding: 'gettingRole'};
-  const successState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
+  const successState =
+    fundingType == 'Direct' ? {withdrawing: 'submitTransaction'} : {virtualDefunding: 'asLeaf'};
 
-  interpret(concludeChannel(bStore, messagingService).withContext(context)).start();
+  interpret(concludeChannel(bStore, bMessagingService).withContext(context)).start();
 
   // Simulate A crashes before withdrawing
-  const aMachine = interpret(concludeChannel(aStore, messagingService).withContext(context))
+  const aMachine = interpret(concludeChannel(aStore, aMessagingService).withContext(context))
     .onTransition(state => state.value === crashState && aMachine.stop())
     .start();
 
@@ -183,7 +185,7 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
 
   // A concludes again
   await resolveOnTransition(
-    interpret(concludeChannel(aStore, messagingService).withContext(context)).start(),
+    interpret(concludeChannel(aStore, aMessagingService).withContext(context)).start(),
     state => state.matches(successState),
     `Did not hit success state ${successState}`
   );
@@ -192,6 +194,9 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
   expect(entryA2.hasConclusionProof).toBe(true);
 };
 
+let aMessagingService;
+let bMessagingService;
+
 beforeEach(async () => {
   chain = new FakeChain();
   aStore = new TestStore(chain);
@@ -199,6 +204,8 @@ beforeEach(async () => {
   bStore = new TestStore(chain);
   await bStore.initialize([wallet2.privateKey]);
   const hubStore = new SimpleHub(wallet3.privateKey);
+  aMessagingService = new MessagingService(aStore);
+  bMessagingService = new MessagingService(bStore);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     await store.createEntry(allSignedState(firstState(allocation, targetChannel)), {
@@ -230,7 +237,7 @@ async function signFinalState(finalizer: Store, other: Store) {
 }
 
 // eslint-disable-next-line jest/expect-expect
-it('concludes correctly when concluding twice using direct funding', async () => {
+it.only('concludes correctly when concluding twice using direct funding', async () => {
   await runUntilSuccess(createChannel, 'Direct');
   await signFinalState(aStore, bStore);
 
