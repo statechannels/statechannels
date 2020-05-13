@@ -59,6 +59,8 @@ describe('One file, three leechers, one seeder', () => {
   });
 
   it('allows peers to start torrenting', async () => {
+    if (!USES_VIRTUAL_FUNDING) return;
+
     let i = 1;
     console.log('Opening browsers');
     await assignEachLabel(async label => {
