@@ -6,21 +6,17 @@ import {DomainBudget} from '@statechannels/client-api-schema';
 export function useBudget({ready}: {ready: boolean}) {
   const {paymentChannelClient} = web3torrent;
 
-  const [budget, setBudget] = useState<DomainBudget | undefined>(undefined);
+  const [budget, setBudget] = useState<DomainBudget>(undefined);
   const [loading, setLoading] = useState(true);
-  const [doInitialFetch, setDoInitialFetch] = useState(true);
   useEffect(() => {
     const getAndSetBudget = async () => {
       const budget = await paymentChannelClient.getBudget();
 
       setBudget(budget);
       setLoading(false);
-      setDoInitialFetch(false);
     };
-    if (ready && doInitialFetch) {
-      getAndSetBudget();
-    }
-  });
+    if (ready) getAndSetBudget();
+  }, [ready, paymentChannelClient]);
 
   const createBudget = async () => {
     setLoading(true);
@@ -28,6 +24,7 @@ export function useBudget({ready}: {ready: boolean}) {
     setBudget(paymentChannelClient.budgetCache);
     setLoading(false);
   };
+
   const closeBudget = async () => {
     setLoading(true);
     await paymentChannelClient.closeAndWithdraw();
