@@ -9,7 +9,7 @@
     "ethers": "4.0.45",
     "path": "0.12.7",
     "solc": "0.6.0",
-    "typescript": "3.7.5"
+    "typescript": "3.9.2"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",

@@ -139,7 +139,7 @@
     "react-docgen-typescript-loader": "3.6.0",
     "supports-color": "7.0.0",
     "ts-jest": "25.0.0",
-    "typescript": "3.7.5",
+    "typescript": "3.9.2",
     "webtorrent-fixtures": "1.7.3"
   },
   "eslintConfig": {

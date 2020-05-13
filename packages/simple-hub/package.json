@@ -47,7 +47,7 @@
     "prettier": "1.19.1",
     "ts-jest": "25.0.0",
     "ts-node": "8.9.1",
-    "typescript": "3.7.5"
+    "typescript": "3.9.2"
   },
   "license": "MIT",
   "lint-staged": {
