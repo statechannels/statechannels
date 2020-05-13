@@ -3,7 +3,6 @@ import prettier from 'prettier-bytes';
 import React, {useContext} from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
-import {Web3TorrentContext} from '../../../clients/web3torrent-client';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {getPeerStatus} from '../../../utils/torrent-status-checker';
@@ -77,7 +76,6 @@ function channelIdToTableRow(
 }
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
-  const context = useContext(Web3TorrentContext);
   const channelsInfo = _.keys(channels)
     .filter(
       id => channels[id].payer === mySigningAddress || channels[id].beneficiary === mySigningAddress

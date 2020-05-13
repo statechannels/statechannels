@@ -1,6 +1,6 @@
 import React, {useState, useContext, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
-import {download, Web3TorrentContext} from '../../clients/web3torrent-client';
+import {download, Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {DomainBudgetTable} from '../../components/domain-budget-table/DomainBudgetTable';
@@ -37,7 +37,7 @@ interface Props {
 }
 
 const File: React.FC<Props> = props => {
-  const web3Torrent = useContext(Web3TorrentContext);
+  const web3TorrentClient = useContext(Web3TorrentClientContext);
 
   const {infoHash} = useParams();
   const queryParams = useQuery();
@@ -49,7 +49,7 @@ const File: React.FC<Props> = props => {
   const torrentLength = Number(queryParams.get('length'));
 
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
-    getTorrentUI(web3Torrent, {
+    getTorrentUI(web3TorrentClient, {
       infoHash,
       name: torrentName,
       length: torrentLength
@@ -59,22 +59,22 @@ const File: React.FC<Props> = props => {
   useEffect(() => {
     const onTorrentUpdate = () =>
       setTorrent(
-        getTorrentUI(web3Torrent, {
+        getTorrentUI(web3TorrentClient, {
           infoHash,
           name: torrentName,
           length: torrentLength
         })
       );
-    web3Torrent.addListener(
+    web3TorrentClient.addListener(
       WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
       onTorrentUpdate
     );
     return () =>
-      web3Torrent.removeListener(
+      web3TorrentClient.removeListener(
         WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
         onTorrentUpdate
       );
-  }, [infoHash, torrentLength, torrentName, web3Torrent]);
+  }, [infoHash, torrentLength, torrentName, web3TorrentClient]);
 
   useEffect(() => {
     const testResult = async () => {
@@ -89,11 +89,11 @@ const File: React.FC<Props> = props => {
 
   useEffect(() => {
     if (props.ready) {
-      web3Torrent.paymentChannelClient.getChannels().then(channels => setChannels(channels));
+      web3TorrentClient.paymentChannelClient.getChannels().then(channels => setChannels(channels));
     }
-  }, [props.ready, web3Torrent.paymentChannelClient]);
+  }, [props.ready, web3TorrentClient.paymentChannelClient]);
 
-  const {mySigningAddress: me} = web3Torrent.paymentChannelClient;
+  const {mySigningAddress: me} = web3TorrentClient.paymentChannelClient;
   const {budget, closeBudget} = useBudget(props);
   const showBudget = budget?.budgets?.length;
 

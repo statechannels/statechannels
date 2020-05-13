@@ -11,7 +11,7 @@ import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
-import {web3torrent} from './clients/web3torrent-client';
+import {web3TorrentClient} from './clients/web3torrent-client';
 import {identify} from './analytics';
 
 const App: React.FC = () => {
@@ -21,14 +21,14 @@ const App: React.FC = () => {
 
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
-    web3torrent.paymentChannelClient.initialize().then(() => {
+    web3TorrentClient.paymentChannelClient.initialize().then(() => {
       setInitialized(true);
       if (process.env.NODE_ENV === 'production') {
         Sentry.configureScope(scope => {
-          scope.setUser({id: web3torrent.paymentChannelClient.mySigningAddress});
+          scope.setUser({id: web3TorrentClient.paymentChannelClient.mySigningAddress});
         });
-        identify(web3torrent.paymentChannelClient.mySigningAddress, {
-          outcomeAddress: web3torrent.paymentChannelClient.myEthereumSelectedAddress
+        identify(web3TorrentClient.paymentChannelClient.mySigningAddress, {
+          outcomeAddress: web3TorrentClient.paymentChannelClient.myEthereumSelectedAddress
         });
       }
     });

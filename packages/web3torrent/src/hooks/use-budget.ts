@@ -1,10 +1,10 @@
-import {web3torrent} from '../clients/web3torrent-client';
+import {web3TorrentClient} from '../clients/web3torrent-client';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
 
 export function useBudget({ready}: {ready: boolean}) {
-  const {paymentChannelClient} = web3torrent;
+  const {paymentChannelClient} = web3TorrentClient;
 
   const [budget, setBudget] = useState<DomainBudget>(undefined);
   const [loading, setLoading] = useState(true);
