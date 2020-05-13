@@ -1,7 +1,7 @@
 import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
 import {Store} from '../store';
 import {VirtualDefundingAsLeaf, SupportState} from '.';
-import {getDataAndInvoke} from '../utils';
+import {getDataAndInvoke, commonWorkflowActions, CommonActions} from '../utils';
 import {map, first, filter} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
 import {ChannelChainInfo} from '../chain';
@@ -56,6 +56,11 @@ const getRole = (store: Store) => (ctx: Init) => async cb => {
   if (myIndex === ParticipantIdx.Hub) cb('AmHub');
   else cb('AmLeaf');
 };
+const getDirectFundingRole = (store: Store) => (ctx: Init) => async cb => {
+  const {myIndex} = await store.getEntry(ctx.channelId);
+  if (myIndex === ParticipantIdx.A) cb('AmA');
+  else cb('AmB');
+};
 
 const supportState = (store: Store) => SupportState.machine(store);
 
@@ -99,50 +104,49 @@ const submitWithdrawTransaction = (store: Store) => async context => {
   await store.chain.finalizeAndWithdraw(channelEntry.support);
 };
 
-function withdrawing(messagingService: MessagingServiceInterface) {
-  return {
-    initial: 'submitTransaction',
-    invoke: {
-      id: 'observeChain',
-      src: Services.observeFundsWithdrawal
+const withdrawing = {
+  initial: 'gettingRole',
+  invoke: {
+    id: 'observeChain',
+    src: Services.observeFundsWithdrawal
+  },
+  on: {
+    FUNDS_WITHDRAWN: 'success'
+  },
+  states: {
+    gettingRole: {
+      invoke: {src: getDirectFundingRole.name},
+      on: {AmA: 'submitTransaction', AmB: 'waitForWithdrawalToComplete'}
     },
-    states: {
-      submitTransaction: {
-        entry: () => {
-          messagingService.sendDisplayMessage('Show');
-        },
-        exit: () => messagingService.sendDisplayMessage('Hide'),
-        invoke: {
-          id: 'submitTransaction',
-          src: Services.submitWithdrawTransaction,
-          onDone: {
-            target: 'waitMining',
-            actions: assign({
-              transactionId: (context, event: DoneInvokeEvent<string>) => event.data
-            })
-          }
+    submitTransaction: {
+      entry: CommonActions.displayUI,
+      exit: CommonActions.hideUI,
+      invoke: {
+        id: 'submitTransaction',
+        src: Services.submitWithdrawTransaction,
+        onDone: {
+          target: 'waitForWithdrawalToComplete',
+          actions: assign({
+            transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+          })
         }
-      },
-      waitMining: {}
-    }
-  };
-}
+      }
+    },
+    waitForWithdrawalToComplete: {}
+  }
+};
 
-export function config(
-  messagingService: MessagingServiceInterface
-): StateNodeConfig<Init, any, any> {
-  return {
-    key: WORKFLOW,
-    initial: 'concludeChannel',
-    states: {
-      concludeChannel,
-      determineFundingType,
-      virtualDefunding,
-      withdrawing: withdrawing(messagingService),
-      success: {type: 'final'}
-    }
-  };
-}
+export const config: StateNodeConfig<Init, any, any> = {
+  key: WORKFLOW,
+  initial: 'concludeChannel',
+  states: {
+    concludeChannel,
+    determineFundingType,
+    virtualDefunding,
+    withdrawing,
+    success: {type: 'final'}
+  }
+};
 
 const services = (store: Store) => ({
   signFinalState: signFinalState(store),
@@ -150,13 +154,15 @@ const services = (store: Store) => ({
   getFunding: getFunding(store),
   supportState: supportState(store),
   getRole: getRole(store),
+  getDirectFundingRole: getDirectFundingRole(store),
   virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store),
   submitWithdrawTransaction: submitWithdrawTransaction(store),
   observeFundsWithdrawal: observeFundsWithdrawal(store)
 });
 
-const options = (store: Store) => ({
-  services: services(store)
+const options = (store: Store, messagingService: MessagingServiceInterface) => ({
+  services: services(store),
+  actions: commonWorkflowActions(messagingService)
 });
 export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
-  Machine(config(messagingService)).withConfig(options(store));
+  Machine(config).withConfig(options(store, messagingService));
