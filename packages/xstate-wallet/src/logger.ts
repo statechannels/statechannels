@@ -19,7 +19,10 @@ let browser: any = IS_BROWSER_CONTEXT
   ? {
       transmit: {
         send: (_, logEvent) =>
-          window.parent.postMessage({type: 'PINO_LOG', logEvent: {...logEvent, name}}, '*')
+          window.parent.postMessage(
+            {type: 'PINO_LOG', logEvent: {...JSON.parse(JSON.stringify(logEvent)), name}},
+            '*'
+          )
       }
     }
   : undefined;
