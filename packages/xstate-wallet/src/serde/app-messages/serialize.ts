@@ -2,7 +2,7 @@ import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
-  SiteBudget as AppSiteBudget,
+  DomainBudget as AppDomainBudget,
   TokenBudget,
   ChannelResult,
   ChannelStatus
@@ -11,7 +11,7 @@ import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
-  SiteBudget,
+  DomainBudget,
   AssetBudget,
   isAllocation
 } from '../../store/types';
@@ -21,7 +21,7 @@ import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
 import {bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
-export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
+export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({

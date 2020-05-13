@@ -8,7 +8,7 @@ import {
   DoneInvokeEvent,
   Interpreter
 } from 'xstate';
-import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
+import {DomainBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
 
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
@@ -22,7 +22,7 @@ import {
   displayUI
 } from '../utils';
 import {MessagingServiceInterface} from '../messaging';
-import {serializeSiteBudget} from '../serde/app-messages/serialize';
+import {serializeDomainBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
 import {ChannelChainInfo} from '../chain';
@@ -41,7 +41,7 @@ type Event =
   | ChainEvent;
 
 interface Initial {
-  budget: SiteBudget;
+  budget: DomainBudget;
   player: Participant;
   hub: Participant;
   requestId: number;
@@ -227,7 +227,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
   const ledgerId = entry.channelId;
   await store.setFunding(entry.channelId, {type: 'Direct'});
   await store.setLedger(entry.channelId);
-  await store.setApplicationSite(ledgerId, context.budget.domain);
+  await store.setapplicationDomain(ledgerId, context.budget.domain);
   await store.addObjective({
     type: 'FundLedger',
     participants: participants,
@@ -269,7 +269,7 @@ const sendResponse = (
 ): ActionObject<Context, Event> => ({
   type: 'sendResponse',
   exec: context =>
-    messagingService.sendResponse(context.requestId, serializeSiteBudget(context.budget))
+    messagingService.sendResponse(context.requestId, serializeDomainBudget(context.budget))
 });
 
 const assignDepositingInfo = assign<Context>({

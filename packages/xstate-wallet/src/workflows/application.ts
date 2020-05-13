@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map, distinctUntilChanged, tap, first} from 'rxjs/operators';
+import {filter, map, distinctUntilChanged, first} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
 import {Store} from '../store';
@@ -35,7 +35,7 @@ import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 
 export interface WorkflowContext {
-  applicationSite: string;
+  applicationDomain: string;
   fundingStrategy: FundingStrategy;
   channelId?: string;
   requestObserver?: any;
@@ -86,7 +86,7 @@ export type WorkflowEvent =
   | DoneInvokeEvent<keyof WorkflowServices>;
 
 export type WorkflowServices = {
-  setApplicationSite(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
+  setapplicationDomain(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
   signFinalState: (context: ChannelIdExists) => Promise<any>;
   invokeClosingProtocol: (
@@ -118,18 +118,20 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) =>
-  store
+const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) => {
+  // Wait until it's our turn
+  const ourTurnEntry = await store
     .channelUpdatedFeed(channelId)
     .pipe(
       filter(entry => entry.myTurn),
-      tap(async ({supported}) => {
-        const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
-        await store.signAndAddState(channelId, finalState);
-      }),
       first()
     )
     .toPromise();
+  // Sign a finalized state
+  const {supported} = ourTurnEntry;
+  const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
+  return store.signAndAddState(channelId, finalState);
+};
 
 const generateConfig = (
   actions: WorkflowActions,
@@ -150,12 +152,12 @@ const generateConfig = (
               {target: 'done', cond: guards.amCreator}
             ],
             JOIN_CHANNEL: {
-              target: 'settingSite',
+              target: 'settingDomain',
               actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
           }
         },
-        settingSite: {invoke: {src: 'setApplicationSite', onDone: 'done'}},
+        settingDomain: {invoke: {src: 'setapplicationDomain', onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: [
@@ -374,8 +376,8 @@ export const workflow = (
   };
 
   const services: WorkflowServices = {
-    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
-      await store.setApplicationSite(ctx.channelId, event.applicationSite),
+    setapplicationDomain: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
+      await store.setapplicationDomain(ctx.channelId, event.applicationDomain),
 
     signFinalState: signFinalState(store),
     createChannel: async (context: CreateInit) => {
@@ -386,7 +388,7 @@ export const workflow = (
         appData,
         appDefinition,
         fundingStrategy,
-        applicationSite
+        applicationDomain
       } = context;
       const stateVars: StateVariables = {
         outcome,
@@ -399,7 +401,7 @@ export const workflow = (
         bigNumberify(challengeDuration),
         stateVars,
         appDefinition,
-        applicationSite
+        applicationDomain
       );
 
       // Create a open channel objective so we can coordinate with all participants

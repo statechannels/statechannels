@@ -6,7 +6,7 @@ import {
   ChannelResult,
   Allocation,
   Participant,
-  SiteBudget,
+  DomainBudget,
   ChannelUpdatedNotification,
   ChannelProposedNotification,
   BudgetUpdatedNotification,
@@ -141,7 +141,7 @@ export class ChannelClient implements ChannelClientInterface {
     sendCapacity: string,
     hubAddress: string,
     hubOutcomeAddress: string
-  ): Promise<SiteBudget> {
+  ): Promise<DomainBudget> {
     return this.provider.send({
       method: 'ApproveBudgetAndFund',
       params: {
@@ -159,11 +159,11 @@ export class ChannelClient implements ChannelClientInterface {
     });
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget> {
+  async getBudget(hubAddress: string): Promise<DomainBudget> {
     return this.provider.send({method: 'GetBudget', params: {hubAddress}});
   }
 
-  async closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<SiteBudget> {
+  async closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget> {
     return this.provider.send({
       method: 'CloseAndWithdraw',
       params: {
