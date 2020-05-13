@@ -244,7 +244,7 @@ export class Store {
         channel =>
           !!channel &&
           channel.applicationDomain === applicationDomain &&
-          (!channel.isFinalized || includeClosed) &&
+          (!channel.hasConclusionProof || includeClosed) &&
           !bigNumberify(channel.channelConstants.appDefinition).isZero()
       )
     );

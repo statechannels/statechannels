@@ -98,7 +98,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
 
   // Check the channel is finalized
   const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);
-  expect(latestEntry.isFinalized).toBe(true);
+  expect(latestEntry.hasConclusionProof).toBe(true);
 
   waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('success');

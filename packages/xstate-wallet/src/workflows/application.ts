@@ -33,6 +33,7 @@ import {
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
+import _ from 'lodash';
 
 export interface WorkflowContext {
   applicationDomain: string;
@@ -265,12 +266,8 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      distinctUntilChanged(
-        (entry1, entry2) =>
-          entry1.supported.turnNum.eq(entry2.supported.turnNum) &&
-          // TODO: Currently concluding is not limited to your turn
-          // so we need to check for an unsupported conclude state
-          entry1.latest.isFinal === entry2.latest.isFinal
+      distinctUntilChanged((entry1, entry2) =>
+        _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
       ),
 
       map(storeEntry => ({
@@ -283,23 +280,23 @@ export const workflow = (
     sendCloseChannelResponse: async (context: ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
-        messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+        await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
       }
     },
 
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
@@ -315,7 +312,7 @@ export const workflow = (
       if (event.storeEntry.channelId === context.channelId) {
         messagingService.sendChannelNotification(
           'ChannelUpdated',
-          await serializeChannelEntry(event.storeEntry)
+          serializeChannelEntry(event.storeEntry)
         );
       }
     },
@@ -352,7 +349,7 @@ export const workflow = (
           outcome: event.outcome
         };
         const entry = await store.signAndAddState(event.channelId, newState);
-        await messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
+        await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
       }
     }
   };
@@ -414,7 +411,7 @@ export const workflow = (
     },
 
     invokeClosingProtocol: (context: ChannelIdExists) =>
-      ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
+      ConcludeChannel.machine(store, messagingService).withContext({channelId: context.channelId}),
 
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
       ChallengeChannel.machine(store, {channelId}),

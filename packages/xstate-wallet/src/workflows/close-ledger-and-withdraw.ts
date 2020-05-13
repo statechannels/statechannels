@@ -191,7 +191,7 @@ const constructFinalState = (store: Store) => async ({opponent: hub}) => {
 const submitWithdrawTransaction = (store: Store) => async context => {
   // TODO: Should we just fetch this once and store on the context
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
-  if (!ledgerEntry.isFinalized) {
+  if (!ledgerEntry.hasConclusionProof) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
   return store.chain.finalizeAndWithdraw(ledgerEntry.support);
