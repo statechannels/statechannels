@@ -10,7 +10,8 @@ import {
   setupLogging,
   setupFakeWeb3,
   waitForNthState,
-  waitForClosedState
+  waitForClosedState,
+  takeScreenshot
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -35,7 +36,7 @@ describe('One file, three leechers, one seeder', () => {
   const leechers: Label[] = [Label.B, Label.C, Label.D];
   const labels: Label[] = leechers.concat([Label.A]);
 
-  type Actor = {browser: Browser; metamask: Dappeteer; tab: Page};
+  type Actor = {browser: Browser; metamask: Dappeteer; tab: Page; label: Label};
   type Actors = Record<Label, Actor>;
   const actors: Actors = {} as Actors;
 
@@ -50,11 +51,17 @@ describe('One file, three leechers, one seeder', () => {
   afterAll(
     async () => CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()))
   );
+  afterAll(async () => {
+    await forEachActor(async ({browser, tab, label}) => {
+      await takeScreenshot(tab, `stress.${label}.png`);
+      CLOSE_BROWSERS && browser.close();
+    });
+  });
 
   it('allows peers to start torrenting', async () => {
     let i = 1;
     console.log('Opening browsers');
-    await assignEachLabel(async () => {
+    await assignEachLabel(async label => {
       const idx = i++;
       const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
       const tab = (await browser.pages())[0];
@@ -62,7 +69,7 @@ describe('One file, three leechers, one seeder', () => {
       await setupLogging(tab, idx, 'stress', true);
       !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
 
-      return {browser, tab, metamask};
+      return {browser, tab, metamask, label};
     });
 
     console.log('A uploads the file');
