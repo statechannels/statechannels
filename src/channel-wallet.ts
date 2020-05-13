@@ -60,7 +60,7 @@ export class ChannelWallet {
             type: 'JOIN_CHANNEL',
             fundingStrategy: objective.data.fundingStrategy,
             channelId: objective.data.targetChannelId,
-            applicationSite: 'TODO' // FIXME
+            applicationDomain: 'TODO' // FIXME
           }),
           this.calculateWorkflowId(objective)
         );
@@ -140,7 +140,7 @@ export class ChannelWallet {
             opponent: request.hub,
             player: request.player,
             requestId: request.requestId,
-            site: request.site
+            domain: request.domain
           }),
           workflowId
         );

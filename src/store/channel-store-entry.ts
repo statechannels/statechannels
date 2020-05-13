@@ -30,21 +30,21 @@ export class ChannelStoreEntry {
 
   public readonly myIndex: number;
   public readonly channelConstants: ChannelConstants;
-  public readonly applicationSite?: string;
+  public readonly applicationDomain?: string;
 
   constructor(channelData: ChannelStoredData) {
     const {
       myIndex,
       stateVariables,
       funding,
-      applicationSite,
+      applicationDomain,
       channelConstants: {chainId, participants, appDefinition, challengeDuration, channelNonce}
     } = channelData;
 
     this.myIndex = myIndex;
     this.stateVariables = stateVariables;
     this.funding = funding;
-    this.applicationSite = applicationSite;
+    this.applicationDomain = applicationDomain;
 
     this.myIndex = channelData.myIndex;
 
@@ -320,7 +320,7 @@ export class ChannelStoreEntry {
       channelConstants,
       funding: this.funding,
       myIndex: this.myIndex,
-      applicationSite: this.applicationSite
+      applicationDomain: this.applicationDomain
     };
   }
 
@@ -332,7 +332,7 @@ export class ChannelStoreEntry {
 
     // TODO: Add some sort of data validator here
 
-    const {channelConstants, funding, myIndex, applicationSite} = data;
+    const {channelConstants, funding, myIndex, applicationDomain} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
@@ -342,7 +342,7 @@ export class ChannelStoreEntry {
       myIndex,
       stateVariables,
       funding,
-      applicationSite
+      applicationDomain
     });
   }
 

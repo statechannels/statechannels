@@ -2,14 +2,14 @@ import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
-  SiteBudget as AppSiteBudget,
+  DomainBudget as AppDomainBudget,
   TokenBudgetRequest as AppBudgetRequest
 } from '@statechannels/client-api-schema';
 import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
-  SiteBudget,
+  DomainBudget,
   AssetBudget
 } from '../../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
@@ -20,7 +20,7 @@ import {makeDestination, assetHolderAddress} from '../../utils';
 export function deserializeBudgetRequest(
   budgetRequest: AppBudgetRequest,
   domain: string
-): SiteBudget {
+): DomainBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     availableSendCapacity: bigNumberify(budgetRequest.requestedSendCapacity),
@@ -34,8 +34,8 @@ export function deserializeBudgetRequest(
   };
 }
 
-export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
-  const assetBudgets: AssetBudget[] = siteBudget.budgets.map(b => ({
+export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBudget {
+  const assetBudgets: AssetBudget[] = DomainBudget.budgets.map(b => ({
     assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
     availableReceiveCapacity: bigNumberify(b.availableReceiveCapacity),
     availableSendCapacity: bigNumberify(b.availableSendCapacity),
@@ -50,8 +50,8 @@ export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
   }, {});
 
   return {
-    domain: siteBudget.domain,
-    hubAddress: siteBudget.hubAddress,
+    domain: DomainBudget.domain,
+    hubAddress: DomainBudget.hubAddress,
     forAsset: budgets
   };
 }

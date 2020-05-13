@@ -156,12 +156,12 @@ const releaseFundsFromBudget: StateNodeConfig<any, any, any> = {
 const releaseFunds = (store: Store) => async (context: ChannelsSet) =>
   store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.ledgerId, context.targetChannelId);
 
-const getApplicationSite = (store: Store) => async (context: ChannelsSet) => {
+const getApplicationDomain = (store: Store) => async (context: ChannelsSet) => {
   const ledgerEntry = await store.getEntry(context.ledgerId);
-  if (!ledgerEntry.applicationSite) {
-    throw new Error(`No site set for ledger channel ${context.ledgerId}`);
+  if (!ledgerEntry.applicationDomain) {
+    throw new Error(`No app domain set for ledger channel ${context.ledgerId}`);
   }
-  return ledgerEntry.applicationSite;
+  return ledgerEntry.applicationDomain;
 };
 
 export const config: StateNodeConfig<any, any, any> = {
@@ -184,7 +184,7 @@ const enum Services {
   supportState = 'supportState',
   releaseFunds = 'releaseFunds',
   acquireLock = 'acquireLock',
-  getApplicationSite = 'getApplicationSite'
+  getApplicationDomain = 'getApplicationDomain'
 }
 type WorkflowServices = Record<Services, ServiceConfig<any>>;
 
@@ -196,7 +196,7 @@ const services = (store: Store): WorkflowServices => ({
   finalTargetState: finalTargetState(store),
   supportState: SupportState.machine(store),
   releaseFunds: releaseFunds(store),
-  getApplicationSite: getApplicationSite(store)
+  getApplicationDomain: getApplicationDomain(store)
 });
 const options = (store: Store) => ({services: services(store)});
 
