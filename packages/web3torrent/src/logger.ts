@@ -43,6 +43,13 @@ const transformLogEvent = logEvent => ({
 class LogBlob {
   private parts = [];
   private _blob?: Blob;
+  constructor() {
+    window.addEventListener('message', event => {
+      if (event.data?.type === 'PINO_LOG') {
+        this.append(event.data.logEvent);
+      }
+    });
+  }
 
   append(part) {
     this.parts.push(transformLogEvent(part));
