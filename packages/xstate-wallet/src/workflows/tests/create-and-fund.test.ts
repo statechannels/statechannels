@@ -20,7 +20,7 @@ import {
   first,
   third,
   second,
-  TEST_SITE,
+  TEST_APP_DOMAIN,
   budget
 } from './data';
 import {subscribeToMessages} from './message-service';
@@ -94,7 +94,7 @@ beforeEach(async () => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     await store.createEntry(allSignState(firstState(allocation, targetChannel)), {
-      applicationSite: TEST_SITE
+      applicationDomain: TEST_APP_DOMAIN
     });
     const ledgerEntry = await store.createEntry(
       allSignState(firstState(allocation, ledgerChannel))
@@ -160,12 +160,12 @@ test('it uses virtual funding when enabled', async () => {
   expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
 
   // Verify the budgets are allocated to the channel
-  const aBudget = await aStore.getBudget(TEST_SITE);
+  const aBudget = await aStore.getBudget(TEST_APP_DOMAIN);
   const aChannelAmount =
     aBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
-  const bBudget = await bStore.getBudget(TEST_SITE);
+  const bBudget = await bStore.getBudget(TEST_APP_DOMAIN);
   const bChannelAmount =
     bBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());

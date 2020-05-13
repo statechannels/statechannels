@@ -21,7 +21,7 @@ import {
   first,
   third,
   second,
-  TEST_SITE,
+  TEST_APP_DOMAIN,
   budget
 } from './data';
 
@@ -200,7 +200,7 @@ beforeEach(async () => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     await store.createEntry(allSignedState(firstState(allocation, targetChannel)), {
-      applicationSite: TEST_SITE
+      applicationDomain: TEST_APP_DOMAIN
     });
 
     const ledgerEntry = await store.createEntry(

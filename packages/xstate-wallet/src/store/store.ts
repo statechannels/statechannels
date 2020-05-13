@@ -22,7 +22,7 @@ import {
   Objective,
   Participant,
   SignedState,
-  SiteBudget,
+  DomainBudget,
   State,
   StateVariables,
   ObjectStores
@@ -118,8 +118,8 @@ export class Store {
     });
   };
 
-  public async getBudget(site: string): Promise<SiteBudget | undefined> {
-    return this.backend.getBudget(site);
+  public async getBudget(domain: string): Promise<DomainBudget | undefined> {
+    return this.backend.getBudget(domain);
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -150,7 +150,7 @@ export class Store {
 
   private initializeChannel = (
     state: State,
-    applicationSite?: string
+    applicationDomain?: string
   ): Promise<ChannelStoreEntry> =>
     this.backend.transaction(
       'readwrite',
@@ -173,7 +173,7 @@ export class Store {
           stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
           myIndex,
           funding: undefined,
-          applicationSite
+          applicationDomain
         };
         await this.backend.setChannel(channelId, data);
         return new ChannelStoreEntry(data);
@@ -244,13 +244,14 @@ export class Store {
       }
     );
 
-  public setApplicationSite = (channelId: string, applicationSite: string) =>
+  public setapplicationDomain = (channelId: string, applicationDomain: string) =>
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const entry = await this.getEntry(channelId);
 
-      if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
+      if (typeof entry.applicationDomain === 'string')
+        throw new Error(Errors.domainExistsOnChannel);
 
-      await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
+      await this.backend.setChannel(channelId, {...entry.data(), applicationDomain});
     });
 
   public setLedger = (ledgerId: string) =>
@@ -269,12 +270,12 @@ export class Store {
       }
     );
 
-  public getApplicationChannels = (applicationSite: string, includeClosed = false) =>
+  public getApplicationChannels = (applicationDomain: string, includeClosed = false) =>
     this.backend.transaction('readonly', [ObjectStores.channels], async () =>
       recordToArray(await this.backend.channels()).filter(
         channel =>
           !!channel &&
-          channel.applicationSite === applicationSite &&
+          channel.applicationDomain === applicationDomain &&
           (!channel.isFinalized || includeClosed) &&
           !bigNumberify(channel.channelConstants.appDefinition).isZero()
       )
@@ -285,7 +286,7 @@ export class Store {
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero,
-    applicationSite?: string
+    applicationDomain?: string
   ) =>
     this.backend.transaction(
       'readwrite',
@@ -310,7 +311,7 @@ export class Store {
             appDefinition,
             ...stateVars
           },
-          applicationSite
+          applicationDomain
         );
         // sign the state, store the channel
         return this.signAndAddState(
@@ -418,7 +419,7 @@ export class Store {
     return entry;
   }
 
-  public createBudget = (budget: SiteBudget) =>
+  public createBudget = (budget: DomainBudget) =>
     this.backend.transaction('readwrite', [ObjectStores.budgets], async tx => {
       const existingBudget = await this.backend.getBudget(budget.domain);
       if (existingBudget) {
@@ -429,9 +430,9 @@ export class Store {
       await this.backend.setBudget(budget.domain, budget);
     });
 
-  public clearBudget = site =>
+  public clearBudget = domain =>
     this.backend.transaction('readwrite', [ObjectStores.budgets], () =>
-      this.backend.deleteBudget(site)
+      this.backend.deleteBudget(domain)
     );
 
   public releaseFunds = (
@@ -443,11 +444,11 @@ export class Store {
       'readwrite',
       [ObjectStores.budgets, ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
-        const {applicationSite, supported, participants} = await this.getEntry(ledgerChannelId);
+        const {applicationDomain, supported, participants} = await this.getEntry(ledgerChannelId);
         const {outcome} = supported;
-        if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+        if (typeof applicationDomain !== 'string') throw new Error(Errors.noDomainForChannel);
 
-        const currentBudget = await this.getBudget(applicationSite);
+        const currentBudget = await this.getBudget(applicationDomain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
 
@@ -469,7 +470,7 @@ export class Store {
         // Delete the funds assigned to the channel
         delete assetBudget.channels[targetChannelId];
 
-        const result = await this.backend.setBudget(applicationSite, currentBudget);
+        const result = await this.backend.setBudget(applicationDomain, currentBudget);
         return result;
       }
     );
@@ -484,12 +485,13 @@ export class Store {
       [ObjectStores.budgets, ObjectStores.channels],
       async () => {
         const entry = await this.getEntry(channelId);
-        const site = entry.applicationSite;
-        if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
-        const currentBudget = await this.backend.getBudget(site);
+        const domain = entry.applicationDomain;
+        if (typeof domain !== 'string')
+          throw new Error(Errors.noDomainForChannel + ' ' + channelId);
+        const currentBudget = await this.backend.getBudget(domain);
 
         // TODO?: Create a new budget if one doesn't exist
-        if (!currentBudget) throw new Error(Errors.noBudget + site);
+        if (!currentBudget) throw new Error(Errors.noBudget + domain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
         if (!assetBudget) throw new Error(Errors.noAssetBudget);

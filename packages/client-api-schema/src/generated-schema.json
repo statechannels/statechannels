@@ -90,7 +90,7 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/SiteBudget"
+          "$ref": "#/definitions/DomainBudget"
         }
       },
       "required": [
@@ -116,7 +116,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/SiteBudget"
+          "$ref": "#/definitions/DomainBudget"
         }
       },
       "required": [
@@ -810,7 +810,7 @@
         "result": {
           "anyOf": [
             {
-              "$ref": "#/definitions/SiteBudget"
+              "$ref": "#/definitions/DomainBudget"
             },
             {
               "additionalProperties": false,
@@ -1372,7 +1372,7 @@
         }
       ]
     },
-    "SiteBudget": {
+    "DomainBudget": {
       "additionalProperties": false,
       "properties": {
         "budgets": {

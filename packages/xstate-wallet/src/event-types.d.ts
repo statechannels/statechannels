@@ -1,4 +1,4 @@
-import {SimpleAllocation, Participant, SiteBudget} from './store/types';
+import {SimpleAllocation, Participant, DomainBudget} from './store/types';
 import {BigNumber} from 'ethers/utils';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 
@@ -6,7 +6,7 @@ export interface JoinChannelEvent {
   type: 'JOIN_CHANNEL';
   channelId: string;
   requestId: number;
-  applicationSite: string;
+  applicationDomain: string;
 }
 // Events
 export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
@@ -20,7 +20,7 @@ export interface CreateChannelEvent {
   challengeDuration: BigNumber;
   chainId: string;
   requestId: number;
-  applicationSite: string;
+  applicationDomain: string;
   fundingStrategy: 'Direct' | 'Ledger' | 'Virtual';
 }
 
@@ -52,7 +52,7 @@ export interface PlayerRequestConclude {
 export interface ApproveBudgetAndFund {
   requestId: number;
   type: 'APPROVE_BUDGET_AND_FUND';
-  budget: SiteBudget;
+  budget: DomainBudget;
   player: Participant;
   hub: Participant;
 }
@@ -67,7 +67,7 @@ export interface CloseAndWithdrawRequest {
   type: 'CLOSE_AND_WITHDRAW';
   player: Participant;
   hub: Participant;
-  site: string;
+  domain: string;
 }
 
 export type AppRequestEvent =

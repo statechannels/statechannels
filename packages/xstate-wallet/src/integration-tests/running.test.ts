@@ -50,7 +50,7 @@ test('accepts states when running', async () => {
   );
   await playerBChannelUpdatedPromise;
 
-  const context: any = {channelId, applicationSite: 'localhost', fundingStrategy: 'Direct'};
+  const context: any = {channelId, applicationDomain: 'localhost', fundingStrategy: 'Direct'};
   playerA.startAppWorkflow('running', context);
   playerB.startAppWorkflow('running', context);
   playerA.workflowMachine?.send('SPAWN_OBSERVERS');

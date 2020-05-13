@@ -3,7 +3,7 @@ import {ChannelStoreEntry} from './channel-store-entry';
 import {
   Objective,
   DBBackend,
-  SiteBudget,
+  DomainBudget,
   ChannelStoredData,
   AssetBudget,
   ObjectStores,
@@ -99,8 +99,8 @@ export class Backend implements DBBackend {
   }
 
   // Individual Getters
-  public async getBudget(key: string): Promise<SiteBudget | undefined> {
-    const budget: SiteBudget | undefined = await this.get(ObjectStores.budgets, key);
+  public async getBudget(key: string): Promise<DomainBudget | undefined> {
+    const budget: DomainBudget | undefined = await this.get(ObjectStores.budgets, key);
     if (!budget) return budget;
 
     return {
@@ -114,7 +114,7 @@ export class Backend implements DBBackend {
     };
   }
 
-  public async setBudget(key: string, value: SiteBudget) {
+  public async setBudget(key: string, value: DomainBudget) {
     return this.put(ObjectStores.budgets, value, key);
   }
 
