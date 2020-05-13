@@ -126,8 +126,7 @@ const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
   const runMachine = (store: Store, messagingService) =>
     interpret(machine(store, messagingService).withContext(context)).start();
   const services = [runMachine(aStore, aMessagingService), runMachine(bStore, bMessagingService)];
-  const targetState =
-    fundingType == 'Direct' ? {withdrawing: 'submitTransaction'} : {virtualDefunding: 'asLeaf'};
+  const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
 
   await Promise.all(
     services.map(service =>
@@ -237,7 +236,7 @@ async function signFinalState(finalizer: Store, other: Store) {
 }
 
 // eslint-disable-next-line jest/expect-expect
-it.only('concludes correctly when concluding twice using direct funding', async () => {
+it('concludes correctly when concluding twice using direct funding', async () => {
   await runUntilSuccess(createChannel, 'Direct');
   await signFinalState(aStore, bStore);
 
