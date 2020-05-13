@@ -5,18 +5,11 @@ import {SupportState} from '.';
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
 
-import {
-  Store,
-  Errors as StoreErrors,
-  isVirtualFunding,
-  isIndirectFunding,
-  isGuarantee
-} from '../store';
+import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
 import {nextState} from '../store/state-utils';
 import _ from 'lodash';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {ChannelLock} from '../store/store';
-import {first, filter, map} from 'rxjs/operators';
 
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';
@@ -128,26 +121,12 @@ const defundGuarantorInLedger = (store: Store) => async ({
 };
 export {defundGuarantorInLedger};
 
-const acquireLock = (store: Store) => async ({ledgerId}: ChannelsSet): Promise<ChannelLock> => {
-  try {
-    return await store.acquireChannelLock(ledgerId);
-  } catch (e) {
-    if (e.message === StoreErrors.channelLocked) {
-      return await store.lockFeed
-        .pipe(
-          filter(s => s.channelId === ledgerId),
-          first(s => !s.lock),
-          map(async () => await store.acquireChannelLock(ledgerId))
-        )
-        .toPromise();
-    } else throw e;
-  }
-};
+const acquireLock = (store: Store) => ({ledgerId}: ChannelsSet): Promise<ChannelLock> =>
+  store.acquireChannelLock(ledgerId);
 
 type WithLock = Init & {lock: ChannelLock};
-const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
-  await store.releaseChannelLock(ctx.lock);
-};
+
+const releaseLock = (ctx: WithLock) => ctx.lock.release();
 
 const defundGuarantor: StateNodeConfig<any, any, any> = {
   initial: 'acquireLock',
@@ -159,12 +138,11 @@ const defundGuarantor: StateNodeConfig<any, any, any> = {
     ledgerUpdate: getDataAndInvoke(
       {src: defundGuarantorInLedger.name},
       {src: Services.supportState},
-      'releaseLock'
+      'done'
     ),
-    releaseLock: {invoke: {src: releaseLock.name, onDone: 'done'}},
     done: {type: 'final'}
   },
-  exit: ['deleteJointChannel', 'deleteGuarantorChannel'],
+  exit: ['deleteJointChannel', 'deleteGuarantorChannel', releaseLock.name],
   onDone: 'releaseFundsFromBudget'
 };
 
@@ -205,7 +183,6 @@ const enum Services {
   finalTargetState = 'finalTargetState',
   supportState = 'supportState',
   releaseFunds = 'releaseFunds',
-  releaseLock = 'releaseLock',
   acquireLock = 'acquireLock',
   getApplicationSite = 'getApplicationSite'
 }
@@ -214,7 +191,6 @@ type WorkflowServices = Record<Services, ServiceConfig<any>>;
 const services = (store: Store): WorkflowServices => ({
   checkChannelsService: checkChannelsService(store),
   acquireLock: acquireLock(store),
-  releaseLock: releaseLock(store),
   defundGuarantorInLedger: defundGuarantorInLedger(store),
   finalJointChannelUpdate: finalJointChannelUpdate(store),
   finalTargetState: finalTargetState(store),

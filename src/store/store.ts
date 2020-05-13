@@ -2,10 +2,10 @@ import {AddressZero} from 'ethers/constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
-import {Guid} from 'guid-typescript';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {Wallet} from 'ethers';
 import * as _ from 'lodash';
+import AsyncLock from 'async-lock';
 
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
@@ -69,7 +69,6 @@ export function isGuarantees(funding: Funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
 
-const LOCK_TIMEOUT = 3000;
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
@@ -78,14 +77,13 @@ interface InternalEvents {
 }
 export type ChannelLock = {
   channelId: string;
-  lock?: Guid;
+  release: () => void;
 };
 
 export class Store {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
-  protected _channelLocks: Record<string, Guid | undefined> = {};
   private objectives: Objective[] = [];
 
   constructor(chain?: Chain, backend?: DBBackend) {
@@ -193,41 +191,11 @@ export class Store {
       await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
     });
 
+  private ledgerLock = new AsyncLock();
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
-    const lock = this._channelLocks[channelId];
-    if (lock) throw new Error(Errors.channelLocked);
-
-    const newStatus = {channelId, lock: Guid.create()};
-    this._channelLocks[channelId] = newStatus.lock;
-
-    setTimeout(async () => {
-      try {
-        await this.releaseChannelLock(newStatus);
-      } finally {
-        // NO OP
-      }
-    }, LOCK_TIMEOUT);
-    this._eventEmitter.emit('lockUpdated', newStatus);
-
-    return newStatus;
-  }
-
-  public async releaseChannelLock(status: ChannelLock): Promise<void> {
-    if (!status.lock) throw new Error('Invalid lock');
-
-    const {channelId, lock} = status;
-    const currentStatus = this._channelLocks[channelId];
-    if (!currentStatus) return;
-    if (!currentStatus.equals(lock)) throw new Error('Invalid lock');
-    const newStatus = {channelId, lock: undefined};
-    this._channelLocks[channelId] = undefined;
-    this._eventEmitter.emit('lockUpdated', newStatus);
-  }
-
-  public get lockFeed(): Observable<ChannelLock> {
-    return merge(
-      from(_.map(this._channelLocks, (lock: Guid, channelId) => ({lock, channelId}))),
-      fromEvent<ChannelLock>(this._eventEmitter, 'lockUpdated')
+    return new Promise(resolve =>
+      // TODO: Does this need a timeout?
+      this.ledgerLock.acquire(channelId, release => resolve({release, channelId}))
     );
   }
 
