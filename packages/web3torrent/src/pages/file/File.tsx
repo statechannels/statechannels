@@ -95,9 +95,7 @@ const File: React.FC<Props> = props => {
 
   const {mySigningAddress: me} = web3Torrent.paymentChannelClient;
   const {budget, closeBudget} = useBudget(props);
-  // TODO: We shouldn't have to check all these different conditions
-  const showBudget =
-    !!budget && !_.isEmpty(budget) && !!budget.budgets && budget.budgets.length > 0;
+  const showBudget = budget?.budgets?.length;
 
   return (
     <section className="section fill download">
