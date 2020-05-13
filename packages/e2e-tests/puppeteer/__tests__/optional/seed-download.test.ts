@@ -100,13 +100,14 @@ describe('Optional Integration Tests', () => {
     console.log('Downloading');
 
     await waitForNthState(web3tTabB, 10);
+
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for the "Save Download" or "Restart Download" button to appear');
+    console.log('Cancelled - Waiting for Download button to reappear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
     console.log('Wait for Wallet to be hidden');
