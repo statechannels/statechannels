@@ -4,15 +4,26 @@ import pino from 'pino';
 const LOG_TO_CONSOLE = process.env.LOG_DESTINATION === 'console';
 // eslint-disable-next-line no-undef
 const LOG_TO_FILE = process.env.LOG_DESTINATION && !LOG_TO_CONSOLE;
+// eslint-disable-next-line no-undef
+const IS_BROWSER_CONTEXT = process.env.NODE_ENV !== 'test';
 
 const name = 'channel-provider';
 
-// If we are in a browser, but we want to LOG_TO_FILE, we assume that the
-// log statements are meant to be stored as JSON objects
-// So, we log serialized objects, appending the name (which the pino browser-api appears to remove?)
-const browser = LOG_TO_FILE
-  ? {write: (o: any) => console.log(JSON.stringify({...o, name}))}
+const serializeLogEvent = (o: any) => JSON.stringify({...o, name});
+
+let browser: any = IS_BROWSER_CONTEXT
+  ? {
+      transmit: {
+        send: (e: any, logEvent: any) =>
+          window.postMessage({type: 'PINO_LOG', logEvent: {...logEvent, name}}, '*')
+      }
+    }
   : undefined;
+
+if (browser && LOG_TO_FILE) {
+  // TODO: Use the logBlob instead of writing to the browser logs
+  browser = {...browser, write: (o: any) => console.log(serializeLogEvent(o))};
+}
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
