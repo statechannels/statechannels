@@ -9,9 +9,17 @@ import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store'
 import {nextState} from '../store/state-utils';
 import _ from 'lodash';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {ChannelLock} from '../store/store';
 
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';
+
+export const enum Errors {
+  finalized = 'Ledger channel is finalized',
+  invalidOutcome = 'Invalid ledger channel outcome',
+  targetNotFinalized = 'Target channel not finalized',
+  noSupportedJointState = 'No supported state in joint channel'
+}
 
 const checkChannelsService = (store: Store) => async (ctx: Init): Promise<ChannelIds> => {
   const {funding: targetFunding} = await store.getEntry(ctx.targetChannelId);
@@ -57,10 +65,10 @@ const finalJointChannelUpdate = (store: Store) => async (
   const {jointChannelId, targetChannelId} = ctx;
 
   const {supported: targetChannelState} = await store.getEntry(targetChannelId);
-  if (!targetChannelState.isFinal) throw new Error('Target channel not finalized');
+  if (!targetChannelState.isFinal) throw Error(Errors.targetNotFinalized);
 
   const {supported: jointState} = await store.getEntry(jointChannelId);
-  if (!jointState) throw 'No supported state in joint channel';
+  if (!jointState) throw Error(Errors.noSupportedJointState);
 
   const jointAllocation = checkThat(jointState.outcome, isSimpleEthAllocation).allocationItems;
   const targetOutcome = checkThat(targetChannelState.outcome, isSimpleEthAllocation)
@@ -83,12 +91,14 @@ const defundTarget: StateNodeConfig<any, any, any> = _.merge(
   {exit: ['deleteTargetChannel']}
 );
 
-export const defundGuarantorInLedger = (store: Store) => async ({
+const defundGuarantorInLedger = (store: Store) => async ({
   jointChannelId,
   ledgerId,
   guarantorChannelId,
   role
 }: ChannelsSet): Promise<SupportState.Init> => {
+  if ((await store.chain.getChainInfo(ledgerId)).finalized) throw Error(Errors.finalized);
+
   const {supported: jointState} = await store.getEntry(jointChannelId);
   const jAlloc = checkThat(jointState.outcome, isSimpleEthAllocation).allocationItems;
 
@@ -97,7 +107,8 @@ export const defundGuarantorInLedger = (store: Store) => async ({
   const ledgerWithoutGuarantor = _.filter(lAlloc, a => a.destination !== guarantorChannelId);
 
   const [hub, leaf] = ledgerWithoutGuarantor.slice(0, 2);
-  const BadOutcome = new Error('Invalid ledger channel outcome');
+
+  const BadOutcome = new Error(Errors.invalidOutcome);
   if (hub.destination !== jAlloc[OutcomeIdx.Hub].destination) throw BadOutcome;
   if (leaf.destination !== jAlloc[role].destination) throw BadOutcome;
 
@@ -108,15 +119,32 @@ export const defundGuarantorInLedger = (store: Store) => async ({
   ]);
   return {state: nextState(ledgerState, outcome)};
 };
+export {defundGuarantorInLedger};
 
-const defundGuarantor: StateNodeConfig<any, any, any> = _.merge(
-  getDataAndInvoke(
-    {src: Services.defundGuarantorInLedger},
-    {src: Services.supportState},
-    'releaseFundsFromBudget'
-  ),
-  {exit: ['deleteJointChannel', 'deleteGuarantorChannel']}
-);
+const acquireLock = (store: Store) => ({ledgerId}: ChannelsSet): Promise<ChannelLock> =>
+  store.acquireChannelLock(ledgerId);
+
+type WithLock = Init & {lock: ChannelLock};
+
+const releaseLock = (ctx: WithLock) => ctx.lock.release();
+
+const defundGuarantor: StateNodeConfig<any, any, any> = {
+  initial: 'acquireLock',
+  states: {
+    acquireLock: {
+      invoke: {src: acquireLock.name, onDone: 'ledgerUpdate'},
+      exit: assign<WithLock>({lock: (_, event: DoneInvokeEvent<ChannelLock>) => event.data})
+    },
+    ledgerUpdate: getDataAndInvoke(
+      {src: defundGuarantorInLedger.name},
+      {src: Services.supportState},
+      'done'
+    ),
+    done: {type: 'final'}
+  },
+  exit: ['deleteJointChannel', 'deleteGuarantorChannel', releaseLock.name],
+  onDone: 'releaseFundsFromBudget'
+};
 
 const releaseFundsFromBudget: StateNodeConfig<any, any, any> = {
   invoke: {
@@ -155,12 +183,14 @@ const enum Services {
   finalTargetState = 'finalTargetState',
   supportState = 'supportState',
   releaseFunds = 'releaseFunds',
+  acquireLock = 'acquireLock',
   getApplicationDomain = 'getApplicationDomain'
 }
 type WorkflowServices = Record<Services, ServiceConfig<any>>;
 
 const services = (store: Store): WorkflowServices => ({
   checkChannelsService: checkChannelsService(store),
+  acquireLock: acquireLock(store),
   defundGuarantorInLedger: defundGuarantorInLedger(store),
   finalJointChannelUpdate: finalJointChannelUpdate(store),
   finalTargetState: finalTargetState(store),
