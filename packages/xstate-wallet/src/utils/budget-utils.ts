@@ -1,12 +1,12 @@
-import {SiteBudget, AssetBudget} from '../store/types';
+import {DomainBudget, AssetBudget} from '../store/types';
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {checkThat, exists} from './helpers';
 
-export function ethBudget(site: string, opts: Partial<AssetBudget>): SiteBudget {
+export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBudget {
   return {
-    domain: site,
+    domain,
     hubAddress: HUB_ADDRESS,
     forAsset: {
       [ETH_ASSET_HOLDER_ADDRESS]: _.assign(
@@ -22,13 +22,13 @@ export function ethBudget(site: string, opts: Partial<AssetBudget>): SiteBudget 
   };
 }
 
-export function forEthAsset(budget: SiteBudget): AssetBudget {
+export function forEthAsset(budget: DomainBudget): AssetBudget {
   const ethPart = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   if (!ethPart) throw 'No eth part!';
   return ethPart;
 }
 
-export function extractEthAssetBudget(budget: SiteBudget): AssetBudget {
+export function extractEthAssetBudget(budget: DomainBudget): AssetBudget {
   if (Object.keys(budget.forAsset).length !== 1) {
     throw new Error('Cannot handle mixed budget');
   }

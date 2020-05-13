@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers/utils';
 
-import {Objective, DBBackend, SiteBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
+import {Objective, DBBackend, DomainBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
 import {ChannelStoreEntry} from './channel-store-entry';
 
@@ -10,7 +10,7 @@ export class MemoryBackend implements DBBackend {
   private _nonces: Record<string, string | undefined> = {};
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
-  private _budgets: Record<string, SiteBudget | undefined> = {};
+  private _budgets: Record<string, DomainBudget | undefined> = {};
 
   public async initialize(cleanSlate = false) {
     if (cleanSlate) {
@@ -59,7 +59,7 @@ export class MemoryBackend implements DBBackend {
     return this._budgets[key];
   }
 
-  public async setBudget(key: string, value: SiteBudget) {
+  public async setBudget(key: string, value: DomainBudget) {
     this._budgets[key] = value;
     return value;
   }

@@ -6,7 +6,7 @@ import {renderComponentInFrontOfApp} from './helpers';
 
 import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
-import {SiteBudget, Participant} from '../../store/types';
+import {DomainBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {Store} from '../../store';
 import {ethBudget} from '../../utils';
@@ -18,7 +18,7 @@ const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
-const budget: SiteBudget = ethBudget('web3torrent.statechannels.org', {
+const budget: DomainBudget = ethBudget('web3torrent.statechannels.org', {
   availableReceiveCapacity: parseEther('0.05'),
   availableSendCapacity: parseEther('0.05')
 });

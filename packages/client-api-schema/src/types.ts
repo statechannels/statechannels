@@ -195,7 +195,7 @@ export interface TokenBudget {
   availableSendCapacity: Uint256;
   channels: ChannelBudget[];
 }
-export interface SiteBudget {
+export interface DomainBudget {
   domain: string;
   hubAddress: string;
   budgets: TokenBudget[];
@@ -212,13 +212,13 @@ export interface TokenBudgetRequest {
 export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {includeClosed?: boolean}>;
 export type GetChannelsResponse = JsonRpcResponse<ChannelResult[]>;
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
+export type GetBudgetResponse = JsonRpcResponse<DomainBudget | {}>;
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<
   'ApproveBudgetAndFund',
   TokenBudgetRequest
 >;
-export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
+export type ApproveBudgetAndFundResponse = JsonRpcResponse<DomainBudget>;
 
 export type CloseAndWithdrawParams = {hub: Participant; playerParticipantId: string};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
@@ -232,7 +232,7 @@ export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed',
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
 export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', ChannelResult>;
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
-export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', SiteBudget>;
+export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
 export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
 
 export type Notification =
