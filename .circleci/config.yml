@@ -19,6 +19,7 @@ save_dep: &save_dep
     key: v3-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
+
 restore_dep: &restore_dep
   restore_cache:
     key: v3-dependency-cache-{{ checksum "yarn.lock" }}
@@ -28,15 +29,16 @@ save_lib: &save_lib
     # Force a new cache on each build
     key: v3-lib-cache-{{ epoch }}
     paths:
-      - packages/nitro-protocol/lib
-      - packages/rps/lib
+      - packages/channel-client/lib
+      - packages/channel-provider/lib
       - packages/client-api-schema/lib
-      - packages/e2e-tests/lib
-      - packages/web3torrent/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib
-      - packages/channel-provider/lib
-      - packages/channel-client/lib
+      - packages/nitro-protocol/lib
+      - packages/simple-hub/lib
+      - packages/wire-format/lib
+      - packages/xstate-wallet/lib
+
 restore_lib: &restore_lib
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
