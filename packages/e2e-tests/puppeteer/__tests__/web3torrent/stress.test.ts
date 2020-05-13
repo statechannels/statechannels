@@ -16,14 +16,12 @@ import {
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
-import {CLOSE_BROWSERS} from '../../constants';
+import {CLOSE_BROWSERS, USES_VIRTUAL_FUNDING} from '../../constants';
 const USE_DAPPETEER = false;
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
 jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
-
-const USES_VIRTUAL_FUNDING = true;
 
 describe('One file, three leechers, one seeder', () => {
   const enum Label {
