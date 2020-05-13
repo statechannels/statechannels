@@ -33,7 +33,7 @@ describe('<File />', () => {
   });
 
   afterAll(() => {
-    Web3TorrentClient.web3torrent.destroy();
+    Web3TorrentClient.web3TorrentClient.destroy();
   });
 
   it('should render an download button', () => {

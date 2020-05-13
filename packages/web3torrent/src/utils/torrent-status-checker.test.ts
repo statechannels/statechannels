@@ -1,4 +1,4 @@
-import {web3torrent} from '../clients/web3torrent-client';
+import {web3TorrentClient} from '../clients/web3torrent-client';
 import {Status, TorrentStaticData} from '../types';
 import {createMockTorrentUI, infoHash, createMockExtendedTorrent, pseAccount} from './test-utils';
 import {getFormattedETA, getStatus, getTorrentUI} from './torrent-status-checker';
@@ -16,20 +16,20 @@ describe('Torrent Status Checker', () => {
 
   beforeAll(() => {
     mockMetamask();
-    web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
+    web3TorrentClient.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
   });
   beforeEach(() => {
     torrent = createMockExtendedTorrent();
   });
   afterAll(() => {
-    web3torrent.destroy();
+    web3TorrentClient.destroy();
   });
 
   describe('Main function', () => {
     it('should return a torrent with a status of Idle when the torrent is not live', () => {
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
+      const getSpy = jest.spyOn(web3TorrentClient, 'get').mockImplementation(() => undefined);
 
-      const result = getTorrentUI(web3torrent, staticData);
+      const result = getTorrentUI(web3TorrentClient, staticData);
 
       expect(getSpy).toHaveBeenCalledWith(infoHash);
       expect(result).toEqual(getStaticTorrentUI(staticData.infoHash));
@@ -50,12 +50,12 @@ describe('Torrent Status Checker', () => {
         paused: undefined
       };
 
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => ({
+      const getSpy = jest.spyOn(web3TorrentClient, 'get').mockImplementation(() => ({
         ...torrent,
         ...inProgressTorrent
       }));
 
-      const result = getTorrentUI(web3torrent, staticData);
+      const result = getTorrentUI(web3TorrentClient, staticData);
       const expectedResult = {
         ...torrent,
         ...inProgressTorrent,
@@ -107,13 +107,13 @@ describe('Torrent Status Checker', () => {
         expect(
           getStatus(
             {
-              createdBy: web3torrent.pseAccount,
+              createdBy: web3TorrentClient.pseAccount,
               uploadSpeed: 1000,
               downloadSpeed: 0,
               progress: 50,
               done: false
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            web3TorrentClient.pseAccount
           )
         ).toEqual(Status.Seeding);
       });
@@ -127,7 +127,7 @@ describe('Torrent Status Checker', () => {
               progress: 100,
               done: true
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            web3TorrentClient.pseAccount
           )
         ).toEqual(Status.Completed);
       });
@@ -136,7 +136,7 @@ describe('Torrent Status Checker', () => {
         expect(
           getStatus(
             {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            web3TorrentClient.pseAccount
           )
         ).toEqual(Status.Connecting);
       });
@@ -150,7 +150,7 @@ describe('Torrent Status Checker', () => {
               progress: 10,
               done: false
             } as WebTorrent.Torrent,
-            web3torrent.pseAccount
+            web3TorrentClient.pseAccount
           )
         ).toEqual(Status.Downloading);
       });
