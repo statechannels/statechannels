@@ -188,14 +188,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
-    log.info(
-      {
-        wire: {
-          paidStreamingExtension: wire.paidStreamingExtension?.serialize()
-        }
-      },
-      'Wire Setup'
-    );
+    log.info('Wire setup initiated');
     log.trace({wire});
 
     wire.use(
@@ -244,7 +237,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           };
 
           const {buffer, uploaded} = this.peersList[torrent.infoHash][peer];
-          log.info(`${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`);
+          log.info(
+            {pseChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
+            `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
+          );
           response(true);
         }
         this.emitTorrentUpdated(torrent.infoHash);
@@ -300,6 +296,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         }
       }
     });
+    log.info(
+      {
+        wire: {
+          paidStreamingExtension: wire.paidStreamingExtension?.serialize()
+        }
+      },
+      'Wire Setup completed'
+    );
   }
 
   protected async createPaymentChannel(torrent: WebTorrent.Torrent, wire: PaidStreamingWire) {
@@ -448,17 +452,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       return;
     }
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
-    let amountToPay = BUFFER_REFILL_RATE.sub(
-      WEI_PER_BYTE.mul(BLOCK_LENGTH).mul(PEER_TRUST - wire.requests.length)
-    );
+
+    let numBlocksToPayFor = wire.request.length > PEER_TRUST ? PEER_TRUST : wire.request.length;
+    let tailBytes = 0;
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
     if (this.isAboutToPayForLastPiece(torrent, peerAccount)) {
-      const diffBetweenStandardSizeAndTheLastPieceSize = WEI_PER_BYTE.mul(
-        BLOCK_LENGTH - torrent.store.store.lastChunkLength
-      );
-      amountToPay = amountToPay.sub(diffBetweenStandardSizeAndTheLastPieceSize);
+      numBlocksToPayFor = numBlocksToPayFor - 1;
+      tailBytes = BLOCK_LENGTH - torrent.store.store.lastChunkLength;
     }
+
+    const amountToPay = WEI_PER_BYTE.mul(BLOCK_LENGTH * numBlocksToPayFor + tailBytes);
     log.info(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
     await this.paymentChannelClient.makePayment(peerChannelId, amountToPay.toString());
 
