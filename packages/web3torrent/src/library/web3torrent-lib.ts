@@ -191,7 +191,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info(
       {
         wire: {
-          paidStreamingExtension: wire.paidStreamingExtension.serialize()
+          paidStreamingExtension: wire.paidStreamingExtension?.serialize()
         }
       },
       'Wire Setup'
