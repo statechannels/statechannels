@@ -244,6 +244,14 @@ export async function waitAndApproveMetaMask(
   await page.bringToFront();
 }
 
+export async function waitForTransactionIfNecessary(page: Page): Promise<void> {
+  const walletIFrame = page.frames()[1];
+  const sel = await walletIFrame.waitForSelector('#wait-for-transaction', {timeout: 1000});
+  if (sel) {
+    await new Promise(r => setTimeout(r, TX_WAIT_TIMEOUT));
+  }
+}
+
 export async function waitAndApproveDepositWithHub(
   page: Page,
   metamask: dappeteer.Dappeteer
