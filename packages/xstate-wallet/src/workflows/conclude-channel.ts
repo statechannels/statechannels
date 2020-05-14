@@ -1,10 +1,11 @@
-import {Machine, StateNodeConfig} from 'xstate';
+import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
 import {Store} from '../store';
-import {VirtualDefundingAsLeaf} from '.';
-import {getDataAndInvoke} from '../utils';
-
-import {map, first} from 'rxjs/operators';
+import {VirtualDefundingAsLeaf, SupportState} from '.';
+import {getDataAndInvoke, commonWorkflowActions, CommonActions} from '../utils';
+import {map, first, filter} from 'rxjs/operators';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
+import {ChannelChainInfo} from '../chain';
+import {MessagingServiceInterface} from '../messaging';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -20,7 +21,7 @@ const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void
 const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
   store
     .channelUpdatedFeed(channelId)
-    .pipe(first(({isFinalized}) => isFinalized))
+    .pipe(first(({hasConclusionProof}) => hasConclusionProof))
     .toPromise();
 
 const concludeChannel = getDataAndInvoke<Init>(
@@ -55,6 +56,13 @@ const getRole = (store: Store) => (ctx: Init) => async cb => {
   if (myIndex === ParticipantIdx.Hub) cb('AmHub');
   else cb('AmLeaf');
 };
+const getDirectFundingRole = (store: Store) => (ctx: Init) => async cb => {
+  const {myIndex} = await store.getEntry(ctx.channelId);
+  if (myIndex === ParticipantIdx.A) cb('AmA');
+  else cb('AmB');
+};
+
+const supportState = (store: Store) => SupportState.machine(store);
 
 const virtualDefunding = {
   initial: 'gettingRole',
@@ -73,13 +81,60 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const withdraw = (store: Store) => async (ctx: Init) => {
-  // NOOP
+enum Services {
+  submitWithdrawTransaction = 'submitWithdrawTransaction',
+  observeFundsWithdrawal = 'observeFundsWithdrawal'
+}
+
+interface FundsWithdrawn {
+  type: 'FUNDS_WITHDRAWN';
+}
+
+const observeFundsWithdrawal = (store: Store) => context =>
+  store.chain.chainUpdatedFeed(context.channelId).pipe(
+    filter(c => c.amount.eq(0)),
+    map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
+  );
+
+const submitWithdrawTransaction = (store: Store) => async context => {
+  const channelEntry = await store.getEntry(context.channelId);
+  if (!channelEntry.hasConclusionProof) {
+    throw new Error(`Channel ${context.channelId} is not finalized`);
+  }
+  await store.chain.finalizeAndWithdraw(channelEntry.support);
 };
 
-// TODO: Probably display UI for withdrawing when implemented
-const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
+const withdrawing = {
+  initial: 'gettingRole',
+  invoke: {
+    id: 'observeChain',
+    src: Services.observeFundsWithdrawal
+  },
+  on: {
+    FUNDS_WITHDRAWN: 'success'
+  },
+  entry: CommonActions.displayUI,
+  exit: CommonActions.hideUI,
+  states: {
+    gettingRole: {
+      invoke: {src: getDirectFundingRole.name},
+      on: {AmA: 'submitTransaction', AmB: 'waitForWithdrawalToComplete'}
+    },
+    submitTransaction: {
+      invoke: {
+        id: 'submitTransaction',
+        src: Services.submitWithdrawTransaction,
+        onDone: {
+          target: 'waitForWithdrawalToComplete',
+          actions: assign({
+            transactionId: (context, event: DoneInvokeEvent<string>) => event.data
+          })
+        }
+      }
+    },
+    waitForWithdrawalToComplete: {}
+  }
+};
 
 export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
@@ -97,12 +152,17 @@ const services = (store: Store) => ({
   signFinalState: signFinalState(store),
   waitForConclusionProof: waitForConclusionProof(store),
   getFunding: getFunding(store),
-  withdraw: withdraw(store),
+  supportState: supportState(store),
   getRole: getRole(store),
-  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
+  getDirectFundingRole: getDirectFundingRole(store),
+  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store),
+  submitWithdrawTransaction: submitWithdrawTransaction(store),
+  observeFundsWithdrawal: observeFundsWithdrawal(store)
 });
 
-const options = (store: Store) => ({
-  services: services(store)
+const options = (store: Store, messagingService: MessagingServiceInterface) => ({
+  services: services(store),
+  actions: commonWorkflowActions(messagingService)
 });
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
+  Machine(config).withConfig(options(store, messagingService));
