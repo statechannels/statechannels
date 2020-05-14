@@ -4,13 +4,15 @@ import {Button} from 'reactstrap';
 import ConnectionBanner from '@rimble/connection-banner';
 import {MetamaskState} from 'src/redux/metamask/state';
 interface Props {
+  walletReady: boolean;
   metamaskState: MetamaskState;
   login: () => any;
 }
 
-const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
+const HomePage: React.SFC<Props> = ({walletReady, login, metamaskState}) => {
   const currentNetwork = Number(metamaskState.network);
   const targetNetwork = Number(process.env.CHAIN_NETWORK_ID);
+  const buttonDisabled = currentNetwork !== targetNetwork || !walletReady;
   return (
     <div>
       <div className="homePage">
@@ -23,9 +25,9 @@ const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
             className="cog-button homePage-loginButton"
             id="start-playing"
             onClick={login}
-            disabled={currentNetwork !== targetNetwork}
+            disabled={buttonDisabled}
           >
-            Start Playing!
+            {buttonDisabled ? 'Waiting for Wallet' : 'Start Playing!'}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import {applyMiddleware, compose, createStore} from 'redux';
-import {fork, take, call} from 'redux-saga/effects';
+import {fork, take} from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -49,8 +49,6 @@ function* rootSaga() {
   } else if (process.env.AUTO_OPPONENT === 'B') {
     yield fork(autoOpponent, 'B', client);
   } else {
-    yield call([window.channelProvider, 'enable']);
-
     setupFirebase(client, window.channelProvider.signingAddress);
 
     // RPS only supports a directly funded channel, for now

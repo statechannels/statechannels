@@ -80,7 +80,11 @@ export function siteStateFromLocalState<T extends states.LocalState>(
 storiesOf('Setup', module)
   .add('Loading Page', () => <LoadingPage />)
   .add('Home Page', () => (
-    <HomePage login={() => alert('login')} metamaskState={initialState.metamask} />
+    <HomePage
+      walletReady={true}
+      login={() => alert('login')}
+      metamaskState={initialState.metamask}
+    />
   ))
   .add('Profile Modal', testState(initialState));
 
