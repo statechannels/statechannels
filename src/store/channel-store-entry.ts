@@ -256,7 +256,7 @@ export class ChannelStoreEntry {
     const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
 
     if (multipleSignedByMe) {
-      logger.error({entry: this.data()});
+      logger.error({entry: this.data()}, Errors.multipleSignedStates);
 
       throw Error(Errors.multipleSignedStates);
     }
@@ -266,10 +266,7 @@ export class ChannelStoreEntry {
 
     const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
     if (duplicateTurnNums) {
-      logger.error(
-        {signedStates: _.map(signedStates, s => s.turnNum.toHexString())},
-        Errors.duplicateTurnNums
-      );
+      logger.error({signedStates}, Errors.duplicateTurnNums);
       throw Error(Errors.duplicateTurnNums);
     }
     if (!isReverseSorted(turnNums)) {
