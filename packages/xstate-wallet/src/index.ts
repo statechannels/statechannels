@@ -11,12 +11,12 @@ import './render';
 
 import {logger} from './logger';
 import {Backend} from './store/dexie-backend';
-import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, VERSION} from './config';
+import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, GIT_VERSION} from './config';
 
 if (NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://8706e073ecb646a6b7589c87f0468652@o344922.ingest.sentry.io/5236239',
-    release: 'xstate-wallet@' + VERSION
+    release: 'xstate-wallet@' + GIT_VERSION
   });
 }
 
