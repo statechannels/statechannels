@@ -27,10 +27,6 @@ import {ETH_TOKEN} from '../constants';
 const log = logger.info.bind(logger);
 
 export class Player {
-  get signingAddress() {
-    return new Wallet(this.privateKey).address;
-  }
-
   private constructor(
     public privateKey: string,
     private id: string,
@@ -41,6 +37,7 @@ export class Player {
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
   }
+
   store: TestStore;
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
@@ -57,6 +54,7 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
+
   startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
@@ -71,6 +69,7 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
+
   startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
@@ -82,15 +81,23 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
+
   get workflowMachine(): Interpreter<any, any, any, any> | undefined {
     return this.channelWallet.workflows[0]?.service;
   }
+
   get workflowState(): string | object | undefined {
     return this.channelWallet.workflows[0]?.service.state.value;
   }
-  get destination() {
-    return makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7');
+
+  get signingAddress() {
+    return new Wallet(this.privateKey).address;
   }
+
+  get destination() {
+    return makeDestination(this.signingAddress);
+  }
+
   get participant(): Participant {
     return {
       participantId: this.signingAddress,
