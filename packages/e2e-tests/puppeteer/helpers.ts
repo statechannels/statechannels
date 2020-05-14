@@ -15,7 +15,7 @@ export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
 
 export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   const walletIframe = page.frames()[1];
-  await walletIframe.waitForSelector(':root', {hidden: true, timeout: 30_000});
+  await walletIframe.waitForSelector(':root', {hidden: true, timeout: TX_WAIT_TIMEOUT});
 };
 
 export async function setupLogging(
