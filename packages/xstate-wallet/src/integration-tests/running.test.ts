@@ -5,56 +5,58 @@ import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils';
 import {first} from 'rxjs/operators';
 jest.setTimeout(30000);
-test('accepts states when running', async () => {
+
+let playerA, playerB: Player;
+let players: [Player, Player];
+const channelId = '0xe70b337fb9cd3917fc3c5f53ded1a1343cbd519b389fad2bbe56000910bbfa8f';
+
+beforeEach(async () => {
   const fakeChain = new FakeChain();
 
-  const playerA = await Player.createPlayer(
-    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
+  playerA = await Player.createPlayer(
+    '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318',
     'PlayerA',
     fakeChain
   );
-  const playerB = await Player.createPlayer(
-    '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
+  playerB = await Player.createPlayer(
+    '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727',
     'PlayerB',
     fakeChain
   );
-  const outcome = simpleEthAllocation([
-    {
-      destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
-    },
-    {
-      destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
-    }
-  ]);
+  players = [playerA, playerB];
 
   hookUpMessaging(playerA, playerB);
-  const channelId = '0x440b56b6c5b0adca1ee99e3926d1b123fd867566cfab5150479f9d5e9317fa1e';
 
-  const playerBChannelUpdatedPromise = playerB.store
-    .channelUpdatedFeed(channelId)
-    .pipe(first())
-    .toPromise();
-
+  const amount = bigNumberify('0x06f05b59d3b20000');
+  const outcome = simpleEthAllocation(players.map(({destination}) => ({destination, amount})));
   const stateVars = {
     outcome,
     turnNum: bigNumberify(4),
     appData: '0x0',
     isFinal: false
   };
+
+  const playerBChannelUpdatedPromise = playerB.store
+    .channelUpdatedFeed(channelId)
+    .pipe(first())
+    .toPromise();
+
   playerA.store.createChannel(
-    [playerA.participant, playerB.participant],
+    players.map(p => p.participant),
     bigNumberify(4),
     stateVars
   );
+
   await playerBChannelUpdatedPromise;
 
   const context: any = {channelId, applicationDomain: 'localhost', fundingStrategy: 'Direct'};
-  playerA.startAppWorkflow('running', context);
-  playerB.startAppWorkflow('running', context);
-  playerA.workflowMachine?.send('SPAWN_OBSERVERS');
-  playerB.workflowMachine?.send('SPAWN_OBSERVERS');
+  players.map(player => {
+    player.startAppWorkflow('running', context);
+    player.workflowMachine?.send('SPAWN_OBSERVERS');
+  });
+});
+
+test('accepts states when running', async () => {
   await playerA.messagingService.receiveRequest(
     generatePlayerUpdate(channelId, playerA.participant, playerB.participant),
     'localhost'
@@ -73,6 +75,7 @@ test('accepts states when running', async () => {
     generatePlayerUpdate(channelId, playerA.participant, playerB.participant),
     'localhost'
   );
+
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('running');
     expect(playerB.workflowState).toEqual('running');
