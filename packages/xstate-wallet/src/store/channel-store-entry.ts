@@ -9,13 +9,20 @@ import {
   StateVariablesWithHash,
   Outcome
 } from './types';
-import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
+import {
+  hashState,
+  calculateChannelId,
+  createSignatureEntry,
+  outcomesEqual,
+  toNitroSignedState
+} from './state-utils';
 import _ from 'lodash';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {BigNumber, bigNumberify, Interface, defaultAbiCoder} from 'ethers/utils';
 
 import {Funding} from './store';
 import {Errors} from '.';
 import {logger} from '../logger';
+import {getVariablePart} from '@statechannels/nitro-protocol';
 export interface SignatureEntry {
   signature: string;
   signer: string;
@@ -114,7 +121,9 @@ export class ChannelStoreEntry {
   // This is a simple check based on _requireValidTransition from NitroProtocol
   // We will eventually want to perform a proper validTransition check
   // but we will have to be careful where we do that to prevent eating up a ton of cpu
-  private validChain(firstState: SignedState, secondState: SignedState): boolean {
+  // TODO: Edit all usages of validChain to be async
+  private async validChain(firstState: SignedState, secondState: SignedState): Promise<boolean> {
+    // JS implementation of Nitro check
     if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
       return false;
     }
@@ -127,7 +136,28 @@ export class ChannelStoreEntry {
         firstState.appData === secondState.appData
       );
     }
-    return true;
+
+    // JS implementation of App check
+    const fromVariablePart = getVariablePart(toNitroSignedState(firstState)[0].state);
+    const toVariablePart = getVariablePart(toNitroSignedState(secondState)[0].state);
+    const turnNumB = secondState.turnNum;
+
+    const ConsensusAppArtifact = require('@statechannels/nitro-protocol/build/contracts/ConsensusApp.json');
+    const iface = new Interface(ConsensusAppArtifact.abi);
+
+    const txData = iface.functions.validTransition.encode([
+      fromVariablePart,
+      toVariablePart,
+      turnNumB,
+      secondState.participants.length
+    ]);
+
+    const result = await require('ethereumjs-vm').default.runCode({
+      code: Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
+      data: Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
+    });
+
+    return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
   }
 
   private get _support(): Array<SignedStateWithHash> {
