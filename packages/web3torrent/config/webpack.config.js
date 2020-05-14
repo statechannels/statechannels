@@ -71,24 +71,27 @@ module.exports = function(webpackEnv) {
   // This is based on what CRA was doing
   const rawEnv = Object.keys(process.env)
     .filter(key => {
-      return [
-        'VERSION',
-        'CHAIN_NETWORK_ID',
-        'DRIFT_CHATBOX_ID',
-        'FAKE_CHANNEL_PROVIDER',
-        'FIREBASE_API_KEY',
-        'FIREBASE_PREFIX',
-        'FIREBASE_URL',
-        'FUNDING_STRATEGY',
-        'HUB_DESTINATION',
-        'LOG_LEVEL',
-        'NODE_ENV',
-        'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
-        'TARGET_NETWORK',
-        'TRACKER_URL',
-        'TRACKER_URL_HTTP_PROTOCOL',
-        'WALLET_URL'
-      ].indexOf(key) > -1
+      return (
+        [
+          'VERSION',
+          'CHAIN_NETWORK_ID',
+          'DRIFT_CHATBOX_ID',
+          'FAKE_CHANNEL_PROVIDER',
+          'FIREBASE_API_KEY',
+          'FIREBASE_PREFIX',
+          'FIREBASE_URL',
+          'FUNDING_STRATEGY',
+          'HUB_DESTINATION',
+          'LOG_DESTINATION',
+          'LOG_LEVEL',
+          'NODE_ENV',
+          'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
+          'TARGET_NETWORK',
+          'TRACKER_URL',
+          'TRACKER_URL_HTTP_PROTOCOL',
+          'WALLET_URL'
+        ].indexOf(key) > -1
+      );
     })
     .reduce(
       (env, key) => {
@@ -567,6 +570,7 @@ module.exports = function(webpackEnv) {
       // It is absolutely essential that NODE_ENV is set to production
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
+
       new webpack.DefinePlugin({
         // This is a bit messy, we should clean this up
         ['process.env']: {
