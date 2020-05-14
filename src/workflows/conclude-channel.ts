@@ -113,14 +113,14 @@ const withdrawing = {
   on: {
     FUNDS_WITHDRAWN: 'success'
   },
+  entry: CommonActions.displayUI,
+  exit: CommonActions.hideUI,
   states: {
     gettingRole: {
       invoke: {src: getDirectFundingRole.name},
       on: {AmA: 'submitTransaction', AmB: 'waitForWithdrawalToComplete'}
     },
     submitTransaction: {
-      entry: CommonActions.displayUI,
-      exit: CommonActions.hideUI,
       invoke: {
         id: 'submitTransaction',
         src: Services.submitWithdrawTransaction,

@@ -33,7 +33,8 @@ export const ApplicationWorkflow = (props: Props) => {
     sendChallenge: 'Challenging channel...',
     closing: 'Closing channel...',
     done: 'Channel closed',
-    failure: 'Something went wrong ...'
+    failure: 'Something went wrong ...',
+    fundingChannel: 'Funding channel ... '
   };
   return (
     <div

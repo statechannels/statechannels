@@ -63,7 +63,9 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
       return 0.25;
     case 'joiningChannel':
     case 'creatingChannel':
+    case 'fundingChannel':
       return 0.5;
+
     case 'openChannelAndFundProtocol':
       return 0.75;
     case 'running':
