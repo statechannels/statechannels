@@ -112,6 +112,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     closing: {};
     done: {};
     failure: {};
+    fundingChannel: {};
   };
 }
 
