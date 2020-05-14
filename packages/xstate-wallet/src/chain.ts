@@ -26,7 +26,7 @@ const EthAssetHolderInterface = new Interface(
 
 const NitroAdjudicatorInterface = new Interface(ContractArtifacts.NitroAdjudicatorArtifact.abi);
 
-interface ChannelChainInfo {
+export interface ChannelChainInfo {
   readonly amount: BigNumber;
   readonly channelStorage: {
     turnNumRecord: BigNumber;
@@ -37,7 +37,7 @@ interface ChannelChainInfo {
   readonly blockNum: BigNumber; // blockNum that the information is from
 }
 
-interface Chain {
+export interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
   selectedAddress: string | null;
@@ -64,7 +64,7 @@ type ChallengeRegistered = {channelId: string; challengeState: State; challengeE
 // type ChallengeCleared = {channelId: string};
 // type Concluded = {channelId: string};
 
-class FakeChain implements Chain {
+export class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
@@ -232,7 +232,7 @@ class FakeChain implements Chain {
 
 const chainLogger = logger.child({module: 'chain'});
 
-class ChainWatcher implements Chain {
+export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
   private mySelectedAddress: string | null = window.ethereum?.selectedAddress ?? null;
@@ -420,5 +420,3 @@ class ChainWatcher implements Chain {
     );
   }
 }
-
-export {ChannelChainInfo, Chain, FakeChain, ChainWatcher};
