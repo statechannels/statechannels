@@ -23,7 +23,8 @@ import {
   setupFakeWeb3,
   waitForWalletToBeHidden,
   waitForClosedState,
-  takeScreenshot
+  takeScreenshot,
+  waitForTransactionIfNecessary
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -91,6 +92,8 @@ describe('Web3-Torrent Integration Tests', () => {
 
     if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
     else waitAndApproveDeposit(web3tTabB, metamaskB);
+
+    await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');
