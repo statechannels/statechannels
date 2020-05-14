@@ -19,11 +19,7 @@ export const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInf
           id="cancel-download-button"
           type="button"
           className="button cancel"
-          onClick={() => {
-            console.log('CANCEL BUTTON WAS CLICKED');
-            cancel(torrent.infoHash);
-            console.log('CANCEL FUNCTION IS DONE EXECUTION');
-          }}
+          onClick={() => cancel(torrent.infoHash)}
         >
           Cancel Download
         </button>
