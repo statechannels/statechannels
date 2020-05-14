@@ -60,15 +60,13 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
   });
 
   it('works', async () => {
+    console.log('logging in..');
+    await login(rpsTabA, rpsTabB);
     console.log('approving MetaMask..');
     await Promise.all([
       waitAndApproveMetaMask(rpsTabA, metamaskA),
       waitAndApproveMetaMask(rpsTabB, metamaskB)
     ]);
-    await rpsTabA.bringToFront();
-    await rpsTabB.bringToFront();
-    console.log('logging in..');
-    await login(rpsTabA, rpsTabB);
     console.log('starting first game...');
     await startFundAndPlaySingleMove(rpsTabA, metamaskA, rpsTabB, metamaskB);
     // xstate wallet does not fully support challenging yet
