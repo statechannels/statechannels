@@ -17,7 +17,6 @@ import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-cli
 import {
   defaultTrackers,
   WEI_PER_BYTE,
-  BUFFER_REFILL_RATE,
   INITIAL_SEEDER_BALANCE,
   BLOCK_LENGTH,
   PEER_TRUST
@@ -482,7 +481,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const lastPieceIsReservedToThisWire = lastPieceReservations.some(
       wire => wire && wire.paidStreamingExtension.peerAccount === peerAccount
     );
-    return torrent.downloaded === 0 && lastPieceIsReservedToThisWire;
+    return lastPieceIsReservedToThisWire;
   }
   /**
    * Close any channels that I am downloading from (that my peer opened)
