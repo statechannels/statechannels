@@ -246,8 +246,14 @@ export async function waitAndApproveMetaMask(
 
 export async function waitForTransactionIfNecessary(page: Page): Promise<void> {
   const walletIFrame = page.frames()[1];
-  const sel = await walletIFrame.waitForSelector('#wait-for-transaction', {timeout: 1000});
-  if (sel) await waitForWalletToBeHidden(page);
+  try {
+    await walletIFrame.waitForSelector('#wait-for-transaction', {timeout: 1000});
+  } catch (e) {
+    if (e instanceof puppeteer.errors.TimeoutError) return;
+    else throw e;
+  }
+  console.log('Waiting for transaction to be mined');
+  await waitForWalletToBeHidden(page);
 }
 
 export async function waitAndApproveDepositWithHub(
