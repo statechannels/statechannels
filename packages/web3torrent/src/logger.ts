@@ -31,15 +31,6 @@ const getCircularReplacer = () => {
 };
 
 const serializeLogObject = o => JSON.stringify(o, getCircularReplacer()) + '\n';
-const transformLogEvent = logEvent => ({
-  // For some reason, the shape of logEvent and the shape that pino normally prints are different:
-  // - there is a `ts` property instead of a `timestamp` property
-  // - The `level` property is of shape {label: string, value: number}
-  // This transformation makes the resulting object parseable by pino-pretty
-  ..._.omit(logEvent, 'ts'),
-  level: logEvent.level.value,
-  time: logEvent.ts
-});
 class LogBlob {
   private parts = [];
   private _blob?: Blob;
@@ -52,7 +43,7 @@ class LogBlob {
   }
 
   append(part) {
-    this.parts.push(transformLogEvent(part));
+    this.parts.push(part);
     this._blob = undefined;
   }
 
@@ -68,17 +59,29 @@ class LogBlob {
 
 const logBlob = new LogBlob();
 
-// So as to not overwrite the `name` property from xstate-wallet (and later, channel-provider),
-// we only call `addName` on objects that we know came from web3torrent.
-const addName = o => ({...o, name});
-let browser: any = IS_BROWSER_CONTEXT
-  ? {transmit: {send: (__, logEvent) => logBlob.append(addName(logEvent))}}
-  : undefined;
+const appendAndCallToConsoleFn = (consoleFn: {(message?: any, ...optionalParams: any[]): void}) => (
+  o: any
+) => {
+  const withName = {...o, name};
 
-if (browser && LOG_TO_FILE) {
-  // TODO: Use the logBlob instead of writing to the browser logs
-  browser = {...browser, write: o => console.log(serializeLogObject(addName(o)))};
-}
+  // So as to not overwrite the `name` property from xstate-wallet (and later, channel-provider),
+  // we only call `addName` on objects that we know came from web3torrent.
+  logBlob.append(withName);
+  if (LOG_TO_FILE) consoleFn(withName);
+  else consoleFn(o.msg, _.omit(o, 'msg'));
+};
+
+const browser: any = IS_BROWSER_CONTEXT
+  ? {
+      write: {
+        error: appendAndCallToConsoleFn(console.error),
+        warn: appendAndCallToConsoleFn(console.warn),
+        info: appendAndCallToConsoleFn(console.info),
+        debug: appendAndCallToConsoleFn(console.debug),
+        trace: appendAndCallToConsoleFn(console.trace)
+      }
+    }
+  : undefined;
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
