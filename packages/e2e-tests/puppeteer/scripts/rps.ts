@@ -130,12 +130,8 @@ export async function bResigns(
     //   // App & Wallet left in a 'clean' no-game state
     // } else {
 
-    // TODO B never sees the wallet nor sends a tx
-    // await waitForWalletToBeDisplayed(page);
-    // await page.waitFor(2000); // Give the wallet some time to prepare the transaction TODO once UI is fixed, we can await a visual cue that the tx is ready to be confirmed
-    // await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
-    // await page.bringToFront();
-    // await waitForWalletToBeHidden(page);
+    await waitForWalletToBeDisplayed(page);
+    await waitForWalletToBeHidden(page); // We do not send a transaction as Player B
 
     await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
     await waitForAndClickButton(page, page.mainFrame(), '#exit');
