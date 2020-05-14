@@ -7,6 +7,7 @@ import ConnectionBanner from '@rimble/connection-banner';
 import RimbleUtils from '@rimble/utils';
 import {WorkflowState} from '../workflows/ethereum-enable';
 import {WindowContext} from './window-context';
+import {CHAIN_NETWORK_ID} from '../config';
 
 interface Props {
   current: WorkflowState;
@@ -15,7 +16,7 @@ interface Props {
 
 export const EnableEthereum = (props: Props) => {
   const currentState = props.current;
-  const targetNetwork = Number(process.env.CHAIN_NETWORK_ID);
+  const targetNetwork = Number(CHAIN_NETWORK_ID);
 
   const window = useContext(WindowContext);
   const networkVersion = window?.ethereum?.networkVersion;

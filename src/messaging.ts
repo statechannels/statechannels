@@ -31,7 +31,7 @@ import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 
 import {bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, VERSION, CHAIN_NETWORK_ID} from './config';
+import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 import {Store} from './store';
 
@@ -166,7 +166,7 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
           selectedAddress: this.store.chain.selectedAddress ?? null,
-          walletVersion: VERSION
+          walletVersion: GIT_VERSION
         });
         break;
       case 'EnableEthereum':
@@ -174,7 +174,7 @@ export class MessagingService implements MessagingServiceInterface {
           await this.sendResponse(requestId, {
             signingAddress: await this.store.getAddress(),
             selectedAddress: this.store.chain.selectedAddress,
-            walletVersion: VERSION
+            walletVersion: GIT_VERSION
           });
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});

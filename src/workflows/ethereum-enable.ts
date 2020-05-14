@@ -12,7 +12,7 @@ import {
 } from 'xstate';
 import {MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
-import {VERSION} from '../config';
+import {GIT_VERSION} from '../config';
 
 interface UserApproves {
   type: 'USER_APPROVES_ENABLE';
@@ -100,7 +100,7 @@ export const ethereumEnableWorkflow = (
     sendResponse: async (context: WorkflowContext) => {
       messagingService.sendResponse(context.requestId, {
         signingAddress: await store.getAddress(),
-        walletVersion: VERSION,
+        walletVersion: GIT_VERSION,
         selectedAddress: context.enabledAddress as string
       });
     },

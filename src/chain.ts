@@ -11,7 +11,7 @@ import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethe
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
 
-import EventEmitter = require('eventemitter3');
+import EventEmitter from 'eventemitter3';
 
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
 import {getProvider} from './utils/contract-utils';
