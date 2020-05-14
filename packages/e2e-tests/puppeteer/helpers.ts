@@ -247,9 +247,7 @@ export async function waitAndApproveMetaMask(
 export async function waitForTransactionIfNecessary(page: Page): Promise<void> {
   const walletIFrame = page.frames()[1];
   const sel = await walletIFrame.waitForSelector('#wait-for-transaction', {timeout: 1000});
-  if (sel) {
-    await new Promise(r => setTimeout(r, TX_WAIT_TIMEOUT));
-  }
+  if (sel) await waitForWalletToBeHidden(page);
 }
 
 export async function waitAndApproveDepositWithHub(
