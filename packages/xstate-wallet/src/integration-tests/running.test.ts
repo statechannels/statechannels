@@ -85,3 +85,24 @@ test('accepts states when running', async () => {
     expect(playerBTurnNum).toBe(6);
   }, 3000);
 });
+
+test('multiple state updates for a single channel', async () => {
+  [2, 3].map(i =>
+    playerA.messagingService.receiveRequest(
+      generatePlayerUpdate(channelId, playerA.participant, playerB.participant, {
+        appData: '0x' + i.toString()
+      }),
+      'localhost'
+    )
+  );
+
+  await waitForExpect(async () => {
+    expect(playerA.workflowState).toEqual('running');
+    expect(playerB.workflowState).toEqual('running');
+    const {
+      latest: {turnNum, appData}
+    } = await playerA.store.getEntry(channelId);
+    expect(appData).toEqual('0x3');
+    expect(turnNum.toNumber()).toEqual(6);
+  }, 5000);
+});

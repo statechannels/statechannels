@@ -23,6 +23,7 @@ import {makeDestination} from '../utils';
 import {hexZeroPad} from 'ethers/utils';
 import {logger} from '../logger';
 import {ETH_TOKEN} from '../constants';
+import _ from 'lodash';
 
 const log = logger.info.bind(logger);
 
@@ -163,8 +164,11 @@ export function generateCloseRequest(channelId: string): CloseChannelRequest {
 export function generatePlayerUpdate(
   channelId: string,
   playerA: Participant,
-  playerB: Participant
+  playerB: Participant,
+  opts?: {appData?: string}
 ): UpdateChannelRequest {
+  const opts2 = _.merge({appData: '0x'}, opts);
+  const {appData} = opts2;
   return {
     id: 555555555,
     method: 'UpdateChannel',
@@ -172,7 +176,7 @@ export function generatePlayerUpdate(
     params: {
       channelId,
       participants: [playerA, playerB],
-      appData: '0x0',
+      appData,
       allocations: [
         {
           token: hexZeroPad('0x0', 32),
