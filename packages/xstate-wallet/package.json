@@ -8,10 +8,22 @@
       "react-app"
     ]
   },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "dependencies": {
     "@rimble/connection-banner": "1.2.3",
     "@rimble/utils": "1.2.3",
-    "@sentry/browser": "5.12.1",
+    "@sentry/browser": "5.15.5",
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
     "@statechannels/wire-format": "0.0.1",
@@ -54,8 +66,8 @@
     "@types/webpack-merge": "4.1.5",
     "awesome-typescript-loader": "5.2.1",
     "babel-loader": "8.0.6",
-    "babel-plugin-const-enum": "^1.0.1",
-    "babel-plugin-named-asset-import": "^0.3.6",
+    "babel-plugin-const-enum": "1.0.1",
+    "babel-plugin-named-asset-import": "0.3.6",
     "css-loader": "3.4.2",
     "fake-indexeddb": "3.0.0",
     "git-revision-webpack-plugin": "3.0.6",
@@ -96,17 +108,5 @@
     "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
     "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }
