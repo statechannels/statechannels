@@ -34,7 +34,7 @@ describe('<Upload />', () => {
   });
 
   afterAll(() => {
-    Web3TorrentClient.web3torrent.destroy();
+    Web3TorrentClient.web3TorrentClient.destroy();
   });
 
   it('should render an Upload button', () => {

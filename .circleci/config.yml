@@ -16,27 +16,42 @@ defaults: &defaults
 
 save_dep: &save_dep
   save_cache:
-    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
+      - packages/channel-client/node_modules
+      - packages/channel-provider/node_modules
+      - packages/client-api-schema/node_modules
+      - packages/devtools/node_modules
+      - packages/e2e-tests/node_modules
+      - packages/jest-gas-reporter/node_modules
+      - packages/nitro-protocol/node_modules
+      - packages/rps/node_modules
+      - packages/simple-hub/node_modules
+      - packages/tic-tac-toe/node_modules
+      - packages/web3torrent/node_modules
+      - packages/wire-format/node_modules
+      - packages/xstate-wallet/node_modules
+
 restore_dep: &restore_dep
   restore_cache:
-    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_lib: &save_lib
   save_cache:
     # Force a new cache on each build
     key: v3-lib-cache-{{ epoch }}
     paths:
-      - packages/nitro-protocol/lib
-      - packages/rps/lib
+      - packages/channel-client/lib
+      - packages/channel-provider/lib
       - packages/client-api-schema/lib
-      - packages/e2e-tests/lib
-      - packages/web3torrent/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib
-      - packages/channel-provider/lib
-      - packages/channel-client/lib
+      - packages/nitro-protocol/lib
+      - packages/simple-hub/lib
+      - packages/wire-format/lib
+      - packages/xstate-wallet/lib
+
 restore_lib: &restore_lib
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
@@ -475,7 +490,6 @@ jobs:
       - run: (cd packages/e2e-tests && yarn jest web3torrent --runInBand --bail)
       - upload_logs:
           file: e2e-test-w3t-production-stats
-      - notify_slack
 
   push-master-to-deploy:
     working_directory: /home/circleci/project

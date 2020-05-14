@@ -23,15 +23,15 @@ import {
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
 import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
-import {Message, SiteBudget, Participant} from './store/types';
-import {serializeSiteBudget, serializeChannelEntry} from './serde/app-messages/serialize';
+import {Message, DomainBudget, Participant} from './store/types';
+import {serializeDomainBudget, serializeChannelEntry} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 
 import {bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, VERSION, CHAIN_NETWORK_ID} from './config';
+import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 import {Store} from './store';
 
@@ -60,7 +60,7 @@ export interface MessagingServiceInterface {
   readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
-  sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
+  sendBudgetNotification(notificationData: DomainBudget): Promise<void>;
   sendChannelNotification(
     method: (ChannelClosingNotification | ChannelUpdatedNotification)['method'],
     notificationData: ChannelResult
@@ -100,11 +100,11 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', response);
   }
 
-  public async sendBudgetNotification(notificationData: SiteBudget) {
+  public async sendBudgetNotification(notificationData: DomainBudget) {
     const notification: Notification = {
       jsonrpc: '2.0',
       method: 'BudgetUpdated',
-      params: serializeSiteBudget(notificationData)
+      params: serializeDomainBudget(notificationData)
     };
     this.eventEmitter.emit('SendMessage', notification);
   }
@@ -166,7 +166,7 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
           selectedAddress: this.store.chain.selectedAddress ?? null,
-          walletVersion: VERSION
+          walletVersion: GIT_VERSION
         });
         break;
       case 'EnableEthereum':
@@ -174,7 +174,7 @@ export class MessagingService implements MessagingServiceInterface {
           await this.sendResponse(requestId, {
             signingAddress: await this.store.getAddress(),
             selectedAddress: this.store.chain.selectedAddress,
-            walletVersion: VERSION
+            walletVersion: GIT_VERSION
           });
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
@@ -210,8 +210,8 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':
-        const siteBudget = await this.store.getBudget(fromDomain);
-        await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
+        const DomainBudget = await this.store.getBudget(fromDomain);
+        await this.sendResponse(requestId, DomainBudget ? serializeDomainBudget(DomainBudget) : {});
         break;
       case 'GetState':
         // TODO: handle these requests
@@ -258,7 +258,7 @@ async function convertToInternalEvent(
           destination: store.chain.selectedAddress
         }),
         hub: convertToInternalParticipant(request.params.hub),
-        site: domain
+        domain: domain
       };
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;
@@ -297,7 +297,7 @@ async function convertToInternalEvent(
         challengeDuration: bigNumberify(CHALLENGE_DURATION),
         chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
-        applicationSite: domain
+        applicationDomain: domain
       };
     }
     case 'JoinChannel':
@@ -305,7 +305,7 @@ async function convertToInternalEvent(
         type: 'JOIN_CHANNEL',
         ...request.params,
         requestId: request.id,
-        applicationSite: domain
+        applicationDomain: domain
       };
     case 'UpdateChannel':
       const outcome = deserializeAllocations(request.params.allocations);

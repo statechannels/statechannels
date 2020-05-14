@@ -33,9 +33,10 @@ import {
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
+import _ from 'lodash';
 
 export interface WorkflowContext {
-  applicationSite: string;
+  applicationDomain: string;
   fundingStrategy: FundingStrategy;
   channelId?: string;
   requestObserver?: any;
@@ -86,7 +87,7 @@ export type WorkflowEvent =
   | DoneInvokeEvent<keyof WorkflowServices>;
 
 export type WorkflowServices = {
-  setApplicationSite(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
+  setapplicationDomain(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
   signFinalState: (context: ChannelIdExists) => Promise<any>;
   invokeClosingProtocol: (
@@ -111,6 +112,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     closing: {};
     done: {};
     failure: {};
+    fundingChannel: {};
   };
 }
 
@@ -152,12 +154,12 @@ const generateConfig = (
               {target: 'done', cond: guards.amCreator}
             ],
             JOIN_CHANNEL: {
-              target: 'settingSite',
+              target: 'settingDomain',
               actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
           }
         },
-        settingSite: {invoke: {src: 'setApplicationSite', onDone: 'done'}},
+        settingDomain: {invoke: {src: 'setapplicationDomain', onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: [
@@ -265,12 +267,8 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      distinctUntilChanged(
-        (entry1, entry2) =>
-          entry1.supported.turnNum.eq(entry2.supported.turnNum) &&
-          // TODO: Currently concluding is not limited to your turn
-          // so we need to check for an unsupported conclude state
-          entry1.latest.isFinal === entry2.latest.isFinal
+      distinctUntilChanged((entry1, entry2) =>
+        _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
       ),
 
       map(storeEntry => ({
@@ -283,23 +281,23 @@ export const workflow = (
     sendCloseChannelResponse: async (context: ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
-        messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+        await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
       }
     },
 
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, await serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
@@ -315,7 +313,7 @@ export const workflow = (
       if (event.storeEntry.channelId === context.channelId) {
         messagingService.sendChannelNotification(
           'ChannelUpdated',
-          await serializeChannelEntry(event.storeEntry)
+          serializeChannelEntry(event.storeEntry)
         );
       }
     },
@@ -352,7 +350,7 @@ export const workflow = (
           outcome: event.outcome
         };
         const entry = await store.signAndAddState(event.channelId, newState);
-        await messagingService.sendResponse(event.requestId, await serializeChannelEntry(entry));
+        await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
       }
     }
   };
@@ -376,8 +374,8 @@ export const workflow = (
   };
 
   const services: WorkflowServices = {
-    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
-      await store.setApplicationSite(ctx.channelId, event.applicationSite),
+    setapplicationDomain: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
+      await store.setapplicationDomain(ctx.channelId, event.applicationDomain),
 
     signFinalState: signFinalState(store),
     createChannel: async (context: CreateInit) => {
@@ -388,7 +386,7 @@ export const workflow = (
         appData,
         appDefinition,
         fundingStrategy,
-        applicationSite
+        applicationDomain
       } = context;
       const stateVars: StateVariables = {
         outcome,
@@ -401,7 +399,7 @@ export const workflow = (
         bigNumberify(challengeDuration),
         stateVars,
         appDefinition,
-        applicationSite
+        applicationDomain
       );
 
       // Create a open channel objective so we can coordinate with all participants
@@ -414,7 +412,7 @@ export const workflow = (
     },
 
     invokeClosingProtocol: (context: ChannelIdExists) =>
-      ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
+      ConcludeChannel.machine(store, messagingService).withContext({channelId: context.channelId}),
 
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
       ChallengeChannel.machine(store, {channelId}),

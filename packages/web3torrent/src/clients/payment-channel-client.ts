@@ -3,7 +3,7 @@ import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
-import {SiteBudget} from '@statechannels/client-api-schema';
+import {DomainBudget} from '@statechannels/client-api-schema';
 import {
   SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
   HUB,
@@ -60,7 +60,7 @@ if (process.env.FAKE_CHANNEL_PROVIDER === 'true') {
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
   channelCache: Record<string, ChannelState | undefined> = {};
-  budgetCache?: SiteBudget;
+  budgetCache?: DomainBudget;
 
   get mySigningAddress(): string | undefined {
     return this.channelClient.signingAddress;
@@ -248,8 +248,9 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt() {
+  getLatestPaymentReceipt(channelId) {
     const readyToPay = (state: ChannelState) =>
+      state.channelId === channelId &&
       state.status === 'running' &&
       state.payer === this.mySigningAddress &&
       state.turnNum.mod(2).eq(Index.Payer);
@@ -260,7 +261,7 @@ export class PaymentChannelClient {
   }
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const channelState: ChannelState = await this.getLatestPaymentReceipt();
+    const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
 
     const {payerBalance} = channelState;
     if (bigNumberify(payerBalance).lt(amount)) {
@@ -350,12 +351,12 @@ export class PaymentChannelClient {
     return this.channelCache;
   }
 
-  async getBudget(): Promise<SiteBudget> {
+  async getBudget(): Promise<DomainBudget> {
     this.budgetCache = await this.channelClient.getBudget(HUB.signingAddress);
     return this.budgetCache;
   }
 
-  async closeAndWithdraw(): Promise<SiteBudget | {}> {
+  async closeAndWithdraw(): Promise<DomainBudget | {}> {
     await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
 
     this.budgetCache = undefined;

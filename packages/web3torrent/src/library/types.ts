@@ -11,12 +11,19 @@ export enum ClientEvents {
   TORRENT_NOTICE = 'torrent_notice'
 }
 
+// The events are documented at https://webtorrent.io/docs
 export enum TorrentEvents {
-  WIRE = 'wire',
-  NOTICE = 'notice',
-  STOP = 'stop',
   DONE = 'done',
-  ERROR = 'error'
+  DOWNLOAD = 'download',
+  ERROR = 'error',
+  INFOHASH = 'infoHash',
+  NOTICE = 'notice',
+  NOPEERS = 'noPeers',
+  METADATA = 'metadata',
+  READY = 'ready',
+  UPLOAD = 'upload',
+  WARNING = 'warning',
+  WIRE = 'wire'
 }
 
 export enum TorrentTestResult {
@@ -62,9 +69,6 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
 
     uploaded: number;
     downloaded: number;
-
-    // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
-    setTimeout(ms: number, unref?: boolean): void;
 
     _clearTimeout(): void;
     _onRequest(index: number, offset: number, length: number): void;

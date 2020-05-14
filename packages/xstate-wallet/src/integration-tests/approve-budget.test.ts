@@ -6,7 +6,7 @@ import {assertSimpleEthAllocation} from '../utils';
 
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
-import {TEST_SITE} from '../workflows/tests/data';
+import {TEST_APP_DOMAIN} from '../workflows/tests/data';
 
 jest.setTimeout(30000);
 
@@ -78,5 +78,5 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);
   expect(chainInfo.amount.eq(10)).toBe(true);
 
-  expect(await playerA.store.getBudget(TEST_SITE)).toBeDefined();
+  expect(await playerA.store.getBudget(TEST_APP_DOMAIN)).toBeDefined();
 });

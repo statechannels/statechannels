@@ -5,9 +5,10 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndApproveMetaMask,
-  waitAndApproveDeposit
+  waitAndApproveDeposit,
+  waitForWalletToBeDisplayed,
+  waitForWalletToBeHidden
 } from '../helpers';
-import {getEnvBool} from '@statechannels/devtools';
 import {Dappeteer} from 'dappeteer';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
@@ -110,40 +111,50 @@ export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
   return true;
 }
 
-export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
-  const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
-  async function playerB(page: Page): Promise<void> {
-    const walletIFrame = page.frames()[1];
+export async function bResigns(
+  rpsTabA: Page,
+  metamaskA: Dappeteer,
+  rpsTabB: Page,
+  metamaskB: Dappeteer
+): Promise<boolean> {
+  // const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function playerB(page: Page, _metamask: Dappeteer): Promise<void> {
+    await waitForAndClickButton(page, page.mainFrame(), '#resign:not([disabled])');
+    // unsupported for now
+    // if (virtual) {
+    //   await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+    //   await waitForAndClickButton(page, walletIFrame, '#ok');
+    //   await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+    //   await waitForAndClickButton(page, page.mainFrame(), '#exit');
+    //   // App & Wallet left in a 'clean' no-game state
+    // } else {
 
-    await waitForAndClickButton(page, page.mainFrame(), '#resign');
-    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForWalletToBeDisplayed(page);
+    await waitForWalletToBeHidden(page); // We do not send a transaction as Player B
 
-    if (virtual) {
-      await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
-      await waitForAndClickButton(page, walletIFrame, '#ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#exit');
-      // App & Wallet left in a 'clean' no-game state
-    } else {
-      await waitForAndClickButton(page, walletIFrame, '#ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
-      await waitForAndClickButton(page, page.mainFrame(), '#exit');
-      // App & Wallet left in a 'clean' no-game state
-    }
+    await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#exit');
+    // App & Wallet left in a 'clean' no-game state
+    // }
   }
 
-  async function playerA(page: Page): Promise<void> {
+  async function playerA(page: Page, metamask: Dappeteer): Promise<void> {
+    await page.waitFor(1000);
     await playMove(page, 'rock');
-    const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(page, walletIFrame, '#yes');
-    await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
-    await waitForAndClickButton(page, walletIFrame, '#ok');
+
+    await waitForWalletToBeDisplayed(page);
+    await page.waitFor(2000); // Give the wallet some time to prepare the transaction TODO once UI is fixed, we can await a visual cue that the tx is ready to be confirmed
+    await metamask.confirmTransaction({gas: 20, gasLimit: 50000});
+    await page.bringToFront();
+    await waitForWalletToBeHidden(page);
+
     await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
     await waitForAndClickButton(page, page.mainFrame(), '#exit');
     // App & Wallet left in a 'clean' no-game state
   }
 
-  await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  await Promise.all([playerA(rpsTabA, metamaskA), playerB(rpsTabB, metamaskB)]);
   return true;
 }
 

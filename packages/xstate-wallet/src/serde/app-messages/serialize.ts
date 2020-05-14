@@ -2,7 +2,7 @@ import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
-  SiteBudget as AppSiteBudget,
+  DomainBudget as AppDomainBudget,
   TokenBudget,
   ChannelResult,
   ChannelStatus
@@ -11,7 +11,7 @@ import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
-  SiteBudget,
+  DomainBudget,
   AssetBudget,
   isAllocation
 } from '../../store/types';
@@ -21,7 +21,7 @@ import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
 import {bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
-export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
+export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
@@ -71,9 +71,7 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
   };
 }
 
-export async function serializeChannelEntry(
-  channelEntry: ChannelStoreEntry
-): Promise<ChannelResult> {
+export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
   const {latest, channelId} = channelEntry;
   const {appData, turnNum, outcome} = latest;
   const {participants, appDefinition} = channelEntry.channelConstants;
@@ -87,9 +85,9 @@ export async function serializeChannelEntry(
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
+  } else if (channelEntry.hasConclusionProof) {
     status = 'closed';
-  } else if (latest?.isFinal) {
+  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
     status = 'closing';
   }
 

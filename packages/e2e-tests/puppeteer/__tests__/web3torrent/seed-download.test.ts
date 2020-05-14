@@ -109,12 +109,7 @@ describe('Web3-Torrent Integration Tests', () => {
     await forEachTab(waitForWalletToBeHidden);
 
     // Wait for the close state channel update
-    // TODO: It looks like direct funding is not properly sending a closed state
-    // see https://github.com/statechannels/monorepo/issues/1649
-    if (USES_VIRTUAL_FUNDING) {
-      console.log('Wait for State to be Closed');
-      await forEachTab(waitForClosedState);
-    }
+    await forEachTab(waitForClosedState);
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));

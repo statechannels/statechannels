@@ -1,7 +1,7 @@
 const generalRules = {
   'no-process-env': 'error',
   'no-case-declarations': 'off',
-  'no-undef': 'off' // Shouldn't need this, tsc takes care of it
+  'no-undef': 'off' // Shouldn't need this, tsc takes care of it,
 };
 
 // From the tslint.json we used previously

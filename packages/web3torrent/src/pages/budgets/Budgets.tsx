@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
-import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
-import {Web3TorrentContext} from '../../clients/web3torrent-client';
+import {DomainBudgetTable} from '../../components/domain-budget-table/DomainBudgetTable';
+import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
@@ -27,9 +27,9 @@ export const Budgets: React.FC<Props> = props => {
 };
 
 const CurrentBudget: React.FC<Props> = props => {
-  const web3Torrent = useContext(Web3TorrentContext);
+  const web3TorrentClient = useContext(Web3TorrentClientContext);
 
-  const {channelCache, mySigningAddress: me} = web3Torrent.paymentChannelClient;
+  const {channelCache, mySigningAddress: me} = web3TorrentClient.paymentChannelClient;
   const {budget, loading, createBudget, closeBudget} = useBudget(props);
   const budgetExists = !!budget && !_.isEmpty(budget);
 
@@ -38,7 +38,7 @@ const CurrentBudget: React.FC<Props> = props => {
       <h1>Your current budget</h1>
       {loading && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
       {!loading && budgetExists && (
-        <SiteBudgetTable
+        <DomainBudgetTable
           budgetCache={budget}
           channelCache={channelCache}
           mySigningAddress={me}

@@ -71,27 +71,16 @@ module.exports = function(webpackEnv) {
   // This is based on what CRA was doing
   const rawEnv = Object.keys(process.env)
     .filter(key => {
-      return (
-        [
-          'VERSION',
-          'CHAIN_NETWORK_ID',
-          'DRIFT_CHATBOX_ID',
-          'FAKE_CHANNEL_PROVIDER',
-          'FIREBASE_API_KEY',
-          'FIREBASE_PREFIX',
-          'FIREBASE_URL',
-          'FUNDING_STRATEGY',
-          'HUB_DESTINATION',
-          'LOG_DESTINATION',
-          'LOG_LEVEL',
-          'NODE_ENV',
-          'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
-          'TARGET_NETWORK',
-          'TRACKER_URL',
-          'TRACKER_URL_HTTP_PROTOCOL',
-          'WALLET_URL'
-        ].indexOf(key) > -1
-      );
+      return [
+        'CHAIN_NETWORK_ID',
+        'CLEAR_STORAGE_ON_START',
+        'ETH_ASSET_HOLDER_ADDRESS',
+        'HUB_ADDRESS',
+        'HUB_DESTINATION',
+        'LOG_DESTINATION',
+        'NITRO_ADJUDICATOR_ADDRESS',
+        'USE_INDEXED_DB'
+      ].indexOf(key) > -1
     })
     .reduce(
       (env, key) => {
@@ -227,6 +216,9 @@ module.exports = function(webpackEnv) {
         // This is only used in production mode
         new TerserPlugin({
           terserOptions: {
+            // We keep function names because various workflows use Function.name to refer
+            // to actions that an xstate machine will trigger under certain conditions
+            keep_fnames: true,
             parse: {
               // We want terser to parse ecma 8 code. However, we don't want it
               // to apply any minification steps that turns valid ecma 5 code
@@ -258,7 +250,7 @@ module.exports = function(webpackEnv) {
               // Turned on because emoji and regex is not minified properly using default
               // https://github.com/facebook/create-react-app/issues/2488
               ascii_only: true
-            }
+            },
           },
           // Use multi-process parallel running to improve the build speed
           // Default number of concurrent runs: os.cpus().length - 1
@@ -345,24 +337,25 @@ module.exports = function(webpackEnv) {
         // Disable require.ensure as it's not a standard language feature.
         {parser: {requireEnsure: false}},
 
+        // REMOVED SINCE xstate-wallet USES SEPERATE LINTING
         // First, run the linter.
         // It's important to do this before Babel processes the JS.
-        {
-          test: /\.(js|mjs|jsx|ts|tsx)$/,
-          enforce: 'pre',
-          use: [
-            {
-              options: {
-                cache: true,
-                formatter: require.resolve('react-dev-utils/eslintFormatter'),
-                eslintPath: require.resolve('eslint'),
-                resolvePluginsRelativeTo: __dirname
-              },
-              loader: require.resolve('eslint-loader')
-            }
-          ],
-          include: paths.appSrc
-        },
+        // {
+        //   test: /\.(js|mjs|jsx|ts|tsx)$/,
+        //   enforce: 'pre',
+        //   use: [
+        //     {
+        //       options: {
+        //         cache: true,
+        //         formatter: require.resolve('react-dev-utils/eslintFormatter'),
+        //         eslintPath: require.resolve('eslint'),
+        //         resolvePluginsRelativeTo: __dirname
+        //       },
+        //       loader: require.resolve('eslint-loader')
+        //     }
+        //   ],
+        //   include: paths.appSrc
+        // },
         {
           // "oneOf" will traverse all following loaders until one will
           // match the requirements. When no loader matches it will fall
@@ -389,6 +382,12 @@ module.exports = function(webpackEnv) {
                 customize: require.resolve('babel-preset-react-app/webpack-overrides'),
 
                 plugins: [
+                  [
+                    'const-enum', // From https://github.com/babel/babel/issues/8741#issuecomment-509041135
+                    {
+                      "transform": "constObject"
+                    }
+                  ],
                   [
                     require.resolve('babel-plugin-named-asset-import'),
                     {
@@ -570,14 +569,13 @@ module.exports = function(webpackEnv) {
       // It is absolutely essential that NODE_ENV is set to production
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
-
       new webpack.DefinePlugin({
         // This is a bit messy, we should clean this up
         ['process.env']: {
           ...stringifiedEnv['process.env'],
-          VERSION: JSON.stringify(gitRevisionPlugin.version()),
-          COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
-          BRANCH: JSON.stringify(gitRevisionPlugin.branch())
+          GIT_VERSION: JSON.stringify(gitRevisionPlugin.version()),
+          GIT_COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+          GIT_BRANCH: JSON.stringify(gitRevisionPlugin.branch())
         }
       }),
       // This is necessary to emit hot updates (currently CSS only):

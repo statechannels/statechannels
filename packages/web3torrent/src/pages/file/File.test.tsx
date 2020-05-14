@@ -30,11 +30,10 @@ describe('<File />', () => {
         <File ready={true} />
       </Router>
     );
-    jest.useFakeTimers();
   });
 
   afterAll(() => {
-    Web3TorrentClient.web3torrent.destroy();
+    Web3TorrentClient.web3TorrentClient.destroy();
   });
 
   it('should render an download button', () => {
@@ -50,22 +49,4 @@ describe('<File />', () => {
   //   expect(ChannelClient.mock.instances[0].approveBudgetAndFund).toHaveBeenCalled();
   //   expect(torrentFile).toHaveBeenCalled();
   // });
-
-  it('should run checker function if the File Button is clicked', async () => {
-    const torrentStatusChecker = jest
-      .spyOn(TorrentStatus, 'getTorrentUI')
-      .mockImplementation((_w3t: WebTorrentPaidStreamingClient, _staticData: TorrentStaticData) =>
-        createMockTorrentUI()
-      );
-
-    await act(async () => {
-      await component.find(testSelector('download-button')).simulate('click');
-    });
-
-    act(() => {
-      jest.runOnlyPendingTimers();
-    });
-
-    expect(torrentStatusChecker).toHaveBeenCalled();
-  });
 });

@@ -1,6 +1,7 @@
 import pino from 'pino';
 
 import {LOG_DESTINATION, ADD_LOGS, NODE_ENV} from './config';
+import _ from 'lodash';
 
 // TODO: Is there a better way to determine if we're in a browser context?
 const IS_BROWSER_CONTEXT = NODE_ENV !== 'test';
@@ -13,13 +14,30 @@ const name = 'xstate-wallet';
 const destination =
   LOG_TO_FILE && !IS_BROWSER_CONTEXT ? pino.destination(LOG_DESTINATION) : undefined;
 
-// If we are in a browser, but we want to LOG_TO_FILE, we assume that the
-// log statements are meant to be stored as JSON objects
-// So, we log serialized objects, appending the name (which the pino browser-api appears to remove?)
-const browser =
-  LOG_TO_FILE && IS_BROWSER_CONTEXT
-    ? {write: o => console.log(JSON.stringify({...o, name}))}
-    : undefined;
+const postMessageAndCallConsoleFn = (consoleFn: {
+  (message?: any, ...optionalParams: any[]): void;
+}) => (o: any) => {
+  const withName = JSON.stringify({...o, name});
+
+  // The simplest way to give users/developers easy access to the logs in a single place is to
+  // make the application aware of all the pino logs via postMessage
+  // Then, the application can package up all the logs into a single file
+  window.parent.postMessage({type: 'PINO_LOG', logEvent: JSON.parse(withName)}, '*');
+  if (LOG_TO_FILE) consoleFn(withName);
+  else consoleFn(o.msg, _.omit(o, 'msg'));
+};
+
+const browser: any = IS_BROWSER_CONTEXT
+  ? {
+      write: {
+        error: postMessageAndCallConsoleFn(console.error),
+        warn: postMessageAndCallConsoleFn(console.warn),
+        info: postMessageAndCallConsoleFn(console.info),
+        debug: postMessageAndCallConsoleFn(console.debug),
+        trace: postMessageAndCallConsoleFn(console.trace)
+      }
+    }
+  : undefined;
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 

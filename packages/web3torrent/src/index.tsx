@@ -14,12 +14,12 @@ if (process.env.NODE_ENV === 'production') {
 
 import Drift from 'react-driftjs';
 
-import {web3torrent, Web3TorrentContext} from './clients/web3torrent-client';
+import {web3TorrentClient, Web3TorrentClientContext} from './clients/web3torrent-client';
 
 ReactDOM.render(
-  <Web3TorrentContext.Provider value={web3torrent}>
+  <Web3TorrentClientContext.Provider value={web3TorrentClient}>
     <App />
     {process.env.DRIFT_CHATBOX_APP_ID && <Drift appId={process.env.DRIFT_CHATBOX_APP_ID} />}
-  </Web3TorrentContext.Provider>,
+  </Web3TorrentClientContext.Provider>,
   document.getElementById('root')
 );

@@ -90,7 +90,7 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/SiteBudget"
+          "$ref": "#/definitions/DomainBudget"
         }
       },
       "required": [
@@ -116,7 +116,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/SiteBudget"
+          "$ref": "#/definitions/DomainBudget"
         }
       },
       "required": [
@@ -592,6 +592,29 @@
       ],
       "type": "object"
     },
+    "DomainBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "budgets": {
+          "items": {
+            "$ref": "#/definitions/TokenBudget"
+          },
+          "type": "array"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "hubAddress": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "hubAddress",
+        "budgets"
+      ],
+      "type": "object"
+    },
     "EnableEthereumError": {
       "additionalProperties": false,
       "properties": {
@@ -810,7 +833,7 @@
         "result": {
           "anyOf": [
             {
-              "$ref": "#/definitions/SiteBudget"
+              "$ref": "#/definitions/DomainBudget"
             },
             {
               "additionalProperties": false,
@@ -1371,29 +1394,6 @@
           "$ref": "#/definitions/GetChannelsResponse"
         }
       ]
-    },
-    "SiteBudget": {
-      "additionalProperties": false,
-      "properties": {
-        "budgets": {
-          "items": {
-            "$ref": "#/definitions/TokenBudget"
-          },
-          "type": "array"
-        },
-        "domain": {
-          "type": "string"
-        },
-        "hubAddress": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "domain",
-        "hubAddress",
-        "budgets"
-      ],
-      "type": "object"
     },
     "TokenBudget": {
       "additionalProperties": false,

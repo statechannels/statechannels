@@ -1,9 +1,8 @@
 import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
-import {filter, first, map} from 'rxjs/operators';
 import {ChannelLock} from '../store/store';
 
 import {SupportState} from '.';
-import {Store, Errors as StoreErrors, Funding} from '../store';
+import {Store, Funding} from '../store';
 import {
   allocateToTarget,
   isSimpleEthAllocation,
@@ -29,8 +28,7 @@ const enum Services {
   updateFunding = 'updateFunding',
   supportState = 'supportState',
   checkTarget = 'checkTarget',
-  acquireLock = 'acquireLock',
-  releaseLock = 'releaseLock'
+  acquireLock = 'acquireLock'
 }
 
 export const enum Errors {
@@ -46,7 +44,7 @@ const onError = {target: FAILURE};
 const fundingTarget = getDataAndInvoke(
   {src: Services.getTargetOutcome, opts: {onError}},
   {src: Services.supportState, opts: {onError}},
-  'releasingLock'
+  'updatingFunding'
 );
 
 const checkTarget = (store: Store) => async (ctx: Init) => {
@@ -67,47 +65,25 @@ export const config: MachineConfig<any, any, any> = {
     },
     fundingTarget,
     failure: {
-      entry: [assignError, 'escalateError'],
-      invoke: {src: Services.releaseLock}
-    },
-    releasingLock: {
-      invoke: {src: Services.releaseLock, onDone: 'updatingFunding', onError: 'updatingFunding'}
+      entry: [assignError, 'escalateError', 'releaseLock']
     },
     updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
-    success: {type: 'final'}
+    success: {type: 'final', entry: 'releaseLock'}
   }
 };
 
-const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
-  try {
-    return await store.acquireChannelLock(ctx.ledgerChannelId);
-  } catch (e) {
-    if (e.message === StoreErrors.channelLocked) {
-      return await store.lockFeed
-        .pipe(
-          filter(s => s.channelId === ctx.ledgerChannelId),
-          first(s => !s.lock),
-          map(async () => await store.acquireChannelLock(ctx.ledgerChannelId))
-        )
-        .toPromise();
-    } else throw e;
-  }
-};
+const acquireLock = (store: Store) => (ctx: Init): Promise<ChannelLock> =>
+  store.acquireChannelLock(ctx.ledgerChannelId);
 
 type WithLock = Init & {lock: ChannelLock};
-const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
-  await store.releaseChannelLock(ctx.lock);
-};
 
 const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
   // TODO: Switch to feed
   const {targetChannelId, ledgerChannelId, deductions} = ctx;
   const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
-  const {
-    amount,
-    channelStorage: {finalizesAt}
-  } = await store.chain.getChainInfo(ledgerChannelId);
+  const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+  if (finalized) throw new Error(Errors.finalized);
 
   const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
     .allocationItems.map(i => i.amount)
@@ -115,10 +91,6 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
   const toDeduct = deductions.map(i => i.amount).reduce(add);
 
   if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
-
-  // TODO: Store should expose method as opposed to workflow checking chain directly
-  if (finalizesAt.gt(0) && finalizesAt.lte(await store.chain.getBlockNumber()))
-    throw new Error(Errors.finalized);
 
   if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
 
@@ -142,12 +114,12 @@ const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
   getTargetOutcome: getTargetOutcome(store),
   updateFunding: updateFunding(store),
   supportState: SupportState.machine(store),
-  acquireLock: acquireLock(store),
-  releaseLock: releaseLock(store)
+  acquireLock: acquireLock(store)
 });
 
 const actions = {
-  escalateError: escalate(({error}) => ({type: 'FAILURE', error}))
+  escalateError: escalate(({error}) => ({type: 'FAILURE', error})),
+  releaseLock: (ctx: WithLock) => ctx.lock.release()
 };
 
 const options = (store: Store) => ({services: services(store), actions});

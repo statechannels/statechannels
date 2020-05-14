@@ -26,7 +26,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       challengeDuration: bigNumberify(500),
       requestId: 5,
       fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
 
     const store = new Store();
@@ -79,7 +79,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
       fundingStrategy: 'Direct',
       channelId,
       type: 'JOIN_CHANNEL',
-      applicationSite: 'localhost',
+      applicationDomain: 'localhost',
       requestId: 5
     };
 
@@ -91,7 +91,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
 
     const enum expectations {
       channelFunded = 'Channel was funded',
-      siteSet = 'applicationSite was set'
+      domainSet = 'applicationDomain was set'
     }
     const service = interpret<any, any, any>(
       Application.workflow(store, messagingService, context).withConfig({
@@ -99,7 +99,8 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
         services: {
           invokeCreateChannelAndFundProtocol: () =>
             new Promise(resolve => spy(expectations.channelFunded) && resolve()),
-          setApplicationSite: () => new Promise(resolve => spy(expectations.siteSet) && resolve())
+          setapplicationDomain: () =>
+            new Promise(resolve => spy(expectations.domainSet) && resolve())
         }
       })
     );
@@ -114,13 +115,13 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
       type: 'JOIN_CHANNEL',
       channelId,
       requestId: 5,
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     };
 
     service.send(joinEvent);
     expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenCalledWith(context, joinEvent, expect.any(Object));
-    expect(spy).toHaveBeenCalledWith(expectations.siteSet);
+    expect(spy).toHaveBeenCalledWith(expectations.domainSet);
 
     // It invokes confirmingWithUser
     await waitForExpect(async () => {
@@ -147,7 +148,7 @@ it('raises an channel updated action when the channel is updated', async () => {
   const service = interpret<any, any, any>(
     Application.workflow(store, messagingService).withConfig(mockOptions, {
       fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     })
   );
   service.start();
@@ -190,7 +191,7 @@ it('starts concluding when requested', async () => {
   const service = interpret<any, any, any>(
     Application.workflow(store, messagingService).withConfig(
       {services, actions} as any, // TODO: Casting
-      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+      {fundingStrategy: 'Direct', applicationDomain: 'localhost'}
     )
   );
   service.start('running');
@@ -223,7 +224,7 @@ it('starts challenging when requested', async () => {
   const service = interpret<any, any, any>(
     Application.workflow(store, messagingService).withConfig({services, actions} as any, {
       fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
+      applicationDomain: 'localhost'
     })
   );
   service.start('running');
@@ -258,7 +259,7 @@ it('starts concluding when receiving a final state', async () => {
   const service = interpret<any, any, any>(
     Application.workflow(store, messagingService).withConfig(
       {services} as any, //TODO: Casting
-      {channelId: '0x0a', fundingStrategy: 'Direct', applicationSite: 'localhost'}
+      {channelId: '0x0a', fundingStrategy: 'Direct', applicationDomain: 'localhost'}
     )
   );
 

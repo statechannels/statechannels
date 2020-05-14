@@ -62,7 +62,7 @@ test('concludes on their turn', async () => {
   [playerA, playerB].forEach(async player => {
     player.startAppWorkflow('running', {
       channelId,
-      applicationSite: 'localhost',
+      applicationDomain: 'localhost',
       fundingStrategy: 'Direct'
     });
     player.workflowMachine?.send('SPAWN_OBSERVERS');

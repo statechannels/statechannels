@@ -3,7 +3,7 @@ import {
   StateValue as AppStateValue
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
-import {SiteBudget} from '../store/types';
+import {DomainBudget} from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers/utils';
 import {unreachable} from '../utils';
@@ -63,7 +63,9 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
       return 0.25;
     case 'joiningChannel':
     case 'creatingChannel':
+    case 'fundingChannel':
       return 0.5;
+
     case 'openChannelAndFundProtocol':
       return 0.75;
     case 'running':
@@ -80,7 +82,7 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
 }
 
 export function getAmountsFromBudget(
-  budget: SiteBudget
+  budget: DomainBudget
 ): {playerAmount: BigNumber; hubAmount: BigNumber} {
   const pending = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   if (!pending) throw new Error('No eth budget found');

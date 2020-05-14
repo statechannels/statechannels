@@ -16,7 +16,7 @@ import {
   CommonActions
 } from '../utils';
 import {SupportState} from '.';
-import {Store, SiteBudget} from '../store';
+import {Store, DomainBudget} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
@@ -28,10 +28,10 @@ interface Initial {
   requestId: number;
   opponent: Participant;
   player: Participant;
-  site: string;
+  domain: string;
 }
 interface BudgetExists extends Initial {
-  budget: SiteBudget;
+  budget: DomainBudget;
 }
 interface LedgerExists extends BudgetExists {
   ledgerId: string;
@@ -66,7 +66,7 @@ export type WorkflowEvent =
   | UserRejects
   | DoneInvokeEvent<CloseLedger>
   | DoneInvokeEvent<LedgerExists>
-  | DoneInvokeEvent<SiteBudget>
+  | DoneInvokeEvent<DomainBudget>
   | DoneInvokeEvent<string>
   | FundsWithdrawn;
 interface UserApproves {
@@ -191,7 +191,7 @@ const constructFinalState = (store: Store) => async ({opponent: hub}) => {
 const submitWithdrawTransaction = (store: Store) => async context => {
   // TODO: Should we just fetch this once and store on the context
   const ledgerEntry = await store.getLedger(context.opponent.participantId);
-  if (!ledgerEntry.isFinalized) {
+  if (!ledgerEntry.hasConclusionProof) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
   return store.chain.finalizeAndWithdraw(ledgerEntry.support);
@@ -215,13 +215,13 @@ const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
   );
 
 const clearBudget = (store: Store): ServiceConfig<Initial> => async context => {
-  await store.clearBudget(context.site);
+  await store.clearBudget(context.domain);
 };
 
 const fetchBudget = (store: Store): ServiceConfig<Initial> => async context =>
-  store.getBudget(context.site);
+  store.getBudget(context.domain);
 
-const assignBudget = (): AssignAction<Initial, DoneInvokeEvent<SiteBudget>> =>
+const assignBudget = (): AssignAction<Initial, DoneInvokeEvent<DomainBudget>> =>
   assign((context, event) => ({
     ...context,
     budget: event.data

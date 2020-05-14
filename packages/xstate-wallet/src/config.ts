@@ -17,11 +17,8 @@ function getBool(val: string | undefined): boolean {
   }
 }
 
-// From webpack DefinePlugin
-declare let GIT_VERSION: string;
-export const VERSION = GIT_VERSION;
+export const GIT_VERSION = process.env.GIT_VERSION;
 
-// From process.env
 export const NODE_ENV: string = process.env.NODE_ENV as string;
 
 export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';

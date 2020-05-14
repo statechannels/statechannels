@@ -3,7 +3,7 @@ import {
   ChannelResult,
   Participant,
   Allocation,
-  SiteBudget,
+  DomainBudget,
   Message,
   FundingStrategy
 } from '@statechannels/client-api-schema';
@@ -20,7 +20,7 @@ export interface ChannelClientInterface {
   onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
-  onBudgetUpdated: (callback: (result: SiteBudget) => void) => UnsubscribeFunction;
+  onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
 
   provider: ChannelProviderInterface;
   channelState: ReplaySubject<ChannelResult>;
@@ -55,15 +55,15 @@ export interface ChannelClientInterface {
     hubAmount: string,
     hubAddress: string,
     hubOutcomeAddress: string
-  ): Promise<SiteBudget>;
-  getBudget(hubAddress: string): Promise<SiteBudget>;
-  closeAndWithdraw(hubAddress: string, hubDestination: string): Promise<SiteBudget>;
+  ): Promise<DomainBudget>;
+  getBudget(hubAddress: string): Promise<DomainBudget>;
+  closeAndWithdraw(hubAddress: string, hubDestination: string): Promise<DomainBudget>;
   getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message];
   ChannelUpdated: [ChannelResult];
-  BudgetUpdated: [SiteBudget];
+  BudgetUpdated: [DomainBudget];
   // TODO: Is `ChannelResult` the right type to use here?
   ChannelProposed: [ChannelResult];
 }

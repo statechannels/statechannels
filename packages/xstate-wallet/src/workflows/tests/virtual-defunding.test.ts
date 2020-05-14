@@ -5,11 +5,17 @@ import {SimpleHub} from './simple-hub';
 import {bigNumberify, BigNumberish, BigNumber} from 'ethers/utils';
 
 import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {Participant, Outcome, SignedState, ChannelConstants, SiteBudget} from '../../store/types';
+import {Participant, Outcome, SignedState, ChannelConstants, DomainBudget} from '../../store/types';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
 
-import {wallet1, wallet2, wallet3, threeParticipants as participants, TEST_SITE} from './data';
+import {
+  wallet1,
+  wallet2,
+  wallet3,
+  threeParticipants as participants,
+  TEST_APP_DOMAIN
+} from './data';
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
@@ -147,8 +153,8 @@ const context: VirtualDefundingAsLeaf.Init = {targetChannelId};
 let aStore: TestStore;
 let bStore: TestStore;
 
-const generateBudget = (ledgerAmounts): SiteBudget => ({
-  domain: TEST_SITE,
+const generateBudget = (ledgerAmounts): DomainBudget => ({
+  domain: TEST_APP_DOMAIN,
   hubAddress: HUB.signingAddress,
   forAsset: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
@@ -166,7 +172,10 @@ beforeEach(async () => {
 
   await aStore.createBudget(generateBudget(ledger1Amounts));
 
-  await aStore.createEntry(ledger1State, {funding: {type: 'Direct'}, applicationSite: TEST_SITE});
+  await aStore.createEntry(ledger1State, {
+    funding: {type: 'Direct'},
+    applicationDomain: TEST_APP_DOMAIN
+  });
   await aStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
   await aStore.createEntry(jointState, {
     funding: {type: 'Guarantee', guarantorChannelId: guarantor1Id}
@@ -178,7 +187,10 @@ beforeEach(async () => {
 
   await bStore.createBudget(generateBudget(ledger2Amounts));
 
-  await bStore.createEntry(ledger2State, {funding: {type: 'Direct'}, applicationSite: TEST_SITE});
+  await bStore.createEntry(ledger2State, {
+    funding: {type: 'Direct'},
+    applicationDomain: TEST_APP_DOMAIN
+  });
   await bStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
   await bStore.createEntry(jointState, {
     funding: {type: 'Guarantee', guarantorChannelId: guarantor2Id}
@@ -258,7 +270,7 @@ test('virtual defunding with a proper hub', async () => {
 });
 
 async function expectBudgetIsUpdated(expectedLedgerAmounts: BigNumber[], store: TestStore) {
-  const budget = assumeNotUndefined(await store.getBudget(TEST_SITE));
+  const budget = assumeNotUndefined(await store.getBudget(TEST_APP_DOMAIN));
   const ethBudget = assumeNotUndefined(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]);
   expect(ethBudget.availableSendCapacity.eq(expectedLedgerAmounts[1])).toBe(true);
   expect(ethBudget.availableReceiveCapacity.eq(expectedLedgerAmounts[0])).toBe(true);
