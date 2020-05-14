@@ -5,6 +5,7 @@ import * as loginActions from '../redux/login/actions';
 import {SiteState} from 'src/redux/reducer';
 
 const mapStateToProps = (siteState: SiteState) => ({
+  walletReady: !siteState.wallet.loading,
   metamaskState: siteState.metamask,
 });
 
