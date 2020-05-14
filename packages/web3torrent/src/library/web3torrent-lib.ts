@@ -459,7 +459,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
     if (this.isAboutToPayForLastPiece(torrent, peerAccount)) {
       numBlocksToPayFor = numBlocksToPayFor - 1;
-      tailBytes = BLOCK_LENGTH - torrent.store.store.lastChunkLength;
+      tailBytes = torrent.store.store.lastChunkLength;
     }
 
     const amountToPay = WEI_PER_BYTE.mul(BLOCK_LENGTH * numBlocksToPayFor + tailBytes);
