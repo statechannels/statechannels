@@ -70,6 +70,9 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
     uploaded: number;
     downloaded: number;
 
+    // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
+    setTimeout(ms: number, unref?: boolean): void;
+
     _clearTimeout(): void;
     _onRequest(index: number, offset: number, length: number): void;
     _onCancel(index: number, offset: number, length: number): void;

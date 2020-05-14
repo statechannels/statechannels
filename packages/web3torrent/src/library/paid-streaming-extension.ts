@@ -11,19 +11,6 @@ import {
 
 const log = logger.child({module: 'paid-streaming-extension'});
 
-export type PaidStreamingExtensionSerialized = Pick<
-  PaidStreamingExtension,
-  | 'pseAccount'
-  | 'pseAddress'
-  | 'pseChannelId'
-  | 'peerAccount'
-  | 'peerOutcomeAddress'
-  | 'peerChannelId'
-  | 'isForceChoking'
-  | 'isBeingChoked'
-  | 'blockedRequests'
->;
-
 export abstract class PaidStreamingExtension implements Extension {
   protected wire: PaidStreamingWire;
   protected messageBus: EventEmitter;
@@ -149,20 +136,6 @@ export abstract class PaidStreamingExtension implements Extension {
       log.error(err, 'onMessage decoding or handling');
       return;
     }
-  }
-
-  serialize(): PaidStreamingExtensionSerialized {
-    return {
-      pseAccount: this.pseAccount,
-      pseAddress: this.pseAddress,
-      pseChannelId: this.pseChannelId,
-      peerAccount: this.peerAccount,
-      peerOutcomeAddress: this.peerOutcomeAddress,
-      peerChannelId: this.peerChannelId,
-      isForceChoking: this.isForceChoking,
-      isBeingChoked: this.isBeingChoked,
-      blockedRequests: this.blockedRequests
-    };
   }
 
   protected messageHandler({command, data}) {
