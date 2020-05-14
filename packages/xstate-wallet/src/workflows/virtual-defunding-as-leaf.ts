@@ -21,6 +21,17 @@ export const enum Errors {
   noSupportedJointState = 'No supported state in joint channel'
 }
 
+const enum Services {
+  checkChannelsService = 'checkChannelsService',
+  defundGuarantorInLedger = 'defundGuarantorInLedger',
+  finalJointChannelUpdate = 'finalJointChannelUpdate',
+  finalTargetState = 'finalTargetState',
+  supportState = 'supportState',
+  releaseFunds = 'releaseFunds',
+  acquireLock = 'acquireLock',
+  getApplicationDomain = 'getApplicationDomain'
+}
+
 const checkChannelsService = (store: Store) => async (ctx: Init): Promise<ChannelIds> => {
   const {funding: targetFunding} = await store.getEntry(ctx.targetChannelId);
   const {jointChannelId} = checkThat(targetFunding, isVirtualFunding);
@@ -176,16 +187,7 @@ export const config: StateNodeConfig<any, any, any> = {
     success: {type: 'final'}
   }
 };
-const enum Services {
-  checkChannelsService = 'checkChannelsService',
-  defundGuarantorInLedger = 'defundGuarantorInLedger',
-  finalJointChannelUpdate = 'finalJointChannelUpdate',
-  finalTargetState = 'finalTargetState',
-  supportState = 'supportState',
-  releaseFunds = 'releaseFunds',
-  acquireLock = 'acquireLock',
-  getApplicationDomain = 'getApplicationDomain'
-}
+
 type WorkflowServices = Record<Services, ServiceConfig<any>>;
 
 const services = (store: Store): WorkflowServices => ({

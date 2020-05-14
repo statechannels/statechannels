@@ -1,7 +1,8 @@
 const generalRules = {
   'no-process-env': 'error',
   'no-case-declarations': 'off',
-  'no-undef': 'off' // Shouldn't need this, tsc takes care of it
+  'no-undef': 'off', // Shouldn't need this, tsc takes care of it
+  'react/prop-types': 'off'
 };
 
 // From the tslint.json we used previously
@@ -26,9 +27,6 @@ module.exports = {
     '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript',
     'plugin:react/recommended'
   ],
   rules: {

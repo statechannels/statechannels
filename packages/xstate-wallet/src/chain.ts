@@ -11,7 +11,7 @@ import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethe
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
 
-import EventEmitter = require('eventemitter3');
+import EventEmitter from 'eventemitter3';
 
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
 import {getProvider} from './utils/contract-utils';
@@ -26,7 +26,7 @@ const EthAssetHolderInterface = new Interface(
 
 const NitroAdjudicatorInterface = new Interface(ContractArtifacts.NitroAdjudicatorArtifact.abi);
 
-export interface ChannelChainInfo {
+interface ChannelChainInfo {
   readonly amount: BigNumber;
   readonly channelStorage: {
     turnNumRecord: BigNumber;
@@ -37,7 +37,7 @@ export interface ChannelChainInfo {
   readonly blockNum: BigNumber; // blockNum that the information is from
 }
 
-export interface Chain {
+interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
   selectedAddress: string | null;
@@ -64,7 +64,7 @@ type ChallengeRegistered = {channelId: string; challengeState: State; challengeE
 // type ChallengeCleared = {channelId: string};
 // type Concluded = {channelId: string};
 
-export class FakeChain implements Chain {
+class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
@@ -232,7 +232,7 @@ export class FakeChain implements Chain {
 
 const chainLogger = logger.child({module: 'chain'});
 
-export class ChainWatcher implements Chain {
+class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
   private mySelectedAddress: string | null = window.ethereum?.selectedAddress ?? null;
@@ -420,3 +420,5 @@ export class ChainWatcher implements Chain {
     );
   }
 }
+
+export {ChannelChainInfo, Chain, FakeChain, ChainWatcher};
