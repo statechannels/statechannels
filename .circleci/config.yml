@@ -35,7 +35,7 @@ save_dep: &save_dep
 
 restore_dep: &restore_dep
   restore_cache:
-    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_lib: &save_lib
   save_cache:
