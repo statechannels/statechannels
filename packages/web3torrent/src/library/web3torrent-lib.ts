@@ -453,7 +453,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
 
-    let numBlocksToPayFor = wire.request.length > PEER_TRUST ? PEER_TRUST : wire.request.length;
+    let numBlocksToPayFor = wire.requests.length > PEER_TRUST ? PEER_TRUST : wire.requests.length;
     let tailBytes = 0;
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
