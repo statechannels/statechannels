@@ -248,8 +248,9 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt() {
+  getLatestPaymentReceipt(channelId) {
     const readyToPay = (state: ChannelState) =>
+      state.channelId === channelId &&
       state.status === 'running' &&
       state.payer === this.mySigningAddress &&
       state.turnNum.mod(2).eq(Index.Payer);
@@ -260,7 +261,7 @@ export class PaymentChannelClient {
   }
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const channelState: ChannelState = await this.getLatestPaymentReceipt();
+    const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
 
     const {payerBalance} = channelState;
     if (bigNumberify(payerBalance).lt(amount)) {
