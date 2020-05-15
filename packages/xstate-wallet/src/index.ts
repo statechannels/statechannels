@@ -32,6 +32,12 @@ const log = logger.info.bind(logger);
   const messagingService = new MessagingService(store);
   const channelWallet = new ChannelWallet(store, messagingService);
 
+  if (NODE_ENV === 'production') {
+    Sentry.configureScope(async scope => {
+      scope.setUser({id: await store.getAddress()});
+    });
+  }
+
   // Communicate via postMessage
   window.addEventListener('message', event => {
     if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {

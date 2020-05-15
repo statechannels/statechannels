@@ -90,7 +90,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Text pb={2}>Waiting for your transaction to be mined.</Text>
 
-      <Text>
+      <Text id="wait-for-transaction">
         Click{' '}
         <Link target="_blank" href={`https://ropsten.etherscan.io/tx/${transactionId}`}>
           here

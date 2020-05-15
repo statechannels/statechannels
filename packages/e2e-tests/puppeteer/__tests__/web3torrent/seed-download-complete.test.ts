@@ -22,7 +22,8 @@ import {
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   waitForWalletToBeHidden,
-  takeScreenshot
+  takeScreenshot,
+  waitForTransactionIfNecessary
 } from '../../helpers';
 
 import {uploadFile, startDownload} from '../../scripts/web3torrent';
@@ -93,6 +94,8 @@ describe('Web3-Torrent Integration Tests', () => {
     } else {
       await waitAndApproveDeposit(web3tTabB, metamaskB);
     }
+
+    await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');

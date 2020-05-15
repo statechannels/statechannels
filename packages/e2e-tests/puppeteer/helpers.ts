@@ -17,7 +17,7 @@ export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
 
 export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   const walletIframe = page.frames()[1];
-  await walletIframe.waitForSelector(':root', {hidden: true, timeout: 30_000});
+  await walletIframe.waitForSelector(':root', {hidden: true, timeout: TX_WAIT_TIMEOUT});
 };
 
 export async function setupLogging(
@@ -248,6 +248,18 @@ export async function waitAndApproveMetaMask(
   await waitForAndClickButton(page, walletIFrame, connectWithMetamaskButton);
   await metamask.approve();
   await page.bringToFront();
+}
+
+export async function waitForTransactionIfNecessary(page: Page): Promise<void> {
+  const walletIFrame = page.frames()[1];
+  try {
+    await walletIFrame.waitForSelector('#wait-for-transaction', {timeout: 1000});
+  } catch (e) {
+    if (e instanceof puppeteer.errors.TimeoutError) return;
+    else throw e;
+  }
+  console.log('Waiting for transaction to be mined');
+  await waitForWalletToBeHidden(page);
 }
 
 export async function waitAndApproveDepositWithHub(

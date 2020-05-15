@@ -470,6 +470,7 @@ jobs:
     docker:
       - image: circleci/node:10.16.3-browsers
     environment:
+      SCREENSHOT_DIR: 'screenshots'
       SC_ENV: production-ropsten
     steps:
       - install_xvfb
@@ -479,9 +480,18 @@ jobs:
           file: e2e-test-w3t-production-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn jest web3torrent --runInBand --bail)
+      - run: (cd packages/e2e-tests && yarn jest seed-download withdraw --runInBand --bail)
+      - store_artifacts:
+          path: /tmp/seed-download.pino.log
+      - store_artifacts:
+          path: /tmp/seed-download.browser.log
+      - store_artifacts:
+          path: /tmp/withdraw.pino.log
+      - store_artifacts:
+          path: /tmp/withdraw.browser.log
       - upload_logs:
           file: e2e-test-w3t-production-stats
+      - upload_e2e_screenshots
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
