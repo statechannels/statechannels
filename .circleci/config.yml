@@ -297,8 +297,6 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       - log_stats:
           file: integration-test-web3torrent-stats
