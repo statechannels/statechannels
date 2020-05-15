@@ -224,13 +224,13 @@ const generateConfig = (
 
     //This could handled by another workflow instead of the application workflow
     closing: {
-      entry: [actions.assignRequestId],
+      entry: [actions.assignRequestId, actions.sendCloseChannelResponse],
       invoke: {
         id: 'closing-protocol',
         src: 'invokeClosingProtocol',
         data: context => context,
         autoForward: true,
-        onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
+        onDone: {target: 'done'}
       }
     },
 
@@ -282,7 +282,7 @@ export const workflow = (
     );
 
   const actions: WorkflowActions = {
-    sendCloseChannelResponse: async (context: ChannelIdExists) => {
+    sendCloseChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
         await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
