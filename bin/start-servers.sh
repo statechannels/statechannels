@@ -36,13 +36,15 @@ yarn start:shared-ganache | tee $E2E_ROOT/shared-ganache.log &
 
 yarn run wait-on -t $WAIT_ON_TIMEOUT -i $WAIT_ON_INTERVAL $MONOREPO_ROOT/.ganache-deployments/ganache-deployments-8545.json
 
+cd $PACKAGES/simple-hub
+yarn hub:start:dev | tee $E2E_ROOT/hub.log &
+
+sleep 5000
+
 cd $PACKAGES/$APP 
 yarn start | tee $E2E_ROOT/$APP.log &
 
 cd $PACKAGES/xstate-wallet
 yarn start | tee $E2E_ROOT/xstate-wallet.log &
-
-cd $PACKAGES/simple-hub
-yarn hub:start:dev | tee $E2E_ROOT/hub.log &
 
 wait
