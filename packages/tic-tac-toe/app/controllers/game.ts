@@ -6,10 +6,22 @@ import CurrentGameService, {Player} from '../services/current-game';
 import TttChannelClientService from '../services/ttt-channel-client';
 import * as ChannelState from '../core/channel-state';
 import UserService from '../services/user';
-import {AppData} from '../core/app-data';
+import {AppData, StateUpdateType} from '../core/app-data';
 import MessageModel from '../models/message';
 import {Message} from '@statechannels/client-api-schema';
 import ChannelUpdatesService from '../services/channel-updates';
+
+const {bigNumberify} = ethers.utils;
+
+const TOP_ROW = 448; /*  0b111000000 = 448 mask for win @ row 1 */
+const MID_ROW = 56; /*  0b000111000 =  56 mask for win @ row 2 */
+const BOT_ROW = 7; /*  0b000000111 =   7 mask for win @ row 3 */
+const LEFT_COL = 292; /*  0b100100100 = 292 mask for win @ col 1 */
+const MID_COL = 146; /*  0b010010010 = 146 mask for win @ col 2 */
+const RIGHT_COL = 73; /*  0b001001001 =  73 mask for win @ col 3 */
+const DH_DIAG = 273; /*  0b100010001 = 273 mask for win @ downhill diag */
+const UH_DIAG = 84; /*  0b001010100 =  84 mask for win @ uphill diag */
+const FULL_BOARD = 511; /*  0b111111111 = 511 full board */
 
 export default class GameController extends Controller {
   @service currentGame!: CurrentGameService;
@@ -61,6 +73,7 @@ export default class GameController extends Controller {
     this.channelUpdates.subscribeToMessages(
       updatesId,
       (channelState: ChannelState.ChannelState<AppData>) => {
+        this.currentGame.setChannelState(channelState);
         if (ChannelState.isRunning(channelState)) {
           if (ChannelState.inXPlaying(channelState)) {
             this.updateBoard('o', channelState.appData.Xs, channelState.appData.Os);
@@ -69,6 +82,19 @@ export default class GameController extends Controller {
           if (ChannelState.inOPlaying(channelState)) {
             this.updateBoard('x', channelState.appData.Xs, channelState.appData.Os);
             console.log('Moving from oPlaying -> xPlaying');
+          }
+          if (ChannelState.inVictory(channelState)) {
+            console.log('Someone won');
+            this.closeChannel();
+            this.transitionToRoute('games');
+          }
+          if (ChannelState.inDraw(channelState)) {
+            console.log('Its a draw');
+            this.closeChannel();
+            this.transitionToRoute('games');
+          }
+          if (ChannelState.inStart(channelState)) {
+            console.log('Restart game');
           }
         }
       }
@@ -81,13 +107,25 @@ export default class GameController extends Controller {
       return;
     }
 
+    let moveType: StateUpdateType;
+
     if (this.player == 'x') {
       this.Xs |= 1 << index;
-      this.setTileInChannel('xPlaying');
+      moveType = this.isWinningMove(this.Xs)
+        ? 'victory'
+        : this.isDraw(this.Xs, this.Os)
+        ? 'draw'
+        : 'xPlaying';
+      this.setTileInChannel(moveType);
       console.log('Setting X on board');
     } else {
       this.Os |= 1 << index;
-      this.setTileInChannel('oPlaying');
+      moveType = this.isWinningMove(this.Os)
+        ? 'victory'
+        : this.isDraw(this.Xs, this.Os)
+        ? 'draw'
+        : 'oPlaying';
+      this.setTileInChannel(moveType);
       console.log('Setting O on board');
     }
   }
@@ -109,7 +147,7 @@ export default class GameController extends Controller {
     this.tttChannelClient.pushMessage(clientMessage);
   }
 
-  private setTileInChannel(type: 'start' | 'xPlaying' | 'oPlaying' | 'draw' | 'victory'): void {
+  private async setTileInChannel(type: StateUpdateType): Promise<void> {
     const currentChannelState = this.currentGame.getChannelState();
     const appAttrs: AppData = {
       type,
@@ -117,7 +155,19 @@ export default class GameController extends Controller {
       Xs: this.Xs,
       Os: this.Os
     };
-    this.tttChannelClient.updateChannel(
+    if (type === 'victory') {
+      const aBal = bigNumberify(currentChannelState.aBal);
+      const bBal = bigNumberify(currentChannelState.bBal);
+      const stake = bigNumberify(this.currentGame.getGame().stake);
+      if (this.currentGame.getPlayer() === Player.A) {
+        currentChannelState.aBal = aBal.add(stake).toString();
+        currentChannelState.bBal = bBal.sub(stake).toString();
+      } else {
+        currentChannelState.aBal = aBal.sub(stake).toString();
+        currentChannelState.bBal = bBal.add(stake).toString();
+      }
+    }
+    await this.tttChannelClient.updateChannel(
       currentChannelState.channelId,
       currentChannelState.aAddress,
       currentChannelState.bAddress,
@@ -127,12 +177,36 @@ export default class GameController extends Controller {
       currentChannelState.aOutcomeAddress,
       currentChannelState.bOutcomeAddress
     );
+    if (type === 'victory') {
+      this.transitionToRoute('games');
+    }
+  }
+
+  private async closeChannel(): Promise<void> {
+    await this.tttChannelClient.closeChannel(this.currentGame.getChannelState().channelId);
   }
 
   private updateBoard(player: string, Xs: number, Os: number): void {
     this.player = player;
     this.Xs = Xs;
     this.Os = Os;
+  }
+
+  private isWinningMove(marks: number): boolean {
+    return (
+      (marks & TOP_ROW) === TOP_ROW ||
+      (marks & MID_ROW) === MID_ROW ||
+      (marks & BOT_ROW) === BOT_ROW ||
+      (marks & LEFT_COL) === LEFT_COL ||
+      (marks & MID_COL) === MID_COL ||
+      (marks & RIGHT_COL) === RIGHT_COL ||
+      (marks & DH_DIAG) === DH_DIAG ||
+      (marks & UH_DIAG) === UH_DIAG
+    );
+  }
+
+  private isDraw(Xs: number, Os: number): boolean {
+    return (Os ^ Xs) == FULL_BOARD;
   }
 }
 
