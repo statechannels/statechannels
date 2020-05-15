@@ -89,11 +89,11 @@ describe('Optional Integration Tests', () => {
     await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
     await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
 
-    if (USES_VIRTUAL_FUNDING) {
-      await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
-    } else {
-      await waitAndApproveDeposit(web3tTabB, metamaskB);
-    }
+    // if (USES_VIRTUAL_FUNDING) {
+    //   await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
+    // } else {
+    await waitAndApproveDeposit(web3tTabB, metamaskB);
+    // }
 
     // Let the download continue for some time
     console.log('Downloading');
