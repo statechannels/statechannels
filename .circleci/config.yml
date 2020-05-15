@@ -239,8 +239,6 @@ jobs:
     environment:
       SC_ENV: circle-integration-rps
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       # - run: yarn # local testing only
       #  using circleci cli (cannot run workflows, only individual jobs)
@@ -263,8 +261,6 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       - log_stats:
           file: integration-test-web3torrent-stats
@@ -329,8 +325,6 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       - log_stats:
           file: integration-test-web3torrent-with-hub-stats
@@ -363,8 +357,6 @@ jobs:
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       - log_stats:
           file: integration-test-web3torrent-with-hub-stats
