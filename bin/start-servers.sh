@@ -39,7 +39,7 @@ yarn run wait-on -t $WAIT_ON_TIMEOUT -i $WAIT_ON_INTERVAL $MONOREPO_ROOT/.ganach
 cd $PACKAGES/simple-hub
 yarn hub:start:dev | tee $E2E_ROOT/hub.log &
 
-sleep 5000
+sleep 5
 
 cd $PACKAGES/$APP 
 yarn start | tee $E2E_ROOT/$APP.log &
