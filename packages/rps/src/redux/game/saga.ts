@@ -129,7 +129,8 @@ function* gameSagaRun(client: RPSChannelClient) {
         !cs.isClosing(channelState) &&
         !cs.isClosed(channelState)
       ) {
-        yield* closeChannel(channelState, client);
+        // TODO do not fork this call (when the wallet is fixed and the call resolves properly)
+        yield fork(closeChannel, channelState, client);
       }
       break;
     case 'A.Resigned':
@@ -140,7 +141,8 @@ function* gameSagaRun(client: RPSChannelClient) {
         !cs.isClosed(channelState) &&
         isPlayersTurnNext(localState, channelState)
       ) {
-        yield* closeChannel(channelState, client);
+        // TODO do not fork this call (when the wallet is fixed and the call resolves properly)
+        yield fork(closeChannel, channelState, client);
       }
       break;
     case 'EndGame.GameOver':
@@ -310,13 +312,14 @@ function* calculateResultAndCloseChannelIfNoFunds(
   client: RPSChannelClient
 ) {
   const {playerAWeapon: theirWeapon} = channelState.appData;
-  const {aBal, bBal, channelId} = channelState;
+  const {aBal, bBal} = channelState;
   const {myWeapon, roundBuyIn} = localState;
   const result = calculateResult(myWeapon, theirWeapon);
   const fundingSituation = calculateFundingSituation(Player.PlayerB, aBal, bBal, roundBuyIn);
   yield put(a.resultArrived(theirWeapon, result, fundingSituation));
   if (fundingSituation !== 'Ok') {
-    yield call([client, 'closeChannel'], channelId);
+    // TODO do not fork this call (when the wallet is fixed and the call resolves properly)
+    yield fork(closeChannel, channelState, client);
     // yield put(a.updateChannelState(state));
   }
 }
