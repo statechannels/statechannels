@@ -8,7 +8,7 @@ import {
 import {Contract} from 'ethers';
 import {Zero, One} from 'ethers/constants';
 import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
-import {Observable, fromEvent, from, merge} from 'rxjs';
+import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
 
 import EventEmitter from 'eventemitter3';
@@ -380,7 +380,9 @@ export class ChainWatcher implements Chain {
       throw new Error('Not connected to contracts');
     }
 
-    const first = from(this.getChainInfo(channelId));
+    // TODO: We shouldn't need to poll.
+    const polls = interval(5000).pipe(flatMap(async () => this.getChainInfo(channelId)));
+    // const first = from(this.getChainInfo(channelId));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
@@ -396,7 +398,7 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
-    return merge(first, depositEvents, assetTransferEvents);
+    return merge(polls, depositEvents, assetTransferEvents);
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
