@@ -254,7 +254,7 @@ jobs:
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots
-      
+
   integration-test-web3torrent:
     resource_class: large
     working_directory: /home/circleci/project
@@ -288,7 +288,7 @@ jobs:
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots
-      
+
   integration-test-web3torrent-optional:
     resource_class: large
     working_directory: /home/circleci/project
@@ -356,7 +356,7 @@ jobs:
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots
-      
+
   integration-test-web3torrent-with-hub-optional:
     resource_class: large
     working_directory: /home/circleci/project
@@ -442,7 +442,7 @@ jobs:
       - <<: *restore_lib
       - run:
           rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf app-wallet-interface channel-provider
-          channel-client client-api-schema e2e-tests rps tic-tac-toe web3torrent xstate-wallet
+          channel-client client-api-schema e2e-tests persistent-seeder rps tic-tac-toe web3torrent xstate-wallet
       - run: yarn --frozen-lockfile
       - build_push_release:
           dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
