@@ -1,6 +1,6 @@
-import {setUpBrowser} from '../helpers';
-import {uploadFile} from './web3torrent';
-import {APP_URL as WEB3TORRENT_URL} from '../constants';
+import {setUpBrowser} from '@statechannels/e2e-tests/puppeteer/helpers';
+import {uploadFile} from '@statechannels/e2e-tests/puppeteer/scripts/web3torrent';
+import {APP_URL as WEB3TORRENT_URL} from '@statechannels/e2e-tests/puppeteer/constants';
 
 export async function persistentSeeder(): Promise<void> {
   console.log('Opening browser');

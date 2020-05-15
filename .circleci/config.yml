@@ -400,7 +400,7 @@ jobs:
       - <<: *restore_lib
       - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
       - build_push_release:
-          dockerfile_path: packages/e2e-tests/persistent-seeder/persistent-seeder.dockerfile
+          dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
           app: persistent-seeder-production
 
