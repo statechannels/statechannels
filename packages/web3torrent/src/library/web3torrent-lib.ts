@@ -139,7 +139,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       await this.closeDownloadingChannels(torrent);
-      torrent.destroy(callback);
+      torrent.destroy(() => this.emitTorrentUpdated(infoHash));
       track('Torrent Cancelled', {
         infoHash,
         magnetURI: torrent.magnetURI,
