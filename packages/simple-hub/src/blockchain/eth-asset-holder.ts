@@ -89,5 +89,10 @@ export async function createEthAssetHolder() {
 
   const contract = await ethAssetHolderFactory.attach(process.env.ETH_ASSET_HOLDER_ADDRESS);
 
+  log.info(
+    {ETH_ASSET_HOLDER_ADDRESS: process.env.ETH_ASSET_HOLDER_ADDRESS},
+    'Connected to eth asset holder'
+  );
+
   return contract;
 }
