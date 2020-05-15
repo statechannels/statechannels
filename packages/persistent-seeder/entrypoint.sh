@@ -7,5 +7,5 @@ then
   exec "$@"
 else
   Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1 &
-  yarn persistent-seeder
+  yarn start
 fi

@@ -25,6 +25,6 @@ RUN yarn
 
 WORKDIR /statechannels/monorepo/packages/e2e-tests
 
-COPY ./packages/e2e-tests/persistent-seeder/entrypoint.sh /entrypoint.sh
+COPY ./packages/persistent-seeder/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
