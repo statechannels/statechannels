@@ -239,6 +239,8 @@ jobs:
     environment:
       SC_ENV: circle-integration-rps
     steps:
+      - install_xvfb
+      - run_xvfb
       - checkout
       # - run: yarn # local testing only
       #  using circleci cli (cannot run workflows, only individual jobs)
