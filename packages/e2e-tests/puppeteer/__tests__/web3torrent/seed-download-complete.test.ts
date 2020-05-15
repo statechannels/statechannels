@@ -104,9 +104,7 @@ describe('Web3-Torrent Integration Tests', () => {
     // Ensure the wallet is not visible
     await forEachTab(waitForWalletToBeHidden);
 
-    // Wait for the close state channel update
-
-    console.log('Wait for the "Restart Download" button to appear');
+    console.log('Wait for the "Save File" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.

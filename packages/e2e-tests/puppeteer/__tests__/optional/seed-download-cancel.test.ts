@@ -99,6 +99,7 @@ describe('Optional Integration Tests', () => {
     console.log('Downloading');
 
     await waitForNthState(web3tTabB, 10);
+    console.log('Got until 10th state');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -109,10 +110,6 @@ describe('Optional Integration Tests', () => {
     console.log('Wait for Wallet to be hidden');
     // Ensure the wallet is not visible
     await forEachTab(waitForWalletToBeHidden);
-
-    // Wait for the close state channel update
-    // TODO: It looks like direct funding is not properly sending a closed state
-    // see https://github.com/statechannels/monorepo/issues/1649
 
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
