@@ -284,9 +284,7 @@ export const workflow = (
   const actions: WorkflowActions = {
     sendCloseChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      if (context.requestId) {
-        await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-      }
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
     },
 
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
