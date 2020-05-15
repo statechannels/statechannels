@@ -107,9 +107,6 @@ describe('Optional Integration Tests', () => {
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Cancelled - Waiting for Download button to reappear');
-    await waitForFinishedOrCanceledDownload(web3tTabB);
-
     console.log('Wait for Wallet to be hidden');
     // Ensure the wallet is not visible
     await forEachTab(waitForWalletToBeHidden);
@@ -117,10 +114,9 @@ describe('Optional Integration Tests', () => {
     // Wait for the close state channel update
     // TODO: It looks like direct funding is not properly sending a closed state
     // see https://github.com/statechannels/monorepo/issues/1649
-    if (USES_VIRTUAL_FUNDING) {
-      console.log('Wait for State to be Closed');
-      await forEachTab(waitForClosedState);
-    }
+
+    console.log('Wait for the "Restart Download" button to appear');
+    await waitForFinishedOrCanceledDownload(web3tTabB);
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));

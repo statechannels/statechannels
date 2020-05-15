@@ -101,15 +101,14 @@ describe('Web3-Torrent Integration Tests', () => {
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for the "Save Download" or "Restart Download" button to appear');
-    await waitForFinishedOrCanceledDownload(web3tTabB);
-
     console.log('Wait for Wallet to be hidden');
     // Ensure the wallet is not visible
     await forEachTab(waitForWalletToBeHidden);
 
     // Wait for the close state channel update
-    await forEachTab(waitForClosedState);
+
+    console.log('Wait for the "Restart Download" button to appear');
+    await waitForFinishedOrCanceledDownload(web3tTabB);
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));
