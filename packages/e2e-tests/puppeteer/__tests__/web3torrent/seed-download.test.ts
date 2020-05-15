@@ -22,7 +22,6 @@ import {
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   waitForWalletToBeHidden,
-  waitForClosedState,
   takeScreenshot
 } from '../../helpers';
 
