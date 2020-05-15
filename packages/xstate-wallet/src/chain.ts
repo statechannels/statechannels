@@ -265,6 +265,15 @@ export class ChainWatcher implements Chain {
       NitroAdjudicatorInterface,
       this.signer
     );
+
+    chainLogger.info(
+      {
+        ETH_ASSET_HOLDER_ADDRESS,
+        NITRO_ADJUDICATOR_ADDRESS,
+        numAssetHolders: this._assetHolders.length
+      },
+      'Contracts configured'
+    );
   }
 
   public async getBlockNumber() {

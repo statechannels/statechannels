@@ -4589,16 +4589,6 @@
     "@sentry/utils" "5.15.5"
     tslib "^1.9.3"
 
-"@sentry/browser@5.12.1":
-  version "5.12.1"
-  resolved "https://registry.npmjs.org/@sentry/browser/-/browser-5.12.1.tgz#dc1f268595269fb7277f55eb625c7e92d76dc01b"
-  integrity sha512-Zl7VdppUxctyaoqMSEhnDJp2rrupx8n8N2n3PSooH74yhB2Z91nt84mouczprBsw3JU1iggGyUw9seRFzDI1hw==
-  dependencies:
-    "@sentry/core" "5.12.0"
-    "@sentry/types" "5.12.0"
-    "@sentry/utils" "5.12.0"
-    tslib "^1.9.3"
-
 "@sentry/browser@5.15.5":
   version "5.15.5"
   resolved "https://registry.npmjs.org/@sentry/browser/-/browser-5.15.5.tgz#d9a51f1388581067b50d30ed9b1aed2cbb333a36"
@@ -4607,17 +4597,6 @@
     "@sentry/core" "5.15.5"
     "@sentry/types" "5.15.5"
     "@sentry/utils" "5.15.5"
-    tslib "^1.9.3"
-
-"@sentry/core@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@sentry/core/-/core-5.12.0.tgz#d6380c4ef7beee5f418ac1d0e5be86a2de2af449"
-  integrity sha512-wY4rsoX71QsGpcs9tF+OxKgDPKzIFMRvFiSRcJoPMfhFsTilQ/CBMn/c3bDtWQd9Bnr/ReQIL6NbnIjUsPHA4Q==
-  dependencies:
-    "@sentry/hub" "5.12.0"
-    "@sentry/minimal" "5.12.0"
-    "@sentry/types" "5.12.0"
-    "@sentry/utils" "5.12.0"
     tslib "^1.9.3"
 
 "@sentry/core@5.15.5":
@@ -4631,15 +4610,6 @@
     "@sentry/utils" "5.15.5"
     tslib "^1.9.3"
 
-"@sentry/hub@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@sentry/hub/-/hub-5.12.0.tgz#5e8c8f249f5bdbeb8cc4ec02c2ccc53a67f2cc02"
-  integrity sha512-3k7yE8BEVJsKx8mR4LcI4IN0O8pngmq44OcJ/fRUUBAPqsT38jsJdP2CaWhdlM1jiNUzUDB1ktBv6/lY+VgcoQ==
-  dependencies:
-    "@sentry/types" "5.12.0"
-    "@sentry/utils" "5.12.0"
-    tslib "^1.9.3"
-
 "@sentry/hub@5.15.5":
   version "5.15.5"
   resolved "https://registry.npmjs.org/@sentry/hub/-/hub-5.15.5.tgz#f5abbcdbe656a70e2ff02c02a5a4cffa0f125935"
@@ -4647,15 +4617,6 @@
   dependencies:
     "@sentry/types" "5.15.5"
     "@sentry/utils" "5.15.5"
-    tslib "^1.9.3"
-
-"@sentry/minimal@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@sentry/minimal/-/minimal-5.12.0.tgz#2611e2aa520c1edb7999e6de51bd65ec66341757"
-  integrity sha512-fk73meyz4k4jCg9yzbma+WkggsfEIQWI2e2TWfYsRGcrV3RnlSrXyM4D91/A8Bjx10SNezHPUFHjasjlHXOkyA==
-  dependencies:
-    "@sentry/hub" "5.12.0"
-    "@sentry/types" "5.12.0"
     tslib "^1.9.3"
 
 "@sentry/minimal@5.15.5":
@@ -4682,23 +4643,10 @@
     lru_map "^0.3.3"
     tslib "^1.9.3"
 
-"@sentry/types@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@sentry/types/-/types-5.12.0.tgz#5367e53c74261beea01502e3f7b6f3d822682a31"
-  integrity sha512-aZbBouBLrKB8wXlztriIagZNmsB+wegk1Jkl6eprqRW/w24Sl/47tiwH8c5S4jYTxdAiJk+SAR10AAuYmIN3zg==
-
 "@sentry/types@5.15.5":
   version "5.15.5"
   resolved "https://registry.npmjs.org/@sentry/types/-/types-5.15.5.tgz#16c97e464cf09bbd1d2e8ce90d130e781709076e"
   integrity sha512-F9A5W7ucgQLJUG4LXw1ZIy4iLevrYZzbeZ7GJ09aMlmXH9PqGThm1t5LSZlVpZvUfQ2rYA8NU6BdKJSt7B5LPw==
-
-"@sentry/utils@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@sentry/utils/-/utils-5.12.0.tgz#62967f934a3ee6d21472eac0219084e37225933e"
-  integrity sha512-fYUadGLbfTCbs4OG5hKCOtv2jrNE4/8LHNABy9DwNJ/t5DVtGqWAZBnxsC+FG6a3nVqCpxjFI9AHlYsJ2wsf7Q==
-  dependencies:
-    "@sentry/types" "5.12.0"
-    tslib "^1.9.3"
 
 "@sentry/utils@5.15.5":
   version "5.15.5"
@@ -9025,7 +8973,7 @@ babel-plugin-check-es2015-constants@^6.22.0:
   dependencies:
     babel-runtime "^6.22.0"
 
-babel-plugin-const-enum@^1.0.1:
+babel-plugin-const-enum@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/babel-plugin-const-enum/-/babel-plugin-const-enum-1.0.1.tgz#0d742faf9731be4f213c4d01d61fc4e93c44d159"
   integrity sha512-6oGu63g1FS9psUPQyLCJM08ty6kGihGKTbzWGbAKHfUuCzCh7y9twh516cR6v0lM4d4NOoR+DgLb7uKVytyp6Q==
@@ -9244,7 +9192,7 @@ babel-plugin-module-resolver@^4.0.0:
     reselect "^4.0.0"
     resolve "^1.13.1"
 
-babel-plugin-named-asset-import@^0.3.1, babel-plugin-named-asset-import@^0.3.4, babel-plugin-named-asset-import@^0.3.6:
+babel-plugin-named-asset-import@0.3.6, babel-plugin-named-asset-import@^0.3.1:
   version "0.3.6"
   resolved "https://registry.npmjs.org/babel-plugin-named-asset-import/-/babel-plugin-named-asset-import-0.3.6.tgz#c9750a1b38d85112c9e166bf3ef7c5dbc605f4be"
   integrity sha512-1aGDUfL1qOOIoqk9QKGIo2lANk+C7ko/fqH0uIyC71x3PEGz0uVP8ISgfEsFuG+FKmjHTvFK/nNM8dowpmUxLA==

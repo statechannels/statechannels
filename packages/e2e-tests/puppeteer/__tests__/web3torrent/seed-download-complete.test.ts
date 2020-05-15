@@ -17,17 +17,16 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForNthState,
+  waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   waitForWalletToBeHidden,
-  waitForClosedState,
   takeScreenshot,
   waitForTransactionIfNecessary
 } from '../../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {uploadFile, startDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
@@ -75,7 +74,7 @@ describe('Web3-Torrent Integration Tests', () => {
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('allows peers to start torrenting', async () => {
+  it('Torrent a file - Complete download', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
@@ -90,26 +89,26 @@ describe('Web3-Torrent Integration Tests', () => {
     await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabA);
     await waitAndOpenChannel(USES_VIRTUAL_FUNDING)(web3tTabB);
 
-    if (USES_VIRTUAL_FUNDING) await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
-    else waitAndApproveDeposit(web3tTabB, metamaskB);
+    if (USES_VIRTUAL_FUNDING) {
+      await waitAndApproveDepositWithHub(web3tTabB, metamaskB);
+    } else {
+      await waitAndApproveDeposit(web3tTabB, metamaskB);
+    }
 
     await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');
-    await waitForNthState(web3tTabB, 10);
-
-    console.log('B cancels download');
-    await cancelDownload(web3tTabB);
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
+    console.log('Wait for Wallet to be hidden');
     // Ensure the wallet is not visible
     await forEachTab(waitForWalletToBeHidden);
 
-    // Wait for the close state channel update
-    await forEachTab(waitForClosedState);
+    console.log('Wait for the "Save File" button to appear');
+    await waitForFinishedOrCanceledDownload(web3tTabB);
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));
@@ -125,6 +124,6 @@ describe('Web3-Torrent Integration Tests', () => {
     console.log(`transferred = ${transferred}`);
     expect(transferred).not.toEqual(`0 B`);
     expect(paid).not.toEqual(`-0 wei`);
-    expect(paid).toEqual(`-${earned}`);
+    return expect(paid).toEqual(`-${earned}`);
   });
 });
