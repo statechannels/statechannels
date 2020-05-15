@@ -201,14 +201,19 @@ export function logTransition(state: State<any, any, any, any>, event, id?: stri
   if (alreadyLogging[k]) return;
   alreadyLogging[k] = true;
 
-  const to = state.value;
+  const eventType = event.type ? event.type : event;
+  const {context, value: to} = state;
   if (!state.history) {
-    log({id, workflow: state.configuration[0].id, to}, 'WORKFLOW STARTED');
+    log(
+      {id, workflow: state.configuration[0].id, to, context, event},
+      'WORKFLOW STARTED id %s event %s',
+      id,
+      eventType
+    );
   } else {
     const from = state.history.value;
-    const eventType = event.type ? event.type : event;
 
-    log({id, from, eventType, to}, 'WORKFLOW TRANSITION');
+    log({id, from, to, context, event}, 'WORKFLOW TRANSITION id %s event %o', id, event.type);
   }
 
   Object.keys(state.children).forEach(k => {
