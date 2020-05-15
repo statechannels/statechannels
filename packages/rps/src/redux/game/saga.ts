@@ -312,7 +312,7 @@ function* calculateResultAndCloseChannelIfNoFunds(
   client: RPSChannelClient
 ) {
   const {playerAWeapon: theirWeapon} = channelState.appData;
-  const {aBal, bBal, channelId} = channelState;
+  const {aBal, bBal} = channelState;
   const {myWeapon, roundBuyIn} = localState;
   const result = calculateResult(myWeapon, theirWeapon);
   const fundingSituation = calculateFundingSituation(Player.PlayerB, aBal, bBal, roundBuyIn);
