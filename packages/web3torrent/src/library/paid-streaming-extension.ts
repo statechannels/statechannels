@@ -114,11 +114,10 @@ export abstract class PaidStreamingExtension implements Extension {
   start() {
     if (this.isForceChoking) {
       this.isForceChoking = false;
-      const blockedRequestsToService = this.blockedRequests;
-      this.blockedRequests = [];
-
       this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
-      blockedRequestsToService.map(req => this.wire._onRequest(req[0], req[1], req[2]));
+      this.blockedRequests
+        .splice(0, this.blockedRequests.length)
+        .map(req => this.wire._onRequest(req[0], req[1], req[2]));
     }
   }
 
