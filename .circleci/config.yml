@@ -486,7 +486,7 @@ jobs:
           file: e2e-test-w3t-production-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn jest seed-download withdraw --runInBand --bail)
+      - run: (cd packages/e2e-tests && yarn jest seed-download-complete withdraw --runInBand --bail)
       - store_artifacts:
           path: /tmp/seed-download.pino.log
       - store_artifacts:
