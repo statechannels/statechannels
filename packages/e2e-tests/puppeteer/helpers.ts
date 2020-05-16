@@ -138,7 +138,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
     }
 
     window.ethereum = window.web3.currentProvider;
-    window.ethereum.isFakeWeb3 = true;
+    ${TARGET_NETWORK === 'ropsten' ? 'window.ethereum.mockingInfuraProvider = true;' : ''}
 
     window.ethereum.enable = () => new Promise(r => {
       console.log("[puppeteer] window.ethereum.enable() was called");

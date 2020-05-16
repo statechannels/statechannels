@@ -240,7 +240,7 @@ export class ChainWatcher implements Chain {
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
 
-    if (window.ethereum.isFakeWeb3) {
+    if (window.ethereum.mockingInfuraProvider) {
       return new Wallet(
         '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce',
         this.provider
