@@ -11,7 +11,7 @@ COPY .env.* ./
 COPY *.json ./
 COPY yarn.lock ./
 COPY ./packages/devtools packages/devtools/
-COPY ./packages/persistent-seeder/ packages/persistent-seeder//
+COPY ./packages/persistent-seeder/ packages/persistent-seeder/
 COPY ./packages/channel-provider packages/channel-provider/
 COPY ./packages/client-api-schema packages/client-api-schema/
 
