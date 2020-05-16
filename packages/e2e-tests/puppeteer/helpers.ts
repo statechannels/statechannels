@@ -3,7 +3,14 @@ import * as dappeteer from 'dappeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {USE_DAPPETEER, TARGET_NETWORK, TX_WAIT_TIMEOUT, SCREENSHOT_DIR} from './constants';
+import {
+  USE_DAPPETEER,
+  TARGET_NETWORK,
+  TX_WAIT_TIMEOUT,
+  SCREENSHOT_DIR,
+  RPC_ENDPOINT,
+  CHAIN_NETWORK_ID
+} from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
 
@@ -117,27 +124,36 @@ class FakeMetaMask implements dappeteer.Dappeteer {
 }
 
 export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
-  const ganachePort = process.env.GANACHE_PORT || 8545;
-
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
-    window.web3 = new Web3("http://localhost:${ganachePort}");
+    window.web3 = new Web3(new Web3.providers.HttpProvider("${RPC_ENDPOINT}"));
+    ${
+      TARGET_NETWORK === 'ropsten'
+        ? 'window.web3.eth.accounts.wallet.add("0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce");'
+        : ''
+    }
+
     window.ethereum = window.web3.currentProvider;
-    
+    ${TARGET_NETWORK === 'ropsten' ? 'window.ethereum.mockingInfuraProvider = true;' : ''}
+
     window.ethereum.enable = () => new Promise(r => {
       console.log("[puppeteer] window.ethereum.enable() was called");
       web3.eth.getAccounts().then(lst => {
-        web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
+        web3.eth.defaultAccount = ${
+          TARGET_NETWORK === 'ropsten'
+            ? '"0x7e4ABd63A7C8314Cc28D388303472353D884f292"'
+            : `lst[${ganacheAccountIndex}]`
+        };
         console.log("Using address " + web3.eth.defaultAccount);
         window.ethereum.selectedAddress = web3.eth.defaultAccount;
         r([window.ethereum.selectedAddress]);
-    });      
+      });      
     });
-    window.ethereum.networkVersion = 9001;
+    window.ethereum.networkVersion = ${CHAIN_NETWORK_ID};
     window.ethereum.on = () => {};
   `);
 }

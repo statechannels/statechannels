@@ -5,7 +5,7 @@ import {
   getChallengeRegisteredEvent,
   ChallengeRegisteredEvent
 } from '@statechannels/nitro-protocol';
-import {Contract} from 'ethers';
+import {Contract, Wallet} from 'ethers';
 import {Zero, One} from 'ethers/constants';
 import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
 import {Observable, fromEvent, from, merge} from 'rxjs';
@@ -239,6 +239,13 @@ export class ChainWatcher implements Chain {
   private provider: ReturnType<typeof getProvider>;
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
+
+    if (window.ethereum.mockingInfuraProvider) {
+      return new Wallet(
+        '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce',
+        this.provider
+      );
+    }
 
     return this.provider.getSigner(this.selectedAddress as string);
   }
