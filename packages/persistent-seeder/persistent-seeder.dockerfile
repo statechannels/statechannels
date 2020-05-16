@@ -11,7 +11,7 @@ COPY .env.* ./
 COPY *.json ./
 COPY yarn.lock ./
 COPY ./packages/devtools packages/devtools/
-COPY ./packages/e2e-tests packages/e2e-tests/
+COPY ./packages/persistent-seeder/ packages/persistent-seeder//
 COPY ./packages/channel-provider packages/channel-provider/
 COPY ./packages/client-api-schema packages/client-api-schema/
 
@@ -23,7 +23,7 @@ USER seeder
 # Install dependencies
 RUN yarn
 
-WORKDIR /statechannels/monorepo/packages/e2e-tests
+WORKDIR /statechannels/monorepo/packages/persistent-seeder
 
 COPY ./packages/persistent-seeder/entrypoint.sh /entrypoint.sh
 
