@@ -464,7 +464,7 @@ jobs:
       - checkout
       - <<: *restore_dep
       - <<: *restore_lib
-      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
+      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./persistent-seeder" ! -path "./devtools" -exec rm -rf {} ';'
       - build_push_release:
           dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
