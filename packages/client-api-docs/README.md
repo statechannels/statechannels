@@ -1,6 +1,6 @@
 # Channel API
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/b7621005-62f0-4142-9901-f72c6c60b55c/deploy-status)](https://app.netlify.com/sites/app-wallet-interface/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b7621005-62f0-4142-9901-f72c6c60b55c/deploy-status)](https://app.netlify.com/sites/client-api-docs/deploys)
 
 ### Prerequisites
 

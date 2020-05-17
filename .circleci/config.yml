@@ -441,7 +441,7 @@ jobs:
       - <<: *restore_dep
       - <<: *restore_lib
       - run:
-          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf app-wallet-interface channel-provider
+          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
           channel-client client-api-schema e2e-tests persistent-seeder rps tic-tac-toe web3torrent xstate-wallet
       - run: yarn --frozen-lockfile
       - build_push_release:
