@@ -13,10 +13,10 @@ import {
 } from 'xstate';
 
 import {MessagingServiceInterface} from '../messaging';
-import {filter, map, distinctUntilChanged, first} from 'rxjs/operators';
+import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store, SimpleAllocation} from '../store';
+import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
@@ -67,6 +67,7 @@ type WorkflowGuards = Guards<
 export interface WorkflowActions {
   sendChallengeChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendCloseChannelResponse: Action<ChannelIdExists, any>;
+  sendCloseChannelRejection: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
@@ -89,7 +90,7 @@ export type WorkflowEvent =
 export type WorkflowServices = {
   setapplicationDomain(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
-  signFinalState: (context: ChannelIdExists) => Promise<any>;
+  signFinalStateIfMyTurn: (context: ChannelIdExists) => Promise<any>;
   invokeClosingProtocol: (
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
@@ -120,23 +121,19 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) => {
-  // Wait until it's our turn
-  const ourTurnEntry = await store
-    .channelUpdatedFeed(channelId)
-    .pipe(
-      filter(entry => entry.myTurn),
-      first()
-    )
-    .toPromise();
-  // Sign a finalized state
-  const {supported} = ourTurnEntry;
-  const finalState = {
-    outcome: supported.outcome as SimpleAllocation,
-    appData: supported.appData,
-    isFinal: true
-  };
-  return store.updateChannel(channelId, finalState);
+const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) => {
+  const entry = await store.getEntry(channelId);
+
+  if (entry.myTurn) {
+    const {supported} = entry;
+    return store.signAndAddState(channelId, {
+      ...supported,
+      turnNum: supported.turnNum.add(1),
+      isFinal: true
+    });
+  } else {
+    throw Error('Not your turn');
+  }
 };
 
 const generateConfig = (
@@ -212,29 +209,36 @@ const generateConfig = (
           {target: 'closing', cond: guards.channelClosing},
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
-        PLAYER_REQUEST_CONCLUDE: {target: 'signingFinalState'},
+        PLAYER_REQUEST_CONCLUDE: {
+          target: 'attemptToSignFinalState',
+          actions: [actions.assignRequestId]
+        },
+
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
     },
 
-    signingFinalState: {
-      invoke: {src: signFinalState.name, onDone: 'closing'},
+    attemptToSignFinalState: {
+      invoke: {
+        src: signFinalStateIfMyTurn.name,
+        onDone: {target: 'closing', actions: [actions.sendCloseChannelResponse]},
+        onError: {target: 'running', actions: [actions.sendCloseChannelRejection]}
+      },
       after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
-    //This could handled by another workflow instead of the application workflow
+    // This could handled by another workflow instead of the application workflow
     closing: {
-      entry: [actions.assignRequestId],
       invoke: {
         id: 'closing-protocol',
         src: 'invokeClosingProtocol',
         data: context => context,
         autoForward: true,
-        onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
+        onDone: {target: 'done'}
       }
     },
 
-    //This could handled by another workflow instead of the application workflow
+    // This could handled by another workflow instead of the application workflow
     sendChallenge: {
       entry: actions.displayUi,
       exit: actions.hideUi,
@@ -282,11 +286,13 @@ export const workflow = (
     );
 
   const actions: WorkflowActions = {
-    sendCloseChannelResponse: async (context: ChannelIdExists) => {
+    sendCloseChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      if (context.requestId) {
-        await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-      }
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+    },
+
+    sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
+      await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
     },
 
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
@@ -374,7 +380,7 @@ export const workflow = (
     setapplicationDomain: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
       await store.setapplicationDomain(ctx.channelId, event.applicationDomain),
 
-    signFinalState: signFinalState(store),
+    signFinalStateIfMyTurn: signFinalStateIfMyTurn(store),
     createChannel: async (context: CreateInit) => {
       const {
         participants,
@@ -438,6 +444,7 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   assignChannelId: 'assignChannelId',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   sendCloseChannelResponse: 'sendCloseChannelResponse',
+  sendCloseChannelRejection: 'sendCloseChannelRejection',
   sendChallengeChannelResponse: 'sendChallengeChannelResponse',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
