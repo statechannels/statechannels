@@ -175,7 +175,7 @@ it('starts concluding when requested', async () => {
       })
     ),
 
-    signFinalState: jest.fn().mockReturnValue(
+    signFinalStateIfMyTurn: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
       })
@@ -197,8 +197,8 @@ it('starts concluding when requested', async () => {
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('signingFinalState');
-    expect(services.signFinalState).toHaveBeenCalled();
+    expect(service.state.value).toEqual('attemptToSignFinalState');
+    expect(services.signFinalStateIfMyTurn).toHaveBeenCalled();
   }, 2000);
 });
 
