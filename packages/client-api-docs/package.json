@@ -7,6 +7,7 @@
   "repository": "statechannels/monorepo/blob/master/packages/client-api-docs",
   "scripts": {
     "build:netlify": "gem install bundler:2.0.2 && bundle update --bundler && bundle exec middleman build --clean",
-    "release:netlify": "netlify deploy --site $APP_WALLET_INTERFACE_NETLIFY_ID --dir=build"
+    "release:netlify": "netlify deploy --site $APP_WALLET_INTERFACE_NETLIFY_ID --dir=build",
+    "start": "bundle exec middleman server"
   }
 }
