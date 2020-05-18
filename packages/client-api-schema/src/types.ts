@@ -48,8 +48,12 @@ interface JsonRpcNotification<NotificationName, NotificationParams> {
 
 export const UserDeclinedErrorCode = 200;
 export const EthereumNotEnabledErrorCode = 100;
+export const NotYourTurnErrorCode = 300;
 
-type ErrorCode = typeof UserDeclinedErrorCode | typeof EthereumNotEnabledErrorCode;
+type ErrorCode =
+  | typeof UserDeclinedErrorCode
+  | typeof EthereumNotEnabledErrorCode
+  | typeof NotYourTurnErrorCode;
 interface JsonRpcError<Code extends ErrorCode, Message, Data = undefined> {
   id: number;
   jsonrpc: '2.0';
@@ -127,6 +131,7 @@ export type EnableEthereumError = JsonRpcError<
   typeof EthereumNotEnabledErrorCode,
   'Ethereum Not Enabled'
 >;
+export type NotYourTurnError = JsonRpcError<typeof NotYourTurnErrorCode, 'Not your turn'>;
 
 // CreateChannel
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
@@ -281,7 +286,7 @@ export type Response =
 
 export type UserDeclinedErrorResponse = JsonRpcError<typeof UserDeclinedErrorCode, 'User declined'>;
 
-export type ErrorResponse = EnableEthereumError | UserDeclinedErrorResponse;
+export type ErrorResponse = EnableEthereumError | UserDeclinedErrorResponse | NotYourTurnError;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 
