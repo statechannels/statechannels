@@ -37,11 +37,12 @@ restore_dep: &restore_dep
   restore_cache:
     key: v4-dependency-cache-{{ checksum "yarn.lock" }}
 
-save_lib: &save_lib
+save_built_artifacts: &save_built_artifacts
   save_cache:
     # Force a new cache on each build
-    key: v3-lib-cache-{{ epoch }}
+    key: v3-built-artifacts-cache-{{ epoch }}
     paths:
+      # Various TypeScript emissions
       - packages/channel-client/lib
       - packages/channel-provider/lib
       - packages/client-api-schema/lib
@@ -51,11 +52,19 @@ save_lib: &save_lib
       - packages/simple-hub/lib
       - packages/wire-format/lib
       - packages/xstate-wallet/lib
+      # Smart contract compiles
+      - packages/nitro-protocol/build
+      # Webpack builds & contract compiles
+      - packages/rps/build
+      - packages/tic-tac-toe/build
+      - packages/web3torrent/build
+      - packages/xstate-wallet/build
 
-restore_lib: &restore_lib
+
+restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
-    key: v3-lib-cache-
+    key: v3-built-artifacts-cache-
 
 commands:
   log_stats:
@@ -163,10 +172,10 @@ jobs:
       - log_stats:
           file: prepare-stats
       - <<: *restore_dep
-      - <<: *restore_lib
+      - <<: *restore_built_artifacts
       - run: yarn --frozen-lockfile
       - <<: *save_dep
-      - <<: *save_lib
+      - <<: *save_built_artifacts
 
       - persist_to_workspace:
           root: /home/circleci/project
@@ -435,7 +444,7 @@ jobs:
       - setup_remote_docker
       - checkout
       - <<: *restore_dep
-      - <<: *restore_lib
+      - <<: *restore_built_artifacts
       - run:
           rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
           channel-client client-api-schema e2e-tests persistent-seeder rps tic-tac-toe web3torrent xstate-wallet
@@ -459,7 +468,7 @@ jobs:
       - setup_remote_docker
       - checkout
       - <<: *restore_dep
-      - <<: *restore_lib
+      - <<: *restore_built_artifacts
       - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./persistent-seeder" ! -path "./devtools" -exec rm -rf {} ';'
       - build_push_release:
           dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
