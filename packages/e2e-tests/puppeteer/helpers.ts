@@ -233,9 +233,8 @@ export async function waitForBudgetEntry(page: Page): Promise<void> {
   await page.waitForSelector('.domain-budget-table > tbody > tr');
 }
 
-// For local runs, the default timeout of 30 seconds is not sufficient for a test with a 13MB file exchange.
 export async function waitForFinishedOrCanceledDownload(page: Page): Promise<void> {
-  await page.waitForSelector('#download-button, .DownloadLink', {timeout: 60000});
+  await page.waitForSelector('#download-button, .DownloadLink');
 }
 
 export async function waitForEmptyBudget(page: Page): Promise<void> {
