@@ -16,7 +16,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store, SimpleAllocation} from '../store';
+import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
@@ -126,9 +126,9 @@ const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdEx
 
   if (entry.myTurn) {
     const {supported} = entry;
-    return store.updateChannel(channelId, {
-      outcome: supported.outcome as SimpleAllocation, // TODO avoid type assertion
-      appData: '',
+    return store.signAndAddState(channelId, {
+      ...supported,
+      turnNum: supported.turnNum.add(1),
       isFinal: true
     });
   } else {
