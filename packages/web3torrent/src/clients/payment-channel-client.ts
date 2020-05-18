@@ -205,12 +205,12 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    const isClosed = (channelState: ChannelState) =>
-      channelState.channelId === channelId && channelState.status === 'closed';
+    const isClosing = (channelState: ChannelState) =>
+      channelState.channelId === channelId && channelState.status === 'closing';
     this.channelClient.closeChannel(channelId);
 
     return this.channelClient.channelState
-      .pipe(map(convertToChannelState), filter(isClosed), first())
+      .pipe(map(convertToChannelState), filter(isClosing), first())
       .toPromise();
   }
 
@@ -273,16 +273,17 @@ export class PaymentChannelClient {
       await this.closeChannel(channelId);
       return;
     }
-
-    await this.updateChannel(
-      channelId,
-      channelState.beneficiary,
-      channelState.payer,
-      add(channelState.beneficiaryBalance, amount),
-      subtract(payerBalance, amount),
-      channelState.beneficiaryOutcomeAddress,
-      channelState.payerOutcomeAddress
-    );
+    if (channelState.status == 'running') {
+      await this.updateChannel(
+        channelId,
+        channelState.beneficiary,
+        channelState.payer,
+        add(channelState.beneficiaryBalance, amount),
+        subtract(payerBalance, amount),
+        channelState.beneficiaryOutcomeAddress,
+        channelState.payerOutcomeAddress
+      );
+    }
   }
 
   // beneficiary may use this method to accept payments
