@@ -137,7 +137,6 @@ export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
 export type PeerByTorrent = {
   id: string;
   wire: PaidStreamingWire | PeerWire;
-  allowed: boolean;
   buffer: string;
   beneficiaryBalance: string;
   channelId: string;

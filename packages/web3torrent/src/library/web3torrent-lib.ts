@@ -151,7 +151,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.peersList[torrentInfoHash][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
@@ -163,7 +162,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
     log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: start');
-    this.peersList[torrentInfoHash][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
@@ -174,8 +172,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   togglePeer(torrentInfoHash: string, peerAccount: string) {
-    const {wire, allowed} = this.peersList[torrentInfoHash][peerAccount];
-    if (allowed) {
+    const {wire} = this.peersList[torrentInfoHash][peerAccount];
+    if (!(wire as PaidStreamingWire).paidStreamingExtension.isForceChoking) {
       this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     } else {
       this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
@@ -213,7 +211,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       PaidStreamingExtensionEvents.REQUEST,
       async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
-        const {pseChannelId, peerAccount: peer} = wire.paidStreamingExtension;
+        const {pseChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
         const knownPeer = this.peersList[torrent.infoHash][peer];
 
         if (!knownPeer || !pseChannelId) {
@@ -221,7 +219,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire, peer);
-        } else if (!knownPeer.allowed || reqPrice.gt(knownPeer.buffer)) {
+        } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
           const {uploaded} = this.peersList[torrent.infoHash][peer];
           log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${uploaded}`);
           response(false);
@@ -324,7 +322,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       wire,
       buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
       beneficiaryBalance: '0', // (wei)
-      allowed: false,
       channelId, // TODO: remove this prop, it isn't as trustworthy as the wire one, and it's just repeating data
       uploaded: 0
     };
