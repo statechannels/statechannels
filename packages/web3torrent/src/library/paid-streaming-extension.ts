@@ -43,7 +43,7 @@ export abstract class PaidStreamingExtension implements Extension {
   isForceChoking = false;
   isBeingChoked = false;
 
-  blockedRequests: number[][] = [];
+  blockedRequests: [number, number, number][] = [];
 
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
@@ -107,28 +107,18 @@ export abstract class PaidStreamingExtension implements Extension {
   stop() {
     if (!this.isForceChoking) {
       this.isForceChoking = true;
-      setTimeout(() => {
-        this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
-      }, 0);
+      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
     }
   }
 
   start() {
     if (this.isForceChoking) {
       this.isForceChoking = false;
-
-      setTimeout(() => {
-        this.respond();
-        this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
-      }, 0);
+      this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
+      this.blockedRequests
+        .splice(0, this.blockedRequests.length)
+        .map(req => this.wire._onRequest(req[0], req[1], req[2]));
     }
-  }
-
-  respond() {
-    const _onRequest = this.wire._onRequest;
-    this.blockedRequests
-      .splice(0, this.blockedRequests.length)
-      .map(req => _onRequest.apply(this.wire, req));
   }
 
   ack() {
@@ -176,7 +166,10 @@ export abstract class PaidStreamingExtension implements Extension {
       case PaidStreamingExtensionNotices.STOP:
         log.info(`STOP received from ${this.peerAccount}`);
         this.peerChannelId = data;
-        if (this.isBeingChoked) return;
+        if (this.isBeingChoked) {
+          this.ack();
+          return;
+        }
         this.isBeingChoked = true;
         break;
       case PaidStreamingExtensionNotices.MESSAGE:

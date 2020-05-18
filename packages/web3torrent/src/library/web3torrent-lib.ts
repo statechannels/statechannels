@@ -161,6 +161,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
+    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: start');
     this.peersList[torrentInfoHash][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
@@ -168,7 +169,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrentInfoHash,
       peerAccount
     });
-    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer');
+    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: finish');
   }
 
   togglePeer(torrentInfoHash: string, peerAccount: string) {
@@ -518,7 +519,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     log.info({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
     log.trace({pieces: torrent.pieces});
-    wire.unchoke();
     (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
   }
 

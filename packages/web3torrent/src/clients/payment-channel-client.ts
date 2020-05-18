@@ -267,21 +267,28 @@ export class PaymentChannelClient {
   }
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
+    let amountWillPay = amount;
     const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
 
     const {payerBalance} = channelState;
-    if (bigNumberify(payerBalance).lt(amount)) {
-      logger.error('Insufficient fund to make a payment. Closing channel.');
+    if (bigNumberify(payerBalance).eq(0)) {
+      logger.error('Out of funds. Closing channel.');
       await this.closeChannel(channelId);
       return;
     }
+
     if (channelState.status == 'running') {
+      if (bigNumberify(payerBalance).lt(amount)) {
+        amountWillPay = payerBalance;
+        logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
+      }
+
       await this.updateChannel(
         channelId,
         channelState.beneficiary,
         channelState.payer,
-        add(channelState.beneficiaryBalance, amount),
-        subtract(payerBalance, amount),
+        add(channelState.beneficiaryBalance, amountWillPay),
+        subtract(payerBalance, amountWillPay),
         channelState.beneficiaryOutcomeAddress,
         channelState.payerOutcomeAddress
       );
