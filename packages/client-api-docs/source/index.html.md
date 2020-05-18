@@ -448,6 +448,10 @@ Possible response to a `Channel Proposed` event.
 
 ## Close Channel
 
+The wallet will respond to this request with an error if it is not your turn. If it is your turn, the wallet will respond as soon as it has signed an `isFinal` state, and the channel is updated to `closing` status.
+
+The channel may later update to `closed` status only when other channel participants have responded in kind: this can be detected by listening to `ChannelUpdated` events and filtering on the channel status.
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -499,9 +503,9 @@ Possible response to a `Channel Proposed` event.
 
 ### Errors
 
-| Code | Message           | Meaning                                                          |
-| ---- | ----------------- | ---------------------------------------------------------------- |
-|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
+| Code | Message       | Meaning                                              |
+| ---- | ------------- | ---------------------------------------------------- |
+| 300  | Not your turn | You cannot update the channel until it is your turn. |
 
 ## Challenge Channel
 
