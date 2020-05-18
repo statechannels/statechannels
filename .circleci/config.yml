@@ -7,7 +7,6 @@ orbs:
 
 defaults: &defaults
   environment:
-    NODE_ENV: test
     USE_NATIVE_SOLC: true
   working_directory: /home/circleci/project
   resource_class: medium
