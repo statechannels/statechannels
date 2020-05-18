@@ -317,14 +317,15 @@ export class Store {
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const existingState = (await this.getEntry(channelId)).latest;
+        const entry = await this.getEntry(channelId);
+        const existingState = entry.latest;
         const newState = {
           ...existingState,
           turnNum: existingState.turnNum.add(1),
           appData: updateData.appData,
-          outcome: updateData.outcome
+          outcome: updateData.outcome,
+          isFinal: updateData.isFinal || existingState.isFinal
         };
-        const entry = await this.getEntry(channelId);
 
         const {participants} = entry;
         const myAddress = participants[entry.myIndex].signingAddress;
