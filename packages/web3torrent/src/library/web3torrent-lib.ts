@@ -152,6 +152,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
     this.peersList[torrentInfoHash][peerAccount].allowed = false;
+    wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
       torrentInfoHash,
@@ -225,7 +226,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${uploaded}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire, peer); // As soon as buffer is empty, block
-          wire.paidStreamingExtension.stop(); // prompt peer for a payment
         } else {
           this.peersList[torrent.infoHash][peer] = {
             ...knownPeer,
@@ -286,7 +286,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           log.info('sent spacer state, now sending STOP');
-          wire.paidStreamingExtension.stop(); // prompt peer for a payment
+          this.blockPeer(torrent.infoHash, wire, peerAccount);
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
