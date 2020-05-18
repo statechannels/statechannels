@@ -735,6 +735,9 @@
         },
         {
           "$ref": "#/definitions/UserDeclinedErrorResponse"
+        },
+        {
+          "$ref": "#/definitions/NotYourTurnError"
         }
       ]
     },
@@ -1177,6 +1180,48 @@
         "jsonrpc",
         "method",
         "params"
+      ],
+      "type": "object"
+    },
+    "NotYourTurnError": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                300
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Not your turn"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
       ],
       "type": "object"
     },
