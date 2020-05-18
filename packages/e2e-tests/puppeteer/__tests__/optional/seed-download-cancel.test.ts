@@ -63,7 +63,7 @@ describe('Optional Integration Tests', () => {
 
     console.log('Loading dapps');
     await forEachTab(async (tab, idx) => {
-      await setupLogging(tab, idx, 'seed-download', true);
+      await setupLogging(tab, idx, 'seed-download-cancel', true);
       if (!USE_DAPPETEER) await setupFakeWeb3(tab, idx);
     });
 

@@ -44,6 +44,8 @@ export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
 export const CHALLENGE_DURATION = bigNumberify(process.env.CHALLENGE_DURATION || '0x12c');
 
+export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
+
 // TODO: Embed this inside logger.ts
 export const ADD_LOGS = !!LOG_DESTINATION;
 
