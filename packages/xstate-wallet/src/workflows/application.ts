@@ -16,7 +16,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged, first} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store} from '../store';
+import {Store, SimpleAllocation} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
@@ -131,8 +131,12 @@ const signFinalState = (store: Store) => async ({channelId}: ChannelIdExists) =>
     .toPromise();
   // Sign a finalized state
   const {supported} = ourTurnEntry;
-  const finalState = {...supported, turnNum: supported.turnNum.add(1), isFinal: true};
-  return store.signAndAddState(channelId, finalState);
+  const finalState = {
+    outcome: supported.outcome as SimpleAllocation,
+    appData: supported.appData,
+    isFinal: true
+  };
+  return store.updateChannel(channelId, finalState);
 };
 
 const generateConfig = (
@@ -342,14 +346,7 @@ export const workflow = (
       // TODO: This should probably be done in a service and we should handle the failure cases
       // For now we update the store and then send the response in one action so the response has the latest state
       if (context.channelId === event.channelId) {
-        const existingState = (await store.getEntry(event.channelId)).latest;
-        const newState = {
-          ...existingState,
-          turnNum: existingState.turnNum.add(1),
-          appData: event.appData,
-          outcome: event.outcome
-        };
-        const entry = await store.signAndAddState(event.channelId, newState);
+        const entry = await store.updateChannel(event.channelId, event);
         await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
       }
     }
