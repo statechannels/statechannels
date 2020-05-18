@@ -324,7 +324,7 @@ export class PaymentChannelClient {
   }
 
   shouldSendSpacerState(channelState: ChannelState): boolean {
-    return channelState.turnNum.eq(FINAL_SETUP_STATE) ? true : false;
+    return this.amProposer(channelState) && channelState.turnNum.eq(FINAL_SETUP_STATE);
   }
 
   async pushMessage(message: Message) {
