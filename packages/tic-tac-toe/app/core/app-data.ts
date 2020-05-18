@@ -2,6 +2,8 @@ import {unreachable} from '../utils/unreachable';
 
 const {defaultAbiCoder, bigNumberify} = ethers.utils;
 
+export type StateUpdateType = 'start' | 'xPlaying' | 'oPlaying' | 'draw' | 'victory';
+
 export enum PositionType {
   Start, // 0
   XPlaying, // 1
