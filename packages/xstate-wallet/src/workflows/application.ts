@@ -212,7 +212,10 @@ const generateConfig = (
           {target: 'closing', cond: guards.channelClosing},
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
-        PLAYER_REQUEST_CONCLUDE: {target: 'signingFinalState'},
+        PLAYER_REQUEST_CONCLUDE: {
+          target: 'signingFinalState',
+          actions: [actions.assignRequestId]
+        },
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
     },
@@ -222,9 +225,9 @@ const generateConfig = (
       after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
-    //This could handled by another workflow instead of the application workflow
+    // This could handled by another workflow instead of the application workflow
     closing: {
-      entry: [actions.assignRequestId, actions.sendCloseChannelResponse],
+      entry: [actions.sendCloseChannelResponse],
       invoke: {
         id: 'closing-protocol',
         src: 'invokeClosingProtocol',
@@ -234,7 +237,7 @@ const generateConfig = (
       }
     },
 
-    //This could handled by another workflow instead of the application workflow
+    // This could handled by another workflow instead of the application workflow
     sendChallenge: {
       entry: actions.displayUi,
       exit: actions.hideUi,
