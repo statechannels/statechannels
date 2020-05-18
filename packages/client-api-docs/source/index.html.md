@@ -503,9 +503,9 @@ The channel may later update to `closed` status only when other channel particip
 
 ### Errors
 
-| Code | Message       | Meaning                                              |
-| ---- | ------------- | ---------------------------------------------------- |
-| 300  | Not your turn | You cannot update the channel until it is your turn. |
+| Code | Message       | Meaning                                             |
+| ---- | ------------- | --------------------------------------------------- |
+| 300  | Not your turn | You cannot close the channel until it is your turn. |
 
 ## Challenge Channel
 
