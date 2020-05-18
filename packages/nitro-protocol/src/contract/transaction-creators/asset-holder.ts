@@ -12,7 +12,7 @@ import {
 // TODO: Currently we are setting some arbitrary gas limit
 // To avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
+const GAS_LIMIT = 100_000;
 
 export function createTransferAllTransaction(
   assetHolderContractInterface: Interface,

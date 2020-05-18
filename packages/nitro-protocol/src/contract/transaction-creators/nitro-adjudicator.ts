@@ -9,7 +9,7 @@ import {Signature, Interface} from 'ethers/utils';
 // TODO: Currently we are setting some arbitrary gas limit
 // To avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
+const GAS_LIMIT = 100_000;
 
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);

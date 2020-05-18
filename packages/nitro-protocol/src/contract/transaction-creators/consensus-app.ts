@@ -8,7 +8,7 @@ import {Outcome} from '../outcome';
 // TODO: Currently we are setting some arbitrary gas limit
 // To avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
+const GAS_LIMIT = 100_000;
 
 // Ethers mis-interprets the artifact's abi paramter so we cast to any
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi as any);
