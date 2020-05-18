@@ -171,6 +171,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: finish');
   }
 
+  // Note, this is only used by unit tests.
   togglePeer(torrentInfoHash: string, peerAccount: string) {
     const {wire} = this.peersList[torrentInfoHash][peerAccount];
     if (!(wire as PaidStreamingWire).paidStreamingExtension.isForceChoking) {
