@@ -3,7 +3,7 @@ import pino from 'pino';
 import {LOG_DESTINATION, ADD_LOGS, JEST_WORKER_ID} from './config';
 import _ from 'lodash';
 
-const IS_BROWSER_CONTEXT = JEST_WORKER_ID !== undefined;
+const IS_BROWSER_CONTEXT = JEST_WORKER_ID === undefined;
 
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
 const LOG_TO_FILE = ADD_LOGS && !LOG_TO_CONSOLE;

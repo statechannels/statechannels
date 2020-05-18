@@ -6,7 +6,7 @@ const LOG_TO_CONSOLE = process.env.LOG_DESTINATION === 'console';
 // eslint-disable-next-line no-undef
 const LOG_TO_FILE = process.env.LOG_DESTINATION && !LOG_TO_CONSOLE;
 // eslint-disable-next-line no-undef
-const IS_BROWSER_CONTEXT = process.env.NODE_ENV !== 'test';
+const IS_BROWSER_CONTEXT = process.env.JEST_WORKER_ID === undefined;
 
 const name = 'channel-provider';
 
