@@ -351,7 +351,6 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
 
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   yield call([client, 'closeChannel'], channelState.channelId);
-  console.log('XXXX closeChannel call resolved XXXX');
 }
 
 function* challengeChannel(channelId: string, client: RPSChannelClient) {
