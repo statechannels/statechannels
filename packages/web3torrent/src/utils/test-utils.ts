@@ -42,7 +42,6 @@ export function createMockTorrentPeers(): TorrentPeers {
   return {
     '7595267661936611': {
       id: '7595267661936611',
-      allowed: true,
       wire: {
         uploaded: 4225
       },
@@ -53,7 +52,6 @@ export function createMockTorrentPeers(): TorrentPeers {
     },
     '5589113806923374': {
       id: '5589113806923374',
-      allowed: true,
       buffer: '50',
       beneficiaryBalance: '50',
       wire: {

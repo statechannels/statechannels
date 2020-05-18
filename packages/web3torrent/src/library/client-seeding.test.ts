@@ -86,7 +86,9 @@ describe('Seeding and Leeching', () => {
   it('should reach a ready-for-leeching, choked state', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
-        expect(torrentPeers[`${leecherA.pseAccount}`].allowed).toEqual(false);
+        expect(
+          torrentPeers[leecherA.pseAccount].wire.paidStreamingExtension.isForceChoking
+        ).toEqual(true);
         done();
       });
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
@@ -97,7 +99,9 @@ describe('Seeding and Leeching', () => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
         seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
-          expect(torrentPeers[`${leecherA.pseAccount}`].allowed).toEqual(true);
+          expect(
+            torrentPeers[leecherA.pseAccount].wire.paidStreamingExtension.isForceChoking
+          ).toEqual(true);
         });
         seeder.togglePeer(seededTorrent.infoHash, peerAccount);
 
