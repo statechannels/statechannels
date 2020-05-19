@@ -24,7 +24,8 @@ import {
   setupFakeWeb3,
   waitForWalletToBeHidden,
   takeScreenshot,
-  waitForTransactionIfNecessary
+  waitForTransactionIfNecessary,
+  waitForClosedState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -112,6 +113,9 @@ describe('Optional Integration Tests', () => {
 
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
+
+    console.log('Wait for the ChannelUpdated "closed" state');
+    await forEachTab(tab => waitForClosedState(tab));
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));
