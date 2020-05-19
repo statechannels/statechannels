@@ -139,12 +139,11 @@ export type PeerByTorrent = {
   wire: PaidStreamingWire | PeerWire;
   buffer: string;
   beneficiaryBalance: string;
-  channelId: string;
   uploaded: number;
 };
 
 export type TorrentPeers = {
-  [key: string /* PeerAccount */]: PeerByTorrent;
+  [key: string /* ChannelId */]: PeerByTorrent;
 };
 
 export type PeersByTorrent = {
