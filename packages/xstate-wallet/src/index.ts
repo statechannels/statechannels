@@ -23,6 +23,9 @@ if (NODE_ENV === 'production') {
 const log = logger.info.bind(logger);
 
 (async function() {
+  window.PureEVM = await import(/* webpackPrefetch: true */ 'pure-evm');
+  logger.info({PureEVM: window.PureEVM}, '🔋 Loaded pure-evm WebAssembly module!');
+
   const chain = new ChainWatcher();
 
   const backend = USE_INDEXED_DB ? new Backend() : new MemoryBackend();

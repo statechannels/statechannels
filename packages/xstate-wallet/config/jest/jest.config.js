@@ -16,5 +16,6 @@ module.exports = {
     GIT_VERSION: 'jest-GIT_VERSION',
     GIT_COMMIT_HASH: 'jest-GIT_COMMIT_HASH',
     GIT_BRANCH: 'jest-GIT_BRANCH',
+    PureEVM: require("pure-evm")
   }
 };

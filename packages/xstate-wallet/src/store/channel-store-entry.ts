@@ -28,6 +28,10 @@ export interface SignatureEntry {
   signer: string;
 }
 
+// TODO: Pull out hard-coded app and store app artifacts somewhere by appDefinition
+import ConsensusAppArtifact from '@statechannels/nitro-protocol/build/contracts/ConsensusApp.json';
+const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
+
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {
@@ -121,43 +125,50 @@ export class ChannelStoreEntry {
   // This is a simple check based on _requireValidTransition from NitroProtocol
   // We will eventually want to perform a proper validTransition check
   // but we will have to be careful where we do that to prevent eating up a ton of cpu
-  // TODO: Edit all usages of validChain to be async
-  private async validChain(firstState: SignedState, secondState: SignedState): Promise<boolean> {
-    // JS implementation of Nitro check
-    if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
-      return false;
-    }
-    if (secondState.isFinal) {
-      return outcomesEqual(firstState.outcome, secondState.outcome);
-    }
-    if (secondState.turnNum.lt(2 * this.nParticipants())) {
-      return (
-        outcomesEqual(firstState.outcome, secondState.outcome) &&
-        firstState.appData === secondState.appData
-      );
-    }
-
+  private validChain(firstState: SignedState, secondState: SignedState): boolean {
     // JS implementation of App check
-    const fromVariablePart = getVariablePart(toNitroSignedState(firstState)[0].state);
-    const toVariablePart = getVariablePart(toNitroSignedState(secondState)[0].state);
-    const turnNumB = secondState.turnNum;
+    const isValidAppTransition = () => {
+      const fromVariablePart = getVariablePart(toNitroSignedState(firstState)[0].state);
+      const toVariablePart = getVariablePart(toNitroSignedState(secondState)[0].state);
+      const turnNumB = secondState.turnNum;
 
-    const ConsensusAppArtifact = require('@statechannels/nitro-protocol/build/contracts/ConsensusApp.json');
-    const iface = new Interface(ConsensusAppArtifact.abi);
+      const txData = ConsensusAppContractInterface.functions.validTransition.encode([
+        fromVariablePart,
+        toVariablePart,
+        turnNumB,
+        secondState.participants.length
+      ]);
 
-    const txData = iface.functions.validTransition.encode([
-      fromVariablePart,
-      toVariablePart,
-      turnNumB,
-      secondState.participants.length
-    ]);
+      const result = window.PureEVM.exec(
+        Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
+        Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
+      );
 
-    const result = await require('ethereumjs-vm').default.runCode({
-      code: Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
-      data: Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
-    });
+      return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
+    };
 
-    return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
+    const isValidNitroTransition = () => {
+      // JS implementation of Nitro check
+      if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
+        return false;
+      }
+
+      if (secondState.isFinal) {
+        return outcomesEqual(firstState.outcome, secondState.outcome) && isValidAppTransition();
+      }
+
+      if (secondState.turnNum.lt(2 * this.nParticipants())) {
+        return (
+          outcomesEqual(firstState.outcome, secondState.outcome) &&
+          firstState.appData === secondState.appData &&
+          isValidAppTransition()
+        );
+      }
+
+      return true;
+    };
+
+    return isValidNitroTransition() && isValidAppTransition();
   }
 
   private get _support(): Array<SignedStateWithHash> {
