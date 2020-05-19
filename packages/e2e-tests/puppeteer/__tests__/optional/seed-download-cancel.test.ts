@@ -22,7 +22,6 @@ import {
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
-  waitForWalletToBeHidden,
   takeScreenshot,
   waitForTransactionIfNecessary,
   waitForClosedState
