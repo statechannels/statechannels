@@ -122,18 +122,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  // TODO: refactor "pause" and "cancel" functions. It's an ugly mess right
-  pause(infoHash: string, callback?: (err?: Error | string) => void) {
+  pause(infoHash: string) {
     log.info('> Peer pauses download: Pause torrent, eventual close PaymentChannels');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       torrent.pause(); // the paymentChannelClosing is done at the moment of payment
+      this.emitTorrentUpdated(infoHash);
     } else {
-      return callback(new Error('No torrent found'));
+      throw new Error('No torrent found');
     }
   }
 
-  async cancel(infoHash: string, callback?: (err?: Error | string) => void) {
+  async cancel(infoHash: string) {
     log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
@@ -146,7 +146,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         filesize: torrent.length
       });
     } else {
-      return callback(new Error('No torrent found'));
+      throw new Error('No torrent found');
     }
   }
 

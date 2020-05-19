@@ -53,19 +53,6 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
   );
 };
 
-export const cancel = (torrentId: string = '') => {
-  return new Promise((resolve, reject) =>
-    web3TorrentClient.cancel(torrentId, err => {
-      if (err) {
-        reject(err);
-      } else {
-        // TODO: clean up channel info
-        resolve(torrentId);
-      }
-    })
-  );
-};
-
 const torrentNamer = (input: WebTorrentSeedInput) => {
   if ((input as FileList).length && (input as FileList).length > 1) {
     return {name: `various.zip`};
