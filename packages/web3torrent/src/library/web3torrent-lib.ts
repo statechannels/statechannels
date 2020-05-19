@@ -137,7 +137,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
-      await this.closeDownloadingChannels(torrent);
+      await this.closeChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
       track('Torrent Cancelled', {
         infoHash,
@@ -382,7 +382,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           if (torrent.paused) {
             // We currently treat pausing torrent as canceling downloads
             log.info({data}, 'Closing torrent');
-            await this.closeDownloadingChannels(torrent);
+            await this.closeChannels(torrent);
           } else if (!torrent.done || !torrent.destroyed) {
             log.info({data}, 'Making payment');
             await this.makePayment(torrent, wire);
@@ -405,7 +405,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      await this.closeDownloadingChannels(torrent);
+      await this.closeChannels(torrent);
       track('Torrent Finished Downloading', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
@@ -484,25 +484,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
     return lastPieceIsReservedToThisWire;
   }
-  /**
-   * Close any channels that I am downloading from (that my peer opened)
-   */
-  protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
+
+  // Close any channels that I am downloading from or seeding to
+  protected async closeChannels(torrent: PaidStreamingTorrent, includeSeedChannels = false) {
     await Promise.all(
       torrent.wires.map(async wire => {
-        // TODO: What about the pseChannelId?
-        const {peerChannelId} = wire.paidStreamingExtension;
-        await this.paymentChannelClient.getLatestPaymentReceipt(peerChannelId);
+        const {peerChannelId, pseChannelId} = wire.paidStreamingExtension;
         if (peerChannelId) {
-          log.info(`About to close channel ${peerChannelId}`);
-          wire.paidStreamingExtension.peerChannelId = null;
+          log.info(`About to close payment channel ${peerChannelId}`);
+          await this.paymentChannelClient.getLatestPaymentReceipt(peerChannelId);
           await this.paymentChannelClient.closeChannel(peerChannelId);
-          // TODO: sometimes this 'closeChannel' call never resolves (the following log never shows up)
-          log.info('Peer PaymentChannel Closed', peerChannelId);
-        } else {
-          log.info(
-            `Wire with peer ${wire.paidStreamingExtension.peerAccount} didn't had a channel`
-          );
+          wire.paidStreamingExtension.peerChannelId = null;
+          log.info(`Channel ${peerChannelId} closed`);
+        }
+
+        if (includeSeedChannels && pseChannelId) {
+          // TODO: do we need to make something like getLatestPaymentReceipt for this case?
+          log.info(`About to close paying channel ${pseChannelId}`);
+          await this.paymentChannelClient.closeChannel(pseChannelId);
+          wire.paidStreamingExtension.pseChannelId = null;
+          log.info(`Channel ${pseChannelId} closed`);
         }
       })
     );
