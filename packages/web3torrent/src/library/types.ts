@@ -163,11 +163,13 @@ declare module 'webtorrent' {
       callback: ({
         torrentPeers,
         torrentInfoHash,
-        peerAccount
+        peerAccount,
+        seedingChannelId
       }: {
         torrentPeers: TorrentPeers;
         torrentInfoHash: string;
         peerAccount: string;
+        seedingChannelId: string;
       }) => void
     ): this;
 

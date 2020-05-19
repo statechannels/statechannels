@@ -150,34 +150,57 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
   }
 
-  blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
+  blockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
       torrentInfoHash,
-      peerAccount
+      peerAccount: wire.paidStreamingExtension.peerAccount,
+      seedingChannelId: wire.paidStreamingExtension.seedingChannelId
     });
-    log.info({from: this.peersList[torrentInfoHash], peerAccount}, `<< blockedPeer ${peerAccount}`);
+    log.info(
+      {
+        from: this.peersList[torrentInfoHash],
+        peerAccount: wire.paidStreamingExtension.peerAccount,
+        seedingChannelId: wire.paidStreamingExtension.seedingChannelId
+      },
+      `<< blockPeer`
+    );
   }
 
-  unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, channelId: string) {
-    log.info({from: Object.keys(this.peersList), channelId}, '<< unblockedPeer: start');
+  unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
+    log.info(
+      {
+        from: Object.keys(this.peersList),
+        peerAccount: wire.paidStreamingExtension.peerAccount,
+        seedingChannelId: wire.paidStreamingExtension.seedingChannelId
+      },
+      '<< unblockPeer: start'
+    );
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
       torrentInfoHash,
-      channelId
+      peerAccount: wire.paidStreamingExtension.peerAccount,
+      seedingChannelId: wire.paidStreamingExtension.seedingChannelId
     });
-    log.info({from: this.peersList[torrentInfoHash], channelId}, '<< unblockedPeer: finish');
+    log.info(
+      {
+        from: this.peersList[torrentInfoHash],
+        peerAccount: wire.paidStreamingExtension.peerAccount,
+        seedingChannelId: wire.paidStreamingExtension.seedingChannelId
+      },
+      '<< unblockPeer: finish'
+    );
   }
 
   // Note, this is only used by unit tests.
-  togglePeer(torrentInfoHash: string, peerAccount: string) {
-    const {wire} = this.peersList[torrentInfoHash][peerAccount];
+  togglePeerByChannel(torrentInfoHash: string, channelId: string) {
+    const {wire} = this.peersList[torrentInfoHash][channelId];
     if (!(wire as PaidStreamingWire).paidStreamingExtension.isForceChoking) {
-      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
+      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire);
     } else {
-      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
+      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire);
     }
   }
 
@@ -219,11 +242,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.createPaymentChannel(torrent, wire);
           log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
-          this.blockPeer(torrent.infoHash, wire, peer);
+          this.blockPeer(torrent.infoHash, wire);
         } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
           log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
           response(false);
-          this.blockPeer(torrent.infoHash, wire, peer); // As soon as buffer is empty, block
+          this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
         } else {
           this.peersList[torrent.infoHash][seedingChannelId] = {
             ...knownPeer,
@@ -287,12 +310,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           log.info('sent spacer state, now sending STOP');
-          this.blockPeer(torrent.infoHash, wire, peerAccount);
+          this.blockPeer(torrent.infoHash, wire);
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           await this.refillBuffer(torrent.infoHash, channelState.channelId);
-          this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.seedingChannelId);
+          this.unblockPeer(torrent.infoHash, wire);
           // TODO: only unblock if the buffer is large enough
         }
       }
