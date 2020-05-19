@@ -71,7 +71,7 @@ describe('Optional Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}.png`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
@@ -109,10 +109,6 @@ describe('Optional Integration Tests', () => {
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
-
-    console.log('Wait for Wallet to be hidden');
-    // Ensure the wallet is not visible
-    await forEachTab(waitForWalletToBeHidden);
 
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
