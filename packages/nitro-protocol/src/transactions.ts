@@ -88,6 +88,7 @@ export function createSignatureArguments(
   // Get a list of unique states ignoring their signatures
   // This allows us to create a single state with multiple signatures
   // which is required by the contracts
+  // GK: that is not required. What is required are a signature for each participant, and a valid whoSignedWhat
   const uniqueStates = uniqueSignedStates.map(s => s.state).filter((s, i, a) => a.indexOf(s) === i);
   const signatures = new Array<Signature>(uniqueStates.length);
   for (let i = 0; i < uniqueStates.length; i++) {
