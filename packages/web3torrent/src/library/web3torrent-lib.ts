@@ -398,13 +398,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      await this.closeChannels(torrent);
-      track('Torrent Finished Downloading', {
-        infoHash: torrent.infoHash,
-        magnetURI: torrent.magnetURI,
-        filename: torrent.name,
-        filesize: torrent.length
-      });
+      await this.closeDownloadingChannels(torrent);
       this.emitTorrentUpdated(torrent.infoHash);
     });
 
