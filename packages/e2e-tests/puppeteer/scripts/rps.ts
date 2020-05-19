@@ -67,11 +67,13 @@ export async function startFundAndPlaySingleMove(
 
 export async function aChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
-    const walletIFrame = page.frames()[1];
+    // const walletIFrame = page.frames()[1];
     await playMove(page, 'paper');
     await waitForAndClickButton(page, page.mainFrame(), '#challenge');
-    await waitForAndClickButton(page, walletIFrame, '#yes');
-    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForWalletToBeDisplayed(page);
+    await waitForWalletToBeHidden(page);
+    // await waitForAndClickButton(page, walletIFrame, '#yes');
+    // await waitForAndClickButton(page, walletIFrame, '#ok');
     await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
