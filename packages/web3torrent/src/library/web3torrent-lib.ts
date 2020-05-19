@@ -94,13 +94,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
     this.setupTorrent(torrent);
 
-    track('Torrent Starting Seeding', {
-      infoHash: torrent.infoHash,
-      magnetURI: torrent.magnetURI,
-      filename: torrent.name,
-      filesize: torrent.length
-    });
-
     return torrent;
   }
 

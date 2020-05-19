@@ -5,6 +5,7 @@ import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 import {defaultTrackers, INITIAL_BUDGET_AMOUNT, FUNDING_STRATEGY} from '../constants';
 import _ from 'lodash';
+import {track} from '../analytics';
 
 export const web3TorrentClient = new WebTorrentPaidStreamingClient({
   paymentChannelClient: paymentChannelClient,
@@ -44,6 +45,12 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
 
   return new Promise((resolve, reject) =>
     web3TorrentClient.seed(input, {...torrentNamer(input)}, (torrent: any) => {
+      track('Torrent Starting Seeding', {
+        infoHash: torrent.infoHash,
+        magnetURI: torrent.magnetURI,
+        filename: torrent.name,
+        filesize: torrent.length
+      });
       resolve({
         ...torrent,
         status: Status.Seeding,
