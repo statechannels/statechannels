@@ -15,10 +15,10 @@ export type PaidStreamingExtensionSerialized = Pick<
   PaidStreamingExtension,
   | 'pseAccount'
   | 'pseAddress'
-  | 'pseChannelId'
+  | 'seedingChannelId'
   | 'peerAccount'
   | 'peerOutcomeAddress'
-  | 'peerChannelId'
+  | 'leechingChannelId'
   | 'isForceChoking'
   | 'isBeingChoked'
   | 'blockedRequests'
@@ -37,8 +37,10 @@ export abstract class PaidStreamingExtension implements Extension {
   peerAccount?: string;
   peerOutcomeAddress?: string;
 
-  pseChannelId: string;
-  peerChannelId: string;
+  // channel that another peer uses to pay me.
+  seedingChannelId: string;
+  // channel that I use to pay another peer.
+  leechingChannelId: string;
 
   isForceChoking = false;
   isBeingChoked = false;
@@ -107,7 +109,7 @@ export abstract class PaidStreamingExtension implements Extension {
   stop() {
     if (!this.isForceChoking) {
       this.isForceChoking = true;
-      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.seedingChannelId);
     }
   }
 
@@ -145,10 +147,10 @@ export abstract class PaidStreamingExtension implements Extension {
     return {
       pseAccount: this.pseAccount,
       pseAddress: this.pseAddress,
-      pseChannelId: this.pseChannelId,
+      seedingChannelId: this.seedingChannelId,
       peerAccount: this.peerAccount,
       peerOutcomeAddress: this.peerOutcomeAddress,
-      peerChannelId: this.peerChannelId,
+      leechingChannelId: this.leechingChannelId,
       isForceChoking: this.isForceChoking,
       isBeingChoked: this.isBeingChoked,
       blockedRequests: this.blockedRequests
@@ -165,7 +167,7 @@ export abstract class PaidStreamingExtension implements Extension {
         break;
       case PaidStreamingExtensionNotices.STOP:
         log.info(`STOP received from ${this.peerAccount}`);
-        this.peerChannelId = data;
+        this.leechingChannelId = data;
         if (this.isBeingChoked) {
           this.ack();
           return;

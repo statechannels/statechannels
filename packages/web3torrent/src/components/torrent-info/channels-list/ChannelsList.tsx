@@ -27,8 +27,8 @@ function channelIdToTableRow(
   const isBeneficiary = participantType === 'beneficiary';
   const wire = torrent.wires.find(
     wire =>
-      wire.paidStreamingExtension.peerChannelId === channelId ||
-      wire.paidStreamingExtension.pseChannelId === channelId
+      wire.paidStreamingExtension.leechingChannelId === channelId ||
+      wire.paidStreamingExtension.seedingChannelId === channelId
   );
   if (channel.status === 'closing') {
     channelButton = <button disabled>Closing ...</button>;
