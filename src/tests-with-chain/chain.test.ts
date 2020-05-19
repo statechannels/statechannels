@@ -192,7 +192,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(0),
+    channelNonce: bigNumberify(1),
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
@@ -205,7 +205,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(0),
+    channelNonce: bigNumberify(1),
     appDefinition: TRIVIAL_APP_ADDRESS,
     participants: [playerA.participant, playerB.participant]
   };
