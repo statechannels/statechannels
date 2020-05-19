@@ -82,15 +82,15 @@ beforeAll(async () => {
 // Scenarios are synonymous with channelNonce:
 
 const acceptsWhenOpen = 'It accepts for an open channel, and updates storage correctly, ';
-const accepts1 = acceptsWhenOpen + 'when the slot is empty, n states submitted';
-const accepts2 = acceptsWhenOpen + 'when the slot is empty, 1 state submitted';
-const accepts3 = acceptsWhenOpen + 'when the slot is not empty, n states submitted';
+const accepts1 = acceptsWhenOpen + 'when the slot is empty, 1 state submitted';
+const accepts2 = acceptsWhenOpen + 'when the slot is empty, 3 states submitted';
+const accepts3 = acceptsWhenOpen + 'when the slot is not empty, 3 states submitted';
 const accepts4 = acceptsWhenOpen + 'when the slot is not empty, 1 state submitted';
 
 const acceptsWhenChallengePresent =
   'It accepts when a challenge is present, and updates storage correctly, ';
 const accepts5 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, 1 state';
-const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, n states';
+const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, 3 states';
 
 const revertsWhenOpenIf = 'It reverts for an open channel if ';
 const reverts1 = revertsWhenOpenIf + 'the turnNumRecord does not increase';
