@@ -5,6 +5,7 @@ import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 import {defaultTrackers, INITIAL_BUDGET_AMOUNT, FUNDING_STRATEGY} from '../constants';
 import _ from 'lodash';
+import {track} from '../analytics';
 
 export const web3TorrentClient = new WebTorrentPaidStreamingClient({
   paymentChannelClient: paymentChannelClient,

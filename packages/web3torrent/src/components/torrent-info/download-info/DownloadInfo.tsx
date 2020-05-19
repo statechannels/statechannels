@@ -3,6 +3,7 @@ import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {TorrentUI} from '../../../types';
 import {Web3TorrentClientContext} from '../../../clients/web3torrent-client';
+import {track} from '../../../analytics';
 
 export type DownloadInfoProps = {torrent: TorrentUI};
 
@@ -21,7 +22,15 @@ export const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInf
             id="cancel-download-button"
             type="button"
             className="button cancel"
-            onClick={() => web3torrent.cancel(torrent.infoHash)}
+            onClick={() => {
+              track('Torrent Cancelled', {
+                infoHash: torrent.infoHash,
+                magnetURI: torrent.magnetURI,
+                filename: torrent.name,
+                filesize: torrent.length
+              });
+              return web3torrent.cancel(torrent.infoHash);
+            }}
           >
             Cancel Download
           </button>

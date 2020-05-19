@@ -94,13 +94,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
     this.setupTorrent(torrent);
 
-    track('Torrent Starting Seeding', {
-      infoHash: torrent.infoHash,
-      magnetURI: torrent.magnetURI,
-      filename: torrent.name,
-      filesize: torrent.length
-    });
-
     return torrent;
   }
 
@@ -139,12 +132,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (torrent) {
       await this.closeChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
-      track('Torrent Cancelled', {
-        infoHash,
-        magnetURI: torrent.magnetURI,
-        filename: torrent.name,
-        filesize: torrent.length
-      });
     } else {
       throw new Error('No torrent found');
     }
@@ -426,7 +413,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeChannels(torrent);
-      track('Torrent Finished Downloading', {
+      track('Torrent Starting Seeding', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
         filename: torrent.name,
