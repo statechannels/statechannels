@@ -112,6 +112,7 @@ export const machine = (
     initial: 'init',
 
     on: {
+      CHANNEL_UPDATED: {target: undefined},
       CHAIN_EVENT: [
         {
           target: 'waitForResponseOrTimeout',
