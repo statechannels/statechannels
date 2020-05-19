@@ -485,7 +485,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return lastPieceIsReservedToThisWire;
   }
 
-  /**Close any channels that I am downloading from or seeding to  */
+  // Close any channels that I am downloading from or seeding to
   protected async closeChannels(torrent: PaidStreamingTorrent, includeSeedChannels = false) {
     await Promise.all(
       torrent.wires.map(async wire => {
