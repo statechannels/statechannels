@@ -48,7 +48,7 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         if (_mode(channelId) == ChannelMode.Open) {
@@ -116,7 +116,7 @@ contract ForceMove is IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public {
+    ) public override{
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
@@ -188,7 +188,7 @@ contract ForceMove is IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public {
+    ) public override{
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -227,7 +227,7 @@ contract ForceMove is IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
