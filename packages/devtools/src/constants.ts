@@ -7,6 +7,7 @@ export const ETHERLIME_ACCOUNTS: Account[] = [
   {privateKey: '0xf473040b1a83739a9c7cc1f5719fab0f5bf178f83314d98557c58aae1910e03a'},
   {privateKey: '0x823d590ed2cb5e8493bb0efc834771c1cde36f9fc49b9fe3620ebd0754ad6ea2'},
   {privateKey: '0xd6d710943471e4c37ceb787857e7a2b41ca57f9cb4307ee9a9b21436a8e709c3'},
+  // Hub uses this (index 6)
   {privateKey: '0x187bb12e927c1652377405f81d93ce948a593f7d66cfba383ee761858b05921a'},
   {privateKey: '0xf41486fdb04505e7966c8720a353ed92ce0d6830f8a5e915fbde735106a06d25'},
   {privateKey: '0x6ca40ba4cca775643398385022264c0c414da1abd21d08d9e7136796a520a543'},
