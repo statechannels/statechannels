@@ -132,12 +132,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (torrent) {
       await this.closeChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
-      track('Torrent Cancelled', {
-        infoHash,
-        magnetURI: torrent.magnetURI,
-        filename: torrent.name,
-        filesize: torrent.length
-      });
     } else {
       throw new Error('No torrent found');
     }
