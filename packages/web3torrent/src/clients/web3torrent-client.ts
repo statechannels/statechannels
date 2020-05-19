@@ -45,12 +45,6 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
 
   return new Promise((resolve, reject) =>
     web3TorrentClient.seed(input, {...torrentNamer(input)}, (torrent: any) => {
-      track('Torrent Starting Seeding', {
-        infoHash: torrent.infoHash,
-        magnetURI: torrent.magnetURI,
-        filename: torrent.name,
-        filesize: torrent.length
-      });
       resolve({
         ...torrent,
         status: Status.Seeding,

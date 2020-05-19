@@ -393,6 +393,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeDownloadingChannels(torrent);
+      track('Torrent Starting Seeding', {
+        infoHash: torrent.infoHash,
+        magnetURI: torrent.magnetURI,
+        filename: torrent.name,
+        filesize: torrent.length
+      });
       this.emitTorrentUpdated(torrent.infoHash);
     });
 
