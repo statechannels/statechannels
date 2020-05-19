@@ -83,7 +83,7 @@ export async function setupLogging(
 // https://github.com/puppeteer/puppeteer/issues/2977
 export async function waitForAndClickButton(
   page: Page,
-  frame: Frame,
+  frame: Frame | Page,
   selector: string
 ): Promise<void> {
   try {
