@@ -53,7 +53,7 @@ describe('Optional Integration Tests', () => {
     [
       {browser: browserA, metamask: metamaskA},
       {browser: browserB, metamask: metamaskB}
-    ] = await Promise.all([6, 7].map(async idx => await setUpBrowser(HEADLESS, idx, 100)));
+    ] = await Promise.all([4, 5].map(async idx => await setUpBrowser(HEADLESS, idx, 0)));
 
     browsers = [browserA, browserB];
 

@@ -215,6 +215,9 @@ export async function setUpBrowser(
     metamask = await dappeteer.getMetamask(browser);
 
     if (etherlimeAccountIndex && TARGET_NETWORK === 'localhost') {
+      if (etherlimeAccountIndex === 6) {
+        throw new Error('STOP! You are using the same private key as the hub. Expect nonce errors');
+      }
       // if targeting ropsten, use dappeteer default account for now
       await metamask.importPK(ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey);
       console.log(`imported ${ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey}`);
