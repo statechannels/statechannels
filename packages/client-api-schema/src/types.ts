@@ -72,5 +72,6 @@ export * from './methods';
 export * from './data-types';
 
 import {ErrorCodes} from './error-codes';
-export type EthereumNotEnabledErrorCode = ErrorCodes['EnableEthereum']['EthereumNotEnabled'];
-export type UserDeclinedErrorCode = ErrorCodes['CloseAndWithdraw']['UserDeclined'];
+
+export const EthereumNotEnabledErrorCode: ErrorCodes['EnableEthereum']['EthereumNotEnabled'] = 100;
+export const UserDeclinedErrorCode: ErrorCodes['CloseAndWithdraw']['UserDeclined'] = 200;
