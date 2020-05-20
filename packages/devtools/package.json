@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/devtools",
   "description": "Scripts used for our team development processes",
-  "version": "0.1.23",
+  "version": "0.1.0",
   "author": "Andrew Stewart",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
@@ -48,7 +48,7 @@
     "src/**/*.ts": "eslint"
   },
   "main": "lib/src/index.js",
-  "private": true,
+  "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build:typescript": "tsc -b",

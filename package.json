@@ -3,7 +3,7 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.23",
+    "@statechannels/devtools": "0.1.0",
     "@types/prettier": "1.19.0",
     "@types/wait-on": "4.0.0",
     "husky": "3.0.7",
