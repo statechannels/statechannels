@@ -413,7 +413,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {leechingChannelId: channelId} = wire.paidStreamingExtension;
         const channelOfWire = this.paymentChannelClient.channelCache[channelId];
         if (channelOfWire) {
-          const balance = bigNumberify(channelOfWire.beneficiaryBalance).toString();
+          const balance = channelOfWire.beneficiaryBalance;
           const downloaded = wire.downloaded;
           log.info(`<< DONE! Channel ${channelId} Balance: ${balance} Downloaded ${downloaded}`);
         }
