@@ -186,7 +186,11 @@ export async function setUpBrowser(
       args: [
         // Needed to inject web3.js code into wallet iframe
         // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
-        '--disable-features=site-per-process'
+        '--disable-features=site-per-process',
+        // https://github.com/puppeteer/puppeteer/issues/1175#issuecomment-369728215
+        '--disable-dev-shm-usage',
+        // https://github.com/puppeteer/puppeteer/issues/3683#issuecomment-453236421
+        '--no-sandbox'
       ]
     });
     metamask = new FakeMetaMask();
@@ -333,19 +337,24 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   return new Promise(
     (resolve, reject) =>
       setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
-      page.exposeFunction(doneFunc, resolve).then(() => {
-        page.evaluate(
-          `
-          ${cb} = channelStatus => {
-            if (${done}) {
-              window.${doneFunc}('Done');
-              window.channelProvider.off('ChannelUpdated', ${cb});
-            } 
-          }
-          window.channelProvider.on('ChannelUpdated', ${cb});
-          `
-        );
-      })
+      page
+        .exposeFunction(doneFunc, resolve)
+        .then(() => {
+          page
+            .evaluate(
+              `
+              ${cb} = channelStatus => {
+                if (${done}) {
+                  window.${doneFunc}('Done');
+                  window.channelProvider.off('ChannelUpdated', ${cb});
+                } 
+              }
+              window.channelProvider.on('ChannelUpdated', ${cb});
+              `
+            )
+            .catch(reject);
+        })
+        .catch(reject)
   );
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
