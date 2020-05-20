@@ -16,16 +16,7 @@ export interface JsonRpcNotification<NotificationName, NotificationParams> {
   params: NotificationParams;
 }
 
-// TODO: These are not utils
-export const UserDeclinedErrorCode = 200;
-export const EthereumNotEnabledErrorCode = 100;
-export const NotYourTurnErrorCode = 300;
-
-type ErrorCode =
-  | typeof UserDeclinedErrorCode
-  | typeof EthereumNotEnabledErrorCode
-  | typeof NotYourTurnErrorCode;
-export interface JsonRpcError<Code extends ErrorCode, Message, Data = undefined> {
+export interface JsonRpcError<Code, Message, Data = undefined> {
   id: number;
   jsonrpc: '2.0';
   error: Data extends undefined
