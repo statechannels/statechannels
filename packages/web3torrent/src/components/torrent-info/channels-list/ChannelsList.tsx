@@ -79,11 +79,17 @@ function channelIdToTableRow(
 }
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
+  const statuses = ['running', 'closing', 'proposing', 'closed'];
+
   const channelsInfo = _.keys(channels)
     .filter(
       id => channels[id].payer === mySigningAddress || channels[id].beneficiary === mySigningAddress
     )
-    .sort((id1, id2) => Number(id1) - Number(id2));
+    .sort(
+      (id1, id2) =>
+        statuses.indexOf(channels[id1].status) - statuses.indexOf(channels[id2].status) ||
+        Number(id1) - Number(id2)
+    );
   return (
     <section className="wires-list">
       <table className="wires-list-table">
