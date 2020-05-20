@@ -72,6 +72,7 @@ export function getTorrentUI(
     // The spread operator above doesn't quite work for property definitions below
     // It might be because WebTorrent.Torrent uses getters for these properties?
     files: liveTorrent.files,
+    wires: liveTorrent.wires,
     done: liveTorrent.done,
     downloaded: liveTorrent.downloaded || staticTorrent.downloaded,
     downloadSpeed: liveTorrent.downloadSpeed,

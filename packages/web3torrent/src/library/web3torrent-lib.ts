@@ -75,6 +75,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.outcomeAddress = null;
   }
 
+  get(torrentId: PaidStreamingTorrent | string | Buffer): PaidStreamingTorrent | void {
+    return super.get(torrentId) as PaidStreamingTorrent;
+  }
+
   seed(
     input: WebTorrentSeedInput,
     optionsOrCallback?: TorrentOptions | TorrentCallback,
