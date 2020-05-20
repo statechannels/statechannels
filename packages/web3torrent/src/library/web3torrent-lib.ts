@@ -415,7 +415,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         if (channelOfWire) {
           const balance = channelOfWire.beneficiaryBalance;
           const downloaded = wire.downloaded;
-          log.info(`<< DONE! Channel ${channelId} Balance: ${balance} Downloaded ${downloaded}`);
+          log.info(`TorrentEvents: Done, per-wire info. Channel: ${channelId} Balance: ${balance} Downloaded: ${downloaded}`);
         }
       });
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
