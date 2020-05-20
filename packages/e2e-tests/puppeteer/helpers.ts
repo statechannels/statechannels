@@ -170,6 +170,7 @@ export async function setUpBrowser(
     browser = await puppeteer.launch({
       headless,
       slowMo,
+      pipe: usePipe,
       devtools: !headless,
       // Keep code here for convenience... if you want to use redux-dev-tools
       // then download and unzip the release from Github and specify the location.
