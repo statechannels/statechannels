@@ -25,8 +25,7 @@ import {
   DomainBudget,
   State,
   StateVariables,
-  ObjectStores,
-  SimpleAllocation
+  ObjectStores
 } from './types';
 import {logger} from '../logger';
 
@@ -312,38 +311,11 @@ export class Store {
   }
 
   public updateChannel = (
-    channelId: string,
-    updateData: {outcome: SimpleAllocation; appData: string; isFinal?: boolean}
+    updateData: () => Promise<{entry: ChannelStoreEntry; signedState: SignedState}>
   ) =>
     this.backend
-      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const entry = await this.getEntry(channelId);
-        const existingState = entry.latest;
-        const newState = {
-          ...existingState,
-          turnNum: existingState.turnNum.add(1),
-          appData: updateData.appData,
-          outcome: updateData.outcome,
-          isFinal: updateData.isFinal || existingState.isFinal
-        };
-
-        const {participants} = entry;
-        const myAddress = participants[entry.myIndex].signingAddress;
-        const privateKey = await this.backend.getPrivateKey(myAddress);
-
-        if (!privateKey) {
-          throw new Error('No longer have private key');
-        }
-        const signedState = entry.signAndAdd(
-          _.pick(newState, 'outcome', 'turnNum', 'appData', 'isFinal'),
-          privateKey
-        );
-        await this.backend.setChannel(channelId, entry.data());
-        return {entry, signedState};
-      })
+      .transaction('external', [ObjectStores.channels, ObjectStores.privateKeys], updateData)
       .then(({entry, signedState}) => {
-        // These events trigger callbacks that should not run within the transaction scope
-        // See https://github.com/dfahlander/Dexie.js/issues/1029
         this._eventEmitter.emit('channelUpdated', entry);
         this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
 

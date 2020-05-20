@@ -349,11 +349,32 @@ export const workflow = (
       requestId: event.requestId
     })),
     updateStoreAndSendResponse: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
-      // TODO: This should probably be done in a service and we should handle the failure cases
+      // FIXME: This should probably be done in a service and we should handle the failure cases
       // For now we update the store and then send the response in one action so the response has the latest state
-      if (context.channelId === event.channelId) {
-        const entry = await store.updateChannel(event.channelId, event);
-        await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
+      const {channelId, appData, outcome, requestId} = event;
+
+      if (context.channelId === channelId) {
+        const entry = await store.updateChannel(async () => {
+          // FIXME: This should pull off the _supported_ state, not the _latest_ state
+          // The "running" test set up does not currently do this
+          const {latest: existingState} = await store.getEntry(channelId);
+          const newState = {
+            ...existingState,
+            appData,
+            outcome,
+            turnNum: existingState.turnNum.add(1)
+          };
+
+          const entry = await store.signAndAddState(
+            channelId,
+            _.pick(newState, 'outcome', 'turnNum', 'appData', 'isFinal')
+          );
+          // FIXME: This should pull off the _supported_ state, not the _latest_ state
+          // The "running" test set up does not currently do this
+          return {entry, signedState: entry.latest};
+        });
+
+        await messagingService.sendResponse(requestId, serializeChannelEntry(entry));
       }
     }
   };
