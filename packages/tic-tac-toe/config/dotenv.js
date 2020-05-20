@@ -6,6 +6,19 @@ const path = require('path');
 const fs = require('fs');
 
 function configureEnvVariables(env) {
+  // State Channel Environment
+  // Intended usage is a single file in monorepo root defining configuration for multiple packages
+  const SC_ENV = process.env.SC_ENV;
+  if (SC_ENV) {
+    const scEnvFile = path.join('../..', '.env.' + SC_ENV);
+    const scEnvFileFullPath = path.join(process.cwd(), scEnvFile);
+    if (!fs.existsSync(scEnvFileFullPath)) {
+      throw new Error(`${scEnvFileFullPath} must exist in the monorepo root`);
+    }
+
+    return scEnvFile;
+  }
+
   // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
   let dotenvFiles = [
     `.env.${env}.local`,
@@ -26,18 +39,14 @@ function configureEnvVariables(env) {
 
 module.exports = function(env) {
   const dotenvFile = configureEnvVariables(env);
-  const DOT_ENV_PATH = path.join(
-    path.dirname(__dirname),
-    dotenvFile
-  );
+  const DOT_ENV_PATH = path.join(path.dirname(__dirname), dotenvFile);
   return {
     clientAllowedKeys: [
       'TARGET_NETWORK',
-      'FIREBASE_PROJECT',
+      'FIREBASE_PROJECT_TTT',
       'WALLET_URL',
       'TTT_CONTRACT_ADDRESS',
-      'CHAIN_NETWORK_ID',
-      'USE_GANACHE_DEPLOYMENT_CACHE'
+      'CHAIN_NETWORK_ID'
     ],
     failOnMissingKey: true,
     path: DOT_ENV_PATH

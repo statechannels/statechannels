@@ -61,6 +61,19 @@ module.exports = function(defaults) {
           child_process: 'empty'
         }
       }
+    },
+    'ember-cli-uglify': {
+      // Not uglifying as this breaks Class Names used here:
+      // https://github.com/statechannels/monorepo/blob/master/packages/tic-tac-toe/app/serializers/application.ts#L11
+      enabled: false,
+      uglify: {
+        compress: {
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          keep_classnames: true,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          keep_fnames: true
+        }
+      }
     }
   });
 
