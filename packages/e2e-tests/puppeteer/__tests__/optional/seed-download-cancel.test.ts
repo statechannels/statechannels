@@ -96,12 +96,14 @@ describe('Optional Integration Tests', () => {
       await waitAndApproveDeposit(web3tTabB, metamaskB);
     }
 
+    const listenFor10thState = waitForNthState(web3tTabB, 10);
+
     await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');
 
-    await waitForNthState(web3tTabB, 10);
+    await listenFor10thState;
     console.log('Got until 10th state');
 
     const listenForClosedState = forEachTab(waitForClosedState);
@@ -117,9 +119,6 @@ describe('Optional Integration Tests', () => {
 
     console.log('Wait for the ChannelUpdated "closed" state');
     await listenForClosedState;
-
-    // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await forEachTab(tab => tab.waitFor(1500));
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.earned');
