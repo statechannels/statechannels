@@ -8,10 +8,10 @@ import {
 } from '@statechannels/nitro-protocol';
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
-import {Observable, fromEvent, from, merge} from 'rxjs';
-import {filter, map, flatMap} from 'rxjs/operators';
+import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
+import {filter, map, flatMap, defaultIfEmpty, last} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
-import {hexZeroPad} from '@ethersproject/bytes';
+import {hexZeroPad, id} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
@@ -31,6 +31,7 @@ export interface ChannelChainInfo {
   };
   readonly finalized: boolean; // this is a check on 0 < finalizesAt <= now
   readonly blockNum: BigNumber; // blockNum that the information is from
+  challengeState?: State;
 }
 
 export interface Chain {
@@ -40,7 +41,6 @@ export interface Chain {
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
-  challengeRegisteredFeed: (channelId: string) => Observable<ChallengeRegistered>;
 
   // Setup / Web3 Specific
   ethereumEnable: () => Promise<string>;
@@ -402,10 +402,17 @@ export class ChainWatcher implements Chain {
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
+    return combineLatest(this.chainInfoUpdated(channelId), this.challengeStateFeed(channelId)).pipe(
+      map(value => ({
+        ...value[0],
+        challengeState: value[1]
+      }))
+    );
+  }
+  private chainInfoUpdated(channelId: string): Observable<ChannelChainInfo> {
     if (!this._assetHolders || !this._assetHolders[0] || !this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
-
     const first = from(this.getChainInfo(channelId));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
@@ -425,25 +432,42 @@ export class ChainWatcher implements Chain {
     return merge(first, depositEvents, assetTransferEvents);
   }
 
-  public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
+  private challengeStateFeed(channelId: string): Observable<State | undefined> {
     if (!this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
+    const topic = id(`ChallengeRegistered( 
+        bytes32 indexed channelId,
+        // everything needed to respond or checkpoint
+        uint256 turnNumRecord,
+        uint256 finalizesAt,
+        address challenger,
+        bool isFinal,
+        FixedPart fixedPart,
+        ForceMoveApp.VariablePart[] variableParts,
+        Signature[] sigs,
+        uint8[] whoSignedWhat
+    )`);
+    // Query for all existing ChallengeRegistered events and get the latest one for the channel
+    const first = from(this._adjudicator.queryFilter({topics: [topic]}, 0)).pipe(
+      filter((event: any) => event[0] === channelId),
+      map(getChallengeRegisteredEvent),
+      map(({challengeStates}: ChallengeRegisteredEvent) =>
+        fromNitroState(challengeStates[challengeStates.length - 1].state)
+      ),
+      last(),
+      defaultIfEmpty(undefined)
+    );
 
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
       filter((event: any) => event[0] === channelId), // index 0 of ChallengeRegistered event is channelId
       map(getChallengeRegisteredEvent),
-      map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) => ({
-        channelId,
-        challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state),
-        challengeExpiry: BigNumber.from(finalizesAt)
-      }))
+      map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) =>
+        fromNitroState(challengeStates[challengeStates.length - 1].state)
+      )
     );
 
-    return merge(
-      /* first */ // TODO: We cannot have a first because we can't "replay" events yet
-      updates
-    );
+    return merge(first, updates);
   }
 }
 
