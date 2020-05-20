@@ -388,7 +388,7 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   await closingIframeB.waitForSelector(closingText);
 }
 
-export async function prepareStubUploadFile(path: string, repeats = 100_000): Promise<void> {
+export async function prepareStubUploadFile(path: string, repeats = 20_000): Promise<void> {
   const uniqueContent = Date.now();
   console.log(`Make Stub file with seed ${Date.now()}`);
   const content = `web3torrent-${uniqueContent}\n`.repeat(repeats);
