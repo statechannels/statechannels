@@ -16,7 +16,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store} from '../store';
+import {Store, Errors} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
@@ -34,6 +34,7 @@ import {FundingStrategy, ErrorCodes} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
+import {logger} from '../logger';
 
 export interface WorkflowContext {
   applicationDomain: string;
@@ -354,35 +355,40 @@ export const workflow = (
       const {channelId, appData, outcome, requestId} = event;
 
       if (context.channelId === channelId) {
-        const entry = await store.updateChannel(async () => {
-          // FIXME: This should pull off the _supported_ state, not the _latest_ state
-          // The "running" test set up does not currently do this
-          const {latest: existingState, myTurn} = await store.getEntry(channelId);
+        try {
+          const entry = await store.updateChannel(async () => {
+            const {supported: existingState, myTurn} = await store.getEntry(channelId);
 
-          if (!myTurn) {
-            const code: ErrorCodes['UpdateChannel']['NotYourTurn'] = 403;
-            throw new Error(`JSON-RPC error ${code}`);
+            if (!myTurn) {
+              const code: ErrorCodes['UpdateChannel']['NotYourTurn'] = 403;
+              const message = 'Not your turn';
+              const data = {currentTurnNum: existingState.turnNum.toString()};
+              messagingService.sendError(requestId, {code, message, data});
+
+              logger.error({existingState}, message);
+              throw new Error(message);
+            }
+
+            const turnNum = existingState.turnNum.add(1);
+            const newState = {...existingState, appData, outcome, turnNum};
+
+            // TODO: Validate transition to new state
+
+            const entry = await store.signAndAddState(
+              channelId,
+              _.pick(newState, 'outcome', 'turnNum', 'appData', 'isFinal')
+            );
+            return {entry, signedState: entry.supported};
+          });
+          await messagingService.sendResponse(requestId, serializeChannelEntry(entry));
+        } catch (error) {
+          if (error.message === Errors.channelMissing) {
+            const code: ErrorCodes['UpdateChannel']['ChannelNotFound'] = 400;
+            messagingService.sendError(requestId, {code, message: 'Channel not found'});
           }
 
-          const newState = {
-            ...existingState,
-            appData,
-            outcome,
-            turnNum: existingState.turnNum.add(1)
-          };
-
-          // TODO: Validate transition to new state
-
-          const entry = await store.signAndAddState(
-            channelId,
-            _.pick(newState, 'outcome', 'turnNum', 'appData', 'isFinal')
-          );
-          // FIXME: This should pull off the _supported_ state, not the _latest_ state
-          // The "running" test set up does not currently do this
-          return {entry, signedState: entry.latest};
-        });
-
-        await messagingService.sendResponse(requestId, serializeChannelEntry(entry));
+          logger.error({error: error.toString()}, 'Update error');
+        }
       }
     }
   };
