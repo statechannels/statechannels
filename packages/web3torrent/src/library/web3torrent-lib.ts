@@ -156,6 +156,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
+    // TODO: only unblock if the buffer is large enough
     log.info(
       {
         from: Object.keys(this.peersList),
@@ -280,19 +281,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
       const {seedingChannelId, leechingChannelId, peerAccount} = wire.paidStreamingExtension;
 
-      if (
-        channelState.channelId === seedingChannelId ||
-        channelState.channelId === leechingChannelId
-      ) {
-        console.log(channelState.channelId, 'status', channelState.status);
-        // remove, just for debugging purposes
-        if (channelState.status === 'closed') {
-          wire.paidStreamingExtension.seedingChannelId = null;
-          wire.paidStreamingExtension.leechingChannelId = null;
+      const isSeedingChannel = channelState.channelId === seedingChannelId;
+      const isLeechingChannel = channelState.channelId === leechingChannelId;
+
+      if (isSeedingChannel || isLeechingChannel) {
+        const isClosed = channelState.status === 'closed';
+        if (isClosed) {
+          if (isLeechingChannel) {
+            wire.paidStreamingExtension.leechingChannelId = null;
+          } else {
+            wire.paidStreamingExtension.seedingChannelId = null;
+          }
           this.emitTorrentUpdated(torrent.infoHash);
-          log.info(
-            `PeerAccount ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed||Closing`
-          );
+          log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
         // filter to updates for the channel on this wire
         log.info(`Channel updated to turnNum ${channelState.turnNum}`);
@@ -306,7 +307,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           await this.refillBuffer(torrent.infoHash, channelState.channelId);
           this.unblockPeer(torrent.infoHash, wire);
-          // TODO: only unblock if the buffer is large enough
         }
       }
     });

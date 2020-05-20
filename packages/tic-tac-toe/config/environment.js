@@ -25,8 +25,8 @@ module.exports = function(environment) {
       // when it is created
     },
     firebase: {
-      databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
-      projectId: process.env.FIREBASE_PROJECT
+      databaseURL: `https://${process.env.FIREBASE_PROJECT_TTT}.firebaseio.com`,
+      projectId: process.env.FIREBASE_PROJECT_TTT
     }
   };
 
