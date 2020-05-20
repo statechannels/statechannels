@@ -1,6 +1,6 @@
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
 import {Address} from '../data-types';
-import {EthereumNotEnabledErrorCode} from '../error-codes';
+import Codes from '../error-codes';
 
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<{
@@ -10,6 +10,6 @@ export type EnableEthereumResponse = JsonRpcResponse<{
 }>;
 
 export type EnableEthereumError = JsonRpcError<
-  typeof EthereumNotEnabledErrorCode,
+  typeof Codes.EnableEthereum.EthereumNotEnabled,
   'Ethereum Not Enabled'
 >;

@@ -1,8 +1,11 @@
-// EnableEthereum
-export const EthereumNotEnabledErrorCode = 100;
-
-// CloseAndWithdraw
-export const UserDeclinedErrorCode = 200;
-
-// CloseChannel
-export const NotYourTurnErrorCode = 300;
+export default {
+  EnableEthereum: {
+    EthereumNotEnabled: 100
+  },
+  CloseAndWithdraw: {
+    UserDeclined: 200
+  },
+  CloseChannel: {
+    NotYourTurn: 300
+  }
+};

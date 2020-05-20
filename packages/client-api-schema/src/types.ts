@@ -70,4 +70,6 @@ export * from './notifications';
 export * from './methods';
 export * from './data-types';
 
-export {EthereumNotEnabledErrorCode, UserDeclinedErrorCode} from './error-codes';
+import ErrorCodes from './error-codes';
+export const EthereumNotEnabledErrorCode = ErrorCodes.EnableEthereum.EthereumNotEnabled;
+export const UserDeclinedErrorCode = ErrorCodes.CloseAndWithdraw.UserDeclined;
