@@ -51,7 +51,7 @@
     "publish": "lerna publish --yes from-package patch",
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
-    "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod --ignore @statechannels/tic-tac-toe",
+    "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod",
     "run:w3t": "lerna run start --scope=**/web3torrent",
     "start-servers": "./bin/start-servers.sh",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
