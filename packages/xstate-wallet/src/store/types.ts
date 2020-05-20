@@ -209,7 +209,8 @@ export type Transaction = {
   // channels(): Table<ChannelRecord>
 };
 
-export type TXMode = 'readonly' | 'readwrite';
+// External facing transactions should be top-level as an extra precaution
+export type TXMode = 'readonly' | 'readwrite' | 'external';
 
 export const enum ObjectStores {
   channels = 'channels',

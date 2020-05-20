@@ -181,6 +181,10 @@ export class Backend implements DBBackend {
       case 'readonly':
         dexieMode = 'r';
         break;
+      case 'external':
+        dexieMode = 'rw!';
+        break;
+
       default:
         return unreachable(mode);
     }
