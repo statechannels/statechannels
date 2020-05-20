@@ -39,7 +39,7 @@
     "build:ci:incremental": "yarn build:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "build:netlify": "lerna run build:netlify --stream --concurrency 2",
     "build:netlify:incremental": "yarn build:netlify --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "build:netlify:production": "lerna run build:netlify:production --stream",
+    "build:netlify:production": "lerna run build:netlify:production --stream --concurrency 2",
     "build:typescript": "lerna run build:typescript",
     "clean": "git clean -Xdf --exclude=\"!.env.*\"",
     "clean:dry": "git clean -Xdn --exclude=\"!.env.*\"",
