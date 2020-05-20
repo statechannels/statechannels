@@ -1,7 +1,7 @@
 import {Participant, Address, Uint256, DomainBudget} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse} from '../utils';
 
-export interface TokenBudgetRequest {
+export interface ApproveBudgetAndFundParams {
   hub: Participant;
   playerParticipantId: string;
   token: Address;
@@ -11,6 +11,6 @@ export interface TokenBudgetRequest {
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<
   'ApproveBudgetAndFund',
-  TokenBudgetRequest
+  ApproveBudgetAndFundParams
 >;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<DomainBudget>;
