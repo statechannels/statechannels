@@ -563,17 +563,17 @@ workflows:
             - prepare
           filters:
             branches:
-              only: master
+              only: geoknee-patch-1
 
       - release-hub-production:
           filters:
             branches:
-              only: master
+              only: geoknee-patch-1
 
       - release-persistent-seeder:
           filters:
             branches:
-              only: master
+              only: geoknee-patch-1
 
       - e2e-test-w3t-production:
           requires:
@@ -582,7 +582,7 @@ workflows:
             - release-netlify-production
           filters:
             branches:
-              only: master
+              only: geoknee-patch-1
 
   scheduled-release:
     triggers:
