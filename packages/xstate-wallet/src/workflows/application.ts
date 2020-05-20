@@ -30,7 +30,7 @@ import {
   PlayerRequestConclude,
   OpenEvent
 } from '../event-types';
-import {FundingStrategy} from '@statechannels/client-api-schema';
+import {FundingStrategy, ErrorCodes} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
@@ -357,13 +357,21 @@ export const workflow = (
         const entry = await store.updateChannel(async () => {
           // FIXME: This should pull off the _supported_ state, not the _latest_ state
           // The "running" test set up does not currently do this
-          const {latest: existingState} = await store.getEntry(channelId);
+          const {latest: existingState, myTurn} = await store.getEntry(channelId);
+
+          if (!myTurn) {
+            const code: ErrorCodes['UpdateChannel']['NotYourTurn'] = 403;
+            throw new Error(`JSON-RPC error ${code}`);
+          }
+
           const newState = {
             ...existingState,
             appData,
             outcome,
             turnNum: existingState.turnNum.add(1)
           };
+
+          // TODO: Validate transition to new state
 
           const entry = await store.signAndAddState(
             channelId,
