@@ -2,7 +2,7 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentFile} from 'webtorrent';
-import * as Web3TorrentClient from '../../../clients/web3torrent-client';
+import * as Web3TorrentContext from '../../../clients/web3torrent-client';
 import {TorrentUI} from '../../../types';
 import {createMockTorrentUI} from '../../../utils/test-utils';
 import {DownloadInfo, DownloadInfoProps} from './DownloadInfo';
@@ -46,9 +46,9 @@ describe('<DownloadInfo />', () => {
     expect(cancelButton.exists()).toEqual(true);
   });
 
-  it('can call Web3TorrentClient.cancel() when clicking the Cancel button', () => {
+  it('can call web3TorrentClient.cancel() when clicking the Cancel button', () => {
     const removeSpy = jest
-      .spyOn(Web3TorrentClient, 'cancel')
+      .spyOn(Web3TorrentContext.web3TorrentClient, 'cancel')
       .mockImplementation(async (_?: string) => {
         /* nothing to see here */
       });

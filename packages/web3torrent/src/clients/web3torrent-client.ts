@@ -5,6 +5,7 @@ import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 import {defaultTrackers, INITIAL_BUDGET_AMOUNT, FUNDING_STRATEGY} from '../constants';
 import _ from 'lodash';
+import {track} from '../analytics';
 
 export const web3TorrentClient = new WebTorrentPaidStreamingClient({
   paymentChannelClient: paymentChannelClient,
@@ -49,19 +50,6 @@ export const upload: (input: WebTorrentSeedInput) => Promise<ExtendedTorrent> = 
         status: Status.Seeding,
         originalSeed: true
       });
-    })
-  );
-};
-
-export const cancel = (torrentId: string = '') => {
-  return new Promise((resolve, reject) =>
-    web3TorrentClient.cancel(torrentId, err => {
-      if (err) {
-        reject(err);
-      } else {
-        // TODO: clean up channel info
-        resolve(torrentId);
-      }
     })
   );
 };

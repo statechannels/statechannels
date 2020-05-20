@@ -16,11 +16,20 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   }, [torrent.done, torrent.files, torrent.name, torrent.originalSeed]);
 
   const trackDownload = () => {
-    track('File Downloaded', {
+    track('File Saved', {
       filename: file.name
     });
     return true; // necessary to ensure href is triggered
   };
+
+  if (torrent.done && !torrent.originalSeed) {
+    track('Torrent Finished Downloading', {
+      infoHash: torrent.infoHash,
+      magnetURI: torrent.magnetURI,
+      filename: torrent.name,
+      filesize: torrent.length
+    });
+  }
 
   return (
     <>

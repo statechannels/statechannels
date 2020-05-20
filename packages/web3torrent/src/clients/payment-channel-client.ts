@@ -205,15 +205,15 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    const isClosing = (channelState: ChannelState) =>
-      channelState.channelId === channelId && channelState.status === 'closing';
-    const status = this.channelCache[channelId].status;
-    if (status !== 'closed' && status !== 'closing') {
+    const isClosed = (channelState: ChannelState) =>
+      channelState.channelId === channelId && channelState.status === 'closed';
+
+    if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
       this.channelClient.closeChannel(channelId);
-      return this.channelClient.channelState
-        .pipe(map(convertToChannelState), filter(isClosing), first())
-        .toPromise();
-    } else return this.channelCache[channelId];
+    }
+    return this.channelClient.channelState
+      .pipe(map(convertToChannelState), filter(isClosed), first())
+      .toPromise();
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {

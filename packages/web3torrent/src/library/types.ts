@@ -137,15 +137,13 @@ export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
 export type PeerByTorrent = {
   id: string;
   wire: PaidStreamingWire | PeerWire;
-  allowed: boolean;
   buffer: string;
   beneficiaryBalance: string;
-  channelId: string;
   uploaded: number;
 };
 
 export type TorrentPeers = {
-  [key: string /* PeerAccount */]: PeerByTorrent;
+  [key: string /* ChannelId */]: PeerByTorrent;
 };
 
 export type PeersByTorrent = {
@@ -165,11 +163,13 @@ declare module 'webtorrent' {
       callback: ({
         torrentPeers,
         torrentInfoHash,
-        peerAccount
+        peerAccount,
+        seedingChannelId
       }: {
         torrentPeers: TorrentPeers;
         torrentInfoHash: string;
         peerAccount: string;
+        seedingChannelId: string;
       }) => void
     ): this;
 

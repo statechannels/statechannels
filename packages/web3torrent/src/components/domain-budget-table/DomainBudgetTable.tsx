@@ -53,7 +53,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               <button
                 id="budget-withdraw"
                 onClick={() => {
-                  track('Withdraw Initiated', {spendBudget, receiveBudget});
+                  track('Withdraw Initiated', {spent, received, spendBudget, receiveBudget});
                   withdraw();
                 }}
               >

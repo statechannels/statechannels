@@ -3,7 +3,7 @@ import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {createMockExtendedTorrent, createMockTorrentPeers, pseAccount} from '../utils/test-utils';
-import {download, getTorrentPeers, cancel, upload, web3TorrentClient} from './web3torrent-client';
+import {download, getTorrentPeers, upload, web3TorrentClient} from './web3torrent-client';
 import {getStatus} from '../utils/torrent-status-checker';
 
 describe('Web3TorrentClient', () => {
@@ -89,35 +89,6 @@ describe('Web3TorrentClient', () => {
 
     afterEach(() => {
       seedSpy.mockRestore();
-    });
-  });
-
-  describe('cancel()', () => {
-    let removeSpy: jest.SpyInstance<
-      Promise<void>,
-      [string | WebTorrent.Torrent | Buffer, (((err: string | Error) => void) | undefined)?]
-    >;
-
-    beforeEach(() => {
-      removeSpy = jest.spyOn(web3TorrentClient, 'cancel').mockImplementation(
-        (torrentInfoHash: string, callback?: (err: string | Error) => void): Promise<void> => {
-          if (callback) {
-            return new Promise(() => callback(''));
-          }
-          return new Promise(() => ({}));
-        }
-      );
-    });
-
-    it('should return the infohash of the paused client', async () => {
-      const mockInfoHash = '124203';
-      const result = await cancel(mockInfoHash);
-
-      expect(result).toEqual(mockInfoHash);
-    });
-
-    afterEach(() => {
-      removeSpy.mockRestore();
     });
   });
 
