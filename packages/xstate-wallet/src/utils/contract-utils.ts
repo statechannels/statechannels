@@ -1,10 +1,9 @@
 import {Contract, providers} from 'ethers';
-import {Web3Provider, JsonRpcProvider} from 'ethers/providers';
-import {Interface, bigNumberify} from 'ethers/utils';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
+import {bigNumberify} from 'ethers/utils';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
   if (bigNumberify(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
@@ -20,9 +19,9 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   throw 'TokenAddress not found';
 }
 
-export function getProvider(): Web3Provider | JsonRpcProvider {
+export function getProvider(): providers.Web3Provider | providers.JsonRpcProvider {
   if (window.ethereum) {
-    return new Web3Provider(window.ethereum);
+    return new providers.Web3Provider(window.ethereum);
   } else {
     return new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
   }
@@ -31,15 +30,9 @@ export function getProvider(): Web3Provider | JsonRpcProvider {
 export function getEthAssetHolderContract() {
   const provider = getProvider();
   return new Contract(
+    // eslint-disable-next-line no-process-env
     process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0',
-    getETHAssetHolderInterface(),
+    ContractArtifacts.EthAssetHolderArtifact['abi'],
     provider
-  );
-}
-
-export function getETHAssetHolderInterface(): Interface {
-  return new Interface(
-    // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-    ContractArtifacts.EthAssetHolderArtifact['abi']
   );
 }

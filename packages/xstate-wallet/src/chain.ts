@@ -7,7 +7,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {Contract, Wallet} from 'ethers';
 import {Zero, One} from 'ethers/constants';
-import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
+import {BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
 
@@ -18,13 +18,6 @@ import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
-
-const EthAssetHolderInterface = new Interface(
-  // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-  ContractArtifacts.EthAssetHolderArtifact.abi
-);
-
-const NitroAdjudicatorInterface = new Interface(ContractArtifacts.NitroAdjudicatorArtifact.abi);
 
 export interface ChannelChainInfo {
   readonly amount: BigNumber;
@@ -262,14 +255,16 @@ export class ChainWatcher implements Chain {
     if (!this.ethereumIsEnabled) return;
 
     this._assetHolders = [
-      new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, this.signer)
-    ]; // TODO allow for other asset holders, for now we use slot 0 only
-    this._assetHolders[0].on('Deposited', (...event) =>
-      chainLogger.info({...event}, 'Deposited event')
-    );
+      new Contract(
+        ETH_ASSET_HOLDER_ADDRESS,
+        ContractArtifacts.EthAssetHolderArtifact.abi,
+        this.signer
+      )
+    ];
+
     this._adjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
-      NitroAdjudicatorInterface,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
       this.signer
     );
 
@@ -325,18 +320,18 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await this.signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: Seems to be an ethers typing issue around the nonce;
     return response.hash;
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
     const response = await this.signer.sendTransaction({
-      ...Transactions.createForceMoveTransaction(
+      ...(Transactions.createForceMoveTransaction(
         // TODO: Code is assuming a doubly-signed state at the moment.
         toNitroSignedState(support[0]),
         // createForceMoveTransaction requires this to sign a "challenge message"
         privateKey
-      ),
+      ) as any), // TODO: Seems to be an ethers typing issue around the nonce
       to: NITRO_ADJUDICATOR_ADDRESS
     });
     const tx = await response.wait();
@@ -353,7 +348,7 @@ export class ChainWatcher implements Chain {
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await this.signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: Seems to be an ethers typing issue around the nonce
     chainLogger.info({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
@@ -361,13 +356,13 @@ export class ChainWatcher implements Chain {
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     const ethAssetHolder = new Contract(
       ETH_ASSET_HOLDER_ADDRESS,
-      EthAssetHolderInterface,
+      ContractArtifacts.EthAssetHolderArtifact.abi,
       this.provider
     );
 
     const nitroAdjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
-      NitroAdjudicatorInterface,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
       this.provider
     );
 

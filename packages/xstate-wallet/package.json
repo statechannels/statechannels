@@ -30,7 +30,7 @@
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
     "dexie": "3.0.0",
-    "ethers": "4.0.45",
+    "ethers": "5.0.0-beta.187",
     "eventemitter3": "4.0.0",
     "filter-async-rxjs-pipe": "0.1.5",
     "guid-typescript": "1.0.9",
