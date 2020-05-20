@@ -104,6 +104,8 @@ describe('Optional Integration Tests', () => {
     await waitForNthState(web3tTabB, 10);
     console.log('Got until 10th state');
 
+    const listenForClosedState = forEachTab(waitForClosedState);
+
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
 
@@ -114,7 +116,7 @@ describe('Optional Integration Tests', () => {
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
     console.log('Wait for the ChannelUpdated "closed" state');
-    await forEachTab(tab => waitForClosedState(tab));
+    await listenForClosedState;
 
     // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await forEachTab(tab => tab.waitFor(1500));
