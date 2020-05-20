@@ -1,7 +1,6 @@
 import {Participant} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
-
-export const UserDeclinedErrorCode = 200;
+import {UserDeclinedErrorCode} from '../error-codes';
 
 export type CloseAndWithdrawParams = {hub: Participant; playerParticipantId: string};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;

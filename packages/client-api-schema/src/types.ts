@@ -70,4 +70,4 @@ export * from './notifications';
 export * from './methods';
 export * from './data-types';
 
-export {EthereumNotEnabledErrorCode, UserDeclinedErrorCode} from './utils';
+export {EthereumNotEnabledErrorCode, UserDeclinedErrorCode} from './error-codes';

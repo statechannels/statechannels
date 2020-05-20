@@ -1,5 +1,6 @@
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
 import {Address} from '../data-types';
+import {EthereumNotEnabledErrorCode} from '../error-codes';
 
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<{
@@ -8,7 +9,6 @@ export type EnableEthereumResponse = JsonRpcResponse<{
   walletVersion: string;
 }>;
 
-export const EthereumNotEnabledErrorCode = 100;
 export type EnableEthereumError = JsonRpcError<
   typeof EthereumNotEnabledErrorCode,
   'Ethereum Not Enabled'
