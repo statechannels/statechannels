@@ -161,7 +161,8 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
 export async function setUpBrowser(
   headless: boolean,
   etherlimeAccountIndex?: number,
-  slowMo?: number
+  slowMo?: number,
+  usePipe = false
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;
@@ -201,6 +202,8 @@ export async function setUpBrowser(
     browser = await dappeteer.launch(puppeteer, {
       headless: false,
       slowMo,
+      pipe: usePipe,
+
       //, Needed to allow both windows to execute JS at the same time
       ignoreDefaultArgs: [
         '--disable-background-timer-throttling',
