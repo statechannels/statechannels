@@ -563,17 +563,17 @@ workflows:
             - prepare
           filters:
             branches:
-              only: deploy
+              only: master
 
       - release-hub-production:
           filters:
             branches:
-              only: deploy
+              only: master
 
       - release-persistent-seeder:
           filters:
             branches:
-              only: deploy
+              only: master
 
       - e2e-test-w3t-production:
           requires:
@@ -582,7 +582,7 @@ workflows:
             - release-netlify-production
           filters:
             branches:
-              only: deploy
+              only: master
 
   scheduled-release:
     triggers:
