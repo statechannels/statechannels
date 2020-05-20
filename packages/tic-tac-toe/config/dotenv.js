@@ -33,7 +33,7 @@ module.exports = function(env) {
   return {
     clientAllowedKeys: [
       'TARGET_NETWORK',
-      'FIREBASE_PROJECT',
+      'FIREBASE_PROJECT_TTT',
       'WALLET_URL',
       'TTT_CONTRACT_ADDRESS',
       'CHAIN_NETWORK_ID',

@@ -32,7 +32,7 @@ const REACT_APP = /^REACT_APP_/i;
 // These are Magmo specific values that should be injected into the application
 const MAGMO_VALUES = [
   'TARGET_NETWORK',
-  'FIREBASE_PROJECT',
+  'FIREBASE_PROJECT_TTT',
   'FIREBASE_API_KEY',
   'WALLET_URL',
   'BOT_URL',
