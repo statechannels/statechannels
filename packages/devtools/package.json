@@ -48,7 +48,7 @@
     "src/**/*.ts": "eslint"
   },
   "main": "lib/src/index.js",
-  "private": true,
+  "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build:typescript": "tsc -b",
