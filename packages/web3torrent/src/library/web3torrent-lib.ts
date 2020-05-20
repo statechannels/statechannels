@@ -282,6 +282,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const {seedingChannelId, leechingChannelId, peerAccount} = wire.paidStreamingExtension;
       const isSeedingChannel = channelState.channelId === seedingChannelId;
       const isLeechingChannel = channelState.channelId === leechingChannelId;
+      const {infoHash} = torrent;
       if (isSeedingChannel || isLeechingChannel) {
         const isClosed = channelState.status === 'closed';
         if (isClosed) {
@@ -290,6 +291,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           } else {
             wire.paidStreamingExtension.seedingChannelId = null;
           }
+          this.emitTorrentUpdated(infoHash);
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
         // filter to updates for the channel on this wire
@@ -298,12 +300,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           log.info('sent spacer state, now sending STOP');
-          this.blockPeer(torrent.infoHash, wire);
+          this.blockPeer(infoHash, wire);
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
-          await this.refillBuffer(torrent.infoHash, channelState.channelId);
-          this.unblockPeer(torrent.infoHash, wire);
+          await this.refillBuffer(infoHash, channelState.channelId);
+          this.unblockPeer(infoHash, wire);
         }
       }
     });
