@@ -280,6 +280,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
       const {seedingChannelId, leechingChannelId, peerAccount} = wire.paidStreamingExtension;
+
       const isSeedingChannel = channelState.channelId === seedingChannelId;
       const isLeechingChannel = channelState.channelId === leechingChannelId;
 

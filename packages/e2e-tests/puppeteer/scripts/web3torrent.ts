@@ -8,7 +8,8 @@ import {
   waitAndApproveBudget,
   waitAndApproveMetaMask,
   waitForBudgetEntry,
-  waitAndApproveDepositWithHub
+  waitAndApproveDepositWithHub,
+  waitForAndClickButton
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
 import {TX_WAIT_TIMEOUT} from '../constants';
@@ -67,7 +68,7 @@ export async function startDownload(
 }
 
 export async function cancelDownload(page: Page): Promise<void> {
-  await page.click('#cancel-download-button');
+  await waitForAndClickButton(page, page, '#cancel-download-button');
 }
 
 /**

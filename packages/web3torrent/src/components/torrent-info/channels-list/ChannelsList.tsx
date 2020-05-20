@@ -22,7 +22,7 @@ function channelIdToTableRow(
   // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
   // clickHandler: (string) => Promise<ChannelState>
 ) {
-  let channelButton;
+  // let channelButton;
   const channel = channels[channelId];
   const isBeneficiary = participantType === 'beneficiary';
   const wire = torrent.wires.find(
@@ -30,21 +30,21 @@ function channelIdToTableRow(
       wire.paidStreamingExtension.leechingChannelId === channelId ||
       wire.paidStreamingExtension.seedingChannelId === channelId
   );
-  if (channel.status === 'closing') {
-    channelButton = <button disabled>Closing ...</button>;
-  } else if (channel.status === 'closed') {
-    channelButton = <button disabled>Closed</button>;
-  } else if (channel.status === 'challenging') {
-    channelButton = <button disabled>Challenging</button>;
-  } else {
-    channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
-    // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
-    // (
-    //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
-    //     Challenge Channel
-    //   </button>
-    // );
-  }
+  // if (channel.status === 'closing') {
+  //   channelButton = <button disabled>Closing ...</button>;
+  // } else if (channel.status === 'closed') {
+  //   channelButton = <button disabled>Closed</button>;
+  // } else if (channel.status === 'challenging') {
+  //   channelButton = <button disabled>Challenging</button>;
+  // } else {
+  //   channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
+  // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
+  // (
+  //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
+  //     Challenge Channel
+  //   </button>
+  // );
+  // }
 
   let dataTransferred: string;
   const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
@@ -59,7 +59,10 @@ function channelIdToTableRow(
 
   return (
     <tr className="peerInfo" key={channelId}>
-      <td className="channel">{channelButton}</td>
+      <td className="channel">
+        <button disabled>{channel.status}</button>
+        {/* temporal thing to show the true state instead of a parsed one */}
+      </td>
       <td className="channel-id">{channelId}</td>
       <td className="peer-id">{peerAccount}</td>
       <td className="transferred">
