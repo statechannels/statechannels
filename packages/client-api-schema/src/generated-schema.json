@@ -41,8 +41,36 @@
       ],
       "type": "object"
     },
+    "ApproveBudgetAndFundParams": {
+      "additionalProperties": false,
+      "properties": {
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "playerParticipantId": {
+          "type": "string"
+        },
+        "requestedReceiveCapacity": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "requestedSendCapacity": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "token": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "hub",
+        "playerParticipantId",
+        "token",
+        "requestedSendCapacity",
+        "requestedReceiveCapacity"
+      ],
+      "type": "object"
+    },
     "ApproveBudgetAndFundRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22ApproveBudgetAndFund%22%2CTokenBudgetRequest%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22ApproveBudgetAndFund%22%2CApproveBudgetAndFundParams%3E"
     },
     "ApproveBudgetAndFundResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CDomainBudget%3E"
@@ -954,7 +982,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"ApproveBudgetAndFund\",TokenBudgetRequest>": {
+    "JsonRpcRequest<\"ApproveBudgetAndFund\",ApproveBudgetAndFundParams>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -973,7 +1001,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/TokenBudgetRequest"
+          "$ref": "#/definitions/ApproveBudgetAndFundParams"
         }
       },
       "required": [
@@ -1807,34 +1835,6 @@
         "availableReceiveCapacity",
         "availableSendCapacity",
         "channels"
-      ],
-      "type": "object"
-    },
-    "TokenBudgetRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerParticipantId": {
-          "type": "string"
-        },
-        "requestedReceiveCapacity": {
-          "$ref": "#/definitions/Uint256"
-        },
-        "requestedSendCapacity": {
-          "$ref": "#/definitions/Uint256"
-        },
-        "token": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "hub",
-        "playerParticipantId",
-        "token",
-        "requestedSendCapacity",
-        "requestedReceiveCapacity"
       ],
       "type": "object"
     },
