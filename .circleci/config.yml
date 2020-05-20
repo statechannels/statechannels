@@ -307,6 +307,7 @@ jobs:
     docker:
       - image: circleci/node:10.16.3-browsers
     environment:
+      HEADLESS: false
       SC_ENV: circle-integration-w3t
     steps:
       - install_xvfb
@@ -371,6 +372,7 @@ jobs:
     docker:
       - image: circleci/node:10.16.3-browsers
     environment:
+      HEADLESS: false
       SC_ENV: circle-integration-w3t-with-hub
     steps:
       - checkout
