@@ -284,7 +284,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         channelState.channelId === seedingChannelId ||
         channelState.channelId === leechingChannelId
       ) {
-        if (channelState.status === 'closed' || channelState.status === 'closing') {
+        if (channelState.status === 'closed') {
           wire.paidStreamingExtension.seedingChannelId = null;
           wire.paidStreamingExtension.leechingChannelId = null;
           log.info(
