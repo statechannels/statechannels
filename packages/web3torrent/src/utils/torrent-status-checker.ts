@@ -1,5 +1,5 @@
 import {Status, TorrentUI, TorrentStaticData} from '../types';
-import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
+import WebTorrentPaidStreamingClient, {PaidStreamingTorrent} from '../library/web3torrent-lib';
 import WebTorrent from 'webtorrent';
 import {getStaticTorrentUI} from '../constants';
 
@@ -58,7 +58,7 @@ export function getTorrentUI(
 ): TorrentUI {
   const staticTorrent = getStaticTorrentUI(staticData.infoHash, staticData.name, staticData.length);
 
-  const liveTorrent = web3Torrent.get(staticData.infoHash);
+  const liveTorrent = web3Torrent.get(staticData.infoHash) as PaidStreamingTorrent;
   if (!liveTorrent) {
     return {
       ...staticTorrent,
@@ -72,6 +72,7 @@ export function getTorrentUI(
     // The spread operator above doesn't quite work for property definitions below
     // It might be because WebTorrent.Torrent uses getters for these properties?
     files: liveTorrent.files,
+    wires: liveTorrent.wires,
     done: liveTorrent.done,
     downloaded: liveTorrent.downloaded || staticTorrent.downloaded,
     downloadSpeed: liveTorrent.downloadSpeed,
