@@ -7,6 +7,7 @@ export type EnableEthereumResponse = JsonRpcResponse<{
   selectedAddress: Address;
   walletVersion: string;
 }>;
+
 export type EnableEthereumError = JsonRpcError<
   typeof EthereumNotEnabledErrorCode,
   'Ethereum Not Enabled'

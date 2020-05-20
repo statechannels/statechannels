@@ -1,75 +1,53 @@
-import {
-  GetWalletInformationRequest,
-  GetWalletInformationResponse
-} from './methods/GetWalletInformationRequest';
-
-import {
-  EnableEthereumRequest,
-  EnableEthereumResponse,
-  EnableEthereumError
-} from './methods/EnableEthereumRequest';
-
-import {CreateChannelRequest, CreateChannelResponse} from './methods/CreateChannelRequest';
-import {JoinChannelRequest, JoinChannelResponse} from './methods/JoinChannelRequest';
-import {UpdateChannelRequest, UpdateChannelResponse} from './methods/UpdateChannelRequest';
-import {GetStateRequest, GetStateResponse} from './methods/GetStateRequest';
-import {PushMessageRequest, PushMessageResponse} from './methods/PushMessageRequest';
-
-import {
-  CloseChannelRequest,
-  CloseChannelResponse,
-  NotYourTurnError
-} from './methods/CloseChannelRequest';
-
-import {ChallengeChannelRequest, ChallengeChannelResponse} from './methods/ChallengeChannelRequest';
-
-import {GetChannelsRequest, GetChannelsResponse} from './methods/GetChannelsRequest';
-
-import {GetBudgetRequest, GetBudgetResponse} from './methods/GetBudgetRequest';
-
-import {
-  ApproveBudgetAndFundRequest,
-  ApproveBudgetAndFundResponse
-} from './methods/ApproveBudgetAndFundRequest';
-import {
-  CloseAndWithdrawRequest,
-  CloseAndWithdrawResponse,
-  UserDeclinedErrorResponse
-} from './methods/CloseAndWithdrawParams';
+import * as GetClientWalletInformation from './methods/GetWalletInformation';
+import * as EnableEthereum from './methods/EnableEthereum';
+import * as CreateChannel from './methods/CreateChannel';
+import * as JoinChannel from './methods/JoinChannel';
+import * as UpdateChannel from './methods/UpdateChannel';
+import * as GetState from './methods/GetState';
+import * as PushMessage from './methods/PushMessage';
+import * as CloseChannel from './methods/CloseChannel';
+import * as ChallengeChannel from './methods/ChallengeChannel';
+import * as GetChannels from './methods/GetChannels';
+import * as GetBudget from './methods/GetBudget';
+import * as ApproveBudgetAndFund from './methods/ApproveBudgetAndFund';
+import * as CloseAndWithdraw from './methods/CloseAndWithdraw';
 
 import {Notification} from './notifications';
 
 export type Request =
-  | CreateChannelRequest
-  | JoinChannelRequest
-  | UpdateChannelRequest
-  | GetWalletInformationRequest
-  | EnableEthereumRequest
-  | GetStateRequest
-  | PushMessageRequest
-  | ChallengeChannelRequest
-  | GetBudgetRequest
-  | ApproveBudgetAndFundRequest
-  | CloseChannelRequest
-  | CloseAndWithdrawRequest
-  | GetChannelsRequest;
+  | CreateChannel.CreateChannelRequest
+  | JoinChannel.JoinChannelRequest
+  | UpdateChannel.UpdateChannelRequest
+  | GetClientWalletInformation.GetWalletInformationRequest
+  | EnableEthereum.EnableEthereumRequest
+  | GetState.GetStateRequest
+  | PushMessage.PushMessageRequest
+  | ChallengeChannel.ChallengeChannelRequest
+  | GetBudget.GetBudgetRequest
+  | ApproveBudgetAndFund.ApproveBudgetAndFundRequest
+  | CloseChannel.CloseChannelRequest
+  | CloseAndWithdraw.CloseAndWithdrawRequest
+  | GetChannels.GetChannelsRequest;
 
 export type Response =
-  | CreateChannelResponse
-  | JoinChannelResponse
-  | UpdateChannelResponse
-  | GetWalletInformationResponse
-  | EnableEthereumResponse
-  | GetStateResponse
-  | PushMessageResponse
-  | ChallengeChannelResponse
-  | GetBudgetResponse
-  | CloseChannelResponse
-  | ApproveBudgetAndFundResponse
-  | CloseAndWithdrawResponse
-  | GetChannelsResponse;
+  | CreateChannel.CreateChannelResponse
+  | JoinChannel.JoinChannelResponse
+  | UpdateChannel.UpdateChannelResponse
+  | GetClientWalletInformation.GetWalletInformationResponse
+  | EnableEthereum.EnableEthereumResponse
+  | GetState.GetStateResponse
+  | PushMessage.PushMessageResponse
+  | ChallengeChannel.ChallengeChannelResponse
+  | GetBudget.GetBudgetResponse
+  | CloseChannel.CloseChannelResponse
+  | ApproveBudgetAndFund.ApproveBudgetAndFundResponse
+  | CloseAndWithdraw.CloseAndWithdrawResponse
+  | GetChannels.GetChannelsResponse;
 
-export type ErrorResponse = EnableEthereumError | UserDeclinedErrorResponse | NotYourTurnError;
+export type ErrorResponse =
+  | EnableEthereum.EnableEthereumError
+  | CloseAndWithdraw.CloseAndWithdrawError
+  | CloseChannel.NotYourTurnError;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 
