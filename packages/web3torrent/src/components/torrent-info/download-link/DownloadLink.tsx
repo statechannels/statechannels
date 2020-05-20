@@ -22,15 +22,6 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
     return true; // necessary to ensure href is triggered
   };
 
-  if (torrent.done && !torrent.originalSeed) {
-    track('Torrent Finished Downloading', {
-      infoHash: torrent.infoHash,
-      magnetURI: torrent.magnetURI,
-      filename: torrent.name,
-      filesize: torrent.length
-    });
-  }
-
   return (
     <>
       {torrent.done && !torrent.originalSeed && (

@@ -292,6 +292,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           } else {
             wire.paidStreamingExtension.seedingChannelId = null;
           }
+          track('Torrent Finished Downloading', {
+            infoHash: torrent.infoHash,
+            magnetURI: torrent.magnetURI,
+            filename: torrent.name,
+            filesize: torrent.length
+          });
           this.emitTorrentUpdated(torrent.infoHash);
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
