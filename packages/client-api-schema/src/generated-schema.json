@@ -174,6 +174,16 @@
     "CloseAndWithdrawResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540%3E"
     },
+    "CloseChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C300%2C%22Not%20your%20turn%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C301%2C%22Channel%20not%20found%22%3E"
+        }
+      ]
+    },
     "CloseChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -273,15 +283,12 @@
           "$ref": "#/definitions/CloseAndWithdrawError"
         },
         {
-          "$ref": "#/definitions/NotYourTurnError"
+          "$ref": "#/definitions/CloseChannelError"
+        },
+        {
+          "$ref": "#/definitions/UpdateChannelError"
         }
       ]
-    },
-    "EthereumNotEnabledErrorCode": {
-      "enum": [
-        100
-      ],
-      "type": "number"
     },
     "FundingStrategy": {
       "enum": [
@@ -451,6 +458,301 @@
           "required": [
             "code",
             "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<301,\"Channel not found\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                301
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel not found"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<400,\"Channel not found\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                400
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel not found"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1291>": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                401
+              ],
+              "type": "number"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "channelStatus": {
+                  "$ref": "#/definitions/ChannelStatus"
+                },
+                "proposedUpdate": {
+                  "$ref": "#/definitions/UpdateChannelParams"
+                }
+              },
+              "required": [
+                "channelStatus",
+                "proposedUpdate"
+              ],
+              "type": "object"
+            },
+            "message": {
+              "enum": [
+                "Invalid transition"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1291>": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                402
+              ],
+              "type": "number"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "appData": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "appData"
+              ],
+              "type": "object"
+            },
+            "message": {
+              "enum": [
+                "Invalid app data"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<403,\"Channel closed\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                403
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel closed"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<403,\"Not your turn\",structure-1165839259-1047-1075-1165839259-985-1077-1165839259-966-1078-1165839259-0-1291>": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                403
+              ],
+              "type": "number"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "currentTurnNum": {
+                  "$ref": "#/definitions/Uint256"
+                }
+              },
+              "required": [
+                "currentTurnNum"
+              ],
+              "type": "object"
+            },
+            "message": {
+              "enum": [
+                "Not your turn"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "data"
           ],
           "type": "object"
         },
@@ -1335,9 +1637,6 @@
     "MessageQueuedNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22MessageQueued%22%2CMessage%3E"
     },
-    "NotYourTurnError": {
-      "$ref": "#/definitions/JsonRpcError%3C300%2C%22Not%20your%20turn%22%3E"
-    },
     "Notification": {
       "anyOf": [
         {
@@ -1547,6 +1846,25 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "UpdateChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1291%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1291%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%2Cstructure-1165839259-1047-1075-1165839259-985-1077-1165839259-966-1078-1165839259-0-1291%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Channel%20closed%22%3E"
+        }
+      ]
+    },
     "UpdateChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -1582,12 +1900,6 @@
     },
     "UpdateChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
-    },
-    "UserDeclinedErrorCode": {
-      "enum": [
-        200
-      ],
-      "type": "number"
     }
   }
 }
