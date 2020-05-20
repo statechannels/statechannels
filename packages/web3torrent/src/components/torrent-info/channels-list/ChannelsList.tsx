@@ -59,7 +59,7 @@ function channelIdToTableRow(
 
   return (
     <tr className="peerInfo" key={channelId}>
-      <td className="channel">
+      <td className={`channel ${channel.status}`}>
         <button disabled>{channel.status}</button>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
