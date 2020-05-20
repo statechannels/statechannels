@@ -408,7 +408,16 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
-      log.info('<< Torrent DONE!');
+      log.info({torrent, channels: this.paymentChannelClient.channelCache}, '<< TORRENT DONE!');
+      torrent.wires.map(wire => {
+        const {leechingChannelId: channelId} = wire.paidStreamingExtension;
+        const channelOfWire = this.paymentChannelClient.channelCache[channelId];
+        if (channelOfWire) {
+          const balance = bigNumberify(channelOfWire.beneficiaryBalance).toString();
+          const downloaded = wire.downloaded;
+          log.info(`<< DONE! Channel ${channelId} Balance: ${balance} Downloaded ${downloaded}`);
+        }
+      });
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
