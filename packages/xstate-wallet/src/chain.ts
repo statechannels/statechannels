@@ -332,11 +332,13 @@ export class ChainWatcher implements Chain {
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
-    const convertedSignedStates = support.reduce(
-      (previous, current) => previous.concat(toNitroSignedState(current)),
-      new Array<NitroSignedState>()
-    );
-    console.log(convertedSignedStates);
+    const convertedSignedStates = support
+      .reduce(
+        (previous, current) => previous.concat(toNitroSignedState(current)),
+        new Array<NitroSignedState>()
+      )
+      .sort((s1, s2) => s1.state.turnNum - s2.state.turnNum);
+
     const response = await this.signer.sendTransaction({
       ...Transactions.createForceMoveTransaction(
         convertedSignedStates,
