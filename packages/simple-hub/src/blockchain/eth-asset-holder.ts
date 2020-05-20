@@ -1,5 +1,5 @@
 import AsyncLock from 'async-lock';
-import {Contract, ContractFactory, ethers, providers, BigNumber} from 'ethers';
+import {Contract, ContractFactory, ethers, providers, BigNumber, utils} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
 import {log} from '../logger';
@@ -50,11 +50,15 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
       {value: value.sub(expectedHeld).toHexString()},
       'submitting deposit transaction to eth asset holder'
     );
+
+    // Gas Price: in theory, it would be nice to use provider.getGasPrice() method to estimate a competitive gas price
+    // In practice, getGasPrice() seems to always return 1GWei.
     const tx: TransactionResponse = await ethAssetHolder.deposit(
       channelID,
       expectedHeld.toHexString(),
       value,
       {
+        gasPrice: utils.parseUnits('100', 'gwei'),
         value: value.sub(expectedHeld)
       }
     );
