@@ -5,8 +5,9 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
-import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
+import {Blockie, Tooltip, Avatar} from 'rimble-ui';
+import Badge from '@material-ui/core/Badge';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -64,7 +65,28 @@ function channelIdToTableRow(
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="channel-id">{channelId}</td>
-      <td className="peer-id">{peerAccount}</td>
+      <Badge
+        badgeContent={
+          channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+        }
+        color={'primary'}
+        max={999}
+      >
+        <Tooltip message={peerAccount}>
+          <Avatar src="" ml="auto" mr="auto">
+            <Blockie
+              opts={{
+                seed: peerAccount,
+                color: '#2728e2',
+                bgcolor: '#46A5D0',
+                size: 15,
+                scale: 3,
+                spotcolor: '#000'
+              }}
+            />
+          </Avatar>
+        </Tooltip>
+      </Badge>
       <td className="transferred">
         {dataTransferred}
         <i className={isBeneficiary ? 'up' : 'down'}></i>
