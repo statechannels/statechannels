@@ -47,7 +47,8 @@ export type Response =
 export type ErrorResponse =
   | EnableEthereum.EnableEthereumError
   | CloseAndWithdraw.CloseAndWithdrawError
-  | CloseChannel.NotYourTurnError;
+  | CloseChannel.CloseChannelError
+  | UpdateChannel.UpdateChannelError;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 
