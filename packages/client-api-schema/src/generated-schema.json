@@ -172,7 +172,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-378-396-736846332-361-397-736846332-322-398-736846332-0-496%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540%3E"
     },
     "CloseChannelParams": {
       "additionalProperties": false,
@@ -259,10 +259,10 @@
       "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-209-212-721393493-176-213-721393493-139-214-721393493-0-469%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499%3E"
     },
     "EnableEthereumResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-268-351-721393493-251-352-721393493-214-353-721393493-0-469%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499%3E"
     },
     "ErrorResponse": {
       "anyOf": [
@@ -276,6 +276,12 @@
           "$ref": "#/definitions/NotYourTurnError"
         }
       ]
+    },
+    "EthereumNotEnabledErrorCode": {
+      "enum": [
+        100
+      ],
+      "type": "number"
     },
     "FundingStrategy": {
       "enum": [
@@ -805,7 +811,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-209-212-721393493-176-213-721393493-139-214-721393493-0-469>": {
+    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1188,7 +1194,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-721393493-268-351-721393493-251-352-721393493-214-353-721393493-0-469>": {
+    "JsonRpcResponse<structure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1228,7 +1234,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-378-396-736846332-361-397-736846332-322-398-736846332-0-496>": {
+    "JsonRpcResponse<structure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1576,6 +1582,12 @@
     },
     "UpdateChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "UserDeclinedErrorCode": {
+      "enum": [
+        200
+      ],
+      "type": "number"
     }
   }
 }
