@@ -70,6 +70,7 @@ export function isError(message: JsonRpcMessage): message is ErrorResponse {
 export * from './notifications';
 export * from './methods';
 export * from './data-types';
+export * from './error-codes';
 
 import {ErrorCodes} from './error-codes';
 
