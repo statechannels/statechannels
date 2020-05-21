@@ -5,7 +5,7 @@ import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
-import {Avatar} from '@material-ui/core';
+import {Avatar, Badge} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
 
 const bigNumberify = utils.bigNumberify;
@@ -66,18 +66,20 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
             <td className="budget-identity">
               <span>
                 <Tooltip message={window.channelProvider.selectedAddress}>
-                  <Avatar>
-                    <Blockie
-                      opts={{
-                        seed: window.channelProvider.selectedAddress,
-                        color: '#2728e2',
-                        bgcolor: '#46A5D0',
-                        size: 15,
-                        scale: 3,
-                        spotcolor: '#000'
-                      }}
-                    />
-                  </Avatar>
+                  <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+                    <Avatar>
+                      <Blockie
+                        opts={{
+                          seed: window.channelProvider.selectedAddress,
+                          color: '#2728e2',
+                          bgcolor: '#46A5D0',
+                          size: 15,
+                          scale: 3,
+                          spotcolor: '#000'
+                        }}
+                      />
+                    </Avatar>
+                  </Badge>
                 </Tooltip>
               </span>
             </td>

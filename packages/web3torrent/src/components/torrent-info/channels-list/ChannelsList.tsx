@@ -74,18 +74,20 @@ function channelIdToTableRow(
       <td className="channel-id">
         <span>
           <Tooltip message={channelId}>
-            <Avatar>
-              <Blockie
-                opts={{
-                  seed: channelId,
-                  color: '#FC473D',
-                  bgcolor: '#E4A663',
-                  size: 15,
-                  scale: 3,
-                  spotcolor: '#000'
-                }}
-              />
-            </Avatar>
+            <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+              <Avatar>
+                <Blockie
+                  opts={{
+                    seed: channelId,
+                    color: '#FC473D',
+                    bgcolor: '#E4A663',
+                    size: 15,
+                    scale: 3,
+                    spotcolor: '#000'
+                  }}
+                />
+              </Avatar>
+            </Badge>
           </Tooltip>
         </span>
       </td>
