@@ -65,10 +65,23 @@ function channelIdToTableRow(
 
   const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
 
+  let connectionStatus;
+  if (wire && (channel.status === 'running' || channel.status === 'closing')) {
+    connectionStatus = isBeneficiary ? 'uploading' : 'downloading';
+  } else if (channel.status === 'closed') {
+    connectionStatus = 'finished';
+  } else if (wire && channel.status === 'proposed') {
+    connectionStatus = 'connecting';
+  } else if (!wire) {
+    connectionStatus = 'disconnected';
+  }
+
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
-        <button disabled>{channel.status}</button>
+        <div className={`dot ${connectionStatus}`}>
+          <span className="tooltiptext">{connectionStatus}</span>
+        </div>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">

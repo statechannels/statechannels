@@ -48,9 +48,71 @@ section.wires-list {
           min-width: 50px;
           padding: 5px 5px;
           vertical-align: middle;
-          width: 25%;
+          width: 20%;
           min-width: 100px;
           text-align: center;
+        }
+
+        .channel {
+          padding-left: 30px;
+        }
+
+        .dot {
+          height: 15px;
+          width: 15px;
+          background-color: #bbb;
+          border-radius: 50%;
+          display: inline-block;
+          &.downloading {
+            background-color: #006dff;
+          }
+          &.uploading {
+            background-color: #1ec51b;
+          }
+          &.connecting {
+            background-color: #717171;
+          }
+          &.disconnected {
+            background-color: #616161;
+            &:before {
+              color: #fff;
+              font-size: 13px;
+              padding-left: 4px;
+              position: absolute;
+              content: '?';
+            }
+          }
+          &.finished {
+            background-color: #e8e8e8;
+          }
+          &.downloading,
+          &.uploading,
+          &.connecting {
+            animation: pulsate 2s ease-in-out;
+            animation-iteration-count: infinite;
+            opacity: 1;
+          }
+
+          /* Tooltip text */
+          .tooltiptext {
+            visibility: hidden;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            padding: 5px 5px;
+            border-radius: 6px;
+            margin: -5px 20px;
+            font-size: 12px;
+            background-color: #717171;
+            /* Position the tooltip text - see examples below! */
+            position: absolute;
+            z-index: 1;
+          }
+
+          /* Show the tooltip text when you mouse over the tooltip container */
+          &:hover .tooltiptext {
+            visibility: visible;
+          }
         }
 
         .peer-id,
@@ -112,5 +174,17 @@ section.wires-list {
       transform: rotate(45deg);
       -webkit-transform: rotate(45deg);
     }
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
   }
 }
