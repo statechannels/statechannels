@@ -5,7 +5,7 @@ import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -114,7 +114,7 @@ describe('respond', () => {
 
       const challengeExistsHash = slotEmpty
         ? HashZero
-        : hashChannelStorage({
+        : channelDataToChannelStorageHash({
             turnNumRecord,
             finalizesAt,
             state: challenger ? challengeState : undefined,
@@ -145,9 +145,9 @@ describe('respond', () => {
           newTurnNumRecord: bigNumberify(turnNumRecord + 1),
         });
 
-        // Compute and check new expected ChannelStorageHash
+        // Compute and check new expected ChannelDataHash
 
-        const expectedChannelStorageHash = hashChannelStorage({
+        const expectedChannelStorageHash = channelDataToChannelStorageHash({
           turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
         });

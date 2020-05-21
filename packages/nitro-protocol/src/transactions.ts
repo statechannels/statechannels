@@ -8,13 +8,13 @@ import {getStateSignerAddress} from './signatures';
 import {SignedState} from '.';
 import {Signature} from 'ethers/utils';
 
-export async function getData(provider, contractAddress: string, channelId: string) {
+export async function getChannelStorage(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
     contractAddress,
     forceMoveTrans.ForceMoveContractInterface,
     provider
   );
-  return await forceMove.getData(channelId);
+  return await forceMove.getChannelStorage(channelId);
 }
 
 export function createForceMoveTransaction(

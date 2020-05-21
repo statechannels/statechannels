@@ -34,7 +34,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
 
         _requireMatchingStorage(
-            ChannelStorage(
+            ChannelData(
                 turnNumRecord,
                 finalizesAt,
                 stateHash,
@@ -81,7 +81,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
 
         _requireMatchingStorage(
-            ChannelStorage(
+            ChannelData(
                 turnNumRecord,
                 finalizesAt,
                 stateHash,
@@ -152,8 +152,8 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         // effects
         
 
-        channelStorageHashes[channelId] = _hashChannelStorage(
-            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
+        channelStorageHashes[channelId] = _hashChannelData(
+            ChannelData(0, now, bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
 
