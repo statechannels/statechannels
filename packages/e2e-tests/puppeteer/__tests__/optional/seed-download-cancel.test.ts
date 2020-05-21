@@ -17,14 +17,12 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForNthState,
   waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   takeScreenshot,
-  waitForTransactionIfNecessary,
-  waitForClosedState
+  waitForTransactionIfNecessary
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -75,7 +73,7 @@ describe('Optional Integration Tests', () => {
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('Optional - Torrent a file - Cancelling at State N°10', async () => {
+  it('Optional - Torrent a file - Cancelling', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
@@ -96,17 +94,12 @@ describe('Optional Integration Tests', () => {
       await waitAndApproveDeposit(web3tTabB, metamaskB);
     }
 
-    const listenFor10thState = waitForNthState(web3tTabB, 10);
-
     await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');
 
-    await listenFor10thState;
-    console.log('Got until 10th state');
-
-    const listenForClosedState = forEachTab(waitForClosedState);
+    await web3tTabB.waitForSelector('.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -117,8 +110,8 @@ describe('Optional Integration Tests', () => {
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
-    console.log('Wait for the ChannelUpdated "closed" state');
-    await listenForClosedState;
+    console.log('Wait for the "closed" state');
+    await forEachTab(tab => tab.waitForSelector('.channel.closed'));
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.earned');
