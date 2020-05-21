@@ -23,5 +23,5 @@
     }
   ],
   "include": ["src/**/*", "env.ts"],
-  "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
+  "exclude": ["**/*test_data.ts", "**/__test__/*", "**/__test-with-chain__/*"]
 }

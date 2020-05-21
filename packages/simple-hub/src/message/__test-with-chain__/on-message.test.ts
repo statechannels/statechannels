@@ -24,7 +24,6 @@ describe('server: end to end test', () => {
       onIncomingMessage(observable, resolve, _.noop)
     );
     await subscriptionPromise;
-
     expect(mocked(deleteIncomingMessage)).toHaveBeenCalled();
   });
 });
