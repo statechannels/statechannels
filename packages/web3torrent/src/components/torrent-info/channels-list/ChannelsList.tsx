@@ -72,20 +72,22 @@ function channelIdToTableRow(
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="channel-id">
-        <Tooltip message={channelId}>
-          <Avatar>
-            <Blockie
-              opts={{
-                seed: channelId,
-                color: '#FC473D',
-                bgcolor: '#E4A663',
-                size: 15,
-                scale: 3,
-                spotcolor: '#000'
-              }}
-            />
-          </Avatar>
-        </Tooltip>
+        <span>
+          <Tooltip message={channelId}>
+            <Avatar>
+              <Blockie
+                opts={{
+                  seed: channelId,
+                  color: '#FC473D',
+                  bgcolor: '#E4A663',
+                  size: 15,
+                  scale: 3,
+                  spotcolor: '#000'
+                }}
+              />
+            </Avatar>
+          </Tooltip>
+        </span>
       </td>
       <td className="peer-id">
         <Tooltip message={peerSelectedAddress}>

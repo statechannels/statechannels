@@ -41,15 +41,15 @@ table.domain-budget-table {
         min-width: 50px;
         padding: 5px 5px;
         vertical-align: middle;
-        text-align: left;
+        text-align: center;
       }
 
-      td.budget-number {
-        width: 40%;
-      }
-
-      td.budget-button {
-        width: 20%;
+      td.budget-number,
+      td.budget-identity,
+      td.budget-button,
+      td.budget-spent,
+      td.budget-recieved {
+        width: 25%;
       }
     }
   }

@@ -6,8 +6,8 @@ section.wires-list {
   table.wires-list-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
-    vertical-align: center;
+    text-align: center;
+    vertical-align: middle;
 
     tbody,
     thead {
@@ -48,21 +48,17 @@ section.wires-list {
           min-width: 50px;
           padding: 5px 5px;
           vertical-align: middle;
-          width: 25%;
+          width: 20%;
           min-width: 100px;
-          text-align: left;
-        }
-
-        .channel {
+          text-align: center;
         }
 
         .peer-id,
         .channel-id {
-          text-align: left;
+          text-align: center;
           font-style: italic;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 100px;
         }
 
         .channel-id {
@@ -76,13 +72,13 @@ section.wires-list {
         }
         .paid {
           min-width: 70px;
-          text-align: right;
+          text-align: center;
           color: red;
           width: 20%;
         }
         .earned {
           min-width: 70px;
-          text-align: right;
+          text-align: center;
           width: 20%;
           i {
             transform: rotate(-135deg);

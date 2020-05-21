@@ -64,26 +64,28 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </button>
             </td>
             <td className="budget-identity">
-              <Tooltip message={window.channelProvider.selectedAddress}>
-                <Avatar>
-                  <Blockie
-                    opts={{
-                      seed: window.channelProvider.selectedAddress,
-                      color: '#2728e2',
-                      bgcolor: '#46A5D0',
-                      size: 15,
-                      scale: 3,
-                      spotcolor: '#000'
-                    }}
-                  />
-                </Avatar>
-              </Tooltip>
+              <span>
+                <Tooltip message={window.channelProvider.selectedAddress}>
+                  <Avatar>
+                    <Blockie
+                      opts={{
+                        seed: window.channelProvider.selectedAddress,
+                        color: '#2728e2',
+                        bgcolor: '#46A5D0',
+                        size: 15,
+                        scale: 3,
+                        spotcolor: '#000'
+                      }}
+                    />
+                  </Avatar>
+                </Tooltip>
+              </span>
             </td>
-            <td className="budget-number">
+            <td className="budget-sent">
               {' '}
               {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
             </td>
-            <td className="budget-number">
+            <td className="budget-received">
               {' '}
               {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
             </td>
