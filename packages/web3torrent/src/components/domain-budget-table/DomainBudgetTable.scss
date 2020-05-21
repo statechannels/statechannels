@@ -32,6 +32,7 @@ table.domain-budget-table {
       flex-direction: row;
       width: 100%;
       border-bottom: 1px solid $c-mediumgrey;
+      max-height: 40px;
 
       &:last-child {
         border-bottom: 0px solid transparent;
@@ -41,16 +42,20 @@ table.domain-budget-table {
         min-width: 50px;
         padding: 5px 5px;
         vertical-align: middle;
-        text-align: left;
+        text-align: center;
       }
 
-      td.budget-number {
-        width: 40%;
-      }
-
-      td.budget-button {
-        width: 20%;
+      td.budget-number,
+      td.budget-identity,
+      td.budget-button,
+      td.budget-spent,
+      td.budget-received {
+        width: 25%;
       }
     }
   }
+}
+
+.CircularProgressbar {
+  height: 40px;
 }
