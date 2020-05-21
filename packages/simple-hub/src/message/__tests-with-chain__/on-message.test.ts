@@ -4,6 +4,7 @@ import {ledgerStateIncoming} from '../../wallet/test-helpers';
 import {onIncomingMessage} from '../on-message';
 import {deleteIncomingMessage} from '../firebase-relay';
 import {mocked} from 'ts-jest/utils';
+import _ from 'lodash';
 
 jest.mock('../firebase-relay');
 
@@ -19,7 +20,9 @@ describe('server: end to end test', () => {
         })
       }
     ]);
-    const subscriptionPromise = new Promise(resolve => onIncomingMessage(observable, resolve));
+    const subscriptionPromise = new Promise(resolve =>
+      onIncomingMessage(observable, resolve, _.noop)
+    );
     await subscriptionPromise;
 
     expect(mocked(deleteIncomingMessage)).toHaveBeenCalled();

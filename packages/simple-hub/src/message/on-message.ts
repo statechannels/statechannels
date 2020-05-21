@@ -5,7 +5,7 @@ import {log} from '../logger';
 import {depositsToMake} from '../wallet/deposit';
 import {makeDeposits} from '../blockchain/eth-asset-holder';
 import {pipe} from 'fp-ts/lib/pipeable';
-import {map as fpMap, fold, Either, getOrElse} from 'fp-ts/lib/Either';
+import {map as fpMap, fold, Either} from 'fp-ts/lib/Either';
 import {Observable} from 'rxjs';
 import {Message} from '../wallet/xstate-wallet-internals';
 
@@ -14,6 +14,7 @@ export function onIncomingMessage(
     snapshotKey: string;
     message: Either<Error, Message>;
   }>,
+  onNext?: () => void,
   onComplete?: () => void
 ) {
   return observable
@@ -32,9 +33,9 @@ export function onIncomingMessage(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
         try {
           deleteIncomingMessage(snapshotKey);
-          //await pipe(depositsToMake, fold(log.error, makeDeposits));
-          await makeDeposits(getOrElse(() => [])(depositsToMake));
-          pipe(messageToSend, fold(log.error, sendReplies));
+          await pipe(messageToSend, fold(log.error, sendReplies));
+          await pipe(depositsToMake, fold(log.error, makeDeposits));
+          onNext();
         } catch (e) {
           log.error(e);
         }

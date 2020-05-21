@@ -21,6 +21,7 @@ export async function makeDeposits(
   }[]
 ) {
   log.info(`makeDeposit: attempting to make ${depositsToMake.length} deposits`);
+
   await Promise.all(
     depositsToMake.map(depositToMake => {
       log.info(
@@ -30,21 +31,17 @@ export async function makeDeposits(
     })
   );
   log.info(`makeDepost: making ${depositsToMake.length} deposits`);
-  console.log('About to err');
-  throw new Error('random error');
 }
 
 async function fund(channelID: string, value: BigNumber): Promise<string> {
-  // We lock to avoid this issue: https://github.com/ethers-io/ethers.js/issues/363
-  // When ethers.js attempts to run multiple transactions around the same time it results in an error
-  // due to the nonce getting out of sync.
-  // To avoid this we only allow deposit transactions to happen serially.
-  return lock.acquire('depositing', async release => {
-    if (!ethAssetHolder) ethAssetHolder = await createEthAssetHolder();
+  if (!ethAssetHolder) {
+    const createdEthAssetHolder = await createEthAssetHolder();
+    ethAssetHolder = ethAssetHolder ?? createdEthAssetHolder;
+  }
 
+  await lock.acquire(channelID, async () => {
     const expectedHeld: BigNumber = await ethAssetHolder.holdings(channelID);
     if (expectedHeld.gte(value)) {
-      release();
       return;
     }
 
@@ -71,11 +68,9 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     await tx.wait();
 
     log.info({transaction: {hash: tx.hash}}, 'Transaction mined');
-
-    const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
-    release();
-    return holdings;
   });
+
+  return (await ethAssetHolder.holdings(channelID)).toHexString();
 }
 
 export async function createEthAssetHolder() {
