@@ -77,7 +77,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
                     <Avatar>
                       <Blockie
                         opts={{
-                          seed: window.channelProvider.selectedAddress,
+                          seed: window.channelProvider.selectedAddress.toLowerCase(),
                           color: '#2728e2',
                           bgcolor: '#46A5D0',
                           size: 15,
