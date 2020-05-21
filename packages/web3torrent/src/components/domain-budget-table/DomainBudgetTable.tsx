@@ -82,8 +82,8 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
             </td>
             <td className="budget-identity">
               <Tooltip message={window.channelProvider.selectedAddress.toLowerCase()}>
-                <Badge badgeContent={0} overlap={'rectangle'} showZero={false} max={999}>
-                  <Avatar variant="rounded">
+                <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+                  <Avatar>
                     <Blockie
                       opts={{
                         seed: window.channelProvider.selectedAddress.toLowerCase(),

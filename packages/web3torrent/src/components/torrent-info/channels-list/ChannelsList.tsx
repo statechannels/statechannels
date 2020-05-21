@@ -78,11 +78,11 @@ function channelIdToTableRow(
               channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
             }
             color={isBeneficiary ? 'primary' : 'error'}
-            overlap={'rectangle'}
+            overlap={'circle'}
             showZero={false}
             max={999}
           >
-            <Avatar variant="rounded">
+            <Avatar>
               <Blockie
                 opts={{
                   seed: peerSelectedAddress,

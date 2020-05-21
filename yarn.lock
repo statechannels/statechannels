@@ -27365,6 +27365,11 @@ react-burger-menu@2.6.13:
     prop-types "^15.7.2"
     snapsvg-cjs "0.0.6"
 
+react-circular-progressbar@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/react-circular-progressbar/-/react-circular-progressbar-2.0.3.tgz#fa8eb59f8db168d2904bae4590641792c80f5991"
+  integrity sha512-YKN+xAShXA3gYihevbQZbavfiJxo83Dt1cUxqg/cltj4VVsRQpDr7Fg1mvjDG3x1KHGtd9NmYKvJ2mMrPwbKyw==
+
 react-clientside-effect@^1.2.0, react-clientside-effect@^1.2.2:
   version "1.2.2"
   resolved "https://registry.npmjs.org/react-clientside-effect/-/react-clientside-effect-1.2.2.tgz#6212fb0e07b204e714581dd51992603d1accc837"
