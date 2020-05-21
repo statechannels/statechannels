@@ -71,26 +71,6 @@ function channelIdToTableRow(
         <button disabled>{channel.status}</button>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
-      <td className="channel-id">
-        <span>
-          <Tooltip message={channelId}>
-            <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-              <Avatar>
-                <Blockie
-                  opts={{
-                    seed: channelId,
-                    color: '#FC473D',
-                    bgcolor: '#E4A663',
-                    size: 15,
-                    scale: 3,
-                    spotcolor: '#000'
-                  }}
-                />
-              </Avatar>
-            </Badge>
-          </Tooltip>
-        </span>
-      </td>
       <td className="peer-id">
         <Tooltip message={peerSelectedAddress}>
           <Badge
@@ -98,11 +78,11 @@ function channelIdToTableRow(
               channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
             }
             color={isBeneficiary ? 'primary' : 'error'}
-            overlap={'circle'}
+            overlap={'rectangle'}
             showZero={false}
             max={999}
           >
-            <Avatar>
+            <Avatar variant="rounded">
               <Blockie
                 opts={{
                   seed: peerSelectedAddress,
@@ -143,7 +123,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
           <thead>
             <tr className="peerInfo">
               <td>Status</td>
-              <td>Channel</td>
               <td>Peer</td>
               <td>Data</td>
               <td>Funds</td>

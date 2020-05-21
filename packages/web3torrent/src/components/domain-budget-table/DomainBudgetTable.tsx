@@ -71,24 +71,22 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </button>
             </td>
             <td className="budget-identity">
-              <span>
-                <Tooltip message={window.channelProvider.selectedAddress}>
-                  <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-                    <Avatar>
-                      <Blockie
-                        opts={{
-                          seed: window.channelProvider.selectedAddress.toLowerCase(),
-                          color: '#2728e2',
-                          bgcolor: '#46A5D0',
-                          size: 15,
-                          scale: 3,
-                          spotcolor: '#000'
-                        }}
-                      />
-                    </Avatar>
-                  </Badge>
-                </Tooltip>
-              </span>
+              <Tooltip message={window.channelProvider.selectedAddress.toLowerCase()}>
+                <Badge badgeContent={0} overlap={'rectangle'} showZero={false} max={999}>
+                  <Avatar variant="rounded">
+                    <Blockie
+                      opts={{
+                        seed: window.channelProvider.selectedAddress.toLowerCase(),
+                        color: '#2728e2',
+                        bgcolor: '#46A5D0',
+                        size: 15,
+                        scale: 3,
+                        spotcolor: '#000'
+                      }}
+                    />
+                  </Avatar>
+                </Badge>
+              </Tooltip>
             </td>
             <td className="budget-spent">
               <CircularProgress variant="static" value={100 * spentFraction} />
