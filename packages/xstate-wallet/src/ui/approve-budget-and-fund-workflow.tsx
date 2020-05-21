@@ -4,16 +4,16 @@ import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund'
 import {useService} from '@xstate/react';
 
 import {formatEther} from 'ethers/utils';
-import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Box} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {Deposit} from './depositing';
 
 interface Props {
   service: ApproveBudgetAndFundService;
 }
 
 export const ApproveBudgetAndFund = (props: Props) => {
-  const [current, send] = useService(props.service);
+  const [current, send]: any[] = useService(props.service);
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
 
@@ -59,76 +59,13 @@ export const ApproveBudgetAndFund = (props: Props) => {
     </Flex>
   );
 
-  const depositInit = (
+  const depositing = depositingService => (
     <Flex alignItems="center" flexDirection="column">
-      <Heading>Deposit funds</Heading>
-
-      <Text textAlign="center">Querying blockchain</Text>
-    </Flex>
-  );
-
-  const depositWaitTurn = (
-    <Flex alignItems="center" flexDirection="column">
-      <Heading>Deposit funds</Heading>
-
-      <Text pb="2">The hub is now depositing funds on-chain. This may take a moment.</Text>
-
-      <Text id="wait-for-transaction">
-        Click{' '}
-        <Link
-          target="_blank"
-          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
-        >
-          here
-        </Link>{' '}
-        to follow the progress on etherscan.
-      </Text>
-    </Flex>
-  );
-
-  const depositSubmitTransaction = (
-    <Flex alignItems="center" flexDirection="column">
-      <Heading>Deposit funds</Heading>
-
-      <Text textAlign="center" id="please-approve-transaction">
-        Please approve the transaction in metamask
-      </Text>
-    </Flex>
-  );
-
-  const depositWaitMining = ({transactionId}: {transactionId: string}) => (
-    <Flex alignItems="center" flexDirection="column">
-      <Heading>Deposit funds</Heading>
-
-      <Text pb={2}>Waiting for your transaction to be mined.</Text>
-
-      <Text id="wait-for-transaction">
-        Click{' '}
-        <Link target="_blank" href={`https://ropsten.etherscan.io/tx/${transactionId}`}>
-          here
-        </Link>{' '}
-        to follow the progress on etherscan.
-      </Text>
-    </Flex>
-  );
-
-  const depositRetry = () => (
-    <Flex alignItems="left" justifyContent="space-between" flexDirection="column">
-      <Heading textAlign="center">Deposit Funds</Heading>
-
-      <Text pb={4}>Your deposit transaction failed. Do you want to retry?</Text>
-
-      <Button onClick={() => send('USER_APPROVES_RETRY')}>Resubmit transaction</Button>
-      <Button.Text onClick={() => send('USER_REJECTS_RETRY')}>Cancel</Button.Text>
-    </Flex>
-  );
-
-  // in the current setup, the hub deposits first, so this should never be shown
-  const depositFullyFunded = (
-    <Flex alignItems="center" flexDirection="column">
-      <Heading>Deposit funds</Heading>
-
-      <Text textAlign="center">Waiting for hub to deposit</Text>
+      <Heading>Depositing funds</Heading>
+      We are currently depositing funds into the ledger channel. We can add some
+      approve-budget-and-fund specific stuff here. Then, we can add an element containing the status
+      of the depositing service:
+      <Deposit service={depositingService}></Deposit>
     </Flex>
   );
 
@@ -138,20 +75,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
     return waitForUserApproval({waiting: true});
   } else if (current.matches('waitForPreFS')) {
     return waitForPreFS;
-  } else if (current.matches({deposit: 'init'})) {
-    return depositInit;
-  } else if (current.matches({deposit: 'waitTurn'})) {
-    return depositWaitTurn;
-  } else if (current.matches({deposit: 'submitTransaction'})) {
-    return depositSubmitTransaction;
-  } else if (current.matches({deposit: 'waitMining'})) {
-    return depositWaitMining(current.context);
-  } else if (current.matches({deposit: 'retry'})) {
-    return depositRetry();
-  } else if (current.matches({deposit: 'waitFullyFunded'})) {
-    return depositFullyFunded;
-  } else if (current.matches('createBudget')) {
-    return depositFullyFunded;
+  } else if (current.matches('deposit')) {
+    return depositing(current.children.depositingService);
   } else if (current.matches('done')) {
     // workflow hides ui, so user shouldn't ever see this
     return <div>Success! Returning to app..</div>;
