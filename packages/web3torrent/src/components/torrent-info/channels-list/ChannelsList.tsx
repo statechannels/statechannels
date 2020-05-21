@@ -6,8 +6,8 @@ import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
-import {Blockie, Tooltip, Avatar} from 'rimble-ui';
-import Badge from '@material-ui/core/Badge';
+import {Blockie, Tooltip} from 'rimble-ui';
+import {Badge, Avatar} from '@material-ui/core';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -48,7 +48,14 @@ function channelIdToTableRow(
   // }
 
   let dataTransferred: string;
-  const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  const peerOutcomeAddress = isBeneficiary
+    ? channel.payerOutcomeAddress
+    : channel.beneficiaryOutcomeAddress;
+
+  const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
+  // For now, this ^ is the ethereum address in my peer's metamask
+
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
@@ -64,21 +71,14 @@ function channelIdToTableRow(
         <button disabled>{channel.status}</button>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
-      <td className="channel-id">{channelId}</td>
-      <Badge
-        badgeContent={
-          channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
-        }
-        color={'primary'}
-        max={999}
-      >
-        <Tooltip message={peerAccount}>
-          <Avatar src="" ml="auto" mr="auto">
+      <td className="channel-id">
+        <Tooltip message={channelId}>
+          <Avatar>
             <Blockie
               opts={{
-                seed: peerAccount,
-                color: '#2728e2',
-                bgcolor: '#46A5D0',
+                seed: channelId,
+                color: '#FC473D',
+                bgcolor: '#E4A663',
                 size: 15,
                 scale: 3,
                 spotcolor: '#000'
@@ -86,9 +86,35 @@ function channelIdToTableRow(
             />
           </Avatar>
         </Tooltip>
-      </Badge>
+      </td>
+      <td className="peer-id">
+        <Tooltip message={peerSelectedAddress}>
+          <Badge
+            badgeContent={
+              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+            }
+            color={isBeneficiary ? 'primary' : 'error'}
+            overlap={'circle'}
+            showZero={false}
+            max={999}
+          >
+            <Avatar>
+              <Blockie
+                opts={{
+                  seed: peerSelectedAddress,
+                  color: '#2728e2',
+                  bgcolor: '#46A5D0',
+                  size: 15,
+                  scale: 3,
+                  spotcolor: '#000'
+                }}
+              />
+            </Avatar>
+          </Badge>
+        </Tooltip>
+      </td>
       <td className="transferred">
-        {dataTransferred}
+        {dataTransferred + ' '}
         <i className={isBeneficiary ? 'up' : 'down'}></i>
       </td>
       {isBeneficiary ? (
