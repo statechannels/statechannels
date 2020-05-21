@@ -55,8 +55,6 @@ function channelIdToTableRow(
     dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
   }
 
-  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
-
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
@@ -69,11 +67,6 @@ function channelIdToTableRow(
         {dataTransferred}
         <i className={isBeneficiary ? 'up' : 'down'}></i>
       </td>
-      {isBeneficiary ? (
-        <td className="earned">{weiTransferred}</td>
-      ) : (
-        <td className="paid">-{weiTransferred}</td>
-      )}
     </tr>
   );
 }
@@ -100,7 +93,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
               <td>Channel</td>
               <td>Peer</td>
               <td>Data</td>
-              <td>Funds</td>
             </tr>
           </thead>
         )}
