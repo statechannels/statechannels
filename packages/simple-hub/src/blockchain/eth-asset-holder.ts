@@ -30,6 +30,8 @@ export async function makeDeposits(
     })
   );
   log.info(`makeDepost: making ${depositsToMake.length} deposits`);
+  console.log('About to err');
+  throw new Error('random error');
 }
 
 async function fund(channelID: string, value: BigNumber): Promise<string> {
