@@ -320,7 +320,7 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: Seems to be an ethers typing issue around the nonce;
+    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: https://github.com/ethers-io/ethers.js/issues/844
     return response.hash;
   }
 
@@ -331,7 +331,7 @@ export class ChainWatcher implements Chain {
         toNitroSignedState(support[0]),
         // createForceMoveTransaction requires this to sign a "challenge message"
         privateKey
-      ) as any), // TODO: Seems to be an ethers typing issue around the nonce
+      ) as any), // TODO: https://github.com/ethers-io/ethers.js/issues/844
       to: NITRO_ADJUDICATOR_ADDRESS
     });
     const tx = await response.wait();
@@ -348,7 +348,7 @@ export class ChainWatcher implements Chain {
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: Seems to be an ethers typing issue around the nonce
+    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: https://github.com/ethers-io/ethers.js/issues/844
     chainLogger.info({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
