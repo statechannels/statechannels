@@ -5,8 +5,9 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
-import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
+import {Blockie, Tooltip} from 'rimble-ui';
+import {Badge, Avatar} from '@material-ui/core';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -47,7 +48,14 @@ function channelIdToTableRow(
   // }
 
   let dataTransferred: string;
-  const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  const peerOutcomeAddress = isBeneficiary
+    ? channel.payerOutcomeAddress
+    : channel.beneficiaryOutcomeAddress;
+
+  const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
+  // For now, this ^ is the ethereum address in my peer's metamask
+
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
@@ -63,10 +71,34 @@ function channelIdToTableRow(
         <button disabled>{channel.status}</button>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
-      <td className="channel-id">{channelId}</td>
-      <td className="peer-id">{peerAccount}</td>
+      <td className="peer-id">
+        <Tooltip message={peerSelectedAddress}>
+          <Badge
+            badgeContent={
+              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+            }
+            color={isBeneficiary ? 'primary' : 'error'}
+            overlap={'circle'}
+            showZero={false}
+            max={999}
+          >
+            <Avatar>
+              <Blockie
+                opts={{
+                  seed: peerSelectedAddress,
+                  color: '#2728e2',
+                  bgcolor: '#46A5D0',
+                  size: 15,
+                  scale: 3,
+                  spotcolor: '#000'
+                }}
+              />
+            </Avatar>
+          </Badge>
+        </Tooltip>
+      </td>
       <td className="transferred">
-        {dataTransferred}
+        {dataTransferred + ' '}
         <i className={isBeneficiary ? 'up' : 'down'}></i>
       </td>
       {isBeneficiary ? (
@@ -97,7 +129,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
           <thead>
             <tr className="peerInfo">
               <td>Status</td>
-              <td>Channel</td>
               <td>Peer</td>
               <td>Data</td>
               <td>Funds</td>
