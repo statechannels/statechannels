@@ -39,8 +39,6 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
 
-  // TODO remove this. currently the budget is equivalent to 1 petabyte. this would bring it down to 1 MB
-  const BUDGET_HACK = 1e9;
   const inverseSpentFraction = spent.gt(0) ? spendBudget.div(spent).toNumber() : undefined;
   const spentFraction = inverseSpentFraction ? 1 / inverseSpentFraction : 0;
   const inverseRecievedFraction = received.gt(0)
@@ -93,12 +91,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </span>
             </td>
             <td className="budget-spent">
-              <CircularProgress variant="static" value={100 * spentFraction * BUDGET_HACK} />
-              {`${(100 * spentFraction * BUDGET_HACK).toFixed(0)} %`}
+              <CircularProgress variant="static" value={100 * spentFraction} />
+              {`${(100 * spentFraction).toFixed(0)} %`}
             </td>
             <td className="budget-received">
-              <CircularProgress variant="static" value={100 * receiveFraction * BUDGET_HACK} />
-              {`${(100 * receiveFraction * BUDGET_HACK).toFixed(0)} %`}
+              <CircularProgress variant="static" value={100 * receiveFraction} />
+              {`${(100 * receiveFraction).toFixed(0)} %`}
             </td>
           </tr>
         </tbody>
