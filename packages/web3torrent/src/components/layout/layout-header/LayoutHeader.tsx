@@ -25,7 +25,7 @@ export const LayoutHeader: React.FC = () => {
               }
             }}
           >
-            {history.location.pathname === RoutePath.Budgets ? 'Your budget' : 'Back'}
+            {history.location.pathname === RoutePath.Budgets ? 'Back' : 'Your budget'}
           </FormButton>
           <FormButton name="upload" onClick={() => history.push(RoutePath.Upload)}>
             Upload
