@@ -1,12 +1,22 @@
 import React from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
-import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
+import {CircularProgressbar, buildStyles} from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
-import {Avatar, Badge, CircularProgress} from '@material-ui/core';
+import {Avatar, Badge} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
+
+const styles = {
+  ...buildStyles({
+    pathColor: '#ea692b',
+    textColor: '#ea692b'
+  }),
+  width: 40,
+  marginTop: -5
+};
 
 const bigNumberify = utils.bigNumberify;
 
@@ -89,12 +99,18 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </Tooltip>
             </td>
             <td className="budget-spent">
-              <CircularProgress variant="static" value={100 * spentFraction} />
-              {`${(100 * spentFraction).toFixed(0)} %`}
+              <CircularProgressbar
+                value={100 * spentFraction}
+                text={`${(100 * spentFraction).toFixed(1)}%`}
+                styles={styles}
+              />
             </td>
             <td className="budget-received">
-              <CircularProgress variant="static" value={100 * receiveFraction} />
-              {`${(100 * receiveFraction).toFixed(0)} %`}
+              <CircularProgressbar
+                value={100 * receiveFraction}
+                text={`${(100 * receiveFraction).toFixed(1)}%`}
+                styles={styles}
+              />
             </td>
           </tr>
         </tbody>

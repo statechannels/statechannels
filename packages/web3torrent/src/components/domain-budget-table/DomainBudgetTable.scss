@@ -32,6 +32,7 @@ table.domain-budget-table {
       flex-direction: row;
       width: 100%;
       border-bottom: 1px solid $c-mediumgrey;
+      max-height: 40px;
 
       &:last-child {
         border-bottom: 0px solid transparent;
@@ -53,4 +54,8 @@ table.domain-budget-table {
       }
     }
   }
+}
+
+.CircularProgressbar {
+  height: 40px;
 }
