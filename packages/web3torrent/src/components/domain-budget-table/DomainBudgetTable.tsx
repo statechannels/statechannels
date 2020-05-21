@@ -5,7 +5,7 @@ import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
-import {Avatar, Badge} from '@material-ui/core';
+import {Avatar, Badge, CircularProgress} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
 
 const bigNumberify = utils.bigNumberify;
@@ -38,6 +38,15 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
+
+  // TODO remove this. currently the budget is equivalent to 1 petabyte. this would bring it down to 1 MB
+  const BUDGET_HACK = 1e9;
+  const inverseSpentFraction = spent.gt(0) ? spendBudget.div(spent).toNumber() : undefined;
+  const spentFraction = inverseSpentFraction ? 1 / inverseSpentFraction : 0;
+  const inverseRecievedFraction = received.gt(0)
+    ? receiveBudget.div(received).toNumber()
+    : undefined;
+  const receiveFraction = inverseRecievedFraction ? 1 / inverseRecievedFraction : 0;
 
   return (
     <>
@@ -83,13 +92,13 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
                 </Tooltip>
               </span>
             </td>
-            <td className="budget-sent">
-              {' '}
-              {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
+            <td className="budget-spent">
+              <CircularProgress variant="static" value={100 * spentFraction * BUDGET_HACK} />
+              {`${(100 * spentFraction * BUDGET_HACK).toFixed(0)} %`}
             </td>
             <td className="budget-received">
-              {' '}
-              {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
+              <CircularProgress variant="static" value={100 * receiveFraction * BUDGET_HACK} />
+              {`${(100 * receiveFraction * BUDGET_HACK).toFixed(0)} %`}
             </td>
           </tr>
         </tbody>
