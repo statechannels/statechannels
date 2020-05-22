@@ -307,8 +307,9 @@ export class Store {
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const entry = await this.getEntry(channelId);
-        const existingState = entry.latest;
+        const {supported: existingState, myTurn} = await this.getEntry(channelId);
+        if (!myTurn) throw Error(Errors.notMyTurn);
+
         const newState = {
           ...existingState,
           turnNum: existingState.turnNum.add(1),
