@@ -321,6 +321,18 @@ export class Store {
       })
       .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
+  public signFinalState = (channelId: string) =>
+    this.backend
+      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
+        const {supported, latestSignedByMe} = await this.getEntry(channelId);
+        if (!supported.isFinal) throw new Error('Supported state not final');
+        if (latestSignedByMe.turnNum.eq(supported.turnNum)) return; // already signed
+        return await this.signAndAddStateWithinTx(channelId, supported);
+      })
+      .then(result => {
+        if (result) this.emitChannelUpdatedEventAfterTX(result.entry, result.signedState);
+      });
+
   private emitChannelUpdatedEventAfterTX(entry: ChannelStoreEntry, signedState?: SignedState) {
     // These events trigger callbacks that should not run within the transaction scope
     // See https://github.com/dfahlander/Dexie.js/issues/1029
