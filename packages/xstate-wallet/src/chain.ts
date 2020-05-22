@@ -11,7 +11,8 @@ import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
 import {filter, map, flatMap, defaultIfEmpty, last} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
-import {hexZeroPad, id} from '@ethersproject/bytes';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {id} from '@ethersproject/hash';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
@@ -462,7 +463,7 @@ export class ChainWatcher implements Chain {
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
       filter((event: any) => event[0] === channelId), // index 0 of ChallengeRegistered event is channelId
       map(getChallengeRegisteredEvent),
-      map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) =>
+      map(({challengeStates}: ChallengeRegisteredEvent) =>
         fromNitroState(challengeStates[challengeStates.length - 1].state)
       )
     );

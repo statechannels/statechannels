@@ -16,7 +16,7 @@ import {BigNumber} from 'ethers';
 import {Funding} from './store';
 import {Errors} from '.';
 import {logger} from '../logger';
-import {Chain} from '../chain';
+
 export interface SignatureEntry {
   signature: string;
   signer: string;
@@ -33,7 +33,7 @@ export class ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
   public readonly applicationDomain?: string;
 
-  constructor(channelData: ChannelStoredData, private chain: Chain) {
+  constructor(channelData: ChannelStoredData) {
     const {
       myIndex,
       stateVariables,
@@ -97,7 +97,6 @@ export class ChannelStoreEntry {
   get hasConclusionProof() {
     return this.isSupported && this.support.every(s => s.isFinal);
   }
-
 
   private get _supported() {
     const latestSupport = this._support;
@@ -318,7 +317,7 @@ export class ChannelStoreEntry {
     };
   }
 
-  static fromJson(data, chain): ChannelStoreEntry {
+  static fromJson(data): ChannelStoreEntry {
     if (!data) {
       logger.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
@@ -331,16 +330,13 @@ export class ChannelStoreEntry {
     channelConstants.challengeDuration = BigNumber.from(channelConstants.challengeDuration);
     channelConstants.channelNonce = BigNumber.from(channelConstants.channelNonce);
 
-    return new ChannelStoreEntry(
-      {
-        channelConstants,
-        myIndex,
-        stateVariables,
-        funding,
-        applicationDomain
-      },
-      chain
-    );
+    return new ChannelStoreEntry({
+      channelConstants,
+      myIndex,
+      stateVariables,
+      funding,
+      applicationDomain
+    });
   }
 
   private static prepareStateVariables(

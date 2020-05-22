@@ -370,8 +370,8 @@ export const workflow = (
     channelClosing: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.latest?.isFinal, // TODO: Should use supported
 
-    channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.isChallenging,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    channelChallenging: (_context: ChannelIdExists, _event: ChannelUpdated): boolean => false,
 
     channelClosed: (_, event: any): boolean => !!event.storeEntry.supported?.isFinal,
     isDirectFunding: (ctx: Init) => ctx.fundingStrategy === 'Direct',
