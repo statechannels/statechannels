@@ -2,6 +2,7 @@
   "name": "@statechannels/web3torrent-tracker",
   "version": "0.0.0",
   "scripts": {
+    "dev": "DEBUG=* PORT=8001 node index.js",
     "build-and-release": "./build-push-release.sh"
   },
   "dependencies": {
