@@ -70,7 +70,7 @@
     "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "jest --runInBand -c ./jest/jest.config.js",
-    "test:ci": "yarn test && yarn test:with-chain",
+    "test:ci": "run-s test test:with-chain",
     "test:with-chain": "jest --runInBand -c ./jest/jest.with-chain.config.js"
   }
 }
