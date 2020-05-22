@@ -90,8 +90,8 @@ describe('One file, three leechers, one seeder', () => {
     console.log('Downloading');
     await forEachActor(({tab}) => waitForNthState(tab, 10));
 
-    console.log('C cancels download');
-    await cancelDownload(actors.C.tab);
+    // console.log('C cancels download');
+    // await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
     await forEachActor(({tab}) => waitForClosedState(tab));
