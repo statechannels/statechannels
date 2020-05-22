@@ -129,7 +129,8 @@ section.wires-list {
           font-weight: bold;
         }
 
-        .transferred {
+        .transferred,
+        .exchanged {
           min-width: 50px;
           text-align: center;
           white-space: nowrap;

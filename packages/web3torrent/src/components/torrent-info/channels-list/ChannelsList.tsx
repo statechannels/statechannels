@@ -113,8 +113,8 @@ function channelIdToTableRow(
         <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
         <div className="amount">{dataTransferred + ' '}</div>
       </td>
-      <td className="transferred">
-        <div className="type">{isBeneficiary ? 'sent' : 'received'}</div>
+      <td className="exchanged">
+        <div className="type">{isBeneficiary ? 'earned' : 'spent'}</div>
         <div className="amount">{weiTransferred + ' '}</div>
       </td>
     </tr>
