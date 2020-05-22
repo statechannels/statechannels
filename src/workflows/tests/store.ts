@@ -3,7 +3,7 @@ import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
 import {Store, Funding} from '../../store';
-import {SigningKey} from '@ethersproject/signing-key';
+import {Wallet} from 'ethers';
 
 export class TestStore extends Store {
   public _channelLocks: Record<string, Guid>;
@@ -47,7 +47,7 @@ export class TestStore extends Store {
   }
 
   async setPrivateKey(pk: string) {
-    const {publicKey} = new SigningKey(pk);
-    await this.backend.setPrivateKey(publicKey, pk);
+    const {address} = new Wallet(pk);
+    await this.backend.setPrivateKey(address, pk);
   }
 }
