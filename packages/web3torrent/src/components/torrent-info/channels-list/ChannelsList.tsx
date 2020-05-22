@@ -67,12 +67,14 @@ function channelIdToTableRow(
   const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
 
   let connectionStatus;
-  if (wire && (channel.status === 'running' || channel.status === 'closing')) {
+  if (wire && channel.status === 'running') {
     connectionStatus = isBeneficiary ? 'uploading' : 'downloading';
+  } else if (wire && channel.status === 'closing') {
+    connectionStatus = 'closing';
   } else if (channel.status === 'closed') {
     connectionStatus = 'finished';
   } else if (wire && channel.status === 'proposed') {
-    connectionStatus = 'connecting';
+    connectionStatus = 'starting';
   } else if (!wire) {
     connectionStatus = 'disconnected';
   }
