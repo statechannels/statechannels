@@ -34,7 +34,6 @@ section.wires-list {
       tr.peerInfo {
         padding-top: 10px;
         padding-bottom: 10px;
-        margin-bottom: 10px;
         display: flex;
         flex-direction: row;
         width: 100%;
@@ -46,7 +45,6 @@ section.wires-list {
 
         td {
           min-width: 50px;
-          padding: 5px 5px;
           vertical-align: middle;
           width: 25%;
           min-width: 100px;
@@ -54,12 +52,13 @@ section.wires-list {
         }
 
         .channel {
-          padding-left: 30px;
+          padding-left: 0px;
         }
 
         .dot {
-          height: 15px;
-          width: 15px;
+          margin-top: 10px;
+          height: 17px;
+          width: 17px;
           background-color: #bbb;
           border-radius: 50%;
           display: inline-block;
@@ -70,14 +69,14 @@ section.wires-list {
             background-color: #1ec51b;
           }
           &.connecting {
-            background-color: #717171;
+            background-color: #f16721;
           }
           &.disconnected {
-            background-color: #616161;
+            background-color: #fbe9e7;
             &:before {
-              color: #fff;
-              font-size: 13px;
-              padding-left: 4px;
+              color: #b26b60;
+              font-size: 16px;
+              margin-left: -5px;
               position: absolute;
               content: '?';
             }
@@ -131,6 +130,13 @@ section.wires-list {
           min-width: 50px;
           text-align: center;
           white-space: nowrap;
+          margin-top: 4px;
+          div.type {
+            font-size: 12px;
+          }
+        }
+        .transactions {
+          margin-top: 10px;
         }
         .paid {
           min-width: 70px;
@@ -187,4 +193,13 @@ section.wires-list {
   100% {
     opacity: 1;
   }
+}
+
+.MuiAvatar-root {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.MuiAvatar-colorDefault {
+  background-color: rgba(0, 0, 0, 0) !important;
 }

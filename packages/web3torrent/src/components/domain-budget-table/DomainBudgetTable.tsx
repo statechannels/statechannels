@@ -84,16 +84,15 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </button>
             </td>
             <td className="budget-identity">
-              <Tooltip message={web3torrent.paymentChannelClient.mySigningAddress}>
+              <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
                 <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
                   <Avatar>
                     <Blockie
                       opts={{
-                        seed: web3torrent.paymentChannelClient.mySigningAddress,
-                        color: '#2728e2',
-                        bgcolor: '#46A5D0',
-                        size: 15,
-                        scale: 3,
+                        seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                        bgcolor: '#f16721',
+                        size: 6,
+                        scale: 4,
                         spotcolor: '#000'
                       }}
                     />

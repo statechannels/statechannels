@@ -8,6 +8,7 @@ import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
 import {Blockie, Tooltip} from 'rimble-ui';
 import {Badge, Avatar} from '@material-ui/core';
+import {color} from '@storybook/addon-knobs';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -86,23 +87,14 @@ function channelIdToTableRow(
       </td>
       <td className="peer-id">
         <Tooltip message={peerSelectedAddress}>
-          <Badge
-            badgeContent={
-              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
-            }
-            color={isBeneficiary ? 'primary' : 'error'}
-            overlap={'circle'}
-            showZero={false}
-            max={999}
-          >
+          <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
             <Avatar>
               <Blockie
                 opts={{
                   seed: peerSelectedAddress,
-                  color: '#2728e2',
-                  bgcolor: '#46A5D0',
-                  size: 15,
-                  scale: 3,
+                  bgcolor: '#f16721',
+                  size: 6,
+                  scale: 4,
                   spotcolor: '#000'
                 }}
               />
@@ -110,15 +102,13 @@ function channelIdToTableRow(
           </Badge>
         </Tooltip>
       </td>
-      <td className="transferred">
-        {dataTransferred + ' '}
-        <i className={isBeneficiary ? 'up' : 'down'}></i>
+      <td className="transactions">
+        {channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0}
       </td>
-      {isBeneficiary ? (
-        <td className="earned">{weiTransferred}</td>
-      ) : (
-        <td className="paid">-{weiTransferred}</td>
-      )}
+      <td className="transferred">
+        <div className="type">{isBeneficiary ? 'sent' : 'received'}</div>
+        <div className="amount">{dataTransferred + ' '}</div>
+      </td>
     </tr>
   );
 }
@@ -143,8 +133,8 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
             <tr className="peerInfo">
               <td>Status</td>
               <td>Peer</td>
+              <td>Transactions</td>
               <td>Data</td>
-              <td>Funds</td>
             </tr>
           </thead>
         )}
