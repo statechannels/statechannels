@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {CircularProgressbar, buildStyles} from 'react-circular-progressbar';
+import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import 'react-circular-progressbar/dist/styles.css';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
@@ -28,6 +29,8 @@ export type DomainBudgetTableProps = {
 };
 
 export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
+  const web3torrent = useContext(Web3TorrentClientContext);
+
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
@@ -81,12 +84,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
               </button>
             </td>
             <td className="budget-identity">
-              <Tooltip message={window.channelProvider.selectedAddress.toLowerCase()}>
+              <Tooltip message={web3torrent.paymentChannelClient.mySigningAddress}>
                 <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
                   <Avatar>
                     <Blockie
                       opts={{
-                        seed: window.channelProvider.selectedAddress.toLowerCase(),
+                        seed: web3torrent.paymentChannelClient.mySigningAddress,
                         color: '#2728e2',
                         bgcolor: '#46A5D0',
                         size: 15,
