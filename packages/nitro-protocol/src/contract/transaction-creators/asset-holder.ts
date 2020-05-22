@@ -9,11 +9,6 @@ import {
   Outcome,
 } from '../outcome';
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 export function createTransferAllTransaction(
   assetHolderContractInterface: Interface,
   channelId: string,
@@ -23,7 +18,7 @@ export function createTransferAllTransaction(
     channelId,
     encodeAllocation(allocation),
   ]);
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function claimAllArgs(
@@ -43,7 +38,7 @@ export function createClaimAllTransaction(
   const data = assetHolderContractInterface.functions.claimAll.encode(
     claimAllArgs(channelId, guarantee, allocation)
   );
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function createSetOutcomeTransaction(
@@ -55,5 +50,5 @@ export function createSetOutcomeTransaction(
     channelId,
     hashOutcome(outcome),
   ]);
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }

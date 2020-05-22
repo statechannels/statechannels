@@ -5,11 +5,6 @@ import {getVariablePart} from '../consensus-app';
 import {ConsensusData} from '../consensus-data';
 import {Outcome} from '../outcome';
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 // Ethers mis-interprets the artifact's abi paramter so we cast to any
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi as any);
 
@@ -30,5 +25,5 @@ export function createValidTransitionTransaction(
     numberOfParticipants,
   ]);
 
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
