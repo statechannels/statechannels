@@ -14,8 +14,8 @@ export function onIncomingMessage(
     snapshotKey: string;
     message: Either<Error, Message>;
   }>,
-  onNext?: () => void,
-  onComplete?: () => void
+  onNext: () => void = noop,
+  onComplete: () => void = noop
 ) {
   return observable
     .pipe(
