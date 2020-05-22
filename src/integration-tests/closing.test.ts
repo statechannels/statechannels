@@ -1,14 +1,16 @@
 import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
-import {bigNumberify, hexZeroPad} from 'ethers/utils';
+
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils';
 import {State, SignedState} from '../store/types';
 import {createSignatureEntry} from '../store/state-utils';
 import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero} from '@ethersproject/constants';
+import {hexZeroPad} from '@ethersproject/bytes';
 require('fake-indexeddb/auto');
 import {Backend} from '../store/dexie-backend';
+import {BigNumber} from 'ethers';
 
 jest.setTimeout(30000);
 
@@ -30,23 +32,23 @@ test('concludes on their turn', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
   hookUpMessaging(playerA, playerB);
   const state: State = {
     outcome,
-    turnNum: bigNumberify(5),
+    turnNum: BigNumber.from(5),
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(0),
+    channelNonce: BigNumber.from(0),
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]
   };

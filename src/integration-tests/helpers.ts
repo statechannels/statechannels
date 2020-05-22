@@ -1,5 +1,5 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
-import {Wallet} from 'ethers/wallet';
+import {Wallet} from 'ethers';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant, DBBackend} from '../store/types';
 import {Chain} from '../chain';
@@ -20,7 +20,7 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ADD_LOGS} from '../config';
 import {makeDestination} from '../utils';
-import {hexZeroPad} from 'ethers/utils';
+import {hexZeroPad} from '@ethersproject/bytes';
 import {logger} from '../logger';
 import {ETH_TOKEN} from '../constants';
 

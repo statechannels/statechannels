@@ -11,7 +11,7 @@ import {
 } from './types';
 import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {Funding} from './store';
 import {Errors} from '.';
@@ -52,8 +52,8 @@ export class ChannelStoreEntry {
       chainId,
       participants,
       appDefinition,
-      challengeDuration: bigNumberify(challengeDuration),
-      channelNonce: bigNumberify(channelNonce)
+      challengeDuration: BigNumber.from(challengeDuration),
+      channelNonce: BigNumber.from(channelNonce)
     };
 
     this.stateVariables = channelData.stateVariables;
@@ -331,8 +331,8 @@ export class ChannelStoreEntry {
 
     const {channelConstants, funding, myIndex, applicationDomain} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
-    channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
-    channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
+    channelConstants.challengeDuration = BigNumber.from(channelConstants.challengeDuration);
+    channelConstants.channelNonce = BigNumber.from(channelConstants.channelNonce);
 
     return new ChannelStoreEntry({
       channelConstants,
@@ -345,7 +345,7 @@ export class ChannelStoreEntry {
 
   private static prepareStateVariables(
     stateVariables, // TODO: Make this typesafe!
-    parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
+    parserFunction: (data: string | BigNumber) => BigNumber | string = v => BigNumber.from(v)
   ): Array<SignedStateWithHash> {
     for (const state of stateVariables) {
       if (state.turnNum) {

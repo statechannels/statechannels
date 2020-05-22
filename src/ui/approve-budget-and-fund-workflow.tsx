@@ -3,7 +3,7 @@ import './wallet.scss';
 import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
 import {useService} from '@xstate/react';
 
-import {formatEther} from 'ethers/utils';
+import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 

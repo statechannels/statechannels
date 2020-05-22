@@ -3,10 +3,10 @@ import {FakeChain} from '../chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 import {FundLedger} from '../store/types';
 import {assertSimpleEthAllocation} from '../utils';
-
-import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import {hexZeroPad} from '@ethersproject/bytes';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
 import {TEST_APP_DOMAIN} from '../workflows/tests/data';
+import {BigNumber} from 'ethers';
 
 jest.setTimeout(30000);
 
@@ -68,11 +68,11 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   const allocation = assertSimpleEthAllocation(ledgerEntry.supported.outcome);
   expect(allocation.allocationItems).toContainEqual({
     destination: hub.destination,
-    amount: bigNumberify(hexZeroPad('0x5', 32))
+    amount: BigNumber.from(hexZeroPad('0x5', 32))
   });
   expect(allocation.allocationItems).toContainEqual({
     destination: playerA.destination,
-    amount: bigNumberify(hexZeroPad('0x5', 32))
+    amount: BigNumber.from(hexZeroPad('0x5', 32))
   });
   // Check that the funds are reflected on chain
   const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);

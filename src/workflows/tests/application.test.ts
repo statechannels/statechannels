@@ -5,7 +5,7 @@ import {Store} from '../../store';
 import {StateVariables, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {simpleEthAllocation, exists} from '../../utils';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {Application} from '..';
@@ -23,7 +23,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       appDefinition: ethers.constants.AddressZero,
       participants,
       outcome: simpleEthAllocation([]),
-      challengeDuration: bigNumberify(500),
+      challengeDuration: BigNumber.from(500),
       requestId: 5,
       fundingStrategy: 'Direct',
       applicationDomain: 'localhost'

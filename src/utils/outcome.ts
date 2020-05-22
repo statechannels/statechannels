@@ -8,7 +8,7 @@ import {
 } from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ethers} from 'ethers';
 import {checkThat} from './helpers';
 
@@ -64,7 +64,7 @@ export function allocateToTarget(
 
   currentOutcome = _.cloneDeep(currentOutcome);
 
-  let total = bigNumberify(0);
+  let total = BigNumber.from(0);
   let currentItems = currentOutcome.allocationItems;
 
   deductions.forEach(targetItem => {

@@ -1,6 +1,6 @@
 import {DomainBudget, AssetBudget} from '../store/types';
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import _ from 'lodash';
 import {checkThat, exists} from './helpers';
 
@@ -12,8 +12,8 @@ export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBud
       [ETH_ASSET_HOLDER_ADDRESS]: _.assign(
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          availableReceiveCapacity: bigNumberify(0),
-          availableSendCapacity: bigNumberify(0),
+          availableReceiveCapacity: BigNumber.from(0),
+          availableSendCapacity: BigNumber.from(0),
           channels: {}
         },
         opts
