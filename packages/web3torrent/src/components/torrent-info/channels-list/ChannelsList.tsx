@@ -106,7 +106,7 @@ function channelIdToTableRow(
         {channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0}
       </td>
       <td className="transferred">
-        <div className="type">{isBeneficiary ? 'sent' : 'received'}</div>
+        <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
         <div className="amount">{dataTransferred + ' '}</div>
       </td>
     </tr>
