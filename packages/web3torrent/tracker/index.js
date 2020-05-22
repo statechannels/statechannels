@@ -11,6 +11,7 @@ const server = new Server({
   http: true,
   ws: true,
   stats: true,
+  interval: 150000,
   filter: function(_, params, cb) {
     if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
       if (!params.pseAccount || !isAddress(params.pseAccount)) {
