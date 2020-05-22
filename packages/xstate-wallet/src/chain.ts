@@ -3,7 +3,8 @@ import {
   createETHDepositTransaction,
   Transactions,
   getChallengeRegisteredEvent,
-  ChallengeRegisteredEvent
+  ChallengeRegisteredEvent,
+  SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
 import {Contract, Wallet} from 'ethers';
 import {Zero, One} from 'ethers/constants';
@@ -14,6 +15,7 @@ import {filter, map, flatMap} from 'rxjs/operators';
 import EventEmitter from 'eventemitter3';
 
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
+
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
@@ -330,10 +332,16 @@ export class ChainWatcher implements Chain {
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
+    const convertedSignedStates = support
+      .reduce(
+        (previous, current) => previous.concat(toNitroSignedState(current)),
+        new Array<NitroSignedState>()
+      )
+      .sort((s1, s2) => s1.state.turnNum - s2.state.turnNum);
+
     const response = await this.signer.sendTransaction({
       ...Transactions.createForceMoveTransaction(
-        // TODO: Code is assuming a doubly-signed state at the moment.
-        toNitroSignedState(support[0]),
+        convertedSignedStates,
         // createForceMoveTransaction requires this to sign a "challenge message"
         privateKey
       ),
