@@ -1,3 +1,4 @@
+import {noop} from 'lodash';
 import {deleteIncomingMessage, sendReplies} from '../message/firebase-relay';
 import {respondToMessage} from '../wallet/respond-to-message';
 import {map} from 'rxjs/operators';
@@ -14,7 +15,7 @@ export function onIncomingMessage(
     snapshotKey: string;
     message: Either<Error, Message>;
   }>,
-  onNext?: () => void,
+  onNext: () => void = noop,
   onComplete?: () => void
 ) {
   return observable
