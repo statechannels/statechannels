@@ -72,9 +72,11 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
 }
 
 export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
-  const {latest, channelId} = channelEntry;
-  const {appData, turnNum, outcome} = latest;
-  const {participants, appDefinition} = channelEntry.channelConstants;
+  const {
+    latest: {appData, turnNum, outcome}, // FIXME: This should be supported
+    channelConstants: {participants, appDefinition},
+    channelId
+  } = channelEntry;
 
   if (!isAllocation(outcome)) {
     throw new Error('Can only send allocations to the app');
