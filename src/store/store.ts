@@ -310,10 +310,10 @@ export class Store {
         const {supported: existingState, myTurn} = await this.getEntry(channelId);
         if (!myTurn) throw Error(Errors.notMyTurn);
 
-        const newState = _.merge(
-          {turnNum: existingState.turnNum.add(1), ...updateData},
-          existingState
-        );
+        const newState = _.merge(existingState, {
+          turnNum: existingState.turnNum.add(1),
+          ...updateData
+        });
 
         return this.signAndAddStateWithinTx(channelId, newState);
       })
