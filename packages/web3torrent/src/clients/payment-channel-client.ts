@@ -360,7 +360,7 @@ export class PaymentChannelClient {
   }
 
   async getChannels(): Promise<Record<string, ChannelState | undefined>> {
-    const channelResults = await this.channelClient.getChannels(true);
+    const channelResults = await this.channelClient.getChannels(false);
     channelResults.map(convertToChannelState).forEach(cr => (this.channelCache[cr.channelId] = cr));
     return this.channelCache;
   }
