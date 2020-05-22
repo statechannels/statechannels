@@ -1,11 +1,11 @@
 import {interpret} from 'xstate';
-import {ethers} from 'ethers';
+import {ethers, BigNumber} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {Store} from '../../store';
 import {StateVariables, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {BigNumber} from 'ethers';
+
 import {simpleEthAllocation, exists} from '../../utils';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {Application} from '..';
