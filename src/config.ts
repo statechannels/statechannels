@@ -40,6 +40,8 @@ export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 export const NITRO_ADJUDICATOR_ADDRESS: string =
   process.env.NITRO_ADJUDICATOR_ADDRESS || AddressZero;
 
+export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || AddressZero;
+
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
 export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION || '0x12c');
