@@ -119,4 +119,6 @@ export class MemoryBackend implements DBBackend {
   public async transaction<T>(_mode: TXMode, _stores: ObjectStores[], cb: (tx: any) => Promise<T>) {
     return cb({abort: () => null});
   }
+
+  public transactionOngoing = false;
 }
