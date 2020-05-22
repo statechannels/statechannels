@@ -5,11 +5,6 @@ import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 // @ts-ignore
 const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi);
 
@@ -57,5 +52,5 @@ export function createDepositTransaction(
     expectedHeld,
     amount,
   ]);
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }

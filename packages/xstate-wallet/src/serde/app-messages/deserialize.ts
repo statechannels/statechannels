@@ -3,7 +3,7 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
   DomainBudget as AppDomainBudget,
-  TokenBudgetRequest as AppBudgetRequest
+  ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
 import {
   Allocation,

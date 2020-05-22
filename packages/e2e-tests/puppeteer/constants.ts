@@ -9,7 +9,7 @@ export const APP_URL = process.env.WEB3TORRENT_URL
   ? process.env.WEB3TORRENT_URL
   : 'http://localhost:3000';
 export const WALLET_URL = process.env.WALLET_URL ? process.env.WALLET_URL : 'http://localhost:3055';
-export const TX_WAIT_TIMEOUT = process.env.TARGET_NETWORK === 'ropsten' ? 90000 : 30000;
+export const TX_WAIT_TIMEOUT = process.env.TARGET_NETWORK === 'ropsten' ? 180_000 : 30000;
 export const CHAIN_NETWORK_ID = process.env.CHAIN_NETWORK_ID;
 export const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;

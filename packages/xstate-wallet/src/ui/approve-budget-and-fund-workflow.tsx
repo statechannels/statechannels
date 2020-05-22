@@ -6,6 +6,7 @@ import {useService} from '@xstate/react';
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 
 interface Props {
   service: ApproveBudgetAndFundService;
@@ -70,7 +71,18 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Waiting for hub to deposit. You will deposit next.</Text>
+      <Text pb="2">The hub is now depositing funds on-chain. This may take a moment.</Text>
+
+      <Text id="wait-for-transaction">
+        Click{' '}
+        <Link
+          target="_blank"
+          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
+        >
+          here
+        </Link>{' '}
+        to follow the progress on etherscan.
+      </Text>
     </Flex>
   );
 

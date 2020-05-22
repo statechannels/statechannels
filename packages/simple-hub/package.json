@@ -60,7 +60,6 @@
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "hub:start:dev": "ts-node ./start-dev-server.ts",
     "hub:start:prod": "ts-node ./src/server.ts",
-    "hub:test": "jest --runInBand -c ./jest/jest.config.js",
     "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
@@ -70,6 +69,8 @@
     "prettier:check": "prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "yarn hub:test --runInBand"
+    "test": "jest --runInBand -c ./jest/jest.config.js",
+    "test:ci": "yarn test && yarn test:with-chain",
+    "test:with-chain": "jest --runInBand -c ./jest/jest.with-chain.config.js"
   }
 }

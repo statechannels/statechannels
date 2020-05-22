@@ -17,14 +17,12 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForNthState,
   waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   takeScreenshot,
-  waitForTransactionIfNecessary,
-  waitForClosedState
+  waitForTransactionIfNecessary
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -75,7 +73,7 @@ describe('Optional Integration Tests', () => {
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('Optional - Torrent a file - Cancelling at State N°10', async () => {
+  it('Optional - Torrent a file - Cancelling', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
@@ -96,17 +94,12 @@ describe('Optional Integration Tests', () => {
       await waitAndApproveDeposit(web3tTabB, metamaskB);
     }
 
-    const listenFor10thState = waitForNthState(web3tTabB, 10);
-
     await waitForTransactionIfNecessary(web3tTabB);
 
     // Let the download continue for some time
     console.log('Downloading');
 
-    await listenFor10thState;
-    console.log('Got until 10th state');
-
-    const listenForClosedState = forEachTab(waitForClosedState);
+    await web3tTabB.waitForSelector('.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -117,20 +110,20 @@ describe('Optional Integration Tests', () => {
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
-    console.log('Wait for the ChannelUpdated "closed" state');
-    await listenForClosedState;
+    console.log('Wait for the "closed" state');
+    await forEachTab(tab => tab.waitForSelector('.channel.closed'));
 
     console.log('Checking exchanged amount between downloader and uploader...');
-    const earnedColumn = await web3tTabA.waitForSelector('td.earned');
+    const earnedColumn = await web3tTabA.waitForSelector('td.exchanged > .amount');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
-    const paidColumn = await web3tTabB.waitForSelector('td.paid');
+    const paidColumn = await web3tTabB.waitForSelector('td.exchanged > .amount');
     const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
-    const transferredColumn = await web3tTabB.waitForSelector('td.transferred');
+    const transferredColumn = await web3tTabB.waitForSelector('td.transferred > .amount');
     const transferred = await web3tTabB.evaluate(e => e.textContent, transferredColumn);
     console.log(`paid = ${paid}`);
     console.log(`transferred = ${transferred}`);
     expect(transferred).not.toEqual(`0 B`);
-    expect(paid).not.toEqual(`-0 wei`);
-    return expect(paid).toEqual(`-${earned}`);
+    expect(paid).not.toEqual(`0 wei`);
+    return expect(paid).toEqual(`${earned}`);
   });
 });

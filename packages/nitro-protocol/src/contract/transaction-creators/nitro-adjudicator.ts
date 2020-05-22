@@ -6,11 +6,6 @@ import {encodeOutcome, Outcome} from '../outcome';
 import {getFixedPart, hashAppPart, hashState, State} from '../state';
 import {Signature, Interface} from 'ethers/utils';
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
 
@@ -35,7 +30,7 @@ export function createPushOutcomeTransaction(
     encodedOutcome,
   ]);
 
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function concludePushOutcomeAndTransferAllArgs(
@@ -83,6 +78,5 @@ export function createConcludePushOutcomeAndTransferAllTransaction(
     data: NitroAdjudicatorContractInterface.functions.concludePushOutcomeAndTransferAll.encode(
       concludePushOutcomeAndTransferAllArgs(states, signatures, whoSignedWhat)
     ),
-    gasLimit: GAS_LIMIT,
   };
 }

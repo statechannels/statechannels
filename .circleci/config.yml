@@ -473,6 +473,11 @@ jobs:
           dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
           app: persistent-seeder-production
+      - slack/status:
+          # notify-deployments
+          channel: C0125NB072B
+          failure_message: ':red_circle: Failed to release persistent-seeder at $CIRCLE_SHA1!'
+          success_message: ':tada: Released persistent-seeder at $CIRCLE_SHA1 '
 
   e2e-test-w3t-production:
     resource_class: large

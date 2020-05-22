@@ -5,8 +5,10 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
-import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
+import {Blockie, Tooltip} from 'rimble-ui';
+import {Badge, Avatar} from '@material-ui/core';
+import {color} from '@storybook/addon-knobs';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -47,7 +49,14 @@ function channelIdToTableRow(
   // }
 
   let dataTransferred: string;
-  const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  const peerOutcomeAddress = isBeneficiary
+    ? channel.payerOutcomeAddress
+    : channel.beneficiaryOutcomeAddress;
+
+  const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
+  // For now, this ^ is the ethereum address in my peer's metamask
+
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
@@ -57,23 +66,57 @@ function channelIdToTableRow(
 
   const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
 
+  let connectionStatus;
+  if (wire && (channel.status === 'running' || channel.status === 'closing')) {
+    connectionStatus = isBeneficiary ? 'uploading' : 'downloading';
+  } else if (channel.status === 'closed') {
+    connectionStatus = 'finished';
+  } else if (wire && channel.status === 'proposed') {
+    connectionStatus = 'connecting';
+  } else if (!wire) {
+    connectionStatus = 'disconnected';
+  }
+
   return (
     <tr className="peerInfo" key={channelId}>
-      <td className="channel">
-        <button disabled>{channel.status}</button>
+      <td className={`channel ${channel.status}`}>
+        <div className={`dot ${connectionStatus}`}></div>
+        <span className={`status ${connectionStatus}`}>{connectionStatus}</span>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
-      <td className="channel-id">{channelId}</td>
-      <td className="peer-id">{peerAccount}</td>
-      <td className="transferred">
-        {dataTransferred}
-        <i className={isBeneficiary ? 'up' : 'down'}></i>
+      <td className="peer-id">
+        <Tooltip message={peerSelectedAddress}>
+          <Badge
+            badgeContent={
+              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+            }
+            color={isBeneficiary ? 'primary' : 'error'}
+            overlap={'circle'}
+            showZero={false}
+            max={999}
+          >
+            <Avatar>
+              <Blockie
+                opts={{
+                  seed: peerSelectedAddress,
+                  bgcolor: '#3531ff',
+                  size: 6,
+                  scale: 4,
+                  spotcolor: '#000'
+                }}
+              />
+            </Avatar>
+          </Badge>
+        </Tooltip>
       </td>
-      {isBeneficiary ? (
-        <td className="earned">{weiTransferred}</td>
-      ) : (
-        <td className="paid">-{weiTransferred}</td>
-      )}
+      <td className="transferred">
+        <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
+        <div className="amount">{dataTransferred + ' '}</div>
+      </td>
+      <td className="exchanged">
+        <div className="type">{isBeneficiary ? 'earned' : 'spent'}</div>
+        <div className="amount">{weiTransferred + ' '}</div>
+      </td>
     </tr>
   );
 }
@@ -97,7 +140,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
           <thead>
             <tr className="peerInfo">
               <td>Status</td>
-              <td>Channel</td>
               <td>Peer</td>
               <td>Data</td>
               <td>Funds</td>

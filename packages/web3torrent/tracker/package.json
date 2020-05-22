@@ -2,10 +2,13 @@
   "name": "@statechannels/web3torrent-tracker",
   "version": "0.0.0",
   "scripts": {
+    "dev": "DEBUG=* PORT=8001 node index.js",
     "build-and-release": "./build-push-release.sh"
   },
   "dependencies": {
-    "bittorrent-tracker": "9.14.4",
+    "bittorrent-tracker": "9.15.0",
+    "pino": "6.2.0",
+    "pino-pretty": "4.0.0",
     "web3":"1.2.6",
     "debug": "4.1.1"
   }

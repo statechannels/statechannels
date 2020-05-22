@@ -8,11 +8,6 @@ import * as assetHolderTransactionCreator from './asset-holder';
 // @ts-ignore
 const Erc20AssetHolderContractInterface = new Interface(Erc20AssetHolderArtifact.abi);
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 export function createTransferAllTransaction(
   channelId: string,
   allocation: Allocation
@@ -56,5 +51,5 @@ export function createDepositTransaction(
     expectedHeld,
     amount,
   ]);
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
