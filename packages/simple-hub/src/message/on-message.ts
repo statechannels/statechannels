@@ -16,7 +16,7 @@ export function onIncomingMessage(
     message: Either<Error, Message>;
   }>,
   onNext: () => void = noop,
-  onComplete: () => void = noop
+  onComplete?: () => void
 ) {
   return observable
     .pipe(
