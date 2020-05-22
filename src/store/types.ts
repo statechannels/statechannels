@@ -197,6 +197,7 @@ export interface DBBackend {
     stores: S[],
     cb: (tx: Transaction) => Promise<T>
   ): Promise<T>;
+  transactionOngoing: boolean;
 }
 
 export type Transaction = {
