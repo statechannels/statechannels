@@ -8,8 +8,8 @@ import {
 } from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
-import {BigNumber} from 'ethers';
-import {ethers} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
+
 import {checkThat} from './helpers';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {

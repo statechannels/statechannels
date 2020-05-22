@@ -3,7 +3,7 @@ import {Store} from '../store';
 import {map, filter} from 'rxjs/operators';
 import {MachineFactory, exists} from '../utils';
 import {ChannelChainInfo} from '../chain';
-import { BigNumber } from 'ethers';
+import {BigNumber} from 'ethers';
 
 export type Init = {
   channelId: string;
