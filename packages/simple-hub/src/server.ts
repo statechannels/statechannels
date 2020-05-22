@@ -9,43 +9,13 @@ if (process.env.HEROKU_APP_NAME) {
     environment: _.replace(process.env.HEROKU_APP_NAME, 'simple-hub-', '')
   });
 }
-import {fbObservable, deleteIncomingMessage, sendReplies} from './message/firebase-relay';
-import {respondToMessage} from './wallet/respond-to-message';
-import {map} from 'rxjs/operators';
+import {fbObservable} from './message/firebase-relay';
 import {log} from './logger';
-import {depositsToMake} from './wallet/deposit';
-import {makeDeposits} from './blockchain/eth-asset-holder';
-import {pipe} from 'fp-ts/lib/pipeable';
-import {map as fpMap, fold} from 'fp-ts/lib/Either';
 import {cHubParticipantId, cFirebasePrefix} from './constants';
+import {onIncomingMessage} from './message/on-message';
 
 export async function startServer() {
-  fbObservable()
-    .pipe(
-      map(({snapshotKey, message}) => ({
-        snapshotKey,
-        messageToSend: pipe(message, fpMap(respondToMessage))
-      })),
-      map(({snapshotKey, messageToSend}) => ({
-        snapshotKey,
-        messageToSend,
-        depositsToMake: pipe(messageToSend, fpMap(depositsToMake))
-      }))
-    )
-    .subscribe(
-      async ({snapshotKey, messageToSend, depositsToMake}) => {
-        try {
-          deleteIncomingMessage(snapshotKey);
-          pipe(depositsToMake, fold(log.error, makeDeposits));
-          pipe(messageToSend, fold(log.error, sendReplies));
-        } catch (e) {
-          log.error(e);
-        }
-      },
-      error => log.fatal(error),
-      () => log.fatal('Completed listening to Firebase. This is not expected.')
-    );
-
+  onIncomingMessage(fbObservable());
   log.info(`Listening on database ${process.env.FIREBASE_URL}`);
   log.info(`Firebase prefix set to ${cFirebasePrefix}`);
   log.info(`Hub listening for messages sent to ${cHubParticipantId}`);
