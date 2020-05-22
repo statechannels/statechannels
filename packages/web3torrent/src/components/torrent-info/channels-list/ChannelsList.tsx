@@ -8,6 +8,7 @@ import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
 import {Blockie, Tooltip} from 'rimble-ui';
 import {Badge, Avatar} from '@material-ui/core';
+import {color} from '@storybook/addon-knobs';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -79,9 +80,8 @@ function channelIdToTableRow(
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
-        <div className={`dot ${connectionStatus}`}>
-          <span className="tooltiptext">{connectionStatus}</span>
-        </div>
+        <div className={`dot ${connectionStatus}`}></div>
+        <span className={`status ${connectionStatus}`}>{connectionStatus}</span>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">
@@ -99,10 +99,9 @@ function channelIdToTableRow(
               <Blockie
                 opts={{
                   seed: peerSelectedAddress,
-                  color: '#2728e2',
-                  bgcolor: '#46A5D0',
-                  size: 15,
-                  scale: 3,
+                  bgcolor: '#3531ff',
+                  size: 6,
+                  scale: 4,
                   spotcolor: '#000'
                 }}
               />
@@ -111,14 +110,13 @@ function channelIdToTableRow(
         </Tooltip>
       </td>
       <td className="transferred">
-        {dataTransferred + ' '}
-        <i className={isBeneficiary ? 'up' : 'down'}></i>
+        <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
+        <div className="amount">{dataTransferred + ' '}</div>
       </td>
-      {isBeneficiary ? (
-        <td className="earned">{weiTransferred}</td>
-      ) : (
-        <td className="paid">-{weiTransferred}</td>
-      )}
+      <td className="exchanged">
+        <div className="type">{isBeneficiary ? 'earned' : 'spent'}</div>
+        <div className="amount">{weiTransferred + ' '}</div>
+      </td>
     </tr>
   );
 }
