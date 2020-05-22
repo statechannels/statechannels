@@ -1,3 +1,4 @@
+import {noop} from "lodash";
 import {deleteIncomingMessage, sendReplies} from '../message/firebase-relay';
 import {respondToMessage} from '../wallet/respond-to-message';
 import {map} from 'rxjs/operators';
