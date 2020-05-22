@@ -303,20 +303,17 @@ export class Store {
 
   public updateChannel = (
     channelId: string,
-    updateData: {outcome: SimpleAllocation; appData: string; isFinal?: boolean}
+    updateData: Partial<{outcome: SimpleAllocation; appData: string; isFinal: boolean}>
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const {supported: existingState, myTurn} = await this.getEntry(channelId);
         if (!myTurn) throw Error(Errors.notMyTurn);
 
-        const newState = {
-          ...existingState,
-          turnNum: existingState.turnNum.add(1),
-          appData: updateData.appData,
-          outcome: updateData.outcome,
-          isFinal: updateData.isFinal || existingState.isFinal
-        };
+        const newState = _.merge(
+          {turnNum: existingState.turnNum.add(1), ...updateData},
+          existingState
+        );
 
         return this.signAndAddStateWithinTx(channelId, newState);
       })

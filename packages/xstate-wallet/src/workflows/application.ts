@@ -122,20 +122,8 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) => {
-  const entry = await store.getEntry(channelId);
-
-  if (entry.myTurn) {
-    const {supported} = entry;
-    return store.signAndAddState(channelId, {
-      ...supported,
-      turnNum: supported.turnNum.add(1),
-      isFinal: true
-    });
-  } else {
-    throw Error('Not your turn');
-  }
-};
+const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) =>
+  store.updateChannel(channelId, {isFinal: true});
 
 const generateConfig = (
   actions: WorkflowActions,
@@ -293,6 +281,7 @@ export const workflow = (
     },
 
     sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
+      // FIXME: Shouldn't this inspect the error?
       await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
     },
 
@@ -352,6 +341,7 @@ export const workflow = (
     updateStoreAndSendResponse: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       // TODO: This should probably be done in a service and we should handle the failure cases
       // For now we update the store and then send the response in one action so the response has the latest state
+      // FIXME: In fact, an action seems to be appropriate:
       if (context.channelId === event.channelId) {
         const entry = await store.updateChannel(event.channelId, event);
         await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
@@ -360,11 +350,11 @@ export const workflow = (
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+    channelOpen: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
       !event.storeEntry.latestSignedByMe.isFinal,
 
-    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.latest?.isFinal,
+    channelClosing: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.latest?.isFinal, // FIXME: Should use supported
 
     channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.isChallenging,
