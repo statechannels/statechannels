@@ -7,6 +7,7 @@ import {State, Objective} from './../types';
 import {Wallet, BigNumber} from 'ethers';
 import {Store} from './../store';
 import {Zero} from '@ethersproject/constants';
+import {Errors} from '..';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -128,9 +129,7 @@ describe('createChannel', () => {
 
     await expect(
       store.createChannel(participants, challengeDuration, stateVars, appDefinition)
-    ).rejects.toMatchObject({
-      message: "Couldn't find the signing key for any participant in wallet."
-    });
+    ).rejects.toMatchObject({message: Errors.notInChannel});
   });
 });
 
