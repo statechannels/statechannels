@@ -454,16 +454,14 @@ function convertNitroTransactionRequest(nitroTransactionRequest): TransactionReq
   return {
     ...nitroTransactionRequest,
     gasLimit: nitroTransactionRequest.gasLimit
-      ? BigNumber.from(nitroTransactionRequest.gasLimit.toHexString())
+      ? BigNumber.from(nitroTransactionRequest.gasLimit)
       : undefined,
     gasPrice: nitroTransactionRequest.gasPrice
-      ? BigNumber.from(nitroTransactionRequest.gasPrice.toHexString())
+      ? BigNumber.from(nitroTransactionRequest.gasPrice)
       : undefined,
     nonce: nitroTransactionRequest.nonce
-      ? BigNumber.from(nitroTransactionRequest.nonce.toHexString())
+      ? BigNumber.from(nitroTransactionRequest.nonce)
       : undefined,
-    value: nitroTransactionRequest.value
-      ? BigNumber.from(nitroTransactionRequest.value.toHexString())
-      : undefined
+    value: nitroTransactionRequest.value ? BigNumber.from(nitroTransactionRequest.value) : undefined
   };
 }
