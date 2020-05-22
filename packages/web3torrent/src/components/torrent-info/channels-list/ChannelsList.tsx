@@ -80,19 +80,26 @@ function channelIdToTableRow(
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
-        <div className={`dot ${connectionStatus}`}>
-          <span className="tooltiptext">{connectionStatus}</span>
-        </div>
+        <div className={`dot ${connectionStatus}`}></div>
+        <span className={`status ${connectionStatus}`}>{connectionStatus}</span>
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">
         <Tooltip message={peerSelectedAddress}>
-          <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+          <Badge
+            badgeContent={
+              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+            }
+            color={isBeneficiary ? 'primary' : 'error'}
+            overlap={'circle'}
+            showZero={false}
+            max={999}
+          >
             <Avatar>
               <Blockie
                 opts={{
                   seed: peerSelectedAddress,
-                  bgcolor: '#f16721',
+                  bgcolor: '#3531ff',
                   size: 6,
                   scale: 4,
                   spotcolor: '#000'
@@ -102,12 +109,13 @@ function channelIdToTableRow(
           </Badge>
         </Tooltip>
       </td>
-      <td className="transactions">
-        {channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0}
-      </td>
       <td className="transferred">
         <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
         <div className="amount">{dataTransferred + ' '}</div>
+      </td>
+      <td className="transferred">
+        <div className="type">{isBeneficiary ? 'sent' : 'received'}</div>
+        <div className="amount">{weiTransferred + ' '}</div>
       </td>
     </tr>
   );
@@ -133,8 +141,8 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
             <tr className="peerInfo">
               <td>Status</td>
               <td>Peer</td>
-              <td>Transactions</td>
               <td>Data</td>
+              <td>Funds</td>
             </tr>
           </thead>
         )}

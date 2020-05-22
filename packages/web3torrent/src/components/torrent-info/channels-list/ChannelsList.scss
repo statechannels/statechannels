@@ -34,7 +34,11 @@ section.wires-list {
       tr.peerInfo {
         padding-top: 10px;
         padding-bottom: 10px;
+
         display: flex;
+        align-items: center;
+        justify-content: center;
+
         flex-direction: row;
         width: 100%;
         border-bottom: 1px solid $c-mediumgrey;
@@ -53,12 +57,32 @@ section.wires-list {
 
         .channel {
           padding-left: 0px;
+
+          .status {
+            font-size: 16px;
+            padding-left: 5px;
+            vertical-align: text-top;
+            &.downloading {
+              color: #006dff;
+            }
+            &.uploading {
+              color: #1ec51b;
+            }
+            &.connecting {
+              color: #d4af00;
+            }
+            &.disconnected {
+              color: #b26b60;
+            }
+            &.finished {
+              color: #f16721;
+            }
+          }
         }
 
         .dot {
-          margin-top: 10px;
-          height: 17px;
-          width: 17px;
+          height: 14px;
+          width: 14px;
           background-color: #bbb;
           border-radius: 50%;
           display: inline-block;
@@ -69,20 +93,20 @@ section.wires-list {
             background-color: #1ec51b;
           }
           &.connecting {
-            background-color: #f16721;
+            background-color: #f1cd20;
           }
           &.disconnected {
             background-color: #fbe9e7;
             &:before {
               color: #b26b60;
-              font-size: 16px;
-              margin-left: -5px;
+              font-size: 12px;
+              margin-left: -3px;
               position: absolute;
               content: '?';
             }
           }
           &.finished {
-            background-color: #e8e8e8;
+            background-color: #f16721;
           }
           &.downloading,
           &.uploading,
@@ -90,27 +114,6 @@ section.wires-list {
             animation: pulsate 2s ease-in-out;
             animation-iteration-count: infinite;
             opacity: 1;
-          }
-
-          /* Tooltip text */
-          .tooltiptext {
-            visibility: hidden;
-            background-color: black;
-            color: #fff;
-            text-align: center;
-            padding: 5px 5px;
-            border-radius: 6px;
-            margin: -5px 20px;
-            font-size: 12px;
-            background-color: #717171;
-            /* Position the tooltip text - see examples below! */
-            position: absolute;
-            z-index: 1;
-          }
-
-          /* Show the tooltip text when you mouse over the tooltip container */
-          &:hover .tooltiptext {
-            visibility: visible;
           }
         }
 
@@ -130,13 +133,9 @@ section.wires-list {
           min-width: 50px;
           text-align: center;
           white-space: nowrap;
-          margin-top: 4px;
           div.type {
             font-size: 12px;
           }
-        }
-        .transactions {
-          margin-top: 10px;
         }
         .paid {
           min-width: 70px;
@@ -195,11 +194,21 @@ section.wires-list {
   }
 }
 
-.MuiAvatar-root {
-  width: 30px !important;
-  height: 30px !important;
-}
-
 .MuiAvatar-colorDefault {
   background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.MuiBadge-colorPrimary {
+  color: #fff;
+  background-color: #1ec51b !important;
+}
+
+.MuiBadge-colorError {
+  color: #fff;
+  background-color: #006dff !important;
+}
+
+.MuiBadge-badge {
+  font-size: 0.65rem !important;
+  height: 13px !important;
 }

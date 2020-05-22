@@ -90,7 +90,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
                     <Blockie
                       opts={{
                         seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
-                        bgcolor: '#f16721',
+                        bgcolor: '#3531ff',
                         size: 6,
                         scale: 4,
                         spotcolor: '#000'
