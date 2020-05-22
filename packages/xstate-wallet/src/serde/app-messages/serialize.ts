@@ -16,9 +16,9 @@ import {
   isAllocation
 } from '../../store/types';
 
-import {AddressZero} from 'ethers/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
@@ -26,7 +26,7 @@ export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
       channelId,
-      amount: formatAmount(bigNumberify(assetBudget.channels[channelId].amount))
+      amount: formatAmount(BigNumber.from(assetBudget.channels[channelId].amount))
     }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,

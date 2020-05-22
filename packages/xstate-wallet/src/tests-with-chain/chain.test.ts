@@ -1,11 +1,12 @@
 import {ChainWatcher, ChannelChainInfo} from '../chain';
-import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
-import {Contract, providers} from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {Machine, interpret, Interpreter} from 'xstate';
 import {map} from 'rxjs/operators';
 import {Store} from '../store';
+import {parseUnits} from '@ethersproject/units';
+import {JsonRpcProvider} from '@ethersproject/providers';
 
 const chain = new ChainWatcher();
 
@@ -13,8 +14,8 @@ const store = new Store(chain);
 
 const mockContext = {
   channelId: randomChannelId(),
-  fundedAt: bigNumberify('0'),
-  depositAt: bigNumberify('0')
+  fundedAt: BigNumber.from('0'),
+  depositAt: BigNumber.from('0')
 };
 type Init = {
   channelId: string;
@@ -23,7 +24,7 @@ type Init = {
   fundedAt: BigNumber;
 };
 
-const provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+const provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 
 let ETHAssetHolder: Contract;
 let service: Interpreter<any, any, any, any>;

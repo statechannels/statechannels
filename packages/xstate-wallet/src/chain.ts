@@ -5,12 +5,13 @@ import {
   getChallengeRegisteredEvent,
   ChallengeRegisteredEvent
 } from '@statechannels/nitro-protocol';
-import {Contract, Wallet} from 'ethers';
-import {Zero, One} from 'ethers/constants';
-import {BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
+import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
+
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
-
+import {One, Zero} from '@ethersproject/constants';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
@@ -79,7 +80,7 @@ export class FakeChain implements Chain {
   }
 
   public setBlockNumber(blockNumber: BigNumberish) {
-    this.blockNumber = bigNumberify(blockNumber);
+    this.blockNumber = BigNumber.from(blockNumber);
 
     for (const channelId in this.channelStatus) {
       const {
@@ -151,7 +152,7 @@ export class FakeChain implements Chain {
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
-    const current = (this.channelStatus[channelId] || {}).amount || bigNumberify(0);
+    const current = (this.channelStatus[channelId] || {}).amount || BigNumber.from(0);
 
     if (current.gte(expectedHeld)) {
       this.channelStatus[channelId] = {
@@ -279,7 +280,7 @@ export class ChainWatcher implements Chain {
   }
 
   public async getBlockNumber() {
-    return bigNumberify(await this.provider.getBlockNumber());
+    return BigNumber.from(await this.provider.getBlockNumber());
   }
 
   public async ethereumEnable(): Promise<string> {
@@ -317,10 +318,13 @@ export class ChainWatcher implements Chain {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
-      to: NITRO_ADJUDICATOR_ADDRESS
+      to: NITRO_ADJUDICATOR_ADDRESS,
+      nonce: undefined
     };
 
-    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: https://github.com/ethers-io/ethers.js/issues/844
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
     return response.hash;
   }
 
@@ -348,7 +352,9 @@ export class ChainWatcher implements Chain {
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await this.signer.sendTransaction(transactionRequest as any); // TODO: https://github.com/ethers-io/ethers.js/issues/844
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
     chainLogger.info({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
@@ -370,9 +376,9 @@ export class ChainWatcher implements Chain {
 
     const result = await nitroAdjudicator.getData(channelId);
 
-    const [turnNumRecord, finalizesAt] = result.map(bigNumberify);
+    const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
-    const blockNum = bigNumberify(await this.provider.getBlockNumber());
+    const blockNum = BigNumber.from(await this.provider.getBlockNumber());
 
     // TODO: Fetch other info
     return {
@@ -421,7 +427,7 @@ export class ChainWatcher implements Chain {
       map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) => ({
         channelId,
         challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state),
-        challengeExpiry: bigNumberify(finalizesAt)
+        challengeExpiry: BigNumber.from(finalizesAt)
       }))
     );
 
@@ -430,4 +436,24 @@ export class ChainWatcher implements Chain {
       updates
     );
   }
+}
+
+// Since nitro-protocol is still using v4 of ethers we need to convert any bignumbers the v5 version from ethers
+// TODO: Remove this when nitro protocol is using v5 ethers
+function convertNitroTransactionRequest(nitroTransactionRequest): TransactionRequest {
+  return {
+    ...nitroTransactionRequest,
+    gasLimit: nitroTransactionRequest.gasLimit
+      ? BigNumber.from(nitroTransactionRequest.gasLimit.toHexString())
+      : undefined,
+    gasPrice: nitroTransactionRequest.gasPrice
+      ? BigNumber.from(nitroTransactionRequest.gasPrice.toHexString())
+      : undefined,
+    nonce: nitroTransactionRequest.nonce
+      ? BigNumber.from(nitroTransactionRequest.nonce.toHexString())
+      : undefined,
+    value: nitroTransactionRequest.value
+      ? BigNumber.from(nitroTransactionRequest.value.toHexString())
+      : undefined
+  };
 }

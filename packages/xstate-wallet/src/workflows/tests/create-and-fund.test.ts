@@ -4,11 +4,11 @@ import waitForExpect from 'wait-for-expect';
 import {Init, machine} from '../create-and-fund';
 
 import {Store} from '../../store';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {checkThat, isSimpleEthAllocation, add} from '../../utils';
 
 import {
@@ -36,11 +36,11 @@ jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: BigNumber.from(0),
   chainId,
   challengeDuration,
   participants,
@@ -49,7 +49,7 @@ const targetChannel: ChannelConstants = {
 const targetChannelId = calculateChannelId(targetChannel);
 
 const ledgerChannel: ChannelConstants = {
-  channelNonce: bigNumberify(1),
+  channelNonce: BigNumber.from(1),
   chainId,
   challengeDuration,
   participants,
@@ -57,7 +57,7 @@ const ledgerChannel: ChannelConstants = {
 };
 
 const destinations = participants.map(p => p.destination);
-const amounts = [bigNumberify(7), bigNumberify(5)];
+const amounts = [BigNumber.from(7), BigNumber.from(5)];
 const totalAmount = amounts.reduce((a, b) => a.add(b));
 
 const allocation: Outcome = {
@@ -132,8 +132,8 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) =>
     createSignatureEntry(state, privateKey)
   );
-  await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
-  await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
+  await aStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
+  await bStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 

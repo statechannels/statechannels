@@ -1,5 +1,6 @@
 import {StateNodeConfig, DoneInvokeEvent, TransitionConfig} from 'xstate';
-import {hexZeroPad, BigNumber, hexlify} from 'ethers/utils';
+import {hexZeroPad, hexlify} from '@ethersproject/bytes';
+import {BigNumber} from 'ethers';
 export function unreachable(x: never) {
   return x;
 }

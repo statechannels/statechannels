@@ -3,12 +3,12 @@ import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {Web3Provider, JsonRpcProvider} from '@ethersproject/providers';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
-  if (bigNumberify(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
+  if (BigNumber.from(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
   else if (tokenAddress === MOCK_TOKEN) return MOCK_ASSET_HOLDER_ADDRESS;
 
   throw 'AssetHolderAddress not found';

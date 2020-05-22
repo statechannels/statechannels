@@ -5,12 +5,12 @@ import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
 
-import {bigNumberify} from 'ethers/utils';
 import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
 import {Store} from '../../store';
 import {logger} from '../../logger';
+import {BigNumber} from 'ethers';
 
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
@@ -33,7 +33,7 @@ const testContext: WorkflowContext = {
   appDefinition: '0x0',
   appData: '0x0',
   chainId: '0',
-  challengeDuration: bigNumberify(1)
+  challengeDuration: BigNumber.from(1)
 };
 
 if (config.states) {

@@ -22,7 +22,7 @@ import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 const PROTOCOL = 'create-and-fund';
 
@@ -74,7 +74,7 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   ]);
 
   const stateVars: StateVariables = {
-    turnNum: bigNumberify(0),
+    turnNum: BigNumber.from(0),
     outcome,
     appData: '0x',
     isFinal: false
@@ -106,9 +106,9 @@ const reserveFunds = (store: Store) => async context => {
     channelEntry.supported.participants.find(p => p.signingAddress === playerAddress)
       ?.destination || '0x0';
   const receive =
-    allocationItems.find(a => a.destination !== playerDestination)?.amount || bigNumberify(0);
+    allocationItems.find(a => a.destination !== playerDestination)?.amount || BigNumber.from(0);
   const send =
-    allocationItems.find(a => a.destination === playerDestination)?.amount || bigNumberify(0);
+    allocationItems.find(a => a.destination === playerDestination)?.amount || BigNumber.from(0);
 
   await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {receive, send});
 };
@@ -219,7 +219,7 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
     .pipe(
       map(e => _.sortBy(e.sortedStates, s => s.turnNum)[0]),
       filter(s => s.turnNum.eq(0)),
-      map(s => ({state: {...s, turnNum: bigNumberify(3)}})),
+      map(s => ({state: {...s, turnNum: BigNumber.from(3)}})),
       first()
     )
     .toPromise();
@@ -229,7 +229,7 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   const {allocationItems} = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
-  let depositAt = bigNumberify(0);
+  let depositAt = BigNumber.from(0);
   for (let i = 0; i < allocationItems.length; i++) {
     const {amount} = allocationItems[i];
     if (i !== myIndex) depositAt = depositAt.add(amount);

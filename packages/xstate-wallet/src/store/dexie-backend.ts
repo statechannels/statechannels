@@ -1,4 +1,3 @@
-import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {
   Objective,
@@ -15,6 +14,7 @@ import Dexie, {Transaction, TransactionMode} from 'dexie';
 
 import {unreachable} from '../utils';
 import {logger} from '../logger';
+import {BigNumber} from 'ethers';
 
 const STORES: ObjectStores[] = [
   ObjectStores.budgets,
@@ -82,9 +82,9 @@ export class Backend implements DBBackend {
     const nonces = await this.getAll(ObjectStores.nonces);
     for (const key in nonces) {
       if (nonces[key]) {
-        nonces[key] = new BigNumber(-1);
+        nonces[key] = BigNumber.from(-1);
       } else {
-        nonces[key] = new BigNumber(nonces[key]);
+        nonces[key] = BigNumber.from(nonces[key]);
       }
     }
     return nonces;
@@ -107,8 +107,8 @@ export class Backend implements DBBackend {
       ...budget,
       forAsset: _.mapValues(budget.forAsset, (assetBudget: AssetBudget) => ({
         assetHolderAddress: assetBudget.assetHolderAddress,
-        availableReceiveCapacity: bigNumberify(assetBudget.availableReceiveCapacity),
-        availableSendCapacity: bigNumberify(assetBudget.availableSendCapacity),
+        availableReceiveCapacity: BigNumber.from(assetBudget.availableReceiveCapacity),
+        availableSendCapacity: BigNumber.from(assetBudget.availableSendCapacity),
         channels: assetBudget.channels
       }))
     };
@@ -135,9 +135,9 @@ export class Backend implements DBBackend {
   public async getNonce(key: string) {
     const nonce = await this.get(ObjectStores.nonces, key);
     if (!nonce) {
-      return new BigNumber(-1);
+      return BigNumber.from(-1);
     }
-    return new BigNumber(nonce);
+    return BigNumber.from(nonce);
   }
   public async getPrivateKey(key: string) {
     return this.get(ObjectStores.privateKeys, key);

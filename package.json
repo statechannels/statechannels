@@ -60,7 +60,12 @@
     "test:ci:incremental": "yarn test:ci --concurrency 3 --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent "
   },
-  "workspaces": [
-    "packages/*"
-  ]
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/ethers"
+    ]
+  }
 }

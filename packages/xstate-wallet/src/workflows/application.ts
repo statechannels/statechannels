@@ -19,7 +19,7 @@ import {createMockGuard, unreachable} from '../utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -394,12 +394,12 @@ export const workflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: bigNumberify(0),
+        turnNum: BigNumber.from(0),
         isFinal: false
       };
       const {channelId: targetChannelId} = await store.createChannel(
         participants,
-        bigNumberify(challengeDuration),
+        BigNumber.from(challengeDuration),
         stateVars,
         appDefinition,
         applicationDomain

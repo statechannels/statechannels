@@ -1,5 +1,5 @@
-import {AddressZero} from 'ethers/constants';
-import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from '@ethersproject/constants';
+import {BigNumber} from 'ethers';
 import {Destination} from './store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -42,7 +42,7 @@ export const NITRO_ADJUDICATOR_ADDRESS: string =
 
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
-export const CHALLENGE_DURATION = bigNumberify(process.env.CHALLENGE_DURATION || '0x12c');
+export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION || '0x12c');
 
 export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
 
