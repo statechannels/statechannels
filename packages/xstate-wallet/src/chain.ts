@@ -320,8 +320,7 @@ export class ChainWatcher implements Chain {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
-      to: NITRO_ADJUDICATOR_ADDRESS,
-      nonce: undefined
+      to: NITRO_ADJUDICATOR_ADDRESS
     };
 
     const response = await this.signer.sendTransaction(
