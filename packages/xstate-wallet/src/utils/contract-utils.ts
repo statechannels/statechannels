@@ -32,8 +32,7 @@ export function getProvider(): Web3Provider | JsonRpcProvider {
 export function getEthAssetHolderContract() {
   const provider = getProvider();
   return new Contract(
-    // eslint-disable-next-line no-process-env
-    process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0',
+    ETH_ASSET_HOLDER_ADDRESS || '0x0',
     ContractArtifacts.EthAssetHolderArtifact['abi'],
     provider
   );
