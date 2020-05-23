@@ -23,6 +23,10 @@ import {makeDestination} from '../utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {logger} from '../logger';
 import {ETH_TOKEN} from '../constants';
+import {SignedState} from '../store';
+import {signState} from '../store/state-utils';
+import {SignatureEntry} from '../store/channel-store-entry';
+import _ from 'lodash';
 
 const log = logger.info.bind(logger);
 
@@ -100,6 +104,15 @@ export class Player {
   }
   get participantId(): string {
     return this.signingAddress;
+  }
+
+  signState(state: SignedState): SignedState {
+    const mySignature: SignatureEntry = {
+      signature: signState(state, this.privateKey),
+      signer: this.signingAddress
+    };
+
+    return {...state, signatures: _.unionBy(state.signatures, [mySignature], sig => sig.signature)};
   }
 
   static async createPlayer(

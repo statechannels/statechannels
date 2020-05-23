@@ -1,10 +1,12 @@
 import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
-import {BigNumber} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils';
 import {first} from 'rxjs/operators';
+import {CHAIN_NETWORK_ID} from '../config';
+import {BigNumber, constants} from 'ethers';
 jest.setTimeout(30000);
+
 test('accepts states when running', async () => {
   const fakeChain = new FakeChain();
 
@@ -18,37 +20,32 @@ test('accepts states when running', async () => {
     'PlayerB',
     fakeChain
   );
-  const outcome = simpleEthAllocation([
-    {
-      destination: playerA.destination,
-      amount: BigNumber.from('0x06f05b59d3b20000')
-    },
-    {
-      destination: playerA.destination,
-      amount: BigNumber.from('0x06f05b59d3b20000')
-    }
-  ]);
+  const players = [playerA, playerB];
+
+  const amount = BigNumber.from('0x06f05b59d3b20000');
+  const outcome = simpleEthAllocation(players.map(({destination}) => ({destination, amount})));
 
   hookUpMessaging(playerA, playerB);
-  const channelId = '0x440b56b6c5b0adca1ee99e3926d1b123fd867566cfab5150479f9d5e9317fa1e';
 
-  const playerBChannelUpdatedPromise = playerB.store
+  const turnNum = BigNumber.from(5);
+  const signedState = players.reduce((state, player) => player.signState(state), {
+    outcome,
+    turnNum,
+    appData: '0x0',
+    isFinal: false,
+    participants: [playerA.participant, playerB.participant],
+    challengeDuration: BigNumber.from(4),
+    chainId: CHAIN_NETWORK_ID,
+    appDefinition: constants.AddressZero,
+    channelNonce: BigNumber.from(4),
+    signatures: []
+  });
+  const {channelId} = await players.map(({store}) => store.addState(signedState))[0];
+
+  await playerB.store
     .channelUpdatedFeed(channelId)
     .pipe(first())
     .toPromise();
-
-  const stateVars = {
-    outcome,
-    turnNum: BigNumber.from(4),
-    appData: '0x0',
-    isFinal: false
-  };
-  playerA.store.createChannel(
-    [playerA.participant, playerB.participant],
-    BigNumber.from(4),
-    stateVars
-  );
-  await playerBChannelUpdatedPromise;
 
   const context: any = {channelId, applicationDomain: 'localhost', fundingStrategy: 'Direct'};
   playerA.startAppWorkflow('running', context);
@@ -64,9 +61,9 @@ test('accepts states when running', async () => {
     expect(playerA.workflowState).toEqual('running');
     expect(playerB.workflowState).toEqual('running');
     const playerATurnNum = (await playerA.store.getEntry(channelId)).latest.turnNum.toNumber();
-    expect(playerATurnNum).toBe(5);
+    expect(playerATurnNum).toBe(turnNum.add(1).toNumber());
     const playerBTurnNum = (await playerB.store.getEntry(channelId)).latest.turnNum.toNumber();
-    expect(playerBTurnNum).toBe(5);
+    expect(playerBTurnNum).toBe(turnNum.add(1).toNumber());
   }, 3000);
 
   await playerB.messagingService.receiveRequest(
@@ -77,8 +74,8 @@ test('accepts states when running', async () => {
     expect(playerA.workflowState).toEqual('running');
     expect(playerB.workflowState).toEqual('running');
     const playerATurnNum = (await playerA.store.getEntry(channelId)).latest.turnNum.toNumber();
-    expect(playerATurnNum).toBe(6);
+    expect(playerATurnNum).toBe(turnNum.add(2).toNumber());
     const playerBTurnNum = (await playerB.store.getEntry(channelId)).latest.turnNum.toNumber();
-    expect(playerBTurnNum).toBe(6);
+    expect(playerBTurnNum).toBe(turnNum.add(2).toNumber());
   }, 3000);
 });
