@@ -1,9 +1,8 @@
-import {AddressZero} from 'ethers/constants';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {AddressZero} from '@ethersproject/constants';
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
-import {Wallet} from 'ethers';
+import {Wallet, BigNumber} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 
@@ -246,7 +245,7 @@ export class Store {
           !!channel &&
           channel.applicationDomain === applicationDomain &&
           (!channel.hasConclusionProof || includeClosed) &&
-          !bigNumberify(channel.channelConstants.appDefinition).isZero()
+          !BigNumber.from(channel.channelConstants.appDefinition).isZero()
       )
     );
 
@@ -291,7 +290,7 @@ export class Store {
     );
   private async getNonce(addresses: string[]): Promise<BigNumber> {
     const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
-    return nonce || bigNumberify(-1);
+    return nonce || BigNumber.from(-1);
   }
 
   private async setNonce(addresses: string[], value: BigNumber) {

@@ -8,8 +8,8 @@ import {
 } from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
-import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 import {checkThat} from './helpers';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
@@ -64,7 +64,7 @@ export function allocateToTarget(
 
   currentOutcome = _.cloneDeep(currentOutcome);
 
-  let total = bigNumberify(0);
+  let total = Zero;
   let currentItems = currentOutcome.allocationItems;
 
   deductions.forEach(targetItem => {

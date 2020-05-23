@@ -1,7 +1,7 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
-import {bigNumberify} from 'ethers/utils';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {BigNumber} from 'ethers';
+import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
 
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
@@ -83,9 +83,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
-    const allocated = outcome.allocationItems
-      .map(a => a.amount)
-      .reduce((a, b) => a.add(b), bigNumberify(0));
+    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => a.add(b), Zero);
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
     if (allocated.gt(chainInfo.amount))
@@ -103,9 +101,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           .map(i => i.amount)
           .reduce(add);
 
-        const amountLeft = bigNumberify(amount).gt(currentlyAllocated)
+        const amountLeft = BigNumber.from(amount).gt(currentlyAllocated)
           ? amount.sub(currentlyAllocated)
-          : bigNumberify(0);
+          : Zero;
         return {destination, amount: amountLeft};
       })
     );
@@ -133,7 +131,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = bigNumberify(0);
+    let totalBeforeDeposit = Zero;
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (myIndex === i) {
@@ -142,12 +140,12 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         return {
           channelId,
           depositAt: totalBeforeDeposit,
-          totalAfterDeposit: bigNumberify(totalBeforeDeposit).add(allocation.amount),
+          totalAfterDeposit: BigNumber.from(totalBeforeDeposit).add(allocation.amount),
 
           fundedAt
         };
       } else {
-        totalBeforeDeposit = bigNumberify(allocation.amount).add(totalBeforeDeposit);
+        totalBeforeDeposit = BigNumber.from(allocation.amount).add(totalBeforeDeposit);
       }
     }
 
@@ -180,9 +178,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       return {
         state: {
           ...entry.channelConstants,
-          challengeDuration: bigNumberify(1),
+          challengeDuration: BigNumber.from(1),
           isFinal: false,
-          turnNum: bigNumberify(0),
+          turnNum: Zero,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: HashZero,
           appDefinition: AddressZero

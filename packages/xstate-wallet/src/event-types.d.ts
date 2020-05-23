@@ -1,5 +1,5 @@
 import {SimpleAllocation, Participant, DomainBudget} from './store/types';
-import {BigNumber} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 
 export interface JoinChannelEvent {

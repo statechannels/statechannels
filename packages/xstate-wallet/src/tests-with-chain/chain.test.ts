@@ -1,6 +1,5 @@
 import {ChainWatcher, ChannelChainInfo, FakeChain} from '../chain';
-import {bigNumberify, parseUnits, BigNumber, hexZeroPad} from 'ethers/utils';
-import {Contract, providers} from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {
   ETH_ASSET_HOLDER_ADDRESS,
@@ -11,9 +10,13 @@ import {
 import {Machine, interpret, Interpreter} from 'xstate';
 import {map} from 'rxjs/operators';
 import {Store, SignedState, State} from '../store';
+import {parseUnits} from '@ethersproject/units';
+import {JsonRpcProvider} from '@ethersproject/providers';
 import {simpleEthAllocation} from '../utils';
 import {Player} from '../integration-tests/helpers';
 import {createSignatureEntry} from '../store/state-utils';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {Zero} from '@ethersproject/constants';
 
 const chain = new ChainWatcher();
 
@@ -21,8 +24,8 @@ const store = new Store(chain);
 
 const mockContext = {
   channelId: randomChannelId(),
-  fundedAt: bigNumberify('0'),
-  depositAt: bigNumberify('0')
+  fundedAt: BigNumber.from('0'),
+  depositAt: BigNumber.from('0')
 };
 type Init = {
   channelId: string;
@@ -31,7 +34,7 @@ type Init = {
   fundedAt: BigNumber;
 };
 
-const provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+const provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 
 let ETHAssetHolder: Contract;
 let service: Interpreter<any, any, any, any>;
@@ -132,22 +135,22 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
   const state: State = {
     outcome,
-    turnNum: bigNumberify(5),
+    turnNum: BigNumber.from(5),
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(0),
+    channelNonce: Zero,
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
@@ -177,22 +180,22 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
   const state5: State = {
     outcome,
-    turnNum: bigNumberify(4),
+    turnNum: BigNumber.from(4),
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(1),
+    channelNonce: BigNumber.from(1),
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
@@ -200,12 +203,12 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
 
   const state6: State = {
     outcome,
-    turnNum: bigNumberify(5),
+    turnNum: BigNumber.from(5),
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: bigNumberify(1),
+    channelNonce: BigNumber.from(1),
     appDefinition: TRIVIAL_APP_ADDRESS,
     participants: [playerA.participant, playerB.participant]
   };

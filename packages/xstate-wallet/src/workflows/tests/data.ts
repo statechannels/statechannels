@@ -1,6 +1,5 @@
-import {ethers} from 'ethers';
 import {Participant, State, DomainBudget} from '../../store/types';
-import {BigNumberish, bigNumberify, BigNumber} from 'ethers/utils';
+import {ethers, BigNumberish, BigNumber} from 'ethers';
 import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 
@@ -38,13 +37,13 @@ export const appState = (n: BigNumberish, isFinal = false): State => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
   appDefinition: '0x0000000000000000000000000000000000000000',
   isFinal,
-  turnNum: bigNumberify(n),
+  turnNum: BigNumber.from(n),
   outcome: simpleEthAllocation([
-    {destination: first.destination, amount: bigNumberify(1)},
-    {destination: second.destination, amount: bigNumberify(3)}
+    {destination: first.destination, amount: BigNumber.from(1)},
+    {destination: second.destination, amount: BigNumber.from(3)}
   ]),
   participants,
-  channelNonce: bigNumberify('0x01'),
+  channelNonce: BigNumber.from('0x01'),
   chainId: '0x01',
   challengeDuration: CHALLENGE_DURATION
 });
@@ -54,15 +53,15 @@ export const ledgerState = (
   amounts: BigNumberish[],
   turnNum = 0
 ): State => ({
-  turnNum: bigNumberify(turnNum),
+  turnNum: BigNumber.from(turnNum),
   outcome: simpleEthAllocation(
     amounts.map((a, i) => ({
       destination: participants[i].destination,
-      amount: bigNumberify(a)
+      amount: BigNumber.from(a)
     }))
   ),
   participants,
-  channelNonce: bigNumberify('0x02'),
+  channelNonce: BigNumber.from('0x02'),
   chainId: '0x01',
   isFinal: false,
   challengeDuration: CHALLENGE_DURATION,

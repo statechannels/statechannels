@@ -10,11 +10,11 @@ import {
   actions
 } from 'xstate';
 import {map} from 'rxjs/operators';
-import {Zero} from 'ethers/constants';
-import {BigNumber} from 'ethers/utils';
+import {Zero} from '@ethersproject/constants';
 
 import {Store} from '../store';
 import {ChannelChainInfo} from '../chain';
+import {BigNumber} from 'ethers';
 
 const {log} = actions;
 export interface Initial {

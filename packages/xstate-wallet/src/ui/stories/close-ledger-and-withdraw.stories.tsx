@@ -12,7 +12,7 @@ import React from 'react';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {Participant} from '../../store/types';
-import {parseEther} from 'ethers/utils';
+import {parseEther} from '@ethersproject/units';
 import {ethBudget} from '../../utils';
 import {logger} from '../../logger';
 

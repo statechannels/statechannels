@@ -7,7 +7,7 @@ import {
   participants
 } from '../test-helpers';
 import {calculateChannelId, Outcome, SimpleAllocation} from '../xstate-wallet-internals';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {ethers} from 'ethers';
 
 describe('deposit on prefund state', () => {

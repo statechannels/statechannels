@@ -71,16 +71,18 @@ module.exports = function(webpackEnv) {
   // This is based on what CRA was doing
   const rawEnv = Object.keys(process.env)
     .filter(key => {
-      return [
-        'CHAIN_NETWORK_ID',
-        'CLEAR_STORAGE_ON_START',
-        'ETH_ASSET_HOLDER_ADDRESS',
-        'HUB_ADDRESS',
-        'HUB_DESTINATION',
-        'LOG_DESTINATION',
-        'NITRO_ADJUDICATOR_ADDRESS',
-        'USE_INDEXED_DB'
-      ].indexOf(key) > -1
+      return (
+        [
+          'CHAIN_NETWORK_ID',
+          'CLEAR_STORAGE_ON_START',
+          'ETH_ASSET_HOLDER_ADDRESS',
+          'HUB_ADDRESS',
+          'HUB_DESTINATION',
+          'LOG_DESTINATION',
+          'NITRO_ADJUDICATOR_ADDRESS',
+          'USE_INDEXED_DB'
+        ].indexOf(key) > -1
+      );
     })
     .reduce(
       (env, key) => {
@@ -250,7 +252,7 @@ module.exports = function(webpackEnv) {
               // Turned on because emoji and regex is not minified properly using default
               // https://github.com/facebook/create-react-app/issues/2488
               ascii_only: true
-            },
+            }
           },
           // Use multi-process parallel running to improve the build speed
           // Default number of concurrent runs: os.cpus().length - 1
@@ -385,7 +387,7 @@ module.exports = function(webpackEnv) {
                   [
                     'const-enum', // From https://github.com/babel/babel/issues/8741#issuecomment-509041135
                     {
-                      "transform": "constObject"
+                      transform: 'constObject'
                     }
                   ],
                   [
@@ -624,7 +626,7 @@ module.exports = function(webpackEnv) {
       isEnvProduction &&
         new WorkboxWebpackPlugin.GenerateSW({
           clientsClaim: true,
-          maximumFileSizeToCacheInBytes: 5000000,
+          maximumFileSizeToCacheInBytes: 6000000,
           exclude: [/\.map$/, /asset-manifest\.json$/],
           navigateFallback: publicUrl + '/index.html',
           navigateFallbackDenylist: [

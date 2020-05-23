@@ -1,6 +1,6 @@
 import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils';
 import {first} from 'rxjs/operators';
@@ -21,11 +21,11 @@ test('accepts states when running', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
+      amount: BigNumber.from('0x06f05b59d3b20000')
     },
     {
       destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
+      amount: BigNumber.from('0x06f05b59d3b20000')
     }
   ]);
 
@@ -39,13 +39,13 @@ test('accepts states when running', async () => {
 
   const stateVars = {
     outcome,
-    turnNum: bigNumberify(4),
+    turnNum: BigNumber.from(4),
     appData: '0x0',
     isFinal: false
   };
   playerA.store.createChannel(
     [playerA.participant, playerB.participant],
-    bigNumberify(4),
+    BigNumber.from(4),
     stateVars
   );
   await playerBChannelUpdatedPromise;

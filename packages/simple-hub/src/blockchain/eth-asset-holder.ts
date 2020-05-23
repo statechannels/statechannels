@@ -4,7 +4,7 @@ import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
-import {TransactionResponse} from 'ethers/providers';
+import {TransactionResponse} from '@ethersproject/providers';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);

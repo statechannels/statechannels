@@ -4,7 +4,7 @@ import {
   first as player,
   second as hub
 } from './data';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {ethBudget} from '../../utils/budget-utils';
 import {FakeChain} from '../../chain';
@@ -21,8 +21,8 @@ jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 5000;
 
 const budget = ethBudget('example.com', {
-  availableReceiveCapacity: bigNumberify(5),
-  availableSendCapacity: bigNumberify(5)
+  availableReceiveCapacity: BigNumber.from(5),
+  availableSendCapacity: BigNumber.from(5)
 });
 
 hub.participantId = 'hub';

@@ -24,10 +24,11 @@ import {
 
 import {FundGuarantor, AllocationItem} from '../store/types';
 
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {CHALLENGE_DURATION} from '../config';
 
 import {escalate} from '../actions';
+import {Zero} from '@ethersproject/constants';
 
 export const enum OutcomeIdx {
   A = 0,
@@ -59,7 +60,7 @@ const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<F
     jointParticipants[ParticipantIdx.Hub].participantId
   );
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
-    turnNum: bigNumberify(0),
+    turnNum: Zero,
     appData: '0x',
     isFinal: false,
     outcome: simpleEthGuarantee(
@@ -218,7 +219,7 @@ export const jointChannelUpdate = (store: Store) => ({
           {destination: makeDestination(targetChannelId), amount},
           {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
-        return {state: {...state, turnNum: bigNumberify(1), outcome}};
+        return {state: {...state, turnNum: BigNumber.from(1), outcome}};
       }),
       take(1)
     )

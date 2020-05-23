@@ -1,9 +1,9 @@
-import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {Store} from '../store';
 import {map, filter} from 'rxjs/operators';
 import {MachineFactory, exists} from '../utils';
 import {ChannelChainInfo} from '../chain';
+import {BigNumber} from 'ethers';
 
 export type Init = {
   channelId: string;
@@ -39,7 +39,7 @@ export const machine: MachineFactory<Init, any> = (store: Store) => {
     );
 
   const submitDepositTransaction = async (ctx: Init, {currentHoldings}: SafeToDeposit) => {
-    const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
+    const amount = BigNumber.from(ctx.totalAfterDeposit).sub(currentHoldings);
     if (amount.lte(0)) return;
 
     await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());

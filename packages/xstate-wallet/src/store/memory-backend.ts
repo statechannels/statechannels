@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {Objective, DBBackend, DomainBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
@@ -46,9 +46,9 @@ export class MemoryBackend implements DBBackend {
     const nonces: Record<string, BigNumber | string | undefined> = this._nonces;
     for (const key in nonces) {
       if (!this._nonces[key]) {
-        nonces[key] = new BigNumber(-1);
+        nonces[key] = BigNumber.from(-1);
       } else {
-        nonces[key] = new BigNumber(nonces[key] as string);
+        nonces[key] = BigNumber.from(nonces[key] as string);
       }
     }
     return nonces as Record<string, BigNumber | undefined>;
@@ -97,14 +97,14 @@ export class MemoryBackend implements DBBackend {
 
   public async setNonce(key: string, value: BigNumber) {
     this._nonces[key] = value.toString();
-    return new BigNumber(this._nonces[key] as string);
+    return BigNumber.from(this._nonces[key] as string);
   }
 
   public async getNonce(key: string) {
     if (!this._nonces[key]) {
-      return new BigNumber(-1);
+      return BigNumber.from(-1);
     }
-    return new BigNumber(this._nonces[key] as string);
+    return BigNumber.from(this._nonces[key] as string);
   }
 
   public async setObjective(key: number, value: Objective) {

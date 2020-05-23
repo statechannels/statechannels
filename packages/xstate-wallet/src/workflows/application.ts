@@ -19,7 +19,7 @@ import {createMockGuard, unreachable} from '../utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -34,6 +34,7 @@ import {FundingStrategy} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
+import {Zero} from '@ethersproject/constants';
 
 export interface WorkflowContext {
   applicationDomain: string;
@@ -394,12 +395,12 @@ export const workflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: bigNumberify(0),
+        turnNum: Zero,
         isFinal: false
       };
       const {channelId: targetChannelId} = await store.createChannel(
         participants,
-        bigNumberify(challengeDuration),
+        BigNumber.from(challengeDuration),
         stateVars,
         appDefinition,
         applicationDomain

@@ -13,8 +13,8 @@ import {
   AssetBudget
 } from '../../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {bigNumberify} from 'ethers/utils';
-import {AddressZero} from 'ethers/constants';
+import {BigNumber} from 'ethers';
+import {AddressZero} from '@ethersproject/constants';
 import {makeDestination, assetHolderAddress} from '../../utils';
 
 export function deserializeBudgetRequest(
@@ -23,8 +23,8 @@ export function deserializeBudgetRequest(
 ): DomainBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-    availableSendCapacity: bigNumberify(budgetRequest.requestedSendCapacity),
-    availableReceiveCapacity: bigNumberify(budgetRequest.requestedReceiveCapacity),
+    availableSendCapacity: BigNumber.from(budgetRequest.requestedSendCapacity),
+    availableReceiveCapacity: BigNumber.from(budgetRequest.requestedReceiveCapacity),
     channels: {}
   };
   return {
@@ -37,10 +37,10 @@ export function deserializeBudgetRequest(
 export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBudget {
   const assetBudgets: AssetBudget[] = DomainBudget.budgets.map(b => ({
     assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
-    availableReceiveCapacity: bigNumberify(b.availableReceiveCapacity),
-    availableSendCapacity: bigNumberify(b.availableSendCapacity),
+    availableReceiveCapacity: BigNumber.from(b.availableReceiveCapacity),
+    availableSendCapacity: BigNumber.from(b.availableSendCapacity),
     channels: b.channels.reduce((record, item) => {
-      record[item.channelId] = {amount: bigNumberify(item.amount)};
+      record[item.channelId] = {amount: BigNumber.from(item.amount)};
       return record;
     }, {})
   }));
@@ -86,6 +86,6 @@ function deserializeAllocation(allocation: AppAllocation): SimpleAllocation {
 function deserializeAllocationItem(allocationItem: AppAllocationItem): AllocationItem {
   return {
     destination: makeDestination(allocationItem.destination),
-    amount: bigNumberify(allocationItem.amount)
+    amount: BigNumber.from(allocationItem.amount)
   };
 }
