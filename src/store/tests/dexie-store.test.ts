@@ -9,6 +9,7 @@ import {simpleEthAllocation, makeDestination} from '../../utils';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {Errors} from '..';
+import {Zero} from '@ethersproject/constants';
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -33,7 +34,7 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = BigNumber.from(0);
+const channelNonce = Zero;
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
 const challengeDuration = BigNumber.from(CHALLENGE_DURATION);
@@ -185,7 +186,7 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: BigNumber.from(0)},
+      {...signedState, turnNum: Zero},
       signedState.appDefinition
     );
 

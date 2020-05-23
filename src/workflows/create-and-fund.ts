@@ -23,7 +23,7 @@ import {Store} from '../store';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers';
-
+import {Zero} from '@ethersproject/constants';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
@@ -74,7 +74,7 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   ]);
 
   const stateVars: StateVariables = {
-    turnNum: BigNumber.from(0),
+    turnNum: Zero,
     outcome,
     appData: '0x',
     isFinal: false
@@ -105,10 +105,8 @@ const reserveFunds = (store: Store) => async context => {
   const playerDestination =
     channelEntry.supported.participants.find(p => p.signingAddress === playerAddress)
       ?.destination || '0x0';
-  const receive =
-    allocationItems.find(a => a.destination !== playerDestination)?.amount || BigNumber.from(0);
-  const send =
-    allocationItems.find(a => a.destination === playerDestination)?.amount || BigNumber.from(0);
+  const receive = allocationItems.find(a => a.destination !== playerDestination)?.amount || Zero;
+  const send = allocationItems.find(a => a.destination === playerDestination)?.amount || Zero;
 
   await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {receive, send});
 };
@@ -229,7 +227,7 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   const {allocationItems} = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
-  let depositAt = BigNumber.from(0);
+  let depositAt = Zero;
   for (let i = 0; i < allocationItems.length; i++) {
     const {amount} = allocationItems[i];
     if (i !== myIndex) depositAt = depositAt.add(amount);

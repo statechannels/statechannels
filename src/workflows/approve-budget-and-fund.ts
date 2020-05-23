@@ -26,7 +26,7 @@ import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
 import {ChannelChainInfo} from '../chain';
 import {BigNumber} from 'ethers';
-
+import {Zero} from '@ethersproject/constants';
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: BigNumber;
@@ -219,7 +219,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
 
   const stateVars = {
     outcome: initialOutcome,
-    turnNum: BigNumber.from(0),
+    turnNum: Zero,
     isFinal: false,
     appData: '0x0'
   };

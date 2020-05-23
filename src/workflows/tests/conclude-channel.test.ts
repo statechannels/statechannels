@@ -8,8 +8,7 @@ import {BigNumber} from 'ethers';
 
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from '@ethersproject/constants';
-
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {add} from '../../utils';
 
 import {
@@ -41,7 +40,7 @@ const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,

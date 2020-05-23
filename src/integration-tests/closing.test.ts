@@ -6,7 +6,7 @@ import {simpleEthAllocation} from '../utils';
 import {State, SignedState} from '../store/types';
 import {createSignatureEntry} from '../store/state-utils';
 import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 require('fake-indexeddb/auto');
 import {Backend} from '../store/dexie-backend';
@@ -48,7 +48,7 @@ test('concludes on their turn', async () => {
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: BigNumber.from(0),
+    channelNonce: Zero,
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]
   };

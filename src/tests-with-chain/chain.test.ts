@@ -16,6 +16,7 @@ import {simpleEthAllocation} from '../utils';
 import {Player} from '../integration-tests/helpers';
 import {createSignatureEntry} from '../store/state-utils';
 import {hexZeroPad} from '@ethersproject/bytes';
+import {Zero} from '@ethersproject/constants';
 
 const chain = new ChainWatcher();
 
@@ -149,7 +150,7 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: BigNumber.from(0),
+    channelNonce: Zero,
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };

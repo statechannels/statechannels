@@ -1,7 +1,7 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
 import {BigNumber} from 'ethers';
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
 
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
@@ -83,9 +83,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
-    const allocated = outcome.allocationItems
-      .map(a => a.amount)
-      .reduce((a, b) => a.add(b), BigNumber.from(0));
+    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => a.add(b), Zero);
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
     if (allocated.gt(chainInfo.amount))
@@ -105,7 +103,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
         const amountLeft = BigNumber.from(amount).gt(currentlyAllocated)
           ? amount.sub(currentlyAllocated)
-          : BigNumber.from(0);
+          : Zero;
         return {destination, amount: amountLeft};
       })
     );
@@ -133,7 +131,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = BigNumber.from(0);
+    let totalBeforeDeposit = Zero;
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (myIndex === i) {
@@ -182,7 +180,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           ...entry.channelConstants,
           challengeDuration: BigNumber.from(1),
           isFinal: false,
-          turnNum: BigNumber.from(0),
+          turnNum: Zero,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: HashZero,
           appDefinition: AddressZero

@@ -5,7 +5,7 @@ import {SimpleHub} from './simple-hub';
 
 import {firstState, createSignatureEntry, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {add, simpleEthAllocation, makeDestination, simpleEthGuarantee} from '../../utils';
 
 import {
@@ -34,7 +34,7 @@ const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants: targetParticipants,
@@ -42,7 +42,7 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 const jointChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants: jointParticipants,

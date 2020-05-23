@@ -24,7 +24,7 @@ import _ from 'lodash';
 import {Wallet, BigNumber} from 'ethers';
 import {SignatureEntry} from './channel-store-entry';
 import {logger} from '../logger';
-
+import {Zero} from '@ethersproject/constants';
 function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
   const channel = {
@@ -147,7 +147,7 @@ export const firstState = (
 ): State => ({
   appData: appData || '0x',
   isFinal: false,
-  turnNum: BigNumber.from(0),
+  turnNum: Zero,
   chainId: chainId || '0x01',
   channelNonce,
   challengeDuration,

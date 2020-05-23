@@ -14,7 +14,7 @@ import {SimpleAllocation, Objective, Participant, StateVariables} from '../store
 import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
-import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 import * as Depositing from './depositing';
 import {getDataAndInvoke, checkThat, isSimpleEthAllocation, add} from '../utils';
 
@@ -93,7 +93,7 @@ const initializeChannel = (
 ): WorkflowServices['initializeChannel'] => async context => {
   const stateVars: StateVariables = {
     outcome: context.initialOutcome,
-    turnNum: BigNumber.from(0),
+    turnNum: Zero,
     isFinal: false,
     appData: '0x0'
   };
@@ -123,7 +123,7 @@ const getDepositingInfo = (
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
-  const depositAt = myIndex === 0 ? allocationItems[0].amount : BigNumber.from(0);
+  const depositAt = myIndex === 0 ? allocationItems[0].amount : Zero;
   return {channelId: context.ledgerId, depositAt, totalAfterDeposit: fundedAt, fundedAt};
 };
 

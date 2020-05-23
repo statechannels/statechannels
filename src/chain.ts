@@ -154,7 +154,7 @@ export class FakeChain implements Chain {
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
-    const current = (this.channelStatus[channelId] || {}).amount || BigNumber.from(0);
+    const current = (this.channelStatus[channelId] || {}).amount || Zero;
 
     if (current.gte(expectedHeld)) {
       this.channelStatus[channelId] = {

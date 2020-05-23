@@ -1,4 +1,4 @@
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
@@ -58,7 +58,7 @@ beforeEach(async () => {
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: BigNumber.from(0),
+    channelNonce: Zero,
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]
   };
