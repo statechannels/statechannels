@@ -349,6 +349,29 @@ export class Store {
       this.emitChannelUpdatedEventAfterTX(entry, signedState)
     );
 
+  public supportState = (state: State) =>
+    this.backend
+      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
+        const stateHash = hashState(state);
+        const channelId = calculateChannelId(state);
+        const entry = await this.getEntry(channelId);
+        const {isSupportedByMe} = entry;
+
+        // We only sign the state if we haven't signed it already
+        if (!isSupportedByMe || entry.latestSignedByMe.stateHash !== stateHash) {
+          return await this.signAndAddStateWithinTx(channelId, state);
+        } else {
+          // The support state machine was started with a state that we already support
+          // That's fine but we output a warning in case that's unexpected
+          logger.warn({state}, 'The state is already supported');
+          return;
+        }
+      })
+      .then(args => {
+        if (!args) return;
+        this.emitChannelUpdatedEventAfterTX(args.entry, args.signedState);
+      });
+
   private signAndAddStateWithinTx = (channelId: string, stateVars: StateVariables) =>
     this.backend.transaction(
       'readwrite',
