@@ -22,7 +22,7 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 }
 
 export function getProvider(): Web3Provider | JsonRpcProvider {
-  if (window.ethereum) {
+  if (window.ethereum && !window.ethereum.fake) {
     return new Web3Provider(window.ethereum);
   } else {
     return new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);

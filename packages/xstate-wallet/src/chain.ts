@@ -9,7 +9,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
-import {filter, map, flatMap, defaultIfEmpty, last} from 'rxjs/operators';
+import {filter, map, flatMap} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {id} from '@ethersproject/hash';
@@ -337,6 +337,7 @@ export class ChainWatcher implements Chain {
         new Array<NitroSignedState>()
       )
       .sort((s1, s2) => s1.state.turnNum - s2.state.turnNum);
+
     const transactionRequest = {
       ...Transactions.createForceMoveTransaction(
         convertedSignedStates,
@@ -345,10 +346,11 @@ export class ChainWatcher implements Chain {
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
     };
-    const response = await this.signer.sendTransaction(
-      convertNitroTransactionRequest(transactionRequest)
-    );
+
+    const response = await this.signer.sendTransaction(transactionRequest as any);
+
     const tx = await response.wait();
+
     return tx.transactionHash;
   }
 
@@ -439,7 +441,6 @@ export class ChainWatcher implements Chain {
     }
     const topic = id(`ChallengeRegistered( 
         bytes32 indexed channelId,
-        // everything needed to respond or checkpoint
         uint256 turnNumRecord,
         uint256 finalizesAt,
         address challenger,
@@ -449,15 +450,16 @@ export class ChainWatcher implements Chain {
         Signature[] sigs,
         uint8[] whoSignedWhat
     )`);
+
     // Query for all existing ChallengeRegistered events and get the latest one for the channel
-    const first = from(this._adjudicator.queryFilter({topics: [topic]}, 0)).pipe(
+    const intermediate = from(this._adjudicator.queryFilter({topics: [topic]}, 0));
+
+    const first = intermediate.pipe(
       filter((event: any) => event[0] === channelId),
       map(getChallengeRegisteredEvent),
       map(({challengeStates}: ChallengeRegisteredEvent) =>
         fromNitroState(challengeStates[challengeStates.length - 1].state)
-      ),
-      last(),
-      defaultIfEmpty(undefined)
+      )
     );
 
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
