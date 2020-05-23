@@ -7,7 +7,7 @@ import {Store, SignedState} from '../../store';
 
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 
 import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
 
@@ -26,7 +26,7 @@ const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,

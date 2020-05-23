@@ -9,7 +9,7 @@ import {SignedState} from '../../store';
 import _ from 'lodash';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 
 import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
@@ -26,7 +26,7 @@ const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,

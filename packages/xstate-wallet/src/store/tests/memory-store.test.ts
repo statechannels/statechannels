@@ -6,6 +6,7 @@ import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
 import {Wallet, BigNumber} from 'ethers';
 import {Store} from './../store';
+import {Zero} from '@ethersproject/constants';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -29,7 +30,7 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = BigNumber.from(0);
+const channelNonce = Zero;
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
 const challengeDuration = BigNumber.from(CHALLENGE_DURATION);
@@ -139,7 +140,7 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: BigNumber.from(0)},
+      {...signedState, turnNum: Zero},
       signedState.appDefinition
     );
 

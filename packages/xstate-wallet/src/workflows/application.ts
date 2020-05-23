@@ -34,6 +34,7 @@ import {FundingStrategy} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
+import {Zero} from '@ethersproject/constants';
 
 export interface WorkflowContext {
   applicationDomain: string;
@@ -394,7 +395,7 @@ export const workflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: BigNumber.from(0),
+        turnNum: Zero,
         isFinal: false
       };
       const {channelId: targetChannelId} = await store.createChannel(

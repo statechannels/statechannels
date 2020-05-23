@@ -10,9 +10,10 @@ import {DomainBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {Store} from '../../store';
 import {ethBudget} from '../../utils';
-import { parseEther} from '@ethersproject/units';
+import {parseEther} from '@ethersproject/units';
 import {logger} from '../../logger';
-import { BigNumber } from 'ethers';
+import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 
 const store = new Store();
 
@@ -63,7 +64,7 @@ const contextWithDeposit = {
 
 const contextWaitTurn = {
   ...contextWithDeposit,
-  ledgerTotal: BigNumber.from(0),
+  ledgerTotal: Zero,
   lastChangeBlockNum: 9792500,
   currentBlockNum: 9792500
 };
