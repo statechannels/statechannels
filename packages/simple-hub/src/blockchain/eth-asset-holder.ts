@@ -57,7 +57,7 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
       expectedHeld.toHexString(),
       value,
       {
-        gasPrice: utils.parseUnits('100', 'gwei'),
+        gasPrice: utils.parseUnits('1000', 'gwei'),
         value: value.sub(expectedHeld)
       }
     );
