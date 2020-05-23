@@ -307,9 +307,8 @@ export class Store {
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const {latest: existingState} = await this.getEntry(channelId);
-        // FIXME: Tests fail when I try to do the following check because they don't set up a channel with a supported state
-        // if (!myTurn) throw Error(Errors.notMyTurn);
+        const {supported: existingState, myTurn} = await this.getEntry(channelId);
+        if (!myTurn) throw Error(Errors.notMyTurn);
 
         const newState = _.merge(existingState, {
           turnNum: existingState.turnNum.add(1),
