@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 import {
   ContractArtifacts,
   createETHDepositTransaction,
@@ -9,7 +10,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
-import {filter, map, flatMap} from 'rxjs/operators';
+import {filter, map, flatMap, defaultIfEmpty} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {id} from '@ethersproject/hash';
@@ -347,7 +348,9 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await this.signer.sendTransaction(transactionRequest as any);
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
 
     const tx = await response.wait();
 
@@ -406,10 +409,12 @@ export class ChainWatcher implements Chain {
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     return combineLatest(this.chainInfoUpdated(channelId), this.challengeStateFeed(channelId)).pipe(
-      map(value => ({
-        ...value[0],
-        challengeState: value[1]
-      }))
+      map(value => {
+        return {
+          ...value[0],
+          challengeState: value[1]
+        };
+      })
     );
   }
   private chainInfoUpdated(channelId: string): Observable<ChannelChainInfo> {
@@ -420,7 +425,9 @@ export class ChainWatcher implements Chain {
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
-      filter((event: Array<string | BigNumber>) => event[0] === channelId),
+      filter((event: Array<string | BigNumber>) => {
+        return event[0] === channelId;
+      }),
       // Actually ignores the event data and just polls the chain
       flatMap(async () => this.getChainInfo(channelId))
     );
@@ -452,14 +459,13 @@ export class ChainWatcher implements Chain {
     )`);
 
     // Query for all existing ChallengeRegistered events and get the latest one for the channel
-    const intermediate = from(this._adjudicator.queryFilter({topics: [topic]}, 0));
-
-    const first = intermediate.pipe(
+    const first = from(this._adjudicator.queryFilter({topics: [topic]}, 0)).pipe(
       filter((event: any) => event[0] === channelId),
       map(getChallengeRegisteredEvent),
       map(({challengeStates}: ChallengeRegisteredEvent) =>
         fromNitroState(challengeStates[challengeStates.length - 1].state)
-      )
+      ),
+      defaultIfEmpty(undefined)
     );
 
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
