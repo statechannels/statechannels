@@ -3,7 +3,7 @@ import {BigNumber} from 'ethers';
 import {randomChannelId} from '@statechannels/nitro-protocol';
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION, TRIVIAL_APP_ADDRESS} from '../config';
 
-import {first, take, map} from 'rxjs/operators';
+import {take, map} from 'rxjs/operators';
 import {SignedState, State, Store} from '../store';
 
 import {simpleEthAllocation} from '../utils';
@@ -178,9 +178,10 @@ it('the challenge state gets returned when there is an existing challenge', asyn
 
   await chain.challenge(support, playerA.privateKey);
   const channelId = calculateChannelId(state);
+
   const chainEntry = await chain
     .chainUpdatedFeed(channelId)
-    .pipe(first())
+    .pipe(take(1))
     .toPromise();
   expect(chainEntry.challengeState).toBeDefined();
   expect(statesEqual(state, chainEntry.challengeState as State)).toBe(true);
@@ -228,13 +229,13 @@ it('the chainUpdated fires and returns a challenge state when a challenge occurs
   };
   const support = [allSignState];
   const channelId = calculateChannelId(state);
-  const chainEntryPromise = chain
-    .chainUpdatedFeed(channelId)
-    .pipe(take(1))
-    .toPromise();
 
   await chain.challenge(support, playerA.privateKey);
-  const chainEntry = await chainEntryPromise;
+  const chainEntry = await chain
+    .chainUpdatedFeed(channelId)
+    .pipe(take(2))
+    .toPromise();
+
   expect(chainEntry.challengeState).toBeDefined();
   expect(statesEqual(state, chainEntry.challengeState as State)).toBe(true);
 });

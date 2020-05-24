@@ -10,10 +10,9 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
-import {filter, map, flatMap, defaultIfEmpty} from 'rxjs/operators';
+import {filter, map, flatMap, defaultIfEmpty, mergeAll} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
-import {id} from '@ethersproject/hash';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
@@ -446,22 +445,14 @@ export class ChainWatcher implements Chain {
     if (!this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
-    const topic = id(`ChallengeRegistered( 
-        bytes32 indexed channelId,
-        uint256 turnNumRecord,
-        uint256 finalizesAt,
-        address challenger,
-        bool isFinal,
-        FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts,
-        Signature[] sigs,
-        uint8[] whoSignedWhat
-    )`);
 
     // Query for all existing ChallengeRegistered events and get the latest one for the channel
-    const first = from(this._adjudicator.queryFilter({topics: [topic]}, 0)).pipe(
-      filter((event: any) => event[0] === channelId),
-      map(getChallengeRegisteredEvent),
+    const first = from(
+      this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeRegistered(), 0)
+    ).pipe(
+      mergeAll(),
+      filter(event => (event.args ? event.args[0] : '') === channelId), // The queryFilter returns an event object with an args array
+      map(event => getChallengeRegisteredEvent([event])), // The queryFilter result is slightly different so we need to wrap it in an array
       map(({challengeStates}: ChallengeRegisteredEvent) =>
         fromNitroState(challengeStates[challengeStates.length - 1].state)
       ),
@@ -469,11 +460,9 @@ export class ChainWatcher implements Chain {
     );
 
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
-      filter((event: any) => event[0] === channelId), // index 0 of ChallengeRegistered event is channelId
-      map(getChallengeRegisteredEvent),
-      map(({challengeStates}: ChallengeRegisteredEvent) =>
-        fromNitroState(challengeStates[challengeStates.length - 1].state)
-      )
+      filter((eventArgs: any) => eventArgs[0] === channelId), // The event fired from the contract returns an array with the object event last
+      map(event => getChallengeRegisteredEvent(event)),
+      map(({challengeStates}) => fromNitroState(challengeStates[challengeStates.length - 1].state))
     );
 
     return merge(first, updates);
