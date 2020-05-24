@@ -170,7 +170,6 @@ it('the challenge state gets returned when there is an existing challenge', asyn
     participants: [playerA.participant, playerB.participant]
   };
 
-  // const channelId = calculateChannelId(state);
   const allSignState: SignedState = {
     ...state,
     signatures: [playerA, playerB].map(({privateKey}) => createSignatureEntry(state, privateKey))
