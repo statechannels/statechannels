@@ -79,9 +79,7 @@ it('initializes and starts challenge thing', async () => {
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('waitForResponseOrTimeout');
-    const {
-      channelStorage: {finalizesAt, turnNumRecord}
-    } = await fakeChain.getChainInfo(channelId);
+    const {finalizesAt, turnNumRecord} = await fakeChain.getChainInfo(channelId);
     expect(finalizesAt).toStrictEqual(state.challengeDuration.add(1));
     expect(turnNumRecord).toStrictEqual(state.turnNum);
   }, 10000);

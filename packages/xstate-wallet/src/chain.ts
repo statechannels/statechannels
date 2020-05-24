@@ -9,7 +9,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
-import {filter, map, flatMap, defaultIfEmpty, mergeAll} from 'rxjs/operators';
+import {filter, map, flatMap, defaultIfEmpty, mergeMap, last} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
@@ -177,7 +177,7 @@ export class FakeChain implements Chain {
     return {
       turnNumRecord: turnNumRecord || Zero,
       finalizesAt: finalizesAt || Zero,
-      finalized: finalizesAt.gt(0) && finalizesAt.lte(this.blockNumber),
+      finalized: (finalizesAt || Zero).gt(0) && (finalizesAt || Zero).lte(this.blockNumber),
       blockNum: this.blockNumber,
       amount: amount || Zero
     };
@@ -472,26 +472,46 @@ export class ChainWatcher implements Chain {
       throw new Error('Not connected to contracts');
     }
 
-    // Query for all existing ChallengeRegistered events and get the latest one for the channel
-    // TODO: Currently we don't query for the challenge cleared events which means we could return a challenge when it has already been cleared
-    // We currently handle this by comparing blockNum/finalizedAt in chainUpdatedFeed so if the challenge is stale it will be ignored
-    // However we should probably just query for the challenge cleared events at start so we don't have to worry about that in the ChainUpdatedFeed
+    // Query for all existing Challenge events events and get the latest one for the channel
+
     const first = from(
-      this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeRegistered(), 0)
+      Promise.all([
+        this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeRegistered(), 0),
+        this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeCleared(), 0)
+      ])
     ).pipe(
-      mergeAll(),
+      mergeMap(([e1, e2]) => {
+        const events = e1.concat(e2);
+        return events.sort((a, b) => a.blockNumber - b.blockNumber);
+      }),
       filter(event => (event.args ? event.args[0] : '') === channelId), // The queryFilter returns an event object with an args array
-      map(event => ({...getChallengeRegisteredEvent([event]), blockNum: event.blockNumber})), // The queryFilter result is slightly different so we need to wrap it in an array
-      map(({finalizesAt, challengeStates, blockNum}) => ({
-        blockNum: BigNumber.from(blockNum),
-        finalizesAt: BigNumber.from(finalizesAt),
-        challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state)
-      })),
+
+      map(event => {
+        if (event.event === 'ChallengeRegistered') {
+          const convertedEvent = getChallengeRegisteredEvent([event]);
+          const challengeState = fromNitroState(
+            convertedEvent.challengeStates[convertedEvent.challengeStates.length - 1].state
+          );
+          return {
+            finalizesAt: BigNumber.from(convertedEvent.finalizesAt),
+            challengeState,
+            blockNum: BigNumber.from(event.blockNumber)
+          };
+        } else {
+          return {
+            finalizesAt: Zero,
+            challengeState: undefined,
+            blockNum: BigNumber.from(event.blockNumber)
+          };
+        }
+      }),
+
       defaultIfEmpty<ChallengeEventInfo>({
         finalizesAt: Zero,
         challengeState: undefined,
         blockNum: Zero
-      })
+      }),
+      last()
     );
 
     const challengeRegisteredUpdates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(

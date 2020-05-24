@@ -17,7 +17,7 @@ import {Interpreter, Machine, interpret} from 'xstate';
 const chain = new ChainWatcher();
 
 const store = new Store(chain);
-
+jest.setTimeout(20_000);
 const mockContext = {
   channelId: randomChannelId(),
   fundedAt: BigNumber.from('0'),
