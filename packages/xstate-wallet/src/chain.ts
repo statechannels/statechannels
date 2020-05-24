@@ -16,7 +16,12 @@ import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
-import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
+import {
+  fromNitroState,
+  toNitroSignedState,
+  calculateChannelId,
+  toNitroState
+} from './store/state-utils';
 
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
@@ -356,6 +361,27 @@ export class ChainWatcher implements Chain {
     return tx.transactionHash;
   }
 
+  public async respondToChallenge(
+    challengeState: State,
+    responseState: SignedState
+  ): Promise<string | undefined> {
+    const transactionRequest = {
+      ...Transactions.createRespondTransaction(
+        toNitroState(challengeState),
+        toNitroSignedState(responseState)[0]
+      ),
+      to: NITRO_ADJUDICATOR_ADDRESS
+    };
+
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
+
+    const tx = await response.wait();
+
+    return tx.transactionHash;
+  }
+
   public async deposit(
     channelId: string,
     expectedHeld: string,
@@ -459,13 +485,18 @@ export class ChainWatcher implements Chain {
       defaultIfEmpty(undefined)
     );
 
-    const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
+    const challengeRegisteredUpdates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
       filter((eventArgs: any) => eventArgs[0] === channelId), // The event fired from the contract returns an array with the object event last
       map(event => getChallengeRegisteredEvent(event)),
       map(({challengeStates}) => fromNitroState(challengeStates[challengeStates.length - 1].state))
     );
 
-    return merge(first, updates);
+    const challengeClearedUpdates = fromEvent(this._adjudicator, 'ChallengeCleared').pipe(
+      filter((eventArgs: any) => eventArgs[0] === channelId), // The event fired from the contract returns an array with the object event last
+      map(() => undefined)
+    );
+
+    return merge(first, challengeRegisteredUpdates, challengeClearedUpdates);
   }
 }
 

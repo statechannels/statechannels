@@ -25,7 +25,7 @@ import {Wallet, BigNumber} from 'ethers';
 import {SignatureEntry} from './channel-store-entry';
 import {logger} from '../logger';
 import {Zero} from '@ethersproject/constants';
-function toNitroState(state: State): NitroState {
+export function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
   const channel = {
     channelNonce: channelNonce.toString(),

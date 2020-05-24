@@ -239,6 +239,64 @@ it('the chainUpdated fires and returns a challenge state when a challenge occurs
   expect(chainEntry.challengeState).toBeDefined();
   expect(statesEqual(state, chainEntry.challengeState as State)).toBe(true);
 });
+
+it('the chainUpdated fires and returns no challenge state when a challenge is cleared', async () => {
+  const playerA = await Player.createPlayer(
+    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
+    'PlayerA',
+    chain
+  );
+  const playerB = await Player.createPlayer(
+    '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
+    'PlayerB',
+    chain
+  );
+
+  const outcome = simpleEthAllocation([
+    {
+      destination: playerA.destination,
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
+    },
+    {
+      destination: playerA.destination,
+      amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
+    }
+  ]);
+
+  const state: State = {
+    outcome,
+    turnNum: BigNumber.from(5),
+    appData: '0x0',
+    isFinal: false,
+    challengeDuration: CHALLENGE_DURATION,
+    chainId: CHAIN_NETWORK_ID,
+    channelNonce: BigNumber.from(99),
+    appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
+    participants: [playerA.participant, playerB.participant]
+  };
+
+  // const channelId = calculateChannelId(state);
+  const allSignState: SignedState = {
+    ...state,
+    signatures: [playerA, playerB].map(({privateKey}) => createSignatureEntry(state, privateKey))
+  };
+  const support = [allSignState];
+  const channelId = calculateChannelId(state);
+  const challengeResponseState = {...state, turnNum: BigNumber.from(6)};
+  const challengeResponse: SignedState = {
+    ...challengeResponseState,
+    signatures: [createSignatureEntry(challengeResponseState, playerA.privateKey)]
+  };
+  await chain.challenge(support, playerB.privateKey);
+  await chain.respondToChallenge(support[0], challengeResponse);
+  const chainEntry = await chain
+    .chainUpdatedFeed(channelId)
+    .pipe(take(2))
+    .toPromise();
+
+  expect(chainEntry.challengeState).toBeUndefined();
+});
+
 it('correctly crafts a forceMove transaction (2x single-signed states)', async () => {
   const fakeChain = new FakeChain();
   const playerA = await Player.createPlayer(
