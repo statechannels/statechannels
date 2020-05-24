@@ -4,7 +4,6 @@ import {
   createETHDepositTransaction,
   Transactions,
   getChallengeRegisteredEvent,
-  ChallengeRegisteredEvent,
   SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
@@ -28,16 +27,20 @@ import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
 
-export interface ChannelChainInfo {
+export interface ChannelChainInfo extends ChainQueryInfo, ChallengeEventInfo {}
+
+interface ChainQueryInfo {
   readonly amount: BigNumber;
-  readonly channelStorage: {
-    turnNumRecord: BigNumber;
-    finalizesAt: BigNumber;
-    /* fingerprint: string */
-  };
+  readonly turnNumRecord: BigNumber;
+  readonly finalizesAt: BigNumber;
+
   readonly finalized: boolean; // this is a check on 0 < finalizesAt <= now
   readonly blockNum: BigNumber; // blockNum that the information is from
-  challengeState?: State;
+}
+export interface ChallengeEventInfo {
+  readonly finalizesAt: BigNumber;
+  readonly challengeState?: State;
+  readonly blockNum: BigNumber; // blockNum that the information is from
 }
 
 export interface Chain {
@@ -91,9 +94,7 @@ export class FakeChain implements Chain {
     this.blockNumber = BigNumber.from(blockNumber);
 
     for (const channelId in this.channelStatus) {
-      const {
-        channelStorage: {finalizesAt}
-      } = this.channelStatus[channelId];
+      const {finalizesAt} = this.channelStatus[channelId];
       if (finalizesAt.gt(0) && finalizesAt.lte(blockNumber)) {
         this.channelStatus[channelId] = {...this.channelStatus[channelId], finalized: true};
         this.eventEmitter.emit('updated', {channelId, ...this.channelStatus[channelId]});
@@ -113,10 +114,8 @@ export class FakeChain implements Chain {
 
     this.channelStatus[channelId] = {
       ...(this.channelStatus[channelId] || {}),
-      channelStorage: {
-        turnNumRecord: turnNum,
-        finalizesAt: this.blockNumber.add(challengeDuration)
-      },
+      turnNumRecord: turnNum,
+      finalizesAt: this.blockNumber.add(challengeDuration),
       finalized: challengeDuration.eq(0)
     };
 
@@ -152,10 +151,9 @@ export class FakeChain implements Chain {
   public finalizeSync(channelId: string, turnNum: BigNumber = Zero) {
     this.channelStatus[channelId] = {
       ...(this.channelStatus[channelId] || {}),
-      channelStorage: {
-        turnNumRecord: turnNum,
-        finalizesAt: this.blockNumber
-      }
+
+      turnNumRecord: turnNum,
+      finalizesAt: this.blockNumber
     };
   }
 
@@ -175,16 +173,11 @@ export class FakeChain implements Chain {
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    const {amount, channelStorage} = this.channelStatus[channelId] || {};
+    const {amount, turnNumRecord, finalizesAt} = this.channelStatus[channelId] || {};
     return {
-      channelStorage: channelStorage || {
-        turnNumRecord: Zero,
-        finalizesAt: Zero
-      },
-      finalized:
-        channelStorage &&
-        channelStorage.finalizesAt.gt(0) &&
-        channelStorage.finalizesAt.lte(this.blockNumber),
+      turnNumRecord: turnNumRecord || Zero,
+      finalizesAt: finalizesAt || Zero,
+      finalized: finalizesAt.gt(0) && finalizesAt.lte(this.blockNumber),
       blockNum: this.blockNumber,
       amount: amount || Zero
     };
@@ -195,9 +188,10 @@ export class FakeChain implements Chain {
 
     const updates = fromEvent(this.eventEmitter, 'updated').pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, channelStorage, finalized, blockNum: blockNum}) => ({
+      map(({amount, finalizesAt, turnNumRecord, finalized, blockNum: blockNum}) => ({
         amount,
-        channelStorage,
+        finalizesAt,
+        turnNumRecord,
         finalized,
         blockNum
       }))
@@ -423,26 +417,32 @@ export class ChainWatcher implements Chain {
     // TODO: Fetch other info
     return {
       amount,
-      channelStorage: {
-        turnNumRecord,
-        finalizesAt
-      },
+
+      turnNumRecord,
+      finalizesAt,
+
       finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
       blockNum
     };
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    return combineLatest(this.chainInfoUpdated(channelId), this.challengeStateFeed(channelId)).pipe(
-      map(value => {
+    return combineLatest(this.chainInfoFeed(channelId), this.challengeStateFeed(channelId)).pipe(
+      map(([chainInfo, challengeInfo]) => {
         return {
-          ...value[0],
-          challengeState: value[1]
+          ...chainInfo,
+          challengeState: chainInfo.finalizesAt.gt(Zero) ? challengeInfo.challengeState : undefined,
+          blockNum: chainInfo.blockNum.gt(challengeInfo.blockNum)
+            ? chainInfo.blockNum
+            : challengeInfo.blockNum,
+          finalizesAt: chainInfo.finalizesAt.gt(challengeInfo.finalizesAt)
+            ? chainInfo.finalizesAt
+            : challengeInfo.finalizesAt
         };
       })
     );
   }
-  private chainInfoUpdated(channelId: string): Observable<ChannelChainInfo> {
+  private chainInfoFeed(channelId: string): Observable<ChainQueryInfo> {
     if (!this._assetHolders || !this._assetHolders[0] || !this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
@@ -467,33 +467,53 @@ export class ChainWatcher implements Chain {
     return merge(first, depositEvents, assetTransferEvents);
   }
 
-  private challengeStateFeed(channelId: string): Observable<State | undefined> {
+  private challengeStateFeed(channelId: string): Observable<ChallengeEventInfo> {
     if (!this._adjudicator) {
       throw new Error('Not connected to contracts');
     }
 
     // Query for all existing ChallengeRegistered events and get the latest one for the channel
+    // TODO: Currently we don't query for the challenge cleared events which means we could return a challenge when it has already been cleared
+    // We currently handle this by comparing blockNum/finalizedAt in chainUpdatedFeed so if the challenge is stale it will be ignored
+    // However we should probably just query for the challenge cleared events at start so we don't have to worry about that in the ChainUpdatedFeed
     const first = from(
       this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeRegistered(), 0)
     ).pipe(
       mergeAll(),
       filter(event => (event.args ? event.args[0] : '') === channelId), // The queryFilter returns an event object with an args array
-      map(event => getChallengeRegisteredEvent([event])), // The queryFilter result is slightly different so we need to wrap it in an array
-      map(({challengeStates}: ChallengeRegisteredEvent) =>
-        fromNitroState(challengeStates[challengeStates.length - 1].state)
-      ),
-      defaultIfEmpty(undefined)
+      map(event => ({...getChallengeRegisteredEvent([event]), blockNum: event.blockNumber})), // The queryFilter result is slightly different so we need to wrap it in an array
+      map(({finalizesAt, challengeStates, blockNum}) => ({
+        blockNum: BigNumber.from(blockNum),
+        finalizesAt: BigNumber.from(finalizesAt),
+        challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state)
+      })),
+      defaultIfEmpty<ChallengeEventInfo>({
+        finalizesAt: Zero,
+        challengeState: undefined,
+        blockNum: Zero
+      })
     );
 
     const challengeRegisteredUpdates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
       filter((eventArgs: any) => eventArgs[0] === channelId), // The event fired from the contract returns an array with the object event last
-      map(event => getChallengeRegisteredEvent(event)),
-      map(({challengeStates}) => fromNitroState(challengeStates[challengeStates.length - 1].state))
+      map(event => ({
+        ...getChallengeRegisteredEvent(event),
+        blockNum: event.slice(-1)[0].blockNumber
+      })),
+      map(({finalizesAt, challengeStates, blockNum}) => ({
+        blockNum: BigNumber.from(blockNum),
+        finalizesAt: BigNumber.from(finalizesAt),
+        challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state)
+      }))
     );
 
     const challengeClearedUpdates = fromEvent(this._adjudicator, 'ChallengeCleared').pipe(
       filter((eventArgs: any) => eventArgs[0] === channelId), // The event fired from the contract returns an array with the object event last
-      map(() => undefined)
+      map(eventArgs => ({
+        finalizesAt: Zero,
+        challengeState: undefined,
+        blockNum: eventArgs.slice(-1)[0].blockNumber
+      }))
     );
 
     return merge(first, challengeRegisteredUpdates, challengeClearedUpdates);

@@ -91,10 +91,9 @@ const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial
 
 const observeOnChainChannelStorage = (store: Store, channelId: string) =>
   store.chain.chainUpdatedFeed(channelId).pipe(
-    map<ChannelChainInfo, ChainEvent>(({finalized, channelStorage}) => ({
+    map<ChannelChainInfo, ChainEvent>(event => ({
       type: 'CHAIN_EVENT',
-      finalized,
-      ...channelStorage
+      ...event
     }))
   );
 
