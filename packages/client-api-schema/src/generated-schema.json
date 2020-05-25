@@ -315,6 +315,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelError"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
         }
       ]
     },
@@ -590,7 +593,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1291>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1256>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -649,7 +652,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1291>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1256>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -746,7 +749,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<403,\"Not your turn\",structure-1165839259-1047-1075-1165839259-985-1077-1165839259-966-1078-1165839259-0-1291>": {
+    "JsonRpcError<403,\"Not your turn\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -758,18 +761,6 @@
               ],
               "type": "number"
             },
-            "data": {
-              "additionalProperties": false,
-              "properties": {
-                "currentTurnNum": {
-                  "$ref": "#/definitions/Uint256"
-                }
-              },
-              "required": [
-                "currentTurnNum"
-              ],
-              "type": "object"
-            },
             "message": {
               "enum": [
                 "Not your turn"
@@ -779,8 +770,49 @@
           },
           "required": [
             "code",
-            "message",
-            "data"
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<500,\"Wallet error\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                500
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Wallet error"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
           ],
           "type": "object"
         },
@@ -1852,13 +1884,13 @@
           "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1291%3E"
+          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1256%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1291%3E"
+          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1256%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%2Cstructure-1165839259-1047-1075-1165839259-985-1077-1165839259-966-1078-1165839259-0-1291%3E"
+          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
         },
         {
           "$ref": "#/definitions/JsonRpcError%3C403%2C%22Channel%20closed%22%3E"
