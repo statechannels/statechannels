@@ -339,13 +339,12 @@ export const workflow = (
       requestId: event.requestId
     })),
     updateChannel: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
-      // TODO: This should probably be done in a service and we should handle the failure cases
-      // For now we update the store and then send the response in one action so the response has the latest state
-      // FIXME: In fact, an action seems to be appropriate:
       if (context.channelId === event.channelId) {
         try {
-          const entry = await store.updateChannel(event.channelId, event);
-          messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, event))
+          );
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
 
