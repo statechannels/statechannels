@@ -210,8 +210,8 @@ export class PaymentChannelClient {
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
       await this.getLatestPaymentReceipt(channelId);
+      log.info('My turn, about to close channel');
       this.channelClient.closeChannel(channelId);
-      log.info('closeChannel() - channelClient.closeChannel() called!');
     }
     return this.channelClient.channelState
       .pipe(map(convertToChannelState), filter(isClosed), first())
