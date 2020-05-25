@@ -56,7 +56,7 @@ export const isChannelProposed = (m: Response | Notification): m is ChannelPropo
   'method' in m && m.method === 'ChannelProposed';
 
 export interface MessagingServiceInterface {
-  readonly outboxFeed: Observable<Response | Notification>;
+  readonly outboxFeed: Observable<Response | Notification | ErrorResponse>;
   readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
