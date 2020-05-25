@@ -204,7 +204,7 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
-  async closeChannel(channelId: string, waitForMyTurn = false): Promise<ChannelState> {
+  async closeChannel(channelId: string): Promise<ChannelState> {
     const isClosed = (channelState: ChannelState) =>
       channelState.channelId === channelId && channelState.status === 'closed';
 

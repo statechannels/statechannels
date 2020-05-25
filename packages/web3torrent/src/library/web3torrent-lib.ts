@@ -518,18 +518,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrent.wires.map(async wire => {
         const {seedingChannelId, leechingChannelId} = wire.paidStreamingExtension;
         if (leechingChannelId) {
-          log.info(`SP-> About to close payment channel ${leechingChannelId}`);
-          return this.paymentChannelClient.closeChannel(leechingChannelId, true).then(() => {
+          log.info(`About to close payment channel ${leechingChannelId}`);
+          return this.paymentChannelClient.closeChannel(leechingChannelId).then(() => {
             wire.paidStreamingExtension.leechingChannelId = null;
-            log.info(`SP-> Channel closed: ${leechingChannelId}`);
+            log.info(`Channel closed: ${leechingChannelId}`);
           });
         }
 
         if (includeSeedChannels && seedingChannelId) {
-          log.info(`SP-> About to close paying channel ${seedingChannelId}`);
-          return this.paymentChannelClient.closeChannel(seedingChannelId, true).then(() => {
+          log.info(`About to close paying channel ${seedingChannelId}`);
+          return this.paymentChannelClient.closeChannel(seedingChannelId).then(() => {
             wire.paidStreamingExtension.seedingChannelId = null;
-            log.info(`SP-> Channel closed: ${seedingChannelId}`);
+            log.info(`Channel closed: ${seedingChannelId}`);
           });
         }
       })
