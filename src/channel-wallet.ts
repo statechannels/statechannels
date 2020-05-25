@@ -6,7 +6,7 @@ import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {Notification, Response} from '@statechannels/client-api-schema';
+import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
 import {Message, isOpenChannel, OpenChannel} from './store/types';
 
@@ -185,7 +185,9 @@ export class ChannelWallet {
     await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
   }
 
-  public onSendMessage(callback: (jsonRpcMessage: Notification | Response) => void) {
+  public onSendMessage(
+    callback: (jsonRpcMessage: Notification | Response | ErrorResponse) => void
+  ) {
     this.messagingService.outboxFeed.subscribe(m => callback(m));
   }
 }
