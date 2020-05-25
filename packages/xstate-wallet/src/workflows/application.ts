@@ -281,7 +281,7 @@ export const workflow = (
     },
 
     sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
-      // FIXME: Shouldn't this inspect the error?
+      // TODO: Shouldn't this inspect the error?
       await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
     },
 
@@ -368,7 +368,7 @@ export const workflow = (
       !event.storeEntry.latestSignedByMe.isFinal,
 
     channelClosing: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.latest?.isFinal, // FIXME: Should use supported
+      !!event.storeEntry.latest?.isFinal, // TODO: Should use supported
 
     channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.isChallenging,
