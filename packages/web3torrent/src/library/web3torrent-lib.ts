@@ -120,6 +120,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       torrent.pause(); // the paymentChannelClosing is done at the moment of payment
+      this.closeChannels(torrent, true);
       this.emitTorrentUpdated(infoHash);
     } else {
       throw new Error('No torrent found');
@@ -130,6 +131,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
+      torrent.pause();
       await this.closeChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
     } else {
@@ -396,9 +398,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (torrent.paused) {
-            // We currently treat pausing torrent as canceling downloads
-            log.info({data}, 'Closing torrent');
-            await this.closeChannels(torrent);
+            log.info({data}, 'Torrent Paused');
           } else if (!torrent.done || !torrent.destroyed) {
             log.info({data}, 'Making payment');
             await this.makePayment(torrent, wire);

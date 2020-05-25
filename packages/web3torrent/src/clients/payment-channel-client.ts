@@ -209,11 +209,7 @@ export class PaymentChannelClient {
       channelState.channelId === channelId && channelState.status === 'closed';
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
-      if (waitForMyTurn) {
-        log.info('closeChannel() - Waiting in line');
-        await this.getLatestPaymentReceipt(channelId);
-        log.info('closeChannel() - Ready to Close!');
-      }
+      await this.getLatestPaymentReceipt(channelId);
       this.channelClient.closeChannel(channelId);
       log.info('closeChannel() - channelClient.closeChannel() called!');
     }
