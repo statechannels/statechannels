@@ -30,11 +30,7 @@ type InvalidAppData = JsonRpcError<
   'Invalid app data',
   {appData: string}
 >;
-type NotYourTurn = JsonRpcError<
-  ErrorCodes['NotYourTurn'],
-  'Not your turn',
-  {currentTurnNum: Uint256}
->;
+type NotYourTurn = JsonRpcError<ErrorCodes['NotYourTurn'], 'Not your turn'>;
 type ChannelClosed = JsonRpcError<ErrorCodes['ChannelClosed'], 'Channel closed'>;
 
 export type UpdateChannelError =
