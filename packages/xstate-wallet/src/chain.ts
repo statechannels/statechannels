@@ -438,19 +438,16 @@ export class ChainWatcher implements Chain {
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     return combineLatest(this.chainInfoFeed(channelId), this.challengeStateFeed(channelId)).pipe(
-      map(([chainInfo, challengeInfo]) => {
-        console.log(chainInfo, challengeInfo);
-        return {
-          ...chainInfo,
-          challengeState: chainInfo.finalizesAt.gt(Zero) ? challengeInfo.challengeState : undefined,
-          blockNum: chainInfo.blockNum.gt(challengeInfo.blockNum)
-            ? chainInfo.blockNum
-            : challengeInfo.blockNum,
-          finalizesAt: chainInfo.finalizesAt.gt(challengeInfo.finalizesAt)
-            ? chainInfo.finalizesAt
-            : challengeInfo.finalizesAt
-        };
-      })
+      map(([chainInfo, challengeInfo]) => ({
+        ...chainInfo,
+        challengeState: chainInfo.finalizesAt.gt(Zero) ? challengeInfo.challengeState : undefined,
+        blockNum: chainInfo.blockNum.gt(challengeInfo.blockNum)
+          ? chainInfo.blockNum
+          : challengeInfo.blockNum,
+        finalizesAt: chainInfo.finalizesAt.gt(challengeInfo.finalizesAt)
+          ? chainInfo.finalizesAt
+          : challengeInfo.finalizesAt
+      }))
     );
   }
   private chainInfoFeed(channelId: string): Observable<ChainQueryInfo> {

@@ -11,7 +11,8 @@ import {
   UpdateChannelRequest,
   CloseChannelRequest,
   ApproveBudgetAndFundRequest,
-  CloseAndWithdrawRequest
+  CloseAndWithdrawRequest,
+  ChallengeChannelRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {CreateAndFundLedger, Application as App} from '../workflows';
@@ -160,6 +161,17 @@ export function generateCloseRequest(channelId: string): CloseChannelRequest {
     jsonrpc: '2.0',
     method: 'CloseChannel',
     id: 777777777,
+    params: {
+      channelId
+    }
+  };
+}
+
+export function generateChallengeRequest(channelId: string): ChallengeChannelRequest {
+  return {
+    jsonrpc: '2.0',
+    method: 'ChallengeChannel',
+    id: 999999999,
     params: {
       channelId
     }
