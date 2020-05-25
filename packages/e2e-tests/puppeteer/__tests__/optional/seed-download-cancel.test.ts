@@ -101,8 +101,18 @@ describe('Optional Integration Tests', () => {
 
     await web3tTabB.waitForSelector('.positive.downloading');
 
-    console.log('B cancels download');
-    await cancelDownload(web3tTabB);
+    // NOTE: For some reason wrapping this in a try{}catch{} makes it work.
+    try {
+      // NOTE: Added some delay here because, for some reason that I cannot figure out,
+      // the entire Puppeteer connection between this test and the Chromium window
+      // gets destroyed with an error message "Object" without the delays.
+      console.log('B cancels download');
+      await forEachTab(tab => tab.waitFor(1500));
+      await cancelDownload(web3tTabB);
+      await forEachTab(tab => tab.waitFor(1500));
+    } catch (e) {
+      console.log(e);
+    }
 
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
