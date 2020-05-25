@@ -1,11 +1,4 @@
-import {
-  ChannelId,
-  Participant,
-  Allocation,
-  ChannelResult,
-  Uint256,
-  ChannelStatus
-} from '../data-types';
+import {ChannelId, Participant, Allocation, ChannelResult, ChannelStatus} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
 import {ErrorCodes as AllCodes} from '../error-codes';
 
