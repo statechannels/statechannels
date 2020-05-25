@@ -9,7 +9,16 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, combineLatest} from 'rxjs';
-import {filter, map, flatMap, defaultIfEmpty, mergeMap, last} from 'rxjs/operators';
+import {
+  filter,
+  map,
+  flatMap,
+  defaultIfEmpty,
+  mergeMap,
+  last,
+  switchMap,
+  distinctUntilChanged
+} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
@@ -41,6 +50,7 @@ export interface ChallengeEventInfo {
   readonly finalizesAt: BigNumber;
   readonly challengeState?: State;
   readonly blockNum: BigNumber; // blockNum that the information is from
+  readonly finalized: boolean; // this is a check on 0 < finalizesAt <= now
 }
 
 export interface Chain {
@@ -429,6 +439,7 @@ export class ChainWatcher implements Chain {
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     return combineLatest(this.chainInfoFeed(channelId), this.challengeStateFeed(channelId)).pipe(
       map(([chainInfo, challengeInfo]) => {
+        console.log(chainInfo, challengeInfo);
         return {
           ...chainInfo,
           challengeState: chainInfo.finalizesAt.gt(Zero) ? challengeInfo.challengeState : undefined,
@@ -472,8 +483,7 @@ export class ChainWatcher implements Chain {
       throw new Error('Not connected to contracts');
     }
 
-    // Query for all existing Challenge events events and get the latest one for the channel
-
+    // Query for all existing Challenge events and get the latest one for the channel
     const first = from(
       Promise.all([
         this._adjudicator.queryFilter(this._adjudicator.filters.ChallengeRegistered(), 0),
@@ -506,7 +516,7 @@ export class ChainWatcher implements Chain {
         }
       }),
 
-      defaultIfEmpty<ChallengeEventInfo>({
+      defaultIfEmpty({
         finalizesAt: Zero,
         challengeState: undefined,
         blockNum: Zero
@@ -536,7 +546,27 @@ export class ChainWatcher implements Chain {
       }))
     );
 
-    return merge(first, challengeRegisteredUpdates, challengeClearedUpdates);
+    // Fires when a block is mined
+    const blockMined = merge(
+      from(this.provider.getBlock(this.provider.blockNumber)),
+      fromEvent(this.provider, 'block').pipe(
+        switchMap(async (b: number) => await this.provider.getBlock(b))
+      )
+    );
+
+    const challengeEventFeed = merge(first, challengeRegisteredUpdates, challengeClearedUpdates);
+    return combineLatest(challengeEventFeed, blockMined).pipe(
+      map(([c, b]) => ({
+        ...c,
+        finalized: BigNumber.from(b.timestamp).gte(c.finalizesAt),
+        blockNum: BigNumber.from(b.timestamp).gte(c.finalizesAt)
+          ? BigNumber.from(b.number)
+          : c.blockNum // Only update the blockNum if the challenge is cleared meaning the challengeEventInfo is updated
+      })),
+      distinctUntilChanged((c1, c2) => {
+        return c1.blockNum.eq(c2.blockNum);
+      })
+    );
   }
 }
 

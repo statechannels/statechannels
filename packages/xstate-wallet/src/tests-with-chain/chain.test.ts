@@ -177,6 +177,7 @@ it('the challenge state gets returned when there is an existing challenge', asyn
   const support = [allSignState];
 
   await chain.challenge(support, playerA.privateKey);
+
   const channelId = calculateChannelId(state);
 
   const chainEntry = await chain
@@ -231,9 +232,10 @@ it('the chainUpdated fires and returns a challenge state when a challenge occurs
   const channelId = calculateChannelId(state);
 
   await chain.challenge(support, playerA.privateKey);
+
   const chainEntry = await chain
     .chainUpdatedFeed(channelId)
-    .pipe(take(2))
+    .pipe(take(1))
     .toPromise();
 
   expect(chainEntry.challengeState).toBeDefined();
