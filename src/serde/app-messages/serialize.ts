@@ -73,7 +73,7 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
 
 export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
   const {
-    latest: {appData, turnNum, outcome}, // FIXME: This should be supported
+    latest: {appData, turnNum, outcome}, // TODO: This should be supported
     channelConstants: {participants, appDefinition},
     channelId
   } = channelEntry;
