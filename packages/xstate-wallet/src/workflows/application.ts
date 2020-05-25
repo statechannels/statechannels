@@ -9,9 +9,10 @@ import {
   DoneInvokeEvent,
   StateSchema,
   StateMachine,
-  State
+  State,
+  actions
 } from 'xstate';
-
+const {log} = actions;
 import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
@@ -42,6 +43,7 @@ export interface WorkflowContext {
   channelId?: string;
   requestObserver?: any;
   updateObserver?: any;
+  challengeObserver?: any;
   requestId?: number;
   channelParams?: Omit<CreateChannelEvent, 'type'>;
 }
@@ -194,16 +196,15 @@ const generateConfig = (
           target: 'running',
           actions: [actions.updateChannel]
         },
-        CHANNEL_UPDATED: [
-          {target: 'closing', cond: guards.channelClosing},
-          {target: 'sendChallenge', cond: guards.channelChallenging}
-        ],
+        CHANNEL_UPDATED: [{target: 'closing', cond: guards.channelClosing}],
         PLAYER_REQUEST_CONCLUDE: {
           target: 'attemptToSignFinalState',
           actions: [actions.assignRequestId]
         },
 
-        PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
+        PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'},
+        CHALLENGE_RAISED: {actions: [log('TODO: Handle challenge')]},
+        CHALLENGE_CLEARED: {actions: [log('TODO: Handle challenge cleared')]}
       }
     },
 
@@ -259,6 +260,16 @@ export const workflow = (
           r.channelId === channelId
       )
     );
+  const notifyOnChallenge = ({channelId}: ChannelIdExists) =>
+    store.chain
+      .chainUpdatedFeed(channelId)
+      .pipe(
+        map(c =>
+          c.challengeState
+            ? {type: 'CHALLENGE_RAISED', challengeState: c.challengeState}
+            : {type: 'CHALLENGE_CLEARED'}
+        )
+      );
 
   const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
     store.channelUpdatedFeed(channelId).pipe(
@@ -303,7 +314,8 @@ export const workflow = (
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
       ...context,
       updateObserver: context.updateObserver ?? spawn(notifyOnUpdate(context)),
-      requestObserver: context.requestObserver ?? spawn(notifyOnChannelRequest(context))
+      requestObserver: context.requestObserver ?? spawn(notifyOnChannelRequest(context)),
+      challengeObserver: context.challengeObserver ?? spawn(notifyOnChallenge(context))
     })),
 
     sendChannelUpdatedNotification: async (
