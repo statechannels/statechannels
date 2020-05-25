@@ -593,7 +593,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1256>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -652,7 +652,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1256>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -1884,10 +1884,10 @@
           "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-780-850-1165839259-707-852-1165839259-682-853-1165839259-0-1256%3E"
+          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-943-963-1165839259-875-965-1165839259-853-966-1165839259-0-1256%3E"
+          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233%3E"
         },
         {
           "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
