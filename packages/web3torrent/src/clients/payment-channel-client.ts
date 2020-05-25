@@ -204,12 +204,18 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
-  async closeChannel(channelId: string): Promise<ChannelState> {
+  async closeChannel(channelId: string, waitForMyTurn = false): Promise<ChannelState> {
     const isClosed = (channelState: ChannelState) =>
       channelState.channelId === channelId && channelState.status === 'closed';
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
+      if (waitForMyTurn) {
+        log.info('closeChannel() - Waiting in line');
+        await this.getLatestPaymentReceipt(channelId);
+        log.info('closeChannel() - Ready to Close!');
+      }
       this.channelClient.closeChannel(channelId);
+      log.info('closeChannel() - channelClient.closeChannel() called!');
     }
     return this.channelClient.channelState
       .pipe(map(convertToChannelState), filter(isClosed), first())
@@ -254,7 +260,7 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt(channelId) {
+  getLatestPaymentReceipt(channelId: string) {
     const readyToPay = (state: ChannelState) =>
       state.channelId === channelId &&
       state.status === 'running' &&
