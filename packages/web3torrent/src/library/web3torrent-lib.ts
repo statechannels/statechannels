@@ -518,19 +518,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrent.wires.map(async wire => {
         const {seedingChannelId, leechingChannelId} = wire.paidStreamingExtension;
         if (leechingChannelId) {
-          log.info(`About to close payment channel ${leechingChannelId}`);
-          await this.paymentChannelClient.getLatestPaymentReceipt(leechingChannelId);
-          await this.paymentChannelClient.closeChannel(leechingChannelId);
-          wire.paidStreamingExtension.leechingChannelId = null;
-          log.info(`Channel ${leechingChannelId} closed`);
+          log.info(`SP-> About to close payment channel ${leechingChannelId}`);
+          return this.paymentChannelClient.closeChannel(leechingChannelId, true).then(() => {
+            wire.paidStreamingExtension.leechingChannelId = null;
+            log.info(`SP-> Channel closed: ${leechingChannelId}`);
+          });
         }
 
         if (includeSeedChannels && seedingChannelId) {
-          // TODO: do we need to make something like getLatestPaymentReceipt for this case?
-          log.info(`About to close paying channel ${seedingChannelId}`);
-          await this.paymentChannelClient.closeChannel(seedingChannelId);
-          wire.paidStreamingExtension.seedingChannelId = null;
-          log.info(`Channel ${seedingChannelId} closed`);
+          log.info(`SP-> About to close paying channel ${seedingChannelId}`);
+          return this.paymentChannelClient.closeChannel(seedingChannelId, true).then(() => {
+            wire.paidStreamingExtension.seedingChannelId = null;
+            log.info(`SP-> Channel closed: ${seedingChannelId}`);
+          });
         }
       })
     );
