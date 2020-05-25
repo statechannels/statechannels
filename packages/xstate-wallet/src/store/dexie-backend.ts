@@ -168,6 +168,10 @@ export class Backend implements DBBackend {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
   }
 
+  public get transactionOngoing() {
+    return !!Dexie.currentTransaction;
+  }
+
   public async transaction<T, S extends ObjectStores>(
     mode: TXMode,
     stores: S[],

@@ -11,12 +11,8 @@ const WORKFLOW = 'conclude-channel';
 
 export type Init = {channelId: string};
 
-const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void> => {
-  const {supported, latestSignedByMe} = await store.getEntry(channelId);
-  if (!supported.isFinal) throw new Error('Supported state not final');
-  if (latestSignedByMe.turnNum.eq(supported.turnNum)) return; // already signed
-  await store.signAndAddState(channelId, supported);
-};
+const signFinalState = (store: Store) => async ({channelId}: Init): Promise<void> =>
+  store.signFinalState(channelId);
 
 const waitForConclusionProof = (store: Store) => async ({channelId}: Init) =>
   store

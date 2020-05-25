@@ -1,11 +1,4 @@
-import {
-  ChannelId,
-  Participant,
-  Allocation,
-  ChannelResult,
-  Uint256,
-  ChannelStatus
-} from '../data-types';
+import {ChannelId, Participant, Allocation, ChannelResult, ChannelStatus} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
 import {ErrorCodes as AllCodes} from '../error-codes';
 
@@ -30,11 +23,7 @@ type InvalidAppData = JsonRpcError<
   'Invalid app data',
   {appData: string}
 >;
-type NotYourTurn = JsonRpcError<
-  ErrorCodes['NotYourTurn'],
-  'Not your turn',
-  {currentTurnNum: Uint256}
->;
+type NotYourTurn = JsonRpcError<ErrorCodes['NotYourTurn'], 'Not your turn'>;
 type ChannelClosed = JsonRpcError<ErrorCodes['ChannelClosed'], 'Channel closed'>;
 
 export type UpdateChannelError =

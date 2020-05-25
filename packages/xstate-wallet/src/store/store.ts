@@ -157,13 +157,8 @@ export class Store {
         const addresses = state.participants.map(x => x.signingAddress);
         const privateKeys = await this.backend.privateKeys();
         const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-        if (myIndex === -1) {
-          throw new Error("Couldn't find the signing key for any participant in wallet.");
-        }
+        if (myIndex === -1) throw Error(Errors.notInChannel);
 
-        const channelId = calculateChannelId(state);
-
-        // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
         await this.setNonce(addresses, state.channelNonce);
 
         const data: ChannelStoredData = {
@@ -173,7 +168,8 @@ export class Store {
           funding: undefined,
           applicationDomain
         };
-        await this.backend.setChannel(channelId, data);
+
+        await this.backend.setChannel(calculateChannelId(state), data);
         return new ChannelStoreEntry(data);
       }
     );
@@ -205,8 +201,7 @@ export class Store {
       [ObjectStores.ledgers, ObjectStores.channels],
       async () => {
         const ledgerId = await this.backend.getLedger(peerId);
-
-        if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
+        if (!ledgerId) throw Error(Errors.noLedger + `: ${peerId}`);
 
         return await this.getEntry(ledgerId);
       }
@@ -216,8 +211,7 @@ export class Store {
     this.backend.transaction('readwrite', [ObjectStores.channels], async () => {
       const entry = await this.getEntry(channelId);
 
-      if (typeof entry.applicationDomain === 'string')
-        throw new Error(Errors.domainExistsOnChannel);
+      if (typeof entry.applicationDomain === 'string') throw Error(Errors.domainExistsOnChannel);
 
       await this.backend.setChannel(channelId, {...entry.data(), applicationDomain});
     });
@@ -232,9 +226,8 @@ export class Store {
         // This is not on the Store interface itself -- it is useful to set up a test store
         await this.backend.setChannel(entry.channelId, entry.data());
         const address = await this.getAddress();
-        const peerId = entry.participants.find(p => p.signingAddress !== address);
-        if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
-        else throw 'No peer';
+        const hub = entry.participants.find(p => p.signingAddress !== address) as Participant;
+        await this.backend.setLedger(hub.participantId, entry.channelId);
       }
     );
 
@@ -256,49 +249,47 @@ export class Store {
     appDefinition = AddressZero,
     applicationDomain?: string
   ) =>
-    this.backend.transaction(
-      'readwrite',
-      [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
-      async () => {
-        const addresses = participants.map(x => x.signingAddress);
-        const privateKeys = await this.backend.privateKeys();
-        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
-        if (myIndex === -1) {
-          throw new Error("Couldn't find the signing key for any participant in wallet.");
+    this.backend
+      .transaction(
+        'readwrite',
+        [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
+        async () => {
+          stateVars = _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal');
+          const addresses = participants.map(x => x.signingAddress);
+          const privateKeys = await this.backend.privateKeys();
+          const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+          if (myIndex === -1) {
+            throw Error(Errors.notInChannel);
+          }
+
+          const channelNonce = (await this.getNonce(addresses)).add(1);
+          const chainId = CHAIN_NETWORK_ID;
+
+          const entry = await this.initializeChannel(
+            {
+              chainId,
+              challengeDuration,
+              channelNonce,
+              participants,
+              appDefinition,
+              ...stateVars
+            },
+            applicationDomain
+          );
+          return this.signAndAddStateWithinTx(entry.channelId, stateVars);
         }
+      )
+      .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
-        const channelNonce = (await this.getNonce(addresses)).add(1);
-        const chainId = CHAIN_NETWORK_ID;
-
-        const entry = await this.initializeChannel(
-          {
-            chainId,
-            challengeDuration,
-            channelNonce,
-            participants,
-            appDefinition,
-            ...stateVars
-          },
-          applicationDomain
-        );
-        // sign the state, store the channel
-        return this.signAndAddState(
-          entry.channelId,
-          _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
-        );
-      }
-    );
   private async getNonce(addresses: string[]): Promise<BigNumber> {
     const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
     return nonce || BigNumber.from(-1);
   }
 
   private async setNonce(addresses: string[], value: BigNumber) {
-    const nonce = await this.getNonce(addresses);
     // TODO: Figure out why the lte check is failing
-    if (value.lt(nonce)) {
-      throw 'Invalid nonce';
-    }
+    if (value.lt(await this.getNonce(addresses))) throw Error(Errors.invalidNonce);
+
     await this.backend.setNonce(this.nonceKeyFromAddresses(addresses), value);
   }
 
@@ -306,81 +297,99 @@ export class Store {
 
   public async getPrivateKey(signingAddress: string): Promise<string> {
     const ret = await this.backend.getPrivateKey(signingAddress);
-    if (!ret) throw new Error('No longer have private key');
+    if (!ret) throw Error(Errors.cannotFindPrivateKey);
     return ret;
   }
 
   public updateChannel = (
     channelId: string,
-    updateData: {outcome: SimpleAllocation; appData: string; isFinal?: boolean}
+    updateData: Partial<{outcome: SimpleAllocation; appData: string; isFinal: boolean}>
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const entry = await this.getEntry(channelId);
-        const existingState = entry.latest;
-        const newState = {
-          ...existingState,
+        const {supported: existingState, myTurn} = await this.getEntry(channelId);
+        if (!myTurn) throw Error(Errors.notMyTurn);
+
+        const newState = _.merge(existingState, {
           turnNum: existingState.turnNum.add(1),
-          appData: updateData.appData,
-          outcome: updateData.outcome,
-          isFinal: updateData.isFinal || existingState.isFinal
-        };
+          ...updateData
+        });
 
-        const {participants} = entry;
-        const myAddress = participants[entry.myIndex].signingAddress;
-        const privateKey = await this.backend.getPrivateKey(myAddress);
-
-        if (!privateKey) {
-          throw new Error('No longer have private key');
-        }
-        const signedState = entry.signAndAdd(
-          _.pick(newState, 'outcome', 'turnNum', 'appData', 'isFinal'),
-          privateKey
-        );
-        await this.backend.setChannel(channelId, entry.data());
-        return {entry, signedState};
+        return this.signAndAddStateWithinTx(channelId, newState);
       })
-      .then(({entry, signedState}) => {
-        // These events trigger callbacks that should not run within the transaction scope
-        // See https://github.com/dfahlander/Dexie.js/issues/1029
-        this._eventEmitter.emit('channelUpdated', entry);
-        this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+      .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
-        return entry;
-      });
-
-  public signAndAddState = (channelId: string, stateVars: StateVariables) =>
+  public signFinalState = (channelId: string) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
+        const {supported, latestSignedByMe} = await this.getEntry(channelId);
+        if (!supported.isFinal) throw new Error('Supported state not final');
+        if (latestSignedByMe.turnNum.eq(supported.turnNum)) return; // already signed
+        return await this.signAndAddStateWithinTx(channelId, supported);
+      })
+      .then(result => {
+        if (result) this.emitChannelUpdatedEventAfterTX(result.entry, result.signedState);
+      });
+
+  private emitChannelUpdatedEventAfterTX(entry: ChannelStoreEntry, signedState?: SignedState) {
+    // These events trigger callbacks that should not run within the transaction scope
+    // See https://github.com/dfahlander/Dexie.js/issues/1029
+
+    if (this.backend.transactionOngoing) throw Error(Errors.emittingDuringTransaction);
+
+    this._eventEmitter.emit('channelUpdated', entry);
+    if (signedState) this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+
+    return entry;
+  }
+
+  public signAndAddState = (channelId: string, stateVars: StateVariables) =>
+    this.signAndAddStateWithinTx(channelId, stateVars).then(({entry, signedState}) =>
+      this.emitChannelUpdatedEventAfterTX(entry, signedState)
+    );
+
+  public supportState = (state: State) =>
+    this.backend
+      .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
+        const stateHash = hashState(state);
+        const channelId = calculateChannelId(state);
+        const entry = await this.getEntry(channelId);
+        const {isSupportedByMe} = entry;
+
+        // We only sign the state if we haven't signed it already
+        if (!isSupportedByMe || entry.latestSignedByMe.stateHash !== stateHash) {
+          return await this.signAndAddStateWithinTx(channelId, state);
+        } else {
+          // The support state machine was started with a state that we already support
+          // That's fine but we output a warning in case that's unexpected
+          logger.warn({state}, 'The state is already supported');
+          return;
+        }
+      })
+      .then(args => {
+        if (!args) return;
+        this.emitChannelUpdatedEventAfterTX(args.entry, args.signedState);
+      });
+
+  private signAndAddStateWithinTx = (channelId: string, stateVars: StateVariables) =>
+    this.backend.transaction(
+      'readwrite',
+      [ObjectStores.channels, ObjectStores.privateKeys],
+      async () => {
         const entry = await this.getEntry(channelId);
 
-        const {participants} = entry;
-        const myAddress = participants[entry.myIndex].signingAddress;
-        const privateKey = await this.backend.getPrivateKey(myAddress);
-
-        if (!privateKey) {
-          throw new Error('No longer have private key');
-        }
         const signedState = entry.signAndAdd(
           _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
-          privateKey
+          await this.getPrivateKey(entry.myAddress)
         );
         await this.backend.setChannel(channelId, entry.data());
         return {entry, signedState};
-      })
-      .then(({entry, signedState}) => {
-        // These events trigger callbacks that should not run within the transaction scope
-        // See https://github.com/dfahlander/Dexie.js/issues/1029
-        this._eventEmitter.emit('channelUpdated', entry);
-        this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-
-        return entry;
-      });
+      }
+    );
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
     if (!_.find(objectives, o => _.isEqual(o, objective))) {
-      // TODO: Should setObjective take a key??
       this.objectives.push(objective);
       addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
       this._eventEmitter.emit('newObjective', objective);
@@ -402,9 +411,7 @@ export class Store {
           return memoryChannelStorage;
         }
       )
-      // This event triggers callbacks that should not run within the transaction scope
-      // See https://github.com/dfahlander/Dexie.js/issues/1029
-      .then(entry => this._eventEmitter.emit('channelUpdated', entry));
+      .then(entry => this.emitChannelUpdatedEventAfterTX(entry));
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
@@ -453,22 +460,22 @@ export class Store {
       async () => {
         const {applicationDomain, supported, participants} = await this.getEntry(ledgerChannelId);
         const {outcome} = supported;
-        if (typeof applicationDomain !== 'string') throw new Error(Errors.noDomainForChannel);
+        if (typeof applicationDomain !== 'string') throw Error(Errors.noDomainForChannel);
 
         const currentBudget = await this.getBudget(applicationDomain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
 
-        if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
+        if (!currentBudget || !assetBudget) throw Error(Errors.noBudget);
 
         const channelBudget = assetBudget.channels[targetChannelId];
-        if (!channelBudget) throw new Error(Errors.channelNotInBudget);
+        if (!channelBudget) throw Error(Errors.channelNotInBudget);
         const playerAddress = await this.getAddress();
 
         const playerDestination = participants.find(p => p.signingAddress === playerAddress)
           ?.destination;
         if (!playerDestination) {
-          throw new Error(Errors.cannotFindDestination);
+          throw Error(Errors.cannotFindDestination);
         }
         // Simply set the budget to the current ledger outcome
         assetBudget.availableSendCapacity = getAllocationAmount(outcome, playerDestination);
@@ -493,21 +500,20 @@ export class Store {
       async () => {
         const entry = await this.getEntry(channelId);
         const domain = entry.applicationDomain;
-        if (typeof domain !== 'string')
-          throw new Error(Errors.noDomainForChannel + ' ' + channelId);
+        if (typeof domain !== 'string') throw Error(Errors.noDomainForChannel + ' ' + channelId);
         const currentBudget = await this.backend.getBudget(domain);
 
         // TODO?: Create a new budget if one doesn't exist
-        if (!currentBudget) throw new Error(Errors.noBudget + domain);
+        if (!currentBudget) throw Error(Errors.noBudget + domain);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-        if (!assetBudget) throw new Error(Errors.noAssetBudget);
+        if (!assetBudget) throw Error(Errors.noAssetBudget);
 
         if (
           assetBudget.availableSendCapacity.lt(amount.send) ||
           assetBudget.availableReceiveCapacity.lt(amount.receive)
         ) {
-          throw new Error(Errors.budgetInsufficient);
+          throw Error(Errors.budgetInsufficient);
         }
 
         currentBudget.forAsset[assetHolderAddress] = {
@@ -534,8 +540,7 @@ export function supportedStateFeed(store: Store, channelId: string) {
 function getAllocationAmount(outcome: Outcome, destination: string) {
   const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
   const amount = allocationItems.find(a => a.destination === destination)?.amount;
-  if (!amount) {
-    throw new Error(`Cannot find allocation entry with destination ${destination}`);
-  }
+  if (!amount) throw Error(Errors.amountNotFound + ` ${destination}`);
+
   return amount;
 }

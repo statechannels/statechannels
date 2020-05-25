@@ -133,9 +133,7 @@ describe('createChannel', () => {
 
     await expect(
       store.createChannel(participants, challengeDuration, stateVars, appDefinition)
-    ).rejects.toMatchObject({
-      message: "Couldn't find the signing key for any participant in wallet."
-    });
+    ).rejects.toMatchObject({message: Errors.notInChannel});
   });
 });
 

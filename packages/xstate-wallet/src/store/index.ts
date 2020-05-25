@@ -51,6 +51,7 @@ export function isGuarantee(funding): funding is Guarantee {
 export function isGuarantees(funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
+
 export enum Errors {
   duplicateTurnNums = 'multiple states with same turn number',
   notSorted = 'states not sorted',
@@ -67,5 +68,12 @@ export enum Errors {
   budgetAlreadyExists = 'There already exists a budget for this domain',
   budgetInsufficient = 'Budget insufficient to reserve funds',
   amountUnauthorized = 'Amount unauthorized in current budget',
-  cannotFindDestination = 'Cannot find destination for participant'
+  cannotFindDestination = 'Cannot find destination for participant',
+  cannotFindPrivateKey = 'Private key missing for your address',
+  notInChannel = 'Attempting to initialize  channel as a non-participant',
+  noLedger = 'No ledger exists with peer',
+  amountNotFound = 'Cannot find allocation entry with destination',
+  invalidNonce = 'Invalid nonce',
+  emittingDuringTransaction = 'Attempting to emit event during transaction',
+  notMyTurn = "Cannot update channel unless it's your turn"
 }

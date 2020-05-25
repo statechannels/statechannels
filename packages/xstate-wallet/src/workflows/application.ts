@@ -16,7 +16,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store} from '../store';
+import {Store, Errors} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {BigNumber} from 'ethers';
@@ -30,7 +30,7 @@ import {
   PlayerRequestConclude,
   OpenEvent
 } from '../event-types';
-import {FundingStrategy} from '@statechannels/client-api-schema';
+import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
@@ -77,7 +77,7 @@ export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
   spawnObservers: AssignAction<ChannelIdExists, any>;
-  updateStoreAndSendResponse: Action<WorkflowContext, PlayerStateUpdate>;
+  updateChannel: Action<WorkflowContext, PlayerStateUpdate>;
 }
 
 export type WorkflowEvent =
@@ -122,20 +122,8 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) => {
-  const entry = await store.getEntry(channelId);
-
-  if (entry.myTurn) {
-    const {supported} = entry;
-    return store.signAndAddState(channelId, {
-      ...supported,
-      turnNum: supported.turnNum.add(1),
-      isFinal: true
-    });
-  } else {
-    throw Error('Not your turn');
-  }
-};
+const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) =>
+  store.updateChannel(channelId, {isFinal: true});
 
 const generateConfig = (
   actions: WorkflowActions,
@@ -204,7 +192,7 @@ const generateConfig = (
         SPAWN_OBSERVERS: {actions: actions.spawnObservers},
         PLAYER_STATE_UPDATE: {
           target: 'running',
-          actions: [actions.updateStoreAndSendResponse]
+          actions: [actions.updateChannel]
         },
         CHANNEL_UPDATED: [
           {target: 'closing', cond: guards.channelClosing},
@@ -293,6 +281,7 @@ export const workflow = (
     },
 
     sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
+      // TODO: Shouldn't this inspect the error?
       await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
     },
 
@@ -349,22 +338,37 @@ export const workflow = (
     assignRequestId: assign((context, event: JoinChannelEvent | PlayerRequestConclude) => ({
       requestId: event.requestId
     })),
-    updateStoreAndSendResponse: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
-      // TODO: This should probably be done in a service and we should handle the failure cases
-      // For now we update the store and then send the response in one action so the response has the latest state
+    updateChannel: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
-        const entry = await store.updateChannel(event.channelId, event);
-        await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
+        try {
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, event))
+          );
+        } catch (error) {
+          const matches = reason => new RegExp(reason).test(error.message);
+
+          // TODO: Catch other errors
+          let message: ErrorResponse['error'];
+          if (matches(Errors.channelMissing)) message = {code: 403, message: 'Not your turn'};
+          else if (matches(Errors.notMyTurn)) message = {code: 400, message: 'Channel not found'};
+          else {
+            message = {code: 500, message: 'Wallet error'};
+            console.error({error}, 'UpdateChannel call failed with error 500');
+          }
+
+          messagingService.sendError(event.requestId, message);
+        }
       }
     }
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+    channelOpen: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
       !event.storeEntry.latestSignedByMe.isFinal,
 
-    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.latest?.isFinal,
+    channelClosing: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.latest?.isFinal, // TODO: Should use supported
 
     channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.isChallenging,
@@ -452,7 +456,7 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
-  updateStoreAndSendResponse: 'updateStoreAndSendResponse',
+  updateChannel: 'updateChannel',
   assignRequestId: 'assignRequestId'
 };
 
