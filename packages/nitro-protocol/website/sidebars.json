@@ -1,17 +1,11 @@
 {
   "docs": {
-    "State Channels": ["state-channels/overview", "state-channels/quick-start"],
-    "ForceMove and Nitro": [
-      "forcemove-and-nitro/account-topology",
-      "forcemove-and-nitro/force-move",
-      "forcemove-and-nitro/consensus-app",
-      "forcemove-and-nitro/nitro-adjudicator",
-      "forcemove-and-nitro/asset-holder",
-      "forcemove-and-nitro/single-asset-payments"
-    ],
-    "Client specification": ["client-specification/auxiliary-protocols"]
+    "Overview": ["overview"],
+    "Dapp Developers": ["dapp-devs/dapp-devs-intro"],
+    "Wallet Developers": ["wallet-devs/quick-start", "wallet-devs/tutorial"],
+    "Protocol Developers": ["protocol-devs/protocol-devs-intro"]
   },
-  "API": {
+  "Contract API": {
     "Overview": ["api/contract-inheritance"],
     "Base Contracts": [
       "natspec/IForceMove",

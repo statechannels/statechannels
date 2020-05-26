@@ -124,7 +124,7 @@ function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) publ
 
 Checks:
 
-- `destination` must be an [external destination](#destinations).
+- `destination` must NOT be an [external destination](#destinations).
 - The holdings for `destination` must be greater than or equal to `expectedHeld`.
 - The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
