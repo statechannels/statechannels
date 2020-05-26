@@ -13,7 +13,7 @@ import {
   waitForClosedState
 } from '../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
+import {uploadFile, startDownload} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 import {CLOSE_BROWSERS} from '../constants';
 const USE_DAPPETEER = false;
