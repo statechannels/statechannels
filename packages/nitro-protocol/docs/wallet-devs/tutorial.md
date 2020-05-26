@@ -69,8 +69,6 @@ const tx0 = ETHAssetHolder.deposit(channelId, 0, held, {
 
 ## Execute state transitions off chain
 
-### Support a state in several different ways
-
 ### Construct a State with the correct format
 
 A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behavior of the state channel network. `@statechannels/nitro-protocol` exposes a `State` type as a container for all the fields that are required:
@@ -84,12 +82,7 @@ const chainId = '0x1234';
 const channelNonce = bigNumberify(0).toHexString();
 const channel: Channel = {chainId, channelNonce, participants};
 
-const outcome: Outcome = [
-  {
-    allocationItems: [],
-    assetHolderAddress: Wallet.createRandom().address,
-  },
-];
+const outcome: Outcome = [];
 
 const state: State = {
   turnNum: 0,
@@ -102,7 +95,7 @@ const state: State = {
 };
 ```
 
-Notice that the outcome field must conform to the `Outcome` type, which can also be imported from `@statechannels/nitro-protocol`. Don't worry about this field just yet, we will revisit it later.
+Notice that the outcome field must conform to the `Outcome` type, which can also be imported from `@statechannels/nitro-protocol`. Don't worry about this field just yet, we will revisit it later (we got away with an empty array, for now).
 
 #### Fixed and Variable Parts
 
@@ -136,9 +129,64 @@ const fixedPart = getFixedPart(state);
 const getVariablePaert = getVariablePart(state);
 ```
 
-These structs, along with remaining fields, `turnNum` and `isFinal`, can be passed in to contract methods for more gas efficient execution.
-
 ### Conform to an on chain validTransition function
+
+In ForceMove, every state has an associated 'mover' - the participant who had the unique ability to progress the channel at the point the state was created. The mover can be calculated from the `turnNum` and the `participants` as follows:
+
+```solidity
+moverAddress = participants[turnNum % participants.length]
+```
+
+The implication of this formula is that participants take turns to update the state of the channel. Furthermore, there are strict rules about whether a state update is valid, based on the previous state that has been announced. Beyond conforming to the state format, there are certain relationships that must hold between the state in question, and the previously announced state.
+
+The full rule set is (pseudo-code):
+
+```solidity
+function validTransition(a, b) <=>
+  b.turnNum == a.turnNum + 1
+  b.chainId == a.chainId
+  b.participants == a.participants
+  b.appDefinition == a.appDefinition
+  b.challengeDuration == a.challengeDuration
+  a.signer == a.mover
+  b.signer == b.mover
+  if b.isFinal
+     b.defaultOutcome == a.defaultOutcome
+  else if b.turnNum < 2n
+     a.isFinal == False
+     b.defaultOutcome == a.defaultOutcome
+     b.appData == a.appData
+   else
+     a.isFinal == False
+     b.app.validTransition(a, b)
+```
+
+Note the use of `app.ValidTransition`. This function should be written by third party DApp developers. We provide a `TrivialApp` contract which always returns `true`, to aid in testing:
+
+```typescript
+const fromState: State = {
+  channel,
+  outcome: [],
+  turnNum: 1,
+  isFinal: false,
+  challengeDuration: 0x0,
+  appDefinition: TRIVIAL_APP_ADDRESS, // Assuming this contract has been deployed and its address is known
+  appData: '0x0',
+};
+const toState: State = {...fromState, turnNum: 3}; // FIXME
+
+expect(
+  await NitroAdjudicator.validTransition(
+    channel.participants.length,
+    [fromState.isFinal, toState.isFinal],
+    [getVariablePart(fromState), getVariablePart(toState)],
+    toState.turnNum,
+    fromState.appDefinition
+  )
+).toBe(true);
+```
+
+### Support a state in several different ways
 
 ## Finalize a channel (happy)
 
