@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {LOG_DESTINATION, ADD_LOGS, JEST_WORKER_ID} from './config';
+import {LOG_DESTINATION, ADD_LOGS, JEST_WORKER_ID, LOG_LEVEL} from './config';
 import _ from 'lodash';
 
 const IS_BROWSER_CONTEXT = JEST_WORKER_ID === undefined;
@@ -40,5 +40,5 @@ const browser: any = IS_BROWSER_CONTEXT
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-const opts = {name, prettyPrint, browser};
+const opts = {name, prettyPrint, browser, level: LOG_LEVEL};
 export const logger = destination ? pino(opts, destination) : pino(opts);

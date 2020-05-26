@@ -36,6 +36,12 @@ const browser: any = IS_BROWSER_CONTEXT
   : undefined;
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
+// When logging, we default to 'info', as most logs happen at this level.
+// Some very large classes are serialized at the 'trace' level
+// We probably don't want these logged to the console, but strictly enabling this
+// in the browser might sometimes be helpful
+// eslint-disable-next-line no-undef
+export const LOG_LEVEL = LOG_TO_FILE || LOG_TO_CONSOLE ? process.env.LOG_LEVEL || 'info' : 'silent';
 
-const opts = {name, prettyPrint, browser};
+const opts = {name, prettyPrint, browser, level: LOG_LEVEL};
 export const logger = pino(opts);
