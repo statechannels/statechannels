@@ -131,6 +131,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
+      // I am only allowed to close the channel on my turn.
+      // If I don't pause the torrent, then I will continue to make payments, meaning the call to 
+      // this.closeChannels would race the `makePayment` function, and one of them would fail with a
+      // "Not my turn" error.
       torrent.pause();
       await this.closeChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
