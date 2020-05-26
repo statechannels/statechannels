@@ -7,6 +7,8 @@ The quickest way to get started is to clone our [nitro-tutorial](https://github.
 
 If you would prefer to start from scratch, follow the steps in the quick start and follow along below.
 
+---
+
 ## Deposit assets
 
 ### Compute a channel id
@@ -66,6 +68,8 @@ const tx0 = ETHAssetHolder.deposit(channelId, 0, held, {
   value: held,
 });
 ```
+
+---
 
 ## Execute state transitions off chain
 
@@ -173,7 +177,7 @@ const fromState: State = {
   appDefinition: TRIVIAL_APP_ADDRESS, // Assuming this contract has been deployed and its address is known
   appData: '0x0',
 };
-const toState: State = {...fromState, turnNum: 3}; // FIXME
+const toState: State = {...fromState, turnNum: 2};
 
 expect(
   await NitroAdjudicator.validTransition(
@@ -188,11 +192,15 @@ expect(
 
 ### Support a state in several different ways
 
+---
+
 ## Finalize a channel (happy)
 
 ### Conclude a channel using isFinal property
 
 ### Get your money out using conclude
+
+---
 
 ## Finalize a channel (sad)
 
@@ -201,6 +209,8 @@ expect(
 ### Call checkpoint
 
 ### Call respond
+
+---
 
 ## Get your money out
 
