@@ -51,8 +51,8 @@ function channelIdToTableRow(
   let dataTransferred: string;
   // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
   const peerOutcomeAddress = isBeneficiary
-    ? channel.payerOutcomeAddress
-    : channel.beneficiaryOutcomeAddress;
+    ? channel.payer.outcomeAddress
+    : channel.beneficiary.outcomeAddress;
 
   const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
   // For now, this ^ is the ethereum address in my peer's metamask
@@ -61,10 +61,10 @@ function channelIdToTableRow(
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
     // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
-    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
+    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiary.balance));
   }
 
-  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
+  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiary.balance));
 
   let connectionStatus;
   if (wire) {
@@ -134,7 +134,9 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
 
   const channelsInfo = _.keys(channels)
     .filter(
-      id => channels[id].payer === mySigningAddress || channels[id].beneficiary === mySigningAddress
+      id =>
+        channels[id].payer.signingAddress === mySigningAddress ||
+        channels[id].beneficiary.signingAddress === mySigningAddress
     )
     .sort(
       (id1, id2) =>
@@ -160,7 +162,9 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
               key,
               channels,
               torrent,
-              channels[key].beneficiary === mySigningAddress ? 'beneficiary' : 'payer'
+              channels[key].beneficiary.signingAddress === mySigningAddress
+                ? 'beneficiary'
+                : 'payer'
               // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
               // ,context.paymentChannelClient.challengeChannel
             )

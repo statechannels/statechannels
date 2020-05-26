@@ -1,6 +1,6 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
-import {ChannelState} from '../../clients/payment-channel-client';
+import {ChannelState, peer} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 
 export const defaultFile = new Blob([fixtures.leaves.content]);
@@ -44,10 +44,6 @@ export const mockChannelState: ChannelState = {
   turnNum: utils.bigNumberify(0),
   status: 'running',
   challengeExpirationTime: '0x0',
-  beneficiary: '0x0',
-  payer: '0x0',
-  beneficiaryOutcomeAddress: '0x0',
-  payerOutcomeAddress: '0x0',
-  beneficiaryBalance: '0x0',
-  payerBalance: '0x0'
+  beneficiary: peer('0x0', '0x0', '0x0'),
+  payer: peer('0x0', '0x0', '0x0')
 };

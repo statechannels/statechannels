@@ -372,7 +372,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     // querying channel client for updated balance
     const newBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiary.balance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(newBalance.sub(bigNumberify(peer.beneficiaryBalance)));
@@ -431,7 +431,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {leechingChannelId: channelId} = wire.paidStreamingExtension;
         const channelOfWire = this.paymentChannelClient.channelCache[channelId];
         if (channelOfWire) {
-          const balance = channelOfWire.beneficiaryBalance;
+          const balance = channelOfWire.beneficiary.balance;
           const downloaded = wire.downloaded;
           log.info(
             `TorrentEvents: Done, per-wire info. Channel: ${channelId} Balance: ${balance} Downloaded: ${downloaded}`
@@ -505,7 +505,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const balance =
       this.paymentChannelClient.channelCache[leechingChannelId] &&
       bigNumberify(
-        this.paymentChannelClient.channelCache[leechingChannelId].beneficiaryBalance
+        this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance
       ).toString();
     log.info(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${wire.downloaded}`);
   }

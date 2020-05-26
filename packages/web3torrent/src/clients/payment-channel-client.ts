@@ -26,17 +26,28 @@ function sanitizeMessageForFirebase(message) {
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
 const APP_DATA = constants.HashZero; // unused in the SingleAssetPaymentApp
+
+export interface Peer {
+  signingAddress: string;
+  outcomeAddress: string;
+  balance: string;
+}
+export const peer = (
+  signingAddress: string,
+  outcomeAddress: string,
+  balance: string | number
+): Peer => ({
+  signingAddress,
+  outcomeAddress,
+  balance: utils.bigNumberify(balance).toString()
+});
 export interface ChannelState {
   channelId: string;
   turnNum: utils.BigNumber;
   status: ChannelStatus;
   challengeExpirationTime;
-  beneficiary: string;
-  payer: string;
-  beneficiaryOutcomeAddress: string;
-  payerOutcomeAddress: string;
-  beneficiaryBalance: string;
-  payerBalance: string;
+  beneficiary: Peer;
+  payer: Peer;
 }
 
 enum Index {
@@ -259,7 +270,7 @@ export class PaymentChannelClient {
     const readyToPay = (state: ChannelState) =>
       state.channelId === channelId &&
       state.status === 'running' &&
-      state.payer === this.mySigningAddress &&
+      state.payer.signingAddress === this.mySigningAddress &&
       state.turnNum.mod(2).eq(Index.Payer);
 
     return this.channelClient.channelState
@@ -271,64 +282,59 @@ export class PaymentChannelClient {
     let amountWillPay = amount;
     const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
 
-    const {payerBalance} = channelState;
-    if (bigNumberify(payerBalance).eq(0)) {
+    const {payer, beneficiary} = channelState;
+    if (bigNumberify(payer.balance).eq(0)) {
       logger.error('Out of funds. Closing channel.');
       await this.closeChannel(channelId);
       return;
     }
 
     if (channelState.status == 'running') {
-      if (bigNumberify(payerBalance).lt(amount)) {
-        amountWillPay = payerBalance;
+      if (bigNumberify(payer.balance).lt(amount)) {
+        amountWillPay = payer.balance;
         logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
       }
 
       await this.updateChannel(
         channelId,
-        channelState.beneficiary,
-        channelState.payer,
-        add(channelState.beneficiaryBalance, amountWillPay),
-        subtract(payerBalance, amountWillPay),
-        channelState.beneficiaryOutcomeAddress,
-        channelState.payerOutcomeAddress
+        beneficiary.signingAddress,
+        payer.signingAddress,
+        add(beneficiary.balance, amountWillPay),
+        subtract(payer.balance, amountWillPay),
+        beneficiary.outcomeAddress,
+        payer.outcomeAddress
       );
     }
   }
 
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
-    const {
-      channelId,
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    } = channelState;
+    const {channelId, beneficiary, payer} = channelState;
     await this.updateChannel(
       channelId,
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
+      beneficiary.signingAddress,
+      payer.signingAddress,
+      beneficiary.balance,
+      payer.balance,
+      beneficiary.outcomeAddress,
+      payer.outcomeAddress
     );
   }
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
     if (typeof channelIdOrChannelState === 'string') {
-      return this.channelCache[channelIdOrChannelState]?.beneficiary === this.mySigningAddress;
+      return (
+        this.channelCache[channelIdOrChannelState]?.beneficiary.signingAddress ===
+        this.mySigningAddress
+      );
     } else {
-      return channelIdOrChannelState.beneficiary === this.mySigningAddress;
+      return channelIdOrChannelState.beneficiary.signingAddress === this.mySigningAddress;
     }
   }
 
   isPaymentToMe(channelState: ChannelState): boolean {
     // doesn't guarantee that my balance increased
-    if (channelState.beneficiary === this.mySigningAddress) {
+    if (channelState.beneficiary.signingAddress === this.mySigningAddress) {
       return channelState.status === 'running' && channelState.turnNum.mod(2).eq(1);
     }
     return false; // only beneficiary may receive payments
@@ -398,18 +404,16 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     turnNum: utils.bigNumberify(turnNum),
     status,
     challengeExpirationTime,
-    beneficiary: participants[0].participantId,
-    payer: participants[1].participantId,
-    beneficiaryOutcomeAddress: participants[0].destination,
-    payerOutcomeAddress: participants[1].destination,
-    beneficiaryBalance: hexZeroPad(
-      bigNumberify(allocations[0].allocationItems[0].amount).toHexString(),
-      32
-    ),
-    payerBalance: hexZeroPad(
-      bigNumberify(allocations[0].allocationItems[1].amount).toHexString(),
-      32
-    )
+    beneficiary: {
+      signingAddress: participants[0].participantId,
+      outcomeAddress: participants[0].destination,
+      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[0].amount).toHexString(), 32)
+    },
+    payer: {
+      signingAddress: participants[1].participantId,
+      outcomeAddress: participants[1].destination,
+      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[1].amount).toHexString(), 32)
+    }
   };
 };
 

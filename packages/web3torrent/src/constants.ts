@@ -1,6 +1,7 @@
 import {Status, TorrentUI} from './types';
-import {ChannelState} from './clients/payment-channel-client';
+import {ChannelState, Peer} from './clients/payment-channel-client';
 import {utils} from 'ethers';
+import {BigNumber} from 'ethers/utils';
 
 export const VERSION = process.env.VERSION;
 export const COMMIT_HASH = process.env.COMMIT_HASH;
@@ -142,27 +143,27 @@ export const mockLeecherA = '0x829bd824b016326a401d083b33d092293333a830';
 export const mockLeecherB = '0x3b33d092293333a830829bd824b016326a401d08';
 export const mockSeeder = '0xc631e3bf86075f4d2b45ba974cff4ef5a5f922a0';
 
+const peer = (signingAddress, balance: number): Peer => ({
+  signingAddress,
+  balance: utils.bigNumberify(balance).toString(),
+  outcomeAddress: 'outcome'
+});
+
 export const mockChannels: Array<Partial<ChannelState>> = [
   {
     channelId: '0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c',
-    payer: mockLeecherA,
-    payerBalance: utils.bigNumberify(mockBalance / 2).toString(),
-    beneficiary: mockCurrentUser,
-    beneficiaryBalance: utils.bigNumberify(mockBalance).toString()
+    payer: peer(mockLeecherA, mockBalance / 2),
+    beneficiary: peer(mockCurrentUser, mockBalance)
   },
   {
     channelId: '0xb43b0a0d3e029c4c5a0b54d5dc17e0aadc383d2d',
-    payer: mockLeecherB,
-    payerBalance: utils.bigNumberify(mockBalance * 6).toString(),
-    beneficiary: mockCurrentUser,
-    beneficiaryBalance: utils.bigNumberify(mockBalance).toString()
+    payer: peer(mockLeecherB, mockBalance * 6),
+    beneficiary: peer(mockCurrentUser, mockBalance)
   },
   {
     channelId: '0x7bc8f170fdf3772c5ebdcd90bf257316c69ba45',
-    payer: mockCurrentUser,
-    payerBalance: utils.bigNumberify(mockBalance).toString(),
-    beneficiary: mockSeeder,
-    beneficiaryBalance: utils.bigNumberify(mockBalance * 2).toString()
+    payer: peer(mockCurrentUser, mockBalance),
+    beneficiary: peer(mockSeeder, mockBalance * 2)
   }
 ];
 
