@@ -22,7 +22,7 @@
     "rxjs": "6.5.4"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.0",
+    "@statechannels/devtools": "0.1.1",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
