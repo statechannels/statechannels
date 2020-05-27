@@ -90,8 +90,8 @@ export class MessagingService {
     callback?: (result: ResultType) => void
   ) {
     const listener = (event: MessageEvent) => {
-      if (event.data && event.data.jsonrpc) {
-        if (isJsonRpcResponse(event.data) && event.data.id === message.id) {
+      if (event.data && event.data.jsonrpc && event.data.id === message.id) {
+        if (isJsonRpcResponse(event.data)) {
           if (callback) {
             callback(event.data.result);
           }
@@ -103,7 +103,7 @@ export class MessagingService {
           reject(new Error(`Wallet Error ${event.data.error.code}: ${event.data.error.message}`));
         }
       } else {
-        logger.error({event}, 'Received a non JsonPpc response');
+        logger.error({event}, 'Received a non JsonRpc response');
       }
     };
 
