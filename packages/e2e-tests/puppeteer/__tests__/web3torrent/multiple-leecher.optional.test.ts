@@ -14,7 +14,7 @@ import {
   takeScreenshot
 } from '../../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
+import {uploadFile, startDownload} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 import {CLOSE_BROWSERS, USES_VIRTUAL_FUNDING} from '../../constants';
 const USE_DAPPETEER = false;
