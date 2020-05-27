@@ -214,7 +214,116 @@ expect(
 
 ### Support a state in several different ways
 
----
+Although you can check the validity of a state transition by providing the data above to an on-chain method, to cause any meaningful change in on-chain state (such as releasing funds), digitial signatures on those states are also required.
+
+Nitro protocol uses the idea of supporting a state: in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`). The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
+
+There is also an optimization where a state can be supported by `n` signatures on a sequence of `m < n` states, provided again that each consecutive pair of those `m` states form a valid transition and further provided each participant has provided a signature on a state later or equal in the sequence than the state for which they were the mover.
+
+In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
+
+In the following diagram, A is participant 0, B is participant 1 and C is participant 2. The states are shown by circles and numbered 0, 1, and 2. We are considering whether state with `turnNum = 2` is supported by various sets of signatures on the states in the sequence.
+
+The yellow boxes show who signed what: in this case everyone signed their own state: this _is_ acceptable:
+
+<div class="mermaid" align="center">
+graph LR;
+subgraph A
+zero((0))
+end
+subgraph B
+one((1))
+end
+subgraph C
+two((2))
+end
+    zero-->one;
+    one-->two;
+</div>
+ 
+Alternatively, A could sign a later state in the sequence:
+
+<div class="mermaid" align="center">
+graph LR;
+subgraph " "
+zero((0))
+end
+subgraph "A, B"
+one((1))
+end
+subgraph C
+two((2))
+end
+zero-->one;
+one-->two;
+
+</div>
+
+or A, B and C could all sign the final state in the sequence:
+
+<div class="mermaid" align="center">
+graph LR;
+subgraph " "
+zero((0))
+end
+subgraph "  "
+one((1))
+end
+subgraph "A, B, C"
+two((2))
+end
+zero-->one;
+one-->two;
+
+</div>
+
+The following signatures would not be acceptable:
+
+<div class="mermaid" align="center">
+graph LR;
+subgraph " "
+zero((0))
+end
+subgraph "B, C"
+one((1))
+end
+subgraph A
+two((2))
+end
+    zero-->one;
+    one-->two;
+</div>
+
+We provide a helper function to sign `State`s:
+
+```typescript
+import {signState} from '@statechannels/nitro-protocol';
+
+const wallet = Wallet.createRandom();
+const state: State = {
+  channel: {chainId: '0x1', channelNonce: '0x1', participants: [wallet.address]},
+  outcome: [],
+  turnNum: 1,
+  isFinal: false,
+  appData: '0x0',
+  appDefinition: AddressZero,
+  challengeDuration: 0x5,
+};
+
+const signedState: SignedState = signState(state, wallet.privateKey);
+```
+
+it returns an object of the `SignedState` type:
+
+```typescript
+import {Signature} from 'ethers/utils';
+export interface SignedState {
+  state: State;
+  signature: Signature;
+}
+```
+
+which we can make use of in the rest of the tutorial.
 
 ## Finalize a channel (happy)
 
