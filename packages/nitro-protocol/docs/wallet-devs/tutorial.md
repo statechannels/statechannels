@@ -274,8 +274,9 @@ two((2))
 end
 zero-->one;
 one-->two;
-
 </div>
+
+(Note that there is no need to submit states to the chain if they are not signed by anybody).
 
 The following signatures would not be acceptable:
 
@@ -294,7 +295,7 @@ end
     one-->two;
 </div>
 
-We provide a helper function to sign `State`s:
+We provide a helper function to sign a `State`:
 
 ```typescript
 import {signState} from '@statechannels/nitro-protocol';
@@ -323,11 +324,49 @@ export interface SignedState {
 }
 ```
 
-which we can make use of in the rest of the tutorial.
+which we can make use of in the rest of the tutorial. Alternatively you may use `signStates(states, wallets, whoSignedWhat)`,
+which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSignedWhat` array of integers. The implicit definition of this last argument is as follows: For each participant, we are asserting that `participant[i]` signed `states[whoSignedWhat[i]]`
 
 ## Finalize a channel (happy)
 
-### Conclude a channel using isFinal property
+If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can support that state. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the outcome on-chain. They would do this by calling `conclude` on the adjudicator.
+
+The conclude method allows anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire (more on that later).
+
+The off-chain state(s) is submitted (in an optimized format), and once relevant checks have passed, an expired challenge is stored against the `channelId`. In this example the participants support the state by countersigning it, without increasing the turn number:
+
+```typescript
+import {hashAppPart, hashOutcome} = '@statechannels/nitro-protocol';
+
+const whoSignedWhat = [0, 0, 0];
+const largestTurnNum = 4;
+const state: State = {
+  isFinal: true,
+  channel,
+  outcome: [],
+  appDefinition: AddressZero,
+  appData: HashZero,
+  challengeDuration: 1,
+  turnNum: largestTurnNum,
+};
+
+const numStates = 1;
+const fixedPart = getFixedPart(state);
+const appPartHash = hashAppPart(state);
+const outcomeHash = hashOutcome(state.outcome);
+const sigs = await signStates([state], wallets, whoSignedWhat);
+
+const tx = NitroAdjudicator.conclude(
+  largestTurnNum,
+  fixedPart,
+  appPartHash,
+  outcomeHash,
+  numStates,
+  whoSignedWhat,
+  sigs
+);
+
+```
 
 ### Get your money out using conclude
 
