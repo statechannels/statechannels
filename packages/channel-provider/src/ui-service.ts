@@ -20,7 +20,7 @@ export const cssStyles = `iframe#${UIElementNames.IFrame} {
   top: 0;
   margin-top: 0;
   overflow: hidden;
-  z-index: 1;
+  z-index: 1301;
 }
 div#${UIElementNames.Container} {
   position: absolute;
@@ -29,7 +29,7 @@ div#${UIElementNames.Container} {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.32);
-  z-index: 0;
+  z-index: 1300;
 }
 .hide {
   display:none;
