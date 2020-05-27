@@ -225,7 +225,13 @@ export class PaymentChannelClient {
           map(convertToChannelState),
           filter(cs => this.isMyTurn(cs))
         )
-        .subscribe(() => this.channelClient.closeChannel(channelId));
+        .subscribe(cs => {
+          logger.info(
+            {channelId, cs, me: this.mySigningAddress},
+            "It's my turn, closing the channel"
+          );
+          this.channelClient.closeChannel(channelId);
+        });
       this.channelClient.closeChannel(channelId);
     }
     return this.channelClient.channelState
