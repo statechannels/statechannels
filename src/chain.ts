@@ -9,7 +9,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge} from 'rxjs';
-import {filter, map, flatMap, tap} from 'rxjs/operators';
+import {filter, map, flatMap} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
@@ -265,6 +265,9 @@ export class ChainWatcher implements Chain {
       )
     ];
 
+    // Log all contract events (for now)
+    this._assetHolders[0].on('*', event => chainLogger.info({event}, 'assetHolder[0] event'));
+
     this._adjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
       ContractArtifacts.NitroAdjudicatorArtifact.abi,
@@ -294,12 +297,12 @@ export class ChainWatcher implements Chain {
           return this.selectedAddress as string;
         } else {
           const error = 'Ethereum enabled but no selected address is defined';
-          logger.error(error);
+          chainLogger.error(error);
           return Promise.reject(error);
         }
       } catch (error) {
         // TODO: Handle error. Likely the user rejected the login
-        logger.error(error);
+        chainLogger.error(error);
         return Promise.reject('user rejected in metamask');
       }
     } else {
@@ -409,7 +412,6 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
-      tap((event: Array<string | BigNumber>) => chainLogger.info(event, 'chain: Deposited')),
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
@@ -417,7 +419,6 @@ export class ChainWatcher implements Chain {
     );
 
     const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
-      tap((event: Array<string | BigNumber>) => chainLogger.info(event, 'chain: AssetTransferred')),
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
