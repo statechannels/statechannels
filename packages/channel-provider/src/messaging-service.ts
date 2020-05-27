@@ -103,7 +103,7 @@ export class MessagingService {
         window.removeEventListener('message', listener);
         logger.info({response: event.data}, 'Received response');
         resolve(event.data.result);
-      } else if (isJsonRpcErrorResponse(event.data)) {
+      } else if (event.data && event.data.jsonrpc && isJsonRpcErrorResponse(event.data)) {
         reject(new Error(`Wallet Error ${event.data.error.code}: ${event.data.error.message}`));
       }
     };
