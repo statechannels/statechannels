@@ -209,6 +209,7 @@ export class PaymentChannelClient {
       channelState.channelId === channelId && channelState.status === 'closed';
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
+      await this.getLatestPaymentReceipt(channelId);
       this.channelClient.closeChannel(channelId);
     }
     return this.channelClient.channelState
@@ -254,7 +255,7 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt(channelId) {
+  getLatestPaymentReceipt(channelId: string) {
     const readyToPay = (state: ChannelState) =>
       state.channelId === channelId &&
       state.status === 'running' &&

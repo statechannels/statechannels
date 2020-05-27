@@ -13,7 +13,7 @@ import {
   waitForClosedState
 } from '../helpers';
 
-import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
+import {uploadFile, startDownload} from '../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 import {CLOSE_BROWSERS} from '../constants';
 const USE_DAPPETEER = false;
@@ -51,7 +51,7 @@ describe('One file, three leechers, one seeder', () => {
     async () => CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()))
   );
 
-  it('allows peers to start torrenting', async () => {
+  it('Allows peers to share a torrent completely', async () => {
     let i = 1;
     console.log('Opening browsers');
     await assignEachLabel(async () => {
@@ -83,8 +83,8 @@ describe('One file, three leechers, one seeder', () => {
     console.log('Downloading');
     await forEachActor(({tab}) => waitForNthState(tab, 10));
 
-    console.log('C cancels download');
-    await cancelDownload(actors.C.tab);
+    // console.log('C cancels download'); // disabled to test the correct multiple channel closing
+    // await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
     await forEachActor(({tab}) => waitForClosedState(tab));
