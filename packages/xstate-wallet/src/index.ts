@@ -7,8 +7,6 @@ import {MemoryBackend} from './store/memory-backend';
 import {Store} from './store';
 
 import Url from 'url-parse';
-import './render';
-
 import {logger} from './logger';
 import {Backend} from './store/dexie-backend';
 import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, GIT_VERSION} from './config';
