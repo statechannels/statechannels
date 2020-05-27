@@ -191,6 +191,7 @@ export class PaymentChannelClient {
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
+    // FIXME: Refactor
     function callback(channelResult: ChannelResult): any {
       web3tCallback(convertToChannelState(channelResult));
     }
@@ -223,7 +224,7 @@ export class PaymentChannelClient {
       this.channelClient.channelState
         .pipe(
           map(convertToChannelState),
-          filter(cs => this.isMyTurn(cs))
+          first(cs => this.isMyTurn(cs))
         )
         .subscribe(cs => {
           logger.info(
@@ -235,7 +236,7 @@ export class PaymentChannelClient {
       this.channelClient.closeChannel(channelId);
     }
     return this.channelClient.channelState
-      .pipe(map(convertToChannelState), filter(isClosed), first())
+      .pipe(map(convertToChannelState), first(isClosed))
       .toPromise();
   }
 
