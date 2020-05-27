@@ -1,4 +1,4 @@
-import {JsonRpcRequest} from './types';
+import {JsonRpcRequest, isJsonRpcResponse, isJsonRpcErrorResponse} from './types';
 import {logger} from './logger';
 
 export interface MessagingServiceOptions {
@@ -90,7 +90,12 @@ export class MessagingService {
     callback?: (result: ResultType) => void
   ) {
     const listener = (event: MessageEvent) => {
-      if (event.data && event.data.jsonrpc && event.data.result && event.data.id === message.id) {
+      if (
+        event.data &&
+        event.data.jsonrpc &&
+        isJsonRpcResponse(event.data) &&
+        event.data.id === message.id
+      ) {
         if (callback) {
           callback(event.data.result);
         }
@@ -98,8 +103,8 @@ export class MessagingService {
         window.removeEventListener('message', listener);
         logger.info({response: event.data}, 'Received response');
         resolve(event.data.result);
-      } else if (event.data.error) {
-        reject(event.data.error);
+      } else if (isJsonRpcErrorResponse(event.data)) {
+        reject(new Error(`Wallet Error ${event.data.error.code}: ${event.data.error.message}`));
       }
     };
 
