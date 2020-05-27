@@ -220,12 +220,29 @@ export class PaymentChannelClient {
       channelState.channelId === channelId && channelState.status === 'closed';
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
-      await this.getLatestPaymentReceipt(channelId);
+      this.channelClient.channelState
+        .pipe(
+          map(convertToChannelState),
+          filter(cs => this.isMyTurn(cs))
+        )
+        .subscribe(() => this.channelClient.closeChannel(channelId));
       this.channelClient.closeChannel(channelId);
     }
     return this.channelClient.channelState
       .pipe(map(convertToChannelState), filter(isClosed), first())
       .toPromise();
+  }
+
+  isMyTurn({turnNum, payer, beneficiary}: ChannelState): boolean {
+    let myRole: Index;
+    if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
+    else if (beneficiary.signingAddress === this.mySigningAddress) myRole = Index.Beneficiary;
+    else throw 'Not in channel';
+
+    return turnNum
+      .add(1)
+      .mod(2)
+      .eq(myRole);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
