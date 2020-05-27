@@ -21,12 +21,12 @@ contract ForceMove is IForceMove {
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
      * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
      */
-    function getData(bytes32 channelId)
+    function getChannelStorage(bytes32 channelId)
         public
         view
         returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
     {
-        (turnNumRecord, finalizesAt, fingerprint) = _getData(channelId);
+        (turnNumRecord, finalizesAt, fingerprint) = _getChannelStorage(channelId);
     }
 
     /**
@@ -88,8 +88,8 @@ contract ForceMove is IForceMove {
             whoSignedWhat
         );
 
-        channelStorageHashes[channelId] = _hashChannelStorage(
-            ChannelStorage(
+        channelStorageHashes[channelId] = _hashChannelData(
+            ChannelData(
                 largestTurnNum,
                 now + fixedPart.challengeDuration,
                 supportedStateHash,
@@ -118,7 +118,7 @@ contract ForceMove is IForceMove {
         Signature memory sig
     ) public override{
         bytes32 channelId = _getChannelId(fixedPart);
-        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
+        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
 
         bytes32 challengeOutcomeHash = _hashOutcome(variablePartAB[0].outcome);
         bytes32 responseOutcomeHash = _hashOutcome(variablePartAB[1].outcome);
@@ -143,7 +143,7 @@ contract ForceMove is IForceMove {
         // checks
 
         _requireSpecificChallenge(
-            ChannelStorage(
+            ChannelData(
                 turnNumRecord,
                 finalizesAt,
                 challengeStateHash,
@@ -260,8 +260,8 @@ contract ForceMove is IForceMove {
         );
 
         // effects
-        channelStorageHashes[channelId] = _hashChannelStorage(
-            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
+        channelStorageHashes[channelId] = _hashChannelData(
+            ChannelData(0, now, bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
     }
@@ -547,8 +547,8 @@ contract ForceMove is IForceMove {
      * @param newTurnNumRecord New turnNumRecord to overwrite existing value
      */
     function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
-        channelStorageHashes[channelId] = _hashChannelStorage(
-            ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+        channelStorageHashes[channelId] = _hashChannelData(
+            ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
@@ -560,7 +560,7 @@ contract ForceMove is IForceMove {
      * @param newTurnNumRecord New turnNumRecord intended to overwrite existing value
      */
     function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
-        (uint48 turnNumRecord, , ) = _getData(channelId);
+        (uint48 turnNumRecord, , ) = _getChannelStorage(channelId);
         require(newTurnNumRecord > turnNumRecord, 'turnNumRecord not increased.');
     }
 
@@ -574,18 +574,18 @@ contract ForceMove is IForceMove {
         internal
         view
     {
-        (uint48 turnNumRecord, , ) = _getData(channelId);
+        (uint48 turnNumRecord, , ) = _getChannelStorage(channelId);
         require(newTurnNumRecord >= turnNumRecord, 'turnNumRecord decreased.');
     }
 
     /**
-     * @notice Checks that a given ChannelStorage struct matches the challenge stored on chain, and that the channel is in Challenge mode.
-     * @dev Checks that a given ChannelStorage struct matches the challenge stored on chain, and that the channel is in Challenge mode.
-     * @param cs A given ChannelStorage data structure.
+     * @notice Checks that a given ChannelData struct matches the challenge stored on chain, and that the channel is in Challenge mode.
+     * @dev Checks that a given ChannelData struct matches the challenge stored on chain, and that the channel is in Challenge mode.
+     * @param data A given ChannelData data structure.
      * @param channelId Unique identifier for a channel.
      */
-    function _requireSpecificChallenge(ChannelStorage memory cs, bytes32 channelId) internal view {
-        _requireMatchingStorage(cs, channelId);
+    function _requireSpecificChallenge(ChannelData memory data, bytes32 channelId) internal view {
+        _requireMatchingStorage(data, channelId);
         _requireOngoingChallenge(channelId);
     }
 
@@ -626,14 +626,14 @@ contract ForceMove is IForceMove {
     }
 
     /**
-     * @notice Checks that a given ChannelStorage struct matches the challenge stored on chain.
-     * @dev Checks that a given ChannelStorage struct matches the challenge stored on chain.
-     * @param cs A given ChannelStorage data structure.
+     * @notice Checks that a given ChannelData struct matches the challenge stored on chain.
+     * @dev Checks that a given ChannelData struct matches the challenge stored on chain.
+     * @param data A given ChannelData data structure.
      * @param channelId Unique identifier for a channel.
      */
-    function _requireMatchingStorage(ChannelStorage memory cs, bytes32 channelId) internal view {
+    function _requireMatchingStorage(ChannelData memory data, bytes32 channelId) internal view {
         require(
-            _matchesHash(cs, channelStorageHashes[channelId]),
+            _matchesHash(data, channelStorageHashes[channelId]),
             'Channel storage does not match stored version.'
         );
     }
@@ -644,10 +644,10 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      */
     function _mode(bytes32 channelId) internal view returns (ChannelMode) {
-        // Note that _getData(someRandomChannelId) returns (0,0,0), which is
+        // Note that _getChannelStorage(someRandomChannelId) returns (0,0,0), which is
         // correct when nobody has written to storage yet.
 
-        (, uint48 finalizesAt, ) = _getData(channelId);
+        (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
         } else if (finalizesAt <= now) {
@@ -660,9 +660,9 @@ contract ForceMove is IForceMove {
     /**
      * @notice Hashes the input data and formats it for on chain storage.
      * @dev Hashes the input data and formats it for on chain storage.
-     * @param channelStorage ChannelStorage data.
+     * @param channelData ChannelData data.
      */
-    function _hashChannelStorage(ChannelStorage memory channelStorage)
+    function _hashChannelData(ChannelData memory channelData)
         internal
         pure
         returns (bytes32 newHash)
@@ -672,13 +672,13 @@ contract ForceMove is IForceMove {
         uint16 cursor = 256;
 
         // Shift turnNumRecord 208 bits left to fill the first 48 bits
-        result = uint256(channelStorage.turnNumRecord) << (cursor -= 48);
+        result = uint256(channelData.turnNumRecord) << (cursor -= 48);
 
         // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
-        result |= (channelStorage.finalizesAt << (cursor -= 48));
+        result |= (channelData.finalizesAt << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
-        result |= uint256(uint160(uint256(keccak256(abi.encode(channelStorage)))));
+        result |= uint256(uint160(uint256(keccak256(abi.encode(channelData)))));
 
         newHash = bytes32(result);
     }
@@ -691,7 +691,7 @@ contract ForceMove is IForceMove {
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
      * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
      */
-    function _getData(bytes32 channelId)
+    function _getChannelStorage(bytes32 channelId)
         internal
         view
         returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
@@ -704,13 +704,13 @@ contract ForceMove is IForceMove {
     }
 
     /**
-     * @notice Checks that a given ChannelStorage struct matches a supplied bytes32 when formatted for storage.
-     * @dev Checks that a given ChannelStorage struct matches a supplied bytes32 when formatted for storage.
-     * @param cs A given ChannelStorage data structure.
+     * @notice Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
+     * @dev Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
+     * @param data A given ChannelData data structure.
      * @param h Some data in on-chain storage format.
      */
-    function _matchesHash(ChannelStorage memory cs, bytes32 h) internal pure returns (bool) {
-        return _hashChannelStorage(cs) == h;
+    function _matchesHash(ChannelData memory data, bytes32 h) internal pure returns (bool) {
+        return _hashChannelData(data) == h;
     }
 
     /**

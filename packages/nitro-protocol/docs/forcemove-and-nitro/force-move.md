@@ -21,7 +21,7 @@ A specified format of _state_ is vital, since it constitutes much of the interfa
 In ForceMove, the following fields must be included in state updates:
 
 | **Field**         | **Data type** | **Definition / Explanation**                                  |
-| :---------------- | :------------ | :------------------------------------------------------------ |
+|-------------------|---------------|---------------------------------------------------------------|
 | chainId           | `uint256`     | e.g. 3 (ropsten) or 1 (mainnet)                               |
 | participants      | `address[]`   | participant addresses                                         |
 | channelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
@@ -389,10 +389,10 @@ The value of `channelStorageHashes[someChannelId]` is obtained by:
 - setting the next most significant 48 bits to `finalizesAt`
 - setting the next most significant 160 bits to the `fingerprint`
 
-The `fingerprint` is the 160 least significant bits of `keccak256(abi.encode(channelStorage))`, where `channelStorage` is a struct of type
+The `fingerprint` is the 160 least significant bits of `keccak256(abi.encode(channelData))`, where `channelData` is a struct of type
 
 ```solidity
-    struct ChannelStorage {
+    struct ChannelData {
         uint256 turnNumRecord;
         uint256 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
@@ -440,7 +440,7 @@ Check:
 
 Effects:
 
-- Sets or updates the following ChannelStorage properties:
+- Sets or updates the following ChannelData properties:
   - `turnNumRecord` to the `largestTurnNum`
   - `finalizesAt` to `currentTime` + `challengeInterval`
   - `stateHash`
@@ -494,7 +494,7 @@ Implementation:
 - Calculate `responseStateHash`
 - Recover the signer from the `responseStateHash` and check that they are the mover for `turnNumRecord + 1`
 - Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
-- Set channelStorage:
+- Set channelStorageHashes:
   - `turnNumRecord += 1`
   - Other fields set to their null values (see [Channel Storage](./force-move#channel-storage)).
 

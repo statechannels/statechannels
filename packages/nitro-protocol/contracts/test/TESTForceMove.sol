@@ -70,24 +70,24 @@ contract TESTForceMove is ForceMove {
         return _recoverSigner(_d, sig);
     }
 
-    // public setter for channelStorage
+    // public setter for channelStorageHashes
 
     /**
     * @dev Manually set the channelStorageHash for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
     * @param channelId Unique identifier for a state channel.
-    * @param channelStorage The channelStorage to be hashed and stored against the channelId
+    * @param channelData The channelData to be hashed and stored against the channelId
     */
-    function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
-        if (channelStorage.finalizesAt == 0) {
+    function setChannelStorage(bytes32 channelId, ChannelData memory channelData) public {
+        if (channelData.finalizesAt == 0) {
             require(
-                channelStorage.stateHash == bytes32(0) &&
-                    channelStorage.challengerAddress == address(0) &&
-                    channelStorage.outcomeHash == bytes32(0),
+                channelData.stateHash == bytes32(0) &&
+                    channelData.challengerAddress == address(0) &&
+                    channelData.outcomeHash == bytes32(0),
                 'Invalid open channel'
             );
         }
 
-        channelStorageHashes[channelId] = hashChannelStorage(channelStorage);
+        channelStorageHashes[channelId] = hashChannelData(channelData);
     }
 
     /**
@@ -101,22 +101,22 @@ contract TESTForceMove is ForceMove {
 
     /**
     * @dev Wrapper for otherwise internal function. Hashes the input data and formats it for on chain storage.
-    * @param channelStorage ChannelStorage data.
+    * @param channelData ChannelData data.
     */
-    function hashChannelStorage(ChannelStorage memory channelStorage)
+    function hashChannelData(ChannelData memory channelData)
         public
         pure
         returns (bytes32 newHash)
     {
-        return _hashChannelStorage(channelStorage);
+        return _hashChannelData(channelData);
     }
 
     /**
-    * @dev Wrapper for otherwise internal function. Checks that a given ChannelStorage struct matches a supplied bytes32 when formatted for storage.
-    * @param cs A given ChannelStorage data structure.
+    * @dev Wrapper for otherwise internal function. Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
+    * @param cs A given ChannelData data structure.
     * @param h Some data in on-chain storage format.
     */
-    function matchesHash(ChannelStorage memory cs, bytes32 h) public pure returns (bool) {
+    function matchesHash(ChannelData memory cs, bytes32 h) public pure returns (bool) {
         return _matchesHash(cs, h);
     }
 

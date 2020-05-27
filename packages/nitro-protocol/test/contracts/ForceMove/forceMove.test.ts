@@ -5,7 +5,7 @@ import {defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
+import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
 import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
@@ -221,14 +221,14 @@ describe('forceMove', () => {
           variableParts[variableParts.length - 1].appData
         );
 
-        const expectedChannelStorage: ChannelStorage = {
+        const expectedChannelStorage: ChannelData = {
           turnNumRecord: largestTurnNum,
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
           outcome,
         };
-        const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
+        const expectedChannelStorageHash = channelDataToChannelStorageHash(expectedChannelStorage);
 
         // Check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

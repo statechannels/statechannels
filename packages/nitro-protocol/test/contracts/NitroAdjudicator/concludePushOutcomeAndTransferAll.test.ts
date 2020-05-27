@@ -9,7 +9,7 @@ import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
@@ -181,9 +181,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
           receipt.gasUsed
         );
 
-        // Compute expected ChannelStorageHash
+        // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = hashChannelStorage({
+        const expectedChannelStorageHash = channelDataToChannelStorageHash({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,

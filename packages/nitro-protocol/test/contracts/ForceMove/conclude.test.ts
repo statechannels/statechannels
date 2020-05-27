@@ -5,7 +5,7 @@ import {hexlify} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -135,9 +135,9 @@ describe('conclude', () => {
         const event = receipt.events.pop();
         expect(event.args).toMatchObject({channelId});
 
-        // Compute expected ChannelStorageHash
+        // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = hashChannelStorage({
+        const expectedChannelStorageHash = channelDataToChannelStorageHash({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
