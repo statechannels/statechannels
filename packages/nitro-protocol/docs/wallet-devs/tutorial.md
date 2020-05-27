@@ -69,6 +69,28 @@ const tx0 = ETHAssetHolder.deposit(channelId, 0, held, {
 });
 ```
 
+### Destinations
+
+A `Destination` is a `bytes32` and either:
+
+1. A `ChannelId` (see the section on [channelId](./force-move#channelid)), or
+2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
+
+:::tip
+In JavaScript, the `ExternalDestination` corresponding to `address` may be computed as
+
+```
+'0x' + address.padStart(64, '0')
+```
+
+or
+
+```
+ethers.utils.hexZeroPad(address, 32);
+```
+
+:::
+
 ---
 
 ## Execute state transitions off chain
