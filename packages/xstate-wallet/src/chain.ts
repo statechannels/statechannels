@@ -9,7 +9,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge} from 'rxjs';
-import {filter, map, flatMap} from 'rxjs/operators';
+import {filter, map, flatMap, tap} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
@@ -409,6 +409,7 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
+      tap((event: Array<string | BigNumber>) => chainLogger.info(event, 'chain: Deposited')),
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
@@ -416,6 +417,7 @@ export class ChainWatcher implements Chain {
     );
 
     const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
+      tap((event: Array<string | BigNumber>) => chainLogger.info(event, 'chain: AssetTransferred')),
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
