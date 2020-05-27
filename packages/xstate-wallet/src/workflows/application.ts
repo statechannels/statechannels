@@ -198,16 +198,13 @@ const generateConfig = (
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
         PLAYER_REQUEST_CONCLUDE: {
-          target: 'attemptToSignFinalState',
-          actions: [actions.closeChannel]
+          target: 'running',
+          actions: [actions.closeChannel],
+          after: {[CONCLUDE_TIMEOUT]: {target: 'sendChallenge', cond: guards.channelClosing}}
         },
 
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
-    },
-
-    attemptToSignFinalState: {
-      after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
     // This could handled by another workflow instead of the application workflow
