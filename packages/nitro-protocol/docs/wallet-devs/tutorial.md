@@ -325,7 +325,7 @@ export interface SignedState {
 ```
 
 which we can make use of in the rest of the tutorial. Alternatively you may use `signStates(states, wallets, whoSignedWhat)`,
-which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSignedWhat` array of integers. The implicit definition of this last argument is as follows: For each participant, we are asserting that `participant[i]` signed `states[whoSignedWhat[i]]`
+which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSignedWhat` array of integers. The implicit definition of this last argument is as follows: For each participant, we are asserting that `participant[i]` signed `states[whoSignedWhat[i]]`.
 
 ## Finalize a channel (happy)
 
@@ -368,11 +368,23 @@ const tx = NitroAdjudicator.conclude(
 
 ```
 
-### Get your money out using conclude
-
 ---
 
 ## Finalize a channel (sad)
+
+The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
+
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
+
+:::note
+The challenger needs to sign this data:
+
+```
+keccak256(abi.encode(challengeStateHash, 'forceMove'))
+```
+
+in order to form `challengerSig`. This signals their intent to forceMove this channel with this particular state. This mechanism allows the forceMove to be authorized only by a channel participant.
+:::
 
 ### Call forceMove
 
@@ -388,4 +400,8 @@ const tx = NitroAdjudicator.conclude(
 
 ### Form guarantee outcomes
 
-### Using pushOutcome, and transferAll
+### Get your money out using pushOutcome and transferAll
+
+The `pushOutcome` method on the `NitroAdjudicator` allows one or more `assetOutcomes` to be registered against a channel in a number of AssetHolder contracts (specified by the `outcome` stored against a channel that has been finalized in the adjudicator). In this example we will limit ourselves to an outcome that specifies ETH only, and therefore will only be pushing the outcome to a single contract (the `ETHAssetHolder`).
+
+The `transferAll` method is available on all asset holders, including the `ETHAssetHolder`. It pays out assets according to outcomes that it knows about.
