@@ -313,7 +313,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
         // filter to updates for the channel on this wire
-        log.info(`Channel updated to turnNum ${channelState.turnNum}`);
+        log.info(
+          {channelState},
+          `Channel ${channelState.channelId} updated to turnNum ${channelState.turnNum}`
+        );
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
