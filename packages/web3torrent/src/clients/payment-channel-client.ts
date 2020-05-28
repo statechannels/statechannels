@@ -94,13 +94,13 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   };
 };
 
-const formatParticipants = ({beneficiary, payer}: Peers) => {
-  const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
-    participantId: signingAddress,
-    signingAddress,
-    destination: outcomeAddress
-  });
+const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
+  participantId: signingAddress,
+  signingAddress,
+  destination: outcomeAddress
+});
 
+const formatParticipants = ({beneficiary, payer}: Peers) => {
   const participants: [Participant, Participant] = [undefined, undefined];
   participants[Index.Payer] = formatParticipant(payer);
   participants[Index.Beneficiary] = formatParticipant(beneficiary);
@@ -108,12 +108,12 @@ const formatParticipants = ({beneficiary, payer}: Peers) => {
   return participants;
 };
 
-const formatAllocations = ({beneficiary, payer}: Peers) => {
-  const formatItem = (p: Peer): AllocationItem => ({
-    amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
-    destination: p.outcomeAddress
-  });
+const formatItem = (p: Peer): AllocationItem => ({
+  amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
+  destination: p.outcomeAddress
+});
 
+const formatAllocations = ({beneficiary, payer}: Peers) => {
   const allocationItems: [AllocationItem, AllocationItem] = [undefined, undefined];
   allocationItems[Index.Payer] = formatItem(payer);
   allocationItems[Index.Beneficiary] = formatItem(beneficiary);
