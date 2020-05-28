@@ -102,7 +102,7 @@ export class PaymentChannelClient {
 
     if (FUNDING_STRATEGY !== 'Direct' && !(await doesBudgetExist())) {
       // TODO: This only checks if a budget exists, not if we have enough funds in it
-      log.info('Direct Funding - Creating Budget');
+      log.info('Virtual Funding - Creating Budget');
       await this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
   }
