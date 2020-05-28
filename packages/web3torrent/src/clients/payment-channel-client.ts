@@ -1,8 +1,17 @@
-import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
-import {FakeChannelProvider} from '@statechannels/channel-client';
-import {ChannelClient} from '@statechannels/channel-client';
-import {ChannelStatus, Message} from '@statechannels/client-api-schema';
+import {
+  FakeChannelProvider,
+  ChannelClient,
+  ChannelResult,
+  ChannelClientInterface
+} from '@statechannels/channel-client';
+import {
+  ChannelStatus,
+  Message,
+  Participant,
+  AllocationItem,
+  Allocations
+} from '@statechannels/client-api-schema';
 import {DomainBudget} from '@statechannels/client-api-schema';
 import {
   SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
@@ -36,6 +45,8 @@ export interface Peer {
   outcomeAddress: string;
   balance: string;
 }
+export type Peers = {beneficiary: Peer; payer: Peer};
+
 export const peer = (
   signingAddress: string,
   outcomeAddress: string,
@@ -43,7 +54,7 @@ export const peer = (
 ): Peer => ({
   signingAddress,
   outcomeAddress,
-  balance: utils.bigNumberify(balance).toString()
+  balance: utils.bigNumberify(balance).toHexString()
 });
 export interface ChannelState {
   channelId: string;
@@ -74,40 +85,46 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     turnNum: utils.bigNumberify(turnNum),
     status,
     challengeExpirationTime,
-    beneficiary: {
-      signingAddress: participants[Index.Beneficiary].participantId,
-      outcomeAddress: participants[Index.Beneficiary].destination,
-      balance: hexZeroPad(allocations[0].allocationItems[Index.Beneficiary].amount, 32)
-    },
-    payer: {
-      signingAddress: participants[Index.Payer].participantId,
-      outcomeAddress: participants[Index.Payer].destination,
-      balance: hexZeroPad(allocations[0].allocationItems[Index.Payer].amount, 32)
-    }
+    beneficiary: peer(
+      participants[Index.Beneficiary].participantId,
+      participants[Index.Beneficiary].destination,
+      allocations[0].allocationItems[Index.Beneficiary].amount
+    ),
+    payer: peer(
+      participants[Index.Payer].participantId,
+      participants[Index.Payer].destination,
+      allocations[0].allocationItems[Index.Payer].amount
+    )
   };
 };
 
-const formatParticipants = (
-  aAddress: string,
-  bAddress: string,
-  aOutcomeAddress: string = aAddress,
-  bOutcomeAddress: string = bAddress
-) => [
-  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
-];
+/**
+ *
+ * @param peers: Peers
+ * Arranges peers in order, as determined by the Index enum.
+ */
+const arrangePeers = ({beneficiary, payer}: Peers): [Peer, Peer] => {
+  const peers: [Peer, Peer] = [undefined, undefined];
+  peers[Index.Payer] = payer;
+  peers[Index.Beneficiary] = beneficiary;
 
-const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
-  return [
-    {
-      token: AddressZero,
-      allocationItems: [
-        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
-        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
-      ]
-    }
-  ];
+  return peers;
 };
+
+const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
+  participantId: signingAddress,
+  signingAddress,
+  destination: outcomeAddress
+});
+const formatParticipants = (peers: Peers) => arrangePeers(peers).map(formatParticipant);
+
+const formatItem = (p: Peer): AllocationItem => ({
+  amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
+  destination: p.outcomeAddress
+});
+const formatAllocations = (peers: Peers): Allocations => [
+  {token: AddressZero, allocationItems: arrangePeers(peers).map(formatItem)}
+];
 
 const subtract = (a: string, b: string) =>
   hexZeroPad(
@@ -220,39 +237,19 @@ export class PaymentChannelClient {
     }
   }
 
-  async createChannel(
-    beneficiary: string,
-    payer: string,
-    beneficiaryBalance: string,
-    payerBalance: string,
-    beneficiaryOutcomeAddress: string,
-    payerOutcomeAddress: string
-  ): Promise<ChannelState> {
-    const participants = formatParticipants(
-      beneficiary,
-      payer,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    );
-    const allocations = formatAllocations(
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress,
-      beneficiaryBalance,
-      payerBalance
-    );
-
-    const appDefinition = SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+  async createChannel(peers: Peers): Promise<ChannelState> {
     const channelResult = await this.channelClient.createChannel(
-      participants,
-      allocations,
-      appDefinition,
+      formatParticipants(peers),
+      formatAllocations(peers),
+      SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
       APP_DATA,
       FUNDING_STRATEGY
     );
 
-    this.insertIntoChannelCache(convertToChannelState(channelResult));
+    const channelState = convertToChannelState(channelResult);
+    this.insertIntoChannelCache(channelState);
 
-    return convertToChannelState(channelResult);
+    return channelState;
   }
 
   onMessageQueued(callback: (message: Message) => void) {
@@ -324,36 +321,17 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  async updateChannel(
-    channelId: string,
-    beneficiary: string,
-    payer: string,
-    beneficiaryBalance: string,
-    payerBalance: string,
-    beneficiaryOutcomeAddress: string,
-    payerOutcomeAddress: string
-  ): Promise<ChannelState> {
-    const allocations = formatAllocations(
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress,
-      beneficiaryBalance,
-      payerBalance
-    );
-    const participants = formatParticipants(
-      beneficiary,
-      payer,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    );
-
+  async updateChannel(channelId: string, peers: Peers): Promise<ChannelState> {
     const channelResult = await this.channelClient.updateChannel(
       channelId,
-      participants,
-      allocations,
+      formatParticipants(peers),
+      formatAllocations(peers),
       APP_DATA
     );
-    this.updateChannelCache(convertToChannelState(channelResult));
-    return convertToChannelState(channelResult);
+
+    const channelState = convertToChannelState(channelResult);
+    this.updateChannelCache(channelState);
+    return channelState;
   }
 
   /**
@@ -412,29 +390,16 @@ export class PaymentChannelClient {
       logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
 
-    await this.updateChannel(
-      channelId,
-      beneficiary.signingAddress,
-      payer.signingAddress,
-      add(beneficiary.balance, amountWillPay),
-      subtract(payer.balance, amountWillPay),
-      beneficiary.outcomeAddress,
-      payer.outcomeAddress
-    );
+    await this.updateChannel(channelId, {
+      beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
+      payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
+    });
   }
 
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
     const {channelId, beneficiary, payer} = channelState;
-    await this.updateChannel(
-      channelId,
-      beneficiary.signingAddress,
-      payer.signingAddress,
-      beneficiary.balance,
-      payer.balance,
-      beneficiary.outcomeAddress,
-      payer.outcomeAddress
-    );
+    await this.updateChannel(channelId, {beneficiary, payer});
   }
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
