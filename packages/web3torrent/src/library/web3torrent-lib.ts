@@ -248,7 +248,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
           // If it's running, and not associated with any existing wire
           if (
-            this.paymentChannelClient.channelCache[preExistingChannelId].status == 'running' &&
+            this.paymentChannelClient.channelCache[preExistingChannelId]?.status == 'running' &&
             !thisTorrent.wires.find(
               wire => wire.paidStreamingExtension.seedingChannelId == preExistingChannelId
             )
