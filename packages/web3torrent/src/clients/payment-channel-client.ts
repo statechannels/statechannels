@@ -82,9 +82,7 @@ export class PaymentChannelClient {
   }
 
   constructor(private readonly channelClient: ChannelClientInterface) {
-    this.channelClient.channelState.subscribe(channelResult => {
-      this.updateChannelCache(convertToChannelState(channelResult));
-    });
+    this.channelStates.subscribe(channelResult => this.updateChannelCache(channelResult));
 
     this.channelClient.onBudgetUpdated(budgetResult => {
       this.budgetCache = budgetResult;
@@ -221,11 +219,8 @@ export class PaymentChannelClient {
       channelState.channelId === channelId && channelState.status === 'closed';
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
-      this.channelClient.channelState
-        .pipe(
-          map(convertToChannelState),
-          first(cs => this.isMyTurn(cs, channelId))
-        )
+      this.channelState(channelId)
+        .pipe(first(cs => this.isMyTurn(cs, channelId)))
         .subscribe(cs => {
           logger.info(
             {channelId, cs, me: this.mySigningAddress},
@@ -235,8 +230,9 @@ export class PaymentChannelClient {
         });
       this.channelClient.closeChannel(channelId);
     }
-    return this.channelClient.channelState
-      .pipe(map(convertToChannelState), first(isClosed))
+
+    return this.channelState(channelId)
+      .pipe(first(isClosed))
       .toPromise();
   }
 
@@ -279,6 +275,7 @@ export class PaymentChannelClient {
   }
 
   isMyTurn(state: ChannelState, channelId: string): boolean {
+    // FIXME: Remove channelId param
     const {payer, beneficiary} = state;
     let myRole: Index;
     if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
@@ -296,14 +293,22 @@ export class PaymentChannelClient {
     );
   }
 
+  get channelStates() {
+    return this.channelClient.channelState.pipe(map(convertToChannelState));
+  }
+
+  channelState(channelId) {
+    return this.channelClient.channelState.pipe(
+      filter(cr => cr.channelId === channelId),
+      map(convertToChannelState)
+    );
+  }
+
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
-    this.channelClient.channelState
-      .pipe(
-        map(convertToChannelState),
-        first(cs => this.isMyTurn(cs, channelId))
-      )
+    this.channelState(channelId)
+      .pipe(first(cs => this.isMyTurn(cs, channelId)))
       .subscribe(async channelState => {
         const {payer, beneficiary} = channelState;
         if (bigNumberify(payer.balance).eq(0)) {
