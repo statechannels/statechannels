@@ -269,6 +269,10 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
+    logger.info(`Waiting for my turn to close channel ${channelId}`);
+    // Let an existing channel update happen before waiting for my turn
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     const closing = this.channelState(channelId)
       .pipe(first(cs => this.canUpdateChannel(cs)))
       .subscribe(cs => {
