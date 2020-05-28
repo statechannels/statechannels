@@ -224,6 +224,7 @@ export class PaymentChannelClient {
       this.channelClient.channelState
         .pipe(
           map(convertToChannelState),
+          filter(cs => cs.channelId === channelId),
           first(cs => this.isMyTurn(cs))
         )
         .subscribe(cs => {
