@@ -67,8 +67,6 @@ type WorkflowGuards = Guards<
 
 export interface WorkflowActions {
   sendChallengeChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
-  sendCloseChannelResponse: Action<ChannelIdExists, any>;
-  sendCloseChannelRejection: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
@@ -78,6 +76,7 @@ export interface WorkflowActions {
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
   spawnObservers: AssignAction<ChannelIdExists, any>;
   updateChannel: Action<WorkflowContext, PlayerStateUpdate>;
+  closeChannel: Action<WorkflowContext, PlayerRequestConclude>;
 }
 
 export type WorkflowEvent =
@@ -199,21 +198,13 @@ const generateConfig = (
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
         PLAYER_REQUEST_CONCLUDE: {
-          target: 'attemptToSignFinalState',
-          actions: [actions.assignRequestId]
+          target: 'running',
+          actions: [actions.closeChannel],
+          after: {[CONCLUDE_TIMEOUT]: {target: 'sendChallenge', cond: guards.channelClosing}}
         },
 
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
-    },
-
-    attemptToSignFinalState: {
-      invoke: {
-        src: signFinalStateIfMyTurn.name,
-        onDone: {target: 'closing', actions: [actions.sendCloseChannelResponse]},
-        onError: {target: 'running', actions: [actions.sendCloseChannelRejection]}
-      },
-      after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
     // This could handled by another workflow instead of the application workflow
@@ -275,16 +266,6 @@ export const workflow = (
     );
 
   const actions: WorkflowActions = {
-    sendCloseChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
-      const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-    },
-
-    sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
-      // TODO: Shouldn't this inspect the error?
-      await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
-    },
-
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
@@ -355,6 +336,30 @@ export const workflow = (
           else {
             message = {code: 500, message: 'Wallet error'};
             console.error({error}, 'UpdateChannel call failed with error 500');
+          }
+
+          messagingService.sendError(event.requestId, message);
+        }
+      }
+    },
+
+    closeChannel: async (context: ChannelIdExists, event: PlayerRequestConclude) => {
+      if (context.channelId === event.channelId) {
+        try {
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
+          );
+        } catch (error) {
+          const matches = reason => new RegExp(reason).test(error.message);
+
+          let message: ErrorResponse['error'];
+          if (matches(Errors.notMyTurn)) message = {code: 300, message: 'Not your turn'};
+          else if (matches(Errors.channelMissing))
+            message = {code: 301, message: 'Channel not found'};
+          else {
+            message = {code: 500, message: 'Wallet error'};
+            console.error({error}, 'CloseChannel call failed with error 500');
           }
 
           messagingService.sendError(event.requestId, message);
@@ -448,8 +453,6 @@ const mockGuards: WorkflowGuards = {
 const mockActions: Record<keyof WorkflowActions, string> = {
   assignChannelId: 'assignChannelId',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
-  sendCloseChannelResponse: 'sendCloseChannelResponse',
-  sendCloseChannelRejection: 'sendCloseChannelRejection',
   sendChallengeChannelResponse: 'sendChallengeChannelResponse',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
@@ -457,6 +460,7 @@ const mockActions: Record<keyof WorkflowActions, string> = {
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
   updateChannel: 'updateChannel',
+  closeChannel: 'closeChannel',
   assignRequestId: 'assignRequestId'
 };
 
