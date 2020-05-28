@@ -55,6 +55,72 @@ enum Index {
   Beneficiary = 0
 }
 
+const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
+  const {
+    turnNum,
+    channelId,
+    participants,
+    allocations,
+    challengeExpirationTime,
+    status
+  } = channelResult;
+
+  return {
+    channelId,
+    turnNum: utils.bigNumberify(turnNum),
+    status,
+    challengeExpirationTime,
+    beneficiary: {
+      signingAddress: participants[0].participantId,
+      outcomeAddress: participants[0].destination,
+      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[0].amount).toHexString(), 32)
+    },
+    payer: {
+      signingAddress: participants[1].participantId,
+      outcomeAddress: participants[1].destination,
+      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[1].amount).toHexString(), 32)
+    }
+  };
+};
+
+const formatParticipants = (
+  aAddress: string,
+  bAddress: string,
+  aOutcomeAddress: string = aAddress,
+  bOutcomeAddress: string = bAddress
+) => [
+  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
+  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
+];
+
+const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
+  return [
+    {
+      token: AddressZero,
+      allocationItems: [
+        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
+        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
+      ]
+    }
+  ];
+};
+
+const subtract = (a: string, b: string) =>
+  hexZeroPad(
+    bigNumberify(a)
+      .sub(bigNumberify(b))
+      .toHexString(),
+    32
+  );
+
+const add = (a: string, b: string) =>
+  hexZeroPad(
+    bigNumberify(a)
+      .add(bigNumberify(b))
+      .toHexString(),
+    32
+  );
+
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
 
@@ -415,69 +481,3 @@ export class PaymentChannelClient {
 export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
-
-const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {
-    turnNum,
-    channelId,
-    participants,
-    allocations,
-    challengeExpirationTime,
-    status
-  } = channelResult;
-
-  return {
-    channelId,
-    turnNum: utils.bigNumberify(turnNum),
-    status,
-    challengeExpirationTime,
-    beneficiary: {
-      signingAddress: participants[0].participantId,
-      outcomeAddress: participants[0].destination,
-      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[0].amount).toHexString(), 32)
-    },
-    payer: {
-      signingAddress: participants[1].participantId,
-      outcomeAddress: participants[1].destination,
-      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[1].amount).toHexString(), 32)
-    }
-  };
-};
-
-const formatParticipants = (
-  aAddress: string,
-  bAddress: string,
-  aOutcomeAddress: string = aAddress,
-  bOutcomeAddress: string = bAddress
-) => [
-  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
-];
-
-const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
-  return [
-    {
-      token: AddressZero,
-      allocationItems: [
-        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
-        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
-      ]
-    }
-  ];
-};
-
-const subtract = (a: string, b: string) =>
-  hexZeroPad(
-    bigNumberify(a)
-      .sub(bigNumberify(b))
-      .toHexString(),
-    32
-  );
-
-const add = (a: string, b: string) =>
-  hexZeroPad(
-    bigNumberify(a)
-      .add(bigNumberify(b))
-      .toHexString(),
-    32
-  );
