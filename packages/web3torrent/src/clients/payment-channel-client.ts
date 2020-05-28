@@ -72,14 +72,20 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     status,
     challengeExpirationTime,
     beneficiary: {
-      signingAddress: participants[0].participantId,
-      outcomeAddress: participants[0].destination,
-      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[0].amount).toHexString(), 32)
+      signingAddress: participants[Index.Beneficiary].participantId,
+      outcomeAddress: participants[Index.Beneficiary].destination,
+      balance: hexZeroPad(
+        bigNumberify(allocations[0].allocationItems[Index.Beneficiary].amount).toHexString(),
+        32
+      )
     },
     payer: {
-      signingAddress: participants[1].participantId,
-      outcomeAddress: participants[1].destination,
-      balance: hexZeroPad(bigNumberify(allocations[0].allocationItems[1].amount).toHexString(), 32)
+      signingAddress: participants[Index.Payer].participantId,
+      outcomeAddress: participants[Index.Payer].destination,
+      balance: hexZeroPad(
+        bigNumberify(allocations[0].allocationItems[Index.Payer].amount).toHexString(),
+        32
+      )
     }
   };
 };
