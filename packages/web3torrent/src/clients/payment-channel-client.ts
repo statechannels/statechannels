@@ -360,33 +360,33 @@ export class PaymentChannelClient {
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
-    this.channelState(channelId)
+    // First, wait for my turn
+    const {payer, beneficiary, status} = await this.channelState(channelId)
       .pipe(first(cs => this.isMyTurn(cs)))
-      .subscribe(async channelState => {
-        const {payer, beneficiary} = channelState;
-        if (bigNumberify(payer.balance).eq(0)) {
-          logger.error('Out of funds. Closing channel.');
-          await this.closeChannel(channelId);
-          return;
-        }
+      .toPromise();
 
-        if (channelState.status == 'running') {
-          if (bigNumberify(payer.balance).lt(amount)) {
-            amountWillPay = payer.balance;
-            logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
-          }
+    if (bigNumberify(payer.balance).eq(0)) {
+      logger.error('Out of funds. Closing channel.');
+      await this.closeChannel(channelId);
+      return;
+    }
 
-          await this.updateChannel(
-            channelId,
-            beneficiary.signingAddress,
-            payer.signingAddress,
-            add(beneficiary.balance, amountWillPay),
-            subtract(payer.balance, amountWillPay),
-            beneficiary.outcomeAddress,
-            payer.outcomeAddress
-          );
-        }
-      });
+    if (status == 'running') {
+      if (bigNumberify(payer.balance).lt(amount)) {
+        amountWillPay = payer.balance;
+        logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
+      }
+
+      await this.updateChannel(
+        channelId,
+        beneficiary.signingAddress,
+        payer.signingAddress,
+        add(beneficiary.balance, amountWillPay),
+        subtract(payer.balance, amountWillPay),
+        beneficiary.outcomeAddress,
+        payer.outcomeAddress
+      );
+    }
   }
 
   // beneficiary may use this method to accept payments
