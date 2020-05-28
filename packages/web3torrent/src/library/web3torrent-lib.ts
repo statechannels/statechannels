@@ -241,14 +241,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const existingUploadingChannelId = Object.keys(this.peersList[torrent.infoHash]).find(
           (channelId: string) => {
             peer === this.paymentChannelClient.channelCache[channelId].payer &&
-              this.paymentChannelClient.channelCache[channelId].status === 'running';
+              this.paymentChannelClient.channelCache[channelId].status !== 'closing' &&
+              this.paymentChannelClient.channelCache[channelId].status !== 'closed';
           }
         );
 
         if (!existingUploadingChannelId) {
+          console.log(this.peersList[torrent.infoHash]);
+          console.log(this.paymentChannelClient.channelCache);
           // ...if not, create a new channel and block it to await payments
-          await this.createPaymentChannel(torrent, wire);
-          log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
+          await this.createPaymentChannel(torrent, wire); // this will update this.peersList and this.paymentChannelClient.channelCache so we don't re-enter this block unecessarily
+          log.info(`${peer} >> REQUEST BLOCKED (NEW CHANNEL): ${index}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire);
         } else {
