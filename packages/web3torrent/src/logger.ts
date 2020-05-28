@@ -66,7 +66,7 @@ const appendAndCallToConsoleFn = (consoleFn: {(message?: any, ...optionalParams:
   // So as to not overwrite the `name` property from xstate-wallet (and later, channel-provider),
   // we only call `addName` on objects that we know came from web3torrent.
   logBlob.append(withName);
-  if (LOG_TO_FILE) consoleFn(withName);
+  if (LOG_TO_FILE) consoleFn(serializeLogObject(withName));
   else consoleFn(o.msg, _.omit(o, 'msg'));
 };
 
