@@ -325,6 +325,12 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  /**
+   *
+   * Returns true for channel states where, according to the payment channel client's mySigningAddress,
+   * - the channel is still 'running'
+   * - it's my turn to move
+   */
   private isMyTurn(state: ChannelState): boolean {
     const {payer, beneficiary} = state;
     let myRole: Index;
@@ -334,7 +340,6 @@ export class PaymentChannelClient {
 
     return (
       state.status === 'running' &&
-      state.payer.signingAddress === this.mySigningAddress &&
       state.turnNum
         .add(1)
         .mod(2)
