@@ -227,6 +227,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
+
+      if (!wire.amChoking && wire.downloaded === wire['prevDownloaded']) {
+        this.closeChannel(wire, wire.paidStreamingExtension.leechingChannelId);
+      } else {
+        wire['prevDownloaded'] = wire.downloaded;
+      }
+
       this.emitTorrentUpdated(torrent.infoHash);
     });
 
