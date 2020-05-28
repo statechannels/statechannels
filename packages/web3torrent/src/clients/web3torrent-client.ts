@@ -22,12 +22,8 @@ export async function upload(input: WebTorrentSeedInput): Promise<ExtendedTorren
   await web3TorrentClient.enable();
 
   return new Promise(resolve =>
-    web3TorrentClient.seed(input, (torrent: any) => {
-      resolve({
-        ...torrent,
-        status: Status.Seeding,
-        originalSeed: true
-      });
-    })
+    web3TorrentClient.seed(input, (torrent: any) =>
+      resolve({...torrent, status: Status.Seeding, originalSeed: true})
+    )
   );
 }
