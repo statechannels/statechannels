@@ -51,8 +51,8 @@ export interface ChannelState {
 }
 
 enum Index {
-  Payer = 0,
-  Beneficiary = 1
+  Payer = 1,
+  Beneficiary = 0
 }
 
 // This class wraps the channel client converting the
