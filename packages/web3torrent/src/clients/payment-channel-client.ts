@@ -220,7 +220,7 @@ export class PaymentChannelClient {
 
     if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
       this.channelState(channelId)
-        .pipe(first(cs => this.isMyTurn(cs, channelId)))
+        .pipe(first(cs => this.isMyTurn(cs)))
         .subscribe(cs => {
           logger.info(
             {channelId, cs, me: this.mySigningAddress},
@@ -274,8 +274,7 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  isMyTurn(state: ChannelState, channelId: string): boolean {
-    // FIXME: Remove channelId param
+  isMyTurn(state: ChannelState): boolean {
     const {payer, beneficiary} = state;
     let myRole: Index;
     if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
@@ -283,7 +282,6 @@ export class PaymentChannelClient {
     else throw 'Not in channel';
 
     return (
-      state.channelId === channelId &&
       state.status === 'running' &&
       state.payer.signingAddress === this.mySigningAddress &&
       state.turnNum
@@ -308,7 +306,7 @@ export class PaymentChannelClient {
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
     this.channelState(channelId)
-      .pipe(first(cs => this.isMyTurn(cs, channelId)))
+      .pipe(first(cs => this.isMyTurn(cs)))
       .subscribe(async channelState => {
         const {payer, beneficiary} = channelState;
         if (bigNumberify(payer.balance).eq(0)) {
