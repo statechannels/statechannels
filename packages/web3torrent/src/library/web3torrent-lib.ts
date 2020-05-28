@@ -397,7 +397,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   /**
    * Sets the behaviour of a torrent, once created.
-   * This is, toguether with SetupWire, is what defines the behaviour of each created torrent in Web3Torrent.
+   * This is, together with SetupWire, is what defines the behaviour of each created torrent in Web3Torrent.
    */
   protected setupTorrent(torrent: PaidStreamingTorrent) {
     if (torrent.usingPaidStreaming) {
