@@ -239,6 +239,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 
         if (!knownPeer || !seedingChannelId) {
+          // If we don't know the peer OR if *this wire* has no seedingChannelId set, create a new channel (which sets the seedingChannelId)
           await this.createPaymentChannel(torrent, wire);
           log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
