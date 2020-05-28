@@ -707,7 +707,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<403,\"Channel closed\">": {
+    "JsonRpcError<403,\"Not your turn\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -721,7 +721,7 @@
             },
             "message": {
               "enum": [
-                "Channel closed"
+                "Not your turn"
               ],
               "type": "string"
             }
@@ -749,7 +749,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<403,\"Not your turn\">": {
+    "JsonRpcError<404,\"Channel closed\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -757,13 +757,13 @@
           "properties": {
             "code": {
               "enum": [
-                403
+                404
               ],
               "type": "number"
             },
             "message": {
               "enum": [
-                "Not your turn"
+                "Channel closed"
               ],
               "type": "string"
             }
@@ -1893,7 +1893,7 @@
           "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Channel%20closed%22%3E"
+          "$ref": "#/definitions/JsonRpcError%3C404%2C%22Channel%20closed%22%3E"
         }
       ]
     },
