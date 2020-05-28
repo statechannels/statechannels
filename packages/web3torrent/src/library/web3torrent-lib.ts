@@ -235,32 +235,45 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
 
-        const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
-        const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
+        const {peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
 
-        if (!knownPeer || !seedingChannelId) {
-          // If we don't know the peer OR if *this wire* has no seedingChannelId set, create a new channel (which sets the seedingChannelId)
+        // Check to see if we have a running channel with this peer..
+        const existingUploadingChannelId = Object.keys(this.peersList[torrent.infoHash]).find(
+          (channelId: string) => {
+            peer === this.paymentChannelClient.channelCache[channelId].payer &&
+              this.paymentChannelClient.channelCache[channelId].status === 'running';
+          }
+        );
+
+        if (!existingUploadingChannelId) {
+          // ...if not, create a new channel and block it to await payments
           await this.createPaymentChannel(torrent, wire);
           log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire);
-        } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
-          log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
-          response(false);
-          this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
         } else {
-          this.peersList[torrent.infoHash][seedingChannelId] = {
-            ...knownPeer,
-            wire,
-            buffer: bigNumberify(knownPeer.buffer)
-              .sub(reqPrice) // decrease buffer by the price of this request
-              .toString(),
-            uploaded: knownPeer.uploaded + size
-          };
+          // ... or if there is an existing uploading channel, extract a PeerByChannel object from it...
+          const knownPeer = this.peersList[torrent.infoHash][existingUploadingChannelId];
+          if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
+            // block them again if they are out of funds
+            log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
+            response(false);
+            this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
+          } else {
+            // if they are good to go, reduce their payment buffer
+            this.peersList[torrent.infoHash][existingUploadingChannelId] = {
+              ...knownPeer,
+              wire,
+              buffer: bigNumberify(knownPeer.buffer)
+                .sub(reqPrice) // decrease buffer by the price of this request
+                .toString(),
+              uploaded: knownPeer.uploaded + size
+            };
+          }
 
-          const {buffer, uploaded} = this.peersList[torrent.infoHash][seedingChannelId];
+          const {buffer, uploaded} = this.peersList[torrent.infoHash][existingUploadingChannelId];
           log.info(
-            {seedingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
+            {existingUploadingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
             `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
           );
           response(true);
