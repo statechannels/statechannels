@@ -235,14 +235,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
 
-        const {peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
+        const {peerAccount: peer, isForceChoking, seedingChannelId} = wire.paidStreamingExtension;
 
-        // Check to see if we have a running channel with this peer..
-        const existingUploadingChannelId = _.findKey(this.channelsByInfoHash[torrent.infoHash], {
-          id: peer
-        });
+        if (!seedingChannelId) {
+          // Check to see if we have a running channel with this peer..
+          wire.paidStreamingExtension.seedingChannelId = _.findKey(
+            this.channelsByInfoHash[torrent.infoHash],
+            {
+              id: peer
+            }
+          );
+        }
 
-        if (!existingUploadingChannelId) {
+        if (!wire.paidStreamingExtension.seedingChannelId) {
           // ...if not, create a new channel and block it to await payments
           await this.createPaymentChannel(torrent, wire); // this will update this.paymentChannelClient.channelCache so we don't re-enter this block unecessarily
           log.info(`${peer} >> REQUEST BLOCKED (NEW CHANNEL): ${index}`);
@@ -250,7 +255,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.blockPeer(torrent.infoHash, wire);
         } else {
           // ... or if there is an existing uploading channel, extract a PeerByChannel object from it...
-          const knownPeer = this.channelsByInfoHash[torrent.infoHash][existingUploadingChannelId];
+          const knownPeer = this.channelsByInfoHash[torrent.infoHash][
+            wire.paidStreamingExtension.seedingChannelId
+          ];
           if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
             // block them again if they are out of funds
             log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
@@ -258,7 +265,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
           } else {
             // if they are good to go, reduce their payment buffer
-            this.channelsByInfoHash[torrent.infoHash][existingUploadingChannelId] = {
+            this.channelsByInfoHash[torrent.infoHash][
+              wire.paidStreamingExtension.seedingChannelId
+            ] = {
               ...knownPeer,
               wire,
               buffer: bigNumberify(knownPeer.buffer)
@@ -269,10 +278,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           }
 
           const {buffer, uploaded} = this.channelsByInfoHash[torrent.infoHash][
-            existingUploadingChannelId
+            wire.paidStreamingExtension.seedingChannelId
           ];
           log.info(
-            {existingUploadingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
+            {peerAccout: peer, reqPrice, index, buffer, uploaded},
             `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
           );
           response(true);
