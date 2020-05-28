@@ -50,7 +50,7 @@ export const peer = (
 ): Peer => ({
   signingAddress,
   outcomeAddress,
-  balance: utils.bigNumberify(balance).toString()
+  balance: utils.bigNumberify(balance).toHexString()
 });
 export interface ChannelState {
   channelId: string;
@@ -110,7 +110,7 @@ const formatParticipants = ({beneficiary, payer}: Peers) => {
 
 const formatAllocations = ({beneficiary, payer}: Peers) => {
   const formatItem = (p: Peer): AllocationItem => ({
-    amount: p.balance,
+    amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
     destination: p.outcomeAddress
   });
 
