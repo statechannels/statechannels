@@ -75,6 +75,7 @@ export * from './methods';
 export * from './data-types';
 
 import {ErrorCodes} from './error-codes';
+export {ErrorCodes};
 import {JsonRpcError} from './utils';
 
 // TODO: Don't export these values
