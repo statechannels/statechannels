@@ -1,4 +1,4 @@
-import {TorrentPeers, ExtendedTorrent} from '../library/types';
+import {PeerByChannel, ExtendedTorrent, PeersByChannel} from '../library/types';
 import {TorrentUI} from '../types';
 import {EmptyTorrentUI} from '../constants';
 
@@ -38,7 +38,7 @@ export function createMockTorrentUI(props?: Partial<TorrentUI>): TorrentUI {
   };
 }
 
-export function createMockTorrentPeers(): TorrentPeers {
+export function createMockTorrentPeers(): PeersByChannel {
   return {
     '7595267661936611': {
       id: '7595267661936611',
