@@ -11,7 +11,8 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents
+  WireEvents,
+  TorrentTestResult
 } from './types';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
@@ -239,12 +240,22 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
         if (!seedingChannelId) {
           // Check to see if we have a running channel with this peer..
-          wire.paidStreamingExtension.seedingChannelId = _.findKey(
-            this.channelsByInfoHash[torrent.infoHash],
-            {
-              id: peer
-            }
-          );
+          const preExistingChannelId = _.findKey(this.channelsByInfoHash[torrent.infoHash], {
+            id: peer
+          });
+
+          const thisTorrent = this.torrents.find(t => t.infoHash === torrent.infoHash);
+
+          // If it's running, and not associated with any existing wire
+          if (
+            this.paymentChannelClient.channelCache[preExistingChannelId].status == 'running' &&
+            !thisTorrent.wires.find(
+              wire => wire.paidStreamingExtension.seedingChannelId == preExistingChannelId
+            )
+          ) {
+            // Reuse the channel
+            wire.paidStreamingExtension.seedingChannelId = preExistingChannelId;
+          }
         }
 
         if (!wire.paidStreamingExtension.seedingChannelId) {
