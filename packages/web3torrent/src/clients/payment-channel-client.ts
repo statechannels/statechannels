@@ -270,8 +270,21 @@ export class PaymentChannelClient {
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     logger.info(`Waiting for my turn to close channel ${channelId}`);
-    // Let an existing channel update happen before waiting for my turn
+    /*
+     * There are currently zero or one ongoing UpdateChannel RPCs.
+     * Since the torrent is paused, if there is one ongoing UpdateChannel RPC, it will soon resolve,
+     * and there will be no further UpdateChannel RPCs.
+     * If we don't wait, then a CloseChannel call could race an existing UpdateChannel call, and one of them
+     * would fail.
+     * Therefore, we wait 500ms before waiting for my turn.
+     */
+
     await new Promise(resolve => setTimeout(resolve, 500));
+
+    /*
+     * Now, any UpdateChannel RPC should be finished, so when it's my turn, the CloseChannel
+     * call should succeed.
+     */
 
     const closing = this.channelState(channelId)
       .pipe(first(cs => this.canUpdateChannel(cs)))
