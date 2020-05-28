@@ -143,11 +143,11 @@ export type PeerByChannel = {
 };
 
 export type PeersByChannel = {
-  [key: string /* ChannelId */]: PeerByChannel;
+  [channelId: string]: PeerByChannel;
 };
 
 export type ChannelsByInfoHash = {
-  [key: string /* InfoHash */]: PeersByChannel;
+  [infoHash: string]: PeersByChannel;
 };
 
 // channelsByInfoHash[infoHash][channelId] = peerbyChannel: PeerByChannel
