@@ -270,7 +270,7 @@ export class PaymentChannelClient {
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     const closing = this.channelState(channelId)
-      .pipe(first(cs => this.isMyTurn(cs)))
+      .pipe(first(cs => this.canUpdateChannel(cs)))
       .subscribe(cs => {
         logger.info(
           {channelId, cs, me: this.mySigningAddress},
@@ -331,7 +331,7 @@ export class PaymentChannelClient {
    * - the channel is still 'running'
    * - it's my turn to move
    */
-  private isMyTurn(state: ChannelState): boolean {
+  private canUpdateChannel(state: ChannelState): boolean {
     const {payer, beneficiary} = state;
     let myRole: Index;
     if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
@@ -367,7 +367,7 @@ export class PaymentChannelClient {
     let amountWillPay = amount;
     // First, wait for my turn
     const {payer, beneficiary} = await this.channelState(channelId)
-      .pipe(first(cs => this.isMyTurn(cs)))
+      .pipe(first(cs => this.canUpdateChannel(cs)))
       .toPromise();
 
     if (bigNumberify(payer.balance).eq(0)) {
