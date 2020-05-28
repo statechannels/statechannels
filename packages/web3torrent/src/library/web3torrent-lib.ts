@@ -201,16 +201,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info({from: torrentPeers, peerAccount, seedingChannelId}, '<< unblockPeer: finish');
   }
 
-  /** Toggle between Blocked/Unlocked a channel for a torrent. */
-  togglePeerByChannel(torrentInfoHash: string, channelId: string) {
-    const {wire} = this.peersList[torrentInfoHash][channelId];
-    if (!(wire as PaidStreamingWire).paidStreamingExtension.isForceChoking) {
-      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire);
-    } else {
-      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire);
-    }
-  }
-
   /** Utility function. Checks if the client is ready to seed or leech a torrent.  */
   protected ensureEnabled() {
     if (!(this.pseAccount && this.outcomeAddress)) {
