@@ -366,7 +366,7 @@ export class PaymentChannelClient {
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
     // First, wait for my turn
-    const {payer, beneficiary, status} = await this.channelState(channelId)
+    const {payer, beneficiary} = await this.channelState(channelId)
       .pipe(first(cs => this.isMyTurn(cs)))
       .toPromise();
 
@@ -376,22 +376,20 @@ export class PaymentChannelClient {
       return;
     }
 
-    if (status == 'running') {
-      if (bigNumberify(payer.balance).lt(amount)) {
-        amountWillPay = payer.balance;
-        logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
-      }
-
-      await this.updateChannel(
-        channelId,
-        beneficiary.signingAddress,
-        payer.signingAddress,
-        add(beneficiary.balance, amountWillPay),
-        subtract(payer.balance, amountWillPay),
-        beneficiary.outcomeAddress,
-        payer.outcomeAddress
-      );
+    if (bigNumberify(payer.balance).lt(amount)) {
+      amountWillPay = payer.balance;
+      logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
+
+    await this.updateChannel(
+      channelId,
+      beneficiary.signingAddress,
+      payer.signingAddress,
+      add(beneficiary.balance, amountWillPay),
+      subtract(payer.balance, amountWillPay),
+      beneficiary.outcomeAddress,
+      payer.outcomeAddress
+    );
   }
 
   // beneficiary may use this method to accept payments
