@@ -294,7 +294,6 @@ export class PaymentChannelClient {
           );
           this.channelClient.closeChannel(channelId);
         });
-      this.channelClient.closeChannel(channelId);
     }
 
     return this.channelState(channelId)
