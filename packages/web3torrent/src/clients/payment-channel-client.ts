@@ -9,7 +9,8 @@ import {
   HUB,
   FIREBASE_PREFIX,
   fireBaseConfig,
-  FUNDING_STRATEGY
+  FUNDING_STRATEGY,
+  INITIAL_BUDGET_AMOUNT
 } from '../constants';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
@@ -17,6 +18,8 @@ import 'firebase/database';
 import {map, filter, first, tap} from 'rxjs/operators';
 import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
+import _ from 'lodash';
+
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
@@ -167,6 +170,17 @@ export class PaymentChannelClient {
     await this.channelClient.provider.enable();
 
     log.info('payment channel client enabled');
+
+    const doesBudgetExist = async () => {
+      const budget = await this.getBudget();
+      return !!budget && !_.isEmpty(budget);
+    };
+
+    if (FUNDING_STRATEGY !== 'Direct' && !(await doesBudgetExist())) {
+      // TODO: This only checks if a budget exists, not if we have enough funds in it
+      log.info('Virtual Funding - Creating Budget');
+      await this.createBudget(INITIAL_BUDGET_AMOUNT);
+    }
   }
 
   private initializeHubComms() {

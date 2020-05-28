@@ -265,6 +265,9 @@ export class ChainWatcher implements Chain {
       )
     ];
 
+    // Log all contract events (for now)
+    this._assetHolders[0].on('*', event => chainLogger.info({event}, 'assetHolder[0] event'));
+
     this._adjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
       ContractArtifacts.NitroAdjudicatorArtifact.abi,
@@ -294,12 +297,12 @@ export class ChainWatcher implements Chain {
           return this.selectedAddress as string;
         } else {
           const error = 'Ethereum enabled but no selected address is defined';
-          logger.error(error);
+          chainLogger.error(error);
           return Promise.reject(error);
         }
       } catch (error) {
         // TODO: Handle error. Likely the user rejected the login
-        logger.error(error);
+        chainLogger.error(error);
         return Promise.reject('user rejected in metamask');
       }
     } else {

@@ -2,6 +2,8 @@ import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
 import {ChannelState, peer} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
+import {PaidStreamingWire} from '../types';
+import WebTorrentPaidStreamingClient from '../web3torrent-lib';
 
 export const defaultFile = new Blob([fixtures.leaves.content]);
 export const defaultTorrentHash = fixtures.leaves.parsedTorrent.infoHash;
@@ -37,6 +39,20 @@ export function mockMetamask() {
     enumerable: true,
     value: ethereum
   });
+}
+
+/** Toggle between Blocked/Unlocked a channel for a torrent. */
+export function togglePeerByChannel(
+  web3torrent: WebTorrentPaidStreamingClient,
+  torrentInfoHash: string,
+  channelId: string
+) {
+  const {wire} = web3torrent.peersList[torrentInfoHash][channelId];
+  if (!(wire as PaidStreamingWire).paidStreamingExtension.isForceChoking) {
+    web3torrent.blockPeer(torrentInfoHash, wire as PaidStreamingWire);
+  } else {
+    web3torrent.unblockPeer(torrentInfoHash, wire as PaidStreamingWire);
+  }
 }
 
 export const mockChannelState: ChannelState = {
