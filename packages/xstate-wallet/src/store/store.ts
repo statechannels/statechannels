@@ -308,7 +308,10 @@ export class Store {
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const {supported: existingState, myTurn} = await this.getEntry(channelId);
-        if (!myTurn) throw Error(Errors.notMyTurn);
+        if (!myTurn) {
+          logger.error({channelId, updateData, existingState}, 'Updating channel when not my turn');
+          throw Error(Errors.notMyTurn);
+        }
 
         const newState = _.merge(existingState, {
           turnNum: existingState.turnNum.add(1),

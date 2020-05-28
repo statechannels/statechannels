@@ -316,7 +316,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
         // filter to updates for the channel on this wire
-        log.info(`Channel updated to turnNum ${channelState.turnNum}`);
+        log.info(
+          {channelState},
+          `Channel ${channelState.channelId} updated to turnNum ${channelState.turnNum}`
+        );
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
@@ -367,7 +370,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     // querying channel client for updated balance
     const newBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiary.balance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(newBalance.sub(bigNumberify(peer.beneficiaryBalance)));
@@ -426,7 +429,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {leechingChannelId: channelId} = wire.paidStreamingExtension;
         const channelOfWire = this.paymentChannelClient.channelCache[channelId];
         if (channelOfWire) {
-          const balance = channelOfWire.beneficiaryBalance;
+          const balance = channelOfWire.beneficiary.balance;
           const downloaded = wire.downloaded;
           log.info(
             `TorrentEvents: Done, per-wire info. Channel: ${channelId} Balance: ${balance} Downloaded: ${downloaded}`
@@ -501,9 +504,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.info(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
     await this.paymentChannelClient.makePayment(leechingChannelId, amountToPay.toString());
 
-    const channelInfoLog = this.paymentChannelClient.channelCache[leechingChannelId];
-    const balanceLog = channelInfoLog && bigNumberify(channelInfoLog.beneficiaryBalance).toString();
-    log.info(`<< Payment - Peer ${peerAccount} Balance: ${balanceLog} Downloaded ${downloaded}`);
+    const balance = this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance;
+    log.info(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${downloaded}`);
   }
 
   /** Utility function. Checks if the wire for a torrent is requesting the last piece */

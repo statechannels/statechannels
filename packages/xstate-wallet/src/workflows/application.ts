@@ -331,9 +331,8 @@ export const workflow = (
 
           // TODO: Catch other errors
           let message: ErrorResponse['error'];
-          if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
-          else if (matches(Errors.channelMissing))
-            message = {code: 400, message: 'Channel not found'};
+          if (matches(Errors.channelMissing)) message = {code: 400, message: 'Channel not found'};
+          else if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
           else {
             message = {code: 500, message: 'Wallet error'};
             console.error({error}, 'UpdateChannel call failed with error 500');

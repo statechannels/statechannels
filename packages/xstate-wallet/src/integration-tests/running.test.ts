@@ -3,7 +3,7 @@ import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 import {simpleEthAllocation} from '../utils';
 import {CHAIN_NETWORK_ID} from '../config';
 import {BigNumber, constants} from 'ethers';
-import {ErrorResponse} from '@statechannels/client-api-schema/src';
+import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';
 jest.setTimeout(30000);
 
 const resolveOnError = (player: Player, errorCode: ErrorResponse['error']['code']) =>
@@ -88,7 +88,9 @@ test('accepts states when running', async () => {
 
   const update = generatePlayerUpdate(channelId, playerA.participant, playerB.participant);
   playerB.messagingService.receiveRequest(update, applicationDomain);
-  await resolveOnError(playerB, 403);
+
+  const expectedCode: ErrorCodes['UpdateChannel']['NotYourTurn'] = 403;
+  await resolveOnError(playerB, expectedCode);
 
   playerA.messagingService.receiveRequest(update, applicationDomain);
   await resolveOnResponse(playerA);

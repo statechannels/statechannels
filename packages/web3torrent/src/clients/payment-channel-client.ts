@@ -15,8 +15,9 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import {map, filter, first} from 'rxjs/operators';
+import {map, filter, first, tap} from 'rxjs/operators';
 import {logger} from '../logger';
+import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
 
 const log = logger.child({module: 'payment-channel-client'});
@@ -29,23 +30,100 @@ function sanitizeMessageForFirebase(message) {
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
 const APP_DATA = constants.HashZero; // unused in the SingleAssetPaymentApp
+
+export interface Peer {
+  signingAddress: string;
+  outcomeAddress: string;
+  balance: string;
+}
+export const peer = (
+  signingAddress: string,
+  outcomeAddress: string,
+  balance: string | number
+): Peer => ({
+  signingAddress,
+  outcomeAddress,
+  balance: utils.bigNumberify(balance).toString()
+});
 export interface ChannelState {
   channelId: string;
   turnNum: utils.BigNumber;
   status: ChannelStatus;
   challengeExpirationTime;
-  beneficiary: string;
-  payer: string;
-  beneficiaryOutcomeAddress: string;
-  payerOutcomeAddress: string;
-  beneficiaryBalance: string;
-  payerBalance: string;
+  beneficiary: Peer;
+  payer: Peer;
 }
 
 enum Index {
-  Payer = 0,
-  Beneficiary = 1
+  Payer = 1,
+  Beneficiary = 0
 }
+
+const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
+  const {
+    turnNum,
+    channelId,
+    participants,
+    allocations,
+    challengeExpirationTime,
+    status
+  } = channelResult;
+
+  return {
+    channelId,
+    turnNum: utils.bigNumberify(turnNum),
+    status,
+    challengeExpirationTime,
+    beneficiary: {
+      signingAddress: participants[Index.Beneficiary].participantId,
+      outcomeAddress: participants[Index.Beneficiary].destination,
+      balance: hexZeroPad(allocations[0].allocationItems[Index.Beneficiary].amount, 32)
+    },
+    payer: {
+      signingAddress: participants[Index.Payer].participantId,
+      outcomeAddress: participants[Index.Payer].destination,
+      balance: hexZeroPad(allocations[0].allocationItems[Index.Payer].amount, 32)
+    }
+  };
+};
+
+const formatParticipants = (
+  aAddress: string,
+  bAddress: string,
+  aOutcomeAddress: string = aAddress,
+  bOutcomeAddress: string = bAddress
+) => [
+  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
+  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
+];
+
+const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
+  return [
+    {
+      token: AddressZero,
+      allocationItems: [
+        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
+        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
+      ]
+    }
+  ];
+};
+
+const subtract = (a: string, b: string) =>
+  hexZeroPad(
+    bigNumberify(a)
+      .sub(bigNumberify(b))
+      .toHexString(),
+    32
+  );
+
+const add = (a: string, b: string) =>
+  hexZeroPad(
+    bigNumberify(a)
+      .add(bigNumberify(b))
+      .toHexString(),
+    32
+  );
 
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
@@ -74,9 +152,7 @@ export class PaymentChannelClient {
   }
 
   constructor(private readonly channelClient: ChannelClientInterface) {
-    this.channelClient.channelState.subscribe(channelResult => {
-      this.updateChannelCache(convertToChannelState(channelResult));
-    });
+    this.channelStates.subscribe(channelResult => this.updateChannelCache(channelResult));
 
     this.channelClient.onBudgetUpdated(budgetResult => {
       this.budgetCache = budgetResult;
@@ -194,23 +270,11 @@ export class PaymentChannelClient {
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
-    function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
-    }
-    const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
-    return () => {
-      unsubChannelUpdated();
-    };
+    return this.channelClient.onChannelUpdated(cr => web3tCallback(convertToChannelState(cr)));
   }
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
-    function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
-    }
-    const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
-    return () => {
-      unsubChannelProposed();
-    };
+    return this.channelClient.onChannelProposed(cr => web3tCallback(convertToChannelState(cr)));
   }
 
   async joinChannel(channelId: string) {
@@ -219,15 +283,38 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    const isClosed = (channelState: ChannelState) =>
-      channelState.channelId === channelId && channelState.status === 'closed';
+    logger.info(`Waiting for my turn to close channel ${channelId}`);
+    /*
+     * There are currently zero or one ongoing UpdateChannel RPCs.
+     * Since the torrent is paused, if there is one ongoing UpdateChannel RPC, it will soon resolve,
+     * and there will be no further UpdateChannel RPCs.
+     * If we don't wait, then a CloseChannel call could race an existing UpdateChannel call, and one of them
+     * would fail.
+     * Therefore, we wait 500ms before waiting for my turn.
+     */
 
-    if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
-      await this.getLatestPaymentReceipt(channelId);
-      this.channelClient.closeChannel(channelId);
-    }
-    return this.channelClient.channelState
-      .pipe(map(convertToChannelState), filter(isClosed), first())
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    /*
+     * Now, any UpdateChannel RPC should be finished, so when it's my turn, the CloseChannel
+     * call should succeed.
+     */
+
+    const closing = this.channelState(channelId)
+      .pipe(first(cs => this.canUpdateChannel(cs)))
+      .subscribe(cs => {
+        logger.info(
+          {channelId, cs, me: this.mySigningAddress},
+          "It's my turn, closing the channel"
+        );
+        this.channelClient.closeChannel(channelId);
+      });
+
+    return this.channelState(channelId)
+      .pipe(
+        first(cs => cs.status === 'closed'),
+        tap(() => closing.unsubscribe())
+      )
       .toPromise();
   }
 
@@ -269,80 +356,101 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt(channelId: string) {
-    const readyToPay = (state: ChannelState) =>
-      state.channelId === channelId &&
-      state.status === 'running' &&
-      state.payer === this.mySigningAddress &&
-      state.turnNum.mod(2).eq(Index.Payer);
+  /**
+   *
+   * Returns true for channel states where, according to the payment channel client's mySigningAddress,
+   * - the channel is still 'running'
+   * - it's my turn to move
+   */
+  private canUpdateChannel(state: ChannelState): boolean {
+    const {payer, beneficiary} = state;
+    let myRole: Index;
+    if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
+    else if (beneficiary.signingAddress === this.mySigningAddress) myRole = Index.Beneficiary;
+    else throw 'Not in channel';
 
-    return this.channelClient.channelState
-      .pipe(map(convertToChannelState), filter(readyToPay), first())
-      .toPromise();
+    return (
+      state.status === 'running' &&
+      state.turnNum
+        .add(1)
+        .mod(2)
+        .eq(myRole)
+    );
   }
+
+  get channelStates() {
+    return this.channelClient.channelState.pipe(map(convertToChannelState));
+  }
+
+  channelState(channelId): Observable<ChannelState> {
+    const newStates = this.channelClient.channelState.pipe(
+      filter(cr => cr.channelId === channelId),
+      map(convertToChannelState)
+    );
+
+    return this.channelCache[channelId]
+      ? concat(of(this.channelCache[channelId]), newStates)
+      : newStates;
+  }
+
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
-    const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
+    // First, wait for my turn
+    const {payer, beneficiary} = await this.channelState(channelId)
+      .pipe(first(cs => this.canUpdateChannel(cs)))
+      .toPromise();
 
-    const {payerBalance} = channelState;
-    if (bigNumberify(payerBalance).eq(0)) {
+    if (bigNumberify(payer.balance).eq(0)) {
       logger.error('Out of funds. Closing channel.');
       await this.closeChannel(channelId);
       return;
     }
 
-    if (channelState.status == 'running') {
-      if (bigNumberify(payerBalance).lt(amount)) {
-        amountWillPay = payerBalance;
-        logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
-      }
-
-      await this.updateChannel(
-        channelId,
-        channelState.beneficiary,
-        channelState.payer,
-        add(channelState.beneficiaryBalance, amountWillPay),
-        subtract(payerBalance, amountWillPay),
-        channelState.beneficiaryOutcomeAddress,
-        channelState.payerOutcomeAddress
-      );
+    if (bigNumberify(payer.balance).lt(amount)) {
+      amountWillPay = payer.balance;
+      logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
+
+    await this.updateChannel(
+      channelId,
+      beneficiary.signingAddress,
+      payer.signingAddress,
+      add(beneficiary.balance, amountWillPay),
+      subtract(payer.balance, amountWillPay),
+      beneficiary.outcomeAddress,
+      payer.outcomeAddress
+    );
   }
 
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
-    const {
-      channelId,
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    } = channelState;
+    const {channelId, beneficiary, payer} = channelState;
     await this.updateChannel(
       channelId,
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
+      beneficiary.signingAddress,
+      payer.signingAddress,
+      beneficiary.balance,
+      payer.balance,
+      beneficiary.outcomeAddress,
+      payer.outcomeAddress
     );
   }
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
     if (typeof channelIdOrChannelState === 'string') {
-      return this.channelCache[channelIdOrChannelState]?.beneficiary === this.mySigningAddress;
+      return (
+        this.channelCache[channelIdOrChannelState]?.beneficiary.signingAddress ===
+        this.mySigningAddress
+      );
     } else {
-      return channelIdOrChannelState.beneficiary === this.mySigningAddress;
+      return channelIdOrChannelState.beneficiary.signingAddress === this.mySigningAddress;
     }
   }
 
   isPaymentToMe(channelState: ChannelState): boolean {
     // doesn't guarantee that my balance increased
-    if (channelState.beneficiary === this.mySigningAddress) {
+    if (channelState.beneficiary.signingAddress === this.mySigningAddress) {
       return channelState.status === 'running' && channelState.turnNum.mod(2).eq(1);
     }
     return false; // only beneficiary may receive payments
@@ -396,71 +504,3 @@ export class PaymentChannelClient {
 export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
-
-const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {
-    turnNum,
-    channelId,
-    participants,
-    allocations,
-    challengeExpirationTime,
-    status
-  } = channelResult;
-
-  return {
-    channelId,
-    turnNum: utils.bigNumberify(turnNum),
-    status,
-    challengeExpirationTime,
-    beneficiary: participants[0].participantId,
-    payer: participants[1].participantId,
-    beneficiaryOutcomeAddress: participants[0].destination,
-    payerOutcomeAddress: participants[1].destination,
-    beneficiaryBalance: hexZeroPad(
-      bigNumberify(allocations[0].allocationItems[0].amount).toHexString(),
-      32
-    ),
-    payerBalance: hexZeroPad(
-      bigNumberify(allocations[0].allocationItems[1].amount).toHexString(),
-      32
-    )
-  };
-};
-
-const formatParticipants = (
-  aAddress: string,
-  bAddress: string,
-  aOutcomeAddress: string = aAddress,
-  bOutcomeAddress: string = bAddress
-) => [
-  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
-];
-
-const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
-  return [
-    {
-      token: AddressZero,
-      allocationItems: [
-        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
-        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
-      ]
-    }
-  ];
-};
-
-const subtract = (a: string, b: string) =>
-  hexZeroPad(
-    bigNumberify(a)
-      .sub(bigNumberify(b))
-      .toHexString(),
-    32
-  );
-
-const add = (a: string, b: string) =>
-  hexZeroPad(
-    bigNumberify(a)
-      .add(bigNumberify(b))
-      .toHexString(),
-    32
-  );

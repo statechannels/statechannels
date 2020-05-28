@@ -34,18 +34,18 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
-    key => channelCache[key].payer === mySigningAddress
+    key => channelCache[key].payer.signingAddress === mySigningAddress
   );
   const myReceivingChannelIds: string[] = Object.keys(channelCache).filter(
-    key => channelCache[key].beneficiary === mySigningAddress
+    key => channelCache[key].beneficiary.signingAddress === mySigningAddress
   );
 
   const spent = myPayingChannelIds
-    .map(id => channelCache[id].beneficiaryBalance)
+    .map(id => channelCache[id].beneficiary.balance)
     .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
 
   const received = myReceivingChannelIds
-    .map(id => channelCache[id].beneficiaryBalance)
+    .map(id => channelCache[id].beneficiary.balance)
     .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
 
   const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
