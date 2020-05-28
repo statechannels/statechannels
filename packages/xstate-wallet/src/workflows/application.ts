@@ -354,7 +354,6 @@ export const workflow = (
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
 
-          // TODO: Catch other errors
           let message: ErrorResponse['error'];
           if (matches(Errors.notMyTurn)) message = {code: 300, message: 'Not your turn'};
           else if (matches(Errors.channelMissing))
