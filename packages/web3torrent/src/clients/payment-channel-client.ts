@@ -238,21 +238,18 @@ export class PaymentChannelClient {
   }
 
   async createChannel(peers: Peers): Promise<ChannelState> {
-    const participants = formatParticipants(peers);
-    const allocations = formatAllocations(peers);
-
-    const appDefinition = SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
     const channelResult = await this.channelClient.createChannel(
-      participants,
-      allocations,
-      appDefinition,
+      formatParticipants(peers),
+      formatAllocations(peers),
+      SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
       APP_DATA,
       FUNDING_STRATEGY
     );
 
-    this.insertIntoChannelCache(convertToChannelState(channelResult));
+    const channelState = convertToChannelState(channelResult);
+    this.insertIntoChannelCache(channelState);
 
-    return convertToChannelState(channelResult);
+    return channelState;
   }
 
   onMessageQueued(callback: (message: Message) => void) {
@@ -325,17 +322,16 @@ export class PaymentChannelClient {
   }
 
   async updateChannel(channelId: string, peers: Peers): Promise<ChannelState> {
-    const allocations = formatAllocations(peers);
-    const participants = formatParticipants(peers);
-
     const channelResult = await this.channelClient.updateChannel(
       channelId,
-      participants,
-      allocations,
+      formatParticipants(peers),
+      formatAllocations(peers),
       APP_DATA
     );
-    this.updateChannelCache(convertToChannelState(channelResult));
-    return convertToChannelState(channelResult);
+
+    const channelState = convertToChannelState(channelResult);
+    this.updateChannelCache(channelState);
+    return channelState;
   }
 
   /**
