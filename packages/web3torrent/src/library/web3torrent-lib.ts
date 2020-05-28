@@ -415,13 +415,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       switch (command) {
-        case PaidStreamingExtensionNotices.STOP:
+        case PaidStreamingExtensionNotices.STOP: // payment and "stop asking for data" request
           await this.makePayment(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.START:
+        case PaidStreamingExtensionNotices.START: // "okay, now you can continue asking for data" request
           this.jumpStart(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.MESSAGE:
+        case PaidStreamingExtensionNotices.MESSAGE: // general use message
           log.info({data}, 'Message received');
           await this.paymentChannelClient.pushMessage(data);
           break;
