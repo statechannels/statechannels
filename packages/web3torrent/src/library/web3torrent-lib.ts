@@ -7,7 +7,7 @@ import {
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent,
   PaidStreamingWire,
-  PeersByTorrent,
+  ChannelsByInfoHash,
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
@@ -38,7 +38,7 @@ export * from './types';
 
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
-  peersList: PeersByTorrent;
+  peersList: ChannelsByInfoHash;
   torrents: PaidStreamingTorrent[] = [];
   paymentChannelClient: PaymentChannelClient;
 
@@ -234,6 +234,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       PaidStreamingExtensionEvents.REQUEST,
       async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
+
         const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
         const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 

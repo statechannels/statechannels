@@ -134,7 +134,7 @@ export type WebTorrentAddInput = string | Buffer | ParseTorrent;
 
 export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
 
-export type PeerByTorrent = {
+export type PeerByChannel = {
   id: string;
   wire: PaidStreamingWire | PeerWire;
   buffer: string;
@@ -142,13 +142,15 @@ export type PeerByTorrent = {
   uploaded: number;
 };
 
-export type TorrentPeers = {
-  [key: string /* ChannelId */]: PeerByTorrent;
+export type PeersByChannel = {
+  [key: string /* ChannelId */]: PeerByChannel;
 };
 
-export type PeersByTorrent = {
-  [key: string /* InfoHash */]: TorrentPeers;
+export type ChannelsByInfoHash = {
+  [key: string /* InfoHash */]: PeersByChannel;
 };
+
+// channelsByInfoHash[infoHash][channelId] = peerbyChannel: PeerByChannel
 
 declare module 'webtorrent' {
   export interface Instance {
@@ -166,7 +168,7 @@ declare module 'webtorrent' {
         peerAccount,
         seedingChannelId
       }: {
-        torrentPeers: TorrentPeers;
+        torrentPeers: PeersByChannel;
         torrentInfoHash: string;
         peerAccount: string;
         seedingChannelId: string;
