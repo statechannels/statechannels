@@ -1,6 +1,6 @@
 import {Request, Wire} from 'bittorrent-protocol';
 import {Instance as ParseTorrent} from 'parse-torrent';
-import WebTorrent from 'webtorrent';
+import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import {PaidStreamingExtension} from './paid-streaming-extension';
 
 export enum ClientEvents {
@@ -11,6 +11,8 @@ export enum ClientEvents {
   TORRENT_NOTICE = 'torrent_notice'
 }
 
+export type TorrentCallback = (torrent: Torrent) => any;
+export type ExtendedTorrentOptions = TorrentOptions & {createdBy?: string};
 // The events are documented at https://webtorrent.io/docs
 export enum TorrentEvents {
   DONE = 'done',

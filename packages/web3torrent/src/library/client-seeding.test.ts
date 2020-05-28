@@ -4,7 +4,8 @@ import {
   defaultFileMagnetURI,
   defaultSeedingOptions,
   defaultTorrentHash,
-  mockMetamask
+  mockMetamask,
+  togglePeerByChannel
 } from './testing/test-utils';
 import WebTorrentPaidStreamingClient, {ClientEvents, PaidStreamingTorrent} from './web3torrent-lib';
 import {PaymentChannelClient} from '../clients/payment-channel-client';
@@ -103,7 +104,7 @@ describe('Seeding and Leeching', () => {
             true
           );
         });
-        seeder.togglePeerByChannel(seededTorrent.infoHash, seedingChannelId);
+        togglePeerByChannel(seeder, seededTorrent.infoHash, seedingChannelId);
 
         leecherA.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
           expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
@@ -125,7 +126,7 @@ describe('Seeding and Leeching', () => {
         // Make sure we toggle peers only twice
         if (!knownPeers.has(peerAccount)) {
           knownPeers.add(peerAccount);
-          seeder.togglePeerByChannel(seededTorrent.infoHash, seedingChannelId);
+          togglePeerByChannel(seeder, seededTorrent.infoHash, seedingChannelId);
         }
       });
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
