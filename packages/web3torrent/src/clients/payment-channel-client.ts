@@ -237,9 +237,9 @@ export class PaymentChannelClient {
     }
   }
 
-  async createChannel({beneficiary, payer}: Peers): Promise<ChannelState> {
-    const participants = formatParticipants({beneficiary, payer});
-    const allocations = formatAllocations({beneficiary, payer});
+  async createChannel(peers: Peers): Promise<ChannelState> {
+    const participants = formatParticipants(peers);
+    const allocations = formatAllocations(peers);
 
     const appDefinition = SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
     const channelResult = await this.channelClient.createChannel(
@@ -324,9 +324,9 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  async updateChannel(channelId: string, {beneficiary, payer}: Peers): Promise<ChannelState> {
-    const allocations = formatAllocations({beneficiary, payer});
-    const participants = formatParticipants({beneficiary, payer});
+  async updateChannel(channelId: string, peers: Peers): Promise<ChannelState> {
+    const allocations = formatAllocations(peers);
+    const participants = formatParticipants(peers);
 
     const channelResult = await this.channelClient.updateChannel(
       channelId,
