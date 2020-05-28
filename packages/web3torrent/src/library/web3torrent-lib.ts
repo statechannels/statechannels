@@ -15,7 +15,7 @@ import {
   TorrentCallback,
   ExtendedTorrentOptions
 } from './types';
-import {ChannelState, PaymentChannelClient, peer} from '../clients/payment-channel-client';
+import {ChannelState, PaymentChannelClient, peer, Peers} from '../clients/payment-channel-client';
 import {
   defaultTrackers,
   WEI_PER_BYTE,
@@ -350,7 +350,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       peerOutcomeAddress,
       hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32)
     );
-    const {channelId} = await this.paymentChannelClient.createChannel(seeder, leecher);
+    const peers: Peers = {beneficiary: seeder, payer: leecher};
+    const {channelId} = await this.paymentChannelClient.createChannel(peers);
 
     wire.paidStreamingExtension.seedingChannelId = channelId;
     this.peersList[torrent.infoHash][channelId] = {

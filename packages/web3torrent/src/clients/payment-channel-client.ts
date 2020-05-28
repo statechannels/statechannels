@@ -41,6 +41,8 @@ export interface Peer {
   outcomeAddress: string;
   balance: string;
 }
+export type Peers = {beneficiary: Peer; payer: Peer};
+
 export const peer = (
   signingAddress: string,
   outcomeAddress: string,
@@ -92,7 +94,7 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   };
 };
 
-const formatParticipants = ({beneficiary, payer}: {beneficiary: Peer; payer: Peer}) => {
+const formatParticipants = ({beneficiary, payer}: Peers) => {
   const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
     participantId: signingAddress,
     signingAddress,
@@ -106,7 +108,7 @@ const formatParticipants = ({beneficiary, payer}: {beneficiary: Peer; payer: Pee
   return participants;
 };
 
-const formatAllocations = ({beneficiary, payer}: {beneficiary: Peer; payer: Peer}) => {
+const formatAllocations = ({beneficiary, payer}: Peers) => {
   const formatItem = (p: Peer): AllocationItem => ({
     amount: p.balance,
     destination: p.outcomeAddress
@@ -229,7 +231,7 @@ export class PaymentChannelClient {
     }
   }
 
-  async createChannel(beneficiary: Peer, payer: Peer): Promise<ChannelState> {
+  async createChannel({beneficiary, payer}: Peers): Promise<ChannelState> {
     const participants = formatParticipants({beneficiary, payer});
     const allocations = formatAllocations({beneficiary, payer});
 
@@ -316,7 +318,7 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  async updateChannel(channelId: string, beneficiary: Peer, payer: Peer): Promise<ChannelState> {
+  async updateChannel(channelId: string, {beneficiary, payer}: Peers): Promise<ChannelState> {
     const allocations = formatAllocations({beneficiary, payer});
     const participants = formatParticipants({beneficiary, payer});
 
@@ -386,17 +388,16 @@ export class PaymentChannelClient {
       logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
 
-    await this.updateChannel(
-      channelId,
-      {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
-      {...payer, balance: subtract(payer.balance, amountWillPay)}
-    );
+    await this.updateChannel(channelId, {
+      beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
+      payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
+    });
   }
 
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
     const {channelId, beneficiary, payer} = channelState;
-    await this.updateChannel(channelId, beneficiary, payer);
+    await this.updateChannel(channelId, {beneficiary, payer});
   }
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
