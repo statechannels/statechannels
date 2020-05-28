@@ -1,12 +1,16 @@
-import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
-import {FakeChannelProvider} from '@statechannels/channel-client';
-import {ChannelClient} from '@statechannels/channel-client';
+import {
+  FakeChannelProvider,
+  ChannelClient,
+  ChannelResult,
+  ChannelClientInterface
+} from '@statechannels/channel-client';
 import {
   ChannelStatus,
   Message,
   Participant,
-  AllocationItem
+  AllocationItem,
+  Allocations
 } from '@statechannels/client-api-schema';
 import {DomainBudget} from '@statechannels/client-api-schema';
 import {
@@ -94,31 +98,33 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   };
 };
 
+/**
+ *
+ * @param peers: Peers
+ * Arranges peers in order, as determined by the Index enum.
+ */
+const arrangePeers = ({beneficiary, payer}: Peers): [Peer, Peer] => {
+  const peers: [Peer, Peer] = [undefined, undefined];
+  peers[Index.Payer] = payer;
+  peers[Index.Beneficiary] = beneficiary;
+
+  return peers;
+};
+
 const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
   participantId: signingAddress,
   signingAddress,
   destination: outcomeAddress
 });
-
-const formatParticipants = ({beneficiary, payer}: Peers) => {
-  const participants: [Participant, Participant] = [undefined, undefined];
-  participants[Index.Payer] = formatParticipant(payer);
-  participants[Index.Beneficiary] = formatParticipant(beneficiary);
-
-  return participants;
-};
+const formatParticipants = (peers: Peers) => arrangePeers(peers).map(formatParticipant);
 
 const formatItem = (p: Peer): AllocationItem => ({
   amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
   destination: p.outcomeAddress
 });
-
-const formatAllocations = ({beneficiary, payer}: Peers) => {
-  const allocationItems: [AllocationItem, AllocationItem] = [undefined, undefined];
-  allocationItems[Index.Payer] = formatItem(payer);
-  allocationItems[Index.Beneficiary] = formatItem(beneficiary);
-  return [{token: AddressZero, allocationItems}];
-};
+const formatAllocations = (peers: Peers): Allocations => [
+  {token: AddressZero, allocationItems: arrangePeers(peers).map(formatItem)}
+];
 
 const subtract = (a: string, b: string) =>
   hexZeroPad(
