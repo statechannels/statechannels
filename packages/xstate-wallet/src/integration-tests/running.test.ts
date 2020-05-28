@@ -88,7 +88,7 @@ test('accepts states when running', async () => {
 
   const update = generatePlayerUpdate(channelId, playerA.participant, playerB.participant);
   playerB.messagingService.receiveRequest(update, applicationDomain);
-  await resolveOnError(playerB, 400);
+  await resolveOnError(playerB, 403);
 
   playerA.messagingService.receiveRequest(update, applicationDomain);
   await resolveOnResponse(playerA);
