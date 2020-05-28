@@ -2,9 +2,9 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {TorrentPeers} from '../../library/types';
+import {PeersByChannel} from '../../library/types';
 import {Status, TorrentUI} from '../../types';
-import {createMockTorrentUI, createMockTorrentPeers} from '../../utils/test-utils';
+import {createMockTorrentUI, createMockPeersByChannel} from '../../utils/test-utils';
 import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
@@ -16,7 +16,7 @@ Enzyme.configure({adapter: new Adapter()});
 type MockTorrentInfo = {
   torrentInfoWrapper: ReactWrapper<TorrentInfoProps>;
   torrent: Partial<TorrentUI>;
-  peers: TorrentPeers;
+  peers: PeersByChannel;
   sectionElement: ReactWrapper;
   fileNameElement: ReactWrapper;
   fileSizeElement: ReactWrapper;
@@ -29,7 +29,7 @@ type MockTorrentInfo = {
 
 const mockTorrentInfo = (torrentProps?: Partial<TorrentUI>): MockTorrentInfo => {
   const torrent = createMockTorrentUI(torrentProps);
-  const peers = createMockTorrentPeers();
+  const peers = createMockPeersByChannel();
   const torrentInfoWrapper = mount(
     <TorrentInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
   );

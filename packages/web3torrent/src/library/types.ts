@@ -163,12 +163,12 @@ declare module 'webtorrent' {
     on(
       event: ClientEvents.PEER_STATUS_CHANGED,
       callback: ({
-        torrentPeers,
+        PeersByChannel,
         torrentInfoHash,
         peerAccount,
         seedingChannelId
       }: {
-        torrentPeers: PeersByChannel;
+        PeersByChannel: PeersByChannel;
         torrentInfoHash: string;
         peerAccount: string;
         seedingChannelId: string;

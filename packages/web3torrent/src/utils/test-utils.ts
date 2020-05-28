@@ -38,7 +38,7 @@ export function createMockTorrentUI(props?: Partial<TorrentUI>): TorrentUI {
   };
 }
 
-export function createMockTorrentPeers(): PeersByChannel {
+export function createMockPeersByChannel(): PeersByChannel {
   return {
     '7595267661936611': {
       id: '7595267661936611',

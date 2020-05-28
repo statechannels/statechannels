@@ -2,8 +2,8 @@ import WebTorrent, {TorrentOptions} from 'webtorrent';
 import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
-import {createMockExtendedTorrent, createMockTorrentPeers, pseAccount} from '../utils/test-utils';
-import {download, getTorrentPeers, upload, web3TorrentClient} from './web3torrent-client';
+import {createMockExtendedTorrent, createMockPeersByChannel, pseAccount} from '../utils/test-utils';
+import {download, getPeersByChannel, upload, web3TorrentClient} from './web3torrent-client';
 import {getStatus} from '../utils/torrent-status-checker';
 
 describe('Web3TorrentClient', () => {
@@ -92,19 +92,21 @@ describe('Web3TorrentClient', () => {
     });
   });
 
-  describe('getTorrentPeers()', () => {
+  describe('getPeersByChannel()', () => {
     const mockInfoHash = '124203';
 
     beforeEach(() => {
-      web3TorrentClient.peersList[mockInfoHash] = createMockTorrentPeers();
+      web3TorrentClient.channelsByInfoHash[mockInfoHash] = createMockPeersByChannel();
     });
 
     it('should return peers for a given torrent', () => {
-      expect(getTorrentPeers(mockInfoHash)).toEqual(web3TorrentClient.peersList[mockInfoHash]);
+      expect(getPeersByChannel(mockInfoHash)).toEqual(
+        web3TorrentClient.channelsByInfoHash[mockInfoHash]
+      );
     });
 
     afterEach(() => {
-      web3TorrentClient.peersList = {};
+      web3TorrentClient.channelsByInfoHash = {};
     });
   });
 });

@@ -19,7 +19,7 @@ As the client is a custom, extended version of [Webtorrent](https://github.com/w
 **There is a couple of extra properties and methods to take into account, the rest you can assume are pretty much the same**:
 
 - `pseAccount` it's an ID, wich identifies the client (peer). This can be set when the client is instantiated (by passing an object with the key `pseAccount`). We use the state channel wallet signing address for this ID.
-- `peersList` holds a list of torrents (identified by infoHash), in wich every torrent has a list of allowed peers (identified by pseAccount)
+- `channelsByInfoHash` holds a list of torrents (identified by infoHash), in wich every torrent has a list of allowed peers (identified by pseAccount)
   this list is used by each peer Client, to control which peer is trying to leech files, and see who is allowed to do so.
 - `togglePeer (affectedTorrent, peerAccount)` is a method that allows a user to choke/unchoke a peer
 

@@ -1,9 +1,13 @@
 import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import {TorrentPeers} from '../../../library/types';
+import {PeersByChannel} from '../../../library/types';
 import {TorrentUI, Status} from '../../../types';
-import {createMockTorrentUI, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
+import {
+  createMockTorrentUI,
+  createMockPeersByChannel,
+  testSelector
+} from '../../../utils/test-utils';
 import {PeerNetworkStats, PeerNetworkStatsProps} from './PeerNetworkStats';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
 
@@ -11,14 +15,14 @@ Enzyme.configure({adapter: new Adapter()});
 
 type MockPeerNetworkStats = {
   torrent: Partial<TorrentUI>;
-  peers: TorrentPeers;
+  peers: PeersByChannel;
   PeerNetworkStatsWrapper: ReactWrapper<PeerNetworkStatsProps>;
   uploadingSectionElement: ReactWrapper;
   numPeersElement: ReactWrapper;
 };
 
 const mockPeerNetworkStats = (noPeers = false, isOriginalSeed = true): MockPeerNetworkStats => {
-  const peers = noPeers ? {} : createMockTorrentPeers();
+  const peers = noPeers ? {} : createMockPeersByChannel();
   const torrent = createMockTorrentUI({
     numPeers: Object.keys(peers).length,
     originalSeed: isOriginalSeed,

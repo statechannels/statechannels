@@ -14,7 +14,7 @@ export const web3TorrentClient = new WebTorrentPaidStreamingClient({
 
 export const Web3TorrentClientContext = React.createContext(web3TorrentClient);
 
-export const getTorrentPeers = infoHash => web3TorrentClient.channelsByInfoHash[infoHash];
+export const getPeersByChannel = infoHash => web3TorrentClient.channelsByInfoHash[infoHash];
 
 const doesBudgetExist = async (): Promise<boolean> => {
   const budget = await web3TorrentClient.paymentChannelClient.getBudget();

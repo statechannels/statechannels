@@ -6,7 +6,7 @@ import '../../../App.scss';
 import {TorrentUI} from '../../../types';
 import {PeerNetworkStats} from './PeerNetworkStats';
 import './PeerNetworkStats.scss';
-import {createMockTorrentPeers} from '../../../utils/test-utils';
+import {createMockPeersByChannel} from '../../../utils/test-utils';
 
 const a = '0xFb4A85D4bBf25e10Fc0Bed72f864dD1ead0006e7';
 const b = '0xBaaed72f864dD1ead0006e7Fb4A85D4bBf25e10F';
@@ -23,7 +23,7 @@ storiesOf('Web3Torrent', module)
       torrent={
         ({
           numPeers: 2,
-          _peers: createMockTorrentPeers(),
+          _peers: createMockPeersByChannel(),
           wires: [
             {
               paidStreamingExtension: {

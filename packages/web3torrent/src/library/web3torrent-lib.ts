@@ -152,7 +152,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.channelsByInfoHash[torrentInfoHash],
+      PeersByChannel: this.channelsByInfoHash[torrentInfoHash],
       torrentInfoHash,
       peerAccount: wire.paidStreamingExtension.peerAccount,
       seedingChannelId: wire.paidStreamingExtension.seedingChannelId
@@ -179,7 +179,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.channelsByInfoHash[torrentInfoHash],
+      PeersByChannel: this.channelsByInfoHash[torrentInfoHash],
       torrentInfoHash,
       peerAccount: wire.paidStreamingExtension.peerAccount,
       seedingChannelId: wire.paidStreamingExtension.seedingChannelId

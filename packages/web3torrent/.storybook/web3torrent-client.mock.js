@@ -2,7 +2,7 @@ const React = require('react');
 const utils = require('./../src/utils/test-utils');
 
 function mockWeb3TorrentClient() {
-  const _peers = utils.createMockTorrentPeers();
+  const _peers = utils.createMockPeersByChannel();
   const torrent = utils.createMockTorrentUI({
     numPeers: Object.keys(_peers).length,
     _peers,

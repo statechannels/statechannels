@@ -85,8 +85,8 @@ describe('Seeding and Leeching', () => {
 
   it('should reach a ready-for-leeching, choked state', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers, seedingChannelId}) => {
-        expect(torrentPeers[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({PeersByChannel, seedingChannelId}) => {
+        expect(PeersByChannel[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
           true
         );
         done();
@@ -98,10 +98,10 @@ describe('Seeding and Leeching', () => {
   it('should be able to unchoke and finish a download', async done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount, seedingChannelId}) => {
-        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers, seedingChannelId}) => {
-          expect(torrentPeers[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
-            true
-          );
+        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({PeersByChannel, seedingChannelId}) => {
+          expect(
+            PeersByChannel[seedingChannelId].wire.paidStreamingExtension.isForceChoking
+          ).toEqual(true);
         });
         seeder.togglePeerByChannel(seededTorrent.infoHash, seedingChannelId);
 
