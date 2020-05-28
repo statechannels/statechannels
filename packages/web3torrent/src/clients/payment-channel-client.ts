@@ -224,8 +224,7 @@ export class PaymentChannelClient {
       this.channelClient.channelState
         .pipe(
           map(convertToChannelState),
-          filter(cs => cs.channelId === channelId),
-          first(cs => this.isMyTurn(cs))
+          first(cs => this.isMyTurn(cs, channelId))
         )
         .subscribe(cs => {
           logger.info(
@@ -239,18 +238,6 @@ export class PaymentChannelClient {
     return this.channelClient.channelState
       .pipe(map(convertToChannelState), first(isClosed))
       .toPromise();
-  }
-
-  isMyTurn({turnNum, payer, beneficiary}: ChannelState): boolean {
-    let myRole: Index;
-    if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
-    else if (beneficiary.signingAddress === this.mySigningAddress) myRole = Index.Beneficiary;
-    else throw 'Not in channel';
-
-    return turnNum
-      .add(1)
-      .mod(2)
-      .eq(myRole);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
@@ -291,45 +278,57 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  getLatestPaymentReceipt(channelId: string) {
-    const readyToPay = (state: ChannelState) =>
+  isMyTurn(state: ChannelState, channelId: string): boolean {
+    const {payer, beneficiary} = state;
+    let myRole: Index;
+    if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
+    else if (beneficiary.signingAddress === this.mySigningAddress) myRole = Index.Beneficiary;
+    else throw 'Not in channel';
+
+    return (
       state.channelId === channelId &&
       state.status === 'running' &&
       state.payer.signingAddress === this.mySigningAddress &&
-      state.turnNum.mod(2).eq(Index.Payer);
-
-    return this.channelClient.channelState
-      .pipe(map(convertToChannelState), filter(readyToPay), first())
-      .toPromise();
+      state.turnNum
+        .add(1)
+        .mod(2)
+        .eq(myRole)
+    );
   }
+
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     let amountWillPay = amount;
-    const channelState: ChannelState = await this.getLatestPaymentReceipt(channelId);
+    this.channelClient.channelState
+      .pipe(
+        map(convertToChannelState),
+        first(cs => this.isMyTurn(cs, channelId))
+      )
+      .subscribe(async channelState => {
+        const {payer, beneficiary} = channelState;
+        if (bigNumberify(payer.balance).eq(0)) {
+          logger.error('Out of funds. Closing channel.');
+          await this.closeChannel(channelId);
+          return;
+        }
 
-    const {payer, beneficiary} = channelState;
-    if (bigNumberify(payer.balance).eq(0)) {
-      logger.error('Out of funds. Closing channel.');
-      await this.closeChannel(channelId);
-      return;
-    }
+        if (channelState.status == 'running') {
+          if (bigNumberify(payer.balance).lt(amount)) {
+            amountWillPay = payer.balance;
+            logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
+          }
 
-    if (channelState.status == 'running') {
-      if (bigNumberify(payer.balance).lt(amount)) {
-        amountWillPay = payer.balance;
-        logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
-      }
-
-      await this.updateChannel(
-        channelId,
-        beneficiary.signingAddress,
-        payer.signingAddress,
-        add(beneficiary.balance, amountWillPay),
-        subtract(payer.balance, amountWillPay),
-        beneficiary.outcomeAddress,
-        payer.outcomeAddress
-      );
-    }
+          await this.updateChannel(
+            channelId,
+            beneficiary.signingAddress,
+            payer.signingAddress,
+            add(beneficiary.balance, amountWillPay),
+            subtract(payer.balance, amountWillPay),
+            beneficiary.outcomeAddress,
+            payer.outcomeAddress
+          );
+        }
+      });
   }
 
   // beneficiary may use this method to accept payments
