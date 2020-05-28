@@ -1,6 +1,6 @@
 import React from 'react';
 import {WebTorrentAddInput, WebTorrentSeedInput, ExtendedTorrent} from '../library/types';
-import WebTorrentLibrary from '../library/web3torrent-lib';
+import Web3TorrentLibrary from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 
