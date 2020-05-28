@@ -74,6 +74,8 @@ export enum Errors {
   noLedger = 'No ledger exists with peer',
   amountNotFound = 'Cannot find allocation entry with destination',
   invalidNonce = 'Invalid nonce',
+  invalidTransition = 'Invalid transition',
+  invalidAppData = 'Invalid app data',
   emittingDuringTransaction = 'Attempting to emit event during transaction',
   notMyTurn = "Cannot update channel unless it's your turn"
 }
