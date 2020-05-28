@@ -391,7 +391,18 @@ export class ChainWatcher implements Chain {
     const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
     const blockNum = BigNumber.from(await this.provider.getBlockNumber());
-
+    chainLogger.info(
+      {
+        amount,
+        channelStorage: {
+          turnNumRecord,
+          finalizesAt
+        },
+        finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
+        blockNum
+      },
+      'Chain query result'
+    );
     // TODO: Fetch other info
     return {
       amount,
