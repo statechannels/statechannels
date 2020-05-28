@@ -4,7 +4,7 @@ import Web3TorrentLibrary from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {paymentChannelClient} from './payment-channel-client';
 
-export const web3TorrentClient = new WebTorrentLibrary({paymentChannelClient});
+export const web3TorrentClient = new Web3TorrentLibrary({paymentChannelClient});
 
 export const Web3TorrentClientContext = React.createContext(web3TorrentClient);
 
