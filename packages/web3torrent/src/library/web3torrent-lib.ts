@@ -239,38 +239,38 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {peerAccount: peer, isForceChoking, seedingChannelId} = wire.paidStreamingExtension;
 
         if (!seedingChannelId) {
-          // Check to see if we have a running channel with this peer..
+          // Check to see if we have a running channel with this peer.
           const preExistingChannelId = _.findKey(this.channelsByInfoHash[torrent.infoHash], {
             id: peer
           });
 
           const thisTorrent = this.torrents.find(t => t.infoHash === torrent.infoHash);
 
-          // If it's running, and not associated with any existing wire
+          // If it's running, and not associated with any existing wire...
           if (
             this.paymentChannelClient.channelCache[preExistingChannelId]?.status == 'running' &&
             !thisTorrent.wires.find(
               wire => wire.paidStreamingExtension.seedingChannelId == preExistingChannelId
             )
           ) {
-            // Reuse the channel
+            // ...reuse the channel
             wire.paidStreamingExtension.seedingChannelId = preExistingChannelId;
           }
         }
 
         if (!wire.paidStreamingExtension.seedingChannelId) {
-          // ...if not, create a new channel and block it to await payments
+          // If there's no seedingChannelId , create a new channel and block it to await payments
           await this.createPaymentChannel(torrent, wire); // this will update this.paymentChannelClient.channelCache so we don't re-enter this block unecessarily
           log.info(`${peer} >> REQUEST BLOCKED (NEW CHANNEL): ${index}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire);
         } else {
-          // ... or if there is an existing uploading channel, extract a PeerByChannel object from it...
+          // If there is an existing uploading channel, extract a PeerByChannel object from it.
           const knownPeer = this.channelsByInfoHash[torrent.infoHash][
             wire.paidStreamingExtension.seedingChannelId
           ];
           if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
-            // block them again if they are out of funds
+            // block them peer if they are out of funds
             log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
             response(false);
             this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
