@@ -15,7 +15,7 @@ import {
   TorrentCallback,
   ExtendedTorrentOptions
 } from './types';
-import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
+import {ChannelState, PaymentChannelClient, peer} from '../clients/payment-channel-client';
 import {
   defaultTrackers,
   WEI_PER_BYTE,
@@ -340,14 +340,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async createPaymentChannel(torrent: WebTorrent.Torrent, wire: PaidStreamingWire) {
     const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
 
-    const {channelId} = await this.paymentChannelClient.createChannel(
-      this.pseAccount, // seeder
-      peerAccount, // leecher
-      hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32), // seederBalance,
-      hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32), // leecherBalance,
-      this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-      peerOutcomeAddress // leecherOutcomeAddress
+    const seeder = peer(
+      this.pseAccount,
+      this.paymentChannelClient.myEthereumSelectedAddress,
+      hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32)
     );
+    const leecher = peer(
+      peerAccount,
+      peerOutcomeAddress,
+      hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32)
+    );
+    const {channelId} = await this.paymentChannelClient.createChannel(seeder, leecher);
 
     wire.paidStreamingExtension.seedingChannelId = channelId;
     this.peersList[torrent.infoHash][channelId] = {
