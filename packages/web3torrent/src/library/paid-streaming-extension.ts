@@ -47,6 +47,11 @@ export abstract class PaidStreamingExtension implements Extension {
 
   blockedRequests: [number, number, number][] = [];
 
+  // this value is meant to be bumped to mirror wire.downloaded
+  // and incremented every time a keep-alive is sent; useful for
+  // detecting if there has been progress over a keep-alive period
+  _keepAliveIncrementalDownloaded: number = 0;
+
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
     this.messageBus = new EventEmitter();
