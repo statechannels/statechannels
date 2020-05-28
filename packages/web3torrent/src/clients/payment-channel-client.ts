@@ -16,6 +16,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/database';
 import {map, filter, first, tap} from 'rxjs/operators';
 import {logger} from '../logger';
+import {concat, of, Observable} from 'rxjs';
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
@@ -358,11 +359,15 @@ export class PaymentChannelClient {
     return this.channelClient.channelState.pipe(map(convertToChannelState));
   }
 
-  channelState(channelId) {
-    return this.channelClient.channelState.pipe(
+  channelState(channelId): Observable<ChannelState> {
+    const newStates = this.channelClient.channelState.pipe(
       filter(cr => cr.channelId === channelId),
       map(convertToChannelState)
     );
+
+    return this.channelCache[channelId]
+      ? concat(of(this.channelCache[channelId]), newStates)
+      : newStates;
   }
 
   // payer may use this method to make payments (if they have sufficient funds)
