@@ -14,7 +14,7 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import {map, filter, first} from 'rxjs/operators';
+import {map, filter, first, tap} from 'rxjs/operators';
 import {logger} from '../logger';
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
@@ -281,23 +281,21 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    const isClosed = (channelState: ChannelState) =>
-      channelState.channelId === channelId && channelState.status === 'closed';
-
-    if (!['closing', 'closed'].includes(this.channelCache[channelId].status)) {
-      this.channelState(channelId)
-        .pipe(first(cs => this.isMyTurn(cs)))
-        .subscribe(cs => {
-          logger.info(
-            {channelId, cs, me: this.mySigningAddress},
-            "It's my turn, closing the channel"
-          );
-          this.channelClient.closeChannel(channelId);
-        });
-    }
+    const closing = this.channelState(channelId)
+      .pipe(first(cs => this.isMyTurn(cs)))
+      .subscribe(cs => {
+        logger.info(
+          {channelId, cs, me: this.mySigningAddress},
+          "It's my turn, closing the channel"
+        );
+        this.channelClient.closeChannel(channelId);
+      });
 
     return this.channelState(channelId)
-      .pipe(first(isClosed))
+      .pipe(
+        first(cs => cs.status === 'closed'),
+        tap(() => closing.unsubscribe())
+      )
       .toPromise();
   }
 
@@ -339,7 +337,7 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  isMyTurn(state: ChannelState): boolean {
+  private isMyTurn(state: ChannelState): boolean {
     const {payer, beneficiary} = state;
     let myRole: Index;
     if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
