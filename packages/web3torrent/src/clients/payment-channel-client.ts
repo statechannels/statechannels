@@ -256,24 +256,11 @@ export class PaymentChannelClient {
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
-    // FIXME: Refactor
-    function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
-    }
-    const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
-    return () => {
-      unsubChannelUpdated();
-    };
+    return this.channelClient.onChannelUpdated(cr => web3tCallback(convertToChannelState(cr)));
   }
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
-    function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
-    }
-    const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
-    return () => {
-      unsubChannelProposed();
-    };
+    return this.channelClient.onChannelProposed(cr => web3tCallback(convertToChannelState(cr)));
   }
 
   async joinChannel(channelId: string) {
