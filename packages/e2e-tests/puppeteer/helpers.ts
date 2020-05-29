@@ -9,13 +9,13 @@ import {
   TX_WAIT_TIMEOUT,
   SCREENSHOT_DIR,
   RPC_ENDPOINT,
-  CHAIN_NETWORK_ID
+  CHAIN_NETWORK_ID,
+  LOGS_DIR
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
 
 const writeFile = promisify(fs.writeFile);
-const logDistinguisherCache: Record<string, true | undefined> = {};
 
 export const waitForWalletToBeDisplayed = async (page: Page): Promise<void> => {
   const walletIframe = page.frames()[1];
@@ -27,6 +27,7 @@ export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   await walletIframe.waitForSelector(':root', {hidden: true, timeout: TX_WAIT_TIMEOUT});
 };
 
+const logDistinguisherCache: Record<string, true | undefined> = {};
 export async function setupLogging(
   page: Page,
   ganacheAccountIndex: number,
@@ -41,8 +42,7 @@ export async function setupLogging(
   if (logDistinguisherCache[uniquenessKey]) throw `Ambiguous log config detected: ${uniquenessKey}`;
   logDistinguisherCache[uniquenessKey] = true;
 
-  // For convenience, I am requiring that logs are stored in /tmp
-  const LOGS_LOCATION = path.join('/tmp', logPrefix);
+  const LOGS_LOCATION = path.join(LOGS_DIR, logPrefix);
 
   const APPEND = 'a';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
