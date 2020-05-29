@@ -59,7 +59,6 @@ save_built_artifacts: &save_built_artifacts
       - packages/web3torrent/build
       - packages/xstate-wallet/build
 
-
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
@@ -106,6 +105,12 @@ commands:
     steps:
       - store_artifacts:
           path: /home/circleci/project/packages/e2e-tests/screenshots
+
+  upload_e2e_logs:
+    description: 'Upload e2e logs'
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/logs
 
   notify_slack:
     description: 'Notify slack '
@@ -259,12 +264,9 @@ jobs:
       - start_servers:
           app: rps
       - run: (cd packages/e2e-tests && yarn test rps)
-      - store_artifacts:
-          path: /tmp/rps-test.pino.log
-      - store_artifacts:
-          path: /tmp/rps-test.browser.log
       - upload_logs:
           file: integration-test-stats
+      - upload_e2e_logs
       - upload_e2e_screenshots
 
   integration-test-web3torrent:
@@ -288,18 +290,11 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/seed-download-complete.pino.log
-      - store_artifacts:
-          path: /tmp/seed-download-complete.browser.log
-      - store_artifacts:
-          path: /tmp/withdraw.pino.log
-      - store_artifacts:
-          path: /tmp/withdraw.browser.log
-      - store_artifacts:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots
+      - upload_e2e_logs
 
   integration-test-web3torrent-optional:
     resource_class: large
@@ -322,14 +317,11 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/seed-download-cancel.pino.log
-      - store_artifacts:
-          path: /tmp/seed-download-cancel.browser.log
-      - store_artifacts:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots
+      - upload_e2e_logs
 
   integration-test-web3torrent-with-hub:
     resource_class: large
@@ -352,18 +344,11 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/seed-download-complete.pino.log
-      - store_artifacts:
-          path: /tmp/seed-download-complete.browser.log
-      - store_artifacts:
-          path: /tmp/withdraw.pino.log
-      - store_artifacts:
-          path: /tmp/withdraw.browser.log
-      - store_artifacts:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots
+      - upload_e2e_logs
 
   integration-test-web3torrent-with-hub-optional:
     resource_class: large
@@ -384,14 +369,11 @@ jobs:
       - store_artifacts:
           path: /tmp/ganache.log
       - store_artifacts:
-          path: /tmp/multiple-leecher.pino.log
-      - store_artifacts:
-          path: /tmp/multiple-leecher.browser.log
-      - store_artifacts:
           path: packages/simple-hub/pino.log
       - upload_logs:
           file: integration-test-web3torrent-with-hub-stats
       - upload_e2e_screenshots
+      - upload_e2e_logs
 
   release-pull-request:
     <<: *defaults
@@ -497,17 +479,10 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run: (cd packages/e2e-tests && yarn jest seed-download-complete withdraw --runInBand --bail)
-      - store_artifacts:
-          path: /tmp/seed-download-complete.pino.log
-      - store_artifacts:
-          path: /tmp/seed-download-complete.browser.log
-      - store_artifacts:
-          path: /tmp/withdraw.pino.log
-      - store_artifacts:
-          path: /tmp/withdraw.browser.log
       - upload_logs:
           file: e2e-test-w3t-production-stats
       - upload_e2e_screenshots
+      - upload_e2e_logs
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
