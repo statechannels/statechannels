@@ -126,7 +126,7 @@ const File: React.FC<Props> = props => {
             spinner={loading}
             disabled={!props.ready || loading}
             onClick={async () => {
-              track('File Download Requested', {
+              track('Torrent Started', {
                 infoHash,
                 magnetURI: torrent.magnetURI,
                 filename: torrentName,
