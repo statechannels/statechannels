@@ -10,7 +10,8 @@ import {
   setupLogging,
   setupFakeWeb3,
   waitForNthState,
-  waitForClosedState
+  waitForClosedState,
+  takeScreenshot
 } from '../../helpers';
 
 import {uploadFile, startDownload} from '../../scripts/web3torrent';
@@ -47,9 +48,10 @@ describe('One file, three leechers, one seeder', () => {
     labelsToMap: Label[] = labels
   ) => await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
-  afterAll(
-    async () => CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()))
-  );
+  afterAll(async () => {
+    CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
+    await forEachActor(({tab}, label) => takeScreenshot(tab, `seed-download-cancel.${label}.png`));
+  });
 
   it('Allows peers to share a torrent completely', async () => {
     let i = 1;
@@ -59,7 +61,7 @@ describe('One file, three leechers, one seeder', () => {
       const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
       const tab = (await browser.pages())[0];
 
-      await setupLogging(tab, idx, 'stress', true);
+      await setupLogging(tab, idx, 'multiple-leecher', true);
       !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
 
       return {browser, tab, metamask};
