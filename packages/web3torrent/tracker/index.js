@@ -13,6 +13,10 @@ const server = new Server({
   stats: true,
   interval: 150000,
   filter: function(_, params, cb) {
+    /**
+     * The function doesn't actually checks if it is the same pseAccount or not, it only checks the
+     * existence and validity of the value. It's use is to filter other clients of using this tracker.
+     */
     if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
       if (!params.pseAccount || !isAddress(params.pseAccount)) {
         cb(new Error('401 - Unauthorized client - This tracker is for Web3Torrents only'));
@@ -51,6 +55,12 @@ server.on('listening', () => {
     log.info('UDP6 tracker: udp://' + udp6Host + ':' + udp6Port);
   }
   if (server.ws) {
+    /**
+     * As far as I know, the trackers and client use mostly WebSockets.
+     * For some reason HTTP and UDP don't get used.
+     * The source of an issue where the tracker test would fail a lot,
+     *              was that the websocket would get dropped by heroku.
+     */
     const wsAddr = server.http.address();
     const wsHost = wsAddr.address !== '::' ? wsAddr.address : 'localhost';
     const wsPort = wsAddr.port;

@@ -217,18 +217,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.trace({wire});
 
     wire.use(
+      // sets out custom extension. See https://github.com/webtorrent/bittorrent-protocol#extension-protocol-bep-10
       paidStreamingExtension({
         pseAccount: this.pseAccount,
         outcomeAddress: this.outcomeAddress
       })
     );
-    wire.setKeepAlive(true);
-    wire.setTimeout(65000);
+    wire.setKeepAlive(true); //  enables the keep-alive ping (triggered every 60s).
+    wire.setTimeout(65000); // sets the requests timeout to 65seconds
     wire.on(WireEvents.KEEP_ALIVE, () => {
       log.info({keepAlive: !torrent.done && wire.amChoking}, 'wire keep-alive');
       log.trace({torrent});
       if (!torrent.done && wire.amChoking) {
-        wire._clearTimeout();
+        wire._clearTimeout(); // clears the timeout for the pending requests sent to the seeder.
       }
 
       if (wire.paidStreamingExtension.leechingChannelId) {
@@ -525,6 +526,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   private needsToPayTheLastPiece(torrent: PaidStreamingTorrent, peerAccount: string) {
     const lastPieceReservations: PaidStreamingWire[] =
       torrent._reservations && torrent._reservations[torrent.pieces.length - 1];
+    // the reservations is an array that registers the pieces that have been requested of the torrent.
     if (!lastPieceReservations || !lastPieceReservations.length) return false;
 
     const lastPieceIsReservedToThisWire = lastPieceReservations.some(
@@ -550,6 +552,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         channelsToClose.push({wire, channelId: seedingChannelId});
       }
     });
+    // essentially creates a list of ids to close, and wires to update.
     log.info({ids: channelsToClose.map(({channelId}) => channelId)}, 'About to close channels');
     return await Promise.all(
       channelsToClose.map(({wire, channelId}) => this.closeChannel(wire, channelId))
@@ -582,7 +585,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     log.info({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
     log.trace({pieces: torrent.pieces});
-    (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
+    torrent._updateWireWrapper(wire); // schedules a wire update (which checks it's wires and tries to make new requests and replace dead ones)
+    // this is an internal function implemented here: https://github.com/webtorrent/webtorrent/blob/7ff77c3e95b2dddfa70dd49cf924073383dd565a/lib/torrent.js#L1182
+    // As we changed the way peers comunicated (and it has indeed changed since the PoC days)
+    // this has suffered a lot of changes, and it might not be the best solution for every case (for example, I don't know if it works for long torrent pauses).
   }
 
   /** Emit an event that triggers a UI re-render */

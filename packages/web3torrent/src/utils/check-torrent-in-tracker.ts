@@ -18,6 +18,15 @@ export async function checkTorrentInTracker(infoHash: string): Promise<TorrentTe
   client.stop();
   client.destroy();
 
+  /**
+   * scrapeResult is always a number.
+   * If it's 0+ it means the scrape call was sucessfull. And 0+ people
+   * have a complete copy of the torrent and an active connection with the tracker.
+   *
+   * If it's -1, it means the timeout triggered before the tracker answered.
+   * We give the tracker 2.5 seconds to give a response (it's a really small json object)
+   */
+
   if (scrapeResult > 0) {
     log.info(`Test Result: SEEDERS_FOUND (${scrapeResult})`);
     return TorrentTestResult.SEEDERS_FOUND; // Found seeders (peers with the complete torrent)

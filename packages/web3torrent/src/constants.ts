@@ -1,7 +1,6 @@
 import {Status, TorrentUI} from './types';
 import {ChannelState, Peer} from './clients/payment-channel-client';
 import {utils} from 'ethers';
-import {BigNumber} from 'ethers/utils';
 
 export const VERSION = process.env.VERSION;
 export const COMMIT_HASH = process.env.COMMIT_HASH;
