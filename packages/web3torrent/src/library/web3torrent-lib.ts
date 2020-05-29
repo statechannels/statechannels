@@ -11,9 +11,11 @@ import {
   TorrentEvents,
   WebTorrentAddInput,
   WebTorrentSeedInput,
-  WireEvents
+  WireEvents,
+  TorrentCallback,
+  ExtendedTorrentOptions
 } from './types';
-import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
+import {ChannelState, PaymentChannelClient, peer, Peers} from '../clients/payment-channel-client';
 import {
   defaultTrackers,
   WEI_PER_BYTE,
@@ -29,10 +31,7 @@ import _ from 'lodash';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
-// To enable logs in the browser, run `localStorage.debug = "web3torrent:*"`
 const log = logger.child({module: 'web3torrent-lib'});
-
-export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
@@ -45,36 +44,42 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
 
-  static torrentUpdatedEventPrefix: string = 'torrentUpdated';
-
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
-    super(opts);
+    super({tracker: {announce: defaultTrackers}, ...opts});
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
   }
 
+  /** Enable the client capabilities to seed or leech torrents, enabling the paymentChannelClient
+   * and setting key information used to seed and leech torrents  */
   async enable() {
     if (!this.pseAccount || !this.outcomeAddress) {
       await this.paymentChannelClient.enable();
       this.pseAccount = this.paymentChannelClient.mySigningAddress;
-      log.info({pseAccount: this.pseAccount}, 'set pseAccount to sc-wallet signing address');
       this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+      this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
+
+      log.info({pseAccount: this.pseAccount}, 'PSEAccount set to sc-wallet signing address');
       log.info(
         {outcomeAddress: this.outcomeAddress},
-        'set outcomeAddress to sc-wallet web3 wallet address'
+        'OutcomeAddress set to sc-wallet Wallet address'
       );
-      this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
     }
   }
 
+  /** Utility function. Disables the client capabilities to seed or leech torrents  */
   async disable() {
     log.warn('Disabling WebTorrentPaidStreamingClient');
     this.pseAccount = null;
     this.outcomeAddress = null;
   }
 
+  /**
+   * From a string, a file, a buffer, or an array from the previous, it creates a torrent,
+   * adds it to the client to be shared and announces it to the tracker.
+   */
   seed(
     input: WebTorrentSeedInput,
     optionsOrCallback?: TorrentOptions | TorrentCallback,
@@ -82,28 +87,25 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   ): PaidStreamingTorrent {
     this.ensureEnabled();
 
-    const options =
-      typeof optionsOrCallback === 'function'
-        ? {createdBy: this.pseAccount, announce: defaultTrackers}
-        : {
-            createdBy: this.pseAccount,
-            announce: defaultTrackers,
-            ...optionsOrCallback
-          };
+    let torrent: PaidStreamingTorrent;
+    let options: ExtendedTorrentOptions = {createdBy: this.pseAccount, announce: defaultTrackers};
 
-    const torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
+    if ((input as FileList).length && (input as FileList).length > 1) {
+      options.name = 'various.zip';
+    }
+
+    if (typeof optionsOrCallback === 'function') {
+      torrent = super.seed(input, options, optionsOrCallback) as PaidStreamingTorrent;
+    } else {
+      options = {...options, ...optionsOrCallback};
+      torrent = super.seed(input, options, callback) as PaidStreamingTorrent;
+    }
     this.setupTorrent(torrent);
-
-    track('Torrent Starting Seeding', {
-      infoHash: torrent.infoHash,
-      magnetURI: torrent.magnetURI,
-      filename: torrent.name,
-      filesize: torrent.length
-    });
 
     return torrent;
   }
 
+  /** Using a magnet, torrent information object, creates a torrent object it adds it to the client to download. */
   add(
     input: WebTorrentAddInput,
     optionsOrCallback?: TorrentOptions | TorrentCallback,
@@ -122,89 +124,122 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  // TODO: refactor "pause" and "cancel" functions. It's an ugly mess right
-  pause(infoHash: string, callback?: (err?: Error | string) => void) {
+  /**
+   * Pauses a Torrent (stop connecting to new peers). Not being used.
+   *
+   * WARNING: this method has not been tested since the PoC times.
+   */
+  pause(infoHash: string) {
     log.info('> Peer pauses download: Pause torrent, eventual close PaymentChannels');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
       torrent.pause(); // the paymentChannelClosing is done at the moment of payment
+      this.closeTorrentChannels(torrent, true);
+      this.emitTorrentUpdated(infoHash);
     } else {
-      return callback(new Error('No torrent found'));
+      throw new Error('No torrent found');
     }
   }
 
-  async cancel(infoHash: string, callback?: (err?: Error | string) => void) {
+  /**
+   * Cancels a Torrent (closes all channels, destroys the torrent from memory).
+   *
+   * This method removes the torrent from the client and all payments trying to download a file are forfeit.
+   */
+  async cancel(infoHash: string) {
     log.info('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
     if (torrent) {
-      await this.closeDownloadingChannels(torrent);
+      // I am only allowed to close the channel on my turn.
+      // If I don't pause the torrent, then I will continue to make payments, meaning the call to
+      // this.closeChannels would race the `makePayment` function, and one of them would fail with a
+      // "Not my turn" error.
+      torrent.pause();
+      await this.closeTorrentChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash));
-      track('Torrent Cancelled', {
-        infoHash,
-        magnetURI: torrent.magnetURI,
-        filename: torrent.name,
-        filesize: torrent.length
-      });
     } else {
-      return callback(new Error('No torrent found'));
+      throw new Error('No torrent found');
     }
   }
 
-  blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.peersList[torrentInfoHash][peerAccount].allowed = false;
+  /**
+   * Sets a local block in the wire to block new requests for data to be responded.
+   * And sends a STOP event to the requesting peer (leecher).
+   */
+  blockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
+    wire.paidStreamingExtension.stop();
+    const {peerAccount, seedingChannelId} = wire.paidStreamingExtension;
+    const torrentPeers = this.peersList[torrentInfoHash];
+
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.peersList[torrentInfoHash],
+      torrentPeers,
       torrentInfoHash,
-      peerAccount
+      peerAccount,
+      seedingChannelId
     });
-    log.info({from: Object.keys(this.peersList)[0]}, '<< blockedPeer %s', peerAccount);
+    log.info({from: torrentPeers, peerAccount, seedingChannelId}, `<< blockPeer`);
   }
 
-  unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: start');
-    this.peersList[torrentInfoHash][peerAccount].allowed = true;
+  /**
+   * Removes a local block in the wire to block new requests for data to be responded.
+   * Triggers a re-processing of the cached-blocked-requests from the blocked peer.
+   * Sends a START event to the requesting peer (leecher).
+   */
+  unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire) {
+    const {peerAccount, seedingChannelId} = wire.paidStreamingExtension;
+    const torrentPeers = this.peersList[torrentInfoHash];
+
+    // TODO: only unblock if the buffer is large enough
+    log.info({from: torrentPeers, peerAccount, seedingChannelId}, '<< unblockPeer: start');
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.peersList[torrentInfoHash],
+      torrentPeers,
       torrentInfoHash,
-      peerAccount
+      peerAccount,
+      seedingChannelId
     });
-    log.info({from: Object.keys(this.peersList), peerAccount}, '<< unblockedPeer: finish');
+    log.info({from: torrentPeers, peerAccount, seedingChannelId}, '<< unblockPeer: finish');
   }
 
-  togglePeer(torrentInfoHash: string, peerAccount: string) {
-    const {wire, allowed} = this.peersList[torrentInfoHash][peerAccount];
-    if (allowed) {
-      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
-    } else {
-      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
-    }
-  }
-
+  /** Utility function. Checks if the client is ready to seed or leech a torrent.  */
   protected ensureEnabled() {
     if (!(this.pseAccount && this.outcomeAddress)) {
       throw new Error('WebTorrentPaidStreamingClient is not enabled');
     }
   }
 
+  /**
+   * Sets the behaviour of a wire, once created.
+   * This method, together with SetupTorrent, is what defines the behaviour of each created torrent in Web3Torrent.
+   */
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
     log.info('Wire setup initiated');
     log.trace({wire});
 
     wire.use(
+      // sets out custom extension. See https://github.com/webtorrent/bittorrent-protocol#extension-protocol-bep-10
       paidStreamingExtension({
         pseAccount: this.pseAccount,
         outcomeAddress: this.outcomeAddress
       })
     );
-    wire.setKeepAlive(true);
-    wire.setTimeout(65000);
+    wire.setKeepAlive(true); //  enables the keep-alive ping (triggered every 60s).
+    wire.setTimeout(65000); // sets the requests timeout to 65seconds
     wire.on(WireEvents.KEEP_ALIVE, () => {
       log.info({keepAlive: !torrent.done && wire.amChoking}, 'wire keep-alive');
       log.trace({torrent});
       if (!torrent.done && wire.amChoking) {
-        wire._clearTimeout();
+        wire._clearTimeout(); // clears the timeout for the pending requests sent to the seeder.
       }
+
+      if (wire.paidStreamingExtension.leechingChannelId) {
+        if (wire.downloaded === wire.paidStreamingExtension._keepAliveIncrementalDownloaded) {
+          this.closeChannel(wire, wire.paidStreamingExtension.leechingChannelId);
+        } else {
+          wire.paidStreamingExtension._keepAliveIncrementalDownloaded = wire.downloaded;
+        }
+      }
+
       this.emitTorrentUpdated(torrent.infoHash);
     });
 
@@ -212,22 +247,20 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       PaidStreamingExtensionEvents.REQUEST,
       async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
-        const {pseChannelId, peerAccount: peer} = wire.paidStreamingExtension;
-        const knownPeer = this.peersList[torrent.infoHash][peer];
+        const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
+        const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 
-        if (!knownPeer || !pseChannelId) {
+        if (!knownPeer || !seedingChannelId) {
           await this.createPaymentChannel(torrent, wire);
           log.info(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
-          this.blockPeer(torrent.infoHash, wire, peer);
-        } else if (!knownPeer.allowed || reqPrice.gt(knownPeer.buffer)) {
-          const {uploaded} = this.peersList[torrent.infoHash][peer];
-          log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${uploaded}`);
+          this.blockPeer(torrent.infoHash, wire);
+        } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
+          log.info(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
           response(false);
-          this.blockPeer(torrent.infoHash, wire, peer); // As soon as buffer is empty, block
-          wire.paidStreamingExtension.stop(); // prompt peer for a payment
+          this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
         } else {
-          this.peersList[torrent.infoHash][peer] = {
+          this.peersList[torrent.infoHash][seedingChannelId] = {
             ...knownPeer,
             wire,
             buffer: bigNumberify(knownPeer.buffer)
@@ -236,9 +269,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             uploaded: knownPeer.uploaded + size
           };
 
-          const {buffer, uploaded} = this.peersList[torrent.infoHash][peer];
+          const {buffer, uploaded} = this.peersList[torrent.infoHash][seedingChannelId];
           log.info(
-            {pseChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
+            {seedingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
             `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
           );
           response(true);
@@ -270,62 +303,72 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
-      const {pseChannelId, peerChannelId, peerAccount} = wire.paidStreamingExtension;
+      const {seedingChannelId, leechingChannelId, peerAccount} = wire.paidStreamingExtension;
 
-      if (channelState.channelId === pseChannelId || channelState.channelId === peerChannelId) {
-        if (channelState.status === 'closed' || channelState.status === 'closing') {
-          wire.paidStreamingExtension.pseChannelId = null;
-          wire.paidStreamingExtension.peerChannelId = null;
-          log.info(
-            `PeerAccount ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed||Closing`
-          );
+      const isSeedingChannel = channelState.channelId === seedingChannelId;
+      const isLeechingChannel = channelState.channelId === leechingChannelId;
+
+      if (isSeedingChannel || isLeechingChannel) {
+        const isClosed = channelState.status === 'closed';
+        if (isClosed) {
+          if (isLeechingChannel) {
+            wire.paidStreamingExtension.leechingChannelId = null;
+          } else {
+            wire.paidStreamingExtension.seedingChannelId = null;
+          }
+          track('Torrent Finished Downloading', {
+            infoHash: torrent.infoHash,
+            magnetURI: torrent.magnetURI,
+            filename: torrent.name,
+            filesize: torrent.length
+          });
+          this.emitTorrentUpdated(torrent.infoHash);
+          log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
         // filter to updates for the channel on this wire
-        log.info(`Channel updated to turnNum ${channelState.turnNum}`);
+        log.info(
+          {channelState},
+          `Channel ${channelState.channelId} updated to turnNum ${channelState.turnNum}`
+        );
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
           log.info('sent spacer state, now sending STOP');
-          wire.paidStreamingExtension.stop(); // prompt peer for a payment
+          this.blockPeer(torrent.infoHash, wire);
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
-          await this.refillBuffer(torrent.infoHash, peerAccount, channelState.channelId);
-          this.unblockPeer(torrent.infoHash, wire, peerAccount);
-          // TODO: only unblock if the buffer is large enough
+          await this.refillBuffer(torrent.infoHash, channelState.channelId);
+          this.unblockPeer(torrent.infoHash, wire);
         }
       }
     });
-    log.info(
-      {
-        wire: {
-          paidStreamingExtension: wire.paidStreamingExtension?.serialize()
-        }
-      },
-      'Wire Setup completed'
-    );
+    log.info({wireData: wire.paidStreamingExtension?.serialize()}, 'Wire Setup completed');
   }
 
+  /** Creates a payment channel, and sets the channelId property, sent to the leecher on the STOP events to leeching peers  */
   protected async createPaymentChannel(torrent: WebTorrent.Torrent, wire: PaidStreamingWire) {
     const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
 
-    const {channelId} = await this.paymentChannelClient.createChannel(
-      this.pseAccount, // seeder
-      peerAccount, // leecher
-      hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32), // seederBalance,
-      hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32), // leecherBalance,
-      this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-      peerOutcomeAddress // leecherOutcomeAddress
+    const seeder = peer(
+      this.pseAccount,
+      this.paymentChannelClient.myEthereumSelectedAddress,
+      hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32)
     );
+    const leecher = peer(
+      peerAccount,
+      peerOutcomeAddress,
+      hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32)
+    );
+    const peers: Peers = {beneficiary: seeder, payer: leecher};
+    const {channelId} = await this.paymentChannelClient.createChannel(peers);
 
-    wire.paidStreamingExtension.pseChannelId = channelId;
-    this.peersList[torrent.infoHash][peerAccount] = {
+    wire.paidStreamingExtension.seedingChannelId = channelId;
+    this.peersList[torrent.infoHash][channelId] = {
       id: peerAccount,
       wire,
       buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
       beneficiaryBalance: '0', // (wei)
-      allowed: false,
-      channelId, // TODO: remove this prop, it isn't as trustworthy as the wire one, and it's just repeating data
       uploaded: 0
     };
 
@@ -333,36 +376,36 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return channelId;
   }
 
-  /**
-   * Refill the buffer for a peer in a torrent, querying the channelClient for the updated balance.
-   */
-  protected refillBuffer(infoHash: string, peerId: string, channelId: string) {
-    if (!this.peersList[infoHash][peerId]) {
-      throw new Error(
-        `>> Received payment from ${peerId} in channel ${channelId} but peer not known!`
-      );
+  /** Refill the buffer for a peer in a torrent, querying the channelClient for the updated balance.  */
+  protected refillBuffer(infoHash: string, channelId: string) {
+    const peer = this.peersList[infoHash][channelId];
+    if (!peer) {
+      throw new Error(`>> Received payment in channel ${channelId} but peer not known!`);
     }
     // querying channel client for updated balance
     const newBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiary.balance
     );
     // infer payment using update balance and previously stored balance
-    const payment = bigNumberify(
-      newBalance.sub(bigNumberify(this.peersList[infoHash][peerId].beneficiaryBalance))
-    );
+    const payment = bigNumberify(newBalance.sub(bigNumberify(peer.beneficiaryBalance)));
     // store new balance
 
-    this.peersList[infoHash][peerId].beneficiaryBalance = newBalance.toString();
+    peer.beneficiaryBalance = newBalance.toString();
     // convert payment into buffer units (bytes)
-    this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
+    peer.buffer = bigNumberify(peer.buffer)
       .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
       // ethers BigNumbers are always integers
       .toString();
 
-    const logBuffer = this.peersList[infoHash][peerId].buffer;
-    log.info(`${peerId} >> Refill: Balance ${newBalance} payment: ${payment} buffer: ${logBuffer}`);
+    log.info(
+      `${channelId} >> Refill: Balance ${newBalance} payment: ${payment} buffer: ${peer.buffer}`
+    );
   }
 
+  /**
+   * Sets the behaviour of a torrent, once created.
+   * This is, together with SetupWire, is what defines the behaviour of each created torrent in Web3Torrent.
+   */
   protected setupTorrent(torrent: PaidStreamingTorrent) {
     if (torrent.usingPaidStreaming) {
       return torrent;
@@ -371,6 +414,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.peersList = {...this.peersList, [torrent.infoHash]: {}};
       this.emitTorrentUpdated(torrent.infoHash);
     });
+
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
       this.emitTorrentUpdated(torrent.infoHash);
@@ -378,20 +422,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       switch (command) {
-        case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
-          if (torrent.paused) {
-            // We currently treat pausing torrent as canceling downloads
-            log.info({data}, 'Closing torrent');
-            await this.closeDownloadingChannels(torrent);
-          } else if (!torrent.done || !torrent.destroyed) {
-            log.info({data}, 'Making payment');
-            await this.makePayment(torrent, wire);
-          }
+        case PaidStreamingExtensionNotices.STOP: // payment and "stop asking for data" request
+          await this.makePayment(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.START:
+        case PaidStreamingExtensionNotices.START: // "okay, now you can continue asking for data" request
           this.jumpStart(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.MESSAGE:
+        case PaidStreamingExtensionNotices.MESSAGE: // general use message
           log.info({data}, 'Message received');
           await this.paymentChannelClient.pushMessage(data);
           break;
@@ -401,12 +438,23 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.DONE, async () => {
-      log.info('<< Torrent DONE!');
+      log.info({channels: this.paymentChannelClient.channelCache}, 'TorrentEvents: Done');
+      torrent.wires.map(wire => {
+        const {leechingChannelId: channelId} = wire.paidStreamingExtension;
+        const channelOfWire = this.paymentChannelClient.channelCache[channelId];
+        if (channelOfWire) {
+          const balance = channelOfWire.beneficiary.balance;
+          const downloaded = wire.downloaded;
+          log.info(
+            `TorrentEvents: Done, per-wire info. Channel: ${channelId} Balance: ${balance} Downloaded: ${downloaded}`
+          );
+        }
+      });
       log.trace({torrent, peers: this.peersList[torrent.infoHash]});
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      await this.closeDownloadingChannels(torrent);
-      track('Torrent Finished Downloading', {
+      await this.closeTorrentChannels(torrent);
+      track('Torrent Starting Seeding', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
         filename: torrent.name,
@@ -432,8 +480,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  // TODO: make this publicly accesible and not in an error handler. (when we get a pause/resume button)
-  // TODO: make this work okay (takes a long time to restart)
+  /**
+   * Resumes the download of a paused torrent.
+   * Warning: not being used, not tested, previous testing showed that torrents could take a long time to resume.
+   */
   protected resumeTorrent(infoHash: string) {
     const torrent = super.get(infoHash);
     if (torrent && torrent.paused) {
@@ -443,40 +493,40 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
   }
 
-  /**
-   * Define the amount to pay, and makes the payment
-   */
+  /** Defines the amount to pay, and makes the payment */
   protected async makePayment(torrent: PaidStreamingTorrent, wire: PaidStreamingWire) {
-    if (torrent.paused) {
-      log.info('Torrent Paused - makePayment early exit', torrent);
+    if (torrent.paused || torrent.done || torrent.destroyed) {
+      const status = torrent.paused ? 'PAUSED' : 'DONE/DESTROYED';
+      log.info({torrent}, `Torrent ${status} - makePayment early exit`);
       return;
     }
-    const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
 
-    let numBlocksToPayFor = wire.requests.length > PEER_TRUST ? PEER_TRUST : wire.requests.length;
+    log.info(`About to make Payment`);
+    const {requests, downloaded, paidStreamingExtension} = wire;
+    const {leechingChannelId, peerAccount} = paidStreamingExtension;
+
+    let numBlocksToPayFor = requests.length > PEER_TRUST ? PEER_TRUST : requests.length;
     let tailBytes = 0;
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
-    if (this.isAboutToPayForLastPiece(torrent, peerAccount)) {
+    if (this.needsToPayTheLastPiece(torrent, peerAccount)) {
       numBlocksToPayFor = numBlocksToPayFor - 1;
       tailBytes = torrent.store.store.lastChunkLength;
     }
 
     const amountToPay = WEI_PER_BYTE.mul(BLOCK_LENGTH * numBlocksToPayFor + tailBytes);
     log.info(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
-    await this.paymentChannelClient.makePayment(peerChannelId, amountToPay.toString());
+    await this.paymentChannelClient.makePayment(leechingChannelId, amountToPay.toString());
 
-    const balance =
-      this.paymentChannelClient.channelCache[peerChannelId] &&
-      bigNumberify(
-        this.paymentChannelClient.channelCache[peerChannelId].beneficiaryBalance
-      ).toString();
-    log.info(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${wire.downloaded}`);
+    const balance = this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance;
+    log.info(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${downloaded}`);
   }
 
-  private isAboutToPayForLastPiece(torrent: PaidStreamingTorrent, peerAccount: string) {
+  /** Utility function. Checks if the wire for a torrent is requesting the last piece */
+  private needsToPayTheLastPiece(torrent: PaidStreamingTorrent, peerAccount: string) {
     const lastPieceReservations: PaidStreamingWire[] =
       torrent._reservations && torrent._reservations[torrent.pieces.length - 1];
+    // the reservations is an array that registers the pieces that have been requested of the torrent.
     if (!lastPieceReservations || !lastPieceReservations.length) return false;
 
     const lastPieceIsReservedToThisWire = lastPieceReservations.some(
@@ -484,49 +534,70 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
     return lastPieceIsReservedToThisWire;
   }
+
   /**
-   * Close any channels that I am downloading from (that my peer opened)
+   * Close any channels that I am downloading from or seeding to
+   * @param torrent torrent to close channels from
+   * @param includeSeedChannels optional. Used to also include seeding channels
+   * (meaning payments channels where the peer is getting payed)
    */
-  protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
-    await Promise.all(
-      torrent.wires.map(async wire => {
-        // TODO: What about the pseChannelId?
-        const {peerChannelId} = wire.paidStreamingExtension;
-        await this.paymentChannelClient.getLatestPaymentReceipt(peerChannelId);
-        if (peerChannelId) {
-          log.info(`About to close channel ${peerChannelId}`);
-          wire.paidStreamingExtension.peerChannelId = null;
-          await this.paymentChannelClient.closeChannel(peerChannelId);
-          // TODO: sometimes this 'closeChannel' call never resolves (the following log never shows up)
-          log.info('Peer PaymentChannel Closed', peerChannelId);
-        } else {
-          log.info(
-            `Wire with peer ${wire.paidStreamingExtension.peerAccount} didn't had a channel`
-          );
-        }
-      })
+  protected async closeTorrentChannels(torrent: PaidStreamingTorrent, includeSeedChannels = false) {
+    const channelsToClose: {wire: PaidStreamingWire; channelId: string}[] = [];
+    torrent.wires.forEach(wire => {
+      const {seedingChannelId, leechingChannelId} = wire.paidStreamingExtension;
+      if (leechingChannelId) {
+        channelsToClose.push({wire, channelId: leechingChannelId});
+      }
+      if (includeSeedChannels && seedingChannelId) {
+        channelsToClose.push({wire, channelId: seedingChannelId});
+      }
+    });
+    // essentially creates a list of ids to close, and wires to update.
+    log.info({ids: channelsToClose.map(({channelId}) => channelId)}, 'About to close channels');
+    return await Promise.all(
+      channelsToClose.map(({wire, channelId}) => this.closeChannel(wire, channelId))
     );
   }
 
-  /**
-   * Jumpstart a torrent wire download, after being stopped by a peer.
-   */
+  /** Close a channel and remove the corresponding channelId from the wire. */
+  private async closeChannel(wire: PaidStreamingWire, channelId: string): Promise<string> {
+    try {
+      await this.paymentChannelClient.closeChannel(channelId);
+      if (channelId === wire.paidStreamingExtension.leechingChannelId) {
+        wire.paidStreamingExtension.leechingChannelId = null;
+        log.info(`Payment Channel closed: ${channelId}`);
+      } else {
+        wire.paidStreamingExtension.seedingChannelId = null;
+        log.info(`Paying Channel closed: ${channelId}`);
+      }
+    } catch (error) {
+      log.error({error}, 'Error closing channel');
+    }
+    return channelId;
+  }
+
+  /** Jumpstart a torrent wire download, after being stopped by a peer. */
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
     if (torrent.done) {
       log.info('<< JUMPSTART: FINISHED');
-      log.trace({torrent, wire});
+      log.trace({torrent, wire: wire.paidStreamingExtension.serialize()});
       return;
     }
     log.info({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
     log.trace({pieces: torrent.pieces});
-    (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
+    torrent._updateWireWrapper(wire); // schedules a wire update (which checks it's wires and tries to make new requests and replace dead ones)
+    // this is an internal function implemented here: https://github.com/webtorrent/webtorrent/blob/7ff77c3e95b2dddfa70dd49cf924073383dd565a/lib/torrent.js#L1182
+    // As we changed the way peers comunicated (and it has indeed changed since the PoC days)
+    // this has suffered a lot of changes, and it might not be the best solution for every case (for example, I don't know if it works for long torrent pauses).
   }
 
+  /** Emit an event that triggers a UI re-render */
   private emitTorrentUpdated(infoHash) {
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));
   }
 
+  /** Util Method. Normalizes an event name. */
   public static torrentUpdatedEventName(infoHash) {
-    return this.torrentUpdatedEventPrefix + infoHash;
+    return `torrentUpdated-${infoHash}`;
   }
 }

@@ -28,6 +28,11 @@ const mockPeerNetworkStats = (noPeers = false, isOriginalSeed = true): MockPeerN
     status: Status.Downloading
   });
 
+  torrent.wires = [
+    {paidStreamingExtension: {leechingChannelId: '0x'}} as any,
+    {paidStreamingExtension: {leechingChannelId: '0x'}} as any
+  ];
+
   const PeerNetworkStatsWrapper = mount(<PeerNetworkStats torrent={torrent} />);
 
   return {
@@ -51,7 +56,7 @@ describe('<PeerNetworkStats />', () => {
 
     expect(numPeersElement.exists()).toEqual(true);
 
-    expect(numPeersElement.text()).toEqual(`${torrent.numPeers}`);
+    expect(numPeersElement.text()).toEqual(`${torrent.wires.length}`);
   });
 
   it('can show the correct peer an speed info', () => {
@@ -60,6 +65,6 @@ describe('<PeerNetworkStats />', () => {
     expect(uploadingSectionElement.exists()).toEqual(true);
     expect(numPeersElement.exists()).toEqual(true);
 
-    expect(numPeersElement.text()).toEqual(`${torrent.numPeers}`);
+    expect(numPeersElement.text()).toEqual(`${torrent.wires.length}`);
   });
 });

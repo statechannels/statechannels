@@ -6,15 +6,17 @@ import {
   StateMachine,
   StateSchema,
   Guard,
-  spawn
+  spawn,
+  actions
 } from 'xstate';
 import {map} from 'rxjs/operators';
-import {Zero} from 'ethers/constants';
-import {BigNumber} from 'ethers/utils';
+import {Zero} from '@ethersproject/constants';
 
 import {Store} from '../store';
 import {ChannelChainInfo} from '../chain';
+import {BigNumber} from 'ethers';
 
+const {log} = actions;
 export interface Initial {
   channelId: string;
 }
@@ -112,6 +114,7 @@ export const machine = (
     initial: 'init',
 
     on: {
+      CHANNEL_UPDATED: {actions: log('CHANNEL_UPDATED sent to challenge channel machine')},
       CHAIN_EVENT: [
         {
           target: 'waitForResponseOrTimeout',

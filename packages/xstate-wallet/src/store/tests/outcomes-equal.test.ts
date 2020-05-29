@@ -1,18 +1,18 @@
 import {outcomesEqual} from '../state-utils';
 import {SimpleAllocation, Destination} from '../types';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {bigNumberify} from 'ethers/utils';
+import {AddressZero, HashZero} from '@ethersproject/constants';
+import {BigNumber} from 'ethers';
 
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: bigNumberify('0x2')}]
+  allocationItems: [{destination: HashZero as Destination, amount: BigNumber.from('0x2')}]
 };
 
 const simpleAllocation2: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: bigNumberify('0x02')}]
+  allocationItems: [{destination: HashZero as Destination, amount: BigNumber.from('0x02')}]
 };
 
 describe('outcomesEqual', () => {

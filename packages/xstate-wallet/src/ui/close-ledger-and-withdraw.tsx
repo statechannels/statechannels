@@ -3,7 +3,7 @@ import './wallet.scss';
 
 import {useService} from '@xstate/react';
 
-import {formatEther} from 'ethers/utils';
+import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';

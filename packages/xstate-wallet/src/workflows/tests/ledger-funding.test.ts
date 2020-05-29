@@ -5,27 +5,28 @@ import {add, checkThat, isSimpleEthAllocation} from '../../utils';
 import {Init, machine, Errors} from '../ledger-funding';
 
 import {SignedState} from '../../store';
-import {bigNumberify} from 'ethers/utils';
+
 import _ from 'lodash';
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 
 import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {TestStore} from './store';
+import {BigNumber} from 'ethers';
 
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,
@@ -34,7 +35,7 @@ const targetChannel: ChannelConstants = {
 const targetChannelId = calculateChannelId(targetChannel);
 
 const ledgerChannel: ChannelConstants = {
-  channelNonce: bigNumberify(1),
+  channelNonce: BigNumber.from(1),
   chainId,
   challengeDuration,
   participants,
@@ -43,8 +44,8 @@ const ledgerChannel: ChannelConstants = {
 const ledgerChannelId = calculateChannelId(ledgerChannel);
 
 const destinations = participants.map(p => p.destination);
-const amounts = [bigNumberify(7), bigNumberify(5)];
-const deductionAmounts = [bigNumberify(3), bigNumberify(2)];
+const amounts = [BigNumber.from(7), BigNumber.from(5)];
+const deductionAmounts = [BigNumber.from(3), BigNumber.from(2)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
@@ -218,7 +219,7 @@ describe('failure modes', () => {
     (aStore as any).chain = _chain;
 
     aStore.createEntry(
-      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
+      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: BigNumber.from(1)})
     );
     aStore.chain.initialize();
 

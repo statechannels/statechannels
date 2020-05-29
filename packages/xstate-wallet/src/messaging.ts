@@ -30,7 +30,7 @@ import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 import {Store} from './store';
@@ -56,7 +56,7 @@ export const isChannelProposed = (m: Response | Notification): m is ChannelPropo
   'method' in m && m.method === 'ChannelProposed';
 
 export interface MessagingServiceInterface {
-  readonly outboxFeed: Observable<Response | Notification>;
+  readonly outboxFeed: Observable<Response | Notification | ErrorResponse>;
   readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
@@ -294,7 +294,7 @@ async function convertToInternalEvent(
         ...request.params,
         participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
-        challengeDuration: bigNumberify(CHALLENGE_DURATION),
+        challengeDuration: BigNumber.from(CHALLENGE_DURATION),
         chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
         applicationDomain: domain

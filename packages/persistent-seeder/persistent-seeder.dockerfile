@@ -14,6 +14,7 @@ COPY ./packages/devtools packages/devtools/
 COPY ./packages/persistent-seeder/ packages/persistent-seeder/
 COPY ./packages/channel-provider packages/channel-provider/
 COPY ./packages/client-api-schema packages/client-api-schema/
+COPY ./packages/e2e-tests packages/e2e-tests/
 
 # Add non-root, set permissions, switch user
 RUN useradd --create-home --no-log-init --shell /bin/bash seeder

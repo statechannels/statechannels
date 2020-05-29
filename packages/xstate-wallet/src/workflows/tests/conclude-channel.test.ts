@@ -4,12 +4,11 @@ import {Init, machine as createChannel} from '../create-and-fund';
 import {machine as concludeChannel} from '../conclude-channel';
 
 import {Store} from '../../store';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from 'ethers/constants';
-
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {add} from '../../utils';
 
 import {
@@ -37,11 +36,11 @@ import {MessagingService} from '../../messaging';
 jest.setTimeout(20000);
 
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,
@@ -52,14 +51,14 @@ const targetChannelId = calculateChannelId(targetChannel);
 const destinations = participants.map(p => p.destination);
 
 const ledgerChannel: ChannelConstants = {
-  channelNonce: bigNumberify(1),
+  channelNonce: BigNumber.from(1),
   chainId,
   challengeDuration,
   participants,
   appDefinition
 };
 
-const amounts = [bigNumberify(7), bigNumberify(5)];
+const amounts = [BigNumber.from(7), BigNumber.from(5)];
 const ledgerAmounts = amounts.map(a => a.add(2));
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
@@ -90,8 +89,8 @@ const createLedgerChannels = async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) =>
     createSignatureEntry(state, privateKey)
   );
-  await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
-  await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
+  await aStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
+  await bStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 

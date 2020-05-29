@@ -5,8 +5,10 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
-import {getPeerStatus} from '../../../utils/torrent-status-checker';
 import {TorrentUI} from '../../../types';
+import {Blockie, Tooltip} from 'rimble-ui';
+import {Badge, Avatar} from '@material-ui/core';
+import {color} from '@storybook/addon-knobs';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -22,65 +24,125 @@ function channelIdToTableRow(
   // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
   // clickHandler: (string) => Promise<ChannelState>
 ) {
-  let channelButton;
+  // let channelButton;
   const channel = channels[channelId];
   const isBeneficiary = participantType === 'beneficiary';
   const wire = torrent.wires.find(
     wire =>
-      wire.paidStreamingExtension.peerChannelId === channelId ||
-      wire.paidStreamingExtension.pseChannelId === channelId
+      wire.paidStreamingExtension.leechingChannelId === channelId ||
+      wire.paidStreamingExtension.seedingChannelId === channelId
   );
-  if (channel.status === 'closing') {
-    channelButton = <button disabled>Closing ...</button>;
-  } else if (channel.status === 'closed') {
-    channelButton = <button disabled>Closed</button>;
-  } else if (channel.status === 'challenging') {
-    channelButton = <button disabled>Challenging</button>;
-  } else {
-    channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
-    // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
-    // (
-    //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
-    //     Challenge Channel
-    //   </button>
-    // );
-  }
+  // if (channel.status === 'closing') {
+  //   channelButton = <button disabled>Closing ...</button>;
+  // } else if (channel.status === 'closed') {
+  //   channelButton = <button disabled>Closed</button>;
+  // } else if (channel.status === 'challenging') {
+  //   channelButton = <button disabled>Challenging</button>;
+  // } else {
+  //   channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
+  // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
+  // (
+  //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
+  //     Challenge Channel
+  //   </button>
+  // );
+  // }
 
   let dataTransferred: string;
-  const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
+  const peerOutcomeAddress = isBeneficiary
+    ? channel.payer.outcomeAddress
+    : channel.beneficiary.outcomeAddress;
+
+  const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
+  // For now, this ^ is the ethereum address in my peer's metamask
+
   if (wire) {
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
     // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
-    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
+    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiary.balance));
   }
 
-  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
+  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiary.balance));
+
+  let connectionStatus;
+  if (wire) {
+    if (channel.status === 'running') {
+      connectionStatus = isBeneficiary ? 'uploading' : 'downloading';
+    } else if (channel.status === 'closing') {
+      connectionStatus = 'closing';
+    } else if (channel.status === 'proposed') {
+      connectionStatus = 'starting';
+    } else {
+      connectionStatus = 'unknown';
+    }
+  } else {
+    if (channel.status === 'closed') {
+      connectionStatus = 'finished';
+    } else {
+      connectionStatus = 'disconnected';
+    }
+  }
 
   return (
     <tr className="peerInfo" key={channelId}>
-      <td className="channel">{channelButton}</td>
-      <td className="channel-id">{channelId}</td>
-      <td className="peer-id">{peerAccount}</td>
-      <td className="transferred">
-        {dataTransferred}
-        <i className={isBeneficiary ? 'up' : 'down'}></i>
+      <td className={`channel ${channel.status}`}>
+        <div className={`dot ${connectionStatus}`}></div>
+        <span className={`status ${connectionStatus}`}>{connectionStatus}</span>
+        {/* temporal thing to show the true state instead of a parsed one */}
       </td>
-      {isBeneficiary ? (
-        <td className="earned">{weiTransferred}</td>
-      ) : (
-        <td className="paid">-{weiTransferred}</td>
-      )}
+      <td className="peer-id">
+        <Tooltip message={peerSelectedAddress}>
+          <Badge
+            badgeContent={
+              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
+            }
+            color={isBeneficiary ? 'primary' : 'error'}
+            overlap={'circle'}
+            showZero={false}
+            max={999}
+          >
+            <Avatar>
+              <Blockie
+                opts={{
+                  seed: peerSelectedAddress,
+                  bgcolor: '#3531ff',
+                  size: 6,
+                  scale: 4,
+                  spotcolor: '#000'
+                }}
+              />
+            </Avatar>
+          </Badge>
+        </Tooltip>
+      </td>
+      <td className="transferred">
+        <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
+        <div className="amount">{dataTransferred + ' '}</div>
+      </td>
+      <td className="exchanged">
+        <div className="type">{isBeneficiary ? 'earned' : 'spent'}</div>
+        <div className="amount">{weiTransferred + ' '}</div>
+      </td>
     </tr>
   );
 }
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
+  const statuses = ['running', 'closing', 'proposing', 'closed'];
+
   const channelsInfo = _.keys(channels)
     .filter(
-      id => channels[id].payer === mySigningAddress || channels[id].beneficiary === mySigningAddress
+      id =>
+        channels[id].payer.signingAddress === mySigningAddress ||
+        channels[id].beneficiary.signingAddress === mySigningAddress
     )
-    .sort((id1, id2) => Number(id1) - Number(id2));
+    .sort(
+      (id1, id2) =>
+        statuses.indexOf(channels[id1].status) - statuses.indexOf(channels[id2].status) ||
+        Number(id1) - Number(id2)
+    );
   return (
     <section className="wires-list">
       <table className="wires-list-table">
@@ -88,7 +150,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
           <thead>
             <tr className="peerInfo">
               <td>Status</td>
-              <td>Channel</td>
               <td>Peer</td>
               <td>Data</td>
               <td>Funds</td>
@@ -101,7 +162,9 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
               key,
               channels,
               torrent,
-              channels[key].beneficiary === mySigningAddress ? 'beneficiary' : 'payer'
+              channels[key].beneficiary.signingAddress === mySigningAddress
+                ? 'beneficiary'
+                : 'payer'
               // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
               // ,context.paymentChannelClient.challengeChannel
             )

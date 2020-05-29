@@ -10,7 +10,6 @@ import {
 } from 'xstate';
 import {DomainBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
 
-import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {
@@ -26,7 +25,8 @@ import {serializeDomainBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
 import {ChannelChainInfo} from '../chain';
-
+import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: BigNumber;
@@ -219,7 +219,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
 
   const stateVars = {
     outcome: initialOutcome,
-    turnNum: bigNumberify(0),
+    turnNum: Zero,
     isFinal: false,
     appData: '0x0'
   };

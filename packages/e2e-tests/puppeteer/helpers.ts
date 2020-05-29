@@ -83,7 +83,7 @@ export async function setupLogging(
 // https://github.com/puppeteer/puppeteer/issues/2977
 export async function waitForAndClickButton(
   page: Page,
-  frame: Frame,
+  frame: Frame | Page,
   selector: string
 ): Promise<void> {
   try {
@@ -161,7 +161,8 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
 export async function setUpBrowser(
   headless: boolean,
   etherlimeAccountIndex?: number,
-  slowMo?: number
+  slowMo?: number,
+  usePipe = false
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;
@@ -169,6 +170,7 @@ export async function setUpBrowser(
     browser = await puppeteer.launch({
       headless,
       slowMo,
+      pipe: usePipe,
       devtools: !headless,
       // Keep code here for convenience... if you want to use redux-dev-tools
       // then download and unzip the release from Github and specify the location.
@@ -186,7 +188,11 @@ export async function setUpBrowser(
       args: [
         // Needed to inject web3.js code into wallet iframe
         // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
-        '--disable-features=site-per-process'
+        '--disable-features=site-per-process',
+        // https://github.com/puppeteer/puppeteer/issues/1175#issuecomment-369728215
+        '--disable-dev-shm-usage',
+        // https://github.com/puppeteer/puppeteer/issues/3683#issuecomment-453236421
+        '--no-sandbox'
       ]
     });
     metamask = new FakeMetaMask();
@@ -197,6 +203,8 @@ export async function setUpBrowser(
     browser = await dappeteer.launch(puppeteer, {
       headless: false,
       slowMo,
+      pipe: usePipe,
+
       //, Needed to allow both windows to execute JS at the same time
       ignoreDefaultArgs: [
         '--disable-background-timer-throttling',
@@ -215,6 +223,9 @@ export async function setUpBrowser(
     metamask = await dappeteer.getMetamask(browser);
 
     if (etherlimeAccountIndex && TARGET_NETWORK === 'localhost') {
+      if (etherlimeAccountIndex === 6) {
+        throw new Error('STOP! You are using the same private key as the hub. Expect nonce errors');
+      }
       // if targeting ropsten, use dappeteer default account for now
       await metamask.importPK(ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey);
       console.log(`imported ${ETHERLIME_ACCOUNTS[etherlimeAccountIndex].privateKey}`);
@@ -333,19 +344,24 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   return new Promise(
     (resolve, reject) =>
       setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
-      page.exposeFunction(doneFunc, resolve).then(() => {
-        page.evaluate(
-          `
-          ${cb} = channelStatus => {
-            if (${done}) {
-              window.${doneFunc}('Done');
-              window.channelProvider.off('ChannelUpdated', ${cb});
-            } 
-          }
-          window.channelProvider.on('ChannelUpdated', ${cb});
-          `
-        );
-      })
+      page
+        .exposeFunction(doneFunc, resolve)
+        .then(() => {
+          page
+            .evaluate(
+              `
+              ${cb} = channelStatus => {
+                if (${done}) {
+                  window.${doneFunc}('Done');
+                  window.channelProvider.off('ChannelUpdated', ${cb});
+                } 
+              }
+              window.channelProvider.on('ChannelUpdated', ${cb});
+              `
+            )
+            .catch(reject);
+        })
+        .catch(reject)
   );
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
@@ -376,7 +392,7 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   await closingIframeB.waitForSelector(closingText);
 }
 
-export async function prepareStubUploadFile(path: string, repeats = 100_000): Promise<void> {
+export async function prepareStubUploadFile(path: string, repeats = 20_000): Promise<void> {
   const uniqueContent = Date.now();
   console.log(`Make Stub file with seed ${Date.now()}`);
   const content = `web3torrent-${uniqueContent}\n`.repeat(repeats);

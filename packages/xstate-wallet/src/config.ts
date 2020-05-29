@@ -1,5 +1,5 @@
-import {AddressZero} from 'ethers/constants';
-import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from '@ethersproject/constants';
+import {BigNumber} from 'ethers';
 import {Destination} from './store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -40,14 +40,22 @@ export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
 export const NITRO_ADJUDICATOR_ADDRESS: string =
   process.env.NITRO_ADJUDICATOR_ADDRESS || AddressZero;
 
+export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || AddressZero;
+
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
-export const CHALLENGE_DURATION = bigNumberify(process.env.CHALLENGE_DURATION || '0x12c');
+export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION || '0x12c');
 
 export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
 
 // TODO: Embed this inside logger.ts
 export const ADD_LOGS = !!LOG_DESTINATION;
+
+// When logging, we default to 'info', as most logs happen at this level.
+// Some very large classes are serialized at the 'trace' level
+// We probably don't want these logged to the console, but strictly enabling this
+// in the browser might sometimes be helpful
+export const LOG_LEVEL = ADD_LOGS ? process.env.LOG_LEVEL || 'info' : 'silent';
 
 export const HUB = {
   destination: HUB_DESTINATION,

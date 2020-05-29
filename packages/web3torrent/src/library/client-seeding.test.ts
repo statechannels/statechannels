@@ -4,7 +4,8 @@ import {
   defaultFileMagnetURI,
   defaultSeedingOptions,
   defaultTorrentHash,
-  mockMetamask
+  mockMetamask,
+  togglePeerByChannel
 } from './testing/test-utils';
 import WebTorrentPaidStreamingClient, {ClientEvents, PaidStreamingTorrent} from './web3torrent-lib';
 import {PaymentChannelClient} from '../clients/payment-channel-client';
@@ -85,8 +86,10 @@ describe('Seeding and Leeching', () => {
 
   it('should reach a ready-for-leeching, choked state', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
-        expect(torrentPeers[`${leecherA.pseAccount}`].allowed).toEqual(false);
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers, seedingChannelId}) => {
+        expect(torrentPeers[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
+          true
+        );
         done();
       });
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
@@ -95,11 +98,13 @@ describe('Seeding and Leeching', () => {
 
   it('should be able to unchoke and finish a download', async done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
-        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
-          expect(torrentPeers[`${leecherA.pseAccount}`].allowed).toEqual(true);
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount, seedingChannelId}) => {
+        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers, seedingChannelId}) => {
+          expect(torrentPeers[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
+            true
+          );
         });
-        seeder.togglePeer(seededTorrent.infoHash, peerAccount);
+        togglePeerByChannel(seeder, seededTorrent.infoHash, seedingChannelId);
 
         leecherA.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
           expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
@@ -117,11 +122,11 @@ describe('Seeding and Leeching', () => {
     const knownPeers = new Set();
 
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.on(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
+      seeder.on(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount, seedingChannelId}) => {
         // Make sure we toggle peers only twice
         if (!knownPeers.has(peerAccount)) {
           knownPeers.add(peerAccount);
-          seeder.togglePeer(seededTorrent.infoHash, peerAccount);
+          togglePeerByChannel(seeder, seededTorrent.infoHash, seedingChannelId);
         }
       });
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});

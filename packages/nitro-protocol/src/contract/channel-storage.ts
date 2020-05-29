@@ -4,14 +4,14 @@ import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
 import {Address, Bytes, Bytes32, Uint48} from './types';
 
-export interface ChannelStorage {
+export interface ChannelData {
   turnNumRecord: Uint48;
   finalizesAt: Uint48;
   state?: State;
   challengerAddress?: Address;
   outcome?: Outcome;
 }
-const CHANNEL_STORAGE_TYPE = `tuple(
+const CHANNEL_DATA_TYPE = `tuple(
   uint256 turnNumRecord,
   uint256 finalizesAt,
   bytes32 stateHash,
@@ -19,22 +19,22 @@ const CHANNEL_STORAGE_TYPE = `tuple(
   bytes32 outcomeHash
 )`;
 
-export interface ChannelStorageLite {
+export interface ChannelDataLite {
   finalizesAt: Uint48;
   state: State;
   challengerAddress: Address;
   outcome: Outcome;
 }
-const CHANNEL_STORAGE_LITE_TYPE = `tuple(
+const CHANNEL_DATA_LITE_TYPE = `tuple(
   uint256 finalizesAt,
   bytes32 stateHash,
   address challengerAddress,
   bytes32 outcomeHash
 )`;
 
-export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
-  const {turnNumRecord, finalizesAt} = channelStorage;
-  const hash = utils.keccak256(encodeChannelStorage(channelStorage));
+export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
+  const {turnNumRecord, finalizesAt} = channelData;
+  const hash = utils.keccak256(encodeChannelData(channelData));
   const fingerprint = utils.hexDataSlice(hash, 12);
 
   const storage =
@@ -47,15 +47,15 @@ export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
 }
 
 export function parseChannelStorageHash(
-  channelStorageHashed: Bytes32
+  channelStorageHash: Bytes32
 ): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
-  validateHexString(channelStorageHashed);
+  validateHexString(channelStorageHash);
 
   //
   let cursor = 2;
-  const turnNumRecord = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
-  const finalizesAt = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
-  const fingerprint = '0x' + channelStorageHashed.slice(cursor);
+  const turnNumRecord = '0x' + channelStorageHash.slice(cursor, (cursor += 12));
+  const finalizesAt = '0x' + channelStorageHash.slice(cursor, (cursor += 12));
+  const fingerprint = '0x' + channelStorageHash.slice(cursor);
 
   return {
     turnNumRecord: asNumber(turnNumRecord),
@@ -65,13 +65,13 @@ export function parseChannelStorageHash(
 }
 const asNumber: (s: string) => number = s => utils.bigNumberify(s).toNumber();
 
-export function channelStorageStruct({
+export function channelDataStruct({
   finalizesAt,
   state,
   challengerAddress,
   turnNumRecord,
   outcome,
-}: ChannelStorage) {
+}: ChannelData) {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -93,16 +93,16 @@ export function channelStorageStruct({
   return {turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash};
 }
 
-export function encodeChannelStorage(storage: ChannelStorage): Bytes {
-  return utils.defaultAbiCoder.encode([CHANNEL_STORAGE_TYPE], [channelStorageStruct(storage)]);
+export function encodeChannelData(data: ChannelData): Bytes {
+  return utils.defaultAbiCoder.encode([CHANNEL_DATA_TYPE], [channelDataStruct(data)]);
 }
 
-export function channelStorageLiteStruct({
+export function channelDataLiteStruct({
   finalizesAt,
   challengerAddress,
   state,
   outcome,
-}: ChannelStorageLite) {
+}: ChannelDataLite) {
   return {
     finalizesAt,
     challengerAddress,
@@ -111,10 +111,10 @@ export function channelStorageLiteStruct({
   };
 }
 
-export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite): Bytes {
+export function encodeChannelStorageLite(channelDataLite: ChannelDataLite): Bytes {
   return utils.defaultAbiCoder.encode(
-    [CHANNEL_STORAGE_LITE_TYPE],
-    [channelStorageLiteStruct(channelStorageLite)]
+    [CHANNEL_DATA_LITE_TYPE],
+    [channelDataLiteStruct(channelDataLite)]
   );
 }
 

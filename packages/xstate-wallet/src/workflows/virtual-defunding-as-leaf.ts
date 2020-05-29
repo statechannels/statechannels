@@ -200,6 +200,6 @@ const services = (store: Store): WorkflowServices => ({
   releaseFunds: releaseFunds(store),
   getApplicationDomain: getApplicationDomain(store)
 });
-const options = (store: Store) => ({services: services(store)});
+const options = (store: Store) => ({services: services(store), actions: {releaseLock}});
 
 export const machine = (store: Store) => Machine(config).withConfig(options(store));

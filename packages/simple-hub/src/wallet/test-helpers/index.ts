@@ -14,7 +14,7 @@ import {
   cHubParticipantId,
   cHubChainDestination
 } from '../../constants';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero} from '@ethersproject/constants';
 import * as _ from 'lodash/fp';
 
 const wallet1 = new ethers.Wallet(

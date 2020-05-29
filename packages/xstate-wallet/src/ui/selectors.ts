@@ -5,9 +5,9 @@ import {
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {DomainBudget} from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {BigNumber} from 'ethers/utils';
 import {unreachable} from '../utils';
 import {Interpreter} from 'xstate';
+import {BigNumber} from 'ethers';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState

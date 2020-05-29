@@ -15,8 +15,17 @@ export const LayoutHeader: React.FC = () => {
           <span className="header-logo-hidden">Web3Torrent Logo - Go to Home</span>
         </Link>
         <div className="actions-container">
-          <FormButton name="budgets" onClick={() => history.push(RoutePath.Budgets)}>
-            Your budget
+          <FormButton
+            name="budgets"
+            onClick={() => {
+              if (history.location.pathname === RoutePath.Budgets) {
+                history.goBack();
+              } else {
+                history.push(RoutePath.Budgets);
+              }
+            }}
+          >
+            {history.location.pathname === RoutePath.Budgets ? 'Back' : 'Your budget'}
           </FormButton>
           <FormButton name="upload" onClick={() => history.push(RoutePath.Upload)}>
             Upload

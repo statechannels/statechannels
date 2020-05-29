@@ -1,11 +1,11 @@
 import {interpret} from 'xstate';
-import {ethers} from 'ethers';
+import {ethers, BigNumber} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {Store} from '../../store';
 import {StateVariables, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {bigNumberify} from 'ethers/utils';
+
 import {simpleEthAllocation, exists} from '../../utils';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {Application} from '..';
@@ -23,7 +23,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       appDefinition: ethers.constants.AddressZero,
       participants,
       outcome: simpleEthAllocation([]),
-      challengeDuration: bigNumberify(500),
+      challengeDuration: BigNumber.from(500),
       requestId: 5,
       fundingStrategy: 'Direct',
       applicationDomain: 'localhost'
@@ -182,7 +182,7 @@ it('starts concluding when requested', async () => {
     )
   };
   const actions: Partial<Application.WorkflowActions> = {
-    sendCloseChannelResponse: jest.fn().mockReturnValue(
+    closeChannel: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
       })
@@ -197,8 +197,8 @@ it('starts concluding when requested', async () => {
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('attemptToSignFinalState');
-    expect(services.signFinalStateIfMyTurn).toHaveBeenCalled();
+    expect(service.state.value).toEqual('running');
+    expect(actions.closeChannel).toHaveBeenCalled();
   }, 2000);
 });
 

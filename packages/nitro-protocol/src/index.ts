@@ -53,7 +53,7 @@ export {
   hashOutcome,
 } from './contract/outcome';
 
-export {State, VariablePart, getVariablePart} from './contract/state';
+export {State, VariablePart, getVariablePart, getFixedPart} from './contract/state';
 export {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 export {
   createDepositTransaction as createETHDepositTransaction,

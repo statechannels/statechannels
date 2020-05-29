@@ -16,10 +16,10 @@ import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {createMockGuard, unreachable} from '../utils';
 
-import {Store} from '../store';
+import {Store, Errors} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
@@ -30,10 +30,11 @@ import {
   PlayerRequestConclude,
   OpenEvent
 } from '../event-types';
-import {FundingStrategy} from '@statechannels/client-api-schema';
+import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '../serde/app-messages/serialize';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
+import {Zero} from '@ethersproject/constants';
 
 export interface WorkflowContext {
   applicationDomain: string;
@@ -66,8 +67,6 @@ type WorkflowGuards = Guards<
 
 export interface WorkflowActions {
   sendChallengeChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
-  sendCloseChannelResponse: Action<ChannelIdExists, any>;
-  sendCloseChannelRejection: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
@@ -76,7 +75,8 @@ export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
   spawnObservers: AssignAction<ChannelIdExists, any>;
-  updateStoreAndSendResponse: Action<WorkflowContext, PlayerStateUpdate>;
+  updateChannel: Action<WorkflowContext, PlayerStateUpdate>;
+  closeChannel: Action<WorkflowContext, PlayerRequestConclude>;
 }
 
 export type WorkflowEvent =
@@ -121,20 +121,8 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
-const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) => {
-  const entry = await store.getEntry(channelId);
-
-  if (entry.myTurn) {
-    const {supported} = entry;
-    return store.signAndAddState(channelId, {
-      ...supported,
-      turnNum: supported.turnNum.add(1),
-      isFinal: true
-    });
-  } else {
-    throw Error('Not your turn');
-  }
-};
+const signFinalStateIfMyTurn = (store: Store) => async ({channelId}: ChannelIdExists) =>
+  store.updateChannel(channelId, {isFinal: true});
 
 const generateConfig = (
   actions: WorkflowActions,
@@ -203,28 +191,20 @@ const generateConfig = (
         SPAWN_OBSERVERS: {actions: actions.spawnObservers},
         PLAYER_STATE_UPDATE: {
           target: 'running',
-          actions: [actions.updateStoreAndSendResponse]
+          actions: [actions.updateChannel]
         },
         CHANNEL_UPDATED: [
           {target: 'closing', cond: guards.channelClosing},
           {target: 'sendChallenge', cond: guards.channelChallenging}
         ],
         PLAYER_REQUEST_CONCLUDE: {
-          target: 'attemptToSignFinalState',
-          actions: [actions.assignRequestId]
+          target: 'running',
+          actions: [actions.closeChannel],
+          after: {[CONCLUDE_TIMEOUT]: {target: 'sendChallenge', cond: guards.channelClosing}}
         },
 
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
-    },
-
-    attemptToSignFinalState: {
-      invoke: {
-        src: signFinalStateIfMyTurn.name,
-        onDone: {target: 'closing', actions: [actions.sendCloseChannelResponse]},
-        onError: {target: 'running', actions: [actions.sendCloseChannelRejection]}
-      },
-      after: {[CONCLUDE_TIMEOUT]: 'sendChallenge'}
     },
 
     // This could handled by another workflow instead of the application workflow
@@ -286,15 +266,6 @@ export const workflow = (
     );
 
   const actions: WorkflowActions = {
-    sendCloseChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
-      const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-    },
-
-    sendCloseChannelRejection: async (context: RequestIdExists & ChannelIdExists) => {
-      await messagingService.sendError(context.requestId, {code: 300, message: 'Not your turn'});
-    },
-
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
@@ -348,22 +319,61 @@ export const workflow = (
     assignRequestId: assign((context, event: JoinChannelEvent | PlayerRequestConclude) => ({
       requestId: event.requestId
     })),
-    updateStoreAndSendResponse: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
-      // TODO: This should probably be done in a service and we should handle the failure cases
-      // For now we update the store and then send the response in one action so the response has the latest state
+    updateChannel: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
-        const entry = await store.updateChannel(event.channelId, event);
-        await messagingService.sendResponse(event.requestId, serializeChannelEntry(entry));
+        try {
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, event))
+          );
+        } catch (error) {
+          const matches = reason => new RegExp(reason).test(error.message);
+
+          // TODO: Catch other errors
+          let message: ErrorResponse['error'];
+          if (matches(Errors.channelMissing)) message = {code: 400, message: 'Channel not found'};
+          else if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
+          else {
+            message = {code: 500, message: 'Wallet error'};
+            console.error({error}, 'UpdateChannel call failed with error 500');
+          }
+
+          messagingService.sendError(event.requestId, message);
+        }
+      }
+    },
+
+    closeChannel: async (context: ChannelIdExists, event: PlayerRequestConclude) => {
+      if (context.channelId === event.channelId) {
+        try {
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
+          );
+        } catch (error) {
+          const matches = reason => new RegExp(reason).test(error.message);
+
+          let message: ErrorResponse['error'];
+          if (matches(Errors.notMyTurn)) message = {code: 300, message: 'Not your turn'};
+          else if (matches(Errors.channelMissing))
+            message = {code: 301, message: 'Channel not found'};
+          else {
+            message = {code: 500, message: 'Wallet error'};
+            console.error({error}, 'CloseChannel call failed with error 500');
+          }
+
+          messagingService.sendError(event.requestId, message);
+        }
       }
     }
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+    channelOpen: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
       !event.storeEntry.latestSignedByMe.isFinal,
 
-    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.latest?.isFinal,
+    channelClosing: (_: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.latest?.isFinal, // TODO: Should use supported
 
     channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.isChallenging,
@@ -394,12 +404,12 @@ export const workflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: bigNumberify(0),
+        turnNum: Zero,
         isFinal: false
       };
       const {channelId: targetChannelId} = await store.createChannel(
         participants,
-        bigNumberify(challengeDuration),
+        BigNumber.from(challengeDuration),
         stateVars,
         appDefinition,
         applicationDomain
@@ -443,15 +453,14 @@ const mockGuards: WorkflowGuards = {
 const mockActions: Record<keyof WorkflowActions, string> = {
   assignChannelId: 'assignChannelId',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
-  sendCloseChannelResponse: 'sendCloseChannelResponse',
-  sendCloseChannelRejection: 'sendCloseChannelRejection',
   sendChallengeChannelResponse: 'sendChallengeChannelResponse',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   spawnObservers: 'spawnObservers',
-  updateStoreAndSendResponse: 'updateStoreAndSendResponse',
+  updateChannel: 'updateChannel',
+  closeChannel: 'closeChannel',
   assignRequestId: 'assignRequestId'
 };
 

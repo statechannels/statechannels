@@ -2,10 +2,10 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
 import {SimpleHub} from './simple-hub';
-import {bigNumberify} from 'ethers/utils';
+
 import {firstState, createSignatureEntry, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 import {add, simpleEthAllocation, makeDestination, simpleEthGuarantee} from '../../utils';
 
 import {
@@ -24,16 +24,17 @@ import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
 import {FakeChain} from '../../chain';
 import {TestStore} from './store';
+import {BigNumber} from 'ethers';
 
 jest.setTimeout(20000);
 
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants: targetParticipants,
@@ -41,7 +42,7 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 const jointChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants: jointParticipants,
@@ -49,7 +50,7 @@ const jointChannel: ChannelConstants = {
 };
 const jointChannelId = calculateChannelId(jointChannel);
 
-const amounts = [bigNumberify(2), bigNumberify(3)];
+const amounts = [BigNumber.from(2), BigNumber.from(3)];
 const outcome: Outcome = simpleEthAllocation([
   {destination: jointParticipants[ParticipantIdx.A].destination, amount: amounts[0]},
   {destination: jointParticipants[ParticipantIdx.Hub].destination, amount: amounts.reduce(add)},
@@ -63,7 +64,7 @@ const hubContext: VirtualFundingAsHub.Init = {
   [ParticipantIdx.B]: {}
 };
 
-const ledgerAmounts = [4, 4].map(bigNumberify);
+const ledgerAmounts = [4, 4].map(BigNumber.from);
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 let hubStore: TestStore;
 let aStore: TestStore;
@@ -132,7 +133,7 @@ test('virtual funding with smart hub', async () => {
     expect(aService.state.value).toEqual('success');
     const {supported: supportedState} = await aStore.getEntry(jointChannelId);
     const outcome = supportedState.outcome;
-    const amount = bigNumberify(5);
+    const amount = BigNumber.from(5);
     expect(outcome).toMatchObject(
       simpleEthAllocation([
         {destination: makeDestination(targetChannelId), amount},
@@ -215,7 +216,7 @@ test('virtual funding with a simple hub', async () => {
     expect(funding).toEqual({type: 'Guarantee', guarantorChannelId: expect.any(String)});
     guarantorChannelId = (funding as any).guarantorChannelId;
 
-    const amount = bigNumberify(5);
+    const amount = BigNumber.from(5);
     expect(supported.outcome).toMatchObject(
       simpleEthAllocation([
         {destination: makeDestination(targetChannelId), amount},

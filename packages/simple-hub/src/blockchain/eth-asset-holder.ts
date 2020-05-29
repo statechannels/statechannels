@@ -1,10 +1,10 @@
 import AsyncLock from 'async-lock';
-import {Contract, ContractFactory, ethers, providers, BigNumber} from 'ethers';
+import {Contract, ContractFactory, ethers, providers, BigNumber, utils} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {cHubChainPK} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
-import {TransactionResponse} from 'ethers/providers';
+import {TransactionResponse} from '@ethersproject/providers';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -21,6 +21,7 @@ export async function makeDeposits(
   }[]
 ) {
   log.info(`makeDeposit: attempting to make ${depositsToMake.length} deposits`);
+
   await Promise.all(
     depositsToMake.map(depositToMake => {
       log.info(
@@ -33,16 +34,14 @@ export async function makeDeposits(
 }
 
 async function fund(channelID: string, value: BigNumber): Promise<string> {
-  // We lock to avoid this issue: https://github.com/ethers-io/ethers.js/issues/363
-  // When ethers.js attempts to run multiple transactions around the same time it results in an error
-  // due to the nonce getting out of sync.
-  // To avoid this we only allow deposit transactions to happen serially.
-  return lock.acquire('depositing', async release => {
-    if (!ethAssetHolder) ethAssetHolder = await createEthAssetHolder();
+  if (!ethAssetHolder) {
+    const createdEthAssetHolder = await createEthAssetHolder();
+    ethAssetHolder = ethAssetHolder ?? createdEthAssetHolder;
+  }
 
+  await lock.acquire(channelID, async () => {
     const expectedHeld: BigNumber = await ethAssetHolder.holdings(channelID);
     if (expectedHeld.gte(value)) {
-      release();
       return;
     }
 
@@ -50,11 +49,15 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
       {value: value.sub(expectedHeld).toHexString()},
       'submitting deposit transaction to eth asset holder'
     );
+
+    // Gas Price: in theory, it would be nice to use provider.getGasPrice() method to estimate a competitive gas price
+    // In practice, getGasPrice() seems to always return 1GWei.
     const tx: TransactionResponse = await ethAssetHolder.deposit(
       channelID,
       expectedHeld.toHexString(),
       value,
       {
+        gasPrice: utils.parseUnits('1000', 'gwei'),
         value: value.sub(expectedHeld)
       }
     );
@@ -65,11 +68,9 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     await tx.wait();
 
     log.info({transaction: {hash: tx.hash}}, 'Transaction mined');
-
-    const holdings = (await ethAssetHolder.holdings(channelID)).toHexString();
-    release();
-    return holdings;
   });
+
+  return (await ethAssetHolder.holdings(channelID)).toHexString();
 }
 
 export async function createEthAssetHolder() {

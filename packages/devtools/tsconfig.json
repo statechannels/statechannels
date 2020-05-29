@@ -6,8 +6,8 @@
     "module": "commonjs",
     "outDir": "lib",
     "target": "es2015",
-    "types": ["react", "jest"],
-    "types": ["node", "jest"],
+    "types": ["node", "react", "jest"],
+    "esModuleInterop": true,
 
     /* The way setupGanache is written is hard to re-write in 5 min to fix this */
     "noImplicitAny": false

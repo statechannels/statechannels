@@ -3,7 +3,10 @@ import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
+import {
+  channelDataToChannelStorageHash,
+  parseChannelStorageHash,
+} from '../../../src/contract/channel-storage';
 // @ts-ignore
 import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
 
@@ -25,8 +28,8 @@ describe('storage', () => {
     ${123456}     | ${789}
   `('Hashing and data retrieval', async storage => {
     const blockchainStorage = {...storage, ...zeroData};
-    const blockchainHash = await ForceMove.hashChannelStorage(blockchainStorage);
-    const clientHash = hashChannelStorage(storage);
+    const blockchainHash = await ForceMove.hashChannelData(blockchainStorage);
+    const clientHash = channelDataToChannelStorageHash(storage);
 
     const expected = {...storage, fingerprint: '0x' + clientHash.slice(2 + 24)};
 
@@ -38,7 +41,9 @@ describe('storage', () => {
 
     // Testing getData is a little more laborious
     await (await ForceMove.setChannelStorage(HashZero, blockchainStorage)).wait();
-    const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getData(HashZero);
+    const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getChannelStorage(
+      HashZero
+    );
     expect({turnNumRecord, finalizesAt, fingerprint: f._hex}).toMatchObject(expected);
   });
 });
@@ -69,7 +74,7 @@ describe('_requireChannelOpen', () => {
 
       await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
-        hashChannelStorage(blockchainStorage)
+        channelDataToChannelStorageHash(blockchainStorage)
       );
 
       const tx = ForceMove.requireChannelOpen(channelId);

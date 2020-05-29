@@ -8,13 +8,13 @@ import {getStateSignerAddress} from './signatures';
 import {SignedState} from '.';
 import {Signature} from 'ethers/utils';
 
-export async function getData(provider, contractAddress: string, channelId: string) {
+export async function getChannelStorage(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
     contractAddress,
     forceMoveTrans.ForceMoveContractInterface,
     provider
   );
-  return await forceMove.getData(channelId);
+  return await forceMove.getChannelStorage(channelId);
 }
 
 export function createForceMoveTransaction(
@@ -85,9 +85,9 @@ export function createSignatureArguments(
 
   // Get a list of all unique signed states.
   const uniqueSignedStates = signedStates.filter((s, i, a) => a.indexOf(s) === i);
-  // Get a list of unique states ignoring their signatures
-  // This allows us to create a single state with multiple signatures
-  // which is required by the contracts
+  // We may receive multiple Signed States which have the same state and different signatures
+  // so we get a list of unique states ignoring their signatures
+  // which allows us to create a single state with multiple signatures
   const uniqueStates = uniqueSignedStates.map(s => s.state).filter((s, i, a) => a.indexOf(s) === i);
   const signatures = new Array<Signature>(uniqueStates.length);
   for (let i = 0; i < uniqueStates.length; i++) {
@@ -103,5 +103,9 @@ export function createSignatureArguments(
     }
   }
 
-  return {states, signatures, whoSignedWhat};
+  return {
+    states,
+    signatures,
+    whoSignedWhat,
+  };
 }

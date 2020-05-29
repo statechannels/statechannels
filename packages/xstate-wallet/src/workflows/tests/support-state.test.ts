@@ -4,11 +4,10 @@ import {Init, machine as createChannel} from '../create-and-fund';
 import {machine as concludeChannel} from '../conclude-channel';
 
 import {Store, SignedState} from '../../store';
-import {bigNumberify} from 'ethers/utils';
 
 import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero, Zero} from '@ethersproject/constants';
 
 import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
 
@@ -18,15 +17,16 @@ import {FakeChain} from '../../chain';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 
 import {TestStore} from './store';
+import {BigNumber} from 'ethers';
 
 jest.setTimeout(5000);
 
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: Zero,
   chainId,
   challengeDuration,
   participants,
@@ -36,7 +36,7 @@ const targetChannelId = calculateChannelId(targetChannel);
 
 const destinations = participants.map(p => p.destination);
 
-const amounts = [bigNumberify(7), bigNumberify(5)];
+const amounts = [BigNumber.from(7), BigNumber.from(5)];
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',

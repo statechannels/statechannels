@@ -10,7 +10,7 @@ import log = require('loglevel');
 
 import {EventEmitter} from 'eventemitter3';
 import {
-  TokenBudgetRequest,
+  ApproveBudgetAndFundParams,
   CloseAndWithdrawParams,
   ChannelResult,
   CloseChannelParams,
@@ -332,7 +332,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<DomainBudget> {
+  private async approveBudgetAndFund(params: ApproveBudgetAndFundParams): Promise<DomainBudget> {
     // TODO: Does this need to be delayed?
     this.budget = {
       hubAddress: params.hub.signingAddress,

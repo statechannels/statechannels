@@ -119,7 +119,7 @@ With these considerations in mind, the ForceMove interface should be something l
         bytes32 outcomeHash;
     }
 
-    struct ChannelStorage {
+    struct ChannelData {
         uint256 turnNumRecord;
         uint256 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))

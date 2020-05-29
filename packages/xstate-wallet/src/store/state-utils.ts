@@ -19,12 +19,12 @@ import {
   convertAddressToBytes32,
   convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
+import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import _ from 'lodash';
-import {Wallet} from 'ethers';
+import {Wallet, BigNumber} from 'ethers';
 import {SignatureEntry} from './channel-store-entry';
 import {logger} from '../logger';
-
+import {Zero} from '@ethersproject/constants';
 function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
   const channel = {
@@ -52,9 +52,9 @@ export function fromNitroState(state: NitroState): State {
     isFinal,
     appData,
     outcome: fromNitroOutcome(outcome),
-    turnNum: bigNumberify(turnNum),
-    challengeDuration: bigNumberify(challengeDuration),
-    channelNonce: bigNumberify(channel.channelNonce),
+    turnNum: BigNumber.from(turnNum),
+    challengeDuration: BigNumber.from(challengeDuration),
+    channelNonce: BigNumber.from(channel.channelNonce),
     chainId: channel.chainId,
     participants: channel.participants.map(x => ({
       signingAddress: x,
@@ -147,7 +147,7 @@ export const firstState = (
 ): State => ({
   appData: appData || '0x',
   isFinal: false,
-  turnNum: bigNumberify(0),
+  turnNum: Zero,
   chainId: chainId || '0x01',
   channelNonce,
   challengeDuration,
@@ -166,7 +166,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
 
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
-    amount: bigNumberify(a.amount),
+    amount: BigNumber.from(a.amount),
     destination:
       a.destination.substr(2, 22) === '00000000000000000000'
         ? (convertBytes32ToAddress(a.destination) as Destination)

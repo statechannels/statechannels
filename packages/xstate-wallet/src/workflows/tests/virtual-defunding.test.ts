@@ -2,11 +2,10 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
 import {SimpleHub} from './simple-hub';
-import {bigNumberify, BigNumberish, BigNumber} from 'ethers/utils';
 
 import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {Participant, Outcome, SignedState, ChannelConstants, DomainBudget} from '../../store/types';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {AddressZero, HashZero} from '@ethersproject/constants';
 import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
 
 import {
@@ -21,11 +20,12 @@ import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 import {TestStore} from './store';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
+import {BigNumber, BigNumberish} from 'ethers';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = BigNumber.from(10);
 const appDefinition = AddressZero;
 const alice = participants[ParticipantIdx.A];
 const bob = participants[ParticipantIdx.B];
@@ -36,7 +36,7 @@ const bobAndHub = [bob, hub];
 
 let channelNonce = 0;
 const channelConstants = (participants: Participant[]): ChannelConstants => ({
-  channelNonce: bigNumberify(channelNonce++),
+  channelNonce: BigNumber.from(channelNonce++),
   chainId,
   challengeDuration,
   participants,
@@ -57,7 +57,7 @@ const state = (
   const state = {
     ...constants,
     isFinal: false,
-    turnNum: bigNumberify(turnNum),
+    turnNum: BigNumber.from(turnNum),
     appData: HashZero,
     outcome
   };
@@ -87,7 +87,7 @@ const state = (
   B: T, J, L2, G2
 */
 
-const targetAmounts = [2, 3].map(bigNumberify);
+const targetAmounts = [2, 3].map(BigNumber.from);
 const totalTargetAmount = targetAmounts.reduce(add);
 const targetChannel = channelConstants(aliceAndBob);
 const targetChannelId = calculateChannelId(targetChannel);
@@ -116,7 +116,7 @@ const guarantor1Outcome = simpleEthGuarantee(
 const guarantor1State = state(guarantor1, guarantor1Outcome);
 const guarantor1Id = calculateChannelId(guarantor1State);
 
-const ledger1Amounts = [5, 7].map(bigNumberify);
+const ledger1Amounts = [5, 7].map(BigNumber.from);
 const ledger1 = channelConstants(aliceAndHub);
 const ledger1Outcome = simpleEthAllocation([
   {destination: hub.destination, amount: ledger1Amounts[0]},
@@ -137,7 +137,7 @@ const guarantor2Outcome = simpleEthGuarantee(
 const guarantor2State = state(guarantor2, guarantor2Outcome);
 const guarantor2Id = calculateChannelId(guarantor2State);
 
-const ledger2Amounts = [5, 7].map(bigNumberify);
+const ledger2Amounts = [5, 7].map(BigNumber.from);
 const ledger2 = channelConstants(bobAndHub);
 const ledger2Outcome = simpleEthAllocation([
   {destination: makeDestination(hub.destination), amount: ledger2Amounts[0]},

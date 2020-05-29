@@ -8,12 +8,12 @@
     "@firebase/app": "0.5.2",
     "@firebase/database": "0.5.19",
     "@sentry/node": "5.15.5",
-    "@statechannels/nitro-protocol": "0.0.1",
+    "@statechannels/nitro-protocol": "0.1.0",
     "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
-    "ethers": "5.0.0-beta.184",
+    "ethers": "5.0.0-beta.187",
     "firebase": "7.11.0",
     "fp-ts": "2.5.3",
     "lodash": "4.17.15",
@@ -22,7 +22,7 @@
     "rxjs": "6.5.4"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.23",
+    "@statechannels/devtools": "0.1.1",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -60,7 +60,6 @@
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "hub:start:dev": "ts-node ./start-dev-server.ts",
     "hub:start:prod": "ts-node ./src/server.ts",
-    "hub:test": "jest --runInBand -c ./jest/jest.config.js",
     "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
@@ -70,6 +69,8 @@
     "prettier:check": "prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "yarn hub:test --runInBand"
+    "test": "jest --runInBand -c ./jest/jest.config.js",
+    "test:ci": "run-s test test:with-chain",
+    "test:with-chain": "jest --runInBand -c ./jest/jest.with-chain.config.js"
   }
 }

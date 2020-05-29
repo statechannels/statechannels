@@ -35,10 +35,9 @@ We use [etherlime](https://etherlime.gitbook.io/) for smart contract development
 
 To get started:
 
-1. Download the repo and `cd` into the directory.
+1. Download the repo, `cd` into the directory and run `yarn install`
 2. Run `yarn install`.
-3. Make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
-4. Run `yarn test`.
+3. Run `yarn test`.
 
 ## Documentation website
 

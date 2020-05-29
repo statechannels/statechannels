@@ -7,11 +7,6 @@ import {signChallengeMessage} from '../../signatures';
 import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
-// TODO: Currently we are setting some arbitrary gas limit
-// To avoid issues with Ganache sendTransaction and parsing BN.js
-// If we don't set a gas limit some transactions will fail
-const GAS_LIMIT = 3000000;
-
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 export const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
@@ -20,12 +15,6 @@ interface CheckpointData {
   states: State[];
   signatures: Signature[];
   whoSignedWhat: number[];
-}
-
-export function createGetDataTransaction(channelId: string): TransactionRequest {
-  return {
-    gasLimit: GAS_LIMIT,
-  };
 }
 
 export function createForceMoveTransaction(
@@ -67,7 +56,7 @@ export function createForceMoveTransaction(
     whoSignedWhat,
     challengerSignature,
   ]);
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 interface RespondArgs {
@@ -90,7 +79,7 @@ export function respondArgs({
 
 export function createRespondTransaction(args: RespondArgs): TransactionRequest {
   const data = ForceMoveContractInterface.functions.respond.encode(respondArgs(args));
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function createCheckpointTransaction({
@@ -102,7 +91,7 @@ export function createCheckpointTransaction({
     checkpointArgs({states, signatures, whoSignedWhat})
   );
 
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function checkpointArgs({states, signatures, whoSignedWhat}: CheckpointData): any[] {
@@ -122,7 +111,7 @@ export function createConcludeTransaction(
   const data = ForceMoveContractInterface.functions.conclude.encode(
     concludeArgs(states, signatures, whoSignedWhat)
   );
-  return {data, gasLimit: GAS_LIMIT};
+  return {data};
 }
 
 export function concludeArgs(

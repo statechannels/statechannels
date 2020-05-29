@@ -5,7 +5,7 @@ import {defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
+import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
 import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
@@ -82,15 +82,15 @@ beforeAll(async () => {
 // Scenarios are synonymous with channelNonce:
 
 const acceptsWhenOpen = 'It accepts for an open channel, and updates storage correctly, ';
-const accepts1 = acceptsWhenOpen + 'when the slot is empty, n states submitted';
-const accepts2 = acceptsWhenOpen + 'when the slot is empty, 1 state submitted';
-const accepts3 = acceptsWhenOpen + 'when the slot is not empty, n states submitted';
+const accepts1 = acceptsWhenOpen + 'when the slot is empty, 1 state submitted';
+const accepts2 = acceptsWhenOpen + 'when the slot is empty, 3 states submitted';
+const accepts3 = acceptsWhenOpen + 'when the slot is not empty, 3 states submitted';
 const accepts4 = acceptsWhenOpen + 'when the slot is not empty, 1 state submitted';
 
 const acceptsWhenChallengePresent =
   'It accepts when a challenge is present, and updates storage correctly, ';
 const accepts5 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, 1 state';
-const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, n states';
+const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, 3 states';
 
 const revertsWhenOpenIf = 'It reverts for an open channel if ';
 const reverts1 = revertsWhenOpenIf + 'the turnNumRecord does not increase';
@@ -221,14 +221,14 @@ describe('forceMove', () => {
           variableParts[variableParts.length - 1].appData
         );
 
-        const expectedChannelStorage: ChannelStorage = {
+        const expectedChannelStorage: ChannelData = {
           turnNumRecord: largestTurnNum,
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
           outcome,
         };
-        const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
+        const expectedChannelStorageHash = channelDataToChannelStorageHash(expectedChannelStorage);
 
         // Check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

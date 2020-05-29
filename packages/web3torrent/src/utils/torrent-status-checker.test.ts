@@ -47,7 +47,8 @@ describe('Torrent Status Checker', () => {
         numPeers: 2,
         done: false,
         timeRemaining: 50000,
-        paused: undefined
+        paused: undefined,
+        wires: []
       };
 
       const getSpy = jest.spyOn(web3TorrentClient, 'get').mockImplementation(() => ({

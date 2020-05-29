@@ -468,11 +468,16 @@ jobs:
       - checkout
       - <<: *restore_dep
       - <<: *restore_built_artifacts
-      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./persistent-seeder" ! -path "./devtools" -exec rm -rf {} ';'
+      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./persistent-seeder" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
       - build_push_release:
           dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
           pipeline: persistent-seeder
           app: persistent-seeder-production
+      - slack/status:
+          # notify-deployments
+          channel: C0125NB072B
+          failure_message: ':red_circle: Failed to release persistent-seeder at $CIRCLE_SHA1!'
+          success_message: ':tada: Released persistent-seeder at $CIRCLE_SHA1 '
 
   e2e-test-w3t-production:
     resource_class: large

@@ -1,16 +1,16 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "George Knee",
-  "bugs": "https://github.com/statechannels/nitro-protocol/",
+  "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
     "@openzeppelin/contracts": "3.0.0-beta.0",
     "ethers": "4.0.45"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.23",
+    "@statechannels/devtools": "0.1.1",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -46,8 +46,7 @@
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "ts-jest": "25.0.0",
     "ts-node": "8.9.1",
-    "typescript": "3.7.5",
-    "write-json-file": "4.2.0"
+    "typescript": "3.7.5"
   },
   "directories": {
     "test": "test"
@@ -60,7 +59,7 @@
     "contracts/*",
     "lib/*"
   ],
-  "homepage": "https://github.com/statechannels/nitro-protocol/",
+  "homepage": "https://github.com/statechannels/monorepo",
   "keywords": [
     "channel",
     "ethereum",

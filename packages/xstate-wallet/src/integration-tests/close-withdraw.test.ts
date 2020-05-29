@@ -5,7 +5,7 @@ import {filter, map, first} from 'rxjs/operators';
 
 import {CHALLENGE_DURATION} from '../config';
 import {simpleEthAllocation} from '../utils';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {isCloseLedger, CloseLedger} from '../store/types';
 import waitForExpect from 'wait-for-expect';
 import {TEST_APP_DOMAIN, budget} from '../workflows/tests/data';
@@ -26,8 +26,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     fakeChain
   );
   const outcome = simpleEthAllocation([
-    {amount: bigNumberify(6), destination: playerA.destination},
-    {amount: bigNumberify(4), destination: hub.destination}
+    {amount: BigNumber.from(6), destination: playerA.destination},
+    {amount: BigNumber.from(4), destination: hub.destination}
   ]);
   hookUpMessaging(playerA, hub);
 
@@ -36,14 +36,14 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     CHALLENGE_DURATION,
     {
       outcome,
-      turnNum: bigNumberify(20),
+      turnNum: BigNumber.from(20),
       isFinal: false,
       appData: '0x0'
     }
   );
 
-  await playerA.store.createBudget(budget(bigNumberify(6), bigNumberify(4)));
-  await hub.store.createBudget(budget(bigNumberify(6), bigNumberify(4)));
+  await playerA.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
+  await hub.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
 
   await playerA.store.setLedger(ledgerChannel.channelId);
   await hub.store

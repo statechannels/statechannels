@@ -31,7 +31,7 @@
         "node_modules/.bin/jest",
         "--runInBand",
         "--env=jsdom",
-        "--config=${workspaceRoot}/jest/jest.chain.config.js",
+        "--config=${workspaceRoot}/jest/jest.with-chain.config.js",
         "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",

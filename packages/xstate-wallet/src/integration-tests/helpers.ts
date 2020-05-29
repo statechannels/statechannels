@@ -1,5 +1,5 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
-import {Wallet} from 'ethers/wallet';
+import {Wallet} from 'ethers';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant, DBBackend} from '../store/types';
 import {Chain} from '../chain';
@@ -20,9 +20,13 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ADD_LOGS} from '../config';
 import {makeDestination} from '../utils';
-import {hexZeroPad} from 'ethers/utils';
+import {hexZeroPad} from '@ethersproject/bytes';
 import {logger} from '../logger';
 import {ETH_TOKEN} from '../constants';
+import {SignedState} from '../store';
+import {signState} from '../store/state-utils';
+import {SignatureEntry} from '../store/channel-store-entry';
+import _ from 'lodash';
 
 const log = logger.info.bind(logger);
 
@@ -100,6 +104,15 @@ export class Player {
   }
   get participantId(): string {
     return this.signingAddress;
+  }
+
+  signState(state: SignedState): SignedState {
+    const mySignature: SignatureEntry = {
+      signature: signState(state, this.privateKey),
+      signer: this.signingAddress
+    };
+
+    return {...state, signatures: _.unionBy(state.signatures, [mySignature], sig => sig.signature)};
   }
 
   static async createPlayer(

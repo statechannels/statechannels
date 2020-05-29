@@ -1,4 +1,4 @@
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {Message, SignedState} from '../../store/types';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';
@@ -76,31 +76,37 @@ export const internalStateFormat: SignedState = {
   appData:
     '0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016345785d8a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004444444444444444444444444444444444444444444444444444444444444444',
   appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-  challengeDuration: bigNumberify(
+  challengeDuration: BigNumber.from(
     '0x00000000000000000000000000000000000000000000000000000000000004a0'
   ),
   chainId: '0x2329',
-  channelNonce: bigNumberify('0x11b1a311d845ca99f8e3c9a5f828f574b1afe2c3a0eb8cd51115dff18f0f34a0'),
+  channelNonce: BigNumber.from(
+    '0x11b1a311d845ca99f8e3c9a5f828f574b1afe2c3a0eb8cd51115dff18f0f34a0'
+  ),
   isFinal: false,
   outcome: {
     type: 'SimpleAllocation',
     assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
     allocationItems: [
       {
-        amount: bigNumberify('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
+        amount: BigNumber.from(
+          '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+        ),
         destination: makeDestination(
           '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
         )
       },
       {
-        amount: bigNumberify('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
+        amount: BigNumber.from(
+          '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+        ),
         destination: makeDestination(
           '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
         )
       }
     ]
   },
-  turnNum: bigNumberify('0x0000000000000000000000000000000000000000000000000000000000000001'),
+  turnNum: BigNumber.from('0x0000000000000000000000000000000000000000000000000000000000000001'),
   signatures: [
     {
       signature:

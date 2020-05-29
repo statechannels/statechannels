@@ -10,8 +10,10 @@ import {DomainBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {Store} from '../../store';
 import {ethBudget} from '../../utils';
-import {bigNumberify, parseEther} from 'ethers/utils';
+import {parseEther} from '@ethersproject/units';
 import {logger} from '../../logger';
+import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 
 const store = new Store();
 
@@ -55,20 +57,20 @@ const testContext = {
 const contextWithLedger = {...testContext, ledgerId: 'ledger123', ledgerState: {}};
 const contextWithDeposit = {
   ...contextWithLedger,
-  depositAt: bigNumberify(5),
-  totalAfterDeposit: bigNumberify(10),
-  fundedAt: bigNumberify(12)
+  depositAt: BigNumber.from(5),
+  totalAfterDeposit: BigNumber.from(10),
+  fundedAt: BigNumber.from(12)
 };
 
 const contextWaitTurn = {
   ...contextWithDeposit,
-  ledgerTotal: bigNumberify(0),
+  ledgerTotal: Zero,
   lastChangeBlockNum: 9792500,
   currentBlockNum: 9792500
 };
-const contextSubmitTransaction = {...contextWaitTurn, ledgerTotal: bigNumberify(5)};
+const contextSubmitTransaction = {...contextWaitTurn, ledgerTotal: BigNumber.from(5)};
 const contextWaitMining = {...contextSubmitTransaction, transactionId: 'transaction-123'};
-const contextWaitFullyFunded = {...contextWaitTurn, ledgerTotal: bigNumberify(10)};
+const contextWaitFullyFunded = {...contextWaitTurn, ledgerTotal: BigNumber.from(10)};
 
 addStory('waitForUserApproval', 'waitForUserApproval', testContext);
 addStory('createLedger', 'createLedger', testContext);

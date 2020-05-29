@@ -3,28 +3,24 @@ import {
   createETHDepositTransaction,
   Transactions,
   getChallengeRegisteredEvent,
-  ChallengeRegisteredEvent
+  ChallengeRegisteredEvent,
+  SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
-import {Contract, Wallet} from 'ethers';
-import {Zero, One} from 'ethers/constants';
-import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
+import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
+
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
-
+import {One, Zero} from '@ethersproject/constants';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
 import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
+
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
-
-const EthAssetHolderInterface = new Interface(
-  // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-  ContractArtifacts.EthAssetHolderArtifact.abi
-);
-
-const NitroAdjudicatorInterface = new Interface(ContractArtifacts.NitroAdjudicatorArtifact.abi);
 
 export interface ChannelChainInfo {
   readonly amount: BigNumber;
@@ -86,7 +82,7 @@ export class FakeChain implements Chain {
   }
 
   public setBlockNumber(blockNumber: BigNumberish) {
-    this.blockNumber = bigNumberify(blockNumber);
+    this.blockNumber = BigNumber.from(blockNumber);
 
     for (const channelId in this.channelStatus) {
       const {
@@ -158,7 +154,7 @@ export class FakeChain implements Chain {
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
-    const current = (this.channelStatus[channelId] || {}).amount || bigNumberify(0);
+    const current = (this.channelStatus[channelId] || {}).amount || Zero;
 
     if (current.gte(expectedHeld)) {
       this.channelStatus[channelId] = {
@@ -262,14 +258,19 @@ export class ChainWatcher implements Chain {
     if (!this.ethereumIsEnabled) return;
 
     this._assetHolders = [
-      new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, this.signer)
-    ]; // TODO allow for other asset holders, for now we use slot 0 only
-    this._assetHolders[0].on('Deposited', (...event) =>
-      chainLogger.info({...event}, 'Deposited event')
-    );
+      new Contract(
+        ETH_ASSET_HOLDER_ADDRESS,
+        ContractArtifacts.EthAssetHolderArtifact.abi,
+        this.signer
+      )
+    ];
+
+    // Log all contract events (for now)
+    this._assetHolders[0].on('*', event => chainLogger.info({event}, 'assetHolder[0] event'));
+
     this._adjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
-      NitroAdjudicatorInterface,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
       this.signer
     );
 
@@ -284,7 +285,7 @@ export class ChainWatcher implements Chain {
   }
 
   public async getBlockNumber() {
-    return bigNumberify(await this.provider.getBlockNumber());
+    return BigNumber.from(await this.provider.getBlockNumber());
   }
 
   public async ethereumEnable(): Promise<string> {
@@ -296,12 +297,12 @@ export class ChainWatcher implements Chain {
           return this.selectedAddress as string;
         } else {
           const error = 'Ethereum enabled but no selected address is defined';
-          logger.error(error);
+          chainLogger.error(error);
           return Promise.reject(error);
         }
       } catch (error) {
         // TODO: Handle error. Likely the user rejected the login
-        logger.error(error);
+        chainLogger.error(error);
         return Promise.reject('user rejected in metamask');
       }
     } else {
@@ -325,20 +326,30 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await this.signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
     return response.hash;
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
-    const response = await this.signer.sendTransaction({
+    const convertedSignedStates = support
+      .reduce(
+        (previous, current) => previous.concat(toNitroSignedState(current)),
+        new Array<NitroSignedState>()
+      )
+      .sort((s1, s2) => s1.state.turnNum - s2.state.turnNum);
+    const transactionRequest = {
       ...Transactions.createForceMoveTransaction(
-        // TODO: Code is assuming a doubly-signed state at the moment.
-        toNitroSignedState(support[0]),
+        convertedSignedStates,
         // createForceMoveTransaction requires this to sign a "challenge message"
         privateKey
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
-    });
+    };
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
     const tx = await response.wait();
     return tx.transactionHash;
   }
@@ -353,7 +364,9 @@ export class ChainWatcher implements Chain {
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await this.signer.sendTransaction(transactionRequest);
+    const response = await this.signer.sendTransaction(
+      convertNitroTransactionRequest(transactionRequest)
+    );
     chainLogger.info({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
@@ -361,24 +374,35 @@ export class ChainWatcher implements Chain {
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     const ethAssetHolder = new Contract(
       ETH_ASSET_HOLDER_ADDRESS,
-      EthAssetHolderInterface,
+      ContractArtifacts.EthAssetHolderArtifact.abi,
       this.provider
     );
 
     const nitroAdjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
-      NitroAdjudicatorInterface,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
       this.provider
     );
 
     const amount: BigNumber = await ethAssetHolder.holdings(channelId);
 
-    const result = await nitroAdjudicator.getData(channelId);
+    const result = await nitroAdjudicator.getChannelStorage(channelId);
 
-    const [turnNumRecord, finalizesAt] = result.map(bigNumberify);
+    const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
-    const blockNum = bigNumberify(await this.provider.getBlockNumber());
-
+    const blockNum = BigNumber.from(await this.provider.getBlockNumber());
+    chainLogger.info(
+      {
+        amount,
+        channelStorage: {
+          turnNumRecord,
+          finalizesAt
+        },
+        finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
+        blockNum
+      },
+      'Chain query result'
+    );
     // TODO: Fetch other info
     return {
       amount,
@@ -426,7 +450,7 @@ export class ChainWatcher implements Chain {
       map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) => ({
         channelId,
         challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state),
-        challengeExpiry: bigNumberify(finalizesAt)
+        challengeExpiry: BigNumber.from(finalizesAt)
       }))
     );
 
@@ -435,4 +459,22 @@ export class ChainWatcher implements Chain {
       updates
     );
   }
+}
+
+// Since nitro-protocol is still using v4 of ethers we need to convert any bignumbers the v5 version from ethers
+// TODO: Remove this when nitro protocol is using v5 ethers
+function convertNitroTransactionRequest(nitroTransactionRequest): TransactionRequest {
+  return {
+    ...nitroTransactionRequest,
+    gasLimit: nitroTransactionRequest.gasLimit
+      ? BigNumber.from(nitroTransactionRequest.gasLimit)
+      : undefined,
+    gasPrice: nitroTransactionRequest.gasPrice
+      ? BigNumber.from(nitroTransactionRequest.gasPrice)
+      : undefined,
+    nonce: nitroTransactionRequest.nonce
+      ? BigNumber.from(nitroTransactionRequest.nonce)
+      : undefined,
+    value: nitroTransactionRequest.value ? BigNumber.from(nitroTransactionRequest.value) : undefined
+  };
 }

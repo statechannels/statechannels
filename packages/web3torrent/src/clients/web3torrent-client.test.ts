@@ -3,7 +3,7 @@ import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {createMockExtendedTorrent, createMockTorrentPeers, pseAccount} from '../utils/test-utils';
-import {download, getTorrentPeers, cancel, upload, web3TorrentClient} from './web3torrent-client';
+import {download, upload, web3TorrentClient} from './web3torrent-client';
 import {getStatus} from '../utils/torrent-status-checker';
 
 describe('Web3TorrentClient', () => {
@@ -67,10 +67,14 @@ describe('Web3TorrentClient', () => {
         .mockImplementation(
           (
             _: WebTorrentSeedInput,
-            __?: TorrentOptions | TorrentCallback,
+            optionsOrCallback?: TorrentOptions | TorrentCallback,
             callback?: TorrentCallback
           ) => {
-            return (callback as TorrentCallback)(torrent as PaidStreamingTorrent);
+            if (typeof optionsOrCallback === 'function') {
+              return (optionsOrCallback as TorrentCallback)(torrent as PaidStreamingTorrent);
+            } else {
+              return (callback as TorrentCallback)(torrent as PaidStreamingTorrent);
+            }
           }
         );
     });
@@ -89,51 +93,6 @@ describe('Web3TorrentClient', () => {
 
     afterEach(() => {
       seedSpy.mockRestore();
-    });
-  });
-
-  describe('cancel()', () => {
-    let removeSpy: jest.SpyInstance<
-      Promise<void>,
-      [string | WebTorrent.Torrent | Buffer, (((err: string | Error) => void) | undefined)?]
-    >;
-
-    beforeEach(() => {
-      removeSpy = jest.spyOn(web3TorrentClient, 'cancel').mockImplementation(
-        (torrentInfoHash: string, callback?: (err: string | Error) => void): Promise<void> => {
-          if (callback) {
-            return new Promise(() => callback(''));
-          }
-          return new Promise(() => ({}));
-        }
-      );
-    });
-
-    it('should return the infohash of the paused client', async () => {
-      const mockInfoHash = '124203';
-      const result = await cancel(mockInfoHash);
-
-      expect(result).toEqual(mockInfoHash);
-    });
-
-    afterEach(() => {
-      removeSpy.mockRestore();
-    });
-  });
-
-  describe('getTorrentPeers()', () => {
-    const mockInfoHash = '124203';
-
-    beforeEach(() => {
-      web3TorrentClient.peersList[mockInfoHash] = createMockTorrentPeers();
-    });
-
-    it('should return peers for a given torrent', () => {
-      expect(getTorrentPeers(mockInfoHash)).toEqual(web3TorrentClient.peersList[mockInfoHash]);
-    });
-
-    afterEach(() => {
-      web3TorrentClient.peersList = {};
     });
   });
 });

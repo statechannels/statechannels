@@ -1,12 +1,13 @@
-import {bigNumberify, BigNumber} from 'ethers/utils';
 import {calculateChannelId, createSignatureEntry} from './../state-utils';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
-import {Wallet} from 'ethers';
+import {Wallet, BigNumber} from 'ethers';
 import {Store} from './../store';
+import {Zero} from '@ethersproject/constants';
+import {Errors} from '..';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -18,10 +19,10 @@ const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
 const [aDestination, bDestination] = [aAddress, bAddress].map(makeDestination); // for convenience
 
 const outcome = simpleEthAllocation([
-  {destination: aDestination, amount: new BigNumber(5)},
-  {destination: bDestination, amount: new BigNumber(6)}
+  {destination: aDestination, amount: BigNumber.from(5)},
+  {destination: bDestination, amount: BigNumber.from(6)}
 ]);
-const turnNum = bigNumberify(4);
+const turnNum = BigNumber.from(4);
 const appData = '0xabc';
 const isFinal = false;
 const chainId = CHAIN_NETWORK_ID;
@@ -30,10 +31,10 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = bigNumberify(0);
+const channelNonce = Zero;
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
-const challengeDuration = bigNumberify(CHALLENGE_DURATION);
+const challengeDuration = BigNumber.from(CHALLENGE_DURATION);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
@@ -128,9 +129,7 @@ describe('createChannel', () => {
 
     await expect(
       store.createChannel(participants, challengeDuration, stateVars, appDefinition)
-    ).rejects.toMatchObject({
-      message: "Couldn't find the signing key for any participant in wallet."
-    });
+    ).rejects.toMatchObject({message: Errors.notInChannel});
   });
 });
 
@@ -140,7 +139,7 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: bigNumberify(0)},
+      {...signedState, turnNum: Zero},
       signedState.appDefinition
     );
 

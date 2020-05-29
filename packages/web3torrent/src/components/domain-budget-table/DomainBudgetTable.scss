@@ -41,16 +41,29 @@ table.domain-budget-table {
         min-width: 50px;
         padding: 5px 5px;
         vertical-align: middle;
-        text-align: left;
+        text-align: center;
       }
 
-      td.budget-number {
-        width: 40%;
-      }
-
-      td.budget-button {
-        width: 20%;
+      td.budget-number,
+      td.budget-identity,
+      td.budget-button,
+      td.budget-spent,
+      td.budget-received {
+        width: 25%;
       }
     }
   }
+}
+
+.CircularProgressbar {
+  height: 40px;
+}
+
+.MuiAvatar-root {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.MuiAvatar-colorDefault {
+  background-color: rgba(0, 0, 0, 0) !important;
 }

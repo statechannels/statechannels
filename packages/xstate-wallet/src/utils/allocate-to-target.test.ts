@@ -1,4 +1,4 @@
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 
 import {AllocationItem} from '../store/types';
 
@@ -10,9 +10,9 @@ import {
   makeDestination
 } from '.';
 
-const one = bigNumberify(1);
-const two = bigNumberify(2);
-const three = bigNumberify(3);
+const one = BigNumber.from(1);
+const two = BigNumber.from(2);
+const three = BigNumber.from(3);
 
 const left = makeDestination('0x0000000000000000000000000000000000000001');
 const right = makeDestination('0x0000000000000000000000000000000000000002');

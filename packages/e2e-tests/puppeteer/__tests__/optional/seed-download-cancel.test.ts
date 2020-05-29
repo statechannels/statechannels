@@ -17,12 +17,10 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForNthState,
   waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
-  waitForWalletToBeHidden,
   takeScreenshot,
   waitForTransactionIfNecessary
 } from '../../helpers';
@@ -53,7 +51,7 @@ describe('Optional Integration Tests', () => {
     [
       {browser: browserA, metamask: metamaskA},
       {browser: browserB, metamask: metamaskB}
-    ] = await Promise.all([6, 7].map(async idx => await setUpBrowser(HEADLESS, idx, 100)));
+    ] = await Promise.all([4, 5].map(async idx => await setUpBrowser(HEADLESS, idx, 0, true)));
 
     browsers = [browserA, browserB];
 
@@ -71,11 +69,11 @@ describe('Optional Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}.png`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
-  it('Optional - Torrent a file - Cancelling at State N°10', async () => {
+  it('Optional - Torrent a file - Cancelling', async () => {
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
@@ -101,8 +99,7 @@ describe('Optional Integration Tests', () => {
     // Let the download continue for some time
     console.log('Downloading');
 
-    await waitForNthState(web3tTabB, 10);
-    console.log('Got until 10th state');
+    await web3tTabB.waitForSelector('.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -110,27 +107,23 @@ describe('Optional Integration Tests', () => {
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for Wallet to be hidden');
-    // Ensure the wallet is not visible
-    await forEachTab(waitForWalletToBeHidden);
-
     console.log('Wait for the "Restart Download" button to appear');
     await waitForFinishedOrCanceledDownload(web3tTabB);
 
-    // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await forEachTab(tab => tab.waitFor(1500));
+    console.log('Wait for the "closed" state');
+    await forEachTab(tab => tab.waitForSelector('.channel.closed'));
 
     console.log('Checking exchanged amount between downloader and uploader...');
-    const earnedColumn = await web3tTabA.waitForSelector('td.earned');
+    const earnedColumn = await web3tTabA.waitForSelector('td.exchanged > .amount');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
-    const paidColumn = await web3tTabB.waitForSelector('td.paid');
+    const paidColumn = await web3tTabB.waitForSelector('td.exchanged > .amount');
     const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
-    const transferredColumn = await web3tTabB.waitForSelector('td.transferred');
+    const transferredColumn = await web3tTabB.waitForSelector('td.transferred > .amount');
     const transferred = await web3tTabB.evaluate(e => e.textContent, transferredColumn);
     console.log(`paid = ${paid}`);
     console.log(`transferred = ${transferred}`);
     expect(transferred).not.toEqual(`0 B`);
-    expect(paid).not.toEqual(`-0 wei`);
-    return expect(paid).toEqual(`-${earned}`);
+    expect(paid).not.toEqual(`0 wei`);
+    return expect(paid).toEqual(`${earned}`);
   });
 });

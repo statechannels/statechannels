@@ -1,6 +1,6 @@
 import {Request, Wire} from 'bittorrent-protocol';
 import {Instance as ParseTorrent} from 'parse-torrent';
-import WebTorrent from 'webtorrent';
+import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import {PaidStreamingExtension} from './paid-streaming-extension';
 
 export enum ClientEvents {
@@ -11,6 +11,8 @@ export enum ClientEvents {
   TORRENT_NOTICE = 'torrent_notice'
 }
 
+export type TorrentCallback = (torrent: Torrent) => any;
+export type ExtendedTorrentOptions = TorrentOptions & {createdBy?: string};
 // The events are documented at https://webtorrent.io/docs
 export enum TorrentEvents {
   DONE = 'done',
@@ -110,7 +112,7 @@ export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentPropertie
   requests: Request[];
   wires: PaidStreamingWire[];
   store: any;
-  _startDiscovery(): void;
+  _updateWireWrapper: (wire: PaidStreamingWire) => void;
   _selections: unknown;
   _update(): void;
   _updateWire(wire: PaidStreamingWire): void;
@@ -137,15 +139,13 @@ export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
 export type PeerByTorrent = {
   id: string;
   wire: PaidStreamingWire | PeerWire;
-  allowed: boolean;
   buffer: string;
   beneficiaryBalance: string;
-  channelId: string;
   uploaded: number;
 };
 
 export type TorrentPeers = {
-  [key: string /* PeerAccount */]: PeerByTorrent;
+  [key: string /* ChannelId */]: PeerByTorrent;
 };
 
 export type PeersByTorrent = {
@@ -165,11 +165,13 @@ declare module 'webtorrent' {
       callback: ({
         torrentPeers,
         torrentInfoHash,
-        peerAccount
+        peerAccount,
+        seedingChannelId
       }: {
         torrentPeers: TorrentPeers;
         torrentInfoHash: string;
         peerAccount: string;
+        seedingChannelId: string;
       }) => void
     ): this;
 

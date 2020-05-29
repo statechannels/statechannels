@@ -69,12 +69,12 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
     }
 
     /**
-    * @dev Manually set the channelStorageHash for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
+    * @dev Manually set the channelStorageHashes for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
     * @param channelId Unique identifier for a state channel.
-    * @param channelStorage The channelStorage to be hashed and stored against the channelId
+    * @param channelData The channelData to be hashed and stored against the channelId
     */
-    function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
-        channelStorageHashes[channelId] = _hashChannelStorage(channelStorage);
+    function setChannelStorage(bytes32 channelId, ChannelData memory channelData) public {
+        channelStorageHashes[channelId] = _hashChannelData(channelData);
     }
 
     /**

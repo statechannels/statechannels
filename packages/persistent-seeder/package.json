@@ -6,7 +6,7 @@
   "devDependencies": {
     "@statechannels/channel-provider": "*",
     "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/devtools": "0.1.23",
+    "@statechannels/devtools": "0.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/node": "13.5.1",

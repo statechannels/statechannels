@@ -1,7 +1,7 @@
 import pino from 'pino';
 import {LOG_DESTINATION, IS_PRODUCTION} from './constants';
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
-const LOG_TO_FILE = !LOG_TO_CONSOLE;
+const LOG_TO_FILE = LOG_DESTINATION && !LOG_TO_CONSOLE;
 
 const name = 'simple-hub';
 

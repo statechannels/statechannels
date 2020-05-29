@@ -41,169 +41,53 @@
       ],
       "type": "object"
     },
-    "Allocations": {
-      "items": {
-        "$ref": "#/definitions/Allocation"
+    "ApproveBudgetAndFundParams": {
+      "additionalProperties": false,
+      "properties": {
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "playerParticipantId": {
+          "type": "string"
+        },
+        "requestedReceiveCapacity": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "requestedSendCapacity": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "token": {
+          "$ref": "#/definitions/Address"
+        }
       },
-      "type": "array"
+      "required": [
+        "hub",
+        "playerParticipantId",
+        "token",
+        "requestedSendCapacity",
+        "requestedReceiveCapacity"
+      ],
+      "type": "object"
     },
     "ApproveBudgetAndFundRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "ApproveBudgetAndFund"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/TokenBudgetRequest"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22ApproveBudgetAndFund%22%2CApproveBudgetAndFundParams%3E"
     },
     "ApproveBudgetAndFundResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/DomainBudget"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CDomainBudget%3E"
     },
     "BudgetUpdatedNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "BudgetUpdated"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/DomainBudget"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22BudgetUpdated%22%2CDomainBudget%3E"
     },
     "Bytes32": {
       "description": "Bytes32",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
-    "ChallengeChannelParams": {
-      "additionalProperties": false,
-      "properties": {
-        "channelId": {
-          "$ref": "#/definitions/ChannelId"
-        }
-      },
-      "required": [
-        "channelId"
-      ],
-      "type": "object"
-    },
     "ChallengeChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "ChallengeChannel"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "$ref": "#/definitions/ChannelId"
-            }
-          },
-          "required": [
-            "channelId"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22ChallengeChannel%22%2Cstructure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387%3E"
     },
     "ChallengeChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "ChannelBudget": {
       "additionalProperties": false,
@@ -222,30 +106,7 @@
       "type": "object"
     },
     "ChannelClosingNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "ChannelClosed"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelClosed%22%2CChannelResult%3E"
     },
     "ChannelId": {
       "description": "Nitro ChannelId",
@@ -253,30 +114,7 @@
       "type": "string"
     },
     "ChannelProposedNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "ChannelProposed"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelProposed%22%2CChannelResult%3E"
     },
     "ChannelResult": {
       "additionalProperties": false,
@@ -337,30 +175,10 @@
       "type": "string"
     },
     "ChannelUpdatedNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "ChannelUpdated"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelUpdated%22%2CChannelResult%3E"
+    },
+    "CloseAndWithdrawError": {
+      "$ref": "#/definitions/JsonRpcError%3C200%2C%22User%20declined%22%3E"
     },
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
@@ -379,66 +197,20 @@
       "type": "object"
     },
     "CloseAndWithdrawRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "CloseAndWithdraw"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/CloseAndWithdrawParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540%3E"
+    },
+    "CloseChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C300%2C%22Not%20your%20turn%22%3E"
         },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "additionalProperties": false,
-          "properties": {
-            "success": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "success"
-          ],
-          "type": "object"
+        {
+          "$ref": "#/definitions/JsonRpcError%3C301%2C%22Channel%20not%20found%22%3E"
         }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      ]
     },
     "CloseChannelParams": {
       "additionalProperties": false,
@@ -453,57 +225,10 @@
       "type": "object"
     },
     "CloseChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "CloseChannel"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/CloseChannelParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22CloseChannel%22%2CCloseChannelParams%3E"
     },
     "CloseChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "CreateChannelParams": {
       "additionalProperties": false,
@@ -540,57 +265,10 @@
       "type": "object"
     },
     "CreateChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "CreateChannel"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/CreateChannelParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22CreateChannel%22%2CCreateChannelParams%3E"
     },
     "CreateChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "DomainBudget": {
       "additionalProperties": false,
@@ -616,6 +294,96 @@
       "type": "object"
     },
     "EnableEthereumError": {
+      "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
+    },
+    "EnableEthereumRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499%3E"
+    },
+    "EnableEthereumResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499%3E"
+    },
+    "ErrorResponse": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EnableEthereumError"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawError"
+        },
+        {
+          "$ref": "#/definitions/CloseChannelError"
+        },
+        {
+          "$ref": "#/definitions/UpdateChannelError"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
+        }
+      ]
+    },
+    "FundingStrategy": {
+      "enum": [
+        "Direct",
+        "Ledger",
+        "Virtual"
+      ],
+      "type": "string"
+    },
+    "GetBudgetRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2Cstructure-45911622-222-244-45911622-194-245-45911622-163-246-45911622-0-315%3E"
+    },
+    "GetBudgetResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-309-312-45911622-295-312-45911622-278-313-45911622-246-314-45911622-0-315)%3E"
+    },
+    "GetChannelsRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
+    },
+    "GetChannelsResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-1821-2067-src%2Fdata-types.ts-0-2325%5B%5D%3E"
+    },
+    "GetStateParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "GetStateRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetState%22%2CGetStateParams%3E"
+    },
+    "GetStateResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "GetWalletInformationRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-336%3E"
+    },
+    "GetWalletInformationResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-333-825486248-226-334-825486248-183-335-825486248-0-336%3E"
+    },
+    "JoinChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "JoinChannelRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22JoinChannel%22%2CJoinChannelParams%3E"
+    },
+    "JoinChannelResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "JsonRpcError<100,\"Ethereum Not Enabled\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -657,7 +425,755 @@
       ],
       "type": "object"
     },
-    "EnableEthereumRequest": {
+    "JsonRpcError<200,\"User declined\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                200
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "User declined"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<300,\"Not your turn\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                300
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Not your turn"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<301,\"Channel not found\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                301
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel not found"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<400,\"Channel not found\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                400
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel not found"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233>": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                401
+              ],
+              "type": "number"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "channelStatus": {
+                  "$ref": "#/definitions/ChannelStatus"
+                },
+                "proposedUpdate": {
+                  "$ref": "#/definitions/UpdateChannelParams"
+                }
+              },
+              "required": [
+                "channelStatus",
+                "proposedUpdate"
+              ],
+              "type": "object"
+            },
+            "message": {
+              "enum": [
+                "Invalid transition"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233>": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                402
+              ],
+              "type": "number"
+            },
+            "data": {
+              "additionalProperties": false,
+              "properties": {
+                "appData": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "appData"
+              ],
+              "type": "object"
+            },
+            "message": {
+              "enum": [
+                "Invalid app data"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<403,\"Channel closed\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                403
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Channel closed"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<403,\"Not your turn\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                403
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Not your turn"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<500,\"Wallet error\">": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                500
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Wallet error"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
+    "JsonRpcMessage": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Request"
+        },
+        {
+          "$ref": "#/definitions/Response"
+        },
+        {
+          "$ref": "#/definitions/Notification"
+        },
+        {
+          "$ref": "#/definitions/ErrorResponse"
+        }
+      ]
+    },
+    "JsonRpcNotification<\"BudgetUpdated\",DomainBudget>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "BudgetUpdated"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/DomainBudget"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"ChannelClosed\",ChannelResult>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelClosed"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"ChannelProposed\",ChannelResult>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelProposed"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"ChannelUpdated\",ChannelResult>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelUpdated"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"MessageQueued\",Message>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "MessageQueued"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Message"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-780-802-683137520-748-803-683137520-719-804-683137520-0-1196>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UIUpdate"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "showWallet": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "showWallet"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"ApproveBudgetAndFund\",ApproveBudgetAndFundParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ApproveBudgetAndFund"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ApproveBudgetAndFundParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"ChallengeChannel\",structure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChallengeChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "$ref": "#/definitions/ChannelId"
+            }
+          },
+          "required": [
+            "channelId"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"CloseAndWithdraw\",CloseAndWithdrawParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CloseAndWithdraw"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/CloseAndWithdrawParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"CloseChannel\",CloseChannelParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CloseChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/CloseChannelParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"CreateChannel\",CreateChannelParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CreateChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/CreateChannelParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -688,7 +1204,359 @@
       ],
       "type": "object"
     },
-    "EnableEthereumResponse": {
+    "JsonRpcRequest<\"GetBudget\",structure-45911622-222-244-45911622-194-245-45911622-163-246-45911622-0-315>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetBudget"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAddress": {
+              "$ref": "#/definitions/Address"
+            }
+          },
+          "required": [
+            "hubAddress"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"GetChannels\",structure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetChannels"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "includeClosed": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"GetState\",GetStateParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetState"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/GetStateParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-336>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetWalletInformation"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"JoinChannel\",JoinChannelParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "JoinChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/JoinChannelParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"PushMessage\",Message>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "PushMessage"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Message"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcRequest<\"UpdateChannel\",UpdateChannelParams>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UpdateChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/UpdateChannelParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<(DomainBudget|structure-45911622-309-312-45911622-295-312-45911622-278-313-45911622-246-314-45911622-0-315)>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DomainBudget"
+            },
+            {
+              "additionalProperties": false,
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<ChannelResult>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<DomainBudget>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/DomainBudget"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<PushMessageResult>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/PushMessageResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<def-interface-src/data-types.ts-1821-2067-src/data-types.ts-0-2325[]>": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "items": {
+            "$ref": "#/definitions/ChannelResult"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<structure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -728,100 +1596,7 @@
       ],
       "type": "object"
     },
-    "ErrorResponse": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/EnableEthereumError"
-        },
-        {
-          "$ref": "#/definitions/UserDeclinedErrorResponse"
-        },
-        {
-          "$ref": "#/definitions/NotYourTurnError"
-        }
-      ]
-    },
-    "ExternalDestination": {
-      "description": "Nitro ChannelId",
-      "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
-      "type": "string"
-    },
-    "FundingStrategy": {
-      "enum": [
-        "Direct",
-        "Ledger",
-        "Virtual"
-      ],
-      "type": "string"
-    },
-    "Funds": {
-      "additionalProperties": false,
-      "properties": {
-        "amount": {
-          "$ref": "#/definitions/Uint256"
-        },
-        "token": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "token",
-        "amount"
-      ],
-      "type": "object"
-    },
-    "GetBudgetParams": {
-      "additionalProperties": false,
-      "properties": {
-        "hubAddress": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "hubAddress"
-      ],
-      "type": "object"
-    },
-    "GetBudgetRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetBudget"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAddress": {
-              "$ref": "#/definitions/Address"
-            }
-          },
-          "required": [
-            "hubAddress"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetBudgetResponse": {
+    "JsonRpcResponse<structure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -834,77 +1609,16 @@
           "type": "string"
         },
         "result": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/DomainBudget"
-            },
-            {
-              "additionalProperties": false,
-              "type": "object"
-            }
-          ]
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "GetChannelsRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetChannels"
-          ],
-          "type": "string"
-        },
-        "params": {
           "additionalProperties": false,
           "properties": {
-            "includeClosed": {
+            "success": {
               "type": "boolean"
             }
           },
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetChannelsResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
+          "required": [
+            "success"
           ],
-          "type": "string"
-        },
-        "result": {
-          "items": {
-            "$ref": "#/definitions/ChannelResult"
-          },
-          "type": "array"
+          "type": "object"
         }
       },
       "required": [
@@ -914,103 +1628,7 @@
       ],
       "type": "object"
     },
-    "GetStateParams": {
-      "additionalProperties": false,
-      "properties": {
-        "channelId": {
-          "$ref": "#/definitions/ChannelId"
-        }
-      },
-      "required": [
-        "channelId"
-      ],
-      "type": "object"
-    },
-    "GetStateRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetState"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/GetStateParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetStateResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "GetWalletInformationRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetWalletInformation"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetWalletInformationResponse": {
+    "JsonRpcResponse<structure-825486248-243-333-825486248-226-334-825486248-183-335-825486248-0-336>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1057,87 +1675,6 @@
       ],
       "type": "object"
     },
-    "JoinChannelParams": {
-      "additionalProperties": false,
-      "properties": {
-        "channelId": {
-          "$ref": "#/definitions/ChannelId"
-        }
-      },
-      "required": [
-        "channelId"
-      ],
-      "type": "object"
-    },
-    "JoinChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "JoinChannel"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/JoinChannelParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "JoinChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "JsonRpcMessage": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Request"
-        },
-        {
-          "$ref": "#/definitions/Response"
-        },
-        {
-          "$ref": "#/definitions/Notification"
-        },
-        {
-          "$ref": "#/definitions/ErrorResponse"
-        }
-      ]
-    },
     "Message": {
       "additionalProperties": false,
       "properties": {
@@ -1158,72 +1695,7 @@
       "type": "object"
     },
     "MessageQueuedNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "MessageQueued"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/Message"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "NotYourTurnError": {
-      "additionalProperties": false,
-      "properties": {
-        "error": {
-          "additionalProperties": false,
-          "properties": {
-            "code": {
-              "enum": [
-                300
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Not your turn"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
-        },
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "error"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22MessageQueued%22%2CMessage%3E"
     },
     "Notification": {
       "anyOf": [
@@ -1247,25 +1719,6 @@
         }
       ]
     },
-    "NotificationType": {
-      "additionalProperties": false,
-      "properties": {
-        "ChannelProposed": {
-          "items": [
-            {
-              "$ref": "#/definitions/ChannelResult"
-            }
-          ],
-          "maxItems": 1,
-          "minItems": 1,
-          "type": "array"
-        }
-      },
-      "required": [
-        "ChannelProposed"
-      ],
-      "type": "object"
-    },
     "Participant": {
       "additionalProperties": false,
       "properties": {
@@ -1286,61 +1739,11 @@
       ],
       "type": "object"
     },
-    "PushMessageParams": {
-      "$ref": "#/definitions/Message"
-    },
     "PushMessageRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "PushMessage"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/Message"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22PushMessage%22%2CMessage%3E"
     },
     "PushMessageResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/PushMessageResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CPushMessageResult%3E"
     },
     "PushMessageResult": {
       "additionalProperties": false,
@@ -1467,73 +1870,32 @@
       ],
       "type": "object"
     },
-    "TokenBudgetRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerParticipantId": {
-          "type": "string"
-        },
-        "requestedReceiveCapacity": {
-          "$ref": "#/definitions/Uint256"
-        },
-        "requestedSendCapacity": {
-          "$ref": "#/definitions/Uint256"
-        },
-        "token": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "hub",
-        "playerParticipantId",
-        "token",
-        "requestedSendCapacity",
-        "requestedReceiveCapacity"
-      ],
-      "type": "object"
-    },
     "UiNotification": {
-      "additionalProperties": false,
-      "properties": {
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "UIUpdate"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "properties": {
-            "showWallet": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "showWallet"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-780-802-683137520-748-803-683137520-719-804-683137520-0-1196%3E"
     },
     "Uint256": {
       "description": "Uint256",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
+    },
+    "UpdateChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Channel%20closed%22%3E"
+        }
+      ]
     },
     "UpdateChannelParams": {
       "additionalProperties": false,
@@ -1566,99 +1928,10 @@
       "type": "object"
     },
     "UpdateChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "UpdateChannel"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/UpdateChannelParams"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22UpdateChannel%22%2CUpdateChannelParams%3E"
     },
     "UpdateChannelResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "UserDeclinedErrorResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "error": {
-          "additionalProperties": false,
-          "properties": {
-            "code": {
-              "enum": [
-                200
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "User declined"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
-        },
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "error"
-      ],
-      "type": "object"
+      "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     }
   }
 }

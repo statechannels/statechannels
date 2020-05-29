@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {Funding} from './store';
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
 import {SignatureEntry, ChannelStoreEntry} from './channel-store-entry';
@@ -197,6 +197,7 @@ export interface DBBackend {
     stores: S[],
     cb: (tx: Transaction) => Promise<T>
   ): Promise<T>;
+  transactionOngoing: boolean;
 }
 
 export type Transaction = {

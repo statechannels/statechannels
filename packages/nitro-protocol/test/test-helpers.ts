@@ -1,7 +1,7 @@
 import {Contract, ethers, Wallet} from 'ethers';
 import {constants, providers, utils} from 'ethers';
 
-import {hashChannelStorage} from '../src/contract/channel-storage';
+import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
   AllocationAssetOutcome,
   encodeAllocation,
@@ -63,13 +63,13 @@ export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) 
 export const nonParticipant = ethers.Wallet.createRandom();
 
 export const clearedChallengeHash = (turnNumRecord = 5) =>
-  hashChannelStorage({
+  channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt: 0,
   });
 
 export const ongoingChallengeHash = (turnNumRecord = 5) =>
-  hashChannelStorage({
+  channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt: 1e12,
     challengerAddress: constants.AddressZero,
@@ -83,7 +83,7 @@ export const finalizedOutcomeHash = (
   state = undefined,
   challengerAddress = undefined
 ) =>
-  hashChannelStorage({
+  channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt,
     outcome,

@@ -16,7 +16,7 @@ import {
   Message,
   Objective
 } from '../../store/types';
-import {bigNumberify} from 'ethers/utils';
+import {BigNumber} from 'ethers';
 import {makeDestination} from '../../utils';
 import {convertToInternalParticipant} from '../../messaging';
 import {getSignerAddress} from '../../store/state-utils';
@@ -36,9 +36,9 @@ export function deserializeState(state: SignedStateWire): SignedState {
   delete stateWithoutChannelId.channelId;
   const deserializedState = {
     ...stateWithoutChannelId,
-    challengeDuration: bigNumberify(state.challengeDuration),
-    channelNonce: bigNumberify(state.channelNonce),
-    turnNum: bigNumberify(state.turnNum),
+    challengeDuration: BigNumber.from(state.challengeDuration),
+    channelNonce: BigNumber.from(state.channelNonce),
+    turnNum: BigNumber.from(state.turnNum),
     outcome: deserializeOutcome(state.outcome),
     participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
   };
@@ -104,5 +104,5 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination: makeDestination(destination), amount: bigNumberify(amount)};
+  return {destination: makeDestination(destination), amount: BigNumber.from(amount)};
 }
