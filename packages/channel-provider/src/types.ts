@@ -25,7 +25,8 @@ import {
   ApproveBudgetAndFundRequest,
   NotificationType,
   GetChannelsRequest,
-  GetChannelsResponse
+  GetChannelsResponse,
+  ErrorResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -63,11 +64,7 @@ export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotifi
   return 'method' in message && !('id' in message);
 }
 
-export interface JsonRpcErrorResponse {
-  id: number;
-  jsonrpc: '2.0';
-  error: JsonRpcError;
-}
+export type JsonRpcErrorResponse = ErrorResponse;
 
 export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
   return 'error' in message;
