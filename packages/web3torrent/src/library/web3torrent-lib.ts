@@ -316,12 +316,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           } else {
             wire.paidStreamingExtension.seedingChannelId = null;
           }
-          track('Torrent Finished Downloading', {
-            infoHash: torrent.infoHash,
-            magnetURI: torrent.magnetURI,
-            filename: torrent.name,
-            filesize: torrent.length
-          });
           this.emitTorrentUpdated(torrent.infoHash);
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
@@ -454,7 +448,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
       await this.closeTorrentChannels(torrent);
-      track('Torrent Starting Seeding', {
+      track('Torrent Done', {
         infoHash: torrent.infoHash,
         magnetURI: torrent.magnetURI,
         filename: torrent.name,
