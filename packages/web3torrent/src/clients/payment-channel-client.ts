@@ -392,10 +392,18 @@ export class PaymentChannelClient {
       logger.info({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
 
-    await this.updateChannel(channelId, {
-      beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
-      payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
-    });
+    try {
+      await this.updateChannel(channelId, {
+        beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
+        payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
+      });
+    } catch (error) {
+      if (error.error.code === ErrorCode.UpdateChannel.NotYourTurn) {
+        logger.warn({channelId}, 'Possible race condition detected');
+      } else {
+        logger.error({error}, 'makePamyent: Unexpected error');
+      }
+    }
   }
 
   // beneficiary may use this method to accept payments
