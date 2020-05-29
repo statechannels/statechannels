@@ -5,9 +5,6 @@ import {ShareList} from '../../components/share-list/ShareList';
 import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
-import {logger} from '../../logger';
-
-const log = logger.child({module: 'welcome-page-tracker-client'});
 
 interface Props {
   ready: boolean;
