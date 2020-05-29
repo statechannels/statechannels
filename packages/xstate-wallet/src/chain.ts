@@ -372,21 +372,14 @@ export class ChainWatcher implements Chain {
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    const ethAssetHolder = new Contract(
-      ETH_ASSET_HOLDER_ADDRESS,
-      ContractArtifacts.EthAssetHolderArtifact.abi,
-      this.provider
-    );
-
-    const nitroAdjudicator = new Contract(
-      NITRO_ADJUDICATOR_ADDRESS,
-      ContractArtifacts.NitroAdjudicatorArtifact.abi,
-      this.provider
-    );
+    if (!this._assetHolders || !this._assetHolders[0] || !this._adjudicator) {
+      throw new Error('Not connected to contracts');
+    }
+    const ethAssetHolder = this._assetHolders[0];
 
     const amount: BigNumber = await ethAssetHolder.holdings(channelId);
 
-    const result = await nitroAdjudicator.getChannelStorage(channelId);
+    const result = await this._adjudicator.getChannelStorage(channelId);
 
     const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
