@@ -59,6 +59,7 @@ save_built_artifacts: &save_built_artifacts
       - packages/web3torrent/build
       - packages/xstate-wallet/build
 
+
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
@@ -300,6 +301,36 @@ jobs:
           file: integration-test-web3torrent-stats
       - upload_e2e_screenshots
 
+  integration-test-web3torrent-optional:
+    resource_class: large
+    working_directory: /home/circleci/project
+    docker:
+      - image: circleci/node:10.16.3-browsers
+    environment:
+      SC_ENV: circle-integration-w3t
+    steps:
+      - install_xvfb
+      - run_xvfb
+      - checkout
+      - log_stats:
+          file: integration-test-web3torrent-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - start_servers:
+          app: web3torrent
+      - run: (cd packages/e2e-tests && yarn test optional)
+      - store_artifacts:
+          path: /tmp/ganache.log
+      - store_artifacts:
+          path: /tmp/seed-download-cancel.pino.log
+      - store_artifacts:
+          path: /tmp/seed-download-cancel.browser.log
+      - store_artifacts:
+          path: packages/simple-hub/pino.log
+      - upload_logs:
+          file: integration-test-web3torrent-stats
+      - upload_e2e_screenshots
+
   integration-test-web3torrent-with-hub:
     resource_class: large
     working_directory: /home/circleci/project
@@ -509,9 +540,6 @@ workflows:
           requires:
             - prepare
       - integration-test-web3torrent:
-          requires:
-            - prepare
-      - integration-test-web3torrent-optional:
           requires:
             - prepare
       - integration-test-web3torrent-with-hub:
