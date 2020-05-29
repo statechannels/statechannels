@@ -1,4 +1,6 @@
 import {getEnvBool, configureEnvVariables} from '@statechannels/devtools';
+import path from 'path';
+
 configureEnvVariables();
 export const HEADLESS = getEnvBool('HEADLESS');
 export const USE_DAPPETEER = getEnvBool('USE_DAPPETEER');
@@ -15,3 +17,5 @@ export const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;
 
 export const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR;
+export const LOGS_DIR =
+  process.env.LOGS_DIR || path.join(process.env.PROJECT_ROOT || '/tmp', 'logs');
