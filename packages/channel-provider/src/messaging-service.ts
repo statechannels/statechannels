@@ -1,9 +1,16 @@
 import {JsonRpcRequest, isJsonRpcResponse, isJsonRpcErrorResponse} from './types';
 import {logger} from './logger';
+import {ErrorResponse} from '@statechannels/client-api-schema';
 
 export interface MessagingServiceOptions {
   timeoutMs?: number;
   maxRetries?: number;
+}
+
+class RpcError extends Error {
+  constructor(readonly error: ErrorResponse['error']) {
+    super('Wallet error');
+  }
 }
 
 export class MessagingService {
@@ -100,7 +107,7 @@ export class MessagingService {
           logger.info({response: event.data}, 'Received response');
           resolve(event.data.result);
         } else if (isJsonRpcErrorResponse(event.data)) {
-          reject(new Error(`Wallet Error ${event.data.error.code}: ${event.data.error.message}`));
+          reject(new RpcError(event.data.error));
         }
       } else {
         logger.error({event}, 'Received a non JsonRpc response');
