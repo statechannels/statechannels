@@ -53,6 +53,7 @@ const checkTarget = (store: Store) => async (ctx: Init) => {
 };
 
 export const config: MachineConfig<any, any, any> = {
+  id: WORKFLOW,
   key: WORKFLOW,
   initial: 'acquiringLock',
   states: {
