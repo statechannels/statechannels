@@ -1,4 +1,5 @@
 import {ErrorCode} from './types';
+export {ChannelResult} from '@statechannels/client-api-schema';
 
 export {ChannelClientInterface, UnsubscribeFunction} from './types';
 export {ChannelClient} from './channel-client';
