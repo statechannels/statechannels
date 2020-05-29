@@ -21,6 +21,8 @@ if (NODE_ENV === 'production') {
 const log = logger.info.bind(logger);
 
 (async function() {
+  log({version: GIT_VERSION}, 'Wallet initializing');
+
   const chain = new ChainWatcher();
 
   const backend = USE_INDEXED_DB ? new Backend() : new MemoryBackend();
