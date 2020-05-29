@@ -628,6 +628,8 @@ const assetOutcome: GuaranteeAssetOutcome = {
 };
 ```
 
+Encoding of all outcomes (including guarantee outcomes) is handled seamlessly by the `getVariablePart` function.
+
 Don't worry if it is not yet clear why we need guarantor channels or outcomes that guarantee. They are a useful tool for virtually funding channels, but can be safely ignored if you are just trying to understand directly funded channels.
 
 ### Get your money out using pushOutcome and transferAll
