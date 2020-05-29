@@ -24,11 +24,11 @@ package-lock.json
 .idea/
 *.iml
 *.sw[op]
+jest-cache/
 
 **/*.log
-
-jest-cache/
 e2e.log
+logs/**/*
 
 # local env vars
 .env.local
