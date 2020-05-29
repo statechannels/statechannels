@@ -285,7 +285,7 @@ export class PaymentChannelClient {
     const closing = this.channelState(channelId)
       .pipe(
         filter(cs => this.canUpdateChannel(cs)),
-        take(5)
+        take(5) // Limit to 5 attempts
       )
       .subscribe(async cs => {
         logger.info(
