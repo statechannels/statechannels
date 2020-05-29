@@ -374,7 +374,9 @@ const tx = NitroAdjudicator.conclude(
 
 The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
-The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
+States and signatures that support a are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
+
+### Call forceMove
 
 :::note
 The challenger needs to sign this data:
@@ -386,9 +388,74 @@ keccak256(abi.encode(challengeStateHash, 'forceMove'))
 in order to form `challengerSig`. This signals their intent to forceMove this channel with this particular state. This mechanism allows the forceMove to be authorized only by a channel participant.
 :::
 
-### Call forceMove
+We provide a handy utility function `signChallengeMessage` to form this signature.
+
+```typescript
+// construct some states as per previous tutorial steps. Then:
+
+const variableParts = states.map(state => getVariablePart(state));
+const fixedPart = getFixedPart(states[0]);
+
+const challenger = wallets[0]; // Note that this can be *any* participant,
+// and need not be the participant who owns this state.
+
+// Sign the states
+const signatures = await signStates(states, wallets, whoSignedWhat);
+const challengeSignedState: SignedState = signState(
+  states[states.length - 1],
+  challenger.privateKey
+);
+
+const challengeSignature = signChallengeMessage([challengeSignedState], challenger.privateKey);
+
+const tx = NitroAdjudicator.forceMove(
+  fixedPart,
+  largestTurnNum,
+  variableParts,
+  isFinalCount,
+  signatures,
+  whoSignedWhat,
+  challengeSignature
+);
+```
+
+## Capture Adjudicator Events
+
+To save gas, information is only stored on chain in a hashed format. Clients should, therefore, cache information emitted in Events emitted by the adjudicator, in order to be able to respond to challenges.
+
+## Clear a challenge
+
+A challenge being registered does _not_ mean that the channel will inexorably finalize. Participants have the timeout period in order to be able to respond. Perhaps they come back online after a brief spell of inactivity, or perhaps the challenger was trying to (maliciously) finalize the channel with a supported but outdated (or 'stale') state.
 
 ### Call checkpoint
+
+The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` on chain, and leave the resulting channel in the "Open" mode. It can be used to clear a challenge.
+
+```typescript
+// Register a challenge with a very long timeout, following the preceding tutorial step
+// Form a new support proof (you should be familiar with how to do this by now) with an increased largestTurnNum
+// Submit this transaction:
+
+const tx = NitroAdjudicator.checkpoint(
+  fixedPart,
+  largestTurnNum,
+  variableParts,
+  isFinalCount,
+  signatures,
+  whoSignedWhat
+);
+
+await(await tx).wait();
+
+// Form an expectation about the new state of the chain:
+const expectedChannelStorageHash = channelDataToChannelStorageHash({
+  turnNumRecord: largestTurnNum,
+  finalizesAt: 0x0, // 0 here implies the channel is open again.
+});
+
+// Check channelStorageHash against the expected value (it is a public mapping)
+expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+```
 
 ### Call respond
 
