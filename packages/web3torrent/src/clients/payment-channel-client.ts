@@ -401,7 +401,7 @@ export class PaymentChannelClient {
       if (error.error.code === ErrorCode.UpdateChannel.NotYourTurn) {
         logger.warn({channelId}, 'Possible race condition detected');
       } else {
-        logger.error({error}, 'makePamyent: Unexpected error');
+        logger.error({error}, 'makePayment: Unexpected error');
       }
     }
   }
