@@ -7,10 +7,13 @@ export type PeerNetworkStatsProps = {torrent: TorrentUI};
 
 const PeerNetworkStats: React.FC<PeerNetworkStatsProps> = ({torrent}: PeerNetworkStatsProps) => {
   const showTimeRemaining = !torrent.originalSeed && torrent.parsedTimeRemaining;
-  const numChannels = torrent.wires.filter(
-    wire =>
-      wire.paidStreamingExtension.leechingChannelId || wire.paidStreamingExtension.seedingChannelId
-  ).length;
+  const numChannels = torrent.wires.reduce(
+    (sum, wire) =>
+      sum +
+      (wire.paidStreamingExtension.leechingChannelId ? 1 : 0) +
+      (wire.paidStreamingExtension.seedingChannelId ? 1 : 0),
+    0
+  );
   return (
     !IdleStatuses.includes(torrent.status) && (
       <section className="PeerNetworkStats">
