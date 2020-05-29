@@ -112,7 +112,7 @@ export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentPropertie
   requests: Request[];
   wires: PaidStreamingWire[];
   store: any;
-  _startDiscovery(): void;
+  _updateWireWrapper: (wire: PaidStreamingWire) => void;
   _selections: unknown;
   _update(): void;
   _updateWire(wire: PaidStreamingWire): void;

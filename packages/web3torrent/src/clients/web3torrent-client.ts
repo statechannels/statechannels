@@ -8,6 +8,7 @@ export const web3TorrentClient = new Web3TorrentLibrary({paymentChannelClient});
 
 export const Web3TorrentClientContext = React.createContext(web3TorrentClient);
 
+// TODO: refactor out, use instead the Web3TorrentLibrary function.
 export async function download(torrentData: WebTorrentAddInput): Promise<ExtendedTorrent> {
   await web3TorrentClient.enable();
 
@@ -18,6 +19,7 @@ export async function download(torrentData: WebTorrentAddInput): Promise<Extende
   );
 }
 
+// TODO: refactor out, use instead the Web3TorrentLibrary function.
 export async function upload(input: WebTorrentSeedInput): Promise<ExtendedTorrent> {
   await web3TorrentClient.enable();
 
