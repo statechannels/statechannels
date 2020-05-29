@@ -43,6 +43,7 @@ export async function setupLogging(
   logDistinguisherCache[uniquenessKey] = true;
 
   const LOGS_LOCATION = path.join(LOGS_DIR, logPrefix);
+  fs.mkdirSync(LOGS_LOCATION, {recursive: true});
 
   const APPEND = 'a';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
