@@ -2,13 +2,13 @@ import {utils, constants} from 'ethers';
 import {
   FakeChannelProvider,
   ChannelClient,
-  ChannelResult,
   ChannelClientInterface
 } from '@statechannels/channel-client';
 import {
   ChannelStatus,
   Message,
   Participant,
+  ChannelResult,
   AllocationItem,
   Allocations
 } from '@statechannels/client-api-schema';
@@ -24,10 +24,12 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import {map, filter, first, tap} from 'rxjs/operators';
+import {map, filter, first, tap, take} from 'rxjs/operators';
 import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
+import {ErrorCode} from '@statechannels/channel-client/lib/src/types';
+import {isJsonRpcErrorResponse} from '@statechannels/channel-provider';
 
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
@@ -280,31 +282,31 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    logger.info(`Waiting for my turn to close channel ${channelId}`);
-    /*
-     * There are currently zero or one ongoing UpdateChannel RPCs.
-     * Since the torrent is paused, if there is one ongoing UpdateChannel RPC, it will soon resolve,
-     * and there will be no further UpdateChannel RPCs.
-     * If we don't wait, then a CloseChannel call could race an existing UpdateChannel call, and one of them
-     * would fail.
-     * Therefore, we wait 500ms before waiting for my turn.
-     */
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    /*
-     * Now, any UpdateChannel RPC should be finished, so when it's my turn, the CloseChannel
-     * call should succeed.
-     */
-
     const closing = this.channelState(channelId)
-      .pipe(first(cs => this.canUpdateChannel(cs)))
-      .subscribe(cs => {
+      .pipe(
+        filter(cs => this.canUpdateChannel(cs)),
+        take(5)
+      )
+      .subscribe(async cs => {
         logger.info(
           {channelId, cs, me: this.mySigningAddress},
           "It's my turn, closing the channel"
         );
-        this.channelClient.closeChannel(channelId);
+        try {
+          await this.channelClient.closeChannel(channelId);
+        } catch (error) {
+          if (error.error.code === ErrorCode.CloseChannel.NotYourTurn) {
+            // Perhaps the application calls UpdateChannel around the same time as the CloseChannel call
+            logger.warn(
+              {channelId},
+              'Possible race condition detected -- is a concurrent UpdateChannel occurring?'
+            );
+            return;
+          } else {
+            logger.error({error}, 'Unexpected error');
+            throw error;
+          }
+        }
       });
 
     return this.channelState(channelId)
