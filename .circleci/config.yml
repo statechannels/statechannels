@@ -175,8 +175,6 @@ commands:
         description: Space-delimited list of test files patterns to run
         type: string
     steps:
-      - install_xvfb
-      - run_xvfb
       - checkout
       - log_stats:
           file: integration-test-stats
