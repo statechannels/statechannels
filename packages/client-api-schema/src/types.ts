@@ -44,6 +44,7 @@ export type Response =
   | CloseAndWithdraw.CloseAndWithdrawResponse
   | GetChannels.GetChannelsResponse;
 
+import {JsonRpcError} from './utils';
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 
 export type ErrorResponse =
@@ -73,11 +74,4 @@ export function isError(message: JsonRpcMessage): message is ErrorResponse {
 export * from './notifications';
 export * from './methods';
 export * from './data-types';
-
-import {ErrorCodes} from './error-codes';
-export {ErrorCodes};
-import {JsonRpcError} from './utils';
-
-// TODO: Don't export these values
-export const EthereumNotEnabledErrorCode: ErrorCodes['EnableEthereum']['EthereumNotEnabled'] = 100;
-export const UserDeclinedErrorCode: ErrorCodes['CloseAndWithdraw']['UserDeclined'] = 200;
+export * from './error-codes';

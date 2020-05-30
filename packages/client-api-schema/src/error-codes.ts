@@ -14,6 +14,6 @@ export type ErrorCodes = {
     InvalidTransition: 401;
     InvalidAppData: 402;
     NotYourTurn: 403;
-    ChannelClosed: 403;
+    ChannelClosed: 404;
   };
 };
