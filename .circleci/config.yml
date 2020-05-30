@@ -13,6 +13,14 @@ defaults: &defaults
   docker:
     - image: counterfactual/statechannels:0.6.1 # Fast contract compilation with solc installed
 
+integration_test_settings: &integration_test_settings
+  resource_class: large
+  working_directory: /home/circleci/project
+  docker:
+    - image: circleci/node:10.16.3-browsers
+  environment:
+    SC_ENV: << parameters.sc_env >>
+
 save_dep: &save_dep
   save_cache:
     key: v4-dependency-cache-{{ checksum "yarn.lock" }}
@@ -127,16 +135,6 @@ commands:
       - run:
           command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
 
-  start_servers:
-    description: 'Starting servers'
-    parameters:
-      app:
-        type: string
-    steps:
-      - run:
-          command: yarn start-servers << parameters.app >>
-          background: true
-
   run_xvfb:
     description: 'Run display server'
     steps:
@@ -166,6 +164,32 @@ commands:
           registry: registry.heroku.com
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
+
+  integration-test:
+    description: 'Running integration tests'
+    parameters:
+      app:
+        type: enum
+        enum: ['rps', 'web3torrent']
+      test_files:
+        description: Space-delimited list of test files patterns to run
+        type: string
+    steps:
+      - install_xvfb
+      - run_xvfb
+      - checkout
+      - log_stats:
+          file: integration-test-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: yarn start-servers << parameters.app >>
+          background: true
+      - run: (cd packages/e2e-tests && yarn test << parameters.test_files >>)
+      - upload_logs:
+          file: integration-test-stats
+      - upload_e2e_logs
+      - upload_e2e_screenshots
 
 jobs:
   prepare:
@@ -245,135 +269,51 @@ jobs:
       - notify_slack
 
   integration-test-rps:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
+    <<: *integration_test_settings
     environment:
       SC_ENV: circle-integration-rps
     steps:
-      - install_xvfb
-      - run_xvfb
-      - checkout
-      # - run: yarn # local testing only
-      #  using circleci cli (cannot run workflows, only individual jobs)
-      - log_stats:
-          file: integration-test-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - start_servers:
+      - integration-test:
           app: rps
-      - run: (cd packages/e2e-tests && yarn test rps)
-      - upload_logs:
-          file: integration-test-stats
-      - upload_e2e_logs
-      - upload_e2e_screenshots
+          test_files: rps
 
   integration-test-web3torrent:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
+    <<: *integration_test_settings
     environment:
       SC_ENV: circle-integration-w3t
     steps:
-      - install_xvfb
-      - run_xvfb
-      - checkout
-      - log_stats:
-          file: integration-test-web3torrent-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - start_servers:
+      - integration-test:
           app: web3torrent
-      - run: (cd packages/e2e-tests && yarn test web3torrent)
-      - store_artifacts:
-          path: /tmp/ganache.log
-      - store_artifacts:
-          path: packages/simple-hub/pino.log
-      - upload_logs:
-          file: integration-test-web3torrent-stats
-      - upload_e2e_screenshots
-      - upload_e2e_logs
-
-  integration-test-web3torrent-optional:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
-    environment:
-      SC_ENV: circle-integration-w3t
-    steps:
-      - install_xvfb
-      - run_xvfb
-      - checkout
-      - log_stats:
-          file: integration-test-web3torrent-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - start_servers:
-          app: web3torrent
-      - run: (cd packages/e2e-tests && yarn test optional)
-      - store_artifacts:
-          path: /tmp/ganache.log
-      - store_artifacts:
-          path: packages/simple-hub/pino.log
-      - upload_logs:
-          file: integration-test-web3torrent-stats
-      - upload_e2e_screenshots
-      - upload_e2e_logs
+          test_files: web3torrent
 
   integration-test-web3torrent-with-hub:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
+    <<: *integration_test_settings
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - install_xvfb
-      - run_xvfb
-      - checkout
-      - log_stats:
-          file: integration-test-web3torrent-with-hub-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - start_servers:
+      - integration-test:
           app: web3torrent
-      - run: (cd packages/e2e-tests && yarn test web3torrent)
-      - store_artifacts:
-          path: /tmp/ganache.log
-      - store_artifacts:
-          path: packages/simple-hub/pino.log
-      - upload_logs:
-          file: integration-test-web3torrent-with-hub-stats
-      - upload_e2e_screenshots
-      - upload_e2e_logs
+          test_files: web3torrent
 
   integration-test-web3torrent-with-hub-optional:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
+    <<: *integration_test_settings
     environment:
       SC_ENV: circle-integration-w3t-with-hub
     steps:
-      - checkout
-      - log_stats:
-          file: integration-test-web3torrent-with-hub-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - start_servers:
+      - integration-test:
           app: web3torrent
-      - run: (cd packages/e2e-tests && yarn test optional)
-      - store_artifacts:
-          path: /tmp/ganache.log
-      - store_artifacts:
-          path: packages/simple-hub/pino.log
-      - upload_logs:
-          file: integration-test-web3torrent-with-hub-stats
-      - upload_e2e_screenshots
-      - upload_e2e_logs
+          test_files: optional
+
+  e2e-test-w3t-production:
+    <<: *integration_test_settings
+    environment:
+      SCREENSHOT_DIR: 'screenshots'
+      LOG_DESTINATION: 'pino.log'
+      SC_ENV: production-ropsten
+    steps:
+      - integration-test:
+          app: web3torrent
+          test_files: seed-download-complete
 
   release-pull-request:
     <<: *defaults
@@ -460,29 +400,6 @@ jobs:
           channel: C0125NB072B
           failure_message: ':red_circle: Failed to release persistent-seeder at $CIRCLE_SHA1!'
           success_message: ':tada: Released persistent-seeder at $CIRCLE_SHA1 '
-
-  e2e-test-w3t-production:
-    resource_class: large
-    working_directory: /home/circleci/project
-    docker:
-      - image: circleci/node:10.16.3-browsers
-    environment:
-      SCREENSHOT_DIR: 'screenshots'
-      LOG_DESTINATION: 'pino.log'
-      SC_ENV: production-ropsten
-    steps:
-      - install_xvfb
-      - run_xvfb
-      - checkout
-      - log_stats:
-          file: e2e-test-w3t-production-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: (cd packages/e2e-tests && yarn jest seed-download-complete withdraw --runInBand --bail)
-      - upload_logs:
-          file: e2e-test-w3t-production-stats
-      - upload_e2e_screenshots
-      - upload_e2e_logs
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
