@@ -52,8 +52,8 @@ describe('One file, six leechers, one seeder', () => {
   ) => await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
   afterAll(async () => {
-    CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
     await forEachActor(({tab}, label) => takeScreenshot(tab, `seed-download-cancel.${label}.png`));
+    CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
   });
 
   it('Allows peers to share a torrent completely', async () => {
