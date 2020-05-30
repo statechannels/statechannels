@@ -25,15 +25,18 @@ jest.setTimeout(HEADLESS ? 200_000 : 1_000_000);
 
 const USES_VIRTUAL_FUNDING = true;
 
-describe('One file, three leechers, one seeder', () => {
+describe('One file, six leechers, one seeder', () => {
   const enum Label {
     A = 'A',
     B = 'B',
     C = 'C',
-    D = 'D'
+    D = 'D',
+    E = 'E',
+    F = 'F',
+    G = 'G'
   }
 
-  const leechers: Label[] = [Label.B, Label.C, Label.D];
+  const leechers: Label[] = [Label.B, Label.C, Label.D, Label.E, Label.F, Label.G];
   const labels: Label[] = leechers.concat([Label.A]);
 
   type Actor = {browser: Browser; metamask: Dappeteer; tab: Page};
@@ -49,8 +52,8 @@ describe('One file, three leechers, one seeder', () => {
   ) => await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
   afterAll(async () => {
-    CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
     await forEachActor(({tab}, label) => takeScreenshot(tab, `seed-download-cancel.${label}.png`));
+    CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
   });
 
   it('Allows peers to share a torrent completely', async () => {
