@@ -632,10 +632,31 @@ Encoding of all outcomes (including guarantee outcomes) is handled seamlessly by
 
 Don't worry if it is not yet clear why we need guarantor channels or outcomes that guarantee. They are a useful tool for virtually funding channels, but can be safely ignored if you are just trying to understand directly funded channels.
 
-### Get your money out using pushOutcome and transferAll
+## Get your money out
 
-The outcome is stored in two places: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
+### Using pushOutcome
 
-The `pushOutcome` method on the `NitroAdjudicator` allows one or more `assetOutcomes` to be registered against a channel in a number of AssetHolder contracts (specified by the `outcome` stored against a channel that has been finalized in the adjudicator). In this example we will limit ourselves to an outcome that specifies ETH only, and therefore will only be pushing the outcome to a single contract (the `ETHAssetHolder`).
+A finalized outcome is stored in two places on chain: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
+
+The `pushOutcome` method on the `NitroAdjudicator` allows one or more `assetOutcomes` to be registered against a channel in a number of AssetHolder contracts (specified by the `outcome` stored against a channel that has been finalized in the adjudicator).
+
+In this example we will limit ourselves to an outcome that specifies ETH only, and therefore will only be pushing the outcome to a single contract (the `ETHAssetHolder`).
+
+Let us start from an expired challenge.
+
+```typescript
+```
+
+### Using transferAll
 
 The `transferAll` method is available on all asset holders, including the `ETHAssetHolder`. It pays out assets according to outcomes that it knows about.
+
+### Using claimAll
+
+### Using pushOutcomeAndTransferAll
+
+Instead of pushing the outcome from the adjudicator to the asset holder in one transaction, and _then_ transferring the assets out of a channel according to that outcome, it is more convenient to use the adjudicator's `pushOutcomeAndTransferfAll` method, which will do both in one go and save gas, to boot.
+
+### Using concludePushOutcomeAndTransferAll
+
+If we have a finalization proof, then we can call `condludePushOutcomeAndTransferAll` to do the channel close, outcome push and payouts in one transaction.
