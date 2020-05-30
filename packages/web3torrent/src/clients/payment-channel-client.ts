@@ -282,37 +282,39 @@ export class PaymentChannelClient {
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    const closing = this.channelState(channelId)
+    const MAX_CLOSE_ATTEMPTS = 5;
+    const {unsubscribe} = this.channelState(channelId)
       .pipe(
         filter(cs => this.canUpdateChannel(cs)),
-        take(5) // Limit to 5 attempts
+        take(MAX_CLOSE_ATTEMPTS)
       )
-      .subscribe(async cs => {
-        logger.info(
-          {channelId, cs, me: this.mySigningAddress},
-          "It's my turn, closing the channel"
-        );
-        try {
-          await this.channelClient.closeChannel(channelId);
-        } catch (error) {
-          if (error.error.code === ErrorCode.CloseChannel.NotYourTurn) {
-            // Perhaps the application calls UpdateChannel around the same time as the CloseChannel call
-            logger.warn(
-              {channelId},
-              'Possible race condition detected -- is a concurrent UpdateChannel occurring?'
-            );
-            return;
-          } else {
-            logger.error({error}, 'Unexpected error');
-            throw error;
+      .subscribe(
+        async cs => {
+          logger.info({channelId, cs, me: this.mySigningAddress}, 'Closing payment channel');
+          try {
+            await this.channelClient.closeChannel(channelId);
+          } catch (error) {
+            if (error.error.code === ErrorCode.CloseChannel.NotYourTurn) {
+              // Perhaps the application calls UpdateChannel around the same time as the CloseChannel call.
+              // Is a concurrent UpdateChannel occurring?
+              logger.warn({channelId}, 'Possible race condition detected');
+              return;
+            } else {
+              logger.error({error}, 'Unexpected error');
+              throw error;
+            }
           }
+        },
+        error => logger.error({error, channelId}, 'Failed to close payment channel'),
+        () => {
+          throw new Error(`CloseChannel failed ${MAX_CLOSE_ATTEMPTS} in a row.`);
         }
-      });
+      );
 
     return this.channelState(channelId)
       .pipe(
         first(cs => cs.status === 'closed'),
-        tap(() => closing.unsubscribe())
+        tap(unsubscribe)
       )
       .toPromise();
   }
