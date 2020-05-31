@@ -24,7 +24,7 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 export function getProvider(): Web3Provider | JsonRpcProvider {
   if (window.ethereum) {
     if (window.ethereum.mockingInfuraProvider) {
-      return new InfuraProvider(CHAIN_NETWORK_ID);
+      return new InfuraProvider('ropsten');
     }
     return new Web3Provider(window.ethereum);
   } else {
