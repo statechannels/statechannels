@@ -45,16 +45,22 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const total = spendBudget
     .add(receiveBudget)
     .add(spent)
-    .add(received);
+    .add(received); // this should be constant
 
-  const spendBudgetPercentage = spendBudget.div(total).toNumber() * 100;
-  const receiveBudgetPercentage = receiveBudget.div(total).toNumber() * 100;
-  const spentPercentage = spent.div(total).toNumber() * 100;
-  const receivedPercentage = received.div(total).toNumber() * 100;
+  const spendBudgetPercentage = spendBudget.gt(0) ? 100 / total.div(spendBudget).toNumber() : 0;
+  const receiveBudgetPercentage = receiveBudget.gt(0)
+    ? 100 / total.div(receiveBudget).toNumber()
+    : 0;
+  const spentPercentage = spent.gt(0) ? 100 / total.div(spent).toNumber() : 0;
+  const receivedPercentage = received.gt(0) ? 100 / total.div(received).toNumber() : 0;
+
+  console.log(spendBudget, receiveBudget, spent, received, total);
+  console.log(spendBudgetPercentage, receiveBudgetPercentage, spentPercentage, receivedPercentage);
 
   return (
     <Fragment>
       <button
+        className={'budget-button'}
         id="budget-withdraw"
         onClick={() => {
           track('Withdraw Initiated', {spent, received, spendBudget, receiveBudget});
