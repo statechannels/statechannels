@@ -1,23 +1,13 @@
-import React, {useContext} from 'react';
+import React, {useContext, Fragment} from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
-import {CircularProgressbar, buildStyles} from 'react-circular-progressbar';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
-import 'react-circular-progressbar/dist/styles.css';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
 import {Avatar, Badge} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
-
-const styles = {
-  ...buildStyles({
-    pathColor: '#ea692b',
-    textColor: '#ea692b'
-  }),
-  width: 40,
-  marginTop: -5
-};
+import {PieChart} from 'react-minimal-pie-chart';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -52,71 +42,50 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
 
-  const inverseSpentFraction = spent.gt(0) ? spendBudget.div(spent).toNumber() : undefined;
-  const spentFraction = inverseSpentFraction ? 1 / inverseSpentFraction : 0;
-  const inverseRecievedFraction = received.gt(0)
-    ? receiveBudget.div(received).toNumber()
-    : undefined;
-  const receiveFraction = inverseRecievedFraction ? 1 / inverseRecievedFraction : 0;
+  const total = spendBudget
+    .add(receiveBudget)
+    .add(spent)
+    .add(received);
+
+  const spendBudgetPercentage = spendBudget.div(total).toNumber() * 100;
+  const receiveBudgetPercentage = receiveBudget.div(total).toNumber() * 100;
+  const spentPercentage = spent.div(total).toNumber() * 100;
+  const receivedPercentage = received.div(total).toNumber() * 100;
 
   return (
-    <>
-      <table className="domain-budget-table">
-        <thead>
-          <tr className="budget-info">
-            <td className="budget-button">Wallet Action</td>
-            <td className="budget-identity">Identity</td>
-            <td className="budget-number"> Spent / Budget </td>
-            <td className="budget-number"> Earned / Budget </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="budget-info">
-            <td className="budget-button">
-              <button
-                id="budget-withdraw"
-                onClick={() => {
-                  track('Withdraw Initiated', {spent, received, spendBudget, receiveBudget});
-                  withdraw();
-                }}
-              >
-                Withdraw
-              </button>
-            </td>
-            <td className="budget-identity">
-              <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
-                <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-                  <Avatar>
-                    <Blockie
-                      opts={{
-                        seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
-                        bgcolor: '#3531ff',
-                        size: 6,
-                        scale: 4,
-                        spotcolor: '#000'
-                      }}
-                    />
-                  </Avatar>
-                </Badge>
-              </Tooltip>
-            </td>
-            <td className="budget-spent">
-              <CircularProgressbar
-                value={100 * spentFraction}
-                text={`${(100 * spentFraction).toFixed(1)}%`}
-                styles={styles}
-              />
-            </td>
-            <td className="budget-received">
-              <CircularProgressbar
-                value={100 * receiveFraction}
-                text={`${(100 * receiveFraction).toFixed(1)}%`}
-                styles={styles}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </>
+    <Fragment>
+      <button
+        id="budget-withdraw"
+        onClick={() => {
+          track('Withdraw Initiated', {spent, received, spendBudget, receiveBudget});
+          withdraw();
+        }}
+      >
+        Withdraw
+      </button>
+      <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
+        <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+          <Avatar>
+            <Blockie
+              opts={{
+                seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                bgcolor: '#3531ff',
+                size: 6,
+                scale: 4,
+                spotcolor: '#000'
+              }}
+            />
+          </Avatar>
+        </Badge>
+      </Tooltip>
+      <PieChart
+        data={[
+          {title: 'Me', value: spendBudgetPercentage, color: '#ea692b'}, // spendBudget
+          {title: 'Hub', value: receiveBudgetPercentage, color: '#E83939'}, // receiveBudget
+          {title: 'Locked-Hub', value: receivedPercentage, color: '#EF8080'}, // received
+          {title: 'Locked-Me', value: spentPercentage, color: '#F2A17A'} // spent
+        ]}
+      />
+    </Fragment>
   );
 };
