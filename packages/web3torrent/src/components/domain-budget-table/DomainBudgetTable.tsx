@@ -54,9 +54,6 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const spentPercentage = spent.gt(0) ? 100 / total.div(spent).toNumber() : 0;
   const receivedPercentage = received.gt(0) ? 100 / total.div(received).toNumber() : 0;
 
-  console.log(spendBudget, receiveBudget, spent, received, total);
-  console.log(spendBudgetPercentage, receiveBudgetPercentage, spentPercentage, receivedPercentage);
-
   return (
     <Fragment>
       <button
