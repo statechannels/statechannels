@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import {CompiledContract} from 'etherlime-lib';
-import * as log from 'loglevel';
 import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
 import {GanacheDeployer} from './deployer';
+import {logger} from './logger';
 
 interface CacheKey {
   name: string;
@@ -58,7 +58,7 @@ export class GanacheNCacheDeployer {
 
     const existingAddress = this.addressFromCache(cacheKey);
     if (existingAddress) {
-      log.info(
+      logger.info(
         `Contract ${colors.colorName(name)} already exists address: ${colors.colorAddress(
           existingAddress
         )}`
@@ -74,7 +74,7 @@ export class GanacheNCacheDeployer {
     } catch (e) {
       if (e instanceof KeyExistsError) {
         const conflictAddress = e.address;
-        log.info(
+        logger.info(
           `Contract ${colors.colorName(name)} already exists at address: ${colors.colorAddress(
             conflictAddress
           )}. We also deployed it at ${colors.colorAddress(
