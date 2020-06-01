@@ -37,7 +37,7 @@ const channel: Channel = {chainId, channelNonce, participants};
 const channelId = getChannelId(channel);
 ```
 
-### Deposit into the ETH asset holder
+### `deposit` into the ETH asset holder
 
 The deposit method allows ETH to be escrowed against a channel.
 
@@ -155,7 +155,7 @@ const fixedPart = getFixedPart(state);
 const getVariablePaert = getVariablePart(state);
 ```
 
-### Conform to an on chain validTransition function
+### Conform to an on chain `validTransition` function
 
 In ForceMove, every state has an associated 'mover' - the participant who had the unique ability to progress the channel at the point the state was created. The mover can be calculated from the `turnNum` and the `participants` as follows:
 
@@ -331,6 +331,8 @@ which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSi
 
 If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can support that state. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the outcome on-chain. They would do this by calling `conclude` on the adjudicator.
 
+### Call `conclude`
+
 The conclude method allows anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire (more on that later).
 
 The off-chain state(s) is submitted (in an optimized format), and once relevant checks have passed, an expired challenge is stored against the `channelId`. In this example the participants support the state by countersigning it, without increasing the turn number:
@@ -376,7 +378,7 @@ The `forceMove` function allows anyone holding the appropriate off-chain state t
 
 States and signatures that support a are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
 
-### Call forceMove
+### Call `forceMove`
 
 :::note
 The challenger needs to sign this data:
@@ -423,7 +425,7 @@ const tx = NitroAdjudicator.forceMove(
 
 A challenge being registered does _not_ mean that the channel will inexorably finalize. Participants have the timeout period in order to be able to respond. Perhaps they come back online after a brief spell of inactivity, or perhaps the challenger was trying to (maliciously) finalize the channel with a supported but outdated (or 'stale') state.
 
-### Call checkpoint
+### Call `checkpoint`
 
 The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` on chain, and leave the resulting channel in the "Open" mode. It can be used to clear a challenge.
 
@@ -453,7 +455,7 @@ const expectedChannelStorageHash = channelDataToChannelStorageHash({
 expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
 ```
 
-### Call respond
+### Call `respond`
 
 The respond method allows anyone with the appropriate, _single_ off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`. This might be significantly cheaper than calling checkpoint (it leverages the fact that the chain has already seen a support for the challenge state, so providing a single validTransition from the challenge state to the response state implies the existence of a support proof for the response state).
 
@@ -530,14 +532,11 @@ const {
 
 ---
 
-## Get your money out
+## Outcomes
 
 So far during this tutorial we have not concerned ourselves with specifying meaningful outcomes on any of our `States`. This has meant that although we have learnt to deposit assets, execute state transitions off chain, and to finalize an outcome via challenge or conclude, no participant could get their funds back out of the state channel and into their ethereum account.
 
 The time has come to tackle this issue!
-
-### Outcomes
-
 Nitro protocol is an extension of ForceMove protocol that we have dealt with so far. ForceMove specifies only that a state should have a default `outcome` but does not specify the format of that `outcome`, and simply treats it as an unstructured `bytes` field. In this section we look at the outcome formats needed for Nitro.
 
 ### Outcomes that allocate
@@ -634,7 +633,7 @@ Don't worry if it is not yet clear why we need guarantor channels or outcomes th
 
 ## Get your money out
 
-### Using pushOutcome
+### Using `pushOutcome`
 
 A finalized outcome is stored in two places on chain: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
 
@@ -642,21 +641,138 @@ The `pushOutcome` method on the `NitroAdjudicator` allows one or more `assetOutc
 
 In this example we will limit ourselves to an outcome that specifies ETH only, and therefore will only be pushing the outcome to a single contract (the `ETHAssetHolder`).
 
-Let us start from an expired challenge.
+Let us begin with a conclude transaction, following the steps in the tutorial section above. When we finalize a channel this way, the chain stores the timestamp of the current blocknumber. We need to scrape this information from the transaction receipt in order to be able to push the outcome successfully.
 
 ```typescript
+const tx0 = NitroAdjudicator.conclude(
+  largestTurnNum,
+  fixedPart,
+  appPartHash,
+  outcomeHash,
+  numStates,
+  whoSignedWhat,
+  sigs
+);
+const receipt = await(await tx0).wait();
+
+const channelId = getChannelId(channel);
+const turnNumRecord = 0; // Always 0 for a happy conclude
+const finalizesAt = (await provider.getBlock(receipt.blockNumber)).timestamp;
+const stateHash = HashZero; // Reset in a happy conclude
+const challengerAddress = AddressZero; // Reset in a happy conclude
+const outcomeBytes = encodeOutcome(state.outcome);
+
+const tx1 = NitroAdjudicator.pushOutcome(
+  channelId,
+  turnNumRecord,
+  finalizesAt,
+  stateHash,
+  challengerAddress,
+  outcomeBytes
+);
+
+await(await tx1).wait();
 ```
 
-### Using transferAll
+### Using `transferAll`
 
-The `transferAll` method is available on all asset holders, including the `ETHAssetHolder`. It pays out assets according to outcomes that it knows about.
+The `transferAll` method is available on all asset holders, including the `ETHAssetHolder`. It pays out assets according to outcomes that it knows about, if the channel is sufficiently funded.
 
-### Using claimAll
+```typescript
+import {encodeAllocation} from '@statechannels/nitro-protocol';
 
-### Using pushOutcomeAndTransferAll
+const amount = '0x03';
+
+const EOA = ethers.Wallet.createRandom().address;
+const destination = hexZeroPad(EOA, 32);
+
+const assetOutcome: AllocationAssetOutcome = {
+  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  allocationItems: [{destination, amount}],
+};
+
+// Following earlier tutorials ...
+// tx0 fund a channel
+// tx1 conclude this channel with this outcome
+// tx2 pushOutcome to the ETH_ASSET_HOLDER
+// ...
+
+const tx3 = ETHAssetHolder.transferAll(channelId, encodeAllocation(assetOutcome.allocationItems));
+
+const {events} = await(await tx3).wait();
+
+expect(events).toMatchObject([
+  {
+    event: 'AssetTransferred',
+    args: {
+      channelId,
+      destination: destination.toLowerCase(),
+      amount: {_hex: amount},
+    },
+  },
+]);
+
+expect(bigNumberify(await provider.getBalance(EOA)).eq(bigNumberify(amount)));
+```
+
+:::tip
+If the destination specified in the outcome is external, the asset holder pays out the funds (as in the example above). Otherwise the destination is a channel id, and the contract updates its internal accounting such that this channel has its direct funding increased.
+:::
+
+:::tip
+This method executes payouts that might benefit multiple participants. If multiple actors try and call this method, after the first transaction is confirmed the remaining ones may fail.
+:::
+
+### Using `claimAll`
+
+The `claimAll` method will pay out the funds held against a guarantor channel, according to a _target_ channel's outcome but with an preference order controlled by the guarantor channel.
+
+```typescript
+import {encodeAllocation} from '@statechannels/nitro-protocol';
+
+const amount = '0x03';
+
+const EOABob = ethers.Wallet.createRandom().address;
+const destination = hexZeroPad(EOA, 32);
+
+const assetOutcome: AllocationAssetOutcome = {
+  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  allocationItems: [{destination, amount}],
+};
+
+// Following earlier tutorials ...
+// tx0 finalize a channel that allocates to Alice then Bob
+// tx1 pushOutcome to the ETH ASSET HOLDER
+// tx2 finalize a guarantor channel that targets the first channel
+// and reprioritizes Bob over Alice
+// tx3 pushOutcome to the ETH_ASSET_HOLDER
+// tx4 fund the guarantor channel
+// ...
+
+const tx5 = ETHAssetHolder.claimAll(gurantorChannelId, // TODO);
+
+const {events} = await(await tx5).wait();
+
+expect(events).toMatchObject([
+  {
+    event: 'AssetTransferred',
+    args: {
+      channelId,
+      destination: destination.toLowerCase(),
+      amount: {_hex: amount},
+    },
+  },
+]);
+
+expect(bigNumberify(await provider.getBalance(EOABob)).eq(bigNumberify(amount)));
+```
+
+If this process seems overly complicated to you: remember that guarantor channels are only required when virtually funding a channel. Also bear in mind that this process is unlinkely to actually play out on chain very often: it is in everyone's interest to administrate inter-channel funding off chain as much as possible, with the on chain administration such as this used as a last resort.
+
+### Using `pushOutcomeAndTransferAll`
 
 Instead of pushing the outcome from the adjudicator to the asset holder in one transaction, and _then_ transferring the assets out of a channel according to that outcome, it is more convenient to use the adjudicator's `pushOutcomeAndTransferfAll` method, which will do both in one go and save gas, to boot.
 
-### Using concludePushOutcomeAndTransferAll
+### Using `concludePushOutcomeAndTransferAll`
 
 If we have a finalization proof, then we can call `condludePushOutcomeAndTransferAll` to do the channel close, outcome push and payouts in one transaction.
