@@ -163,7 +163,7 @@
   "scripts": {
     "build:ci": "run-s prepare build",
     "build:netlify:production": "yarn build",
-    "build": "ember build --environment=production",
+    "build": "NODE_ENV=production ember build --environment=production",
     "clearContracts": "rm -rf ./build/contracts",
     "contracts:compile": "node ./bin/compile.js",
     "eslint:check": "eslint \"**/*.{js,ts}\" --cache --max-warnings=0",
