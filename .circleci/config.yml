@@ -181,6 +181,8 @@ commands:
       - attach_workspace:
           at: /home/circleci/project
       - run:
+          command: mkdir logs
+      - run:
           command: yarn start-servers << parameters.app >>
           background: true
       - run: (cd packages/e2e-tests && yarn test << parameters.test_files >>)
