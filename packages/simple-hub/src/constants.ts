@@ -1,4 +1,5 @@
 import {Wallet, utils} from 'ethers';
+import path from 'path';
 
 export const cFirebasePrefix = process.env.FIREBASE_PREFIX || 'default-prefix';
 
@@ -19,6 +20,10 @@ export const cHubChainDestination = utils.hexZeroPad(new Wallet(cHubChainPK).add
 
 export const cHubParticipantId = process.env.HUB_PARTICIPANT_ID || 'firebase:simple-hub';
 
-export const LOG_DESTINATION = process.env.LOG_DESTINATION ?? 'console';
+export const LOG_DESTINATION = process.env.LOG_DESTINATION
+  ? process.env.LOG_DESTINATION === 'console'
+    ? 'console'
+    : path.join(process.env.LOG_DESTINATION, 'simple-hub.log')
+  : 'console';
 
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';

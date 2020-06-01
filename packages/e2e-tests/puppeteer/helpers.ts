@@ -10,7 +10,7 @@ import {
   SCREENSHOT_DIR,
   RPC_ENDPOINT,
   CHAIN_NETWORK_ID,
-  LOGS_DIR
+  LOG_DESTINATION
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -38,21 +38,22 @@ export async function setupLogging(
     throw error;
   });
 
-  const uniquenessKey = `${ganacheAccountIndex}/${logPrefix}`;
-  if (logDistinguisherCache[uniquenessKey]) throw `Ambiguous log config detected: ${uniquenessKey}`;
-  logDistinguisherCache[uniquenessKey] = true;
+  const filename = `${logPrefix}.${ganacheAccountIndex}`;
 
-  const LOGS_LOCATION = path.join(LOGS_DIR, logPrefix);
-  fs.mkdirSync(LOGS_LOCATION, {recursive: true});
+  if (logDistinguisherCache[filename]) throw `Ambiguous log config detected: ${filename}`;
+  logDistinguisherCache[filename] = true;
+
+  const LOGS_LOCATION = path.join(LOG_DESTINATION, filename);
 
   const APPEND = 'a';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const writeStream = (filename: string): {write: (...x: any[]) => any} =>
-    filename === 'console'
+    LOG_DESTINATION === 'console'
       ? {write: (): null => null}
-      : fs.createWriteStream(`${LOGS_LOCATION}.${filename}`, {flags: APPEND});
-  const pinoLog = writeStream(process.env.LOG_DESTINATION || 'console');
-  const browserConsoleLog = writeStream(process.env.BROWSER_LOG_DESTINATION || 'console');
+      : fs.createWriteStream(filename, {flags: APPEND});
+
+  const pinoLog = writeStream(`${LOGS_LOCATION}.pino.log`);
+  const browserConsoleLog = writeStream(`${LOGS_LOCATION}.browser.log`);
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const isPinoLog = (name: string) => {

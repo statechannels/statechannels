@@ -1,6 +1,7 @@
 import {Status, TorrentUI} from './types';
 import {ChannelState, Peer} from './clients/payment-channel-client';
 import {utils} from 'ethers';
+import path from 'path';
 
 export const VERSION = process.env.VERSION;
 export const COMMIT_HASH = process.env.COMMIT_HASH;
@@ -183,8 +184,12 @@ export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(
 
 export const MAX_FILE_SIZE = 1000 * 1024 * 1024;
 
-export const LOG_DESTINATION = process.env.LOG_DESTINATION;
-export const ADD_LOGS = !!LOG_DESTINATION;
+export const ADD_LOGS = !!process.env.LOG_DESTINATION;
+export const LOG_DESTINATION = ADD_LOGS
+  ? process.env.LOG_DESTINATION === 'console'
+    ? 'console'
+    : path.join(process.env.LOG_DESTINATION, 'web3torrent.log')
+  : undefined;
 
 // When logging, we default to 'info', as most logs happen at this level.
 // Some very large classes are serialized at the 'trace' level
