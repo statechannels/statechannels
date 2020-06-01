@@ -23,6 +23,8 @@ export const NODE_ENV: string = process.env.NODE_ENV as string;
 
 export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';
 
+export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
+
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 
 export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADDRESS || AddressZero;
