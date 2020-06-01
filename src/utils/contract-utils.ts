@@ -1,7 +1,7 @@
 import {Contract} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
-import {ETH_ASSET_HOLDER_ADDRESS, CHAIN_NETWORK_ID} from '../config';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
 import {BigNumber} from 'ethers';
 
