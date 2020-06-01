@@ -7,6 +7,7 @@ import {Spinner} from '../../components/form/spinner/Spinner';
 import {getUserFriendlyError} from '../../utils/error';
 import {Flash} from 'rimble-ui';
 import {track} from '../../analytics';
+import {MAX_FILE_SIZE} from '../../constants';
 
 const Upload: React.FC<{ready: boolean}> = ({ready}) => {
   const history = useHistory();
@@ -32,14 +33,23 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
               setSpinner(true);
               setErrorLabel('');
               try {
-                const {infoHash, length, name, magnetURI} = await upload(event.target.files);
-                track('File Uploaded', {
-                  infoHash,
-                  magnetURI,
-                  filename: name,
-                  filesize: length
-                });
-                history.push(generateURL({infoHash, length, name}));
+                let filesSize = 0;
+                for (let i = 0; i < event.target.files.length; i++) {
+                  filesSize += event.target.files[i].size;
+                }
+                if (filesSize > MAX_FILE_SIZE) {
+                  setErrorLabel('File size too large. The maximum file size is 1 GB.');
+                  setSpinner(false);
+                } else {
+                  const {infoHash, length, name, magnetURI} = await upload(event.target.files);
+                  track('File Uploaded', {
+                    infoHash,
+                    magnetURI,
+                    filename: name,
+                    filesize: length
+                  });
+                  history.push(generateURL({infoHash, length, name}));
+                }
               } catch (error) {
                 setSpinner(false);
                 setErrorLabel(getUserFriendlyError(error.code));
