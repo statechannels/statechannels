@@ -1,14 +1,15 @@
 import {spawn} from 'child_process';
 import {ethers} from 'ethers';
 import {JsonRpcProvider} from 'ethers/providers';
-import * as log from 'loglevel';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 
-log.setDefaultLevel(log.levels.INFO);
+import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
+import {logger} from './logger';
+
 
 export class GanacheServer {
   provider: JsonRpcProvider;
@@ -23,9 +24,7 @@ export class GanacheServer {
     gasLimit = 1000000000,
     gasPrice = 1
   ) {
-    log.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
-    const showVerboseOutput = process.env.SHOW_VERBOSE_GANACHE_OUTPUT === 'true';
-    const showOutput = showVerboseOutput || process.env.SHOW_GANACHE_OUTPUT == 'true';
+    logger.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
     this.fundedPrivateKey = accounts[0].privateKey;
 
     const oneMillion = ethers.utils.parseEther('1000000');
@@ -34,7 +33,7 @@ export class GanacheServer {
       [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
       [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
-      showVerboseOutput ? ['--verbose'] : []
+      SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : []
     ]
       .reduce((a, b) => a.concat(b))
       .join(' ');
@@ -42,13 +41,10 @@ export class GanacheServer {
     const cmd = `ganache-cli ${opts}`;
 
     this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
-    if (showOutput) {
-      this.server.stdout.on('data', data => {
-        log.info(data.toString());
-      });
-    }
+    this.server.stdout.on('data', data => logger.info(data.toString()));
+
     this.server.stderr.on('data', data => {
-      log.error(`Server threw error ${data.toString()}`);
+      logger.error({error: data.toString()}, `Server threw error`);
       throw new Error('Ganache server failed to start');
     });
 
@@ -97,7 +93,7 @@ export class GanacheServer {
         abi: JSON.stringify(artifact.abi)
       };
     }
-    log.info(`Contracts deployed to chain`);
+    logger.info({deployedArtifacts}, 'Contracts deployed to chain');
     return deployedArtifacts;
   }
 }
