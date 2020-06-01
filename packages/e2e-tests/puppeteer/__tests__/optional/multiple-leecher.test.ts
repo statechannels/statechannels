@@ -59,12 +59,12 @@ describe('One file, six leechers, one seeder', () => {
   it('Allows peers to share a torrent completely', async () => {
     let i = 1;
     console.log('Opening browsers');
-    await assignEachLabel(async () => {
+    await assignEachLabel(async label => {
       const idx = i++;
       const {browser, metamask} = await setUpBrowser(HEADLESS, idx, 0);
       const tab = (await browser.pages())[0];
 
-      await setupLogging(tab, idx, 'multiple-leecher', true);
+      await setupLogging(tab, idx, `multiple-leecher.${label}`, true);
       !USE_DAPPETEER && (await setupFakeWeb3(tab, idx));
 
       return {browser, tab, metamask};

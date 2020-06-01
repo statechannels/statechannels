@@ -37,7 +37,11 @@ if (!process.env.HUB_DESTINATION) {
 }
 export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
 
-export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION;
+export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
+  ? process.env.destination === 'console'
+    ? 'console'
+    : `${process.env.LOG_DESTINATION}/wallet.log`
+  : undefined;
 
 export const NITRO_ADJUDICATOR_ADDRESS: string =
   process.env.NITRO_ADJUDICATOR_ADDRESS || AddressZero;
