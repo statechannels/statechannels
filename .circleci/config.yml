@@ -235,7 +235,7 @@ jobs:
             then
                 yarn build:ci
             else
-                yarn build:ci:incremental
+                yarn build:ci
             fi
       - upload_logs:
           file: build-stats
