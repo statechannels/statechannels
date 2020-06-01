@@ -1,7 +1,7 @@
 import {Contract} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {ETH_ASSET_HOLDER_ADDRESS, INFURA_API_KEY} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
 import {BigNumber} from 'ethers';
 
@@ -24,7 +24,7 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 export function getProvider(): Web3Provider | JsonRpcProvider {
   if (window.ethereum) {
     if (window.ethereum.mockingInfuraProvider) {
-      return new InfuraProvider('ropsten');
+      return new InfuraProvider('ropsten', INFURA_API_KEY);
     }
     return new Web3Provider(window.ethereum);
   } else {
