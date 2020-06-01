@@ -137,7 +137,7 @@ export const machine = (
       createBudget: {
         invoke: {
           id: 'createBudget',
-          src: createBudget(store),
+          src: createBudget(store, messagingService),
           onDone: {target: 'done'}
         }
       },
@@ -190,11 +190,7 @@ export const machine = (
       done: {
         id: 'done',
         type: 'final',
-        entry: [
-          hideUI(messagingService),
-          sendResponse(messagingService)
-          // /* This might be overkill */ actions.sendBudgetUpdated
-        ]
+        entry: [hideUI(messagingService), sendResponse(messagingService)]
       },
       failure: {
         type: 'final',
@@ -208,9 +204,12 @@ interface LedgerInitRetVal {
   ledgerId: string;
   ledgerState: ChannelState;
 }
-const createBudget = (store: Store) => async (context: Initial): Promise<void> => {
+const createBudget = (store: Store, messagingService: MessagingServiceInterface) => async (
+  context: Initial
+): Promise<void> => {
   // create budget
   await store.createBudget(context.budget);
+  await messagingService.sendBudgetNotification(context.budget);
 };
 const createLedger = (store: Store) => async (context: Initial): Promise<LedgerInitRetVal> => {
   // create ledger

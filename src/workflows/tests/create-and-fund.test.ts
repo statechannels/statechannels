@@ -30,6 +30,7 @@ import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 
 import {SimpleHub} from './simple-hub';
 import {TestStore} from './store';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);
 
@@ -76,7 +77,8 @@ const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
 let aStore: TestStore;
 let bStore: TestStore;
-
+let aMessaging: MessagingServiceInterface;
+let bMessaging: MessagingServiceInterface;
 const allSignState = (state: State) => ({
   ...state,
   signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
@@ -88,8 +90,10 @@ beforeEach(async () => {
   chain = new FakeChain();
   aStore = new TestStore(chain);
   await aStore.initialize([wallet1.privateKey]);
+  aMessaging = new MessagingService(aStore);
   bStore = new TestStore(chain);
   await bStore.initialize([wallet2.privateKey]);
+  bMessaging = new MessagingService(bStore);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
@@ -110,8 +114,12 @@ beforeEach(async () => {
 });
 
 test('it uses direct funding when told', async () => {
-  const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
-  const [aService, bService] = [aStore, bStore].map(connectToStore);
+  const connectToStore = ([store, messagingService]) =>
+    interpret(machine(store, messagingService).withContext(context)).start();
+  const [aService, bService] = [
+    [aStore, aMessaging],
+    [bStore, bMessaging]
+  ].map(connectToStore);
 
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
@@ -144,8 +152,16 @@ test('it uses virtual funding when enabled', async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const [aService, bService] = [aStore, bStore].map((store: Store) =>
-    interpret(machine(store).withContext({...context, funding: 'Virtual'})).start()
+  const [aService, bService] = [
+    [aStore, aMessaging],
+    [bStore, bMessaging]
+  ].map(([store, messagingService]) =>
+    interpret(
+      machine(store as Store, messagingService as MessagingServiceInterface).withContext({
+        ...context,
+        funding: 'Virtual'
+      })
+    ).start()
   );
 
   await waitForExpect(async () => {

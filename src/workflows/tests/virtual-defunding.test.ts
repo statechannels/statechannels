@@ -21,6 +21,7 @@ import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 import {TestStore} from './store';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 import {BigNumber, BigNumberish} from 'ethers';
+import {MessagingServiceInterface, MessagingService} from '../../messaging';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -152,6 +153,8 @@ const context: VirtualDefundingAsLeaf.Init = {targetChannelId};
 
 let aStore: TestStore;
 let bStore: TestStore;
+let aMessaging: MessagingServiceInterface;
+let bMessaging: MessagingServiceInterface;
 
 const generateBudget = (ledgerAmounts): DomainBudget => ({
   domain: TEST_APP_DOMAIN,
@@ -169,7 +172,7 @@ const generateBudget = (ledgerAmounts): DomainBudget => ({
 beforeEach(async () => {
   aStore = new TestStore();
   await aStore.initialize([wallet1.privateKey]);
-
+  aMessaging = new MessagingService(aStore);
   await aStore.createBudget(generateBudget(ledger1Amounts));
 
   await aStore.createEntry(ledger1State, {
@@ -184,7 +187,7 @@ beforeEach(async () => {
 
   bStore = new TestStore();
   await bStore.initialize([wallet2.privateKey]);
-
+  bMessaging = new MessagingService(bStore);
   await bStore.createBudget(generateBudget(ledger2Amounts));
 
   await bStore.createEntry(ledger2State, {
@@ -201,8 +204,12 @@ beforeEach(async () => {
 test('virtual defunding with a simple hub', async () => {
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  const aService = interpret(VirtualDefundingAsLeaf.machine(aStore).withContext(context));
-  const bService = interpret(VirtualDefundingAsLeaf.machine(bStore).withContext(context));
+  const aService = interpret(
+    VirtualDefundingAsLeaf.machine(aStore, aMessaging).withContext(context)
+  );
+  const bService = interpret(
+    VirtualDefundingAsLeaf.machine(bStore, bMessaging).withContext(context)
+  );
   const services = [aService, bService];
 
   subscribeToMessages({
@@ -242,8 +249,12 @@ test('virtual defunding with a proper hub', async () => {
   await hubStore.createEntry(ledger2State, {funding: {type: 'Direct'}});
   await hubStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
 
-  const aService = interpret(VirtualDefundingAsLeaf.machine(aStore).withContext(context));
-  const bService = interpret(VirtualDefundingAsLeaf.machine(bStore).withContext(context));
+  const aService = interpret(
+    VirtualDefundingAsLeaf.machine(aStore, aMessaging).withContext(context)
+  );
+  const bService = interpret(
+    VirtualDefundingAsLeaf.machine(bStore, bMessaging).withContext(context)
+  );
   const hubService = interpret(
     VirtualDefundingAsHub.machine(hubStore).withContext({jointChannelId})
   );
