@@ -23,7 +23,6 @@ function findClosingPosition(data: string) {
 }
 
 function clean(newData: string): string {
-  newData = newData.replace(/\s+/g, '');
   newData = newData.replace(/>/g, '');
   newData = newData.replace(/</g, '');
 
@@ -71,13 +70,25 @@ function extractLogsFromVerboseGanacheOutput(buffer: string, newData = ''): stri
   buffer = buffer.concat(clean(newData));
 
   const logLineStart = buffer.indexOf('{');
+
+  let statement = '';
+
   if (logLineStart === -1) {
-    logger.trace({buffer, newData}, 'No JSON-RPC detected');
-    return '';
-  }
-  if (logLineStart !== 0) {
-    logger.trace({buffer, logLineStart}, 'Missing some logs?');
+    statement = buffer;
+    buffer = '';
+  } else if (logLineStart > 0) {
+    statement = buffer.slice(0, logLineStart);
     buffer = buffer.slice(logLineStart);
+  }
+
+  statement = statement.trim();
+
+  if (statement) {
+    logger.info({statement}, 'NON-JSON-RPC log line:');
+  }
+
+  if (buffer.length === 0) {
+    return '';
   }
 
   if (buffer.indexOf('}') !== -1 && buffer.indexOf('}') < logLineStart) {
