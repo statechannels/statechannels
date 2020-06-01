@@ -728,16 +728,29 @@ This method executes payouts that might benefit multiple participants. If multip
 The `claimAll` method will pay out the funds held against a guarantor channel, according to a _target_ channel's outcome but with an preference order controlled by the guarantor channel.
 
 ```typescript
-import {encodeAllocation} from '@statechannels/nitro-protocol';
-
 const amount = '0x03';
+const EOA1 = ethers.Wallet.createRandom().address;
+const EOA2 = ethers.Wallet.createRandom().address;
+const destination1 = hexZeroPad(EOA1, 32);
+const destination2 = hexZeroPad(EOA2, 32);
 
-const EOABob = ethers.Wallet.createRandom().address;
-const destination = hexZeroPad(EOA, 32);
-
-const assetOutcome: AllocationAssetOutcome = {
+const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
   assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [{destination, amount}],
+  allocationItems: [
+    {destination: destination1, amount},
+    {destination: destination2, amount},
+  ],
+};
+
+const assetOutcomeForTheGuarantorChannel: GuaranteeAssetOutcome = {
+  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  guarantee: {
+    targetChannelId: targetChannelId,
+    destinations: [
+      destination2,
+      destination1, // Note reversed order
+    ],
+  },
 };
 
 // Following earlier tutorials ...
@@ -746,25 +759,20 @@ const assetOutcome: AllocationAssetOutcome = {
 // tx2 finalize a guarantor channel that targets the first channel
 // and reprioritizes Bob over Alice
 // tx3 pushOutcome to the ETH_ASSET_HOLDER
-// tx4 fund the guarantor channel
+// tx4 fund the _guarantor_ channel, not the target channel
+// with a deposit that only covers one of the payouts
+// check that Bob got his payout
 // ...
 
-const tx5 = ETHAssetHolder.claimAll(gurantorChannelId, // TODO);
+const tx5 = ETHAssetHolder.claimAll(
+  guarantorChannelId,
+  encodeGuarantee(assetOutcomeForTheGuarantorChannel.guarantee),
+  encodeAllocation(assetOutcomeForTheTargetChannel.allocationItems)
+);
 
-const {events} = await(await tx5).wait();
+await(await tx5).wait();
 
-expect(events).toMatchObject([
-  {
-    event: 'AssetTransferred',
-    args: {
-      channelId,
-      destination: destination.toLowerCase(),
-      amount: {_hex: amount},
-    },
-  },
-]);
-
-expect(bigNumberify(await provider.getBalance(EOABob)).eq(bigNumberify(amount)));
+expect(bigNumberify(await provider.getBalance(EOA2)).eq(bigNumberify(amount)));
 ```
 
 If this process seems overly complicated to you: remember that guarantor channels are only required when virtually funding a channel. Also bear in mind that this process is unlinkely to actually play out on chain very often: it is in everyone's interest to administrate inter-channel funding off chain as much as possible, with the on chain administration such as this used as a last resort.
