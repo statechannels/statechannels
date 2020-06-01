@@ -74,6 +74,7 @@ module.exports = function(webpackEnv) {
       return (
         [
           'CHAIN_NETWORK_ID',
+          'INFURA_API_KEY',
           'CLEAR_STORAGE_ON_START',
           'ETH_ASSET_HOLDER_ADDRESS',
           'HUB_ADDRESS',
