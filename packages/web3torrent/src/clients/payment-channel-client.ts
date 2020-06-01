@@ -2,7 +2,8 @@ import {utils, constants} from 'ethers';
 import {
   FakeChannelProvider,
   ChannelClient,
-  ChannelClientInterface
+  ChannelClientInterface,
+  ErrorCode
 } from '@statechannels/channel-client';
 import {
   ChannelStatus,
@@ -28,7 +29,7 @@ import {map, filter, first, tap, take} from 'rxjs/operators';
 import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
-import {ErrorCode} from '@statechannels/channel-client/lib/src/types';
+
 import {isJsonRpcErrorResponse} from '@statechannels/channel-provider';
 
 const log = logger.child({module: 'payment-channel-client'});
