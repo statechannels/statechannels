@@ -75,7 +75,7 @@ module.exports = function(webpackEnv) {
         [
           'VERSION',
           'CHAIN_NETWORK_ID',
-          'DRIFT_CHATBOX_ID',
+          'DRIFT_CHATBOX_APP_ID',
           'FAKE_CHANNEL_PROVIDER',
           'FIREBASE_API_KEY',
           'FIREBASE_PREFIX',
