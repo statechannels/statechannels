@@ -69,39 +69,15 @@ module.exports = function(webpackEnv) {
   const publicUrl = isEnvProduction ? publicPath.slice(0, -1) : isEnvDevelopment && '';
 
   // This is based on what CRA was doing
-  const rawEnv = Object.keys(process.env)
-    .filter(key => {
-      return (
-        [
-          'VERSION',
-          'CHAIN_NETWORK_ID',
-          'DRIFT_CHATBOX_ID',
-          'FAKE_CHANNEL_PROVIDER',
-          'FIREBASE_API_KEY',
-          'FIREBASE_PREFIX',
-          'FIREBASE_URL',
-          'FUNDING_STRATEGY',
-          'HUB_DESTINATION',
-          'LOG_DESTINATION',
-          'LOG_LEVEL',
-          'NODE_ENV',
-          'SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS',
-          'TARGET_NETWORK',
-          'TRACKER_URL',
-          'TRACKER_URL_HTTP_PROTOCOL',
-          'WALLET_URL'
-        ].indexOf(key) > -1
-      );
-    })
-    .reduce(
-      (env, key) => {
-        env[key] = process.env[key];
-        return env;
-      },
-      {
-        PUBLIC_URL: publicUrl
-      }
-    );
+  const rawEnv = Object.keys(process.env).reduce(
+    (env, key) => {
+      env[key] = process.env[key];
+      return env;
+    },
+    {
+      PUBLIC_URL: publicUrl
+    }
+  );
   const stringifiedEnv = {
     'process.env': Object.keys(rawEnv).reduce((env, key) => {
       env[key] = JSON.stringify(rawEnv[key]);
