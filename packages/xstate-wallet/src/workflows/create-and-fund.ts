@@ -24,6 +24,7 @@ import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
+import {MessagingServiceInterface} from '../messaging';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
@@ -98,7 +99,10 @@ const assignJointChannelId = assign<any>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
 
-const reserveFunds = (store: Store) => async context => {
+const reserveFunds = (
+  store: Store,
+  messagingService: MessagingServiceInterface
+) => async context => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
   const playerAddress = await store.getAddress();
@@ -108,7 +112,11 @@ const reserveFunds = (store: Store) => async context => {
   const receive = allocationItems.find(a => a.destination !== playerDestination)?.amount || Zero;
   const send = allocationItems.find(a => a.destination === playerDestination)?.amount || Zero;
 
-  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {receive, send});
+  const budget = await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {
+    receive,
+    send
+  });
+  await messagingService.sendBudgetNotification(budget);
 };
 
 type VirtualFundingComplete = Init & {jointChannelId: string};
@@ -149,7 +157,7 @@ export const config: MachineConfig<Init, any, any> = {
   }
 };
 
-export const services = (store: Store) => ({
+export const services = (store: Store, messagingService: MessagingServiceInterface) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
   virtualFunding: VirtualFundingAsLeaf.machine(store),
@@ -159,20 +167,21 @@ export const services = (store: Store) => ({
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store),
-  reserveFunds: reserveFunds(store)
+  reserveFunds: reserveFunds(store, messagingService)
 });
 
 type Service = keyof ReturnType<typeof services>;
 
-const options = (store: Store) => ({
-  services: services(store),
+const options = (store: Store, messagingService: MessagingServiceInterface) => ({
+  services: services(store, messagingService),
   actions: {
     triggerObjective: triggerObjective(store),
     assignJointChannelId
   }
 });
 
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
+  Machine(config).withConfig(options(store, messagingService));
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
   store.objectiveFeed

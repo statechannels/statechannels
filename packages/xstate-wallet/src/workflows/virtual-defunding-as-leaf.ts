@@ -10,6 +10,7 @@ import {nextState} from '../store/state-utils';
 import _ from 'lodash';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {ChannelLock} from '../store/store';
+import {MessagingServiceInterface} from '../messaging';
 
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';
@@ -164,8 +165,16 @@ const releaseFundsFromBudget: StateNodeConfig<any, any, any> = {
   }
 };
 
-const releaseFunds = (store: Store) => async (context: ChannelsSet) =>
-  store.releaseFunds(ETH_ASSET_HOLDER_ADDRESS, context.ledgerId, context.targetChannelId);
+const releaseFunds = (store: Store, messagingService: MessagingServiceInterface) => async (
+  context: ChannelsSet
+) => {
+  const budget = await store.releaseFunds(
+    ETH_ASSET_HOLDER_ADDRESS,
+    context.ledgerId,
+    context.targetChannelId
+  );
+  await messagingService.sendBudgetNotification(budget);
+};
 
 const getApplicationDomain = (store: Store) => async (context: ChannelsSet) => {
   const ledgerEntry = await store.getEntry(context.ledgerId);
@@ -190,16 +199,20 @@ export const config: StateNodeConfig<any, any, any> = {
 
 type WorkflowServices = Record<Services, ServiceConfig<any>>;
 
-const services = (store: Store): WorkflowServices => ({
+const services = (store: Store, messagingService: MessagingServiceInterface): WorkflowServices => ({
   checkChannelsService: checkChannelsService(store),
   acquireLock: acquireLock(store),
   defundGuarantorInLedger: defundGuarantorInLedger(store),
   finalJointChannelUpdate: finalJointChannelUpdate(store),
   finalTargetState: finalTargetState(store),
   supportState: SupportState.machine(store),
-  releaseFunds: releaseFunds(store),
+  releaseFunds: releaseFunds(store, messagingService),
   getApplicationDomain: getApplicationDomain(store)
 });
-const options = (store: Store) => ({services: services(store), actions: {releaseLock}});
+const options = (store: Store, messagingService: MessagingServiceInterface) => ({
+  services: services(store, messagingService),
+  actions: {releaseLock}
+});
 
-export const machine = (store: Store) => Machine(config).withConfig(options(store));
+export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
+  Machine(config).withConfig(options(store, messagingService));
