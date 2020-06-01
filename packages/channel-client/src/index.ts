@@ -8,3 +8,4 @@ export {FakeChannelProvider} from '../tests/fakes/fake-channel-provider';
 const UserDeclinedErrorCode = ErrorCode.CloseAndWithdraw.UserDeclined;
 const EthereumNotEnabledErrorCode = ErrorCode.EnableEthereum.EthereumNotEnabled;
 export {EthereumNotEnabledErrorCode, UserDeclinedErrorCode};
+export {ErrorCode} from './types';
