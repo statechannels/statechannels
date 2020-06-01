@@ -19,7 +19,7 @@ cleanup() {
   fi
 }
 
-# On exit signals, kill self & child processes 
+# On exit signals, kill self & child processes
 # For some reason, the `node scripts/start.js` command in xstate-wallet
 # does not immediately terminate, even if I send the KILL signal (kill 0 -9)
 # It seems to wait for compilation to succeed, and then terminates, which can
@@ -32,16 +32,14 @@ if test -f $GANACHE_DEPLOYMENTS; then
 fi
 
 cd $PACKAGES/devtools
-yarn start:shared-ganache | tee $E2E_ROOT/shared-ganache.log & 
+yarn start:shared-ganache | tee $E2E_ROOT/shared-ganache.log &
 
 yarn run wait-on -t $WAIT_ON_TIMEOUT -i $WAIT_ON_INTERVAL $MONOREPO_ROOT/.ganache-deployments/ganache-deployments-8545.json
 
 cd $PACKAGES/simple-hub
 yarn hub:start:dev | tee $E2E_ROOT/hub.log &
 
-sleep 5
-
-cd $PACKAGES/$APP 
+cd $PACKAGES/$APP
 yarn start | tee $E2E_ROOT/$APP.log &
 
 cd $PACKAGES/xstate-wallet
