@@ -18,7 +18,7 @@ if (NODE_ENV === 'production') {
   });
 }
 
-const log = logger.info.bind(logger);
+const log = logger.trace.bind(logger);
 
 (async function() {
   log({version: GIT_VERSION}, 'Wallet initializing');

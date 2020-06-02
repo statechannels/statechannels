@@ -249,7 +249,7 @@ export class ChainWatcher implements Chain {
   public async initialize() {
     this.provider = getProvider();
 
-    this.provider.on('block', blockNumber => chainLogger.info({blockNumber}, 'New Block'));
+    this.provider.on('block', blockNumber => chainLogger.trace({blockNumber}, 'New Block'));
 
     this.configureContracts();
   }
@@ -266,7 +266,7 @@ export class ChainWatcher implements Chain {
     ];
 
     // Log all contract events (for now)
-    this._assetHolders[0].on('*', event => chainLogger.info({event}, 'assetHolder[0] event'));
+    this._assetHolders[0].on('*', event => chainLogger.trace({event}, 'assetHolder[0] event'));
 
     this._adjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
@@ -367,7 +367,7 @@ export class ChainWatcher implements Chain {
     const response = await this.signer.sendTransaction(
       convertNitroTransactionRequest(transactionRequest)
     );
-    chainLogger.info({response}, 'Deposit successful from %s', response.from);
+    chainLogger.trace({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
 
@@ -384,7 +384,7 @@ export class ChainWatcher implements Chain {
     const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
     const blockNum = BigNumber.from(await this.provider.getBlockNumber());
-    chainLogger.info(
+    chainLogger.trace(
       {
         amount,
         channelStorage: {
