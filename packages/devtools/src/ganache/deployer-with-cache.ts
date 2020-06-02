@@ -103,7 +103,7 @@ export class GanacheNCacheDeployer {
     } finally {
       await new Promise((resolve, reject) =>
         lockfile.unlock(lockPath, result => {
-          !result ? resolve() : reject(result);
+          result ? reject(result) : resolve();
         })
       );
     }
