@@ -185,11 +185,11 @@ export class PaymentChannelClient {
   }
 
   async enable() {
-    log.trace('enabling payment channel client');
+    log.debug('enabling payment channel client');
 
     await this.channelClient.provider.enable();
 
-    log.trace('payment channel client enabled');
+    log.debug('payment channel client enabled');
 
     const doesBudgetExist = async () => {
       const budget = await this.getBudget();
@@ -198,7 +198,7 @@ export class PaymentChannelClient {
 
     if (FUNDING_STRATEGY !== 'Direct' && !(await doesBudgetExist())) {
       // TODO: This only checks if a budget exists, not if we have enough funds in it
-      log.trace('Virtual Funding - Creating Budget');
+      log.debug('Virtual Funding - Creating Budget');
       await this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
   }
@@ -234,7 +234,7 @@ export class PaymentChannelClient {
         const key = snapshot.key;
         const message = snapshot.val();
         myFirebaseRef.child(key).remove();
-        log.trace({message}, 'GOT FROM FIREBASE: ');
+        log.debug({message}, 'GOT FROM FIREBASE: ');
         await this.pushMessage(message);
       });
     }
@@ -291,7 +291,7 @@ export class PaymentChannelClient {
       )
       .subscribe(
         async cs => {
-          logger.trace({channelId, cs, me: this.mySigningAddress}, 'Closing payment channel');
+          logger.debug({channelId, cs, me: this.mySigningAddress}, 'Closing payment channel');
           try {
             await this.channelClient.closeChannel(channelId);
           } catch (error) {
@@ -392,7 +392,7 @@ export class PaymentChannelClient {
 
     if (bigNumberify(payer.balance).lt(amount)) {
       amountWillPay = payer.balance;
-      logger.trace({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
+      logger.debug({amountAskedToPay: amount, amountWillPay}, 'Paying less than PEER_TRUST');
     }
 
     try {
@@ -452,7 +452,7 @@ export class PaymentChannelClient {
       );
     } catch (e) {
       if (e.message === 'User declined') {
-        log.trace('User declined budget creation');
+        log.debug('User declined budget creation');
         return;
       } else {
         throw e;
