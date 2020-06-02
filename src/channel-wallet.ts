@@ -196,7 +196,7 @@ const alreadyLogging = {};
 const key = (v, id) => `${JSON.stringify(v)}-${id}`;
 
 const transitionLogger = logger.child({module: 'wallet'});
-const log = transitionLogger.info.bind(transitionLogger);
+const log = transitionLogger.trace.bind(transitionLogger);
 
 export function logTransition(state: State<any, any, any, any>, event, id?: string): void {
   const k = key(state.value, id);
