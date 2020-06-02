@@ -4,6 +4,8 @@ import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
 import {GanacheDeployer} from './deployer';
 import {logger} from './logger';
+import lockfile from 'lockfile';
+import * as path from 'path';
 
 interface CacheKey {
   name: string;
@@ -54,6 +56,18 @@ export class GanacheNCacheDeployer {
     ...args: any[]
   ): Promise<string> {
     const {contractName: name, bytecode} = contract;
+    const lockPath = `${path.join(
+      process.cwd(),
+      process.env.GANACHE_CACHE_FOLDER || '',
+      name
+    )}.lock`;
+
+    await new Promise((resolve, reject) =>
+      lockfile.lock(lockPath, {wait: 300_000 /* 5 minutes */}, result => {
+        !result ? resolve() : reject(result);
+      })
+    );
+
     const cacheKey = {name, libraries, bytecode, args};
 
     const existingAddress = this.addressFromCache(cacheKey);
@@ -69,12 +83,13 @@ export class GanacheNCacheDeployer {
     const contractAddress = await this.deployer.deploy(contract, libraries, ...args);
 
     try {
-      this.addToCache(cacheKey, contractAddress);
+      await this.addToCache(cacheKey, contractAddress);
+
       return contractAddress;
     } catch (e) {
       if (e instanceof KeyExistsError) {
         const conflictAddress = e.address;
-        logger.info(
+        logger.warn(
           `Contract ${colors.colorName(name)} already exists at address: ${colors.colorAddress(
             conflictAddress
           )}. We also deployed it at ${colors.colorAddress(
@@ -85,10 +100,16 @@ export class GanacheNCacheDeployer {
       } else {
         throw e;
       }
+    } finally {
+      await new Promise((resolve, reject) =>
+        lockfile.unlock(lockPath, result => {
+          result ? reject(result) : resolve();
+        })
+      );
     }
   }
 
-  private addToCache(key: CacheKey, address: string) {
+  private async addToCache(key: CacheKey, address: string) {
     const deployments = this.loadDeployments();
 
     if (deployments) {
@@ -105,7 +126,7 @@ export class GanacheNCacheDeployer {
     // but that's probably unlikely enough that we won't worry about it
     const fileData: DeploymentsFile = {deploymentsFileVersion: '0.1', deployments: newDeployments};
 
-    writeJsonFile(this.deploymentsPath, fileData);
+    await writeJsonFile(this.deploymentsPath, fileData);
   }
 
   private findDeployment(deployments: Deployment[], key: CacheKey): Deployment | undefined {
