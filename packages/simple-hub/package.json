@@ -58,9 +58,8 @@
   "scripts": {
     "build": "tsc -b .",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
-    "hub:start:dev": "ts-node ./start-dev-server.ts",
-    "hub:start:prod": "ts-node ./src/server.ts",
-    "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
+    "start:dev": "ts-node ./start-dev-server.ts",
+    "watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "precommit": "lint-staged --quiet",

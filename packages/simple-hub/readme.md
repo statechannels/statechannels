@@ -15,7 +15,7 @@ Make sure a local ganache instance is running by following [the instructions at 
 ```
 $ npm i -g yarn
 $ yarn install
-$ yarn hub:watch (will rebuild app on file change)
+$ yarn watch (will rebuild app on file change)
 ```
 
 - To enable logging to the console, set `LOG_DESTINATION=console`
