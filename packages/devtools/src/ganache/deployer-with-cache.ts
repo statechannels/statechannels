@@ -62,7 +62,11 @@ export class GanacheNCacheDeployer {
       name
     )}.lock`;
 
-    lockfile.lockSync(lockPath, {retries: 10});
+    await new Promise((resolve, reject) =>
+      lockfile.lock(lockPath, {retries: 10, stale: 30000, wait: 60000}, result => {
+        !result ? resolve() : reject(result);
+      })
+    );
 
     const cacheKey = {name, libraries, bytecode, args};
 
@@ -85,7 +89,7 @@ export class GanacheNCacheDeployer {
     } catch (e) {
       if (e instanceof KeyExistsError) {
         const conflictAddress = e.address;
-        logger.info(
+        logger.warn(
           `Contract ${colors.colorName(name)} already exists at address: ${colors.colorAddress(
             conflictAddress
           )}. We also deployed it at ${colors.colorAddress(
@@ -97,7 +101,11 @@ export class GanacheNCacheDeployer {
         throw e;
       }
     } finally {
-      lockfile.unlockSync(lockPath);
+      await new Promise((resolve, reject) =>
+        lockfile.unlock(lockPath, result => {
+          !result ? resolve() : reject(result);
+        })
+      );
     }
   }
 
