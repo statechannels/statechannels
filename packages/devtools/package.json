@@ -18,7 +18,6 @@
     "ganache-cli": "6.8.2",
     "jest": "25.1.0",
     "lockfile": "1.0.4",
-    "loglevel": "1.6.6",
     "pino": "6.2.0",
     "solc": "0.6.1",
     "tcp-port-used": "1.0.1",
