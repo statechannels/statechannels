@@ -4,7 +4,8 @@ import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
 import {GanacheDeployer} from './deployer';
 import {logger} from './logger';
-import lockfile from 'proper-lockfile';
+import lockfile from 'lockfile';
+import * as path from 'path';
 
 interface CacheKey {
   name: string;
@@ -54,8 +55,15 @@ export class GanacheNCacheDeployer {
     libraries: Record<string, string> = {},
     ...args: any[]
   ): Promise<string> {
-    const release = await lockfile.lock(this.deploymentsPath, {retries: 10});
     const {contractName: name, bytecode} = contract;
+    const lockPath = `${path.join(
+      process.cwd(),
+      process.env.GANACHE_CACHE_FOLDER || '',
+      name
+    )}.lock`;
+
+    lockfile.lockSync(lockPath, {retries: 10});
+
     const cacheKey = {name, libraries, bytecode, args};
 
     const existingAddress = this.addressFromCache(cacheKey);
@@ -89,7 +97,7 @@ export class GanacheNCacheDeployer {
         throw e;
       }
     } finally {
-      release();
+      lockfile.unlockSync(lockPath);
     }
   }
 
