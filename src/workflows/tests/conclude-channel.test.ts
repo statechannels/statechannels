@@ -75,7 +75,6 @@ const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
 let aStore: TestStore;
 let bStore: TestStore;
-
 const allSignedState = (state: State) => ({
   ...state,
   signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
@@ -101,8 +100,11 @@ const createLedgerChannels = async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const services = [aStore, bStore].map((store: Store) =>
-    interpret(createChannel(store).withContext({...context, funding: 'Virtual'})).start()
+  const services = [
+    [aStore, aMessagingService],
+    [bStore, bMessagingService]
+  ].map(([store, messaging]) =>
+    interpret(createChannel(store, messaging).withContext({...context, funding: 'Virtual'})).start()
   );
 
   await Promise.all(

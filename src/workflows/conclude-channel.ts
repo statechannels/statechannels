@@ -144,20 +144,20 @@ export const config: StateNodeConfig<Init, any, any> = {
   }
 };
 
-const services = (store: Store) => ({
+const services = (store: Store, messagingService: MessagingServiceInterface) => ({
   signFinalState: signFinalState(store),
   waitForConclusionProof: waitForConclusionProof(store),
   getFunding: getFunding(store),
   supportState: supportState(store),
   getRole: getRole(store),
   getDirectFundingRole: getDirectFundingRole(store),
-  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store),
+  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store, messagingService),
   submitWithdrawTransaction: submitWithdrawTransaction(store),
   observeFundsWithdrawal: observeFundsWithdrawal(store)
 });
 
 const options = (store: Store, messagingService: MessagingServiceInterface) => ({
-  services: services(store),
+  services: services(store, messagingService),
   actions: commonWorkflowActions(messagingService)
 });
 export const machine = (store: Store, messagingService: MessagingServiceInterface) =>
