@@ -94,7 +94,7 @@ const File: React.FC<Props> = props => {
   }, [props.ready, web3TorrentClient.paymentChannelClient]);
 
   const {mySigningAddress: me} = web3TorrentClient.paymentChannelClient;
-  const {budget, closeBudget} = useBudget(props);
+  const {budget, closeBudget, getBudget} = useBudget(props);
   const showBudget = budget?.budgets?.length;
 
   return (
@@ -136,6 +136,7 @@ const File: React.FC<Props> = props => {
               setErrorLabel('');
               try {
                 await download(torrent.magnetURI);
+                await getBudget();
               } catch (error) {
                 setLoading(false);
                 setErrorLabel(getUserFriendlyError(error.code));

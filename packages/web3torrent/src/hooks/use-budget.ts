@@ -32,5 +32,13 @@ export function useBudget({ready}: {ready: boolean}) {
     setLoading(false);
   };
 
-  return {budget, loading, createBudget, closeBudget};
+  const getBudget = async () => {
+    setLoading(true);
+    await paymentChannelClient.getBudget();
+    setBudget(paymentChannelClient.budgetCache);
+
+    setLoading(false);
+  };
+
+  return {budget, loading, createBudget, closeBudget, getBudget};
 }
