@@ -83,7 +83,7 @@ export class GanacheNCacheDeployer {
     const contractAddress = await this.deployer.deploy(contract, libraries, ...args);
 
     try {
-      this.addToCache(cacheKey, contractAddress);
+      await this.addToCache(cacheKey, contractAddress);
 
       return contractAddress;
     } catch (e) {
@@ -109,7 +109,7 @@ export class GanacheNCacheDeployer {
     }
   }
 
-  private addToCache(key: CacheKey, address: string) {
+  private async addToCache(key: CacheKey, address: string) {
     const deployments = this.loadDeployments();
 
     if (deployments) {
@@ -126,7 +126,7 @@ export class GanacheNCacheDeployer {
     // but that's probably unlikely enough that we won't worry about it
     const fileData: DeploymentsFile = {deploymentsFileVersion: '0.1', deployments: newDeployments};
 
-    writeJsonFile(this.deploymentsPath, fileData);
+    await writeJsonFile(this.deploymentsPath, fileData);
   }
 
   private findDeployment(deployments: Deployment[], key: CacheKey): Deployment | undefined {
