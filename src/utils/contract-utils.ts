@@ -7,6 +7,9 @@ import {BigNumber} from 'ethers';
 
 import {Web3Provider, JsonRpcProvider, InfuraProvider} from '@ethersproject/providers';
 
+let provider: Web3Provider | JsonRpcProvider;
+let network: string;
+
 export function assetHolderAddress(tokenAddress: string): string | undefined {
   if (BigNumber.from(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
   else if (tokenAddress === MOCK_TOKEN) return MOCK_ASSET_HOLDER_ADDRESS;
@@ -22,14 +25,35 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 }
 
 export function getProvider(): Web3Provider | JsonRpcProvider {
+  if (provider) return provider;
+
   if (window.ethereum) {
     if (window.ethereum.mockingInfuraProvider) {
-      return new InfuraProvider('ropsten', INFURA_API_KEY);
+      provider = new InfuraProvider('ropsten', INFURA_API_KEY);
+    } else {
+      provider = new Web3Provider(window.ethereum);
+      // The code below is reloads the page on network change. This is needed due to:
+      // - Metamask no longer reloads the page on chain change: https://medium.com/metamask/no-longer-reloading-pages-on-network-change-fbf041942b44
+      // - ethers does not have an elegant way to update the provider on network change: https://github.com/MetaMask/metamask-extension/issues/8077#issuecomment-637338683
+
+      // window.ethereum.networkVersion seems to be initialized asynchronously and can be undefined.
+      // https://ethereum.stackexchange.com/questions/82994/window-ethereum-networkversion-undefined#comment103120_82995
+      network = window.ethereum.networkVersion;
+      // The correct event to use is chainChanged: https://docs.metamask.io/guide/ethereum-provider.html#methods-new-api
+      // As of Metmask version 7.7.9, this event does not seem to be working.
+      // Note about the callback below:
+      // - If window.ethereum.networkVersion is undefined, this callback will fire when the networkVersion is initialized.
+      // - If window.ethereum.networkVersion is defined, this callback will only fire when the network is changed in Metamask.
+      window.ethereum.on('networkChanged', (newNetwork: string) => {
+        if (!network) network = newNetwork;
+        if (network !== newNetwork) window.location.reload();
+      });
     }
-    return new Web3Provider(window.ethereum);
   } else {
-    return new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+    provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
   }
+
+  return provider;
 }
 
 export function getEthAssetHolderContract() {
