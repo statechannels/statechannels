@@ -430,7 +430,7 @@ export const workflow = (
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
       ChallengeChannel.machine(store, {channelId}),
 
-    invokeCreateChannelAndFundProtocol: CreateAndFund.machine(store),
+    invokeCreateChannelAndFundProtocol: CreateAndFund.machine(store, messagingService),
     invokeCreateChannelConfirmation: CCC.workflow({})
   };
 
