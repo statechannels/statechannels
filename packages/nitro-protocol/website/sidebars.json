@@ -1,7 +1,7 @@
 {
   "docs": {
     "Overview": ["overview"],
-    "Dapp Developers": ["dapp-devs/dapp-devs-intro"],
+    "Dapp Developers": ["dapp-devs/dapp-devs-intro", "dapp-devs/quick-start"],
     "Wallet Developers": ["wallet-devs/quick-start", "wallet-devs/tutorial"],
     "Wallet Dev Tutorial": [
       "wallet-dev-tutorial/execute-state-transitions",
@@ -12,13 +12,13 @@
       "wallet-dev-tutorial/outcomes",
       "wallet-dev-tutorial/release-assets"
     ],
-    "Protocol Developers": [
-      "protocol-devs/protocol-devs-intro",
-      "protocol-devs/asset-holder",
-      "protocol-devs/force-move",
-      "protocol-devs/nitro-adjudicator",
-      "protocol-devs/consensus-app",
-      "protocol-devs/single-asset-payments"
+    "Contract Developers": [
+      "contract-devs/contract-devs-intro",
+      "contract-devs/asset-holder",
+      "contract-devs/force-move",
+      "contract-devs/nitro-adjudicator",
+      "contract-devs/consensus-app",
+      "contract-devs/single-asset-payments"
     ]
   },
   "Contract API": {

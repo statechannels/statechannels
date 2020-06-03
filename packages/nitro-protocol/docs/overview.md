@@ -15,6 +15,6 @@ To help filter the content that you are interested in, it is helpful to decide i
 - [Wallet developer](./wallet-devs/quick-start.md)
   - Want to write code against the nitro Contract API
   - Want to use the Javascript and Typescript support that we provide
-- [Protocol developer](./protocol-devs/intro.md)
+- [Contract developer](./contract-devs/intro.md)
   - Want to understand how our contracts implement nitro protocol
   - Want to improve our implementation (e.g. to patch a vulnerability or reduce gas consumption)

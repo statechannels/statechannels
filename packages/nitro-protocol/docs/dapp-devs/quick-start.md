@@ -1,5 +1,5 @@
 ---
-id: dapp-dev-quick-start
+id: quick-start
 title: Quick start
 ---
 

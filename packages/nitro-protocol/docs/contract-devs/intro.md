@@ -1,5 +1,5 @@
 ---
-id: protocol-devs-intro
+id: contract-devs-intro
 title: Introduction
 ---
 
