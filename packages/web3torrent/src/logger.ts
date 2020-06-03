@@ -30,7 +30,7 @@ const torrentDataReplacer = () => {
       seen.add(value);
     }
 
-    if (key === 'wire' && isPaidStreamingWire(value)) {
+    if (isPaidStreamingWire(value)) {
       return serializePaidStreamingWire(value);
     } else {
       return value;
