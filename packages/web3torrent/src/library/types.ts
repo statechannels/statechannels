@@ -1,7 +1,7 @@
 import {Request, Wire} from 'bittorrent-protocol';
 import {Instance as ParseTorrent} from 'parse-torrent';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
-import {PaidStreamingExtension} from './paid-streaming-extension';
+import {PaidStreamingExtension, PaidStreamingExtensionSerialized} from './paid-streaming-extension';
 import _ from 'lodash';
 
 export enum ClientEvents {
@@ -85,13 +85,16 @@ export const isPaidStreamingWire = (obj: any): obj is PaidStreamingWire =>
   'peerExtendedHandshake' in obj &&
   'extended' in obj;
 
-export type SerializedPaidStreamingWire = {
-  peerId: string;
-  amChoking: boolean;
-  amInterested: boolean;
-  peerChoking: boolean;
-  peerInterested: boolean;
-};
+export type SerializedPaidStreamingWire = Pick<
+  PaidStreamingWire,
+  | 'peerId'
+  | 'amChoking'
+  | 'amInterested'
+  | 'peerChoking'
+  | 'peerInterested'
+  | 'peerExtendedHandshake'
+  | 'extendedHandshake'
+> & {paidStreamingExtension: PaidStreamingExtensionSerialized};
 
 export type ExtendedHandshake = PaidStreamingExtendedHandshake & {
   m: {

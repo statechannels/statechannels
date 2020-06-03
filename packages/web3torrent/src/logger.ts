@@ -29,13 +29,19 @@ const serializePaidStreamingWire = ({
   amChoking,
   amInterested,
   peerChoking,
-  peerInterested
+  peerInterested,
+  paidStreamingExtension,
+  peerExtendedHandshake,
+  extendedHandshake
 }: PaidStreamingWire): SerializedPaidStreamingWire => ({
   peerId,
   amChoking,
   amInterested,
   peerChoking,
-  peerInterested
+  peerInterested,
+  paidStreamingExtension: serializePaidStreamingExtension(paidStreamingExtension),
+  peerExtendedHandshake,
+  extendedHandshake
 });
 
 const serializePaidStreamingExtension = ({
