@@ -1,5 +1,5 @@
 import {StateNodeConfig, DoneInvokeEvent, TransitionConfig} from 'xstate';
-import {hexZeroPad, hexlify} from '@ethersproject/bytes';
+import {hexZeroPad} from '@ethersproject/bytes';
 import {BigNumber} from 'ethers';
 export function unreachable(x: never) {
   return x;
@@ -57,7 +57,7 @@ export function createDestination(address: string): string {
 }
 
 export function formatAmount(amount: BigNumber): string {
-  return hexZeroPad(hexlify(amount), 32);
+  return hexZeroPad(BigNumber.from(amount).toHexString(), 32);
 }
 
 export function arrayToRecord<T, K extends keyof T>(
