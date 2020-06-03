@@ -16,14 +16,6 @@ table.domain-budget-table {
     border-bottom: 1px solid $c-mediumgrey;
     text-align: center;
 
-    button {
-      vertical-align: middle;
-      color: $c-orange;
-      border: 1px solid $c-orange;
-      margin-top: -3px;
-      margin-bottom: 0px;
-      padding: 3px 6px;
-    }
     tr.budget-info {
       padding-top: 10px;
       padding-bottom: 10px;
@@ -66,4 +58,13 @@ table.domain-budget-table {
 
 .MuiAvatar-colorDefault {
   background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.budget-button {
+  vertical-align: middle;
+  color: $c-orange;
+  border: 1px solid $c-orange;
+  margin-top: -3px;
+  margin-bottom: 15px;
+  padding: 3px 6px;
 }
