@@ -142,7 +142,17 @@ const serializer = () => {
   };
 };
 
-const serializeLogObject = o => JSON.stringify(o, serializer()) + '\n';
+const serializeLogObject = (o: any): string => {
+  try {
+    return JSON.stringify(o, serializer()) + '\n';
+  } catch (error) {
+    // In case the above code does not work.
+    console.error(error);
+    console.error('Failed to serialize a log object');
+    return typeof o;
+  }
+};
+
 class LogBlob {
   private parts = [];
   private _blob?: Blob;
