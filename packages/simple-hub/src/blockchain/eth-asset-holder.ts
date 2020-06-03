@@ -5,6 +5,7 @@ import {cHubChainPK} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
 import {TransactionResponse} from '@ethersproject/providers';
+import * as Sentry from '@sentry/node';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -33,7 +34,7 @@ export async function makeDeposits(
   log.info(`makeDepost: making ${depositsToMake.length} deposits`);
 }
 
-async function fund(channelID: string, value: BigNumber): Promise<string> {
+async function fund(channelID: string, value: BigNumber): Promise<void> {
   if (!ethAssetHolder) {
     const createdEthAssetHolder = await createEthAssetHolder();
     ethAssetHolder = ethAssetHolder ?? createdEthAssetHolder;
@@ -68,12 +69,11 @@ async function fund(channelID: string, value: BigNumber): Promise<string> {
     await tx.wait();
 
     log.info({transaction: {hash: tx.hash}}, 'Transaction mined');
+    checkBalance();
   });
-
-  return (await ethAssetHolder.holdings(channelID)).toHexString();
 }
 
-export async function createEthAssetHolder() {
+async function createEthAssetHolder() {
   let ethAssetHolderFactory: ContractFactory;
   try {
     ethAssetHolderFactory = await ContractFactory.fromSolidity(
@@ -96,4 +96,16 @@ export async function createEthAssetHolder() {
   );
 
   return contract;
+}
+
+async function checkBalance() {
+  const balance = await walletWithProvider.getBalance();
+  const threshold = ethers.constants.WeiPerEther;
+  if (balance.lt(BigNumber.from(threshold))) {
+    Sentry.captureMessage(
+      `The hub balance of ${ethers.utils.formatEther(balance)} is below ${ethers.utils.formatEther(
+        threshold
+      )}`
+    );
+  }
 }
