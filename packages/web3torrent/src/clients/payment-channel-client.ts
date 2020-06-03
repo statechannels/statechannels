@@ -175,6 +175,8 @@ export class PaymentChannelClient {
     this.channelStates.subscribe(channelResult => this.updateChannelCache(channelResult));
 
     this.channelClient.onBudgetUpdated(budgetResult => {
+      console.log('BUDGET_UPDATED');
+      console.log(budgetResult);
       this.budgetCache = budgetResult;
     });
   }
