@@ -177,7 +177,10 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 
 export const FUNDING_STRATEGY = process.env.FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
-export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(utils.parseEther('0.001').toHexString(), 32); //  (equivalent to 1GB at 1 wei per byte)
+export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(
+  utils.parseEther('0.000001').toHexString(),
+  32
+); //  1 szabo (equivalent to 1000GB at 1 wei per byte)
 
 export const MAX_FILE_SIZE = 1000 * 1024 * 1024;
 
