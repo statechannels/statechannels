@@ -1,6 +1,6 @@
 ---
 id: outcomes
-title: Outcomes
+title: Understand Outcomes
 ---
 
 So far during this tutorial we have not concerned ourselves with specifying meaningful outcomes on any of our `States`. This has meant that although we have learnt to deposit assets, execute state transitions off chain, and to finalize an outcome via challenge or conclude, no participant could get their funds back out of the state channel and into their ethereum account.

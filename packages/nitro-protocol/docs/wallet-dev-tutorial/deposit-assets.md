@@ -3,6 +3,10 @@ id: deposit-assets
 title: Deposit Assets
 ---
 
+Early on in the lifecycle of a state channel -- i.e. after exchanging some setup states, but before executing any application logic -- participants will want to "fund it". They will stake assets on the channel so that the state updates are meaningful. The simplest way to do this is with an on chain deposit: a more advanced possibility is fund a new channel from an existing funded channel.
+
+To start, let's explore the on chain deposit case. We will need to understand how channels are uniquely identitided.
+
 ## Compute a channel id
 
 The id of a channel is the `keccak256` hash of the abi encoded `chainId`, `participants` and `channelNonce`.

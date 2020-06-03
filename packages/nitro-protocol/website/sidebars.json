@@ -4,8 +4,8 @@
     "Dapp Developers": ["dapp-devs/dapp-devs-intro"],
     "Wallet Developers": ["wallet-devs/quick-start", "wallet-devs/tutorial"],
     "Wallet Dev Tutorial": [
-      "wallet-dev-tutorial/deposit-assets",
       "wallet-dev-tutorial/execute-state-transitions",
+      "wallet-dev-tutorial/deposit-assets",
       "wallet-dev-tutorial/finalize-a-channel-happy",
       "wallet-dev-tutorial/finalize-a-channel-sad",
       "wallet-dev-tutorial/clear-a-challenge",

@@ -3,9 +3,11 @@ id: execute-state-transitions
 title: Execute state transitions off chain
 ---
 
+A state channel can be thought of as an emergent property of data (which we call `state`) exchanged between a fixed set of actors (which we call `participants`). The participants have the ability to digitially sign the states that they exchange, and they also keep track of the underlying `chainId` and `channelNonce` to uniquely identify the interaction they are about to perform.
+
 ## Construct a State with the correct format
 
-A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behavior of the state channel network. `@statechannels/nitro-protocol` exposes a `State` type as a container for all the fields that are required:
+`@statechannels/nitro-protocol` exposes a `State` type as a container for all the fields that are required:
 
 ```typescript
 const participants = [];
@@ -33,7 +35,7 @@ Notice that the outcome field must conform to the `Outcome` type, which can also
 
 ## Fixed and Variable Parts
 
-It is convenient to define some other structs, each containing a subset of the above data:
+It is convenient to define some solidity structs, each containing a subset of the above data:
 
 ```solidity
   struct FixedPart {
