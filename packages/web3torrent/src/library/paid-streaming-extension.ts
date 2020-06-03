@@ -154,20 +154,6 @@ export abstract class PaidStreamingExtension implements Extension {
     }
   }
 
-  serialize(): PaidStreamingExtensionSerialized {
-    return {
-      pseAccount: this.pseAccount,
-      pseAddress: this.pseAddress,
-      seedingChannelId: this.seedingChannelId,
-      peerAccount: this.peerAccount,
-      peerOutcomeAddress: this.peerOutcomeAddress,
-      leechingChannelId: this.leechingChannelId,
-      isForceChoking: this.isForceChoking,
-      isBeingChoked: this.isBeingChoked,
-      blockedRequests: this.blockedRequests
-    };
-  }
-
   protected messageHandler({command, data}) {
     switch (command) {
       case PaidStreamingExtensionNotices.ACK:

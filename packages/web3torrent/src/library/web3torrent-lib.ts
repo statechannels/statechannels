@@ -337,7 +337,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         }
       }
     });
-    log.info({wireData: wire.paidStreamingExtension?.serialize()}, 'Wire Setup completed');
+    log.info({wireData: wire.paidStreamingExtension}, 'Wire Setup completed');
   }
 
   /** Creates a payment channel, and sets the channelId property, sent to the leecher on the STOP events to leeching peers  */
@@ -574,7 +574,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
     if (torrent.done) {
       log.debug('<< JUMPSTART: FINISHED');
-      log.trace({torrent, wire: wire.paidStreamingExtension.serialize()});
+      log.trace({torrent, wire: wire.paidStreamingExtension});
       return;
     }
     log.debug({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
