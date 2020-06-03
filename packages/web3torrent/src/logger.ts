@@ -2,6 +2,7 @@ import pino from 'pino';
 import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL, VERSION} from './constants';
 import _ from 'lodash';
 import {PaidStreamingWire, SerializedPaidStreamingWire, isPaidStreamingWire} from './library/types';
+import {Torrent} from 'webtorrent';
 
 const IS_BROWSER_CONTEXT = process.env.JEST_WORKER_ID === undefined;
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
@@ -12,33 +13,146 @@ const name = 'web3torrent';
 const destination =
   LOG_TO_FILE && !IS_BROWSER_CONTEXT ? pino.destination(LOG_DESTINATION) : undefined;
 
+/*
+ * web3torrent logs lots of BIG classes.
+ * These serializers makes them more reasonable to log.
+ *
+ ****** WARNING ********
+ * Due to circular import bugs, making the serializers type safe is difficult or impossible.
+ * Even worse, the types defined by web3torrent are not faithful to the values passed to the logger.
+ * EG. a PaidStreamingExtensionWire does not always have a paidStreamingExtension property
+ */
+
+const isObject = (obj: any): obj is Record<string, any> => obj !== null && typeof obj === 'object';
+
+/*
+ * Some things which are typed as "string" are actually things like Buffer.from('some string').toJson()
+ * EXAMPLE (from my clipboard)
+ * ❯ pbpaste | head -n 1 | jq -c '.torrent.wires[].peerExtendedHandshake'
+ * {"m":{"paidStreamingExtension":2,"ut_metadata":1},"metadata_size":723,"outcomeAddress":{"type":"Buffer","data":[48,120,68,57,57,57,53,66,65,69,49,50,70,69,101,51,50,55,50,53,54,70,70,101,99,49,101,51,49,56,52,100,52,57,50,98,68,57,52,67,51,49]},"pseAccount":{"type":"Buffer","data":[48,120,57,51,99,102,48,50,97,57,50,100,65,56,52,57,50,66,49,57,68,68,51,52,65,52,54,66,99,67,98,57,50,56,70,48,57,54,55,49,50,54]}}
+ *
+ * After running serializeBuffer, it looks like:
+ * ❯ pbpaste | head -n 1 | jq -c '.torrent.wires[].peerExtendedHandshake'
+ * {"m":{"paidStreamingExtension":2,"ut_metadata":1},"metadata_size":723,"outcomeAddress":"0xD9995BAE12FEe327256FFec1e3184d492bD94C31","pseAccount":"0xEF9b144621dE6a0a994197062FDCf204a23a93f4"}
+ */
+
+type Bufferish = Buffer | {type: 'Buffer'; data: any};
+const isBuffer = (obj: any): obj is Bufferish =>
+  Buffer.isBuffer(obj) || (isObject(obj) && obj.type === 'Buffer');
+const serializeBuffer = (b: Bufferish) => Buffer.from(b).toString();
+
+// This type "guard" is unfortunately not type safe, since that leads to circular module references
+const isPaidStreamingExtension = (obj: any) =>
+  isObject(obj) && '_isPaidStreamingExtension' in obj && obj._isPaidStreamingExtension;
+
+const serializePaidStreamingExtension = ({
+  pseAccount,
+  pseAddress,
+  seedingChannelId,
+  peerAccount,
+  peerOutcomeAddress,
+  leechingChannelId,
+  isForceChoking,
+  isBeingChoked,
+  blockedRequests
+}: any) => ({
+  pseAccount,
+  pseAddress,
+  seedingChannelId,
+  peerAccount,
+  peerOutcomeAddress,
+  leechingChannelId,
+  isForceChoking,
+  isBeingChoked,
+  blockedRequests
+});
+
+const serializePaidStreamingWire = ({
+  peerId,
+  amChoking,
+  amInterested,
+  peerChoking,
+  peerInterested,
+  paidStreamingExtension,
+  peerExtendedHandshake,
+  extendedHandshake
+}: PaidStreamingWire): SerializedPaidStreamingWire => ({
+  peerId,
+  amChoking,
+  amInterested,
+  peerChoking,
+  peerInterested,
+  paidStreamingExtension,
+  peerExtendedHandshake,
+  extendedHandshake
+});
+
+// TODO: Should we even log torrents?
+const isTorrent = (obj: any): obj is Torrent =>
+  isObject(obj) && 'infoHash' in obj && 'magnetURI' in obj && 'torrentFile' in obj;
+
+const serializeTorrent = o => ({
+  created: o.created,
+  createdBy: o.createdBy,
+  destroyed: o.destroyed,
+  done: o.done,
+  files: o.files,
+  infoHash: o.infoHash,
+  lastPieceLength: o.lastPieceLength,
+  length: o.length,
+  magnetURI: o.magnetURI,
+  maxWebConns: o.maxWebConns,
+  name: o.name,
+  paused: o.paused,
+  pieceLength: o.pieceLength,
+  ready: o.ready,
+  received: o.received,
+  strategy: o.strategy,
+  uploaded: o.uploaded,
+  urlList: o.urlList,
+  usingPaidStreaming: o.usingPaidStreaming,
+  wires: o.wires
+});
+
 // If we are in a browser, but we want to LOG_TO_FILE, we assume that the
 // log statements are meant to be stored as JSON objects
 // So, we log serialized objects, appending the name (which the pino browser-api appears to remove?)
 
 // Since WebTorrentPaidStreamingClient contains circular references, we use
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#Examples
-
-export const serializePaidStreamingWire = (wire: PaidStreamingWire): SerializedPaidStreamingWire =>
-  _.pick(wire, 'peerId', 'amChoking', 'amInterested', 'peerChoking', 'peerInterested');
-
-const torrentDataReplacer = () => {
+const serializer = () => {
   const seen = new WeakSet();
-  return (key, value) => {
+  return (_, value) => {
     if (typeof value === 'object' && value !== null) {
       if (seen.has(value)) return;
       seen.add(value);
     }
 
-    if (key === 'wire' && isPaidStreamingWire(value)) {
+    if (isBuffer(value)) {
+      return serializeBuffer(value);
+    } else if (isPaidStreamingWire(value)) {
       return serializePaidStreamingWire(value);
+    } else if (isPaidStreamingExtension(value)) {
+      return serializePaidStreamingExtension(value);
+    } else if (isTorrent(value)) {
+      return serializeTorrent(value);
     } else {
       return value;
     }
   };
 };
 
-const serializeLogObject = o => JSON.stringify(o, torrentDataReplacer()) + '\n';
+const serializeLogObject = (o: any): string => {
+  try {
+    return JSON.stringify(o, serializer()) + '\n';
+  } catch (error) {
+    // In case the above code does not work.
+    console.error(error);
+    console.error('Failed to serialize a log object');
+    return typeof o;
+  }
+};
+
 class LogBlob {
   private parts = [];
   private _blob?: Blob;

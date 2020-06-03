@@ -57,7 +57,7 @@ export enum PaidStreamingExtensionNotices {
 }
 
 export type PaidStreamingExtendedHandshake = {
-  pseAccount: string;
+  pseAccount: string; // WARNING: This is not a string. It is a Buffer.
   outcomeAddress: string;
 };
 
@@ -80,15 +80,25 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
   };
 
 export const isPaidStreamingWire = (obj: any): obj is PaidStreamingWire =>
-  typeof obj === 'object' && 'paidStreamingExtension' in obj;
+  obj !== null &&
+  typeof obj === 'object' &&
+  // Even though the PaidStreamingWire claims to have a paidStreamingExtension property,
+  // it doesn't always appear to be present
+  // TODO: Why??
+  // 'paidStreamingExtension' in obj &&
+  'peerExtendedHandshake' in obj &&
+  'extended' in obj;
 
-export type SerializedPaidStreamingWire = {
-  peerId: string;
-  amChoking: boolean;
-  amInterested: boolean;
-  peerChoking: boolean;
-  peerInterested: boolean;
-};
+export type SerializedPaidStreamingWire = Pick<
+  PaidStreamingWire,
+  | 'peerId'
+  | 'amChoking'
+  | 'amInterested'
+  | 'peerChoking'
+  | 'peerInterested'
+  | 'peerExtendedHandshake'
+  | 'extendedHandshake'
+> & {paidStreamingExtension: any};
 
 export type ExtendedHandshake = PaidStreamingExtendedHandshake & {
   m: {
