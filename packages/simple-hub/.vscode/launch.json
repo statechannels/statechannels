@@ -52,7 +52,7 @@
       "runtimeArgs": ["-r", "ts-node/register"],
       "args": ["${workspaceFolder}/start-dev-server.ts"],
       "env": {
-        "NODE_ENV": "development"
+        "SC_ENV": "virtual-funding"
       },
       "skipFiles": ["<node_internals>/**/*.js"]
     },
