@@ -147,8 +147,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    * This method removes the torrent from the client and all payments trying to download a file are forfeit.
    */
   async cancel(infoHash: string) {
-    log.debug('> Cancelling download. Closing payment channels, and then removing torrent');
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
+    log.debug({torrent}, '> Cancelling download');
+
     if (torrent) {
       // I am only allowed to close the channel on my turn.
       // If I don't pause the torrent, then I will continue to make payments, meaning the call to
@@ -214,7 +215,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    */
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
     log.info('Wire setup initiated');
-    log.trace({wire});
+    log.debug({wire}, 'Wire setup initiated');
 
     wire.use(
       // sets out custom extension. See https://github.com/webtorrent/bittorrent-protocol#extension-protocol-bep-10
@@ -226,8 +227,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.setKeepAlive(true); //  enables the keep-alive ping (triggered every 60s).
     wire.setTimeout(65000); // sets the requests timeout to 65seconds
     wire.on(WireEvents.KEEP_ALIVE, () => {
-      log.debug({keepAlive: !torrent.done && wire.amChoking}, 'wire keep-alive');
-      log.trace({torrent});
+      {
+        const msg = 'wire keep-alive';
+        log.debug({keepAlive: !torrent.done && wire.amChoking}, msg);
+        log.trace({torrent, wire}, msg);
+      }
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout(); // clears the timeout for the pending requests sent to the seeder.
       }
@@ -337,7 +341,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         }
       }
     });
-    log.info({wireData: wire.paidStreamingExtension}, 'Wire Setup completed');
+
+    {
+      const msg = 'Wire Setup completed';
+      log.info(msg);
+      log.debug({wire}, msg);
+    }
   }
 
   /** Creates a payment channel, and sets the channelId property, sent to the leecher on the STOP events to leeching peers  */
@@ -573,12 +582,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   /** Jumpstart a torrent wire download, after being stopped by a peer. */
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
     if (torrent.done) {
-      log.debug('<< JUMPSTART: FINISHED');
-      log.trace({torrent, wire: wire.paidStreamingExtension});
+      log.warn({torrent, wire}, '<< JUMPSTART: Torrent is done');
       return;
     }
-    log.debug({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
-    log.trace({torrent});
+    const msg = `<< START ${wire.paidStreamingExtension.peerAccount}`;
+    log.info({wire}, msg);
+    log.trace({torrent, requests: wire.requests}, msg);
     torrent._updateWireWrapper(wire); // schedules a wire update (which checks it's wires and tries to make new requests and replace dead ones)
     // this is an internal function implemented here: https://github.com/webtorrent/webtorrent/blob/7ff77c3e95b2dddfa70dd49cf924073383dd565a/lib/torrent.js#L1182
     // As we changed the way peers comunicated (and it has indeed changed since the PoC days)
