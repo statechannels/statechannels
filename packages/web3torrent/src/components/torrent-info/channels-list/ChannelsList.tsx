@@ -1,7 +1,7 @@
-import _, {Dictionary} from 'lodash';
+import _ from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {ChannelState} from '../../../clients/payment-channel-client';
+import {ChannelCache} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
@@ -11,19 +11,16 @@ import {Badge, Avatar, Tooltip} from '@material-ui/core';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
-  channels: Dictionary<ChannelState>;
+  channels: ChannelCache;
   mySigningAddress: string;
 };
 
 function channelIdToTableRow(
   channelId: string,
-  channels: Dictionary<ChannelState>,
+  channels: ChannelCache,
   torrent: TorrentUI,
   participantType: 'payer' | 'beneficiary'
-  // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
-  // clickHandler: (string) => Promise<ChannelState>
 ) {
-  // let channelButton;
   const channel = channels[channelId];
   const isBeneficiary = participantType === 'beneficiary';
   const wire = torrent.wires.find(
@@ -31,24 +28,8 @@ function channelIdToTableRow(
       wire.paidStreamingExtension.leechingChannelId === channelId ||
       wire.paidStreamingExtension.seedingChannelId === channelId
   );
-  // if (channel.status === 'closing') {
-  //   channelButton = <button disabled>Closing ...</button>;
-  // } else if (channel.status === 'closed') {
-  //   channelButton = <button disabled>Closed</button>;
-  // } else if (channel.status === 'challenging') {
-  //   channelButton = <button disabled>Challenging</button>;
-  // } else {
-  //   channelButton = getPeerStatus(torrent, wire) ? <button disabled>Running</button> : null;
-  // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
-  // (
-  //   <button className="button-alt" onClick={() => clickHandler(channelId)}>
-  //     Challenge Channel
-  //   </button>
-  // );
-  // }
 
   let dataTransferred: string;
-  // const peerAccount = isBeneficiary ? channel['payer'] : channel['beneficiary']; // If I am the payer, my peer is the beneficiary and vice versa
   const peerOutcomeAddress = isBeneficiary
     ? channel.payer.outcomeAddress
     : channel.beneficiary.outcomeAddress;
@@ -166,8 +147,6 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
               channels[key].beneficiary.signingAddress === mySigningAddress
                 ? 'beneficiary'
                 : 'payer'
-              // Challenging doesn't work in virtual channels: https://github.com/statechannels/monorepo/issues/1773
-              // ,context.paymentChannelClient.challengeChannel
             )
           )}
         </tbody>

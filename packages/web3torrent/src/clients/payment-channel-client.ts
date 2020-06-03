@@ -156,11 +156,13 @@ if (process.env.FAKE_CHANNEL_PROVIDER === 'true') {
   require('@statechannels/channel-provider');
 }
 
+export type ChannelCache = Record<string, ChannelState | undefined>;
+
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
-  channelCache: Record<string, ChannelState | undefined> = {};
+  channelCache: ChannelCache = {};
   budgetCache?: DomainBudget;
 
   get mySigningAddress(): string | undefined {
@@ -460,7 +462,7 @@ export class PaymentChannelClient {
     }
   }
 
-  async getChannels(): Promise<Record<string, ChannelState | undefined>> {
+  async getChannels(): Promise<ChannelCache> {
     const channelResults = await this.channelClient.getChannels(false);
     channelResults.map(convertToChannelState).forEach(cr => (this.channelCache[cr.channelId] = cr));
     return this.channelCache;
