@@ -115,7 +115,8 @@ export class Backend implements DBBackend {
   }
 
   public async setBudget(key: string, value: DomainBudget) {
-    return this.put(ObjectStores.budgets, value, key);
+    const result = await this.put(ObjectStores.budgets, value, key);
+    return result.value;
   }
 
   public async deleteBudget(key: string) {
