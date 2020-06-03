@@ -24,7 +24,11 @@ export type PaidStreamingExtensionSerialized = Pick<
   | 'blockedRequests'
 >;
 
+export const isPaidStreamingExtension = (obj: any): obj is PaidStreamingExtension =>
+  typeof obj === 'object' && '_isPaidStreamingExtension' in obj && obj._isPaidStreamingExtension;
+
 export abstract class PaidStreamingExtension implements Extension {
+  private _isPaidStreamingExtension = true;
   protected wire: PaidStreamingWire;
   protected messageBus: EventEmitter;
   protected pseId: string = '';
