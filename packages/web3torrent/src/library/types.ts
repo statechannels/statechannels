@@ -80,7 +80,10 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
   };
 
 export const isPaidStreamingWire = (obj: any): obj is PaidStreamingWire =>
-  typeof obj === 'object' && 'paidStreamingExtension' in obj;
+  typeof obj === 'object' &&
+  'paidStreamingExtension' in obj &&
+  'peerExtendedHandshake' in obj &&
+  'extended' in obj;
 
 export type SerializedPaidStreamingWire = {
   peerId: string;
