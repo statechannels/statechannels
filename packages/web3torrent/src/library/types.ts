@@ -1,7 +1,7 @@
 import {Request, Wire} from 'bittorrent-protocol';
 import {Instance as ParseTorrent} from 'parse-torrent';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
-import {PaidStreamingExtension, PaidStreamingExtensionSerialized} from './paid-streaming-extension';
+import {PaidStreamingExtension} from './paid-streaming-extension';
 import _ from 'lodash';
 
 export enum ClientEvents {
@@ -57,7 +57,7 @@ export enum PaidStreamingExtensionNotices {
 }
 
 export type PaidStreamingExtendedHandshake = {
-  pseAccount: string;
+  pseAccount: string; // WARNING: This is not a string. It is a Buffer.
   outcomeAddress: string;
 };
 
@@ -80,8 +80,12 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
   };
 
 export const isPaidStreamingWire = (obj: any): obj is PaidStreamingWire =>
+  obj !== null &&
   typeof obj === 'object' &&
-  'paidStreamingExtension' in obj &&
+  // Even though the PaidStreamingWire claims to have a paidStreamingExtension property,
+  // it doesn't always appear to be present
+  // TODO: Why??
+  // 'paidStreamingExtension' in obj &&
   'peerExtendedHandshake' in obj &&
   'extended' in obj;
 
@@ -94,7 +98,7 @@ export type SerializedPaidStreamingWire = Pick<
   | 'peerInterested'
   | 'peerExtendedHandshake'
   | 'extendedHandshake'
-> & {paidStreamingExtension: PaidStreamingExtensionSerialized};
+> & {paidStreamingExtension: any};
 
 export type ExtendedHandshake = PaidStreamingExtendedHandshake & {
   m: {
