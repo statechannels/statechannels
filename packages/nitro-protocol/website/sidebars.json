@@ -3,6 +3,15 @@
     "Overview": ["overview"],
     "Dapp Developers": ["dapp-devs/dapp-devs-intro"],
     "Wallet Developers": ["wallet-devs/quick-start", "wallet-devs/tutorial"],
+    "Wallet Dev Tutorial": [
+      "wallet-dev-tutorial/deposit-assets",
+      "wallet-dev-tutorial/execute-state-transitions",
+      "wallet-dev-tutorial/finalize-a-channel-happy",
+      "wallet-dev-tutorial/finalize-a-channel-sad",
+      "wallet-dev-tutorial/clear-a-challenge",
+      "wallet-dev-tutorial/outcomes",
+      "wallet-dev-tutorial/release-assets"
+    ],
     "Protocol Developers": ["protocol-devs/protocol-devs-intro"]
   },
   "Contract API": {
