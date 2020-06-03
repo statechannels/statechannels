@@ -2,6 +2,11 @@ import pino from 'pino';
 import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL, VERSION} from './constants';
 import _ from 'lodash';
 import {PaidStreamingWire, SerializedPaidStreamingWire, isPaidStreamingWire} from './library/types';
+import {
+  PaidStreamingExtension,
+  PaidStreamingExtensionSerialized,
+  isPaidStreamingExtension
+} from './library/paid-streaming-extension';
 
 const IS_BROWSER_CONTEXT = process.env.JEST_WORKER_ID === undefined;
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
@@ -19,8 +24,41 @@ const destination =
 // Since WebTorrentPaidStreamingClient contains circular references, we use
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#Examples
 
-export const serializePaidStreamingWire = (wire: PaidStreamingWire): SerializedPaidStreamingWire =>
-  _.pick(wire, 'peerId', 'amChoking', 'amInterested', 'peerChoking', 'peerInterested');
+const serializePaidStreamingWire = ({
+  peerId,
+  amChoking,
+  amInterested,
+  peerChoking,
+  peerInterested
+}: PaidStreamingWire): SerializedPaidStreamingWire => ({
+  peerId,
+  amChoking,
+  amInterested,
+  peerChoking,
+  peerInterested
+});
+
+const serializePaidStreamingExtension = ({
+  pseAccount,
+  pseAddress,
+  seedingChannelId,
+  peerAccount,
+  peerOutcomeAddress,
+  leechingChannelId,
+  isForceChoking,
+  isBeingChoked,
+  blockedRequests
+}: PaidStreamingExtension): PaidStreamingExtensionSerialized => ({
+  pseAccount,
+  pseAddress,
+  seedingChannelId,
+  peerAccount,
+  peerOutcomeAddress,
+  leechingChannelId,
+  isForceChoking,
+  isBeingChoked,
+  blockedRequests
+});
 
 const torrentDataReplacer = () => {
   const seen = new WeakSet();
@@ -32,6 +70,8 @@ const torrentDataReplacer = () => {
 
     if (isPaidStreamingWire(value)) {
       return serializePaidStreamingWire(value);
+    } else if (isPaidStreamingExtension(value)) {
+      return serializePaidStreamingExtension(value);
     } else {
       return value;
     }
