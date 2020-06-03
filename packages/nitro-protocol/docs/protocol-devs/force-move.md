@@ -21,7 +21,7 @@ A specified format of _state_ is vital, since it constitutes much of the interfa
 In ForceMove, the following fields must be included in state updates:
 
 | **Field**         | **Data type** | **Definition / Explanation**                                  |
-|-------------------|---------------|---------------------------------------------------------------|
+| ----------------- | ------------- | ------------------------------------------------------------- |
 | chainId           | `uint256`     | e.g. 3 (ropsten) or 1 (mainnet)                               |
 | participants      | `address[]`   | participant addresses                                         |
 | channelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
@@ -149,46 +149,6 @@ In `/contracts/ForceMove.sol`:
 
 A later [check for support](#support-proofs) for the submitted states implies (if it passes) that the following fields are equal for a and b:
 `chainId`, `participants`, `channelNonce`, `appDefinition`, `challengeDuration`, and that `b.turnNum = a.turnNum + 1`. This is because the `stateHashes` are computed on chain from a single `fixedPart` which is submitted (and implicitly copied across all states) as well as a single `largestTurnNum` (which is implicitly decremented as we step back through the submitted states). This means that the core `_validTransition` function need only perform the remaining checks. See the contract itself for the full implementation.
-
-### App-specific `validTransition`
-
-In addition to the core `validTransition` rules, there are application-specific rules. These are left open to application developers, who must specify these rules in a single function conforming to the [ForceMoveApp interface](../natspec/ForceMoveApp) below.
-
-For example, one can implement a simple counting application
-
-In `/contracts/CountingApp.sol`:
-
-```solidity
-contract CountingApp is ForceMoveApp {
-  struct CountingAppData {
-    uint256 counter;
-  }
-
-  function appData(bytes memory appDataBytes) internal pure returns (CountingAppData memory) {
-    return abi.decode(appDataBytes, (CountingAppData));
-  }
-
-  function validTransition(
-    VariablePart memory a,
-    VariablePart memory b,
-    uint256 turnNumB,
-    uint256 nParticipants
-  ) public pure returns (bool) {
-    require(
-      appData(b.appData).counter == appData(a.appData).counter + 1,
-      'CountingApp: Counter must be incremented'
-    );
-    require(keccak256(b.outcome) == keccak256(a.outcome), 'CountingApp: Outcome must not change');
-    return true;
-  }
-}
-```
-
-but other examples exist: such as a [payment channel](https://github.com/magmo/force-move-protocol/blob/master/packages/fmg-payments/contracts/PaymentApp.sol), or games of [Rock Paper Scissors](https://github.com/statechannels/monorepo/blob/master/packages/rps/contracts/RockPaperScissors.sol) and [Tic Tac Toe](https://github.com/magmo/apps/blob/master/packages/tictactoe/contracts/TicTacToeGame.sol).
-
-:::note
-The linked examples conform to a legacy ForceMoveApp interface.
-:::
 
 ### `_validTransitionChain`
 

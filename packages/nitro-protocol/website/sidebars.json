@@ -12,7 +12,14 @@
       "wallet-dev-tutorial/outcomes",
       "wallet-dev-tutorial/release-assets"
     ],
-    "Protocol Developers": ["protocol-devs/protocol-devs-intro"]
+    "Protocol Developers": [
+      "protocol-devs/protocol-devs-intro",
+      "protocol-devs/asset-holder",
+      "protocol-devs/force-move",
+      "protocol-devs/nitro-adjudicator",
+      "protocol-devs/consensus-app",
+      "protocol-devs/single-asset-payments"
+    ]
   },
   "Contract API": {
     "Overview": ["contract-api/contract-inheritance"],
