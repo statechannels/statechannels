@@ -1,10 +1,10 @@
 import {setUpBrowser, setupFakeWeb3} from '@statechannels/e2e-tests/puppeteer/helpers';
 import {uploadFile} from '@statechannels/e2e-tests/puppeteer/scripts/web3torrent';
-import {APP_URL as WEB3TORRENT_URL} from '@statechannels/e2e-tests/puppeteer/constants';
+import {APP_URL as WEB3TORRENT_URL, HEADLESS} from '@statechannels/e2e-tests/puppeteer/constants';
 
 export async function persistentSeeder(): Promise<void> {
   console.log('Opening browser');
-  const {browser, metamask} = await setUpBrowser(true);
+  const {browser, metamask} = await setUpBrowser(HEADLESS);
 
   console.log('Waiting on pages');
   const web3tTabA = (await browser.pages())[0];
