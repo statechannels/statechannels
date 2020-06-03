@@ -11,22 +11,6 @@ import {
 
 const log = logger.child({module: 'paid-streaming-extension'});
 
-export type PaidStreamingExtensionSerialized = Pick<
-  PaidStreamingExtension,
-  | 'pseAccount'
-  | 'pseAddress'
-  | 'seedingChannelId'
-  | 'peerAccount'
-  | 'peerOutcomeAddress'
-  | 'leechingChannelId'
-  | 'isForceChoking'
-  | 'isBeingChoked'
-  | 'blockedRequests'
->;
-
-export const isPaidStreamingExtension = (obj: any): obj is PaidStreamingExtension =>
-  typeof obj === 'object' && '_isPaidStreamingExtension' in obj && obj._isPaidStreamingExtension;
-
 export abstract class PaidStreamingExtension implements Extension {
   private _isPaidStreamingExtension = true;
   protected wire: PaidStreamingWire;

@@ -2,11 +2,6 @@ import pino from 'pino';
 import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL, VERSION} from './constants';
 import _ from 'lodash';
 import {PaidStreamingWire, SerializedPaidStreamingWire, isPaidStreamingWire} from './library/types';
-import {
-  PaidStreamingExtension,
-  PaidStreamingExtensionSerialized,
-  isPaidStreamingExtension
-} from './library/paid-streaming-extension';
 
 const IS_BROWSER_CONTEXT = process.env.JEST_WORKER_ID === undefined;
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
@@ -54,7 +49,7 @@ const serializePaidStreamingExtension = ({
   isForceChoking,
   isBeingChoked,
   blockedRequests
-}: PaidStreamingExtension): PaidStreamingExtensionSerialized => ({
+}: any) => ({
   pseAccount,
   pseAddress,
   seedingChannelId,
@@ -65,6 +60,10 @@ const serializePaidStreamingExtension = ({
   isBeingChoked,
   blockedRequests
 });
+
+// This type "guard" is unfortunately not type safe, since that leads to circular module references
+export const isPaidStreamingExtension = (obj: any) =>
+  typeof obj === 'object' && '_isPaidStreamingExtension' in obj && obj._isPaidStreamingExtension;
 
 const torrentDataReplacer = () => {
   const seen = new WeakSet();
