@@ -14,6 +14,8 @@ In this example we will limit ourselves to an outcome that specifies ETH only, a
 Let us begin with a conclude transaction, following the steps in the tutorial section above. When we finalize a channel this way, the chain stores the timestamp of the current blocknumber. We need to scrape this information from the transaction receipt in order to be able to push the outcome successfully.
 
 ```typescript
+// In lesson13.test.ts
+
 const tx0 = NitroAdjudicator.conclude(
   largestTurnNum,
   fixedPart,
@@ -49,6 +51,7 @@ await(await tx1).wait();
 The `transferAll` method is available on all asset holders, including the `ETHAssetHolder`. It pays out assets according to outcomes that it knows about, if the channel is sufficiently funded.
 
 ```typescript
+// In lesson14.test.ts
 import {encodeAllocation} from '@statechannels/nitro-protocol';
 
 const amount = '0x03';
@@ -98,6 +101,7 @@ This method executes payouts that might benefit multiple participants. If multip
 The `claimAll` method will pay out the funds held against a guarantor channel, according to a _target_ channel's outcome but with an preference order controlled by the guarantor channel.
 
 ```typescript
+// In lesson15.test.ts
 const amount = '0x03';
 const EOA1 = ethers.Wallet.createRandom().address;
 const EOA2 = ethers.Wallet.createRandom().address;

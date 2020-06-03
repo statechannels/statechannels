@@ -39,6 +39,7 @@ In nitro protocol, channels can allocate funds to other channels!
 To construct an outcome, you can import the `Outcome` type to ensure you're getting the basics right. Then go ahead and attach that outcome in place of the `[]` we used as a placeholder previously on our `States`:
 
 ```typescript
+// In lesson11.test.ts
 
 import { AllocationAssetOutcome, Outcome, encodeOutcome, decodeOutcome } from '@statechannels/nitro-protocol';
 
@@ -82,6 +83,8 @@ Now while we can _transfer_ assets out of a channel, the terminology is instead 
 Constructing the right kind of object in typescript is straightforward:
 
 ```typescript
+// In lesson12.test.ts
+
 import {GuaranteeAssetOutcome} from '@statechannels/nitro-protocol';
 
 const assetOutcome: GuaranteeAssetOutcome = {

@@ -10,6 +10,8 @@ A challenge being registered does _not_ mean that the channel will inexorably fi
 The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` on chain, and leave the resulting channel in the "Open" mode. It can be used to clear a challenge.
 
 ```typescript
+// In lesson8.test.ts
+
 // Register a challenge with a very long timeout, following the preceding tutorial step
 // Form a new support proof (you should be familiar with how to do this by now) with an increased largestTurnNum
 // Submit this transaction:
@@ -40,6 +42,8 @@ expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedC
 The respond method allows anyone with the appropriate, _single_ off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`. This might be significantly cheaper than calling checkpoint (it leverages the fact that the chain has already seen a support for the challenge state, so providing a single validTransition from the challenge state to the response state implies the existence of a support proof for the response state).
 
 ```typescript
+// In lesson9.test.ts
+
 largestTurnNum += 1;
 const responseState: State = {
   turnNum: largestTurnNum,
@@ -83,6 +87,8 @@ expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedC
 You may have noticed that to respond, the challenge state itself must be (re)submitted to the chain. To save gas, information is only stored on chain in a hashed format. Clients should, therefore, cache information emitted in Events emitted by the adjudicator, in order to be able to respond to challenges.
 
 ```typescript
+// In lesson10.test.ts
+
 // Prepare a forceMove transaction as above, and store the transaction receipt
 const receipt = await(
   await NitroAdjudicator.forceMove(

@@ -22,6 +22,7 @@ in order to form `challengerSig`. This signals their intent to forceMove this ch
 We provide a handy utility function `signChallengeMessage` to form this signature.
 
 ```typescript
+// In lesson7.test.ts
 // construct some states as per previous tutorial steps. Then:
 
 const variableParts = states.map(state => getVariablePart(state));

@@ -12,6 +12,8 @@ The conclude method allows anyone with sufficient off-chain state to immediately
 The off-chain state(s) is submitted (in an optimized format), and once relevant checks have passed, an expired challenge is stored against the `channelId`. In this example the participants support the state by countersigning it, without increasing the turn number:
 
 ```typescript
+// In lesson6.test.ts
+
 import {hashAppPart, hashOutcome} = '@statechannels/nitro-protocol';
 
 const whoSignedWhat = [0, 0, 0];

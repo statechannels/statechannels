@@ -14,6 +14,8 @@ The id of a channel is the `keccak256` hash of the abi encoded `chainId`, `parti
 By choosing a new `channelNonce` each time the same participants execute a state channel supported by the same chain, they can avoid replay attacks. The `getChannelId` helper exported by `@statechannels/nitro-protocol` accepts an object of type `Channel` (which contains all the necessary properties) and computes the channel id for you.
 
 ```typescript
+// In lesson4.test.ts
+
 // Import Ethereum utilities
 import {Wallet} from 'ethers';
 
@@ -50,6 +52,8 @@ Checks:
 - The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
 ```typescript
+// In lesson5.test.ts
+
 // Import Ethereum utilities
 import {Contract, parseUnits} from 'ethers/utils';
 let ETHAssetHolder: Contract; // This needs to point to a deployed contract

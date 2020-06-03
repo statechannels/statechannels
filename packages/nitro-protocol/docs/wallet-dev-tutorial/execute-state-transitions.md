@@ -10,12 +10,17 @@ A state channel can be thought of as an emergent property of data (which we call
 `@statechannels/nitro-protocol` exposes a `State` type as a container for all the fields that are required:
 
 ```typescript
+// In lesson1.test.ts
+
+import {ethers} from 'ethers';
+import {Channel, State} from '@statechannels/nitro-protocol';
+
 const participants = [];
 for (let i = 0; i < 3; i++) {
-  participants[i] = Wallet.createRandom().address;
+  participants[i] = ethers.Wallet.createRandom().address;
 }
 const chainId = '0x1234';
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = ethers.utils.bigNumberify(0).toHexString();
 const channel: Channel = {chainId, channelNonce, participants};
 
 const outcome: Outcome = [];
@@ -100,6 +105,8 @@ function validTransition(a, b) <=>
 Note the use of `app.ValidTransition`. This function should be written by third party DApp developers. We provide a `TrivialApp` contract which always returns `true`, to aid in testing:
 
 ```typescript
+// In lesson2.test.ts
+
 const fromState: State = {
   channel,
   outcome: [],
@@ -208,6 +215,7 @@ end
 We provide a helper function to sign a `State`:
 
 ```typescript
+// In lesson3.test.ts
 import {signState} from '@statechannels/nitro-protocol';
 
 const wallet = Wallet.createRandom();
