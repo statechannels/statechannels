@@ -1,7 +1,7 @@
 import AsyncLock from 'async-lock';
 import {Contract, ContractFactory, ethers, providers, BigNumber, utils} from 'ethers';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
-import {cHubChainPK} from '../constants';
+import {cHubChainPK, cHubChainDestination} from '../constants';
 import {log} from '../logger';
 import {NonceManager} from '@ethersproject/experimental';
 import {TransactionResponse} from '@ethersproject/providers';
@@ -105,7 +105,7 @@ async function checkBalance() {
     Sentry.captureMessage(
       `The hub balance of ${ethers.utils.formatEther(balance)} is below ${ethers.utils.formatEther(
         threshold
-      )}`
+      )}. Hub address is ${cHubChainDestination}`
     );
   }
 }
