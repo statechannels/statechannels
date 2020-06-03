@@ -578,7 +578,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       return;
     }
     log.debug({requests: wire.requests}, `<< START ${wire.paidStreamingExtension.peerAccount}`);
-    log.trace({pieces: torrent.pieces});
+    log.trace({torrent});
     torrent._updateWireWrapper(wire); // schedules a wire update (which checks it's wires and tries to make new requests and replace dead ones)
     // this is an internal function implemented here: https://github.com/webtorrent/webtorrent/blob/7ff77c3e95b2dddfa70dd49cf924073383dd565a/lib/torrent.js#L1182
     // As we changed the way peers comunicated (and it has indeed changed since the PoC days)
