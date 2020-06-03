@@ -487,8 +487,8 @@ export class Store {
         // Delete the funds assigned to the channel
         delete assetBudget.channels[targetChannelId];
 
-        const result = await this.backend.setBudget(applicationDomain, currentBudget);
-        return result;
+        await this.backend.setBudget(applicationDomain, currentBudget);
+        return currentBudget;
       }
     );
 
