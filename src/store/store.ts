@@ -521,6 +521,8 @@ export class Store {
 
         currentBudget.forAsset[assetHolderAddress] = {
           ...assetBudget,
+          availableSendCapacity: assetBudget.availableReceiveCapacity.sub(amount.send),
+          availableReceiveCapacity: assetBudget.availableReceiveCapacity.sub(amount.receive),
           channels: {
             ...assetBudget.channels,
             [channelId]: {amount: amount.send.add(amount.receive)}
