@@ -8,6 +8,7 @@ import {track} from '../../analytics';
 import {Avatar, Badge} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
+import {prettyPrintWei} from '../../utils/calculateWei';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -54,6 +55,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const spentPercentage = spent.gt(0) ? 100 / total.div(spent).toNumber() : 0;
   const receivedPercentage = received.gt(0) ? 100 / total.div(received).toNumber() : 0;
 
+  console.log([
+    spendBudgetPercentage,
+    receiveBudgetPercentage,
+    spentPercentage,
+    receivedPercentage
+  ]);
   return (
     <Fragment>
       <button
@@ -83,10 +90,10 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
       </Tooltip>
       <PieChart
         data={[
-          {title: 'Me', value: spendBudgetPercentage, color: '#ea692b'}, // spendBudget
-          {title: 'Hub', value: receiveBudgetPercentage, color: '#E83939'}, // receiveBudget
-          {title: 'Locked-Hub', value: receivedPercentage, color: '#EF8080'}, // received
-          {title: 'Locked-Me', value: spentPercentage, color: '#F2A17A'} // spent
+          {title: prettyPrintWei(spendBudget), value: spendBudgetPercentage, color: '#ea692b'}, // spendBudget
+          {title: prettyPrintWei(receiveBudget), value: receiveBudgetPercentage, color: '#d5dbe3'}, // receiveBudget
+          {title: prettyPrintWei(received), value: receivedPercentage, color: '#006dff'}, // received
+          {title: prettyPrintWei(spent), value: spentPercentage, color: '#1ec51b'} // spent
         ]}
       />
     </Fragment>
