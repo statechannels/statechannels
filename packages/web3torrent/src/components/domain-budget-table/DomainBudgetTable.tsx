@@ -87,37 +87,61 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   const colors = ['#ea692b', '#ea692b', '#d5dbe3', '#d5dbe3'];
   return (
     <Fragment>
-      <PieChart
-        className="budget-pie-chart"
-        lineWidth={18}
-        label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
-        labelStyle={index => ({
-          fill: colors[index],
-          fontSize: '12px',
-          fontFamily: 'sans-serif'
-        })}
-        radius={42}
-        labelPosition={112} // outer labels
-        data={[
-          {title: prettyPrintWei(myBalanceFree), value: myBalanceFreePercentage, color: '#ea692b'},
-          {
-            title: prettyPrintWei(myBalanceLocked),
-            value: myBalanceLockedPercentage,
-            color: '#ea692b60'
-          },
+      <div className="pie-chart-and-identity-container">
+        <PieChart
+          className="budget-pie-chart"
+          lineWidth={18}
+          label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
+          labelStyle={index => ({
+            fill: colors[index],
+            fontSize: '12px',
+            fontFamily: 'sans-serif'
+          })}
+          radius={42}
+          labelPosition={112} // outer labels
+          data={[
+            {
+              title: prettyPrintWei(myBalanceFree),
+              value: myBalanceFreePercentage,
+              color: '#ea692b'
+            },
+            {
+              title: prettyPrintWei(myBalanceLocked),
+              value: myBalanceLockedPercentage,
+              color: '#ea692b60'
+            },
 
-          {
-            title: prettyPrintWei(hubBalanceLocked),
-            value: hubBalanceLockedPercentage,
-            color: '#d5dbe360'
-          },
-          {
-            title: prettyPrintWei(hubBalanceFree),
-            value: hubBalanceFreePercentage,
-            color: '#d5dbe3'
-          }
-        ]}
-      />
+            {
+              title: prettyPrintWei(hubBalanceLocked),
+              value: hubBalanceLockedPercentage,
+              color: '#d5dbe360'
+            },
+            {
+              title: prettyPrintWei(hubBalanceFree),
+              value: hubBalanceFreePercentage,
+              color: '#d5dbe3'
+            }
+          ]}
+        />
+        <div className="identity">
+          <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
+            <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+              <Avatar>
+                <Blockie
+                  opts={{
+                    seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                    bgcolor: '#3531ff',
+                    size: 8,
+                    scale: 4,
+                    spotcolor: '#000'
+                  }}
+                />
+              </Avatar>
+            </Badge>
+          </Tooltip>
+        </div>
+      </div>
+
       <button
         className={'budget-button'}
         id="budget-withdraw"
@@ -132,22 +156,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
         }}
       >
         Withdraw
-      </button>{' '}
-      <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
-        <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-          <Avatar>
-            <Blockie
-              opts={{
-                seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
-                bgcolor: '#3531ff',
-                size: 6,
-                scale: 4,
-                spotcolor: '#000'
-              }}
-            />
-          </Avatar>
-        </Badge>
-      </Tooltip>
+      </button>
     </Fragment>
   );
 };
