@@ -84,7 +84,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     hubBalanceLockedPercentage
   ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
 
-  const colors = ['#ea692b', '#ea692b60', '#d5dbe360', '#d5dbe3'];
+  const colors = ['#ea692b', '#ea692b', '#d5dbe3', '#d5dbe3'];
   return (
     <Fragment>
       <PieChart
