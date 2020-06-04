@@ -26,36 +26,24 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
-  const myBalanceLocked = sum([
-    ...Object.keys(channelCache)
-      .filter(iAmThePayer && locksUpFunds)
-      .map(extractPayerBalance),
-    ...Object.keys(channelCache)
-      .filter(iAmTheBeneficiary && locksUpFunds)
-      .map(extractBeneficiaryBalance)
-  ]); // sum of my balances over unfinalized payment channels that I participate in
-  const hubBalanceLocked = sum([
-    ...Object.keys(channelCache)
-      .filter(iAmThePayer && locksUpFunds)
-      .map(extractBeneficiaryBalance),
-    ...Object.keys(channelCache)
-      .filter(iAmTheBeneficiary && locksUpFunds)
-      .map(extractPayerBalance)
-  ]); // sum of my counterparty's balances over unfinalized payment channels that I participate in
-  const myBalanceFree = bigNumberify(budgetCache.budgets[0].availableSendCapacity); // the balance allocated to me in my ledger channel with the hub
-  const hubBalanceFree = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity); // the balance allocated to the hub in my ledger channel with the hub
-
-  const total = myBalanceFree
-    .add(myBalanceLocked)
-    .add(hubBalanceFree)
-    .add(hubBalanceLocked); // this should be constant
-
-  function iAmThePayer(channelId: string) {
-    return channelCache[channelId].payer.signingAddress === mySigningAddress;
+  function extractMyBalance(channelId: string) {
+    return (
+      (channelCache[channelId].payer.signingAddress === mySigningAddress &&
+        bigNumberify(channelCache[channelId].payer.balance)) ||
+      (channelCache[channelId].beneficiary.signingAddress === mySigningAddress &&
+        bigNumberify(channelCache[channelId].beneficiary.balance))
+    );
   }
-  function iAmTheBeneficiary(channelId: string) {
-    return channelCache[channelId].beneficiary.signingAddress === mySigningAddress;
+
+  function extractCounterpartyBalance(channelId: string) {
+    return (
+      (channelCache[channelId].payer.signingAddress === mySigningAddress &&
+        bigNumberify(channelCache[channelId].beneficiary.balance)) ||
+      (channelCache[channelId].beneficiary.signingAddress === mySigningAddress &&
+        bigNumberify(channelCache[channelId].payer.balance))
+    );
   }
+
   function locksUpFunds(channelId: string) {
     return (
       channelCache[channelId].status === 'running' ||
@@ -63,23 +51,31 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     );
   }
 
-  function extractPayerBalance(channelId: string) {
-    return bigNumberify(channelCache[channelId].payer.balance);
-  }
-  function extractBeneficiaryBalance(channelId: string) {
-    return bigNumberify(channelCache[channelId].beneficiary.balance);
-  }
-
   function sum(arrayOfBigNumbers: BigNumber[]) {
-    return arrayOfBigNumbers.reduce(
-      (a, b) => bigNumberify(a).add(bigNumberify(b)),
-      bigNumberify(0)
-    );
+    return arrayOfBigNumbers.reduce((a: BigNumber, b: BigNumber) => a.add(b), bigNumberify(0));
   }
 
   function percentageOfTotal(quantity: BigNumber) {
     return parseFloat(bigDecimal.divide(quantity.toString(), total.toString(), 8)) * 100;
   }
+
+  const myBalanceLocked = sum(
+    Object.keys(channelCache)
+      .filter(locksUpFunds)
+      .map(extractMyBalance)
+  ); // sum of my balances over unfinalized payment channels that I participate in
+  const hubBalanceLocked = sum(
+    Object.keys(channelCache)
+      .filter(locksUpFunds)
+      .map(extractCounterpartyBalance)
+  ); // sum of my counterparty's balances over unfinalized payment channels that I participate in
+  const myBalanceFree = bigNumberify(budgetCache.budgets[0].availableSendCapacity); // the balance allocated to me in my ledger channel with the hub
+  const hubBalanceFree = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity); // the balance allocated to the hub in my ledger channel with the hub
+
+  const total = myBalanceFree
+    .add(myBalanceLocked)
+    .add(hubBalanceFree)
+    .add(hubBalanceLocked); // this should be constant
 
   const [
     myBalanceFreePercentage,
@@ -102,10 +98,10 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
         id="budget-withdraw"
         onClick={() => {
           track('Withdraw Initiated', {
-            myBalanceFreePercentage,
-            myBalanceLockedPercentage,
-            hubBalanceFreePercentage,
-            hubBalanceLockedPercentage
+            myBalanceFree,
+            myBalanceLocked,
+            hubBalanceFree,
+            hubBalanceLocked
           });
           withdraw();
         }}
