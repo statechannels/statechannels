@@ -10,9 +10,14 @@ interface Props {
 }
 
 export const FactoryReset = (props: Props) => (
-  <button id="destroy" onClick={() => destroyStore(props.store)}>
-    Factory reset
-  </button>
+  <div>
+    <div>If you press this button, we will destroy your wallet. </div>
+    <div>We will dump the contents of your wallet in your console.</div>
+    <div>Contact us, and we can try to recover your funds.</div>
+    <button id="destroy" onClick={() => destroyStore(props.store)}>
+      Factory reset
+    </button>
+  </div>
 );
 
 const destroyStore = async (store: Store) => {

@@ -11,7 +11,7 @@ import {logger} from './logger';
 import {Backend} from './store/dexie-backend';
 import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, GIT_VERSION} from './config';
 import ReactDOM from 'react-dom';
-import {FactoryReset} from './ui/factory-reset';
+import App from './ui/app';
 
 if (NODE_ENV === 'production') {
   Sentry.init({
@@ -55,5 +55,5 @@ const log = logger.trace.bind(logger);
 
   window.parent.postMessage('WalletReady', '*');
 
-  ReactDOM.render(FactoryReset({store}), document.getElementById('root'));
+  ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
