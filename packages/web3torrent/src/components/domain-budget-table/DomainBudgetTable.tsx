@@ -130,12 +130,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
           {
             title: prettyPrintWei(myBalanceLocked),
             value: myBalanceLockedPercentage,
-            color: '#006dff'
+            color: '#1ec51b'
           },
           {
             title: prettyPrintWei(hubBalanceLocked),
             value: hubBalanceLockedPercentage,
-            color: '#1ec51b'
+            color: '#006dff'
           }
         ]}
       />
