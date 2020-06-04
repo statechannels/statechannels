@@ -28,20 +28,20 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   const myBalanceLocked = sum([
     ...Object.keys(channelCache)
-      .filter(iAmThePayer)
+      .filter(iAmThePayer && locksUpFunds)
       .map(extractPayerBalance),
     ...Object.keys(channelCache)
-      .filter(iAmTheBeneficiary)
+      .filter(iAmTheBeneficiary && locksUpFunds)
       .map(extractBeneficiaryBalance)
-  ]); // sum of my balances over payment channels that I participate in
+  ]); // sum of my balances over unfinalized payment channels that I participate in
   const hubBalanceLocked = sum([
     ...Object.keys(channelCache)
-      .filter(iAmThePayer)
+      .filter(iAmThePayer && locksUpFunds)
       .map(extractBeneficiaryBalance),
     ...Object.keys(channelCache)
-      .filter(iAmTheBeneficiary)
+      .filter(iAmTheBeneficiary && locksUpFunds)
       .map(extractPayerBalance)
-  ]); // sum of my counterparty's balances over payment channels that I participate in
+  ]); // sum of my counterparty's balances over unfinalized payment channels that I participate in
   const myBalanceFree = bigNumberify(budgetCache.budgets[0].availableSendCapacity); // the balance allocated to me in my ledger channel with the hub
   const hubBalanceFree = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity); // the balance allocated to the hub in my ledger channel with the hub
 
@@ -55,6 +55,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   }
   function iAmTheBeneficiary(channelId: string) {
     return channelCache[channelId].beneficiary.signingAddress === mySigningAddress;
+  }
+  function locksUpFunds(channelId: string) {
+    return (
+      channelCache[channelId].status === 'running' ||
+      channelCache[channelId].status === 'challenging'
+    );
   }
 
   function extractPayerBalance(channelId: string) {
