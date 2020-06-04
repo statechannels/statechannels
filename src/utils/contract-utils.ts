@@ -28,7 +28,10 @@ export function getProvider(): Web3Provider | JsonRpcProvider {
   if (provider) return provider;
 
   if (window.ethereum) {
-    if (window.ethereum.mockingInfuraProvider) {
+    // TODO: Currently disabled due to InfuraProvider not working
+    // see  https://github.com/ethers-io/ethers.js/issues/868
+    // eslint-disable-next-line no-constant-condition
+    if (window.ethereum.mockingInfuraProvider && false) {
       provider = new InfuraProvider('ropsten', INFURA_API_KEY);
     } else {
       provider = new Web3Provider(window.ethereum);
