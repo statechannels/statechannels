@@ -9,6 +9,7 @@ import {Avatar, Badge} from '@material-ui/core';
 import {Blockie, Tooltip} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
+import {BigNumber} from 'ethers/utils';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -24,50 +25,80 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
 
-  const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
-    key => channelCache[key].payer.signingAddress === mySigningAddress
+  const myBalanceLocked = sum([
+    ...Object.keys(channelCache)
+      .filter(iAmThePayer)
+      .map(extractPayerBalance),
+    ...Object.keys(channelCache)
+      .filter(iAmTheBeneficiary)
+      .map(extractBeneficiaryBalance)
+  ]); // sum of my balances over payment channels that I participate in
+  const hubBalanceLocked = sum([
+    ...Object.keys(channelCache)
+      .filter(iAmThePayer)
+      .map(extractBeneficiaryBalance),
+    ...Object.keys(channelCache)
+      .filter(iAmTheBeneficiary)
+      .map(extractPayerBalance)
+  ]); // sum of my counterparty's balances over payment channels that I participate in
+  const myBalanceFree = bigNumberify(budgetCache.budgets[0].availableSendCapacity); // the balance allocated to me in my ledger channel with the hub
+  const hubBalanceFree = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity); // the balance allocated to the hub in my ledger channel with the hub
+
+  const total = myBalanceFree
+    .add(myBalanceLocked)
+    .add(hubBalanceFree)
+    .add(hubBalanceLocked); // this should be constant
+
+  function iAmThePayer(channelId: string) {
+    return channelCache[channelId].payer.signingAddress === mySigningAddress;
+  }
+  function iAmTheBeneficiary(channelId: string) {
+    return channelCache[channelId].beneficiary.signingAddress === mySigningAddress;
+  }
+
+  function extractPayerBalance(channelId: string) {
+    return bigNumberify(channelCache[channelId].payer.balance);
+  }
+  function extractBeneficiaryBalance(channelId: string) {
+    return bigNumberify(channelCache[channelId].beneficiary.balance);
+  }
+
+  function sum(arrayOfBigNumbers: BigNumber[]) {
+    return arrayOfBigNumbers.reduce(
+      (a, b) => bigNumberify(a).add(bigNumberify(b)),
+      bigNumberify(0)
+    );
+  }
+
+  function percentageOfTotal(quantity: BigNumber) {
+    return quantity.gt(0) ? 100 / total.div(quantity).toNumber() : 0;
+  }
+
+  const [
+    myBalanceFreePercentage,
+    myBalanceLockedPercentage,
+    hubBalanceFreePercentage,
+    hubBalanceLockedPercentage
+  ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
+
+  console.log(
+    myBalanceFreePercentage,
+    myBalanceLockedPercentage,
+    hubBalanceFreePercentage,
+    hubBalanceLockedPercentage
   );
-  const myReceivingChannelIds: string[] = Object.keys(channelCache).filter(
-    key => channelCache[key].beneficiary.signingAddress === mySigningAddress
-  );
-
-  const spent = myPayingChannelIds
-    .map(id => channelCache[id].beneficiary.balance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
-
-  const received = myReceivingChannelIds
-    .map(id => channelCache[id].beneficiary.balance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
-
-  const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
-
-  const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
-
-  const total = spendBudget
-    .add(receiveBudget)
-    .add(spent)
-    .add(received); // this should be constant
-
-  const spendBudgetPercentage = spendBudget.gt(0) ? 100 / total.div(spendBudget).toNumber() : 0;
-  const receiveBudgetPercentage = receiveBudget.gt(0)
-    ? 100 / total.div(receiveBudget).toNumber()
-    : 0;
-  const spentPercentage = spent.gt(0) ? 100 / total.div(spent).toNumber() : 0;
-  const receivedPercentage = received.gt(0) ? 100 / total.div(received).toNumber() : 0;
-
-  console.log([
-    spendBudgetPercentage,
-    receiveBudgetPercentage,
-    spentPercentage,
-    receivedPercentage
-  ]);
   return (
     <Fragment>
       <button
         className={'budget-button'}
         id="budget-withdraw"
         onClick={() => {
-          track('Withdraw Initiated', {spent, received, spendBudget, receiveBudget});
+          track('Withdraw Initiated', {
+            myBalanceFreePercentage,
+            myBalanceLockedPercentage,
+            hubBalanceFreePercentage,
+            hubBalanceLockedPercentage
+          });
           withdraw();
         }}
       >
@@ -90,10 +121,22 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
       </Tooltip>
       <PieChart
         data={[
-          {title: prettyPrintWei(spendBudget), value: spendBudgetPercentage, color: '#ea692b'}, // spendBudget
-          {title: prettyPrintWei(receiveBudget), value: receiveBudgetPercentage, color: '#d5dbe3'}, // receiveBudget
-          {title: prettyPrintWei(received), value: receivedPercentage, color: '#006dff'}, // received
-          {title: prettyPrintWei(spent), value: spentPercentage, color: '#1ec51b'} // spent
+          {title: prettyPrintWei(myBalanceFree), value: myBalanceFreePercentage, color: '#ea692b'},
+          {
+            title: prettyPrintWei(hubBalanceFree),
+            value: hubBalanceFreePercentage,
+            color: '#d5dbe3'
+          },
+          {
+            title: prettyPrintWei(myBalanceLocked),
+            value: myBalanceLockedPercentage,
+            color: '#006dff'
+          },
+          {
+            title: prettyPrintWei(hubBalanceLocked),
+            value: hubBalanceLockedPercentage,
+            color: '#1ec51b'
+          }
         ]}
       />
     </Fragment>
