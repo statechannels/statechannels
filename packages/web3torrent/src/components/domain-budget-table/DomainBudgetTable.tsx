@@ -131,7 +131,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
                   opts={{
                     seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
                     bgcolor: '#3531ff',
-                    size: 8,
+                    size: 6,
                     scale: 4,
                     spotcolor: '#000'
                   }}
