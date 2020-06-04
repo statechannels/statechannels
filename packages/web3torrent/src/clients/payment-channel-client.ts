@@ -171,7 +171,7 @@ export class PaymentChannelClient {
     return this.channelClient.selectedAddress;
   }
 
-  constructor(private readonly channelClient: ChannelClientInterface) {
+  constructor(readonly channelClient: ChannelClientInterface) {
     this.channelStates.subscribe(channelResult => this.updateChannelCache(channelResult));
 
     this.channelClient.onBudgetUpdated(budgetResult => {

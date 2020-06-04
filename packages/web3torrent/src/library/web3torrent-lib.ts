@@ -594,6 +594,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // this has suffered a lot of changes, and it might not be the best solution for every case (for example, I don't know if it works for long torrent pauses).
   }
 
+  private emitbudgetUpdated() {
+    this.emit('BudgetUpdated');
+  }
+
   /** Emit an event that triggers a UI re-render */
   private emitTorrentUpdated(infoHash) {
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));

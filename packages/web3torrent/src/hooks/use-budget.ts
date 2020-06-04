@@ -16,6 +16,7 @@ export function useBudget({ready}: {ready: boolean}) {
       setLoading(false);
     };
     if (ready) getAndSetBudget();
+    return paymentChannelClient.channelClient.onBudgetUpdated(getAndSetBudget);
   }, [ready, paymentChannelClient]);
 
   const createBudget = async () => {

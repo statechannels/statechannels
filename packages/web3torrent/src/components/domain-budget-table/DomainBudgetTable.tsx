@@ -55,10 +55,6 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     return arrayOfBigNumbers.reduce((a: BigNumber, b: BigNumber) => a.add(b), bigNumberify(0));
   }
 
-  function percentageOfTotal(quantity: BigNumber) {
-    return parseFloat(bigDecimal.divide(quantity.toString(), total.toString(), 8)) * 100;
-  }
-
   const myBalanceLocked = sum(
     Object.keys(channelCache)
       .filter(locksUpFunds)
@@ -76,6 +72,10 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     .add(myBalanceLocked)
     .add(hubBalanceFree)
     .add(hubBalanceLocked); // this should be constant
+
+  function percentageOfTotal(quantity: BigNumber) {
+    return parseFloat(bigDecimal.divide(quantity.toString(), total.toString(), 8)) * 100;
+  }
 
   const [
     myBalanceFreePercentage,
