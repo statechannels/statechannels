@@ -8,6 +8,7 @@ import {getUserFriendlyError} from '../../utils/error';
 import {Flash} from 'rimble-ui';
 import {track} from '../../analytics';
 import {MAX_FILE_SIZE} from '../../constants';
+import prettier from 'prettier-bytes';
 
 const Upload: React.FC<{ready: boolean}> = ({ready}) => {
   const history = useHistory();
@@ -38,7 +39,9 @@ const Upload: React.FC<{ready: boolean}> = ({ready}) => {
                   filesSize += event.target.files[i].size;
                 }
                 if (filesSize > MAX_FILE_SIZE) {
-                  setErrorLabel('File size too large. The maximum file size is 1 GB.');
+                  setErrorLabel(
+                    `File size too large. The maximum file size is ${prettier(MAX_FILE_SIZE)}.`
+                  );
                   setSpinner(false);
                 } else {
                   const {infoHash, length, name, magnetURI} = await upload(event.target.files);
