@@ -178,11 +178,10 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 export const FUNDING_STRATEGY = process.env.FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
 export const INITIAL_BUDGET_AMOUNT = utils.hexZeroPad(
-  utils.parseEther('0.0000000001').toHexString(),
+  utils.parseEther('0.0000000000001').toHexString(),
   32
-); //  100 Mwei (FIXME: Set this back to 1 szabo (0.000001))
-
-export const MAX_FILE_SIZE = 1000 * 1024 * 1024;
+); //  100 Mwei , or MAX_FILE_SIZE * 10
+export const MAX_FILE_SIZE = 10 * 1000 * 1000; // 10 million bytes
 
 export const ADD_LOGS = !!process.env.LOG_DESTINATION;
 export const LOG_DESTINATION = ADD_LOGS
