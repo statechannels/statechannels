@@ -28,6 +28,7 @@ import {
   SimpleAllocation
 } from './types';
 import {logger} from '../logger';
+import {DB_NAME} from '../constants';
 
 interface DirectFunding {
   type: 'Direct';
@@ -96,11 +97,7 @@ export class Store {
     }
   }
 
-  public initialize = async (
-    privateKeys?: string[],
-    cleanSlate = false,
-    dbName = 'xstatewallet'
-  ) => {
+  public initialize = async (privateKeys?: string[], cleanSlate = false, dbName = DB_NAME) => {
     await this.backend.initialize(cleanSlate, dbName);
 
     await this.backend.transaction('readwrite', [ObjectStores.privateKeys], async () => {
