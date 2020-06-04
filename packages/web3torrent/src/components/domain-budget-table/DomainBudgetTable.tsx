@@ -84,15 +84,15 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     hubBalanceLockedPercentage
   ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
 
+  const colors = ['#ea692b', '#ea692b60', '#d5dbe360', '#d5dbe3'];
   return (
     <Fragment>
       <PieChart
-        lineWidth={20}
-        paddingAngle={12}
-        rounded
-        label={({dataEntry}) => dataEntry.title}
+        className="budget-pie-chart"
+        lineWidth={18}
+        label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
         labelStyle={index => ({
-          fill: '#ea692b',
+          fill: colors[index],
           fontSize: '12px',
           fontFamily: 'sans-serif'
         })}
@@ -101,19 +101,20 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
         data={[
           {title: prettyPrintWei(myBalanceFree), value: myBalanceFreePercentage, color: '#ea692b'},
           {
-            title: prettyPrintWei(hubBalanceFree),
-            value: hubBalanceFreePercentage,
-            color: '#d5dbe3'
-          },
-          {
             title: prettyPrintWei(myBalanceLocked),
             value: myBalanceLockedPercentage,
-            color: '#1ec51b'
+            color: '#ea692b60'
           },
+
           {
             title: prettyPrintWei(hubBalanceLocked),
             value: hubBalanceLockedPercentage,
-            color: '#006dff'
+            color: '#d5dbe360'
+          },
+          {
+            title: prettyPrintWei(hubBalanceFree),
+            value: hubBalanceFreePercentage,
+            color: '#d5dbe3'
           }
         ]}
       />
