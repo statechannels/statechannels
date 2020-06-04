@@ -86,37 +86,18 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
 
   return (
     <Fragment>
-      <button
-        className={'budget-button'}
-        id="budget-withdraw"
-        onClick={() => {
-          track('Withdraw Initiated', {
-            myBalanceFree,
-            myBalanceLocked,
-            hubBalanceFree,
-            hubBalanceLocked
-          });
-          withdraw();
-        }}
-      >
-        Withdraw
-      </button>
-      <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
-        <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-          <Avatar>
-            <Blockie
-              opts={{
-                seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
-                bgcolor: '#3531ff',
-                size: 6,
-                scale: 4,
-                spotcolor: '#000'
-              }}
-            />
-          </Avatar>
-        </Badge>
-      </Tooltip>
       <PieChart
+        lineWidth={20}
+        paddingAngle={12}
+        rounded
+        label={({dataEntry}) => dataEntry.title}
+        labelStyle={index => ({
+          fill: '#ea692b',
+          fontSize: '12px',
+          fontFamily: 'sans-serif'
+        })}
+        radius={42}
+        labelPosition={112} // outer labels
         data={[
           {title: prettyPrintWei(myBalanceFree), value: myBalanceFreePercentage, color: '#ea692b'},
           {
@@ -136,6 +117,36 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
           }
         ]}
       />
+      <button
+        className={'budget-button'}
+        id="budget-withdraw"
+        onClick={() => {
+          track('Withdraw Initiated', {
+            myBalanceFree,
+            myBalanceLocked,
+            hubBalanceFree,
+            hubBalanceLocked
+          });
+          withdraw();
+        }}
+      >
+        Withdraw
+      </button>{' '}
+      <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
+        <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
+          <Avatar>
+            <Blockie
+              opts={{
+                seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                bgcolor: '#3531ff',
+                size: 6,
+                scale: 4,
+                spotcolor: '#000'
+              }}
+            />
+          </Avatar>
+        </Badge>
+      </Tooltip>
     </Fragment>
   );
 };
