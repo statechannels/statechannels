@@ -84,13 +84,6 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     hubBalanceLockedPercentage
   ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
 
-  console.log(myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked);
-  console.log(
-    myBalanceFreePercentage,
-    myBalanceLockedPercentage,
-    hubBalanceFreePercentage,
-    hubBalanceLockedPercentage
-  );
   return (
     <Fragment>
       <button
