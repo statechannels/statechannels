@@ -10,6 +10,7 @@ import {Blockie, Tooltip} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {BigNumber} from 'ethers/utils';
+import bigDecimal from 'js-big-decimal';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -71,7 +72,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
   }
 
   function percentageOfTotal(quantity: BigNumber) {
-    return quantity.gt(0) ? 100 / total.div(quantity).toNumber() : 0;
+    return parseFloat(bigDecimal.divide(quantity.toString(), total.toString(), 8)) * 100;
   }
 
   const [
@@ -81,6 +82,7 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
     hubBalanceLockedPercentage
   ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
 
+  console.log(myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked);
   console.log(
     myBalanceFreePercentage,
     myBalanceLockedPercentage,
