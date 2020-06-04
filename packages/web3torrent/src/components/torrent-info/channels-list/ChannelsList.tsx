@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {ChannelCache} from '../../../clients/payment-channel-client';
+import {ChannelCache, ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
@@ -16,23 +16,21 @@ type UploadInfoProps = {
 };
 
 function channelIdToTableRow(
-  channelId: string,
-  channels: ChannelCache,
+  channelState: ChannelState,
   torrent: TorrentUI,
   participantType: 'payer' | 'beneficiary'
 ) {
-  const channel = channels[channelId];
   const isBeneficiary = participantType === 'beneficiary';
   const wire = torrent.wires.find(
     wire =>
-      wire.paidStreamingExtension.leechingChannelId === channelId ||
-      wire.paidStreamingExtension.seedingChannelId === channelId
+      wire.paidStreamingExtension.leechingChannelId === channelState.channelId ||
+      wire.paidStreamingExtension.seedingChannelId === channelState.channelId
   );
 
   let dataTransferred: string;
   const peerOutcomeAddress = isBeneficiary
-    ? channel.payer.outcomeAddress
-    : channel.beneficiary.outcomeAddress;
+    ? channelState.payer.outcomeAddress
+    : channelState.beneficiary.outcomeAddress;
 
   const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
   // For now, this ^ is the ethereum address in my peer's metamask
@@ -41,26 +39,26 @@ function channelIdToTableRow(
     dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
   } else {
     // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
-    dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiary.balance));
+    dataTransferred = prettyPrintBytes(utils.bigNumberify(channelState.beneficiary.balance));
   }
 
-  const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiary.balance));
+  const weiTransferred = prettyPrintWei(utils.bigNumberify(channelState.beneficiary.balance));
 
   let connectionStatus;
   if (wire) {
-    if (channel.status === 'running') {
+    if (channelState.status === 'running') {
       connectionStatus = isBeneficiary ? 'uploading' : 'downloading';
-    } else if (channel.status === 'closing') {
+    } else if (channelState.status === 'closing') {
       connectionStatus = 'closing';
-    } else if (channel.status === 'proposed') {
+    } else if (channelState.status === 'proposed') {
       connectionStatus = 'starting';
-    } else if (channel.status === 'closed') {
+    } else if (channelState.status === 'closed') {
       connectionStatus = 'finished';
     } else {
       connectionStatus = 'unknown';
     }
   } else {
-    if (channel.status === 'closed') {
+    if (channelState.status === 'closed') {
       connectionStatus = 'finished';
     } else {
       connectionStatus = 'disconnected';
@@ -68,8 +66,8 @@ function channelIdToTableRow(
   }
 
   return (
-    <tr className="peerInfo" key={channelId}>
-      <td className={`channel ${channel.status}`}>
+    <tr className="peerInfo" key={channelState.channelId}>
+      <td className={`channel ${channelState.status}`}>
         <div className={`dot ${connectionStatus}`}></div>
         <span className={`status ${connectionStatus}`}>{connectionStatus}</span>
         {/* temporal thing to show the true state instead of a parsed one */}
@@ -91,7 +89,7 @@ function channelIdToTableRow(
       </td>
       <td>
         <Badge
-          badgeContent={channel.turnNum.toNumber()}
+          badgeContent={channelState.turnNum.toNumber()}
           color={isBeneficiary ? 'primary' : 'error'}
           overlap={'circle'}
           showZero={true}
@@ -113,16 +111,16 @@ function channelIdToTableRow(
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
   const statuses = ['running', 'closing', 'proposing', 'closed'];
 
-  const channelsInfo = _.keys(channels)
+  const channelsInfo = _.values(channels)
     .filter(
-      id =>
-        channels[id].payer.signingAddress === mySigningAddress ||
-        channels[id].beneficiary.signingAddress === mySigningAddress
+      state =>
+        state.payer.signingAddress === mySigningAddress ||
+        state.beneficiary.signingAddress === mySigningAddress
     )
     .sort(
-      (id1, id2) =>
-        statuses.indexOf(channels[id1].status) - statuses.indexOf(channels[id2].status) ||
-        Number(id1) - Number(id2)
+      (state1, state2) =>
+        statuses.indexOf(state1.status) - statuses.indexOf(state2.status) ||
+        Number(state1.channelId) - Number(state2.channelId)
     );
   return (
     <section className="wires-list">
@@ -139,14 +137,11 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
           </thead>
         )}
         <tbody>
-          {channelsInfo.map(key =>
+          {channelsInfo.map(channelState =>
             channelIdToTableRow(
-              key,
-              channels,
+              channelState,
               torrent,
-              channels[key].beneficiary.signingAddress === mySigningAddress
-                ? 'beneficiary'
-                : 'payer'
+              channelState.beneficiary.signingAddress === mySigningAddress ? 'beneficiary' : 'payer'
             )
           )}
         </tbody>
