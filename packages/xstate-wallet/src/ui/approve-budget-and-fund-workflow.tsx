@@ -23,7 +23,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
   const [stateTimerExpired, setStateTimerExpired] = useState(false);
   useEffect(() => {
     setStateTimerExpired(false);
-    stateTimer = setTimeout(() => setStateTimerExpired(true), 300000 /* 5 min*/);
+    stateTimer = setTimeout(() => setStateTimerExpired(true), 90_000 /* 1.5 min */);
     return () => {
       clearTimeout(stateTimer);
     };
@@ -146,10 +146,19 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
   const hubTimeout = (
     <Flex alignItems="center" flexDirection="column">
-      <Heading>Something went wrong</Heading>
+      <Heading>Deposit Funds</Heading>
       <Text pb={4} textAlign="center">
-        It looks like there was a communication error with the hub. You can download your log files
-        and reach out to us on{' '}
+        We haven&apos;t heard back from the hub in a bit so something might have gone wrong.
+      </Text>
+      <Text pb={4} textAlign="center">
+        You can click{' '}
+        <Link
+          target="_blank"
+          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
+        >
+          here
+        </Link>{' '}
+        to see the progress on etherscan or you can download your log files and reach out to us on{' '}
         <Link target="_blank" href={'https://github.com/statechannels/monorepo/issues'}>
           {' '}
           github.
@@ -182,11 +191,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
   } else if (current.matches({deposit: 'submitTransaction'})) {
     return depositSubmitTransaction;
   } else if (current.matches({deposit: 'waitMining'})) {
-    if (stateTimerExpired) {
-      return hubTimeout;
-    } else {
-      return depositWaitMining(current.context);
-    }
+    return depositWaitMining(current.context);
   } else if (current.matches({deposit: 'retry'})) {
     return depositRetry();
   } else if (current.matches({deposit: 'waitFullyFunded'})) {
