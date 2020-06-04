@@ -90,11 +90,12 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
       <div className="pie-chart-and-identity-container">
         <PieChart
           className="budget-pie-chart"
+          animate
           lineWidth={18}
           label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
           labelStyle={index => ({
             fill: colors[index],
-            fontSize: '12px',
+            fontSize: '10px',
             fontFamily: 'sans-serif'
           })}
           radius={42}
@@ -141,7 +142,15 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
           </Tooltip>
         </div>
       </div>
-
+      <span>
+        <div className={`dot me`}></div>
+        {' Me '}
+        <div className={`dot locked-me`}></div>
+        <div className={`dot locked-hub`}></div>
+        {' Locked '}
+        <div className={`dot hub`}></div>
+        {' Hub '}
+      </span>
       <button
         className={'budget-button'}
         id="budget-withdraw"

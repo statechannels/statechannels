@@ -64,7 +64,7 @@ table.domain-budget-table {
   vertical-align: middle;
   color: $c-orange;
   border: 1px solid $c-orange;
-  margin-top: -3px;
+  margin-top: 15px;
   margin-bottom: 15px;
   padding: 3px 6px;
 }
@@ -88,4 +88,24 @@ svg.budget-pie-chart {
   position: relative;
   width: 200px;
   height: 200px;
+}
+
+.dot {
+  height: 14px;
+  width: 14px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  &.me {
+    background-color: #ea692b;
+  }
+  &.locked-me {
+    background-color: #ea692b60;
+  }
+  &.hub {
+    background-color: #d5dbe3;
+  }
+  &.locked-hub {
+    background-color: #d5dbe360;
+  }
 }
