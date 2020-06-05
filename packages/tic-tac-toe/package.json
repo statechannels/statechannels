@@ -7,7 +7,7 @@
     "@fortawesome/fontawesome-svg-core": "1.2.26",
     "@fortawesome/free-solid-svg-icons": "5.12.0",
     "@fortawesome/react-fontawesome": "0.1.8",
-    "@openzeppelin/contracts": "3.0.0-beta.0",
+    "@openzeppelin/contracts": "3.0.1",
     "@statechannels/channel-client": "0.0.1",
     "@statechannels/channel-provider": "*",
     "@statechannels/nitro-protocol": "0.1.0",

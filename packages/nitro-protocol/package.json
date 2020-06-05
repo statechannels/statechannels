@@ -6,7 +6,7 @@
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
-    "@openzeppelin/contracts": "3.0.0-beta.0",
+    "@openzeppelin/contracts": "3.0.1",
     "ethers": "4.0.45"
   },
   "devDependencies": {
