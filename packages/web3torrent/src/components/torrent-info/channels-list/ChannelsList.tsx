@@ -85,6 +85,21 @@ function channelIdToTableRow(
     }
   }
 
+  function turnNumToNumPayments(turnNum: number): number {
+    return turnNum > 3 ? Math.trunc((turnNum - 3) / 2) : 0;
+    // turnNum | numPayments
+    // 0       | 0
+    // 1       | 0
+    // 2       | 0
+    // 3       | 0
+    // 4       | 0
+    // 5       | 1
+    // 6       | 1
+    // 7       | 2
+    // 8       | 2
+    // 9       | 3
+  }
+
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
@@ -95,9 +110,7 @@ function channelIdToTableRow(
       <td className="peer-id">
         <Tooltip message={peerSelectedAddress}>
           <Badge
-            badgeContent={
-              channel.turnNum.toNumber() > 3 ? Math.trunc(channel.turnNum.toNumber() / 2) : 0
-            }
+            badgeContent={turnNumToNumPayments(channel.turnNum.toNumber())}
             color={isBeneficiary ? 'primary' : 'error'}
             overlap={'circle'}
             showZero={false}
