@@ -243,7 +243,7 @@ export async function setUpBrowser(
 }
 
 export async function waitForBudgetEntry(page: Page): Promise<void> {
-  await page.waitForSelector('.domain-budget-table > tbody > tr');
+  await page.waitForSelector('.budget-button');
 }
 
 export async function waitForFinishedOrCanceledDownload(page: Page): Promise<void> {
