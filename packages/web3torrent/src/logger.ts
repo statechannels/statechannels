@@ -207,7 +207,7 @@ const browser: any = IS_BROWSER_CONTEXT
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-const level = LOG_LEVEL;
+const level = window.localStorage.LOG_LEVEL ?? LOG_LEVEL;
 const opts = {prettyPrint, browser, level};
 
 export const logger = destination ? pino(opts, destination) : pino(opts);
@@ -229,12 +229,34 @@ function saveLogs() {
     document.body.removeChild(elem);
   }
 }
+function setLogLevel(level: string) {
+  const key = 'LOG_LEVEL';
+  const iFrame = document.querySelector('#channelProviderUi');
+  if (!level) {
+    console.log(`web3torrent: level CLEARED from ${logger.level} to ${LOG_LEVEL}`);
+    localStorage.removeItem(key);
+    logger.level = LOG_LEVEL;
+    (iFrame as any).contentWindow.postMessage({type: 'CLEAR_LOG_LEVEL'}, '*');
+    return;
+  }
+
+  if (pino.levels.values[level]) {
+    console.log(`web3torrent: level CHANGED from ${logger.level} to ${level}`);
+    localStorage.setItem(key, level);
+    logger.level = level;
+
+    (iFrame as any).contentWindow.postMessage({type: 'SET_LOG_LEVEL', level}, '*');
+  } else {
+    throw Error(`Invalid log level ${level}`);
+  }
+}
 
 if (IS_BROWSER_CONTEXT) {
   (window as any).saveWeb3torrentLogs = saveLogs;
-  window.addEventListener('message', event => {
-    if (event.data === 'SAVE_WEB3_TORRENT_LOGS') {
-      saveLogs();
-    }
-  });
+  (window as any).setLogLevel = setLogLevel;
+
+  window.addEventListener(
+    'message',
+    event => event.data === 'SAVE_WEB3_TORRENT_LOGS' && saveLogs()
+  );
 }

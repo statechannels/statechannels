@@ -40,5 +40,26 @@ const browser: any = IS_BROWSER_CONTEXT
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
-const opts = {name, prettyPrint, browser, level: LOG_LEVEL};
-export const logger = destination ? pino(opts, destination) : pino(opts);
+const level = window.localStorage.LOG_LEVEL ?? LOG_LEVEL;
+const opts = {name, prettyPrint, browser, level};
+const logger = destination ? pino(opts, destination) : pino(opts);
+logger.on('level-change', (lvl, val, prevLvl, prevVal) => {
+  console.log('wallet: %s (%d) was changed to %s (%d)', lvl, val, prevLvl, prevVal);
+});
+
+window.addEventListener('message', event => {
+  const key = 'LOG_LEVEL';
+
+  if (event.data.type === 'SET_LOG_LEVEL') {
+    const {level} = event.data;
+    console.log(`wallet: level CHANGED from ${logger.level} to ${level}`);
+    window.localStorage.setItem(key, level);
+    logger.level = level;
+  } else if (event.data.type === 'CLEAR_LOG_LEVEL') {
+    console.log(`wallet: level CLEARED from ${logger.level} to ${LOG_LEVEL}`);
+    window.localStorage.removeItem(key);
+    logger.level = LOG_LEVEL;
+  }
+});
+
+export {logger};

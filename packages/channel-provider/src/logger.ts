@@ -36,12 +36,22 @@ const browser: any = IS_BROWSER_CONTEXT
   : undefined;
 
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
-// When logging, we default to 'info', as most logs happen at this level.
-// Some very large classes are serialized at the 'trace' level
-// We probably don't want these logged to the console, but strictly enabling this
-// in the browser might sometimes be helpful
-// eslint-disable-next-line no-undef
-export const LOG_LEVEL = LOG_TO_FILE || LOG_TO_CONSOLE ? process.env.LOG_LEVEL || 'info' : 'silent';
 
-const opts = {name, prettyPrint, browser, level: LOG_LEVEL};
+const ADD_LOGS = LOG_TO_FILE || LOG_TO_CONSOLE;
+// eslint-disable-next-line no-undef
+const LOG_LEVEL = ADD_LOGS ? process.env.LOG_LEVEL ?? 'info' : 'silent';
+const level = window.localStorage.LOG_LEVEL ?? LOG_LEVEL;
+
+const opts = {name, prettyPrint, browser, level};
 export const logger = pino(opts);
+
+window.addEventListener('message', event => {
+  if (event.data.type === 'SET_LOG_LEVEL') {
+    const {level} = event.data;
+    logger.level = level;
+    console.log(`provider: level CLEARED from ${logger.level} to ${level}`);
+  } else if (event.data.type === 'CLEAR_LOG_LEVEL') {
+    logger.level = LOG_LEVEL;
+    console.log(`provider: level CHANGED from ${logger.level} to ${LOG_LEVEL}`);
+  }
+});
