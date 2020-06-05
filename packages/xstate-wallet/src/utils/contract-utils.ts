@@ -35,7 +35,7 @@ export function getProvider(): providers.Web3Provider | providers.JsonRpcProvide
         // event with a null oldNetwork along with the newNetwork. So, if the
         // oldNetwork exists, it represents a changing network
         if (oldNetwork) {
-          //window.location.reload();
+          window.location.reload();
         }
       });
     }
