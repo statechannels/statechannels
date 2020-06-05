@@ -3,6 +3,8 @@ import {StateMachine, createMachine, Guard} from 'xstate';
 import {MessagingServiceInterface} from '../messaging';
 
 import {Store} from '../store';
+import {ChannelStoreEntry} from '../store/channel-store-entry';
+import {ChannelUpdated} from '../event-types';
 // import _ from 'lodash';
 // import {BigNumber} from 'ethers/utils';
 
@@ -92,6 +94,15 @@ type Typestate =
   | {value: 'failure'; context: Initial};
 
 type Context = Typestate['context'];
+
+const channelStateToMachineState = (state: ChannelStoreEntry) => {};
+
+const channelUpdateToEvent = (previousChannelState: ChannelStoreEntry, event: ChannelUpdated) => {
+  const channelState = event.storeEntry;
+
+  
+
+};
 
 // Channel Events
 
