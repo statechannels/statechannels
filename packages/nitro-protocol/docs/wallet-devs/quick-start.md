@@ -10,7 +10,7 @@ The quickest way to get started is to clone our [nitro-tutorial](https://github.
 To get started with the nitro contracts, we recommend you install the @statechannels/nitro-protocol package using your favourite node package manager:
 
 ```console
-> npm i @statechannels/nitro-protocol
+> yarn add @statechannels/nitro-protocol
 ```
 
 You can import precompiled contract artifacts into your project like this:
@@ -27,11 +27,35 @@ const {
 We recommend that you deploy these artifacts to a local blockchain in order to connect and interact with them. Because asset holder contracts need to know the address of the adjudicator contract, your deployment code should look something like this:
 
 ```javascript
-const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
-
-const TEST_ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
+const {
+  NitroAdjudicatorArtifact,
   EthAssetHolderArtifact,
-  {},
-  NITRO_ADJUDICATOR_ADDRESS
-);
+  TrivialAppArtifact,
+} = require('@statechannels/nitro-protocol').ContractArtifacts;
+
+const {GanacheDeployer} = require('@statechannels/devtools');
+
+const deploy = async () => {
+  const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
+
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
+
+  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
+    EthAssetHolderArtifact,
+    {},
+    NITRO_ADJUDICATOR_ADDRESS
+  );
+
+  const TRIVIAL_APP_ADDRESS = await deployer.deploy(TrivialAppArtifact);
+
+  return {
+    NITRO_ADJUDICATOR_ADDRESS,
+    ETH_ASSET_HOLDER_ADDRESS,
+    TRIVIAL_APP_ADDRESS,
+  };
+};
+
+module.exports = {
+  deploy,
+};
 ```
