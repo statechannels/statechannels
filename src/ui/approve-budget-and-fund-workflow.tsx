@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './wallet.scss';
 import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
 import {useService} from '@xstate/react';
@@ -16,6 +16,18 @@ export const ApproveBudgetAndFund = (props: Props) => {
   const [current, send] = useService(props.service);
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
+
+  // Sets a timer that expires after 5 minutes
+  // Used to determine if we've timed out waiting for the hub
+  let stateTimer;
+  const [stateTimerExpired, setStateTimerExpired] = useState(false);
+  useEffect(() => {
+    setStateTimerExpired(false);
+    stateTimer = setTimeout(() => setStateTimerExpired(true), 90_000 /* 1.5 min */);
+    return () => {
+      clearTimeout(stateTimer);
+    };
+  }, [current]);
 
   const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
     <Flex alignItems="left" flexDirection="column">
@@ -132,6 +144,36 @@ export const ApproveBudgetAndFund = (props: Props) => {
     </Flex>
   );
 
+  const hubTimeout = (
+    <Flex alignItems="center" flexDirection="column">
+      <Heading>Deposit Funds</Heading>
+      <Text pb={4} textAlign="center">
+        We haven&apos;t heard back from the hub in a bit so something might have gone wrong.
+      </Text>
+      <Text pb={4} textAlign="center">
+        You can click{' '}
+        <Link
+          target="_blank"
+          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
+        >
+          here
+        </Link>{' '}
+        to see the progress on etherscan or you can download your log files and reach out to us on{' '}
+        <Link target="_blank" href={'https://github.com/statechannels/monorepo/issues'}>
+          {' '}
+          github.
+        </Link>
+      </Text>
+      <Button
+        onClick={() => {
+          window.parent.postMessage('SAVE_WEB3_TORRENT_LOGS', '*');
+        }}
+      >
+        Download logs
+      </Button>
+    </Flex>
+  );
+
   if (current.matches('waitForUserApproval')) {
     return waitForUserApproval();
   } else if (current.matches('createLedger')) {
@@ -141,7 +183,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
   } else if (current.matches({deposit: 'init'})) {
     return depositInit;
   } else if (current.matches({deposit: 'waitTurn'})) {
-    return depositWaitTurn;
+    if (stateTimerExpired) {
+      return hubTimeout;
+    } else {
+      return depositWaitTurn;
+    }
   } else if (current.matches({deposit: 'submitTransaction'})) {
     return depositSubmitTransaction;
   } else if (current.matches({deposit: 'waitMining'})) {
