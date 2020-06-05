@@ -212,22 +212,29 @@ const opts = {prettyPrint, browser, level};
 
 export const logger = destination ? pino(opts, destination) : pino(opts);
 
+function saveLogs() {
+  // Ref: https://stackoverflow.com/a/33542499
+  const filename = `web3torrent.${new Date(Date.now()).toUTCString()}.${VERSION}.${
+    window.channelProvider.signingAddress
+  }.pino.log`;
+  const {blob} = logBlob;
+  if (window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveBlob(blob, filename);
+  } else {
+    const elem = window.document.createElement('a');
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = filename;
+    document.body.appendChild(elem);
+    elem.click();
+    document.body.removeChild(elem);
+  }
+}
+
 if (IS_BROWSER_CONTEXT) {
-  (window as any).saveWeb3torrentLogs = function saveLogs() {
-    // Ref: https://stackoverflow.com/a/33542499
-    const filename = `web3torrent.${new Date(Date.now()).toUTCString()}.${VERSION}.${
-      window.channelProvider.signingAddress
-    }.pino.log`;
-    const {blob} = logBlob;
-    if (window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveBlob(blob, filename);
-    } else {
-      const elem = window.document.createElement('a');
-      elem.href = window.URL.createObjectURL(blob);
-      elem.download = filename;
-      document.body.appendChild(elem);
-      elem.click();
-      document.body.removeChild(elem);
+  (window as any).saveWeb3torrentLogs = saveLogs;
+  window.addEventListener('message', event => {
+    if (event.data === 'SAVE_WEB3_TORRENT_LOGS') {
+      saveLogs();
     }
-  };
+  });
 }
