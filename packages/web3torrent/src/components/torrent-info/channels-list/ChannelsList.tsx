@@ -85,21 +85,6 @@ function channelIdToTableRow(
     }
   }
 
-  function turnNumToNumPayments(turnNum: number): number {
-    return turnNum > 3 ? Math.trunc((turnNum - 3) / 2) : 0;
-    // turnNum | numPayments
-    // 0       | 0
-    // 1       | 0
-    // 2       | 0
-    // 3       | 0
-    // 4       | 0
-    // 5       | 1
-    // 6       | 1
-    // 7       | 2
-    // 8       | 2
-    // 9       | 3
-  }
-
   return (
     <tr className="peerInfo" key={channelId}>
       <td className={`channel ${channel.status}`}>
@@ -187,3 +172,18 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
     </section>
   );
 };
+
+export function turnNumToNumPayments(turnNum: number): number {
+  return turnNum > 3 ? Math.trunc((turnNum - 3) / 2) : 0;
+  // turnNum | numPayments
+  // 0       | 0
+  // 1       | 0
+  // 2       | 0
+  // 3       | 0
+  // 4       | 0
+  // 5       | 1
+  // 6       | 1
+  // 7       | 2
+  // 8       | 2
+  // 9       | 3
+}
