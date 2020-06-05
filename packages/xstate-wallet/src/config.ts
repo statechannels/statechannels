@@ -54,14 +54,12 @@ export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION 
 
 export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
 
-// TODO: Embed this inside logger.ts
 export const ADD_LOGS = !!LOG_DESTINATION;
-
-// When logging, we default to 'info', as most logs happen at this level.
-// Some very large classes are serialized at the 'trace' level
-// We probably don't want these logged to the console, but strictly enabling this
-// in the browser might sometimes be helpful
-export const LOG_LEVEL = ADD_LOGS ? process.env.LOG_LEVEL || 'info' : 'silent';
+export const LOG_LEVEL = ADD_LOGS
+  ? process.env.LOG_LEVEL
+    ? process.env.LOG_LEVEL
+    : 'info'
+  : 'silent';
 
 export const HUB = {
   destination: HUB_DESTINATION,
