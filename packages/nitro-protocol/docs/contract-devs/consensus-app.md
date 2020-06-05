@@ -71,12 +71,9 @@ function validTransition(s1, s2) {
 
 In the current implementation of `ForceMove.sol`, this is equivalent to using `appDefinition = address(0)` (or any address that has no rules). So now contract need actually be deployed.
 
-Ifo utcome `o1` is supported, and Alice wants to propose outcome `o2`, then she can simply sign a state with that outcome and broadcast it.
-
-```
+If outcome `o1` is supported, and Alice wants to propose outcome `o2`, then she can simply sign a state with that outcome and broadcast it.
 
 - If everyone signs it, we've reached consensus.
 - If someone doesn't sign it, then `forceMove(s1)` closes the channel with `s1`, since there are no valid transitions.
 
 This is more scalable than the explicit consensus app: In a channel with `n` participants, ForceMove guarantees that any participant can close the consensus app in `O(n)` time. Since there are no valid moves in the null app, anyone can close the null app in `O(1)` time.
-```
