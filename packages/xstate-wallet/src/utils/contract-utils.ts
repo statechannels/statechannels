@@ -29,7 +29,16 @@ export function getProvider(): providers.Web3Provider | providers.JsonRpcProvide
     if (window.ethereum.mockingInfuraProvider) {
       provider = new providers.InfuraProvider('ropsten', INFURA_API_KEY);
     } else {
-      provider = new providers.Web3Provider(window.ethereum);
+      // https://github.com/ethers-io/ethers.js/issues/861#issuecomment-638031278
+      provider = new providers.Web3Provider(window.ethereum, 'any');
+      provider.on('network', (newNetwork, oldNetwork) => {
+        // When a Provider makes its initial connection, it emits a "network"
+        // event with a null oldNetwork along with the newNetwork. So, if the
+        // oldNetwork exists, it represents a changing network
+        if (oldNetwork) {
+          window.location.reload();
+        }
+      });
       // The code below is reloads the page on network change. This is needed due to:
       // - Metamask no longer reloads the page on chain change: https://medium.com/metamask/no-longer-reloading-pages-on-network-change-fbf041942b44
       // - ethers does not have an elegant way to update the provider on network change: https://github.com/MetaMask/metamask-extension/issues/8077#issuecomment-637338683
