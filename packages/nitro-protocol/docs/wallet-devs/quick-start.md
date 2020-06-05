@@ -3,8 +3,6 @@ id: quick-start
 title: Quick Start
 ---
 
-The quickest way to get started is to clone our [nitro-tutorial](https://github.com/statechannels/nitro-tutorial) github repository, where we have created an small TypeScript package with the steps below already performed.
-
 ## Add precompiled contracts to your project
 
 To get started with the nitro contracts, we recommend you install the @statechannels/nitro-protocol package using your favourite node package manager:

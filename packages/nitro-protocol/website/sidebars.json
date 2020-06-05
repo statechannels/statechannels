@@ -2,7 +2,11 @@
   "docs": {
     "Overview": ["overview"],
     "Dapp Developers": ["dapp-devs/dapp-devs-intro", "dapp-devs/quick-start"],
-    "Wallet Developers": ["wallet-devs/quick-start", "wallet-devs/tutorial"],
+    "Wallet Developers": [
+      "wallet-devs/wallet-devs-intro",
+      "wallet-devs/quick-start",
+      "wallet-devs/tutorial"
+    ],
     "Wallet Dev Tutorial": [
       "wallet-dev-tutorial/execute-state-transitions",
       "wallet-dev-tutorial/deposit-assets",
