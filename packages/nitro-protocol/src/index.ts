@@ -41,19 +41,22 @@ export {validTransition, ForceMoveAppContractInterface} from './contract/force-m
 export {
   encodeAllocation,
   encodeOutcome,
+  decodeOutcome,
   Outcome,
   Allocation,
   AllocationItem,
   Guarantee,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  encodeGuarantee,
   AssetOutcome,
   GuaranteeAssetOutcome,
   AllocationAssetOutcome,
   hashOutcome,
 } from './contract/outcome';
+export {channelDataToChannelStorageHash} from './contract/channel-storage';
 
-export {State, VariablePart, getVariablePart, getFixedPart} from './contract/state';
+export {State, VariablePart, getVariablePart, getFixedPart, hashAppPart} from './contract/state';
 export {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 export {
   createDepositTransaction as createETHDepositTransaction,
@@ -65,7 +68,7 @@ import {State} from './contract/state';
 export {hashState} from './contract/state';
 
 import {Signature} from 'ethers/utils';
-export {signState, getStateSignerAddress} from './signatures';
+export {signState, getStateSignerAddress, signChallengeMessage} from './signatures';
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
