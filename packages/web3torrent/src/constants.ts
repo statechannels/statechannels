@@ -191,6 +191,4 @@ export const LOG_DESTINATION = ADD_LOGS
     : path.join(process.env.LOG_DESTINATION, 'web3torrent.log')
   : undefined;
 
-export const LOG_LEVEL = ADD_LOGS
-  ? process.env.LOG_LEVEL ?? 'info'
-  : 'silent';
+export const LOG_LEVEL = ADD_LOGS ? process.env.LOG_LEVEL ?? 'info' : 'silent';
