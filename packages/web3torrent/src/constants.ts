@@ -192,7 +192,5 @@ export const LOG_DESTINATION = ADD_LOGS
   : undefined;
 
 export const LOG_LEVEL = ADD_LOGS
-  ? process.env.LOG_LEVEL
-    ? process.env.LOG_LEVEL
-    : 'info'
+  ? process.env.LOG_LEVEL ?? 'info'
   : 'silent';
