@@ -39,7 +39,7 @@ const browser: any = IS_BROWSER_CONTEXT
 const prettyPrint = LOG_TO_CONSOLE ? {translateTime: true} : false;
 
 const ADD_LOGS = LOG_TO_FILE || LOG_TO_CONSOLE;
-const LOG_LEVEL = ADD_LOGS ? (process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info') : 'silent';
+const LOG_LEVEL = ADD_LOGS ? (process.env.LOG_LEVEL ?? 'info') : 'silent';
 const level = window.localStorage.LOG_LEVEL ?? LOG_LEVEL;
 
 const opts = {name, prettyPrint, browser, level};
