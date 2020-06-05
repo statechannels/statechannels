@@ -308,7 +308,7 @@ jobs:
     <<: *integration_test_settings
     environment:
       SCREENSHOT_DIR: 'screenshots'
-      LOG_DESTINATION: 'pino.log'
+      LOG_DESTINATION: '../../logs'
       SC_ENV: production-ropsten
     steps:
       - integration-test:
