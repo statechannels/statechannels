@@ -12,31 +12,62 @@ A state channel can be thought of as an emergent property of data (which we call
 ```typescript
 // In lesson1.test.ts
 
+/* Import ethereum wallet utilities  */
 import {ethers} from 'ethers';
-import {Channel, State} from '@statechannels/nitro-protocol';
+import {bigNumberify} from 'ethers/utils';
+import {AddressZero, HashZero} from 'ethers/constants';
 
+/* Import statechannels wallet utilities  */
+import {Channel, Outcome, State} from '@statechannels/nitro-protocol';
+
+/* Form the participants array */
 const participants = [];
 for (let i = 0; i < 3; i++) {
   participants[i] = ethers.Wallet.createRandom().address;
 }
+
+/* Mock out a chainId: this could be '1' for mainnet or '3' for ropsten */
 const chainId = '0x1234';
-const channelNonce = ethers.utils.bigNumberify(0).toHexString();
+
+/* 
+    Define the channelNonce 
+    :~ how many times have these participants
+    already run a channel on this chain?
+  */
+const channelNonce = bigNumberify(0).toHexString();
+
+/* 
+    Define the challengeDuration 
+    :~ how long should participants get to respond to challenges?
+  */
+const challengeDuration = 1;
+
+/* 
+    Mock out the appDefinition and appData.
+    We will get to these later in the tutorial
+  */
+const appDefinition = AddressZero;
+const appData = HashZero;
+
+/* Construct a Channel object */
 const channel: Channel = {chainId, channelNonce, participants};
 
+/* Mock out an outcome */
 const outcome: Outcome = [];
 
+/* Putting it all together */
 const state: State = {
   turnNum: 0,
   isFinal: false,
   channel,
-  challengeDuration: 1,
+  challengeDuration,
   outcome,
-  appDefinition: '0x0',
-  appData: '0x0',
+  appDefinition,
+  appData,
 };
 ```
 
-Notice that the outcome field must conform to the `Outcome` type, which can also be imported from `@statechannels/nitro-protocol`. Don't worry about this field just yet, we will revisit it later (we got away with an empty array, for now).
+Notice that the outcome field must conform to the `Outcome` type, which we also imported from `@statechannels/nitro-protocol`. Don't worry about this field just yet, we will revisit it later (we got away with an empty array, for now).
 
 ## Fixed and Variable Parts
 
@@ -67,7 +98,7 @@ which contains fields which are allowed to change. These structs are part of the
 import {getFixedPart, getVariablePart} from '@statechannels/nitro-protocol';
 
 const fixedPart = getFixedPart(state);
-const getVariablePaert = getVariablePart(state);
+const getVariablePart = getVariablePart(state);
 ```
 
 ## Conform to an on chain `validTransition` function
@@ -107,23 +138,31 @@ Note the use of `app.ValidTransition`. This function should be written by third 
 ```typescript
 // In lesson2.test.ts
 
+/* Construct a state */
 const fromState: State = {
   channel,
   outcome: [],
-  turnNum: 1,
+  turnNum: 0,
   isFinal: false,
   challengeDuration: 0x0,
-  appDefinition: TRIVIAL_APP_ADDRESS, // Assuming this contract has been deployed and its address is known
+  appDefinition: process.env.TRIVIAL_APP_ADDRESS,
   appData: '0x0',
 };
-const toState: State = {...fromState, turnNum: 2};
 
+/* Construct another state */
+const toState: State = {...fromState, turnNum: 1, appData: '0x1'}; // FIXME
+
+/* 
+  Check validity of transition from one state to the other
+  using on chain function
+ */
 expect(
   await NitroAdjudicator.validTransition(
     channel.participants.length,
     [fromState.isFinal, toState.isFinal],
     [getVariablePart(fromState), getVariablePart(toState)],
-    toState.turnNum,
+    toState.turnNum, // We only get to submit one turn number so cannot check validity
+    // If incorrect, transactions will fail during a check on state signatures
     fromState.appDefinition
   )
 ).toBe(true);
@@ -141,7 +180,7 @@ In the extreme, this allows a single state signed by all `n` parties to be accep
 
 In the following diagram, A is participant 0, B is participant 1 and C is participant 2. The states are shown by circles and numbered 0, 1, and 2. We are considering whether state with `turnNum = 2` is supported by various sets of signatures on the states in the sequence.
 
-The yellow boxes show who signed what: in this case everyone signed their own state: this _is_ acceptable:
+The yellow boxes show who signed what: in the first example, everyone signed their own state. This _is_ acceptable:
 
 <div class="mermaid" align="center">
 graph LR;
@@ -195,7 +234,7 @@ one-->two;
 
 (Note that there is no need to submit states to the chain if they are not signed by anybody).
 
-The following signatures would not be acceptable:
+The following signatures would _not_ be acceptable:
 
 <div class="mermaid" align="center">
 graph LR;
@@ -215,7 +254,6 @@ end
 We provide a helper function to sign a `State`:
 
 ```typescript
-// In lesson3.test.ts
 import {signState} from '@statechannels/nitro-protocol';
 
 const wallet = Wallet.createRandom();
@@ -242,5 +280,49 @@ export interface SignedState {
 }
 ```
 
-which we can make use of in the rest of the tutorial. Alternatively you may use `signStates(states, wallets, whoSignedWhat)`,
-which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSignedWhat` array of integers. The implicit definition of this last argument is as follows: For each participant, we are asserting that `participant[i]` signed `states[whoSignedWhat[i]]`.
+which we can make use of in the rest of the tutorial.
+
+Alternatively you may use `signStates(states, wallets, whoSignedWhat)`,
+which accepts an array of `States`, an array of ethers.js `Wallets` and a `whoSignedWhat` array of integers. The implicit definition of this last argument is as follows: For each participant, we are asserting that `participant[i]` signed `states[whoSignedWhat[i]]`:
+
+```typescript
+// In lesson3.test.ts
+
+/* Construct an array of 3 States */
+const numStates = 3;
+const largestTurnNum = 2;
+const states: State[] = [];
+for (let i = 1; i <= numStates; i++) {
+  states.push({
+    isFinal: false,
+    channel,
+    outcome: [],
+    appDefinition: AddressZero,
+    appData: HashZero,
+    challengeDuration: 1,
+    turnNum: largestTurnNum + i - numStates,
+  });
+}
+
+/* Sign the states */
+const whoSignedWhat = [0, 1, 2];
+const sigs = await signStates(states, wallets, whoSignedWhat);
+
+/*
+ * Use the checkpoint method to test our signatures
+ * Tx will revert if they are incorrect
+ */
+const fixedPart = getFixedPart(states[0]);
+const variableParts = states.map(s => getVariablePart(s));
+const isFinalCount = states.filter(s => s.isFinal).length;
+
+const tx = NitroAdjudicator.checkpoint(
+  fixedPart,
+  largestTurnNum,
+  variableParts,
+  isFinalCount,
+  sigs,
+  whoSignedWhat
+);
+await(await tx).wait();
+```
