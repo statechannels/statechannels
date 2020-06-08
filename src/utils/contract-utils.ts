@@ -3,11 +3,9 @@ import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
 import {ETH_ASSET_HOLDER_ADDRESS, INFURA_API_KEY} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
-import {BigNumber} from 'ethers';
+import {BigNumber, providers} from 'ethers';
 
-import {Web3Provider, JsonRpcProvider, InfuraProvider} from '@ethersproject/providers';
-
-let provider: Web3Provider | JsonRpcProvider;
+let provider: providers.Web3Provider | providers.JsonRpcProvider;
 let network: string;
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
@@ -24,17 +22,14 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   throw 'TokenAddress not found';
 }
 
-export function getProvider(): Web3Provider | JsonRpcProvider {
+export function getProvider(): providers.Web3Provider | providers.JsonRpcProvider {
   if (provider) return provider;
 
   if (window.ethereum) {
-    // TODO: Currently disabled due to InfuraProvider not working
-    // see  https://github.com/ethers-io/ethers.js/issues/868
-    // eslint-disable-next-line no-constant-condition
-    if (window.ethereum.mockingInfuraProvider && false) {
-      provider = new InfuraProvider('ropsten', INFURA_API_KEY);
+    if (window.ethereum.mockingInfuraProvider) {
+      provider = new providers.InfuraProvider('ropsten', INFURA_API_KEY);
     } else {
-      provider = new Web3Provider(window.ethereum);
+      provider = new providers.Web3Provider(window.ethereum);
       // The code below is reloads the page on network change. This is needed due to:
       // - Metamask no longer reloads the page on chain change: https://medium.com/metamask/no-longer-reloading-pages-on-network-change-fbf041942b44
       // - ethers does not have an elegant way to update the provider on network change: https://github.com/MetaMask/metamask-extension/issues/8077#issuecomment-637338683
@@ -53,7 +48,7 @@ export function getProvider(): Web3Provider | JsonRpcProvider {
       });
     }
   } else {
-    provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+    provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
   }
 
   return provider;
