@@ -4832,10 +4832,10 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@openzeppelin/contracts@3.0.0-beta.0":
-  version "3.0.0-beta.0"
-  resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-3.0.0-beta.0.tgz#bf62bb570ff1abd57e15dfa145893f81c209d021"
-  integrity sha512-UDYQdvSDjXcnHXBs3QVVoPY2nxpr56cRPN2jo1ahjPsalilr5LPGlCW85zkoHx6AInqm4ZdGnbspgBS5/DvzDw==
+"@openzeppelin/contracts@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-3.0.1.tgz#2f327f77d16b43f14674086b2b634bda38cb0838"
+  integrity sha512-uSrD7hZ0ViuHGqHZbeHawZBi/uy7aBiNramXAt2dFFuSuoU4u9insS3V3zdVfOnYSPreUo636xSOuQIFN4//HA==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -30335,9 +30335,9 @@ solidity-parser-antlr@^0.4.11, solidity-parser-antlr@^0.4.2:
   resolved "https://registry.npmjs.org/solidity-parser-antlr/-/solidity-parser-antlr-0.4.11.tgz#af43e1f13b3b88309a875455f5d6e565b05ee5f1"
   integrity sha512-4jtxasNGmyC0midtjH/lTFPZYvTTUMy6agYcF+HoMnzW8+cqo3piFrINb4ZCzpPW+7tTVFCGa5ubP34zOzeuMg==
 
-"solidoc@https://github.com/statechannels/solidoc.git":
+"solidoc@https://github.com/statechannels/solidoc.git#1cba9fb16e66caa1b91e2322b3b80456a5bd9f78":
   version "1.0.4"
-  resolved "https://github.com/statechannels/solidoc.git#5b56501bad7b585a96f3a7fa5f3e05267674e97c"
+  resolved "https://github.com/statechannels/solidoc.git#1cba9fb16e66caa1b91e2322b3b80456a5bd9f78"
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"

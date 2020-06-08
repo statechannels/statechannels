@@ -11,7 +11,7 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: counterfactual/statechannels:0.6.1 # Fast contract compilation with solc installed
+    - image: counterfactual/statechannels:0.6.9 # Fast contract compilation with solc installed
 
 integration_test_settings: &integration_test_settings
   resource_class: large
