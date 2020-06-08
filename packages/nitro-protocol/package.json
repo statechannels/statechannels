@@ -43,7 +43,7 @@
     "prettier-plugin-solidity": "1.0.0-alpha.34",
     "server-destroy": "1.0.1",
     "solc": "0.6.1",
-    "solidoc": "https://github.com/statechannels/solidoc.git",
+    "solidoc": "https://github.com/statechannels/solidoc.git#1cba9fb16e66caa1b91e2322b3b80456a5bd9f78",
     "ts-jest": "25.0.0",
     "ts-node": "8.9.1",
     "typescript": "3.7.5"

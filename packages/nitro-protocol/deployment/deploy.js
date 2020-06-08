@@ -37,7 +37,7 @@ const deploy = async () => {
 
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
 
-  const TEST_TOKEN_ADDRESS = await deployer.deploy(tokenArtifact);
+  const TEST_TOKEN_ADDRESS = await deployer.deploy(tokenArtifact, {}, 0);
   const TEST_ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     ethAssetHolderArtifact,
     {},
