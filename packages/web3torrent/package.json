@@ -59,6 +59,7 @@
     "react": "16.12.0",
     "react-app-polyfill": "^1.0.3",
     "react-dev-utils": "^9.0.4",
+    "react-device-detect": "1.12.1",
     "react-dom": "16.12.0",
     "react-driftjs": "^1.1.10",
     "react-icons": "3.9.0",
