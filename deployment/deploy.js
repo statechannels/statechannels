@@ -23,7 +23,7 @@ const deploy = async deployer => {
     NITRO_ADJUDICATOR_ADDRESS
   );
 
-  const TEST_TOKEN_ADDRESS = await deployer.deploy(TokenArtifact);
+  const TEST_TOKEN_ADDRESS = await deployer.deploy(TokenArtifact, {}, 0);
   const TEST_TOKEN_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     Erc20AssetHolderArtifact,
     {},
