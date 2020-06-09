@@ -475,8 +475,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.READY, emitTorrentUpdated(TorrentEvents.READY));
     torrent.on(TorrentEvents.WARNING, emitTorrentUpdated(TorrentEvents.WARNING));
     // These events are too frequent
-    // torrent.on(TorrentEvents.DOWNLOAD, emitTorrentUpdated);
-    // torrent.on(TorrentEvents.UPLOAD, emitTorrentUpdated);
+    // torrent.on(TorrentEvents.DOWNLOAD, emitTorrentUpdated(TorrentEvents.DOWNLOAD));
+    // torrent.on(TorrentEvents.UPLOAD, emitTorrentUpdated(TorrentEvents.UPLOAD));
 
     torrent.usingPaidStreaming = true;
     return torrent;
@@ -595,7 +595,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   /** Emit an event that triggers a UI re-render */
   private emitTorrentUpdated(infoHash, trigger) {
-    // log.debug(`emitTorrentUpdate: ${trigger}`);
+    // log.trace(`emitTorrentUpdate: ${trigger}`);
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));
   }
 
