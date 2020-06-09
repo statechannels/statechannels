@@ -16,12 +16,10 @@ export function createValidTransitionTransaction(
   const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
-  const data = ConsensusAppContractInterface.functions.validTransition.encode([
-    fromVariablePart,
-    toVariablePart,
-    turnNumB,
-    numberOfParticipants,
-  ]);
+  const data = ConsensusAppContractInterface.encodeFunctionData(
+    ConsensusAppContractInterface.functions.validTransition,
+    [fromVariablePart, toVariablePart, turnNumB, numberOfParticipants]
+  );
 
   return {data};
 }

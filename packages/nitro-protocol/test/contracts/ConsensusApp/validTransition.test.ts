@@ -31,8 +31,8 @@ describe('validTransition', () => {
     ${false} | ${[1, 1]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'invalid vote: votesReqd not decreased'}
     ${true}  | ${[1, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x1']} | ${'valid veto'}
     ${true}  | ${[2, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid pass'}
-    ${true}  | ${[1, 0]} | ${['0x1', '0x2']} | ${['0x2', '0x']}  | ${'valid finalVote'}
-    ${false} | ${[1, 0]} | ${['0x1', '0x3']} | ${['0x2', '0x']}  | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
+    ${true}  | ${[1, 0]} | ${['0x1', '0x2']} | ${['0x2', '0x0']} | ${'valid finalVote'}
+    ${false} | ${[1, 0]} | ${['0x1', '0x3']} | ${['0x2', '0x0']} | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
   `(
     '$description',
     async ({

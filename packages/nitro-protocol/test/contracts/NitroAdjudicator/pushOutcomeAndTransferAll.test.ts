@@ -1,7 +1,7 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
-import {AddressZero} from '@ethersproject/constants';
+import {AddressZero, HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
 // @ts-ignore
@@ -134,7 +134,7 @@ describe('pushOutcomeAndTransferAll', () => {
         channel,
         outcome,
         appDefinition: AddressZero,
-        appData: '0x0',
+        appData: HashZero,
         challengeDuration: 0x1,
       };
 

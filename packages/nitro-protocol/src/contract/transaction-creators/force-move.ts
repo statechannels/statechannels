@@ -48,15 +48,18 @@ export function createForceMoveTransaction(
   }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
-  const data = ForceMoveContractInterface.functions.forceMove.encode([
-    fixedPart,
-    largestTurnNum,
-    variableParts,
-    isFinalCount,
-    signatures,
-    whoSignedWhat,
-    challengerSignature,
-  ]);
+  const data = ForceMoveContractInterface.encodeFunctionData(
+    ForceMoveContractInterface.functions.forceMove.encode,
+    [
+      fixedPart,
+      largestTurnNum,
+      variableParts,
+      isFinalCount,
+      signatures,
+      whoSignedWhat,
+      challengerSignature,
+    ]
+  );
   return {data};
 }
 
