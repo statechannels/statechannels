@@ -14,12 +14,13 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
+import {BigNumberish, Signature, bigNumberify} from 'ethers/utils';
 
 // Interfaces
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: utils.BigNumberish;
+  [destination: string]: BigNumberish;
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
@@ -225,7 +226,7 @@ export async function signStates(
   states: State[],
   wallets: Wallet[],
   whoSignedWhat: number[]
-): Promise<utils.Signature[]> {
+): Promise<Signature[]> {
   const stateHashes = states.map(s => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
@@ -244,7 +245,7 @@ export function replaceAddressesAndBigNumberify(
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
     }
     if (typeof object[key] === 'number') {
-      newObject[addresses[key]] = utils.bigNumberify(object[key]);
+      newObject[addresses[key]] = bigNumberify(object[key]);
     }
   });
   return newObject;
@@ -317,7 +318,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
-        amount: utils.bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
+        amount: bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
       })
     );
     const assetOutcome: AllocationAssetOutcome = {
@@ -336,10 +337,7 @@ export function assetTransferredEventsFromPayouts(
 ) {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
-    if (
-      singleAssetPayouts[destination] &&
-      utils.bigNumberify(singleAssetPayouts[destination]).gt(0)
-    ) {
+    if (singleAssetPayouts[destination] && bigNumberify(singleAssetPayouts[destination]).gt(0)) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
@@ -365,7 +363,7 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
 export async function writeGasConsumption(
   filename: string,
   description: string,
-  gas: utils.BigNumberish
+  gas: BigNumberish
 ): Promise<void> {
   await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
     if (err) throw err;

@@ -3,6 +3,7 @@ import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
 import {SignedState} from '.';
+import {Signature} from 'ethers/utils';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
@@ -32,10 +33,7 @@ export function signState(state: State, privateKey: string): SignedState {
   return {state, signature};
 }
 
-export function signChallengeMessage(
-  signedStates: SignedState[],
-  privateKey: string
-): utils.Signature {
+export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
@@ -49,7 +47,7 @@ export function signChallengeMessage(
   return signData(challengeHash, privateKey);
 }
 
-function signData(hashedData: string, privateKey: string): utils.Signature {
+function signData(hashedData: string, privateKey: string): Signature {
   const signingKey = new utils.SigningKey(privateKey);
   return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
 }
