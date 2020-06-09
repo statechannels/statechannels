@@ -3,13 +3,12 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
-import {TransactionRequest} from 'ethers/providers';
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {validTransition} from '../../../src/contract/consensus-app';
 import {ConsensusData} from '../../../src/contract/consensus-data';
 import {Outcome} from '../../../src/contract/outcome';
 import {createValidTransitionTransaction} from '../../../src/contract/transaction-creators/consensus-app';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContracts, sendTransaction} from '../../test-helpers';
 
 const provider = getTestProvider();
 let consensusApp: Contract;
@@ -69,7 +68,7 @@ describe('validTransition', () => {
       );
       if (isValid) {
         // Send a transaction, so we can measure gas consumption
-        await sendTransaction(consensusApp.address, transactionRequest);
+        await sendTransaction(provider, consensusApp.address, transactionRequest);
 
         // Just call the function, so we can check the return value easily
         const isValidFromCall = await validTransition(
@@ -83,18 +82,13 @@ describe('validTransition', () => {
         );
         expect(isValidFromCall).toBe(true);
       } else {
-        await expectRevert(() => sendTransaction(consensusApp.address, transactionRequest));
+        await expectRevert(() =>
+          sendTransaction(provider, consensusApp.address, transactionRequest)
+        );
       }
     }
   );
 });
-
-async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
-  // TODO import from test-helpers instead (does not yet exist pending rebase or merge)
-  const signer = provider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
-  await response.wait();
-}
 
 function createOutcome(amount: string): Outcome {
   return [

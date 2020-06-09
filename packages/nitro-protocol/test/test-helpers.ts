@@ -1,5 +1,4 @@
-import {Contract, ethers, Wallet} from 'ethers';
-import {constants, providers, utils} from 'ethers';
+import {Contract, ethers, Wallet, constants, providers, utils} from 'ethers';
 
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {

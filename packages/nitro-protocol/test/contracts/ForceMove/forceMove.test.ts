@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
+import {Contract, Wallet, providers} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
@@ -27,7 +27,6 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {createForceMoveTransaction} from '../../../src/transactions';
-import {TransactionRequest} from 'ethers/providers';
 
 const provider = getTestProvider();
 
@@ -249,7 +248,7 @@ describe('forceMove with transaction generator', () => {
     ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
     ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
   `('$description', async ({description, appData, turnNums, challenger}) => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: providers.TransactionRequest = createForceMoveTransaction(
       [
         await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
         await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),

@@ -1,4 +1,4 @@
-import {TransactionRequest} from 'ethers/providers';
+import {providers} from 'ethers';
 import {Interface} from 'ethers/utils';
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {getVariablePart} from '../consensus-app';
@@ -14,7 +14,7 @@ export function createValidTransitionTransaction(
   toConsensusData: ConsensusData,
   toOutcome: Outcome,
   numberOfParticipants: number
-): TransactionRequest {
+): providers.TransactionRequest {
   const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
