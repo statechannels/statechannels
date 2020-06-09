@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {Contract, Wallet, utils, BigNumber} from 'ethers';
+import {HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -88,7 +87,7 @@ describe('respond', () => {
       slotEmpty,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+      const channel: Channel = {chainId, channelNonce: utils.hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
@@ -96,7 +95,7 @@ describe('respond', () => {
         isFinal: isFinalAB[0],
         channel,
         outcome,
-        appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
+        appData: utils.defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
         appDefinition,
         challengeDuration,
       };
@@ -106,7 +105,7 @@ describe('respond', () => {
         isFinal: isFinalAB[1],
         channel,
         outcome,
-        appData: defaultAbiCoder.encode(['uint256'], [appDatas[1]]),
+        appData: utils.defaultAbiCoder.encode(['uint256'], [appDatas[1]]),
         appDefinition,
         challengeDuration,
       };
@@ -142,7 +141,7 @@ describe('respond', () => {
 
         expect(event.args).toMatchObject({
           channelId,
-          newTurnNumRecord: bigNumberify(turnNumRecord + 1),
+          newTurnNumRecord: BigNumber.from(turnNumRecord + 1),
         });
 
         // Compute and check new expected ChannelDataHash

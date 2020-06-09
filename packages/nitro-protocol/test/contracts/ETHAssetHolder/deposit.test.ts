@@ -1,6 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
+import {Contract, Wallet, utils, BigNumber} from 'ethers';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -50,11 +49,11 @@ describe('deposit', () => {
       reasonString,
       heldAfterString,
     }) => {
-      held = parseUnits(held, 'wei');
-      expectedHeld = parseUnits(expectedHeld, 'wei');
-      amount = parseUnits(amount, 'wei');
-      msgValue = parseUnits(msgValue, 'wei');
-      const heldAfter = parseUnits(heldAfterString, 'wei');
+      held = utils.parseUnits(held, 'wei');
+      expectedHeld = utils.parseUnits(expectedHeld, 'wei');
+      amount = utils.parseUnits(amount, 'wei');
+      msgValue = utils.parseUnits(msgValue, 'wei');
+      const heldAfter = utils.parseUnits(heldAfterString, 'wei');
 
       const destinationChannel: Channel = {chainId, channelNonce, participants};
       const destination = getChannelId(destinationChannel);
@@ -67,11 +66,11 @@ describe('deposit', () => {
         const {events} = await (await tx0).wait();
         const depositedEvent = getDepositedEvent(events);
 
-        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
+        expect(BigNumber.from((await ETHAssetHolder.holdings(destination)).eq(held))).toBe(true);
         expect(depositedEvent).toMatchObject({
           destination,
-          amountDeposited: bigNumberify(held),
-          destinationHoldings: bigNumberify(held),
+          amountDeposited: BigNumber.from(held),
+          destinationHoldings: BigNumber.from(held),
         });
       }
       const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {

@@ -6,6 +6,7 @@
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
+    "@ethersproject/constants": "^5.0.0-beta.134",
     "@openzeppelin/contracts": "3.0.1",
     "ethers": "5.0.0-beta.191"
   },

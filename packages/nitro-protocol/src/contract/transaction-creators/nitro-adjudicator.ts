@@ -1,13 +1,12 @@
 // @ts-ignore
-import {providers} from 'ethers';
+import {providers, utils, Signature} from 'ethers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
 import {encodeOutcome, Outcome} from '../outcome';
 import {getFixedPart, hashAppPart, hashState, State} from '../state';
-import {Signature, Interface} from 'ethers/utils';
 
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
+const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
 
 export function createPushOutcomeTransaction(
   turnNumRecord: number,

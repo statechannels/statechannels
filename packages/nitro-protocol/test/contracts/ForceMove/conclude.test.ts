@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {hexlify} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
+import {HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -102,7 +101,7 @@ describe('conclude', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
-      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
+      const channel: Channel = {chainId, participants, channelNonce: utils.hexlify(channelNonce)};
       const channelId = getChannelId(channel);
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;

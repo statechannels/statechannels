@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {Contract, Wallet, utils, BigNumber} from 'ethers';
+import {HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -100,7 +99,7 @@ describe('checkpoint', () => {
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
   `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
     const {appDatas, whoSignedWhat} = support;
-    const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+    const channel: Channel = {chainId, channelNonce: utils.hexlify(channelNonce), participants};
     const channelId = getChannelId(channel);
 
     const states = appDatas.map((data, idx) => ({
@@ -109,7 +108,7 @@ describe('checkpoint', () => {
       channel,
       challengeDuration,
       outcome: defaultOutcome,
-      appData: defaultAbiCoder.encode(['uint256'], [data]),
+      appData: utils.defaultAbiCoder.encode(['uint256'], [data]),
       appDefinition,
     }));
 
@@ -123,7 +122,7 @@ describe('checkpoint', () => {
           isFinal: false,
           channel,
           outcome,
-          appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
+          appData: utils.defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
           appDefinition,
           challengeDuration,
         };
@@ -152,7 +151,7 @@ describe('checkpoint', () => {
       const event = receipt.events.pop();
       expect(event.args).toMatchObject({
         channelId,
-        newTurnNumRecord: bigNumberify(largestTurnNum),
+        newTurnNumRecord: BigNumber.from(largestTurnNum),
       });
 
       const expectedChannelStorageHash = channelDataToChannelStorageHash({

@@ -1,8 +1,14 @@
+//@ts-ignore
 import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
+//@ts-ignore
 import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
+//@ts-ignore
 import TokenArtifact from '../build/contracts/Token.json';
+//@ts-ignore
 import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
+//@ts-ignore
 import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
+//@ts-ignore
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 export const ContractArtifacts = {
@@ -67,7 +73,7 @@ export {
 import {State} from './contract/state';
 export {hashState} from './contract/state';
 
-import {Signature} from 'ethers/utils';
+import {Signature} from 'ethers';
 export {signState, getStateSignerAddress, signChallengeMessage} from './signatures';
 
 import * as Signatures from './signatures';

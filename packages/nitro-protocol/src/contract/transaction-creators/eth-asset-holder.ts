@@ -1,17 +1,15 @@
-import {TransactionRequest} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
-
+import {providers, utils} from 'ethers';
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
 // @ts-ignore
-const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi);
+const EthAssetHolderContractInterface = new utils.Interface(EthAssetHolderArtifact.abi);
 
 export function createTransferAllTransaction(
   channelId: string,
   allocation: Allocation
-): TransactionRequest {
+): providers.TransactionRequest {
   return assetHolderTransactionCreator.createTransferAllTransaction(
     EthAssetHolderContractInterface,
     channelId,
@@ -23,7 +21,7 @@ export function createClaimAllTransaction(
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation
-): TransactionRequest {
+): providers.TransactionRequest {
   return assetHolderTransactionCreator.createClaimAllTransaction(
     EthAssetHolderContractInterface,
     channelId,
@@ -34,7 +32,7 @@ export function createClaimAllTransaction(
 export function createSetOutcomeTransaction(
   channelId: string,
   outcome: Outcome
-): TransactionRequest {
+): providers.TransactionRequest {
   return assetHolderTransactionCreator.createSetOutcomeTransaction(
     EthAssetHolderContractInterface,
     channelId,
@@ -46,7 +44,7 @@ export function createDepositTransaction(
   destination: string,
   expectedHeld: string,
   amount: string
-): TransactionRequest {
+): providers.TransactionRequest {
   const data = EthAssetHolderContractInterface.functions.deposit.encode([
     destination,
     expectedHeld,

@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {AddressZero, HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {

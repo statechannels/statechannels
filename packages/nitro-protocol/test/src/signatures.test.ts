@@ -1,6 +1,5 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
-import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
+import {Wallet, utils} from 'ethers';
+import {AddressZero} from '@ethersproject/constants';
 import {hashChallengeMessage} from '../../src/contract/challenge';
 import {hashState, State} from '../../src/contract/state';
 import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
@@ -22,7 +21,7 @@ describe('signatures', () => {
       const signedState = signState(state, wallet.privateKey);
 
       const hashedState = hashState(state);
-      const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+      const signature = utils.splitSignature(await wallet.signMessage(utils.arrayify(hashedState)));
 
       expect(signedState).toMatchObject({
         state,
@@ -71,7 +70,10 @@ describe('signatures', () => {
         wallet.privateKey
       );
 
-      const challenger = verifyMessage(arrayify(hashChallengeMessage(state)), signature);
+      const challenger = utils.verifyMessage(
+        utils.arrayify(hashChallengeMessage(state)),
+        signature
+      );
       expect(challenger).toEqual(wallet.address);
     });
 
@@ -91,7 +93,7 @@ describe('signatures', () => {
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
-      const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+      const signature = utils.splitSignature(await wallet.signMessage(utils.arrayify(hashedState)));
       expect(() => {
         signChallengeMessage([{state, signature}], wallet.privateKey);
       }).toThrow();
@@ -110,7 +112,7 @@ describe('signatures', () => {
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
-      const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+      const signature = utils.splitSignature(await wallet.signMessage(utils.arrayify(hashedState)));
 
       expect(getStateSignerAddress({state, signature})).toEqual(wallet.address);
     });
@@ -131,7 +133,7 @@ describe('signatures', () => {
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
-      const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+      const signature = utils.splitSignature(await wallet.signMessage(utils.arrayify(hashedState)));
 
       expect(() => getStateSignerAddress({state, signature})).toThrow();
     });

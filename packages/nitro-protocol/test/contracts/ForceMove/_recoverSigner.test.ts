@@ -1,6 +1,5 @@
 // @ts-ignore
-import {Contract, Wallet} from 'ethers';
-import {arrayify, id} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {getTestProvider, setupContracts, sign} from '../../test-helpers';
 
@@ -29,8 +28,8 @@ describe('_recoverSigner', () => {
     // Following https://docs.ethers.io/ethers.js/html/cookbook-signing.html
     const privateKey = '0x0123456789012345678901234567890123456789012345678901234567890123';
     const wallet = new Wallet(privateKey);
-    const msgHash = id('Hello World');
-    const msgHashBytes = arrayify(msgHash);
+    const msgHash = utils.id('Hello World');
+    const msgHashBytes = utils.arrayify(msgHash);
     const sig = await sign(wallet, msgHashBytes);
     expect(await ForceMove.recoverSigner(msgHash, sig)).toEqual(wallet.address);
   });

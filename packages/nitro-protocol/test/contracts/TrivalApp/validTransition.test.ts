@@ -1,19 +1,16 @@
-// @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {MaxUint256} from 'ethers/constants';
-import {solidityKeccak256} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
 import {State, VariablePart} from '../../../src/contract/state';
 import {getTestProvider, setupContracts} from '../../test-helpers';
+import {MaxUint256} from '@ethersproject/constants';
 
 const provider = getTestProvider();
 let trivialApp: Contract;
 
 function computeSaltedHash(salt: string, num: number) {
-  return solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
+  return utils.solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
 }
 
 function getRandomVariablePart(): VariablePart {

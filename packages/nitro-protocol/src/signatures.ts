@@ -1,9 +1,8 @@
-import {Wallet, utils} from 'ethers';
+import {Wallet, utils, Signature} from 'ethers';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
 import {SignedState} from '.';
-import {Signature} from 'ethers/utils';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);

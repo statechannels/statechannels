@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {hexlify} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
+import {HashZero} from '@ethersproject/constants';
+
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
 // @ts-ignore
@@ -115,7 +115,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
+      const channel: Channel = {chainId, participants, channelNonce: utils.hexlify(channelNonce)};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const support = oneState;

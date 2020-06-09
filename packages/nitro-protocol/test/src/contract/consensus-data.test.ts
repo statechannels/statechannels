@@ -1,6 +1,5 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
-import {id} from 'ethers/utils';
+import {Wallet, utils} from 'ethers';
+import {AddressZero} from '@ethersproject/constants';
 import {
   ConsensusData,
   decodeConsensusData,
@@ -17,7 +16,7 @@ describe('consensus-data', () => {
 
     const numberOfParticipants = 3;
 
-    const destinations = [id('a'), id('b'), id('c')];
+    const destinations = [utils.id('a'), utils.id('b'), utils.id('c')];
 
     const proposedOutcome: Outcome = [
       {

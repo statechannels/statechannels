@@ -1,5 +1,4 @@
 import {Wallet, providers} from 'ethers';
-import {AddressZero} from 'ethers/constants';
 import {SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {signState} from '../../src/signatures';
@@ -10,6 +9,7 @@ import {
   createRespondTransaction,
   createSignatureArguments,
 } from '../../src/transactions';
+import {AddressZero} from '@ethersproject/constants';
 
 const wallet = Wallet.createRandom();
 

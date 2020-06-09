@@ -1,6 +1,5 @@
 // @ts-ignore
-import {Contract, Wallet} from 'ethers';
-import {id} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {getTestProvider, setupContracts, sign} from '../../test-helpers';
 
@@ -39,7 +38,7 @@ describe('_validSignatures (participants sign only their own states)', () => {
       const whoSignedWhat = [];
       for (let i = 0; i < nStates; i++) {
         const turnNum = largestTurnNum - nStates + i;
-        stateHashes[i] = id('state-data' + turnNum);
+        stateHashes[i] = utils.id('state-data' + turnNum);
       }
       for (let i = 0; i < nParticipants; i++) {
         const wallet = Wallet.createRandom();
@@ -82,7 +81,7 @@ describe('_validSignatures (participants all sign a single state)', () => {
       // const nStates = 1
       const addresses = [];
       const sigs = [];
-      const stateHashes = [id('state-data' + largestTurnNum)];
+      const stateHashes = [utils.id('state-data' + largestTurnNum)];
       const whoSignedWhat = [];
       for (let i = 0; i < nParticipants; i++) {
         const wallet = Wallet.createRandom();

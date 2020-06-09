@@ -1,6 +1,5 @@
+import {ethers, providers, Signature} from 'ethers';
 // @ts-ignore
-import {ethers, providers} from 'ethers';
-import {Signature} from 'ethers/utils';
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import {signChallengeMessage} from '../../signatures';
 import {hashOutcome} from '../outcome';
@@ -43,7 +42,10 @@ export function createForceMoveTransaction(
   // Argument rather than a SignedState[] argument?
   // A: Yes, because the signatures must be passed in participant order: [sig-from-p0, sig-from-p1, ...]
   // and SignedStates[] won't comply with that in general. This function accetps the re-ordered sigs.
-  const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
+  const signedStates = states.map(s => ({
+    state: s,
+    signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
+  }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
   const data = ForceMoveContractInterface.functions.forceMove.encode([

@@ -1,5 +1,4 @@
-import {TransactionRequest} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
+import {providers, utils} from 'ethers';
 import {
   Allocation,
   encodeAllocation,
@@ -10,14 +9,14 @@ import {
 } from '../outcome';
 
 export function createTransferAllTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: utils.Interface,
   channelId: string,
   allocation: Allocation
-): TransactionRequest {
-  const data = assetHolderContractInterface.functions.transferAll.encode([
-    channelId,
-    encodeAllocation(allocation),
-  ]);
+): providers.TransactionRequest {
+  const data = assetHolderContractInterface.encodeFunctionData(
+    assetHolderContractInterface.functions.transferAll,
+    [channelId, encodeAllocation(allocation)]
+  );
   return {data};
 }
 
@@ -30,25 +29,26 @@ export function claimAllArgs(
 }
 
 export function createClaimAllTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: utils.Interface,
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation
-): TransactionRequest {
-  const data = assetHolderContractInterface.functions.claimAll.encode(
+): providers.TransactionRequest {
+  const data = assetHolderContractInterface.encodeFunctionData(
+    assetHolderContractInterface.functions.claimAll,
     claimAllArgs(channelId, guarantee, allocation)
   );
   return {data};
 }
 
 export function createSetOutcomeTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: utils.Interface,
   channelId: string,
   outcome: Outcome
-): TransactionRequest {
-  const data = assetHolderContractInterface.functions.setOutcome.encode([
-    channelId,
-    hashOutcome(outcome),
-  ]);
+): providers.TransactionRequest {
+  const data = assetHolderContractInterface.encodeFunctionData(
+    assetHolderContractInterface.functions.setOutcome,
+    [channelId, hashOutcome(outcome)]
+  );
   return {data};
 }

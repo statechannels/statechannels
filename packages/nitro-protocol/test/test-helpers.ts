@@ -1,4 +1,14 @@
-import {Contract, ethers, Wallet, constants, providers, utils} from 'ethers';
+import {
+  Contract,
+  ethers,
+  Wallet,
+  constants,
+  providers,
+  utils,
+  BigNumberish,
+  BigNumber,
+  Signature,
+} from 'ethers';
 
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
@@ -13,7 +23,6 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
-import {BigNumberish, Signature, bigNumberify} from 'ethers/utils';
 
 // Interfaces
 
@@ -244,7 +253,7 @@ export function replaceAddressesAndBigNumberify(
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
     }
     if (typeof object[key] === 'number') {
-      newObject[addresses[key]] = bigNumberify(object[key]);
+      newObject[addresses[key]] = BigNumber.from(object[key]);
     }
   });
   return newObject;
@@ -317,7 +326,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
-        amount: bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
+        amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString(),
       })
     );
     const assetOutcome: AllocationAssetOutcome = {
@@ -336,7 +345,7 @@ export function assetTransferredEventsFromPayouts(
 ) {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
-    if (singleAssetPayouts[destination] && bigNumberify(singleAssetPayouts[destination]).gt(0)) {
+    if (singleAssetPayouts[destination] && BigNumber.from(singleAssetPayouts[destination]).gt(0)) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',

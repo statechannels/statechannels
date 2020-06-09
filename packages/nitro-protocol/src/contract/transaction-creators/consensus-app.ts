@@ -1,12 +1,10 @@
-import {providers} from 'ethers';
-import {Interface} from 'ethers/utils';
+import {providers, utils} from 'ethers';
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {getVariablePart} from '../consensus-app';
 import {ConsensusData} from '../consensus-data';
 import {Outcome} from '../outcome';
 
-// Ethers mis-interprets the artifact's abi paramter so we cast to any
-const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi as any);
+const ConsensusAppContractInterface = new utils.Interface(ConsensusAppArtifact.abi);
 
 export function createValidTransitionTransaction(
   fromConsensusData: ConsensusData,

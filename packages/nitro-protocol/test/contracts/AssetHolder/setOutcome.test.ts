@@ -1,7 +1,5 @@
+import {Contract, Wallet, utils} from 'ethers';
 // @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {id, keccak256} from 'ethers/utils';
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
@@ -14,7 +12,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const chainId = '0x1234';
 const channelNonce = '0x9999';
-const outcomeContent = id('some outcome data');
+const outcomeContent = utils.id('some outcome data');
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -39,7 +37,7 @@ describe('setOutcome', () => {
       '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
     );
     await expect(
-      AssetHolder.setAssetOutcomeHash(channelId, keccak256(outcomeContent))
+      AssetHolder.setAssetOutcomeHash(channelId, utils.keccak256(outcomeContent))
     ).rejects.toThrow(regex);
   });
 });

@@ -1,9 +1,8 @@
-import {constants} from 'ethers';
+import {constants, BigNumber} from 'ethers';
 import {utils} from 'ethers';
 import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
 import {Address, Bytes, Bytes32, Uint48} from './types';
-import {bigNumberify} from 'ethers/utils';
 
 export interface ChannelData {
   turnNumRecord: Uint48;
@@ -64,7 +63,7 @@ export function parseChannelStorageHash(
     fingerprint,
   };
 }
-const asNumber: (s: string) => number = s => bigNumberify(s).toNumber();
+const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
 export function channelDataStruct({
   finalizesAt,

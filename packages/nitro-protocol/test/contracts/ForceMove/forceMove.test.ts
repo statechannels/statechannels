@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, providers} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
+import {Contract, Wallet, providers, utils} from 'ethers';
+import {HashZero} from '@ethersproject/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -42,7 +41,7 @@ const appDefinition = getPlaceHolderContractAddress();
 const keys = [
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29',
   '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
-  '1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
+  '0x1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
 ];
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -62,7 +61,7 @@ async function createSignedCountingAppState(channel: Channel, appData: number, t
       turnNum,
       isFinal: false,
       appDefinition: getPlaceHolderContractAddress(),
-      appData: defaultAbiCoder.encode(['uint256'], [appData]),
+      appData: utils.defaultAbiCoder.encode(['uint256'], [appData]),
       outcome: [],
       channel,
       challengeDuration: 0xfff,
@@ -148,7 +147,7 @@ describe('forceMove', () => {
       const channel: Channel = {
         chainId,
         participants,
-        channelNonce: hexlify(channelNonce),
+        channelNonce: utils.hexlify(channelNonce),
       };
       const channelId = getChannelId(channel);
 
@@ -159,7 +158,7 @@ describe('forceMove', () => {
         challengeDuration,
         outcome,
         appDefinition,
-        appData: defaultAbiCoder.encode(['uint256'], [data]),
+        appData: utils.defaultAbiCoder.encode(['uint256'], [data]),
       }));
       const variableParts = states.map(state => getVariablePart(state));
       const fixedPart = getFixedPart(states[0]);
@@ -168,7 +167,7 @@ describe('forceMove', () => {
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
-        signature: {v: 0, r: '', s: ''},
+        signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
       };
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
@@ -205,13 +204,13 @@ describe('forceMove', () => {
 
         // Check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
+        expect(eventTurnNumRecord._hex).toEqual(utils.hexlify(largestTurnNum));
         expect(eventChallenger).toEqual(challenger.address);
-        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
+        expect(eventFixedPart[0]._hex).toEqual(utils.hexlify(fixedPart.chainId));
         expect(eventFixedPart[1]).toEqual(fixedPart.participants);
-        expect(eventFixedPart[2]._hex).toEqual(hexlify(fixedPart.channelNonce));
+        expect(eventFixedPart[2]._hex).toEqual(utils.hexlify(fixedPart.channelNonce));
         expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
-        expect(eventFixedPart[4]._hex).toEqual(hexlify(fixedPart.challengeDuration));
+        expect(eventFixedPart[4]._hex).toEqual(utils.hexlify(fixedPart.challengeDuration));
         expect(eventIsFinal).toEqual(isFinalCount > 0);
         expect(eventVariableParts[eventVariableParts.length - 1][0]).toEqual(
           variableParts[variableParts.length - 1].outcome

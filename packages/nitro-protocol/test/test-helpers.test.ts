@@ -1,5 +1,5 @@
-import {bigNumberify} from 'ethers/utils';
 import {replaceAddressesAndBigNumberify} from './test-helpers';
+import {BigNumber} from 'ethers';
 
 const addresses = {
   // Channels
@@ -13,12 +13,12 @@ const addresses = {
 };
 
 const singleAsset = {C: 1, X: 2};
-const singleAssetReplaced = {'0xCHANNEL': bigNumberify(1), '0xANOTHERCHANNEL': bigNumberify(2)};
+const singleAssetReplaced = {'0xCHANNEL': BigNumber.from(1), '0xANOTHERCHANNEL': BigNumber.from(2)};
 
 const multiAsset = {ETH: {C: 3}, TOK: {X: 4}};
 const multiAssetReplaced = {
-  '0xETH': {'0xCHANNEL': bigNumberify(3)},
-  '0xTOK': {'0xANOTHERCHANNEL': bigNumberify(4)},
+  '0xETH': {'0xCHANNEL': BigNumber.from(3)},
+  '0xTOK': {'0xANOTHERCHANNEL': BigNumber.from(4)},
 };
 
 describe('replaceAddressesAndBigNumberify', () => {
