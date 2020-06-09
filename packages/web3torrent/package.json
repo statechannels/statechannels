@@ -68,7 +68,7 @@
     "resolve": "1.15.0",
     "resolve-url-loader": "3.1.0",
     "rimble-ui": "0.14.0",
-    "rxjs": "6.5.4",
+    "rxjs": "6.5.5",
     "sass-loader": "8.0.2",
     "semver": "6.3.0",
     "style-loader": "1.1.3",
