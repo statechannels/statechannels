@@ -28784,25 +28784,7 @@ rgba-regex@^1.0.0:
   resolved "https://registry.npmjs.org/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
   integrity sha1-QzdOLiyglosO8VI0YLfXMP8i7rM=
 
-rimble-ui@0.13.1:
-  version "0.13.1"
-  resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.13.1.tgz#82094cc780a85598012c978f31efd16a9ea9f5ac"
-  integrity sha512-MtMQByWxv/CVcHP6o6SeXT1eNi7dr43dObGq7eHAUcG6dFhCyExV/3m8oqa/GG/xhTgGe9jGw39Q6XED91sFBA==
-  dependencies:
-    "@d8660091/react-popper" "^1.0.4"
-    "@rimble/icons" "^1.0.2"
-    "@styled-system/prop-types" "^5.1.2"
-    "@styled-system/theme-get" "^5.1.2"
-    "@svgr/rollup" "^4.2.0"
-    clipboard "^2.0.4"
-    ethereum-blockies "^0.1.1"
-    mixin-deep "^2.0.1"
-    polished "^3.2.0"
-    qrcode.react "^0.9.3"
-    set-value "^3.0.1"
-    styled-system "^5.1.5"
-
-rimble-ui@^0.14.0:
+rimble-ui@0.14.0:
   version "0.14.0"
   resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.14.0.tgz#86623865c62398da51326f8760b033b60a82f755"
   integrity sha512-fwWCYuJCwOAcagt9PZT7cxLbAieF8XijglJCrYqReWKcbY64QES0CK9W/rlLlT/SXJIZw4eNO75b2QV43++ojA==
