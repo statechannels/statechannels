@@ -15,6 +15,8 @@ import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {useBudget} from '../../hooks/use-budget';
 import {track} from '../../analytics';
+import {Observable} from 'rxjs';
+import {throttleTime} from 'rxjs/operators';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -65,10 +67,17 @@ const File: React.FC<Props> = props => {
           length: torrentLength
         })
       );
-    web3TorrentClient.addListener(
-      WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
-      onTorrentUpdate
-    );
+
+    const MAX_FPS = 10;
+    new Observable(subscriber => {
+      web3TorrentClient.addListener(
+        WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
+        event => subscriber.next(event)
+      );
+    })
+      .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: false, leading: true}))
+      .subscribe(onTorrentUpdate);
+
     return () =>
       web3TorrentClient.removeListener(
         WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),

@@ -188,18 +188,18 @@ export abstract class PaidStreamingExtension implements Extension {
     const _onPiece = wire._onPiece; // handler for the "piece recieved" event
     wire._onPiece = function(index, offset, buffer) {
       _onPiece.apply(wire, [index, offset, buffer]);
-      log.info(`<< _onPiece: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
+      log.trace(`<< _onPiece: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
     };
     const blockedRequests = this.blockedRequests;
     const _onRequest = wire._onRequest; // handler for the "request recieved" event
     wire._onRequest = function(index, offset, length) {
-      log.info(`_onRequest: ${index}`);
+      log.trace(`_onRequest: ${index}`);
 
       if (this.paidStreamingExtension.isForceChoking) {
         // if the seeder is already blocking, do not even send the request to the client.
         // Just block and add the request to the blockedRequests array
         blockedRequests.push([index, offset, length]);
-        log.info(`_onRequest: ${index}, ${offset}, ${length} - IGNORED`);
+        log.trace(`_onRequest: ${index}, ${offset}, ${length} - IGNORED`);
       } else {
         messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
           if (allow) {
