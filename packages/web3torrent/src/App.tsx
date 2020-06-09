@@ -5,14 +5,16 @@ import {Route, Switch, BrowserRouter} from 'react-router-dom';
 import './App.scss';
 import {LayoutFooter, LayoutHeader} from './components/layout';
 import Welcome from './pages/welcome/Welcome';
-
+import {Flash, Link} from 'rimble-ui';
 import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
-import {requiredNetwork} from './constants';
+import {requiredNetwork, INITIAL_BUDGET_AMOUNT} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
 import {web3TorrentClient} from './clients/web3torrent-client';
 import {identify} from './analytics';
+import {providers} from 'ethers';
+import {utils} from 'ethers';
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
@@ -20,6 +22,7 @@ const App: React.FC = () => {
   );
 
   const [initialized, setInitialized] = useState(false);
+
   useEffect(() => {
     web3TorrentClient.paymentChannelClient.initialize().then(() => {
       setInitialized(true);
@@ -33,19 +36,44 @@ const App: React.FC = () => {
       }
     });
   }, [initialized]);
+  const [selectedAddress, setSelectedAddress] = useState(undefined);
+  useEffect(() => {
+    if (window.ethereum) {
+      setSelectedAddress(window.ethereum.selectedAddress);
+    }
+  }, []);
 
   useEffect(() => {
     if (window.ethereum && typeof window.ethereum.on === 'function') {
-      const listener = chainId => setCurrentNetwork(Number(chainId));
-      window.ethereum.on('networkChanged', listener);
+      const networkChangeListener = chainId => setCurrentNetwork(Number(chainId));
+      const addressChangeListener = accounts => {
+        console.log(accounts[0]);
+        setSelectedAddress(accounts[0]);
+      };
+      window.ethereum.on('networkChanged', networkChangeListener);
+      window.ethereum.on('accountsChanged', addressChangeListener);
       return () => {
-        window.ethereum.removeListener('networkChanged', listener);
+        window.ethereum.removeListener('networkChanged', networkChangeListener);
+        window.ethereum.removeListener('accountsChanged', addressChangeListener);
       };
     }
     return () => ({});
   }, []);
 
   const ready = currentNetwork === requiredNetwork && initialized;
+
+  const [balance, setBalance] = useState(undefined);
+  useEffect(() => {
+    const getBalance = async () => {
+      if (selectedAddress) {
+        const provider = new providers.Web3Provider(window.ethereum);
+        const balance = await provider.getBalance(selectedAddress);
+        setBalance(balance);
+      }
+    };
+
+    getBalance();
+  }, [ready, selectedAddress]);
 
   return (
     <BrowserRouter>
@@ -55,6 +83,16 @@ const App: React.FC = () => {
           requiredNetwork={requiredNetwork}
           onWeb3Fallback={!('ethereum' in window)}
         />
+        {ready && balance && balance.lt(INITIAL_BUDGET_AMOUNT) && (
+          <Flash my={3} variant="warning">
+            You currently have {utils.formatEther(balance)} ETH in your wallet. You'll need at least{' '}
+            {utils.formatEther(INITIAL_BUDGET_AMOUNT)} ETH in your wallet to fund Web3Torrent. You
+            can get more ETH{' '}
+            <Link target="_blank" href={`https://faucet.ropsten.be/`}>
+              here.
+            </Link>
+          </Flash>
+        )}
         <Route path={RoutePath.Root}>
           <LayoutHeader />
         </Route>
