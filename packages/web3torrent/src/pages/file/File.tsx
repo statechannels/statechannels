@@ -17,6 +17,9 @@ import {useBudget} from '../../hooks/use-budget';
 import {track} from '../../analytics';
 import {Observable} from 'rxjs';
 import {throttleTime} from 'rxjs/operators';
+import {logger} from '../../logger';
+
+const log = logger.child({module: 'File'});
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -79,7 +82,13 @@ const File: React.FC<Props> = props => {
       .subscribe(onTorrentUpdate);
 
     // It is not clear why optional chaining is needed.
-    return () => subscription?.unsubscribe;
+    return () => {
+      try {
+        subscription.unsubscribe();
+      } catch (e) {
+        log.info('Unable to unsubscribe');
+      }
+    };
   }, [infoHash, torrentLength, torrentName, web3TorrentClient]);
 
   useEffect(() => {
