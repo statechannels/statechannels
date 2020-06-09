@@ -74,6 +74,8 @@ function channelIdToTableRow(
       connectionStatus = 'closing';
     } else if (channel.status === 'proposed') {
       connectionStatus = 'starting';
+    } else if (channel.status === 'closed') {
+      connectionStatus = 'finished';
     } else {
       connectionStatus = 'unknown';
     }
