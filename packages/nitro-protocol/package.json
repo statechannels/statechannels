@@ -2,7 +2,7 @@
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
   "version": "0.1.0",
-  "author": "George Knee",
+  "author": "statechannels",
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
@@ -57,7 +57,8 @@
   },
   "files": [
     "contracts/*",
-    "lib/*"
+    "lib/build/contracts/*.json",
+    "lib/src/*"
   ],
   "homepage": "https://github.com/statechannels/monorepo",
   "keywords": [
@@ -71,6 +72,7 @@
     "{src,test}/**/*.{ts,tsx}": "eslint"
   },
   "main": "lib/src/index.js",
+  "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build": "run-s contract:compile build:typescript",
