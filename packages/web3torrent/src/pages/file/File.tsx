@@ -69,7 +69,7 @@ const File: React.FC<Props> = props => {
       );
 
     const MAX_FPS = 10;
-    new Observable(subscriber => {
+    const subscription = new Observable(subscriber => {
       web3TorrentClient.addListener(
         WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
         event => subscriber.next(event)
@@ -78,11 +78,7 @@ const File: React.FC<Props> = props => {
       .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: false, leading: true}))
       .subscribe(onTorrentUpdate);
 
-    return () =>
-      web3TorrentClient.removeListener(
-        WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash),
-        onTorrentUpdate
-      );
+    return subscription.unsubscribe;
   }, [infoHash, torrentLength, torrentName, web3TorrentClient]);
 
   useEffect(() => {
