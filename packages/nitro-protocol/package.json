@@ -7,7 +7,7 @@
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
     "@openzeppelin/contracts": "3.0.1",
-    "ethers": "4.0.45"
+    "ethers": "5.0.0-beta.191"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.1",
