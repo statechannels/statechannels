@@ -81,7 +81,9 @@ const File: React.FC<Props> = props => {
       .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: true, leading: false}))
       .subscribe(onTorrentUpdate);
 
-    // It is not clear why optional chaining is needed.
+    // It is not clear why the following error is sometimes thrown.
+    // TypeError: Cannot read property 'closed' of null
+
     return () => {
       try {
         subscription.unsubscribe();
