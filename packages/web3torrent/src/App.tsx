@@ -63,7 +63,7 @@ const App: React.FC = () => {
   const [balance, setBalance] = useState(undefined);
   useEffect(() => {
     const getBalance = async () => {
-      if (selectedAddress) {
+      if (ready && selectedAddress) {
         const provider = new providers.Web3Provider(window.ethereum);
         const balance = await provider.getBalance(selectedAddress);
         setBalance(balance);
