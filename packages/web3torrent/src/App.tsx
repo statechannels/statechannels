@@ -46,10 +46,8 @@ const App: React.FC = () => {
   useEffect(() => {
     if (window.ethereum && typeof window.ethereum.on === 'function') {
       const networkChangeListener = chainId => setCurrentNetwork(Number(chainId));
-      const addressChangeListener = accounts => {
-        console.log(accounts[0]);
-        setSelectedAddress(accounts[0]);
-      };
+      const addressChangeListener = accounts => setSelectedAddress(accounts[0]);
+
       window.ethereum.on('networkChanged', networkChangeListener);
       window.ethereum.on('accountsChanged', addressChangeListener);
       return () => {
