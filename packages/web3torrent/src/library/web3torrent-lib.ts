@@ -21,7 +21,8 @@ import {
   WEI_PER_BYTE,
   INITIAL_SEEDER_BALANCE,
   BLOCK_LENGTH,
-  PEER_TRUST
+  INITIAL_PEER_TRUST,
+  MAX_PEER_TRUST
 } from '../constants';
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
@@ -508,7 +509,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const {requests, downloaded, paidStreamingExtension} = wire;
     const {leechingChannelId, peerAccount} = paidStreamingExtension;
 
-    let numBlocksToPayFor = requests.length > PEER_TRUST ? PEER_TRUST : requests.length;
+    const trust = wire.trust ?? INITIAL_PEER_TRUST;
+    let numBlocksToPayFor = requests.length > trust ? trust : requests.length;
+    wire.trust = trust * 2 >= MAX_PEER_TRUST ? MAX_PEER_TRUST : trust * 2;
     let tailBytes = 0;
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)

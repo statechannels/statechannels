@@ -72,6 +72,7 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
 
     uploaded: number;
     downloaded: number;
+    trust: number;
 
     _clearTimeout(): void;
     _onRequest(index: number, offset: number, length: number): void;

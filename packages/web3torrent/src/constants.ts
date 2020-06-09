@@ -8,11 +8,11 @@ export const COMMIT_HASH = process.env.COMMIT_HASH;
 
 export const WEI_PER_BYTE = utils.bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
-export const PEER_TRUST = 5; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
+export const INITIAL_PEER_TRUST = 5; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
 // The recomended value is 5 ( the size of the queue of requests made by the leecher to the seeder)
 
-// Currently unused
-export const BUFFER_REFILL_RATE = utils.bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
+export const MAX_PEER_TRUST = 40;
+
 // number of requests the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
