@@ -469,7 +469,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.emitTorrentUpdated(torrent.infoHash, TorrentEvents.ERROR);
     });
 
-    const emitTorrentUpdated = trigger => () => this.emitTorrentUpdated(torrent.infoHash, trigger);
+    const emitTorrentUpdated = (trigger: string) => () =>
+      this.emitTorrentUpdated(torrent.infoHash, trigger);
     torrent.on(TorrentEvents.NOPEERS, emitTorrentUpdated(TorrentEvents.NOPEERS));
     torrent.on(TorrentEvents.METADATA, emitTorrentUpdated(TorrentEvents.METADATA));
     torrent.on(TorrentEvents.READY, emitTorrentUpdated(TorrentEvents.READY));
@@ -594,7 +595,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   /** Emit an event that triggers a UI re-render */
-  private emitTorrentUpdated(infoHash, trigger) {
+  private emitTorrentUpdated(infoHash, trigger: string) {
     // log.trace(`emitTorrentUpdate: ${trigger}`);
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));
   }
