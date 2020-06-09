@@ -78,7 +78,7 @@ const File: React.FC<Props> = props => {
       .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: false, leading: true}))
       .subscribe(onTorrentUpdate);
 
-    return subscription.unsubscribe;
+    return () => subscription?.unsubscribe;
   }, [infoHash, torrentLength, torrentName, web3TorrentClient]);
 
   useEffect(() => {
