@@ -36,17 +36,12 @@ const App: React.FC = () => {
       }
     });
   }, [initialized]);
-  const [selectedAddress, setSelectedAddress] = useState(undefined);
-  useEffect(() => {
-    if (window.ethereum) {
-      setSelectedAddress(window.ethereum.selectedAddress);
-    }
-  }, []);
+  const [selectedAddressState, setSelectedAddressState] = useState(undefined);
 
   useEffect(() => {
     if (window.ethereum && typeof window.ethereum.on === 'function') {
       const networkChangeListener = chainId => setCurrentNetwork(Number(chainId));
-      const addressChangeListener = accounts => setSelectedAddress(accounts[0]);
+      const addressChangeListener = accounts => setSelectedAddressState(accounts[0]);
 
       window.ethereum.on('networkChanged', networkChangeListener);
       window.ethereum.on('accountsChanged', addressChangeListener);
@@ -63,6 +58,7 @@ const App: React.FC = () => {
   const [balance, setBalance] = useState(undefined);
   useEffect(() => {
     const getBalance = async () => {
+      const selectedAddress = selectedAddressState ?? window.ethereum?.selectedAddress;
       if (ready && selectedAddress) {
         const provider = new providers.Web3Provider(window.ethereum);
         const balance = await provider.getBalance(selectedAddress);
@@ -71,7 +67,7 @@ const App: React.FC = () => {
     };
 
     getBalance();
-  }, [ready, selectedAddress]);
+  }, [ready, selectedAddressState]);
 
   return (
     <BrowserRouter>
