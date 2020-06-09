@@ -19,7 +19,7 @@
     "lodash": "4.17.15",
     "pino": "6.2.0",
     "rxfire": "3.11.2",
-    "rxjs": "6.5.4"
+    "rxjs": "6.5.5"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.1",
