@@ -5,7 +5,7 @@ title: Deposit Assets
 
 Early on in the lifecycle of a state channel -- i.e. after exchanging some setup states, but before executing any application logic -- participants will want to "fund it". They will stake assets on the channel so that the state updates are meaningful. The simplest way to do this is with an on chain deposit: a more advanced possibility is fund a new channel from an existing funded channel.
 
-To start, let's explore the on chain deposit case. We will need to understand how channels are uniquely identitided.
+To start, let's explore the on chain deposit case. We will need to understand how channels are uniquely identified.
 
 ## Compute a channel id
 
@@ -38,34 +38,35 @@ const channelId = getChannelId(channel);
 ## `deposit` into the ETH asset holder
 
 The deposit method allows ETH to be escrowed against a channel.
-
-Call signature:
+We have the following call signature:
 
 ```solidity
 function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable
 ```
 
-Checks:
+There are a few rules to obey when calling `deposit`. Firstly, `destination` must NOT be an [external destination](#destinations). Secondly, the on chain holdings for `destination` must be greater than or equal to `expectedHeld`. Thirdlt, the holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
-- `destination` must NOT be an [external destination](#destinations).
-- The holdings for `destination` must be greater than or equal to `expectedHeld`.
-- The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
+Because we are depositing ETH, we must remember to send the right amount of ETH with the transaction. Depositing ERC20 tokens will be covered in a future tutorial.
 
 ```typescript
 // In lesson5.test.ts
 
-// Import Ethereum utilities
-import {Contract, parseUnits} from 'ethers/utils';
-let ETHAssetHolder: Contract; // This needs to point to a deployed contract
+/*
+    Get an appropriate representation of 1 wei, and
+    use one of our helpers to quickly create a 
+    random channel id for our deposit destination.
+    WARNING: don't do this in the wild: you won't be able to recover these funds.
+*/
+const amount = parseUnits('1', 'wei');
+const destination = randomChannelId();
 
-// Import statechannels utilities
-import {randomChannelId} from '@statechannels/nitro-protocol';
-
-const held = parseUnits('1', 'wei');
-const channelId = randomChannelId();
-
-const tx0 = ETHAssetHolder.deposit(channelId, 0, held, {
-  value: held,
+/*
+    Attempt to deposit 1 wei against the channel id we created.
+    Inspect the error message in the console for a hint about the bug on the next line 
+*/
+const expectedHeld = 0;
+const tx0 = ETHAssetHolder.deposit(destination, expectedHeld, amount, {
+  value: amount,
 });
 ```
 
@@ -73,7 +74,7 @@ const tx0 = ETHAssetHolder.deposit(channelId, 0, held, {
 
 A `Destination` is a `bytes32` and either:
 
-1. A `ChannelId` (see the section on [channelId](./force-move#channelid)), or
+1. A `ChannelId` (see the section on [channelId](#compute-a-channel-id)), or
 2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
 
 :::tip
