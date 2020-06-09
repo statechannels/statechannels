@@ -20,6 +20,8 @@ import {throttleTime} from 'rxjs/operators';
 import {logger} from '../../logger';
 
 const log = logger.child({module: 'File'});
+import {WEI_PER_BYTE} from '../../constants';
+import {bigNumberify} from 'ethers/utils';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -53,6 +55,7 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
+  const [buttonEnabled, setButtonEnabled] = useState(true);
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
     getTorrentUI(web3TorrentClient, {
       infoHash,
@@ -98,10 +101,10 @@ const File: React.FC<Props> = props => {
       setWarning(torrentCheckResult);
     };
 
-    if (infoHash) {
+    if (infoHash && !warning) {
       testResult();
     }
-  }, [infoHash]);
+  }, [infoHash, warning]);
 
   useEffect(() => {
     if (props.ready) {
@@ -110,9 +113,29 @@ const File: React.FC<Props> = props => {
   }, [props.ready, web3TorrentClient.paymentChannelClient]);
 
   const {mySigningAddress: me} = web3TorrentClient.paymentChannelClient;
+
   const {budget, closeBudget, getBudget} = useBudget(props);
   const showBudget = budget?.budgets?.length;
-
+  const fileCost = WEI_PER_BYTE.mul(torrent.length);
+  useEffect(() => {
+    if (showBudget) {
+      if (
+        torrent.status === Status.Seeding &&
+        bigNumberify(budget.budgets[0].availableReceiveCapacity).lt(fileCost)
+      ) {
+        setWarning(
+          `You're running out of room to receive funds in your budget! No new connections will be allowed!`
+        );
+      }
+      if (
+        torrent.status === Status.Idle &&
+        bigNumberify(budget.budgets[0].availableSendCapacity).lt(fileCost)
+      ) {
+        setWarning('You do not have enough funds in your budget to download this file.');
+        setButtonEnabled(false);
+      }
+    }
+  }, [budget, fileCost, showBudget, torrent.status]);
   return (
     <section className="section fill download">
       <div className="jumbotron-upload">
@@ -140,7 +163,7 @@ const File: React.FC<Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={!props.ready || loading}
+            disabled={!props.ready || loading || !buttonEnabled}
             onClick={async () => {
               track('Torrent Started', {
                 infoHash,

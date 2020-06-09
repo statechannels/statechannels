@@ -23,7 +23,7 @@ import {
   BLOCK_LENGTH,
   PEER_TRUST
 } from '../constants';
-import {Message} from '@statechannels/client-api-schema';
+import {Message, DomainBudget} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
 import {track} from '../analytics';
@@ -258,6 +258,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.createPaymentChannel(torrent, wire);
           log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
+
           this.blockPeer(torrent.infoHash, wire);
         } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
           log.debug(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
@@ -468,7 +469,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
       this.emitTorrentUpdated(torrent.infoHash, TorrentEvents.ERROR);
     });
-
     const emitTorrentUpdated = (trigger: string) => () =>
       this.emitTorrentUpdated(torrent.infoHash, trigger);
     torrent.on(TorrentEvents.NOPEERS, emitTorrentUpdated(TorrentEvents.NOPEERS));
@@ -479,6 +479,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // torrent.on(TorrentEvents.DOWNLOAD, emitTorrentUpdated(TorrentEvents.DOWNLOAD));
     // torrent.on(TorrentEvents.UPLOAD, emitTorrentUpdated(TorrentEvents.UPLOAD));
 
+    // Do an initial budget check when the torrent is ready
+    torrent.on(TorrentEvents.READY, () => {
+      this.paymentChannelClient.getBudget().then(budget => {
+        this.checkUploadBudget(budget, torrent);
+      });
+    });
+    // If our budget changes perform another check to make sure we have upload room
+    this.paymentChannelClient.onBudgetUpdated(budget => this.checkUploadBudget(budget, torrent));
     torrent.usingPaidStreaming = true;
     return torrent;
   }
@@ -523,6 +531,20 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     const balance = this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance;
     log.debug(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${downloaded}`);
+  }
+
+  /** Utility function. Checks if the budget has enough receive capacity to accept a new channel. Pauses the torrent if it does not. **/
+  private checkUploadBudget(budget, torrent) {
+    if (budget?.budgets?.length === 1) {
+      const receiveCapacity = bigNumberify(budget.budgets[0].availableReceiveCapacity);
+      const uploadSize = WEI_PER_BYTE.mul(torrent.length).toHexString();
+      if (receiveCapacity.lt(uploadSize)) {
+        log.warn(
+          `Receive capacity (${receiveCapacity.toHexString()}) is less than file cost (${uploadSize}). Pausing torrent.`
+        );
+        torrent.pause();
+      }
+    }
   }
 
   /** Utility function. Checks if the wire for a torrent is requesting the last piece */

@@ -53,7 +53,8 @@ export enum PaidStreamingExtensionNotices {
   MESSAGE = 'message',
   START = 'start',
   STOP = 'stop',
-  ACK = 'ack'
+  ACK = 'ack',
+  NO_CAPACITY = 'no_capacity'
 }
 
 export type PaidStreamingExtendedHandshake = {
