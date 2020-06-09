@@ -67,7 +67,7 @@ const state: State = {
 };
 ```
 
-Notice that the outcome field must conform to the `Outcome` type, which we also imported from `@statechannels/nitro-protocol`. Don't worry about this field just yet, we will revisit it later (we got away with an empty array, for now).
+Notice that the outcome field must conform to the `Outcome` type, which we also imported from `@statechannels/nitro-protocol`. The outcome is some data that specifies a redistribution of funds when the channel finalizes. Don't worry about this field just yet, we will revisit it later (we got away with an empty array, for now).
 
 ## Fixed and Variable Parts
 
