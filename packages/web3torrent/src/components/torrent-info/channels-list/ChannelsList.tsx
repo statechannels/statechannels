@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import prettier from 'prettier-bytes';
-import React from 'react';
+import React, {useContext} from 'react';
 import {ChannelCache, ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
@@ -8,6 +8,7 @@ import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
 import {Blockie} from 'rimble-ui';
 import {Badge, Avatar, Tooltip} from '@material-ui/core';
+import {Web3TorrentClientContext} from '../../../clients/web3torrent-client';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -110,6 +111,7 @@ function channelIdToTableRow(
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
   const statuses = ['running', 'closing', 'proposing', 'closed'];
+  const web3TorrentClient = useContext(Web3TorrentClientContext);
 
   const channelsInfo = _.values(channels)
     .filter(
@@ -117,6 +119,7 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
         state.payer.signingAddress === mySigningAddress ||
         state.beneficiary.signingAddress === mySigningAddress
     )
+    .filter(state => web3TorrentClient.paymentChannelClient.channelIdToTorrentMap[state.channelId])
     .sort(
       (state1, state2) =>
         statuses.indexOf(state1.status) - statuses.indexOf(state2.status) ||

@@ -311,6 +311,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const isLeechingChannel = channelState.channelId === leechingChannelId;
 
       if (isSeedingChannel || isLeechingChannel) {
+        this.paymentChannelClient.channelIdToTorrentMap = {
+          ...this.paymentChannelClient.channelIdToTorrentMap,
+          [channelState.channelId]: torrent.infoHash
+        };
         const isClosed = channelState.status === 'closed';
         if (isClosed) {
           if (isLeechingChannel) {

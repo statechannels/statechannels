@@ -164,6 +164,7 @@ export type ChannelCache = Record<string, ChannelState | undefined>;
 export class PaymentChannelClient {
   channelCache: ChannelCache = {};
   budgetCache?: DomainBudget;
+  channelIdToTorrentMap: Record<string, string> = {};
 
   get mySigningAddress(): string | undefined {
     return this.channelClient.signingAddress;
