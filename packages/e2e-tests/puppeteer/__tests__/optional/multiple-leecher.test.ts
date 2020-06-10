@@ -91,7 +91,7 @@ describe('One file, six leechers, one seeder', () => {
     await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
-    await forEachActor(({tab}) => waitForClosedState(tab));
+    await forEachActor(({tab}) => waitForFinishedOrCanceledDownload(tab));
   });
 });
 
