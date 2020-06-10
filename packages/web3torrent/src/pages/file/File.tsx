@@ -121,10 +121,10 @@ const File: React.FC<Props> = props => {
   let warning = warningState;
   if (showBudget) {
     if (
-      torrent.status === Status.Seeding &&
+      (torrent.status === Status.Seeding || torrent.status === Status.Downloading) &&
       bigNumberify(budget.budgets[0].availableReceiveCapacity).lt(fileCost)
     ) {
-      warning = `You're running out of room to receive funds in your budget! No new connections will be allowed!`;
+      warning = `You're running out of room to receive funds in your budget! You won't be able to upload to new peers!`;
     }
     if (
       torrent.status === Status.Idle &&
