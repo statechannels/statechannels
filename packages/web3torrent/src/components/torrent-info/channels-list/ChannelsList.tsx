@@ -113,7 +113,7 @@ function channelIdToTableRow(
           badgeContent={channel.turnNum.toNumber()}
           color={isBeneficiary ? 'primary' : 'error'}
           overlap={'circle'}
-          showZero={false}
+          showZero={true}
           max={9999}
         ></Badge>
       </td>
