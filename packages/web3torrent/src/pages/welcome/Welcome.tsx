@@ -41,7 +41,7 @@ const Welcome: React.FC<Props> = props => {
       <FormButton
         name="upload"
         block={true}
-        disabled={!props.ready}
+        disabled={false}
         onClick={() => history.push(RoutePath.Upload)}
       >
         Upload
