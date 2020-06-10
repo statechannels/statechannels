@@ -9,7 +9,10 @@ export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', C
 export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', ChannelResult>;
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
-export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
+export type UiNotification = JsonRpcNotification<
+  'UIUpdate',
+  {showWallet: boolean; reloadPage?: boolean}
+>;
 
 export type Notification =
   | ChannelProposedNotification

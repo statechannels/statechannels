@@ -157,6 +157,15 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
+  public sendReloadMessage() {
+    const notification: Notification = {
+      jsonrpc: '2.0',
+      method: 'UIUpdate',
+      params: {showWallet: false, reloadPage: true}
+    };
+    this.eventEmitter.emit('SendMessage', notification);
+  }
+
   public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
     const request = parseRequest(jsonRpcRequest);
     const {id: requestId} = request;

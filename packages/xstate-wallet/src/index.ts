@@ -31,7 +31,14 @@ const log = logger.trace.bind(logger);
   const store = new Store(chain, backend);
 
   await store.initialize([], CLEAR_STORAGE_ON_START);
+
   const messagingService = new MessagingService(store);
+
+  chain.accountChangedFeed.subscribe(() => {
+    logger.warn('Detected address change, sending message to parent to reload page');
+    messagingService.sendReloadMessage();
+  });
+
   const channelWallet = new ChannelWallet(store, messagingService);
 
   if (NODE_ENV === 'production') {

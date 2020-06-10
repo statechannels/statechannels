@@ -128,6 +128,10 @@ class ChannelProvider implements ChannelProviderInterface {
       const notificationParams = message.params;
       this.events.emit(notificationMethod, notificationParams);
       if (notificationMethod === 'UIUpdate') {
+        if (message.params.reloadPage) {
+          logger.warn('Received page reload request from the wallet. Reloading page.');
+          window.location.reload();
+        }
         this.ui.setVisibility(message.params.showWallet);
       } else {
         this.subscriptions[notificationMethod].forEach(id => {

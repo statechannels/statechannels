@@ -979,7 +979,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-780-802-683137520-748-803-683137520-719-804-683137520-0-1196>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1224>": {
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
@@ -997,6 +997,9 @@
         "params": {
           "additionalProperties": false,
           "properties": {
+            "reloadPage": {
+              "type": "boolean"
+            },
             "showWallet": {
               "type": "boolean"
             }
@@ -1871,7 +1874,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-780-802-683137520-748-803-683137520-719-804-683137520-0-1196%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1224%3E"
     },
     "Uint256": {
       "description": "Uint256",
