@@ -38,6 +38,8 @@ type Event =
   | {type: 'USER_REJECTS_BUDGET'}
   | {type: 'USER_APPROVES_RETRY'}
   | {type: 'USER_REJECTS_RETRY'}
+  | {type: 'SUFFICIENT_FUNDS_DETECTED'}
+  | {type: 'INSUFFICIENT_FUNDS_DETECTED'}
   | ChainEvent;
 
 interface Initial {
@@ -68,6 +70,8 @@ interface Transaction {
 
 type Typestate =
   | {value: 'waitForUserApproval'; context: Initial}
+  | {value: {waitForSufficientFunds: 'init'}; context: Initial}
+  | {value: {waitForSufficientFunds: 'waitForFunds'}; context: Initial}
   | {value: 'createLedger'; context: Initial}
   | {value: 'createBudget'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
@@ -84,7 +88,7 @@ type Context = Typestate['context'];
 
 export interface Schema extends StateSchema<Context> {
   states: {
-    waitForUserApproval: {};
+    waitForSufficientFunds: {};
     createLedger: {};
     createBudget: {};
     waitForPreFS: {};
@@ -116,10 +120,11 @@ export const machine = (
     states: {
       waitForUserApproval: {
         on: {
-          USER_APPROVES_BUDGET: {target: 'createLedger'},
+          USER_APPROVES_BUDGET: {target: 'waitForSufficientFunds'},
           USER_REJECTS_BUDGET: {target: 'failure'}
         }
       },
+
       createLedger: {
         invoke: {
           id: 'createLedger',
@@ -139,6 +144,21 @@ export const machine = (
           id: 'createBudget',
           src: createBudget(store, messagingService),
           onDone: {target: 'done'}
+        }
+      },
+      waitForSufficientFunds: {
+        initial: 'init',
+        invoke: {
+          id: 'subscribeToBalanceUpdates',
+          src: notifyWhenSufficientFunds(store)
+        },
+        states: {
+          init: {},
+          waitForFunds: {}
+        },
+        on: {
+          INSUFFICIENT_FUNDS_DETECTED: {target: '.waitForFunds'},
+          SUFFICIENT_FUNDS_DETECTED: {target: 'createLedger'}
         }
       },
       deposit: {
@@ -303,6 +323,19 @@ const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: Led
       first()
     )
     .toPromise();
+
+const notifyWhenSufficientFunds = (store: Store) => ({budget}: Initial) => {
+  const ethBudget = checkThat<AssetBudget>(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS], exists);
+  if (!store.chain.selectedAddress) {
+    throw new Error('No selected address');
+  }
+  const depositAmount = ethBudget.availableSendCapacity;
+  return store.chain.balanceUpdatedFeed(store.chain.selectedAddress).pipe(
+    map(b => ({
+      type: b.gte(depositAmount) ? 'SUFFICIENT_FUNDS_DETECTED' : 'INSUFFICIENT_FUNDS_DETECTED'
+    }))
+  );
+};
 
 const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
