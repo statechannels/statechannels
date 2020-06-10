@@ -5,8 +5,8 @@ import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import './DomainBudgetTable.scss';
 import {track} from '../../analytics';
-import {Avatar, Badge} from '@material-ui/core';
-import {Blockie, Tooltip} from 'rimble-ui';
+import {Avatar, Badge, Tooltip} from '@material-ui/core';
+import {Blockie} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {BigNumber} from 'ethers/utils';
@@ -125,9 +125,14 @@ export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
           ]}
         />
         <div className="identity">
-          <Tooltip message={web3torrent.paymentChannelClient.myEthereumSelectedAddress}>
+          <Tooltip
+            title={web3torrent.paymentChannelClient.myEthereumSelectedAddress}
+            interactive
+            arrow
+            placement="top"
+          >
             <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-              <Avatar>
+              <Avatar variant="square">
                 <Blockie
                   opts={{
                     seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,

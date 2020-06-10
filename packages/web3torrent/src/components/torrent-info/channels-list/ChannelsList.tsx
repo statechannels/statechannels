@@ -1,6 +1,6 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
-import React, {useContext} from 'react';
+import React from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
@@ -94,8 +94,8 @@ function channelIdToTableRow(
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">
-        <Tooltip title={peerSelectedAddress} interactive placement="right">
-          <Avatar>
+        <Tooltip title={peerSelectedAddress} interactive arrow placement="right">
+          <Avatar variant="square">
             <Blockie
               opts={{
                 seed: peerSelectedAddress,
