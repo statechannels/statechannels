@@ -186,26 +186,26 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
             />
           </td>
         </tr>
+        <tr>
+          <td className="budget-button-container" colSpan={1}>
+            <button
+              className={'budget-button'}
+              id="budget-withdraw"
+              onClick={() => {
+                track('Withdraw Initiated', {
+                  myBalanceFree,
+                  myBalanceLocked,
+                  hubBalanceFree,
+                  hubBalanceLocked
+                });
+                withdraw();
+              }}
+            >
+              Withdraw
+            </button>
+          </td>
+        </tr>
       </tbody>
-      <tr>
-        <td className="budget-button-container" colSpan={1}>
-          <button
-            className={'budget-button'}
-            id="budget-withdraw"
-            onClick={() => {
-              track('Withdraw Initiated', {
-                myBalanceFree,
-                myBalanceLocked,
-                hubBalanceFree,
-                hubBalanceLocked
-              });
-              withdraw();
-            }}
-          >
-            Withdraw
-          </button>
-        </td>
-      </tr>
     </table>
   );
 };
