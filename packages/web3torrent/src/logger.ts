@@ -200,7 +200,9 @@ const browser: any = IS_BROWSER_CONTEXT
         warn: appendAndCallToConsoleFn(console.warn),
         info: appendAndCallToConsoleFn(console.info),
         debug: appendAndCallToConsoleFn(console.debug),
-        trace: appendAndCallToConsoleFn(console.trace)
+        // Firefox & chrome automatically expand trace calls, which is pretty annoying.
+        // So, we direct trace calls to console.debug instead.
+        trace: appendAndCallToConsoleFn(console.debug)
       }
     }
   : undefined;
