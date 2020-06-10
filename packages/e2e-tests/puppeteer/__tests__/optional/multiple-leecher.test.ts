@@ -10,8 +10,8 @@ import {
   setupLogging,
   setupFakeWeb3,
   waitForNthState,
-  waitForClosedState,
-  takeScreenshot
+  takeScreenshot,
+  waitForFinishedOrCanceledDownload
 } from '../../helpers';
 
 import {uploadFile, startDownload} from '../../scripts/web3torrent';
@@ -32,11 +32,10 @@ describe('One file, six leechers, one seeder', () => {
     C = 'C',
     D = 'D',
     E = 'E',
-    F = 'F',
-    G = 'G'
+    F = 'F'
   }
 
-  const leechers: Label[] = [Label.B, Label.C, Label.D, Label.E, Label.F, Label.G];
+  const leechers: Label[] = [Label.B, Label.C, Label.D, Label.E, Label.F];
   const labels: Label[] = leechers.concat([Label.A]);
 
   type Actor = {browser: Browser; metamask: Dappeteer; tab: Page};
@@ -57,7 +56,7 @@ describe('One file, six leechers, one seeder', () => {
   });
 
   it('Allows peers to share a torrent completely', async () => {
-    let i = 1;
+    let i = 0;
     console.log('Opening browsers');
     await assignEachLabel(async label => {
       const idx = i++;
@@ -88,11 +87,14 @@ describe('One file, six leechers, one seeder', () => {
     console.log('Downloading');
     await forEachActor(({tab}) => waitForNthState(tab, 10));
 
-    // console.log('C cancels download'); // disabled to test the correct multiple channel closing
+    // TODO: Make the stub file big enough so that C can reliably cancel the download
+    // console.log('C cancels download');
     // await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
-    await forEachActor(({tab}) => waitForClosedState(tab));
+    await forEachActor(
+      ({tab}, label) => label !== Label.A && waitForFinishedOrCanceledDownload(tab)
+    );
   });
 });
 
