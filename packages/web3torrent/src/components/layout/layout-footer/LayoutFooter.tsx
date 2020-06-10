@@ -8,7 +8,7 @@ const LayoutFooter: React.FC<RouteComponentProps> = () => (
   <footer>
     <img className="footer-logo" src="/assets/logo.svg" alt="Web3Torrent logo" />
     <span className="footer-text">
-      Works in Chrome, Firefox, and Opera. Source code{' '}
+      Works in Chrome, Firefox, Brave and Opera. Source code{' '}
       <a
         href={`https://github.com/statechannels/monorepo/tree/${COMMIT_HASH}/packages/web3torrent`}
         target="_blank"
