@@ -5,8 +5,14 @@ import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import './DomainBudget.scss';
 import {track} from '../../analytics';
-import {Avatar, Tooltip, LinearProgress} from '@material-ui/core';
-import {makeStyles, createStyles, withStyles, Theme} from '@material-ui/core/styles';
+import {
+  Avatar,
+  Tooltip,
+  LinearProgress,
+  Box,
+  Typography,
+  LinearProgressProps
+} from '@material-ui/core';
 import {Blockie} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
@@ -96,7 +102,6 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
                 className="budget-pie-chart"
                 animate
                 lineWidth={18}
-                label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
                 labelStyle={index => ({
                   fill: colors[index],
                   fontSize: '10px',
@@ -152,13 +157,33 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
           </td>
           <td className="budget-progress-bars">
             <span>Capacity for receiving micropayments</span>
-            <LinearProgress variant="determinate" value={10} className={'bar hub'} />
+            <LinearProgressWithLabel
+              variant="determinate"
+              value={hubBalanceFreePercentage}
+              label={prettyPrintWei(hubBalanceFree)}
+              className={'bar hub'}
+            />
             <span>Locked in payment channels (for others) </span>
-            <LinearProgress variant="determinate" value={60} className={'bar locked-hub'} />
+            <LinearProgressWithLabel
+              variant="determinate"
+              value={hubBalanceLockedPercentage}
+              label={prettyPrintWei(hubBalanceLocked)}
+              className={'bar locked-hub'}
+            />
             <span>Locked in payment channels (for me) </span>
-            <LinearProgress variant="determinate" value={40} className={'bar locked-me'} />
+            <LinearProgressWithLabel
+              variant="determinate"
+              value={myBalanceLockedPercentage}
+              label={prettyPrintWei(myBalanceLocked)}
+              className={'bar locked-me'}
+            />
             <span>Capacity for sending micropayments </span>
-            <LinearProgress variant="determinate" value={20} className={'bar me'} />
+            <LinearProgressWithLabel
+              variant="determinate"
+              value={myBalanceFreePercentage}
+              label={prettyPrintWei(myBalanceFree)}
+              className={'bar me'}
+            />
           </td>
         </tr>
       </tbody>
@@ -184,3 +209,18 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
     </table>
   );
 };
+
+function LinearProgressWithLabel(props: LinearProgressProps & {value: number; label: string}) {
+  return (
+    <Box display="flex" alignItems="center">
+      <Box width="100%" mr={1}>
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      <Box minWidth={100} maxWidth={100}>
+        <Typography variant="caption" color="textSecondary">
+          {props.label}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
