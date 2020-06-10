@@ -20,7 +20,7 @@
   background-size: 100%;
   width: 196px;
   height: 29px;
-  margin-top: 17px;
+  margin: 2px auto 2px 2px;
 }
 
 .header-logo-hidden {
@@ -47,4 +47,9 @@
 
 .logo-container {
   width: auto;
+}
+
+#github-button,
+#faq-button {
+  border: unset;
 }
