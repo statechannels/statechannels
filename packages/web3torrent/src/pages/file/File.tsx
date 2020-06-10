@@ -3,7 +3,7 @@ import {useParams} from 'react-router-dom';
 import {download, Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {DomainBudgetTable} from '../../components/domain-budget-table/DomainBudgetTable';
+import {DomainBudget} from '../../components/domain-budget-table/DomainBudget';
 import {Status, TorrentUI} from '../../types';
 import {useQuery} from '../../utils/url';
 import {getTorrentUI} from '../../utils/torrent-status-checker';
@@ -117,7 +117,7 @@ const File: React.FC<Props> = props => {
         )}
       <br />
       {showBudget && (
-        <DomainBudgetTable
+        <DomainBudget
           budgetCache={budget}
           channelCache={channels}
           mySigningAddress={me}

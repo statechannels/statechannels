@@ -3,7 +3,7 @@ import {DomainBudget} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
-import './DomainBudgetTable.scss';
+import './DomainBudget.scss';
 import {track} from '../../analytics';
 import {Avatar, Badge, Tooltip} from '@material-ui/core';
 import {Blockie} from 'rimble-ui';
@@ -14,14 +14,14 @@ import bigDecimal from 'js-big-decimal';
 
 const bigNumberify = utils.bigNumberify;
 
-export type DomainBudgetTableProps = {
+export type DomainBudgetProps = {
   channelCache: Record<string, ChannelState>;
   budgetCache: DomainBudget;
   mySigningAddress: string;
   withdraw: () => void;
 };
 
-export const DomainBudgetTable: React.FC<DomainBudgetTableProps> = props => {
+export const DomainBudget: React.FC<DomainBudgetProps> = props => {
   const web3torrent = useContext(Web3TorrentClientContext);
 
   const {budgetCache, channelCache, mySigningAddress, withdraw} = props;
