@@ -3,11 +3,11 @@ id: finalize-a-channel-sad
 title: Finalize a channel (sad)
 ---
 
-When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all participants. This is the so-called 'sad' path to finalizing a channel, and it relies on supported (but `isFinal = false`) states being submitted.
+When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but `isFinal = false`) state(s) being submitted.
 
 The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
-States and signatures that imply a support proof are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
+States and signatures that imply a support proof are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](./clear-a-challenge#call-respond) or [checkpoint](./clear-a-challenge#call-checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
 
 ## Call `forceMove`
 
@@ -25,22 +25,49 @@ We provide a handy utility function `signChallengeMessage` to form this signatur
 
 ```typescript
 // In lesson7.test.ts
-// construct some states as per previous tutorial steps. Then:
+import {signChallengeMessage} from '@statechannels/nitro-protocol';
 
-const variableParts = states.map(state => getVariablePart(state));
-const fixedPart = getFixedPart(states[0]);
+const largestTurnNum = 8;
+const isFinalCount = 0;
+const participants = [];
+const wallets: ethers.Wallet[] = [];
+for (let i = 0; i < 3; i++) {
+  wallets[i] = ethers.Wallet.createRandom();
+  participants[i] = wallets[i].address;
+}
+const chainId = '0x1234';
+const channelNonce = bigNumberify(0).toHexString();
+const channel: Channel = {chainId, channelNonce, participants};
 
-const challenger = wallets[0]; // Note that this can be *any* participant,
-// and need not be the participant who owns this state.
+const appDatas = [0, 1, 2];
+const whoSignedWhat = [0, 1, 2];
 
-// Sign the states
+/* Construct a progression of states */
+const states: State[] = appDatas.map((data, idx) => ({
+  turnNum: largestTurnNum - appDatas.length + 1 + idx,
+  isFinal: idx > appDatas.length - isFinalCount,
+  channel,
+  challengeDuration: 1,
+  outcome: [],
+  appDefinition: process.env.TRIVIAL_APP_ADDRESS,
+  appData: HashZero,
+}));
+
+const challenger = wallets[0];
+
+/* Construct a support proof */
 const signatures = await signStates(states, wallets, whoSignedWhat);
+
+/* Form the challengeSignature */
 const challengeSignedState: SignedState = signState(
   states[states.length - 1],
   challenger.privateKey
 );
-
 const challengeSignature = signChallengeMessage([challengeSignedState], challenger.privateKey);
+
+/* Submit the forceMove transaction */
+const variableParts = states.map(state => getVariablePart(state));
+const fixedPart = getFixedPart(states[0]);
 
 const tx = NitroAdjudicator.forceMove(
   fixedPart,
