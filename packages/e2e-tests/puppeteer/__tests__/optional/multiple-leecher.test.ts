@@ -32,11 +32,10 @@ describe('One file, six leechers, one seeder', () => {
     C = 'C',
     D = 'D',
     E = 'E',
-    F = 'F',
-    G = 'G'
+    F = 'F'
   }
 
-  const leechers: Label[] = [Label.B, Label.C, Label.D, Label.E, Label.F, Label.G];
+  const leechers: Label[] = [Label.B, Label.C, Label.D, Label.E, Label.F];
   const labels: Label[] = leechers.concat([Label.A]);
 
   type Actor = {browser: Browser; metamask: Dappeteer; tab: Page};
@@ -57,7 +56,7 @@ describe('One file, six leechers, one seeder', () => {
   });
 
   it('Allows peers to share a torrent completely', async () => {
-    let i = 1;
+    let i = 0;
     console.log('Opening browsers');
     await assignEachLabel(async label => {
       const idx = i++;
