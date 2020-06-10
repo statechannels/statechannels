@@ -10,6 +10,6 @@
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "test/**/*", "build/contracts/*.json", "ganache/**/*"],
+  "include": ["src/**/*", "test/**/*", "build/contracts/*.json"],
   "references": [{"path": "../jest-gas-reporter"}]
 }
