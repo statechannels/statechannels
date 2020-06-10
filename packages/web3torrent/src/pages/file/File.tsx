@@ -75,7 +75,7 @@ const File: React.FC<Props> = props => {
         event => subscriber.next(event)
       );
     })
-      .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: false, leading: true}))
+      .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: true, leading: false}))
       .subscribe(onTorrentUpdate);
 
     return subscription.unsubscribe;
