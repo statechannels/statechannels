@@ -55,7 +55,6 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
-  const [buttonEnabled, setButtonEnabled] = useState(true);
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
     getTorrentUI(web3TorrentClient, {
       infoHash,
@@ -101,10 +100,10 @@ const File: React.FC<Props> = props => {
       setWarningState(torrentCheckResult);
     };
 
-    if (infoHash && !warningState) {
+    if (infoHash) {
       testResult();
     }
-  }, [infoHash, warningState]);
+  }, [infoHash]);
 
   useEffect(() => {
     if (props.ready) {
@@ -119,6 +118,7 @@ const File: React.FC<Props> = props => {
   const fileCost = WEI_PER_BYTE.mul(torrent.length);
 
   let warning = warningState;
+  let buttonEnabled = true;
   if (showBudget) {
     if (
       (torrent.status === Status.Seeding || torrent.status === Status.Downloading) &&
@@ -131,7 +131,7 @@ const File: React.FC<Props> = props => {
       bigNumberify(budget.budgets[0].availableSendCapacity).lt(fileCost)
     ) {
       warning = 'You do not have enough funds in your budget to download this file.';
-      setButtonEnabled(false);
+      buttonEnabled = false;
     }
   }
 
