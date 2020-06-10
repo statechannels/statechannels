@@ -9,7 +9,7 @@ import {
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
-import {filter, map, flatMap} from 'rxjs/operators';
+import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
@@ -52,6 +52,7 @@ export interface Chain {
   challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
+  balanceUpdatedFeed(address: string): Observable<BigNumber>;
 }
 
 type Updated = ChannelChainInfo & {channelId: string};
@@ -199,11 +200,18 @@ export class FakeChain implements Chain {
 
     return merge(first, updates);
   }
-
+  public balanceUpdatedFeed(): Observable<BigNumber> {
+    // You're rich!
+    return from([BigNumber.from('0x999999999999')]);
+  }
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
     const updates = fromEvent(this.eventEmitter, 'challengeRegistered').pipe(
       filter((event: ChallengeRegistered) => event.channelId === channelId),
-      map(({challengeState, challengeExpiry}) => ({channelId, challengeState, challengeExpiry}))
+      map(({challengeState, challengeExpiry}) => ({
+        channelId,
+        challengeState,
+        challengeExpiry
+      }))
     );
 
     return merge(
@@ -406,6 +414,15 @@ export class ChainWatcher implements Chain {
       finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
       blockNum
     };
+  }
+
+  public balanceUpdatedFeed(address: string): Observable<BigNumber> {
+    const first = from(this.provider.getBalance(address));
+    const updates = fromEvent<BigNumber>(this.provider, 'block').pipe(
+      flatMap(() => this.provider.getBalance(address))
+    );
+
+    return merge(first, updates).pipe(distinctUntilChanged((a, b) => a.eq(b)));
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
