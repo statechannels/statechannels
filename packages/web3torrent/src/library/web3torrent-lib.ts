@@ -333,11 +333,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
           await this.paymentChannelClient.acceptChannelUpdate(channelState);
-          await this.refillBuffer(torrent.infoHash, channelState.channelId);
+          this.refillBuffer(torrent.infoHash, channelState.channelId);
           this.unblockPeer(torrent.infoHash, wire);
         }
+        this.emitTorrentUpdated(torrent.infoHash, 'onChannelUpdated');
       }
-      this.emitTorrentUpdated(torrent.infoHash, 'onChannelUpdated');
     });
 
     {
