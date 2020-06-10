@@ -1,11 +1,12 @@
-import React, {useContext, Fragment} from 'react';
+import React, {useContext} from 'react';
 import {DomainBudget as DomainBudgetType} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import './DomainBudget.scss';
 import {track} from '../../analytics';
-import {Avatar, Badge, Tooltip} from '@material-ui/core';
+import {Avatar, Tooltip, LinearProgress} from '@material-ui/core';
+import {makeStyles, createStyles, withStyles, Theme} from '@material-ui/core/styles';
 import {Blockie} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
@@ -86,91 +87,100 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
 
   const colors = ['#ea692b', '#ea692b', '#d5dbe3', '#d5dbe3'];
   return (
-    <Fragment>
-      <div className="pie-chart-and-identity-container">
-        <PieChart
-          className="budget-pie-chart"
-          animate
-          lineWidth={18}
-          label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
-          labelStyle={index => ({
-            fill: colors[index],
-            fontSize: '10px',
-            fontFamily: 'sans-serif'
-          })}
-          radius={42}
-          labelPosition={112} // outer labels
-          data={[
-            {
-              title: prettyPrintWei(myBalanceFree),
-              value: myBalanceFreePercentage,
-              color: '#ea692b'
-            },
-            {
-              title: prettyPrintWei(myBalanceLocked),
-              value: myBalanceLockedPercentage,
-              color: '#ea692b60'
-            },
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <div className="pie-chart-and-identity-container">
+              <PieChart
+                className="budget-pie-chart"
+                animate
+                lineWidth={18}
+                label={({dataEntry}) => dataEntry.value > 0 && dataEntry.title}
+                labelStyle={index => ({
+                  fill: colors[index],
+                  fontSize: '10px',
+                  fontFamily: 'sans-serif'
+                })}
+                radius={42}
+                labelPosition={112} // outer labels
+                data={[
+                  {
+                    title: prettyPrintWei(myBalanceFree),
+                    value: myBalanceFreePercentage,
+                    color: '#ea692b'
+                  },
+                  {
+                    title: prettyPrintWei(myBalanceLocked),
+                    value: myBalanceLockedPercentage,
+                    color: '#ea692b60'
+                  },
 
-            {
-              title: prettyPrintWei(hubBalanceLocked),
-              value: hubBalanceLockedPercentage,
-              color: '#d5dbe360'
-            },
-            {
-              title: prettyPrintWei(hubBalanceFree),
-              value: hubBalanceFreePercentage,
-              color: '#d5dbe3'
-            }
-          ]}
-        />
-        <div className="identity">
-          <Tooltip
-            title={web3torrent.paymentChannelClient.myEthereumSelectedAddress}
-            interactive
-            arrow
-            placement="top"
+                  {
+                    title: prettyPrintWei(hubBalanceLocked),
+                    value: hubBalanceLockedPercentage,
+                    color: '#d5dbe360'
+                  },
+                  {
+                    title: prettyPrintWei(hubBalanceFree),
+                    value: hubBalanceFreePercentage,
+                    color: '#d5dbe3'
+                  }
+                ]}
+              />
+              <div className="identity">
+                <Tooltip
+                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress}
+                  interactive
+                  arrow
+                  placement="top"
+                >
+                  <Avatar variant="square">
+                    <Blockie
+                      opts={{
+                        seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                        bgcolor: '#3531ff',
+                        size: 6,
+                        scale: 4,
+                        spotcolor: '#000'
+                      }}
+                    />
+                  </Avatar>
+                </Tooltip>
+              </div>
+            </div>
+          </td>
+          <td className="budget-progress-bars">
+            <span>Capacity for receiving micropayments</span>
+            <LinearProgress variant="determinate" value={10} className={'bar hub'} />
+            <span>Locked in payment channels (for others) </span>
+            <LinearProgress variant="determinate" value={60} className={'bar locked-hub'} />
+            <span>Locked in payment channels (for me) </span>
+            <LinearProgress variant="determinate" value={40} className={'bar locked-me'} />
+            <span>Capacity for sending micropayments </span>
+            <LinearProgress variant="determinate" value={20} className={'bar me'} />
+          </td>
+        </tr>
+      </tbody>
+      <tr>
+        <td className="budget-button-container" colSpan={1}>
+          <button
+            className={'budget-button'}
+            id="budget-withdraw"
+            onClick={() => {
+              track('Withdraw Initiated', {
+                myBalanceFree,
+                myBalanceLocked,
+                hubBalanceFree,
+                hubBalanceLocked
+              });
+              withdraw();
+            }}
           >
-            <Badge badgeContent={0} overlap={'circle'} showZero={false} max={999}>
-              <Avatar variant="square">
-                <Blockie
-                  opts={{
-                    seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
-                    bgcolor: '#3531ff',
-                    size: 6,
-                    scale: 4,
-                    spotcolor: '#000'
-                  }}
-                />
-              </Avatar>
-            </Badge>
-          </Tooltip>
-        </div>
-      </div>
-      <span>
-        <div className={`dot me`}></div>
-        {' Me '}
-        <div className={`dot locked-me`}></div>
-        <div className={`dot locked-hub`}></div>
-        {' Locked '}
-        <div className={`dot hub`}></div>
-        {' Hub '}
-      </span>
-      <button
-        className={'budget-button'}
-        id="budget-withdraw"
-        onClick={() => {
-          track('Withdraw Initiated', {
-            myBalanceFree,
-            myBalanceLocked,
-            hubBalanceFree,
-            hubBalanceLocked
-          });
-          withdraw();
-        }}
-      >
-        Withdraw
-      </button>
-    </Fragment>
+            Withdraw
+          </button>
+        </td>
+      </tr>
+    </table>
   );
 };

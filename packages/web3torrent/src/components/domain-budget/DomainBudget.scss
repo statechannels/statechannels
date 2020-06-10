@@ -1,56 +1,5 @@
 @import '../../styles/variables';
 
-table.domain-budget-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  thead {
-    text-align: center;
-    color: #ea692b;
-    border-bottom: 1px solid $c-orange;
-    line-height: 0.3;
-  }
-
-  tbody,
-  thead {
-    border-bottom: 1px solid $c-mediumgrey;
-    text-align: center;
-
-    tr.budget-info {
-      padding-top: 10px;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      border-bottom: 1px solid $c-mediumgrey;
-
-      &:last-child {
-        border-bottom: 0px solid transparent;
-      }
-
-      td {
-        min-width: 50px;
-        padding: 5px 5px;
-        vertical-align: middle;
-        text-align: center;
-      }
-
-      td.budget-number,
-      td.budget-identity,
-      td.budget-button,
-      td.budget-spent,
-      td.budget-received {
-        width: 25%;
-      }
-    }
-  }
-}
-
-.CircularProgressbar {
-  height: 40px;
-}
-
 .MuiAvatar-root {
   width: 30px !important;
   height: 30px !important;
@@ -64,8 +13,7 @@ table.domain-budget-table {
   vertical-align: middle;
   color: $c-orange;
   border: 1px solid $c-orange;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin: 15px auto 15px;
   padding: 3px 6px;
 }
 
@@ -108,4 +56,50 @@ svg.budget-pie-chart {
   &.locked-hub {
     background-color: #d5dbe360;
   }
+}
+
+.bar {
+  border-radius: 5;
+  background-color: white !important;
+  border-style: solid;
+  border-width: 1px;
+  margin: 5px 0px 5px;
+  &.me {
+    div.MuiLinearProgress-bar {
+      background-color: #ea692b;
+    }
+    border-color: #ea692b;
+  }
+  &.locked-me {
+    div.MuiLinearProgress-bar {
+      background-color: #ea692b60;
+    }
+    border-color: #ea692b60;
+  }
+  &.hub {
+    div.MuiLinearProgress-bar {
+      background-color: #d5dbe3;
+    }
+    border-color: #d5dbe3;
+  }
+  &.locked-hub {
+    div.MuiLinearProgress-bar {
+      background-color: #d5dbe360;
+    }
+    border-color: #d5dbe360;
+  }
+}
+
+td.budget-progress-bars {
+  span {
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+}
+
+.budget-button-container {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  text-align: center;
 }
