@@ -535,7 +535,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   /** Utility function. Checks if the budget has enough receive capacity to accept a new channel. Pauses the torrent if it does not. **/
   private checkUploadBudget(budget, torrent) {
-    if (budget?.budgets?.length === 1) {
+    if (budget?.budgets?.length) {
       const receiveCapacity = bigNumberify(budget.budgets[0].availableReceiveCapacity);
       const uploadSize = WEI_PER_BYTE.mul(torrent.length).toHexString();
       if (receiveCapacity.lt(uploadSize)) {
