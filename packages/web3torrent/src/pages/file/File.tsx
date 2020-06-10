@@ -3,7 +3,7 @@ import {useParams} from 'react-router-dom';
 import {download, Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {DomainBudget} from '../../components/domain-budget/DomainBudget
+import {DomainBudget} from '../../components/domain-budget/DomainBudget';
 import {Status, TorrentUI} from '../../types';
 import {useQuery} from '../../utils/url';
 import {getTorrentUI} from '../../utils/torrent-status-checker';
