@@ -50,7 +50,7 @@ const File: React.FC<Props> = props => {
   const queryParams = useQuery();
   const [loading, setLoading] = useState(false);
   const [errorLabel, setErrorLabel] = useState('');
-  const [warning, setWarning] = useState('');
+  const [warningState, setWarningState] = useState('');
   const [channels, setChannels] = useState(undefined);
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
@@ -98,13 +98,13 @@ const File: React.FC<Props> = props => {
   useEffect(() => {
     const testResult = async () => {
       const torrentCheckResult = await checkTorrent(infoHash);
-      setWarning(torrentCheckResult);
+      setWarningState(torrentCheckResult);
     };
 
-    if (infoHash && !warning) {
+    if (infoHash && !warningState) {
       testResult();
     }
-  }, [infoHash, warning]);
+  }, [infoHash, warningState]);
 
   useEffect(() => {
     if (props.ready) {
@@ -117,25 +117,24 @@ const File: React.FC<Props> = props => {
   const {budget, closeBudget, getBudget} = useBudget(props);
   const showBudget = budget?.budgets?.length;
   const fileCost = WEI_PER_BYTE.mul(torrent.length);
-  useEffect(() => {
-    if (showBudget) {
-      if (
-        torrent.status === Status.Seeding &&
-        bigNumberify(budget.budgets[0].availableReceiveCapacity).lt(fileCost)
-      ) {
-        setWarning(
-          `You're running out of room to receive funds in your budget! No new connections will be allowed!`
-        );
-      }
-      if (
-        torrent.status === Status.Idle &&
-        bigNumberify(budget.budgets[0].availableSendCapacity).lt(fileCost)
-      ) {
-        setWarning('You do not have enough funds in your budget to download this file.');
-        setButtonEnabled(false);
-      }
+
+  let warning = warningState;
+  if (showBudget) {
+    if (
+      torrent.status === Status.Seeding &&
+      bigNumberify(budget.budgets[0].availableReceiveCapacity).lt(fileCost)
+    ) {
+      warning = `You're running out of room to receive funds in your budget! No new connections will be allowed!`;
     }
-  }, [budget, fileCost, showBudget, torrent.status]);
+    if (
+      torrent.status === Status.Idle &&
+      bigNumberify(budget.budgets[0].availableSendCapacity).lt(fileCost)
+    ) {
+      warning = 'You do not have enough funds in your budget to download this file.';
+      setButtonEnabled(false);
+    }
+  }
+
   return (
     <section className="section fill download">
       <div className="jumbotron-upload">
