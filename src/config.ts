@@ -38,7 +38,7 @@ if (!process.env.HUB_DESTINATION) {
 export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
-  ? process.env.destination === 'console'
+  ? process.env.LOG_DESTINATION === 'console'
     ? 'console'
     : `${process.env.LOG_DESTINATION}/wallet.log`
   : undefined;
