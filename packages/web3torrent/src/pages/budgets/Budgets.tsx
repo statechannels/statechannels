@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {DomainBudget} from '../../components/domain-budget-table/DomainBudget';
+import {DomainBudget} from '../../components/domain-budget/DomainBudget';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
