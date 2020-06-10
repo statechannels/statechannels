@@ -50,7 +50,7 @@ section.wires-list {
         td {
           min-width: 50px;
           vertical-align: middle;
-          width: 25%;
+          width: 20%;
           min-width: 100px;
           text-align: center;
         }
@@ -210,6 +210,11 @@ section.wires-list {
 }
 
 .MuiBadge-badge {
-  font-size: 0.6rem !important;
-  height: 11.5px !important;
+  font-size: 1rem !important;
+  height: 20px !important;
+}
+
+.MuiAvatar-root {
+  margin: auto;
+  border-radius: 0%;
 }

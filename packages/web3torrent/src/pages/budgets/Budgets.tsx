@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {DomainBudgetTable} from '../../components/domain-budget-table/DomainBudgetTable';
+import {DomainBudget} from '../../components/domain-budget/DomainBudget';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
@@ -38,7 +38,7 @@ const CurrentBudget: React.FC<Props> = props => {
       <h1>Your current budget</h1>
       {loading && <Spinner visible color="orange" content="Fetching your budget"></Spinner>}
       {!loading && budgetExists && (
-        <DomainBudgetTable
+        <DomainBudget
           budgetCache={budget}
           channelCache={channelCache}
           mySigningAddress={me}

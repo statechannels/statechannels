@@ -1,14 +1,13 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
-import React, {useContext} from 'react';
+import React from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
-import {Blockie, Tooltip} from 'rimble-ui';
-import {Badge, Avatar} from '@material-ui/core';
-import {color} from '@storybook/addon-knobs';
+import {Blockie} from 'rimble-ui';
+import {Badge, Avatar, Tooltip} from '@material-ui/core';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -95,27 +94,28 @@ function channelIdToTableRow(
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">
-        <Tooltip message={peerSelectedAddress}>
-          <Badge
-            badgeContent={turnNumToNumPayments(channel.turnNum.toNumber())}
-            color={isBeneficiary ? 'primary' : 'error'}
-            overlap={'circle'}
-            showZero={false}
-            max={999}
-          >
-            <Avatar>
-              <Blockie
-                opts={{
-                  seed: peerSelectedAddress,
-                  bgcolor: '#3531ff',
-                  size: 6,
-                  scale: 4,
-                  spotcolor: '#000'
-                }}
-              />
-            </Avatar>
-          </Badge>
+        <Tooltip title={peerSelectedAddress} interactive arrow placement="right">
+          <Avatar variant="square">
+            <Blockie
+              opts={{
+                seed: peerSelectedAddress,
+                bgcolor: '#3531ff',
+                size: 6,
+                scale: 4,
+                spotcolor: '#000'
+              }}
+            />
+          </Avatar>
         </Tooltip>
+      </td>
+      <td>
+        <Badge
+          badgeContent={channel.turnNum.toNumber()}
+          color={isBeneficiary ? 'primary' : 'error'}
+          overlap={'circle'}
+          showZero={true}
+          max={9999}
+        ></Badge>
       </td>
       <td className="transferred">
         <div className="type">{isBeneficiary ? 'uploaded' : 'downloaded'}</div>
@@ -151,6 +151,7 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
             <tr className="peerInfo">
               <td>Status</td>
               <td>Peer</td>
+              <td>Transactions</td>
               <td>Data</td>
               <td>Funds</td>
             </tr>
@@ -175,6 +176,7 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
   );
 };
 
+// This gives inaccurate results when the channel is closing or closed
 export function turnNumToNumPayments(turnNum: number): number {
   return turnNum > 3 ? Math.trunc((turnNum - 3) / 2) : 0;
   // turnNum | numPayments
