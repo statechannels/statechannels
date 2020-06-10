@@ -243,7 +243,7 @@ export class PaymentChannelClient {
     }
   }
 
-  async createChannel(peers: Peers): Promise<ChannelState> {
+  async createChannel(peers: Peers, torrentHash: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.createChannel(
       formatParticipants(peers),
       formatAllocations(peers),
@@ -254,6 +254,7 @@ export class PaymentChannelClient {
 
     const channelState = convertToChannelState(channelResult);
     this.insertIntoChannelCache(channelState);
+    this.updateChannelIdToTorrentMap(channelState.channelId, torrentHash);
 
     return channelState;
   }
@@ -280,8 +281,9 @@ export class PaymentChannelClient {
     return this.channelClient.onChannelProposed(cr => web3tCallback(convertToChannelState(cr)));
   }
 
-  async joinChannel(channelId: string) {
+  async joinChannel(channelId: string, torrentHash: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
+    this.updateChannelIdToTorrentMap(channelId, torrentHash);
     this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
@@ -329,7 +331,8 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  async updateChannel(channelId: string, peers: Peers): Promise<ChannelState> {
+  async updateChannel(channelId: string, peers: Peers, torrentHash: string): Promise<ChannelState> {
+    this.updateChannelIdToTorrentMap(channelId, torrentHash);
     const channelResult = await this.channelClient.updateChannel(
       channelId,
       formatParticipants(peers),
@@ -380,7 +383,7 @@ export class PaymentChannelClient {
   }
 
   // payer may use this method to make payments (if they have sufficient funds)
-  async makePayment(channelId: string, amount: string) {
+  async makePayment(channelId: string, amount: string, torrentHash: string) {
     let amountWillPay = amount;
     // First, wait for my turn
     const {payer, beneficiary} = await this.channelState(channelId)
@@ -399,10 +402,14 @@ export class PaymentChannelClient {
     }
 
     try {
-      await this.updateChannel(channelId, {
-        beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
-        payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
-      });
+      await this.updateChannel(
+        channelId,
+        {
+          beneficiary: {...beneficiary, balance: add(beneficiary.balance, amountWillPay)},
+          payer: {...payer, balance: subtract(payer.balance, amountWillPay)}
+        },
+        torrentHash
+      );
     } catch (error) {
       if (error.error.code === ErrorCode.UpdateChannel.NotYourTurn) {
         logger.warn({channelId}, 'Possible race condition detected');
@@ -413,9 +420,9 @@ export class PaymentChannelClient {
   }
 
   // beneficiary may use this method to accept payments
-  async acceptChannelUpdate(channelState: ChannelState) {
+  async acceptChannelUpdate(channelState: ChannelState, torrentHash: string) {
     const {channelId, beneficiary, payer} = channelState;
-    await this.updateChannel(channelId, {beneficiary, payer});
+    await this.updateChannel(channelId, {beneficiary, payer}, torrentHash);
   }
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
@@ -479,6 +486,13 @@ export class PaymentChannelClient {
 
     this.budgetCache = undefined;
     return this.budgetCache;
+  }
+
+  updateChannelIdToTorrentMap(channelId: string, torrentHash: string) {
+    this.channelIdToTorrentMap = {
+      ...this.channelIdToTorrentMap,
+      [channelId]: torrentHash
+    };
   }
 }
 

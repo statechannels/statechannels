@@ -299,7 +299,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (!this.paymentChannelClient.amProposer(channelState)) {
         // do not pass a channelId, since this is the first we heard about this channel and it won't be cached
         // only join if counterparty proposed
-        await this.paymentChannelClient.joinChannel(channelState.channelId);
+        await this.paymentChannelClient.joinChannel(channelState.channelId, torrent.infoHash);
         log.debug(`<< Joined channel ${channelState.channelId}`);
       }
     });
@@ -311,10 +311,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const isLeechingChannel = channelState.channelId === leechingChannelId;
 
       if (isSeedingChannel || isLeechingChannel) {
-        this.paymentChannelClient.channelIdToTorrentMap = {
-          ...this.paymentChannelClient.channelIdToTorrentMap,
-          [channelState.channelId]: torrent.infoHash
-        };
         const isClosed = channelState.status === 'closed';
         if (isClosed) {
           if (isLeechingChannel) {
@@ -331,12 +327,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         );
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
-          await this.paymentChannelClient.acceptChannelUpdate(channelState);
+          await this.paymentChannelClient.acceptChannelUpdate(channelState, torrent.infoHash);
           log.debug('sent spacer state, now sending STOP');
           this.blockPeer(torrent.infoHash, wire);
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking
-          await this.paymentChannelClient.acceptChannelUpdate(channelState);
+          await this.paymentChannelClient.acceptChannelUpdate(channelState, torrent.infoHash);
           this.refillBuffer(torrent.infoHash, channelState.channelId);
           this.unblockPeer(torrent.infoHash, wire);
         }
@@ -366,7 +362,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32)
     );
     const peers: Peers = {beneficiary: seeder, payer: leecher};
-    const {channelId} = await this.paymentChannelClient.createChannel(peers);
+    const {channelId} = await this.paymentChannelClient.createChannel(peers, torrent.infoHash);
 
     wire.paidStreamingExtension.seedingChannelId = channelId;
     this.peersList[torrent.infoHash][channelId] = {
@@ -523,7 +519,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     const amountToPay = WEI_PER_BYTE.mul(BLOCK_LENGTH * numBlocksToPayFor + tailBytes);
     log.debug(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
-    await this.paymentChannelClient.makePayment(leechingChannelId, amountToPay.toString());
+    await this.paymentChannelClient.makePayment(
+      leechingChannelId,
+      amountToPay.toString(),
+      torrent.infoHash
+    );
 
     const balance = this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance;
     log.debug(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${downloaded}`);
