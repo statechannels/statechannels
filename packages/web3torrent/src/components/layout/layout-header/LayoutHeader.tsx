@@ -17,13 +17,13 @@ export const LayoutHeader: React.FC = () => {
 
         <div className="actions-container">
           <FormButton
-            name="upload"
+            name="github"
             onClick={() => window.open('https://github.com/statechannels/monorepo/', '_blank)')}
           >
             GitHub
           </FormButton>
           <FormButton
-            name="upload"
+            name="faq"
             onClick={() =>
               window.open(
                 'https://www.notion.so/web3Torrent-FAQ-9f384d9dbadc4828aa81e14fcc360466',
