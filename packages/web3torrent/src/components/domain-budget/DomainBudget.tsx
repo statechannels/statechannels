@@ -1,5 +1,5 @@
 import React, {useContext, Fragment} from 'react';
-import {DomainBudget} from '@statechannels/client-api-schema';
+import {DomainBudget as DomainBudgetType} from '@statechannels/client-api-schema';
 import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
@@ -16,7 +16,7 @@ const bigNumberify = utils.bigNumberify;
 
 export type DomainBudgetProps = {
   channelCache: Record<string, ChannelState>;
-  budgetCache: DomainBudget;
+  budgetCache: DomainBudgetType;
   mySigningAddress: string;
   withdraw: () => void;
 };
