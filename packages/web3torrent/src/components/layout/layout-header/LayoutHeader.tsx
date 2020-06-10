@@ -14,7 +14,25 @@ export const LayoutHeader: React.FC = () => {
         <Link className="header-logo" to={RoutePath.Root}>
           <span className="header-logo-hidden">Web3Torrent Logo - Go to Home</span>
         </Link>
+
         <div className="actions-container">
+          <FormButton
+            name="upload"
+            onClick={() => window.open('https://github.com/statechannels/monorepo/', '_blank)')}
+          >
+            GitHub
+          </FormButton>
+          <FormButton
+            name="upload"
+            onClick={() =>
+              window.open(
+                'https://www.notion.so/web3Torrent-FAQ-9f384d9dbadc4828aa81e14fcc360466',
+                '_blank)'
+              )
+            }
+          >
+            FAQ
+          </FormButton>
           <FormButton
             name="budgets"
             onClick={() => {
