@@ -33,7 +33,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>App Budget</Heading>
 
-      <Text textAlign="center">Querying blockchain</Text>
+      <Text textAlign="center">Checking if your Metamask account has sufficient ETH</Text>
     </Flex>
   );
 
