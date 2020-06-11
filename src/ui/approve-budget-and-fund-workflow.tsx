@@ -6,7 +6,7 @@ import {useService} from '@xstate/react';
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK} from '../config';
 import {utils} from 'ethers';
 interface Props {
   service: ApproveBudgetAndFundService;
@@ -46,8 +46,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You don&#39;t have enough ETH in your wallet!
       </Text>
       <Text pb={3} fontSize={1}>
-        You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your Metamask wallet to fund the
-        channel. You can get more ETH{' '}
+        You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your Metamask wallet to
+        fund the channel. You can get more ETH{' '}
         <Link target="_blank" href={`https://faucet.ropsten.be/`}>
           here.
         </Link>
@@ -114,7 +114,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
         Click{' '}
         <Link
           target="_blank"
-          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
+          href={`https://${TARGET_NETWORK}.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
         >
           here
         </Link>{' '}
@@ -141,7 +141,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Text id="wait-for-transaction">
         Click{' '}
-        <Link target="_blank" href={`https://ropsten.etherscan.io/tx/${transactionId}`}>
+        <Link target="_blank" href={`https://${TARGET_NETWORK}.etherscan.io/tx/${transactionId}`}>
           here
         </Link>{' '}
         to follow the progress on etherscan.
@@ -179,7 +179,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You can click{' '}
         <Link
           target="_blank"
-          href={`https://ropsten.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
+          href={`https://${TARGET_NETWORK}.etherscan.io/address/${ETH_ASSET_HOLDER_ADDRESS}`}
         >
           here
         </Link>{' '}
