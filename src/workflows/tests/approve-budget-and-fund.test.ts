@@ -41,6 +41,7 @@ let messagingService: MessagingServiceInterface;
 
 beforeEach(async () => {
   chain = new FakeChain();
+  await chain.ethereumEnable();
   playerStore = new TestStore(chain);
   messagingService = new MessagingService(playerStore);
 
