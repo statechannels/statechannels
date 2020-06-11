@@ -157,28 +157,28 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
             </div>
           </td>
           <td className="budget-progress-bars">
-            <span>Capacity for receiving micropayments</span>
+            <span>Unused receive capacity</span>
             <LinearProgressWithLabel
               variant="determinate"
               value={hubBalanceFreePercentage}
               label={prettyPrintWei(hubBalanceFree)}
               className={'bar hub'}
             />
-            <span>Locked in payment channels (for others) </span>
+            <span>Locked receive capacity </span>
             <LinearProgressWithLabel
               variant="determinate"
               value={hubBalanceLockedPercentage}
               label={prettyPrintWei(hubBalanceLocked)}
               className={'bar locked-hub'}
             />
-            <span>Locked in payment channels (for me) </span>
+            <span>Locked spend capacity </span>
             <LinearProgressWithLabel
               variant="determinate"
               value={myBalanceLockedPercentage}
               label={prettyPrintWei(myBalanceLocked)}
               className={'bar locked-me'}
             />
-            <span>Capacity for sending micropayments </span>
+            <span>Unused spend capacity</span>
             <LinearProgressWithLabel
               variant="determinate"
               value={myBalanceFreePercentage}
