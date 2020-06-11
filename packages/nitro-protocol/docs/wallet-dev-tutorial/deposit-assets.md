@@ -44,11 +44,14 @@ We have the following call signature:
 function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable
 ```
 
-There are a few rules to obey when calling `deposit`. Firstly, `destination` must NOT be an [external destination](#destinations). Secondly, the on chain holdings for `destination` must be greater than or equal to `expectedHeld`. Thirdlt, the holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
+There are a few rules to obey when calling `deposit`. Firstly, `destination` must NOT be an [external destination](#destinations). Secondly, the on chain holdings for `destination` must be greater than or equal to `expectedHeld`. Thirdly, the holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
 Because we are depositing ETH, we must remember to send the right amount of ETH with the transaction. Depositing ERC20 tokens will be covered in a future tutorial.
 
 ```typescript
+import {parseUnits} from 'ethers/utils';
+import {randomChannelId} from '@statechannels/nitro-protocol';
+
 // In lesson5.test.ts
 
 /*

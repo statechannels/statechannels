@@ -18,6 +18,12 @@ In the following example the participants support the state by countersigning it
 ```typescript
 // In lesson6.test.ts
 
+/* Import ethereum wallet utilities  */
+import {ethers} from 'ethers';
+import {AddressZero, HashZero} from 'ethers/constants';
+import {bigNumberify} from 'ethers/utils';
+
+/* Import statechannels wallet utilities  */
 import {
   Channel,
   State,

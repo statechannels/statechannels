@@ -12,9 +12,12 @@ The `checkpoint` method allows anyone with a supported off-chain state to establ
 ```typescript
 // In lesson8.test.ts
 
-// Register a challenge with a very long timeout, following the preceding tutorial step
-// Form a new support proof (you should be familiar with how to do this by now) with an increased largestTurnNum
-// Submit this transaction:
+/* 
+  Register a challenge with a very long timeout, following the preceding tutorial step
+  Form a new support proof (you should be familiar with how to do this by now) with an increased largestTurnNum
+*/
+
+/* Submit this transaction: */
 
 const tx = NitroAdjudicator.checkpoint(
   fixedPart,
@@ -27,13 +30,18 @@ const tx = NitroAdjudicator.checkpoint(
 
 await(await tx).wait();
 
-// Form an expectation about the new state of the chain:
-const expectedChannelStorageHash = channelDataToChannelStorageHash({
+/* 
+    Form an expectation about the new state of the chain:
+  */
+const channelData: ChannelData = {
   turnNumRecord: largestTurnNum,
-  finalizesAt: 0x0, // 0 here implies the channel is open again.
-});
+  finalizesAt: 0x0, // 0 here implies the channel is open again
+};
+const expectedChannelStorageHash = channelDataToChannelStorageHash(channelData);
 
-// Check channelStorageHash against the expected value (it is a public mapping)
+/* 
+    Check channelStorageHash against the expected value (it is a public mapping)
+  */
 expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
 ```
 
@@ -43,7 +51,10 @@ The respond method allows anyone with the appropriate, _single_ off-chain state 
 
 ```typescript
 // In lesson9.test.ts
+// Put the chain in a challenge mode, following the tutorial above.
+// Preserve the variables used.
 
+/* Form a response state */
 largestTurnNum += 1;
 const responseState: State = {
   turnNum: largestTurnNum,
@@ -72,13 +83,17 @@ const tx = NitroAdjudicator.respond(
 );
 await(await tx).wait();
 
-// Form an expectation about the new state of the chain:
+/* 
+    Form an expectation about the new state of the chain:
+*/
 const expectedChannelStorageHash = channelDataToChannelStorageHash({
   turnNumRecord: largestTurnNum,
   finalizesAt: 0x0, // 0 here implies the channel is open again.
 });
 
-// Check channelStorageHash against the expected value (it is a public mapping)
+/* 
+    Check channelStorageHash against the expected value (it is a public mapping)
+*/
 expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
 ```
 
@@ -102,9 +117,8 @@ const receipt = await(
   )
 ).wait();
 
-const event = receipt.events.pop();
-
 // Scrape the information out of the ForceMove event
+const event = receipt.events.pop();
 const {
   channelId: eventChannelId,
   turnNumRecord: eventTurnNumRecord,

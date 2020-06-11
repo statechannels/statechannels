@@ -25,10 +25,9 @@ We provide a handy utility function `signChallengeMessage` to form this signatur
 
 ```typescript
 // In lesson7.test.ts
+
 import {signChallengeMessage} from '@statechannels/nitro-protocol';
 
-const largestTurnNum = 8;
-const isFinalCount = 0;
 const participants = [];
 const wallets: ethers.Wallet[] = [];
 for (let i = 0; i < 3; i++) {
@@ -39,10 +38,13 @@ const chainId = '0x1234';
 const channelNonce = bigNumberify(0).toHexString();
 const channel: Channel = {chainId, channelNonce, participants};
 
-const appDatas = [0, 1, 2];
-const whoSignedWhat = [0, 1, 2];
+/* Choose a challenger */
+const challenger = wallets[0];
 
 /* Construct a progression of states */
+const largestTurnNum = 8;
+const isFinalCount = 0;
+const appDatas = [0, 1, 2];
 const states: State[] = appDatas.map((data, idx) => ({
   turnNum: largestTurnNum - appDatas.length + 1 + idx,
   isFinal: idx > appDatas.length - isFinalCount,
@@ -53,9 +55,8 @@ const states: State[] = appDatas.map((data, idx) => ({
   appData: HashZero,
 }));
 
-const challenger = wallets[0];
-
 /* Construct a support proof */
+const whoSignedWhat = [0, 1, 2];
 const signatures = await signStates(states, wallets, whoSignedWhat);
 
 /* Form the challengeSignature */

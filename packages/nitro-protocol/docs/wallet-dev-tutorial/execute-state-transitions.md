@@ -150,7 +150,7 @@ const fromState: State = {
 };
 
 /* Construct another state */
-const toState: State = {...fromState, turnNum: 1, appData: '0x1'}; // FIXME
+const toState: State = {...fromState, turnNum: 1};
 
 /* 
   Check validity of transition from one state to the other
