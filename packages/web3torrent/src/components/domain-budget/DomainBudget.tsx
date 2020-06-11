@@ -54,7 +54,8 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
   function locksUpFunds(channelId: string) {
     return (
       channelCache[channelId].status === 'running' ||
-      channelCache[channelId].status === 'challenging'
+      channelCache[channelId].status === 'challenging' ||
+      channelCache[channelId].status === 'closing'
     );
   }
 
