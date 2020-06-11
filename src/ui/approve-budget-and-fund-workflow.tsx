@@ -7,7 +7,7 @@ import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-
+import {utils} from 'ethers';
 interface Props {
   service: ApproveBudgetAndFundService;
 }
@@ -17,7 +17,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
 
-  // Sets a timer that expires after 5 minutes
+  // Sets a timer that expires after 1.5 minutes
   // Used to determine if we've timed out waiting for the hub
   let stateTimer;
   const [stateTimerExpired, setStateTimerExpired] = useState(false);
@@ -29,6 +29,31 @@ export const ApproveBudgetAndFund = (props: Props) => {
     };
   }, [current]);
 
+  const waitForSufficientFundsInit = (
+    <Flex alignItems="center" flexDirection="column">
+      <Heading>App Budget</Heading>
+
+      <Text textAlign="center">Checking if your Metamask account has sufficient ETH</Text>
+    </Flex>
+  );
+
+  const waitForSufficientFunds = (
+    <Flex alignItems="left" flexDirection="column">
+      <Heading textAlign="center" mb={2}>
+        App Budget
+      </Heading>
+      <Text pb={3} fontSize={1}>
+        You don&#39;t have enough ETH in your wallet!
+      </Text>
+      <Text pb={3} fontSize={1}>
+        You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your Metamask wallet to fund the
+        channel. You can get more ETH{' '}
+        <Link target="_blank" href={`https://faucet.ropsten.be/`}>
+          here.
+        </Link>
+      </Text>
+    </Flex>
+  );
   const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
     <Flex alignItems="left" flexDirection="column">
       <Heading textAlign="center" mb={2}>
@@ -176,8 +201,12 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
   if (current.matches('waitForUserApproval')) {
     return waitForUserApproval();
+  } else if (current.matches({waitForSufficientFunds: 'init'})) {
+    return waitForSufficientFundsInit;
+  } else if (current.matches({waitForSufficientFunds: 'waitForFunds'})) {
+    return waitForSufficientFunds;
   } else if (current.matches('createLedger')) {
-    return waitForUserApproval({waiting: true});
+    return waitForSufficientFunds;
   } else if (current.matches('waitForPreFS')) {
     return waitForPreFS;
   } else if (current.matches({deposit: 'init'})) {
