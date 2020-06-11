@@ -9,10 +9,11 @@ import {
   waitAndApproveMetaMask,
   waitForBudgetEntry,
   waitAndApproveDepositWithHub,
-  waitForAndClickButton
+  waitForAndClickButton,
+  setupFakeWeb3
 } from '../helpers';
 import {Dappeteer} from 'dappeteer';
-import {TX_WAIT_TIMEOUT} from '../constants';
+import {TX_WAIT_TIMEOUT, USE_DAPPETEER} from '../constants';
 
 export async function uploadFile(
   page: Page,
@@ -82,13 +83,15 @@ export async function cancelDownload(page: Page): Promise<void> {
     // 100ms sloMo avoids some undiagnosed race conditions
     console.log('Opening browser');
 
-    const {browser, metamask} = await setUpBrowser(false, 6, 0);
+    const {browser, metamask} = await setUpBrowser(false, 5, 0);
 
     console.log('Waiting on pages');
     const web3tTabA = (await browser.pages())[0];
 
     console.log('Setting up logging...');
     await setupLogging(web3tTabA, 0, 'seed-download', true);
+
+    if (!USE_DAPPETEER) await setupFakeWeb3(web3tTabA, 5);
 
     await web3tTabA.goto('http://localhost:3000/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
