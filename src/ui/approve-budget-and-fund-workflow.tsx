@@ -6,7 +6,7 @@ import {useService} from '@xstate/react';
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
-import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK} from '../config';
+import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
 import {utils} from 'ethers';
 interface Props {
   service: ApproveBudgetAndFundService;
@@ -48,7 +48,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Text pb={3} fontSize={1}>
         You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your Metamask wallet to
         fund the channel. You can get more ETH{' '}
-        <Link target="_blank" href={`https://faucet.ropsten.be/`}>
+        <Link target="_blank" href={FAUCET_LINK}>
           here.
         </Link>
       </Text>

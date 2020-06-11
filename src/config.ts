@@ -68,3 +68,5 @@ export const HUB = {
 };
 
 export const TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';
+export const FAUCET_LINK =
+  TARGET_NETWORK === 'goerli' ? 'https://goerli-faucet.slock.it/' : 'https://faucet.ropsten.be/';
