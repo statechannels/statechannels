@@ -404,6 +404,6 @@ export async function prepareStubUploadFile(path: string, repeats = 20_000): Pro
 export async function takeScreenshot(tab: Page, file: string): Promise<void> {
   if (typeof SCREENSHOT_DIR === 'string') {
     if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR);
-    await tab.screenshot({path: path.join(SCREENSHOT_DIR, file)});
+    await tab.screenshot({path: path.join(SCREENSHOT_DIR, file), fullPage: true});
   }
 }
