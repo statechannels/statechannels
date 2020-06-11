@@ -109,8 +109,6 @@ export class MessagingService {
         } else if (isJsonRpcErrorResponse(event.data)) {
           reject(new RpcError(event.data.error));
         }
-      } else {
-        logger.error({event}, 'Received a non JsonRpc response');
       }
     };
 
