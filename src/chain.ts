@@ -8,7 +8,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
 
-import {Observable, fromEvent, from, merge} from 'rxjs';
+import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap} from 'rxjs/operators';
 import {One, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
@@ -413,7 +413,7 @@ export class ChainWatcher implements Chain {
       throw new Error('Not connected to contracts');
     }
 
-    const first = from(this.getChainInfo(channelId));
+    const polledData = interval(5000).pipe(flatMap(() => this.getChainInfo(channelId)));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
@@ -434,7 +434,7 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
-    return merge(first, depositEvents, assetTransferEvents);
+    return merge(polledData, depositEvents, assetTransferEvents);
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
