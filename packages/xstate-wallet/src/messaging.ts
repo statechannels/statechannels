@@ -160,8 +160,8 @@ export class MessagingService implements MessagingServiceInterface {
   public sendReloadMessage() {
     const notification: Notification = {
       jsonrpc: '2.0',
-      method: 'UIUpdate',
-      params: {showWallet: false, reloadPage: true}
+      method: 'ReloadPage',
+      params: {}
     };
     this.eventEmitter.emit('SendMessage', notification);
   }

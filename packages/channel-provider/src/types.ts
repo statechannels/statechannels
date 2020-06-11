@@ -85,6 +85,7 @@ export type MethodResponseType = {
   GetBudget: GetBudgetResponse['result'];
   CloseAndWithdraw: any; // TODO: Add types
   GetChannels: GetChannelsResponse['result'];
+  ReloadPage: any;
 };
 
 type Method =
@@ -100,7 +101,8 @@ type Method =
   | 'ApproveBudgetAndFund'
   | 'GetBudget'
   | 'CloseAndWithdraw'
-  | 'GetChannels';
+  | 'GetChannels'
+  | 'ReloadPage';
 
 type Request = {params: RequestParams['params']}; // Replace with union type
 type Call<K extends Method, T extends Request> = {
@@ -121,7 +123,8 @@ export type MethodRequestType =
   | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
   | Call<'GetBudget', GetBudgetRequest>
   | Call<'CloseAndWithdraw', any>
-  | Call<'GetChannels', GetChannelsRequest>;
+  | Call<'GetChannels', GetChannelsRequest>
+  | Call<'ReloadPage', any>;
 
 export interface EventType extends NotificationType {
   [id: string]: [unknown]; // guid

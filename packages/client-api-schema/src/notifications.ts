@@ -13,6 +13,8 @@ export type UiNotification = JsonRpcNotification<
   'UIUpdate',
   {showWallet: boolean; reloadPage?: boolean}
 >;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ReloadPageNotification = JsonRpcNotification<'ReloadPage', any>;
 
 export type Notification =
   | ChannelProposedNotification
@@ -20,7 +22,8 @@ export type Notification =
   | ChannelClosingNotification
   | BudgetUpdatedNotification
   | MessageQueuedNotification
-  | UiNotification;
+  | UiNotification
+  | ReloadPageNotification;
 
 type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
 

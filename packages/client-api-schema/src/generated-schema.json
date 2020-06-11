@@ -979,7 +979,32 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1224>": {
+    "JsonRpcNotification<\"ReloadPage\",any>": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ReloadPage"
+          ],
+          "type": "string"
+        },
+        "params": {
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1391>": {
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
@@ -1719,6 +1744,9 @@
         },
         {
           "$ref": "#/definitions/UiNotification"
+        },
+        {
+          "$ref": "#/definitions/ReloadPageNotification"
         }
       ]
     },
@@ -1759,6 +1787,9 @@
         "success"
       ],
       "type": "object"
+    },
+    "ReloadPageNotification": {
+      "$ref": "#/definitions/JsonRpcNotification%3C%22ReloadPage%22%2Cany%3E"
     },
     "Request": {
       "anyOf": [
@@ -1874,7 +1905,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1224%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-783-829-683137520-748-831-683137520-719-832-683137520-0-1391%3E"
     },
     "Uint256": {
       "description": "Uint256",
