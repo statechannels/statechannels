@@ -114,16 +114,16 @@ const arrangePeers = ({beneficiary, payer}: Peers): [Peer, Peer] => {
   return peers;
 };
 
-const formatParticipant = ({signingAddress, outcomeAddress}: Peer): Participant => ({
+const formatParticipant = ({signingAddress /*, outcomeAddress */}: Peer): Participant => ({
   participantId: signingAddress,
   signingAddress,
-  destination: outcomeAddress
+  destination: signingAddress // Using signingAddress for destination allows user to switch MetaMask accounts
 });
 const formatParticipants = (peers: Peers) => arrangePeers(peers).map(formatParticipant);
 
 const formatItem = (p: Peer): AllocationItem => ({
   amount: hexZeroPad(bigNumberify(p.balance).toHexString(), 32),
-  destination: p.outcomeAddress
+  destination: p.signingAddress // Using signingAddress for destination allows user to switch MetaMask accounts
 });
 const formatAllocations = (peers: Peers): Allocations => [
   {token: AddressZero, allocationItems: arrangePeers(peers).map(formatItem)}

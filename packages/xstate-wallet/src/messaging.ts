@@ -263,7 +263,7 @@ async function convertToInternalEvent(
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;
       const signingAddress = await store.getAddress();
-      const destination = store.chain.selectedAddress;
+      const destination = signingAddress; // Using signingAddress for destination allows user to switch MetaMask accounts
       if (!destination) {
         throw new Error('No selected destination');
       }
