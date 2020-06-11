@@ -1,6 +1,7 @@
 import {utils} from 'ethers';
 import prettier from 'prettier-bytes';
 import {WEI_PER_BYTE} from '../constants';
+import bigDecimal from 'js-big-decimal';
 
 export const calculateWei = (fileSize: number | string) => {
   if (!isNaN(Number(fileSize))) {
@@ -14,8 +15,10 @@ export const prettyPrintBytes = (wei: utils.BigNumber): string => {
 };
 
 export const prettyPrintWei = (wei: utils.BigNumber): string => {
+  const PRECISION = 1;
   const names = ['wei', 'kwei', 'Mwei', 'Gwei', 'szabo', 'finney', 'ether'];
   const decimals = [0, 3, 6, 9, 12, 15, 18];
+
   if (!wei) {
     return 'unknown';
   } else if (wei.eq(utils.bigNumberify(0))) {
@@ -25,12 +28,7 @@ export const prettyPrintWei = (wei: utils.BigNumber): string => {
     decimals.forEach((decimal, index, array) => {
       if (wei.gte(utils.bigNumberify(10).pow(decimal))) {
         formattedString =
-          wei.div(utils.bigNumberify(10).pow(decimal)).toString() +
-          '.' +
-          wei
-            .mod(utils.bigNumberify(10).pow(decimal))
-            .div(utils.bigNumberify(10).pow(decimal - 1)) // TODO: this doesn't do rounding properly
-            .toString() +
+          bigDecimal.divide(wei.toString(), utils.bigNumberify(10).pow(decimal), PRECISION) +
           ' ' +
           names[index];
       }
