@@ -34,7 +34,7 @@ const log = logger.trace.bind(logger);
 
   const messagingService = new MessagingService(store);
 
-  chain.accountChangedFeed.subscribe(() => {
+  chain.accountChangedFeed().subscribe(() => {
     logger.warn('Detected address change, sending message to parent to reload page');
     messagingService.sendReloadMessage();
   });

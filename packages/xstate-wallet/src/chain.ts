@@ -42,7 +42,7 @@ export interface Chain {
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
   challengeRegisteredFeed: (channelId: string) => Observable<ChallengeRegistered>;
   balanceUpdatedFeed(address: string): Observable<BigNumber>;
-  accountChangedFeed: Observable<string>;
+  accountChangedFeed: () => Observable<string>;
   // Setup / Web3 Specific
   ethereumEnable: () => Promise<string>;
   initialize(): Promise<void>;
@@ -205,7 +205,7 @@ export class FakeChain implements Chain {
     return from([BigNumber.from('0x999999999999')]);
   }
 
-  public accountChangedFeed = from([]);
+  public accountChangedFeed = () => from([]);
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
     const updates = fromEvent(this.eventEmitter, 'challengeRegistered').pipe(
@@ -419,10 +419,18 @@ export class ChainWatcher implements Chain {
     };
   }
 
-  public accountChangedFeed = fromEvent(window.ethereum, 'accountsChanged').pipe(
-    map((a: string[]) => a[0]),
-    filter(a => a !== this.selectedAddress)
-  );
+  public accountChangedFeed = () => {
+    // TODO: This is to avoid failures in the integration test
+    if (window.ethereum && !window.ethereum.fake) {
+      return fromEvent(window.ethereum, 'accountsChanged').pipe(
+        map((a: string[]) => a[0]),
+        filter(a => a !== this.selectedAddress)
+      );
+    } else {
+      return from([]);
+    }
+  };
+
   public balanceUpdatedFeed(address: string): Observable<BigNumber> {
     const first = from(this.provider.getBalance(address));
     const updates = fromEvent<BigNumber>(this.provider, 'block').pipe(
