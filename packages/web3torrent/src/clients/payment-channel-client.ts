@@ -178,9 +178,6 @@ export class PaymentChannelClient {
       this.budgetCache = budgetResult;
     });
   }
-  onBudgetUpdated(listener) {
-    return this.channelClient.onBudgetUpdated(listener);
-  }
 
   async initialize() {
     await this.channelClient.provider.mountWalletComponent(process.env.WALLET_URL);

@@ -258,7 +258,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.createPaymentChannel(torrent, wire);
           log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
-
           this.blockPeer(torrent.infoHash, wire);
         } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
           log.debug(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
@@ -469,6 +468,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
       this.emitTorrentUpdated(torrent.infoHash, TorrentEvents.ERROR);
     });
+
     const emitTorrentUpdated = (trigger: string) => () =>
       this.emitTorrentUpdated(torrent.infoHash, trigger);
     torrent.on(TorrentEvents.NOPEERS, emitTorrentUpdated(TorrentEvents.NOPEERS));
@@ -478,6 +478,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // These events are too frequent
     // torrent.on(TorrentEvents.DOWNLOAD, emitTorrentUpdated(TorrentEvents.DOWNLOAD));
     // torrent.on(TorrentEvents.UPLOAD, emitTorrentUpdated(TorrentEvents.UPLOAD));
+
+    torrent.usingPaidStreaming = true;
+    return torrent;
   }
 
   /**
