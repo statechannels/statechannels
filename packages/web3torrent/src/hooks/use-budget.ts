@@ -21,7 +21,13 @@ export function useBudget({ready}: {ready: boolean}) {
 
   const createBudget = async () => {
     setLoading(true);
-    await paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+    if (paymentChannelClient.enabled) {
+      await paymentChannelClient.createBudget(INITIAL_BUDGET_AMOUNT);
+    } else {
+      // enable will call create budget so we don't need to explicitly call it
+      await paymentChannelClient.enable();
+    }
+
     setBudget(paymentChannelClient.budgetCache);
     setLoading(false);
   };
