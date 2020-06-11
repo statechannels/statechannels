@@ -46,7 +46,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You don&#39;t have enough ETH in your wallet!
       </Text>
       <Text pb={3} fontSize={1}>
-        You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your wallet to fund the
+        You&#39;ll need at least {utils.formatEther(playerAmount)} ETH in your Metamask wallet to fund the
         channel. You can get more ETH{' '}
         <Link target="_blank" href={`https://faucet.ropsten.be/`}>
           here.
