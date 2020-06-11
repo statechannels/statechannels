@@ -1,4 +1,4 @@
-import {ChainWatcher, ChannelChainInfo, FakeChain} from '../chain';
+import {ChainWatcher, FakeChain} from '../chain';
 import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {
@@ -7,8 +7,7 @@ import {
   CHALLENGE_DURATION,
   TRIVIAL_APP_ADDRESS
 } from '../config';
-import {Machine, interpret, Interpreter} from 'xstate';
-import {map} from 'rxjs/operators';
+import {first} from 'rxjs/operators';
 import {Store, SignedState, State} from '../store';
 import {parseUnits} from '@ethersproject/units';
 import {JsonRpcProvider} from '@ethersproject/providers';
@@ -18,61 +17,14 @@ import {createSignatureEntry} from '../store/state-utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {Zero} from '@ethersproject/constants';
 
+jest.setTimeout(10_000);
+
 const chain = new ChainWatcher();
-
 const store = new Store(chain);
-
-const mockContext = {
-  channelId: randomChannelId(),
-  fundedAt: BigNumber.from('0'),
-  depositAt: BigNumber.from('0')
-};
-type Init = {
-  channelId: string;
-  depositAt: BigNumber;
-  totalAfterDeposit: BigNumber;
-  fundedAt: BigNumber;
-};
 
 const provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 
 let ETHAssetHolder: Contract;
-let service: Interpreter<any, any, any, any>;
-
-// this service to be invoked by a protocol xstate machine
-const subscribeDepositEvent = (ctx: Init) =>
-  store.chain.chainUpdatedFeed(ctx.channelId).pipe(
-    map((chainInfo: ChannelChainInfo) => {
-      if (chainInfo.amount.gte(ctx.fundedAt)) {
-        return 'FUNDED';
-      } else if (chainInfo.amount.gte(ctx.depositAt)) {
-        return 'SAFE_TO_DEPOSIT';
-      } else {
-        return 'NOT_SAFE_TO_DEPOSIT';
-      }
-    })
-  );
-
-const fundedEventSent = jest.fn();
-const safeToDepositEventSent = jest.fn();
-const notSafeToDepositEventSent = jest.fn();
-
-const mockMachine = Machine({
-  initial: 'init',
-  context: mockContext,
-  states: {
-    init: {
-      invoke: {
-        src: subscribeDepositEvent
-      },
-      on: {
-        FUNDED: {actions: fundedEventSent},
-        SAFE_TO_DEPOSIT: {actions: safeToDepositEventSent},
-        NOT_SAFE_TO_DEPOSIT: {actions: notSafeToDepositEventSent}
-      }
-    }
-  }
-});
 
 beforeAll(async () => {
   (window as any).ethereum = {enable: () => ['0xfec44e15328B7d1d8885a8226b0858964358F1D6']};
@@ -84,41 +36,30 @@ beforeAll(async () => {
     ContractArtifacts.EthAssetHolderArtifact.abi,
     signer
   );
-  service = interpret(mockMachine).start(); // observable should be subscribed to on entering initial state
 });
 
-afterEach(() => {
-  service.stop();
-});
+it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and sends correct event to xstate machine after a deposit', async () => {
+  const channelId = randomChannelId();
+  const updateEvent = store.chain
+    .chainUpdatedFeed(channelId)
+    .pipe(first(info => info.amount.eq(1)))
+    .toPromise();
 
-// TODO: Disabled to flickering/failing. See https://github.com/statechannels/monorepo/issues/2148
-// eslint-disable-next-line jest/no-disabled-tests
-it.skip('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and sends correct event to xstate machine after a deposit', async () => {
-  // const ethDepositedFilter = ETHAssetHolder.filters.Deposited();
-
-  const depositEvent = new Promise((resolve, reject) => {
-    ETHAssetHolder.on('Deposited', (from, to, amount, event) => {
-      event.removeListener();
-      resolve();
-    });
-
-    setTimeout(() => {
-      reject(new Error('timeout'));
-    }, 60000);
-  });
-
-  const tx = ETHAssetHolder.deposit(
-    mockContext.channelId, // destination
+  ETHAssetHolder.deposit(
+    channelId, // destination
     parseUnits('0', 'wei'), // expectedHeld
     parseUnits('1', 'wei'), // amount
-    {
-      value: parseUnits('1', 'wei') // msgValue
-    }
+    {value: parseUnits('1', 'wei')} // msgValue
   );
 
-  await (await tx).wait(); // wait for tx to be mined
-  await depositEvent; // wait for this test to detect the event being fired
-  expect(fundedEventSent).toHaveBeenCalled();
+  expect(await updateEvent).toMatchObject({
+    amount: {_hex: '0x01'},
+    finalized: false,
+    channelStorage: {
+      finalizesAt: {_hex: '0x00'},
+      turnNumRecord: {_hex: '0x00'}
+    }
+  });
 });
 
 it('correctly crafts a forceMove transaction (1x double-signed state)', async () => {
