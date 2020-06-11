@@ -8,6 +8,7 @@ import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
 import {DomainBudget} from '../store';
+import {TARGET_NETWORK} from '../config';
 
 interface Props {
   service: CloseLedgerAndWithdrawService;
@@ -77,7 +78,7 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
 
       <Text id="wait-for-transaction">
         Click{' '}
-        <Link target="_blank" href={`https://ropsten.etherscan.io/tx/${transactionId}`}>
+        <Link target="_blank" href={`https://${TARGET_NETWORK}.etherscan.io/tx/${transactionId}`}>
           here
         </Link>{' '}
         to follow the progress on etherscan.

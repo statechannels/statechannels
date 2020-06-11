@@ -35,6 +35,8 @@ export function getNetworkName(networkId: string | number) {
       return 'ropsten';
     case 4:
       return 'rinkeby';
+    case 5:
+      return 'goerli';
     case 42:
       return 'kovan';
     default:

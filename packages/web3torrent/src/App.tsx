@@ -55,7 +55,6 @@ const App: React.FC = () => {
           requiredNetwork={requiredNetwork}
           onWeb3Fallback={!('ethereum' in window)}
         />
-
         <Route path={RoutePath.Root}>
           <LayoutHeader />
         </Route>
