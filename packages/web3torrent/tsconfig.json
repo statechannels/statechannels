@@ -9,6 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "strict": true,
+    "noImplicitAny": false,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
