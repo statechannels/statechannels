@@ -30,8 +30,6 @@ import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
 
-import {isJsonRpcErrorResponse} from '@statechannels/channel-provider';
-
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
