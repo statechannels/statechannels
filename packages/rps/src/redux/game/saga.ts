@@ -74,7 +74,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       yield put(
         a.gotAddressFromWallet(
           window.channelProvider.signingAddress,
-          window.channelProvider.selectedAddress
+          window.channelProvider.destinationAddress
         )
       );
       break;

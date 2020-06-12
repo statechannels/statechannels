@@ -5,7 +5,7 @@ import {ErrorCodes} from '../error-codes';
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<{
   signingAddress: Address;
-  selectedAddress: Address;
+  destinationAddress: Address;
   walletVersion: string;
 }>;
 

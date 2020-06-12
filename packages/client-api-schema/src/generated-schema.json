@@ -297,10 +297,10 @@
       "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-502%3E"
     },
     "EnableEthereumResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-282-368-721393493-265-369-721393493-228-370-721393493-0-502%3E"
     },
     "ErrorResponse": {
       "anyOf": [
@@ -360,10 +360,10 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "GetWalletInformationRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-336%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-339%3E"
     },
     "GetWalletInformationResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-333-825486248-226-334-825486248-183-335-825486248-0-336%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-336-825486248-226-337-825486248-183-338-825486248-0-339%3E"
     },
     "JoinChannelParams": {
       "additionalProperties": false,
@@ -1173,7 +1173,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-499>": {
+    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-502>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1309,7 +1309,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-336>": {
+    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-339>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1556,7 +1556,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-721393493-282-365-721393493-265-366-721393493-228-367-721393493-0-499>": {
+    "JsonRpcResponse<structure-721393493-282-368-721393493-265-369-721393493-228-370-721393493-0-502>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1571,7 +1571,7 @@
         "result": {
           "additionalProperties": false,
           "properties": {
-            "selectedAddress": {
+            "destinationAddress": {
               "$ref": "#/definitions/Address"
             },
             "signingAddress": {
@@ -1583,7 +1583,7 @@
           },
           "required": [
             "signingAddress",
-            "selectedAddress",
+            "destinationAddress",
             "walletVersion"
           ],
           "type": "object"
@@ -1628,7 +1628,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-825486248-243-333-825486248-226-334-825486248-183-335-825486248-0-336>": {
+    "JsonRpcResponse<structure-825486248-243-336-825486248-226-337-825486248-183-338-825486248-0-339>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1643,7 +1643,7 @@
         "result": {
           "additionalProperties": false,
           "properties": {
-            "selectedAddress": {
+            "destinationAddress": {
               "anyOf": [
                 {
                   "$ref": "#/definitions/Address"
@@ -1662,7 +1662,7 @@
           },
           "required": [
             "signingAddress",
-            "selectedAddress",
+            "destinationAddress",
             "walletVersion"
           ],
           "type": "object"
