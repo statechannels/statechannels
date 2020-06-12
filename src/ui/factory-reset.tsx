@@ -24,5 +24,6 @@ const destroyStore = async (store: Store) => {
   if (confirm('Are you sure you want to delete your store?')) {
     logger.error({store: await (store as any).backend.dump()}, 'Wallet destroyed');
     await Dexie.delete(DB_NAME);
+    window.location.reload();
   }
 };
