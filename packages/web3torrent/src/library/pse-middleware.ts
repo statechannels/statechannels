@@ -23,6 +23,6 @@ export default function usePaidStreamingExtension(
 
 export type PaidStreamingExtensionOptions = {
   pseAccount: string;
-  paymentChannelClient?: PaymentChannelClient;
+  paymentChannelClient: PaymentChannelClient;
   outcomeAddress: string;
 };

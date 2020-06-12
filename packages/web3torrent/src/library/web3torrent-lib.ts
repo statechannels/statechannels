@@ -44,7 +44,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
 
-  constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
+  constructor(opts: WebTorrent.Options & PaidStreamingExtensionOptions) {
     super({tracker: {announce: defaultTrackers}, ...opts});
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
@@ -57,9 +57,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   async enable() {
     if (!this.pseAccount || !this.outcomeAddress) {
       await this.paymentChannelClient.enable();
-      this.pseAccount = this.paymentChannelClient.mySigningAddress;
-      this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
-      this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
+      this.pseAccount = this.paymentChannelClient.mySigningAddress || '';
+      this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress || '';
+      this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount || ''});
 
       log.debug({pseAccount: this.pseAccount}, 'PSEAccount set to sc-wallet signing address');
       log.debug(
@@ -72,8 +72,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   /** Utility function. Disables the client capabilities to seed or leech torrents  */
   async disable() {
     log.warn('Disabling WebTorrentPaidStreamingClient');
-    this.pseAccount = null;
-    this.outcomeAddress = null;
+    this.pseAccount = '';
+    this.outcomeAddress = '';
   }
 
   /**
@@ -88,7 +88,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.ensureEnabled();
 
     let torrent: PaidStreamingTorrent;
-    let options: ExtendedTorrentOptions = {createdBy: this.pseAccount, announce: defaultTrackers};
+    let options: ExtendedTorrentOptions = {
+      createdBy: this.pseAccount || undefined,
+      announce: defaultTrackers
+    };
 
     if ((input as FileList).length && (input as FileList).length > 1) {
       options.name = 'various.zip';
@@ -221,7 +224,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       // sets out custom extension. See https://github.com/webtorrent/bittorrent-protocol#extension-protocol-bep-10
       paidStreamingExtension({
         pseAccount: this.pseAccount,
-        outcomeAddress: this.outcomeAddress
+        outcomeAddress: this.outcomeAddress,
+        paymentChannelClient: this.paymentChannelClient
       })
     );
     wire.setKeepAlive(true); //  enables the keep-alive ping (triggered every 60s).
@@ -314,9 +318,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const isClosed = channelState.status === 'closed';
         if (isClosed) {
           if (isLeechingChannel) {
-            wire.paidStreamingExtension.leechingChannelId = null;
+            wire.paidStreamingExtension.leechingChannelId = '';
           } else {
-            wire.paidStreamingExtension.seedingChannelId = null;
+            wire.paidStreamingExtension.seedingChannelId = '';
           }
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
@@ -351,12 +355,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     const seeder = peer(
       this.pseAccount,
-      this.paymentChannelClient.myEthereumSelectedAddress,
+      this.paymentChannelClient.myEthereumSelectedAddress || '',
       hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32)
     );
     const leecher = peer(
-      peerAccount,
-      peerOutcomeAddress,
+      peerAccount || '',
+      peerOutcomeAddress || '',
       hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32)
     );
     const peers: Peers = {beneficiary: seeder, payer: leecher};
@@ -364,7 +368,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.paidStreamingExtension.seedingChannelId = channelId;
     this.peersList[torrent.infoHash][channelId] = {
-      id: peerAccount,
+      id: peerAccount || '',
       wire,
       buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
       beneficiaryBalance: '0', // (wei)
@@ -383,7 +387,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
     // querying channel client for updated balance
     const newBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].beneficiary.balance
+      this.paymentChannelClient.channelCache[channelId]?.beneficiary.balance || 0
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(newBalance.sub(bigNumberify(peer.beneficiaryBalance)));
@@ -510,7 +514,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     let tailBytes = 0;
 
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
-    if (this.needsToPayTheLastPiece(torrent, peerAccount)) {
+    if (this.needsToPayTheLastPiece(torrent, peerAccount || '')) {
       numBlocksToPayFor = numBlocksToPayFor - 1;
       tailBytes = torrent.store.store.lastChunkLength;
     }
@@ -519,7 +523,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.debug(`<< STOP ${peerAccount} - About to pay ${amountToPay.toString()}`);
     await this.paymentChannelClient.makePayment(leechingChannelId, amountToPay.toString());
 
-    const balance = this.paymentChannelClient.channelCache[leechingChannelId].beneficiary.balance;
+    const balance = this.paymentChannelClient.channelCache[leechingChannelId]?.beneficiary.balance;
     log.debug(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${downloaded}`);
   }
 
@@ -565,10 +569,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     try {
       await this.paymentChannelClient.closeChannel(channelId);
       if (channelId === wire.paidStreamingExtension.leechingChannelId) {
-        wire.paidStreamingExtension.leechingChannelId = null;
+        wire.paidStreamingExtension.leechingChannelId = '';
         log.info(`Payment Channel closed: ${channelId}`);
       } else {
-        wire.paidStreamingExtension.seedingChannelId = null;
+        wire.paidStreamingExtension.seedingChannelId = '';
         log.info(`Paying Channel closed: ${channelId}`);
       }
     } catch (error) {
