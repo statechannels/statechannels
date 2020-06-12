@@ -6,7 +6,7 @@ import {
   ChallengeRegisteredEvent,
   SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
-import {Contract, Wallet, BigNumber, BigNumberish} from 'ethers';
+import {Contract, Wallet, BigNumber, BigNumberish, utils} from 'ethers';
 
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
@@ -235,7 +235,9 @@ export class FakeChain implements Chain {
 }
 
 const chainLogger = logger.child({module: 'chain'});
-
+// Sets a default of gas price 15 Gwei which is more than enough to get picked up in goerli
+// This prevents issues with metamask incorrectly estimating 0 gas
+const GAS_PRICE = utils.parseUnits('15', 'gwei');
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
@@ -334,9 +336,10 @@ export class ChainWatcher implements Chain {
       to: NITRO_ADJUDICATOR_ADDRESS
     };
 
-    const response = await this.signer.sendTransaction(
-      convertNitroTransactionRequest(transactionRequest)
-    );
+    const response = await this.signer.sendTransaction({
+      ...convertNitroTransactionRequest(transactionRequest),
+      gasPrice: GAS_PRICE
+    });
     return response.hash;
   }
 
@@ -355,9 +358,10 @@ export class ChainWatcher implements Chain {
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
     };
-    const response = await this.signer.sendTransaction(
-      convertNitroTransactionRequest(transactionRequest)
-    );
+    const response = await this.signer.sendTransaction({
+      ...convertNitroTransactionRequest(transactionRequest),
+      gasPrice: GAS_PRICE
+    });
     const tx = await response.wait();
     return tx.transactionHash;
   }
@@ -372,9 +376,11 @@ export class ChainWatcher implements Chain {
       to: ETH_ASSET_HOLDER_ADDRESS,
       value: amount
     };
-    const response = await this.signer.sendTransaction(
-      convertNitroTransactionRequest(transactionRequest)
-    );
+    const response = await this.signer.sendTransaction({
+      ...convertNitroTransactionRequest(transactionRequest),
+      gasPrice: GAS_PRICE
+    });
+
     chainLogger.trace({response}, 'Deposit successful from %s', response.from);
     return response.hash;
   }
