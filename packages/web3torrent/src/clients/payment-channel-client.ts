@@ -162,7 +162,10 @@ if (process.env.FAKE_CHANNEL_PROVIDER === 'true') {
 export class PaymentChannelClient {
   channelCache: Record<string, ChannelState | undefined> = {};
   budgetCache?: DomainBudget;
-
+  _enabled = false;
+  get enabled(): boolean {
+    return this._enabled;
+  }
   get mySigningAddress(): string | undefined {
     return this.channelClient.signingAddress;
   }
@@ -201,6 +204,7 @@ export class PaymentChannelClient {
       log.debug('Virtual Funding - Creating Budget');
       await this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
+    this._enabled = true;
   }
 
   private initializeHubComms() {
