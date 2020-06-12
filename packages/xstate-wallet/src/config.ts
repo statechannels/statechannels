@@ -66,3 +66,7 @@ export const HUB = {
   signingAddress: HUB_ADDRESS,
   participantId: 'firebase:simple-hub'
 };
+
+export const TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';
+export const FAUCET_LINK =
+  TARGET_NETWORK === 'goerli' ? 'https://goerli-faucet.slock.it/' : 'https://faucet.ropsten.be/';

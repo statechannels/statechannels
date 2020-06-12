@@ -309,7 +309,7 @@ jobs:
     environment:
       SCREENSHOT_DIR: 'screenshots'
       LOG_DESTINATION: '../../logs'
-      SC_ENV: production-ropsten
+      SC_ENV: production-goerli
     steps:
       - integration-test:
           app: web3torrent
@@ -343,7 +343,7 @@ jobs:
     <<: *defaults
     resource_class: large
     environment:
-      SC_ENV: production-ropsten
+      SC_ENV: production-goerli
     steps:
       - checkout
       - log_stats:

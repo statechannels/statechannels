@@ -10,7 +10,8 @@ import {
   SCREENSHOT_DIR,
   RPC_ENDPOINT,
   CHAIN_NETWORK_ID,
-  LOG_DESTINATION
+  LOG_DESTINATION,
+  USING_EXTERNAL_CHAIN
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -134,19 +135,19 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
   await page.evaluateOnNewDocument(`
     window.web3 = new Web3(new Web3.providers.HttpProvider("${RPC_ENDPOINT}"));
     ${
-      TARGET_NETWORK === 'ropsten'
+      USING_EXTERNAL_CHAIN
         ? 'window.web3.eth.accounts.wallet.add("0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce");'
         : ''
     }
 
     window.ethereum = window.web3.currentProvider;
-    ${TARGET_NETWORK === 'ropsten' ? 'window.ethereum.mockingInfuraProvider = true;' : ''}
+    ${USING_EXTERNAL_CHAIN ? 'window.ethereum.mockingInfuraProvider = true;' : ''}
 
     window.ethereum.enable = () => new Promise(r => {
       console.log("[puppeteer] window.ethereum.enable() was called");
       web3.eth.getAccounts().then(lst => {
         web3.eth.defaultAccount = ${
-          TARGET_NETWORK === 'ropsten'
+          USING_EXTERNAL_CHAIN
             ? '"0x7e4ABd63A7C8314Cc28D388303472353D884f292"'
             : `lst[${ganacheAccountIndex}]`
         };
