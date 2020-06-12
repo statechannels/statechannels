@@ -340,11 +340,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       }
     });
 
-    {
-      const msg = 'Wire Setup completed';
-      log.info(msg);
-      log.debug({wire}, msg);
-    }
+    const msg = 'Wire Setup completed';
+    log.info(msg);
+    log.debug({wire}, msg);
   }
 
   /** Creates a payment channel, and sets the channelId property, sent to the leecher on the STOP events to leeching peers  */
