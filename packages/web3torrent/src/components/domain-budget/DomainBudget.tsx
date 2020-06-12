@@ -134,7 +134,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
               />
               <div className="identity">
                 <Tooltip
-                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress}
+                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress || 'unknown'}
                   interactive
                   arrow
                   placement="top"
