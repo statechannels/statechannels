@@ -119,11 +119,7 @@ export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySi
         state.payer.signingAddress === mySigningAddress ||
         state.beneficiary.signingAddress === mySigningAddress
     )
-    .filter(
-      state =>
-        web3TorrentClient.paymentChannelClient.channelIdToTorrentMap[state.channelId] ==
-        torrent.infoHash
-    )
+    .filter(state => web3TorrentClient.channelIdToTorrentMap[state.channelId] === torrent.infoHash)
     .sort(
       (state1, state2) =>
         statuses.indexOf(state1.status) - statuses.indexOf(state2.status) ||
