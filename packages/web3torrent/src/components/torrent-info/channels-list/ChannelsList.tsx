@@ -1,6 +1,6 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
-import React from 'react';
+import React, {useContext} from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
@@ -8,6 +8,7 @@ import {utils} from 'ethers';
 import {TorrentUI} from '../../../types';
 import {Blockie} from 'rimble-ui';
 import {Badge, Avatar, Tooltip} from '@material-ui/core';
+import {Web3TorrentClientContext} from '../../../clients/web3torrent-client';
 
 type UploadInfoProps = {
   torrent: TorrentUI;
@@ -131,12 +132,21 @@ function channelIdToTableRow(
 
 export const ChannelsList: React.FC<UploadInfoProps> = ({torrent, channels, mySigningAddress}) => {
   const statuses = ['running', 'closing', 'proposing', 'closed'];
-
+  const web3TorrentClient = useContext(Web3TorrentClientContext);
   const channelsInfo = _.keys(channels)
     .filter(
       id =>
         channels[id].payer.signingAddress === mySigningAddress ||
         channels[id].beneficiary.signingAddress === mySigningAddress
+    )
+    .filter(id =>
+      web3TorrentClient.torrents
+        .find(t => t.infoHash === torrent.infoHash)
+        ?.wires.find(
+          wire =>
+            wire.paidStreamingExtension.seedingChannelId === id ||
+            wire.paidStreamingExtension.leechingChannelId === id
+        )
     )
     .sort(
       (id1, id2) =>
