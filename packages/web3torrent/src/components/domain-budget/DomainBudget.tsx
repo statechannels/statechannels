@@ -134,7 +134,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
               />
               <div className="identity">
                 <Tooltip
-                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress}
+                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress || 'unknown'}
                   interactive
                   arrow
                   placement="top"
@@ -155,7 +155,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
             </div>
           </td>
           <td className="budget-progress-bars">
-            <span>Unused receive capacity</span>
+            <span>Available receive capacity</span>
             <LinearProgressWithLabel
               variant="determinate"
               value={hubBalanceFreePercentage}
@@ -176,7 +176,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
               label={prettyPrintWei(myBalanceLocked)}
               className={'bar locked-me'}
             />
-            <span>Unused spend capacity</span>
+            <span>Available spend capacity</span>
             <LinearProgressWithLabel
               variant="determinate"
               value={myBalanceFreePercentage}
