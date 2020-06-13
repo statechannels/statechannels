@@ -51,7 +51,7 @@ describe('One file, six leechers, one seeder', () => {
   ) => await Promise.all(labelsToMap.map(async label => await cb(actors[label], label)));
 
   afterAll(async () => {
-    await forEachActor(({tab}, label) => takeScreenshot(tab, `seed-download-cancel.${label}.png`));
+    await forEachActor(({tab}, label) => takeScreenshot(tab, `seed-download-cancel.${label}`));
     CLOSE_BROWSERS && (await forEachActor(async ({browser}) => browser.close()));
   });
 

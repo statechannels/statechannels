@@ -46,7 +46,7 @@ describe('withdrawal from a ledger channel', () => {
   });
 
   afterAll(async () => {
-    await takeScreenshot(web3tTabA, 'withdraw.png');
+    await takeScreenshot(web3tTabA, 'withdraw');
     CLOSE_BROWSERS && browser && (await browser.close());
   });
 

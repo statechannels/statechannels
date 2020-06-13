@@ -69,7 +69,7 @@ describe('Optional Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 

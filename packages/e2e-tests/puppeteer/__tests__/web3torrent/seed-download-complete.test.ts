@@ -70,7 +70,7 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
