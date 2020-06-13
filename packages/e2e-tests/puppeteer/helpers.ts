@@ -28,6 +28,15 @@ export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   await walletIframe.waitForSelector(':root', {hidden: true, timeout: TX_WAIT_TIMEOUT});
 };
 
+export const expectWalletToBeHidden = async (page: Page): Promise<void> => {
+  const walletIframe = page.frames()[1];
+  await expect(walletIframe.select(':root')).rejects.toThrow();
+};
+
+export const expectSelector = async (page: Page, selector: string): Promise<void> => {
+  await expect(page.select(selector)).resolves.not.toThrow();
+};
+
 const logDistinguisherCache: Record<string, true | undefined> = {};
 export async function setupLogging(
   page: Page,
@@ -344,15 +353,14 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
   const cb = `cb${doneFuncCounter}`;
 
-  return new Promise(
-    (resolve, reject) =>
-      setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
-      page
-        .exposeFunction(doneFunc, resolve)
-        .then(() => {
-          page
-            .evaluate(
-              `
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000);
+    page
+      .exposeFunction(doneFunc, resolve)
+      .then(() => {
+        page
+          .evaluate(
+            `
               ${cb} = channelStatus => {
                 if (${done}) {
                   window.${doneFunc}('Done');
@@ -361,11 +369,11 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
               }
               window.channelProvider.on('ChannelUpdated', ${cb});
               `
-            )
-            .catch(reject);
-        })
-        .catch(reject)
-  );
+          )
+          .catch(reject);
+      })
+      .catch(reject);
+  });
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
@@ -386,6 +394,10 @@ export const waitForNthState = async (page: Page, n = 50): Promise<void> => {
 };
 export const waitForClosedState = async (page: Page): Promise<void> => {
   return doneWhen(page, `channelStatus.status === 'closed'`);
+};
+
+export const waitForRunningState = async (page: Page): Promise<any> => {
+  return doneWhen(page, `channelStatus.status === 'running'`);
 };
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
