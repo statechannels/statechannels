@@ -24,7 +24,8 @@ import {
   waitForClosedState,
   waitForRunningState,
   waitForTransactionIfNecessary,
-  expectSelector
+  expectSelector,
+  waitForNthState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -98,9 +99,11 @@ describe('Optional Integration Tests', () => {
 
     await waitForTransactionIfNecessary(web3tTabB);
     await forEachTab(waitForRunningState);
+    console.log('Downloading');
     await expectSelector(web3tTabB, '.status.downloading');
 
-    console.log('Downloading');
+    await waitForNthState(web3tTabB, 10);
+    await expectSelector(web3tTabB, '.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
