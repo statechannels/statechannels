@@ -10,9 +10,7 @@ import {
   setupLogging,
   setupFakeWeb3,
   waitForNthState,
-  takeScreenshot,
-  waitForClosedState,
-  expectSelector
+  takeScreenshot
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -94,19 +92,19 @@ describe('One file, six leechers, one seeder', () => {
     await cancelDownload(actors.C.tab);
 
     console.log('Waiting for channels to close');
-    await forEachActor(({tab}) => waitForClosedState(tab));
 
     await forEachActor(async ({tab}, label) => {
+      const timeout = 60_000;
       switch (label) {
         case Label.A:
-          return expectSelector(tab, '[data-test-selector=numPeers]');
+          return tab.waitForSelector('[data-test-selector=numPeers]', {timeout});
         case Label.C:
           // This is the "Start download" button
-          return expectSelector(tab, '#download-button');
+          return tab.waitForSelector('#download-button', {timeout});
 
         default:
           // This is the "Download the file" button
-          return expectSelector(tab, '.DownloadLink.button');
+          return tab.waitForSelector('.DownloadLink.button', {timeout});
       }
     });
   });
