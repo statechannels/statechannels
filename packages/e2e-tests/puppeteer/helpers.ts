@@ -33,7 +33,12 @@ export const expectWalletToBeHidden = async (page: Page): Promise<void> => {
   await expect(walletIframe.select(':root')).rejects.toThrow();
 };
 
-export const expectSelector = async (page: Page, selector: string, value?: any): Promise<void> => {
+export const expectSelector = async (
+  page: Page,
+  selector: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value?: any
+): Promise<typeof value> => {
   if (value) {
     await expect(page.waitForSelector(selector, {timeout: 1000})).resolves.toEqual(value);
   } else {
@@ -358,7 +363,7 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   const cb = `cb${doneFuncCounter}`;
 
   return new Promise((resolve, reject) => {
-    setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000);
+    setTimeout(() => reject(`Timed out waiting for ${done}`), 45_000);
     page
       .exposeFunction(doneFunc, resolve)
       .then(() => {
@@ -400,7 +405,7 @@ export const waitForClosedState = async (page: Page): Promise<void> => {
   return doneWhen(page, `channelStatus.status === 'closed'`);
 };
 
-export const waitForRunningState = async (page: Page): Promise<any> => {
+export const waitForRunningState = async (page: Page): Promise<void> => {
   return doneWhen(page, `channelStatus.status === 'running'`);
 };
 

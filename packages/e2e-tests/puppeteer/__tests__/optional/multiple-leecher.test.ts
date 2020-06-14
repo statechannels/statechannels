@@ -88,8 +88,8 @@ describe('One file, six leechers, one seeder', () => {
     await forEachActor(({tab}) => waitAndOpenChannel(USES_VIRTUAL_FUNDING)(tab));
 
     console.log('Downloading');
-    await forEachActor(({tab}) => waitForNthState(tab, 10));
 
+    await waitForNthState(actors.C.tab, 10);
     console.log('C cancels download');
     await cancelDownload(actors.C.tab);
 
