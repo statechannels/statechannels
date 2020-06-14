@@ -98,7 +98,7 @@ describe('Optional Integration Tests', () => {
 
     await waitForTransactionIfNecessary(web3tTabB);
     await forEachTab(waitForRunningState);
-    await expectSelector(web3tTabB, '.positive.downloading');
+    await expectSelector(web3tTabB, '.status.downloading');
 
     console.log('Downloading');
 
