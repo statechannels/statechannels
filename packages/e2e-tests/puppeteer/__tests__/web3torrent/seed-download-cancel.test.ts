@@ -17,12 +17,14 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   takeScreenshot,
-  waitForTransactionIfNecessary
+  waitForClosedState,
+  waitForRunningState,
+  waitForTransactionIfNecessary,
+  expectSelector
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -95,11 +97,10 @@ describe('Optional Integration Tests', () => {
     }
 
     await waitForTransactionIfNecessary(web3tTabB);
+    await forEachTab(waitForRunningState);
+    await expectSelector(web3tTabB, '.positive.downloading');
 
-    // Let the download continue for some time
     console.log('Downloading');
-
-    await web3tTabB.waitForSelector('.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -107,11 +108,9 @@ describe('Optional Integration Tests', () => {
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for the "Restart Download" button to appear');
-    await waitForFinishedOrCanceledDownload(web3tTabB);
-
-    console.log('Wait for the "closed" state');
-    await forEachTab(tab => tab.waitForSelector('.channel.closed'));
+    console.log('Wait for the channel to be closed');
+    await forEachTab(waitForClosedState);
+    await expectSelector(web3tTabB, '.channel.closed');
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.exchanged > .amount');

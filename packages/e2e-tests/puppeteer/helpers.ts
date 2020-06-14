@@ -33,8 +33,12 @@ export const expectWalletToBeHidden = async (page: Page): Promise<void> => {
   await expect(walletIframe.select(':root')).rejects.toThrow();
 };
 
-export const expectSelector = async (page: Page, selector: string): Promise<void> => {
-  await expect(page.select(selector)).resolves.not.toThrow();
+export const expectSelector = async (page: Page, selector: string, value?: any): Promise<void> => {
+  if (value) {
+    await expect(page.waitForSelector(selector, {timeout: 1000})).resolves.toEqual(value);
+  } else {
+    await expect(page.waitForSelector(selector, {timeout: 1000})).resolves.not.toThrow();
+  }
 };
 
 const logDistinguisherCache: Record<string, true | undefined> = {};
@@ -407,7 +411,7 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   await closingIframeB.waitForSelector(closingText);
 }
 
-export async function prepareStubUploadFile(path: string, repeats = 20_000): Promise<void> {
+export async function prepareStubUploadFile(path: string, repeats: number): Promise<void> {
   const uniqueContent = Date.now();
   console.log(`Make Stub file with seed ${Date.now()}`);
   const content = `web3torrent-${uniqueContent}\n`.repeat(repeats);
