@@ -183,7 +183,8 @@ export async function setUpBrowser(
   headless: boolean,
   etherlimeAccountIndex?: number,
   slowMo?: number,
-  usePipe = false
+  usePipe = false,
+  devtools = !headless
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;
@@ -192,7 +193,7 @@ export async function setUpBrowser(
       headless,
       slowMo,
       pipe: usePipe,
-      devtools: !headless,
+      devtools,
       // Keep code here for convenience... if you want to use redux-dev-tools
       // then download and unzip the release from Github and specify the location.
       // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases
