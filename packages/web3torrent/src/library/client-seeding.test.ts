@@ -11,6 +11,8 @@ import WebTorrentPaidStreamingClient, {ClientEvents, PaidStreamingTorrent} from 
 import {PaymentChannelClient} from '../clients/payment-channel-client';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 
+jest.setTimeout(20_000);
+
 async function defaultClient(): Promise<WebTorrentPaidStreamingClient> {
   const client = new WebTorrentPaidStreamingClient({
     dht: false,
