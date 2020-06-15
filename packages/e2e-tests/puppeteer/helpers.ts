@@ -16,6 +16,7 @@ import {
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
+import {BigNumber, utils} from 'ethers';
 
 const writeFile = promisify(fs.writeFile);
 
@@ -408,4 +409,13 @@ export async function takeScreenshot(tab: Page, file: string): Promise<void> {
     if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR);
     await tab.screenshot({path: path.join(SCREENSHOT_DIR, file), fullPage: true});
   }
+}
+
+export async function getCurrentBalance(page: Page, address: string): Promise<BigNumber> {
+  const balance = (await page.evaluate(
+    ` new Promise((resolve,reject)=>web3.eth.getBalance('${address}',(error,wei)=>resolve(wei.toString(10))))`
+  )) as string;
+  console.log(balance);
+  console.log(`Balance for ${address} is ${utils.formatUnits(balance, 'ether')}`);
+  return BigNumber.from(balance);
 }

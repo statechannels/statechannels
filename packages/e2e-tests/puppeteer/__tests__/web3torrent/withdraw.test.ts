@@ -8,7 +8,8 @@ import {
   waitForEmptyBudget,
   setupLogging,
   setupFakeWeb3,
-  takeScreenshot
+  takeScreenshot,
+  getCurrentBalance
 } from '../../helpers';
 import {
   JEST_TIMEOUT,
@@ -23,11 +24,13 @@ import {uploadFile} from '../../scripts/web3torrent';
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(JEST_TIMEOUT);
+
 let browser: Browser;
 let metamask: Dappeteer;
 
 let web3tTabA: Page;
 const itOrSkip = USES_VIRTUAL_FUNDING ? it : it.skip;
+
 describe('withdrawal from a ledger channel', () => {
   beforeAll(async () => {
     // 100ms sloMo avoids some undiagnosed race conditions
@@ -51,12 +54,31 @@ describe('withdrawal from a ledger channel', () => {
   });
 
   itOrSkip('allows a player to withdraw funds from the ledger channel', async () => {
+    const initialBalance = await getCurrentBalance(
+      web3tTabA,
+      '0x760bf27cd45036a6C486802D30B5D90CfFBE31FE'
+    );
+
     await uploadFile(web3tTabA, USES_VIRTUAL_FUNDING, metamask);
 
     await waitForBudgetEntry(web3tTabA);
+    const balanceAfterDeposit = await getCurrentBalance(
+      web3tTabA,
+      '0x760bf27cd45036a6C486802D30B5D90CfFBE31FE'
+    );
+
+    // eslint-disable-next-line jest/no-standalone-expect
+    expect(balanceAfterDeposit.lt(initialBalance)).toBe(true);
 
     await withdrawAndWait(web3tTabA, metamask);
 
     await waitForEmptyBudget(web3tTabA);
+    const balanceAfterWithdrawal = await getCurrentBalance(
+      web3tTabA,
+      '0x760bf27cd45036a6C486802D30B5D90CfFBE31FE'
+    );
+
+    // eslint-disable-next-line jest/no-standalone-expect
+    expect(balanceAfterWithdrawal.gt(balanceAfterDeposit)).toBe(true);
   });
 });
