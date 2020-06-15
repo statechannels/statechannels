@@ -2,6 +2,11 @@ import {web3TorrentClient} from '../clients/web3torrent-client';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
+import {from, noop, Subscription} from 'rxjs';
+import {safeUnsubscribe, safeUnsubscribeFromFunction} from '../utils/react-utls';
+import {logger} from '../logger';
+
+const log = logger.child({module: 'use-budget'});
 
 export function useBudget({ready}: {ready: boolean}) {
   const {paymentChannelClient} = web3TorrentClient;
@@ -9,14 +14,23 @@ export function useBudget({ready}: {ready: boolean}) {
   const [budget, setBudget] = useState<DomainBudget>(undefined);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const getAndSetBudget = async () => {
-      const budget = await paymentChannelClient.getBudget();
-
+    const setBudget = budget => {
       setBudget(budget);
       setLoading(false);
     };
-    if (ready) getAndSetBudget();
-    return paymentChannelClient.channelClient.onBudgetUpdated(getAndSetBudget);
+    const getBudget = () => from(paymentChannelClient.getBudget());
+
+    let getBudgetSubscription: Subscription;
+    if (ready) {
+      getBudgetSubscription = getBudget().subscribe(setBudget);
+    }
+    const onBudgetUpdatedSubscription = paymentChannelClient.channelClient.onBudgetUpdated(() =>
+      getBudget().subscribe(setBudget)
+    );
+    return () => {
+      safeUnsubscribe(getBudgetSubscription, log)();
+      safeUnsubscribeFromFunction(onBudgetUpdatedSubscription, log)();
+    };
   }, [ready, paymentChannelClient]);
 
   const createBudget = async () => {
