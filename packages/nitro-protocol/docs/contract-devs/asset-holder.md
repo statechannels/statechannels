@@ -9,7 +9,7 @@ AssetHolder.sol is a base contract that it is not actually deployed. It is inher
 
 In Nitro a payout is of one of two types: it is either a payout to a channel participant or it is a payout to another channel. It is this second type of payout that allows channels to fund one another in Nitro, enabling the virtual channels that are used to build state channel networks.
 
-Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../natspec/IAssetHolder) interface and
+Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../contract-api/natspec/IAssetHolder) interface and
 
 1. Interprets final outcomes supplied by adjudicator contracts
 2. Allows escrowed assets to be transferred from channels to their beneficiaries

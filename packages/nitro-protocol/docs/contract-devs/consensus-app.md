@@ -3,7 +3,7 @@ id: consensus-app
 title: ConsensusApp.sol
 ---
 
-The Consensus App (or Consensus Game) is a [`ForceMoveApp`](../natspec/ForceMoveApp) compliant application which can be used by participants who wish to reach unanimous consensus about a new outcome. Its purpose is to allow the channel outcome to be updated if and only if all participants are in agreement. This is in contrast to a generic `ForceMoveApp`, where the current mover has a unilateral right to update the channel outcome (as long as the update conforms to the generic transition rules).
+The Consensus App (or Consensus Game) is a [`ForceMoveApp`](../contract-api/natspec/ForceMoveApp) compliant application which can be used by participants who wish to reach unanimous consensus about a new outcome. Its purpose is to allow the channel outcome to be updated if and only if all participants are in agreement. This is in contrast to a generic `ForceMoveApp`, where the current mover has a unilateral right to update the channel outcome (as long as the update conforms to the generic transition rules).
 
 Please see the [API](../contract-api/natspec/ConsensusApp).
 

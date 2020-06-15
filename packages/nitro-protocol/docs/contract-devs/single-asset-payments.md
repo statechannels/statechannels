@@ -7,7 +7,7 @@ Although Nitro supports a mixture of ETH and ERC20 tokens to be escrowed into a 
 
 ## Implementation
 
-Please see the [API](../natspec/SingleAssetPayments).
+Please see the [API](../contract-api/natspec/SingleAssetPayments).
 
 - Decode the information
 - Revert if (on either state):

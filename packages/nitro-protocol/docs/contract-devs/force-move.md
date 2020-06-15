@@ -12,7 +12,7 @@ ForceMove is a state channel execution framework. It:
 3. Enables disputes to be raised and adjudicated;
 4. Allows for a final **outcome** to be registered against a unique `channelId`.
 
-This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../natspec/ForceMove).
+This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../contract-api/natspec/ForceMove).
 
 ---
 
