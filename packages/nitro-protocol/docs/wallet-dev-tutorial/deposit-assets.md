@@ -3,7 +3,7 @@ id: deposit-assets
 title: Deposit Assets
 ---
 
-Early on in the lifecycle of a state channel -- i.e. after exchanging some setup states, but before executing any application logic -- participants will want to "fund it". They will stake assets on the channel so that the state updates are meaningful. The simplest way to do this is with an on chain deposit: a more advanced possibility is fund a new channel from an existing funded channel.
+Early on in the lifecycle of a state channel -- i.e. after exchanging some setup states, but before executing any application logic -- participants will want to "fund it". They will stake assets on the channel so that the state updates are meaningful. The simplest way to do this is with an on chain deposit; a more advanced possibility is fund a new channel from an existing funded channel.
 
 To start, let's explore the on chain deposit case. We will need to understand how channels are uniquely identified.
 
@@ -44,7 +44,9 @@ We have the following call signature:
 function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable
 ```
 
-There are a few rules to obey when calling `deposit`. Firstly, `destination` must NOT be an [external destination](#destinations). Secondly, the on chain holdings for `destination` must be greater than or equal to `expectedHeld`. Thirdly, the holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
+There are a few rules to obey when calling `deposit`. Firstly, `destination` must NOT be an [external destination](#destinations). Secondly, the on-chain holdings for `destination` must be greater than or equal to `expectedHeld`. Thirdly, the holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
+
+The first rule prevents funds being escrowed against something other than a channelId: funds may only be unlocked from channels, so you shouldn't deposit into anything else. The second rule prevents loss of funds: since holdings are paid out in preferential order, depositing before a counterparty has deposited implies that they can withdraw your funds. The check is performed in the same transaction as the deposit, making this safe even in the event of a chain re-org that reverts a previous participant's deposit. The third rule prevents the deposit of uneccessary funds: if my aim was to increase the holdings to a certain level, but they are already at or above that level, then I want my deposit to transaction revert.
 
 Because we are depositing ETH, we must remember to send the right amount of ETH with the transaction. Depositing ERC20 tokens will be covered in a future tutorial.
 

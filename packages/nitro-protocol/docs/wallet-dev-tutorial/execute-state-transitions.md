@@ -251,6 +251,8 @@ end
     one-->two;
 </div>
 
+This is because C signed a state _earlier_ in the sequence than the one she is the mover for.
+
 We provide a helper function to sign a `State`:
 
 ```typescript

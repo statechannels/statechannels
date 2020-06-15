@@ -97,6 +97,10 @@ const expectedChannelStorageHash = channelDataToChannelStorageHash({
 expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
 ```
 
+## Call `challenge` again
+
+It is important to understand that a challenge may be "cleared" by another more recent challenge. The channel will be left in challenge mode (so it has not really been 'cleared' in that sense), but some [on chain storage](./understand-channel-storage) will be updated, such as the deadline for responding.
+
 ## Extract info from Adjudicator Events
 
 You may have noticed that to respond, the challenge state itself must be (re)submitted to the chain. To save gas, information is only stored on chain in a hashed format. Clients should, therefore, cache information emitted in Events emitted by the adjudicator, in order to be able to respond to challenges.
