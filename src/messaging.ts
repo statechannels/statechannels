@@ -165,7 +165,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetWalletInformation':
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
-          selectedAddress: this.store.chain.selectedAddress ?? null,
+          destinationAddress: (await this.store.getDestinationAddress()) ?? null,
           walletVersion: GIT_VERSION
         });
         break;
@@ -173,7 +173,7 @@ export class MessagingService implements MessagingServiceInterface {
         if (this.store.chain.ethereumIsEnabled) {
           await this.sendResponse(requestId, {
             signingAddress: await this.store.getAddress(),
-            selectedAddress: this.store.chain.selectedAddress,
+            destinationAddress: (await this.store.getDestinationAddress()) ?? null,
             walletVersion: GIT_VERSION
           });
         } else {
@@ -246,7 +246,8 @@ async function convertToInternalEvent(
         channelId: request.params.channelId
       };
     case 'CloseAndWithdraw':
-      if (!store.chain.selectedAddress) {
+      const closeAndWithdrawDestination = await store.getDestinationAddress();
+      if (!closeAndWithdrawDestination) {
         throw new Error('No selected destination');
       }
       return {
@@ -255,7 +256,7 @@ async function convertToInternalEvent(
         player: convertToInternalParticipant({
           participantId: request.params.playerParticipantId,
           signingAddress: await store.getAddress(),
-          destination: store.chain.selectedAddress
+          destination: closeAndWithdrawDestination
         }),
         hub: convertToInternalParticipant(request.params.hub),
         domain: domain
@@ -263,7 +264,7 @@ async function convertToInternalEvent(
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;
       const signingAddress = await store.getAddress();
-      const destination = store.chain.selectedAddress;
+      const destination = await store.getDestinationAddress();
       if (!destination) {
         throw new Error('No selected destination');
       }

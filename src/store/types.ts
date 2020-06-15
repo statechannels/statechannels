@@ -158,6 +158,9 @@ export interface DBBackend {
   objectives(): Promise<Objective[]>;
   channels(): Promise<Record<string, ChannelStoreEntry | undefined>>;
 
+  setDestinationAddress(destinationAddress: string): Promise<string>;
+  getDestinationAddress(): Promise<string | undefined>;
+
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
 
@@ -217,6 +220,7 @@ export const enum ObjectStores {
   objectives = 'objectives',
   nonces = 'nonces',
   privateKeys = 'privateKeys',
+  destinationAddress = 'destinationAddress',
   ledgers = 'ledgers',
   budgets = 'budgets'
 }

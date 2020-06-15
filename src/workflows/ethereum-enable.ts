@@ -27,13 +27,19 @@ export interface WorkflowContext {
   enabledAddress?: string;
 }
 
+interface EthereumEnabled extends WorkflowContext {
+  enabledAddress: string;
+}
+
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   enableEthereum: () => Promise<string>;
+  setDestinationAddressIfEmpty: (context: EthereumEnabled) => Promise<string>;
 }
 export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     explainToUser: {};
     enabling: {};
+    settingDestinationAddress: {};
     done: {};
     failure: {};
     retry: {};
@@ -65,10 +71,20 @@ const generateConfig = (
     enabling: {
       invoke: {
         src: 'enableEthereum',
-        onDone: {target: 'done', actions: assign({enabledAddress: (context, event) => event.data})},
+        onDone: {
+          target: 'settingDestinationAddress',
+          actions: assign({enabledAddress: (context, event) => event.data})
+        },
         onError: 'failure'
       }
     }, // invoke ethereum enable
+    settingDestinationAddress: {
+      invoke: {
+        src: 'setDestinationAddressIfEmpty',
+        onDone: 'done',
+        onError: 'failure'
+      }
+    },
     retry: {
       on: {
         USER_APPROVES_ENABLE: {target: 'enabling'},
@@ -88,7 +104,10 @@ export const ethereumEnableWorkflow = (
   context: WorkflowContext
 ): WorkflowMachine => {
   const services: WorkflowServices = {
-    enableEthereum: () => store.chain.ethereumEnable()
+    enableEthereum: () => store.chain.ethereumEnable(),
+    setDestinationAddressIfEmpty: async (context: EthereumEnabled) =>
+      (await store.getDestinationAddress()) ||
+      (await store.setDestinationAddress(context.enabledAddress))
   };
   const actions = {
     displayUi: () => {
@@ -101,7 +120,7 @@ export const ethereumEnableWorkflow = (
       messagingService.sendResponse(context.requestId, {
         signingAddress: await store.getAddress(),
         walletVersion: GIT_VERSION,
-        selectedAddress: context.enabledAddress as string
+        destinationAddress: await store.getDestinationAddress()
       });
     },
     sendErrorResponse: (context: WorkflowContext) => {
@@ -126,7 +145,11 @@ export const mockServices: WorkflowServices = {
   enableEthereum: () =>
     new Promise(() => {
       /* Mock call */
-    }) as any
+    }) as any,
+  setDestinationAddressIfEmpty: () =>
+    new Promise(() => {
+      /* Mock call */
+    })
 };
 export const mockOptions = {services: mockServices, actions: mockActions};
 export const config = generateConfig(mockActions);
