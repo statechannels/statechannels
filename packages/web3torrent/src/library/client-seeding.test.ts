@@ -82,7 +82,7 @@ describe('Seeding and Leeching', () => {
         done();
       });
     });
-  }, 10000);
+  });
 
   it('should reach a ready-for-leeching, choked state', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
@@ -94,7 +94,7 @@ describe('Seeding and Leeching', () => {
       });
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
     });
-  }, 10000);
+  });
 
   it('should be able to unchoke and finish a download', async done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
@@ -116,7 +116,7 @@ describe('Seeding and Leeching', () => {
 
       leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
     });
-  }, 10000);
+  });
 
   it('should support multiple leechers finishing their downloads', async done => {
     const knownPeers = new Set();
@@ -143,7 +143,7 @@ describe('Seeding and Leeching', () => {
 
     leecherA.once(ClientEvents.TORRENT_DONE, downloadFinished);
     leecherB.once(ClientEvents.TORRENT_DONE, downloadFinished);
-  }, 10000);
+  });
 
   afterEach(() => {
     seeder.destroy();
