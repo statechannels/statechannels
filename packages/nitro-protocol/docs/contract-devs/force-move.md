@@ -3,6 +3,8 @@ id: force-move
 title: ForceMove.sol
 ---
 
+ForceMove.sol is a base contract that is not actually deployed: it is inherited by NitroAdjudicator.sol, which is deployed.
+
 ForceMove is a state channel execution framework. It:
 
 1. Specifies a programmable state format and state transition rules;
