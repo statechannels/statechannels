@@ -129,7 +129,7 @@ export class GanacheServer {
     public readonly port: number = 8545,
     public readonly chainId: number = 9001,
     accounts: Account[] = ETHERLIME_ACCOUNTS,
-    public readonly timeout: number = 5000,
+    public readonly timeout: number = 10_000,
     gasLimit = 1000000000,
     gasPrice = 1
   ) {
