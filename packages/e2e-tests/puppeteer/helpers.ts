@@ -11,7 +11,8 @@ import {
   RPC_ENDPOINT,
   CHAIN_NETWORK_ID,
   LOG_DESTINATION,
-  USING_EXTERNAL_CHAIN
+  USING_EXTERNAL_CHAIN,
+  SHOW_DEVTOOLS
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -174,7 +175,7 @@ export async function setUpBrowser(
       headless,
       slowMo,
       pipe: usePipe,
-      devtools: !headless,
+      devtools: SHOW_DEVTOOLS === null ? !headless : SHOW_DEVTOOLS,
       // Keep code here for convenience... if you want to use redux-dev-tools
       // then download and unzip the release from Github and specify the location.
       // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases

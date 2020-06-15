@@ -16,6 +16,7 @@ export const TX_WAIT_TIMEOUT = USING_EXTERNAL_CHAIN ? 180_000 : 30000;
 export const CHAIN_NETWORK_ID = process.env.CHAIN_NETWORK_ID;
 export const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;
+export const SHOW_DEVTOOLS = process.env.SHOW_DEVTOOLS ? getEnvBool('SHOW_DEVTOOLS') : null;
 
 export const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR;
 
