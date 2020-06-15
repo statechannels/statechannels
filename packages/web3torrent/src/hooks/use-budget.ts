@@ -14,7 +14,7 @@ export function useBudget({ready}: {ready: boolean}) {
   const [budget, setBudget] = useState<DomainBudget>(undefined);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const setBudget = budget => {
+    const setBudgetUI = budget => {
       setBudget(budget);
       setLoading(false);
     };
@@ -22,10 +22,10 @@ export function useBudget({ready}: {ready: boolean}) {
 
     let getBudgetSubscription: Subscription;
     if (ready) {
-      getBudgetSubscription = getBudget().subscribe(setBudget);
+      getBudgetSubscription = getBudget().subscribe(setBudgetUI);
     }
     const onBudgetUpdatedSubscription = paymentChannelClient.channelClient.onBudgetUpdated(() =>
-      getBudget().subscribe(setBudget)
+      getBudget().subscribe(setBudgetUI)
     );
 
     // Mostly works.
