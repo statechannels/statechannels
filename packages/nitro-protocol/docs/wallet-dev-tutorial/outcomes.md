@@ -25,6 +25,21 @@ Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being
 | <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
 | <td colspan="8" align="center">Outcome</td>                                                     |
 
+```
+0xETHAssetHolderAddress00xDestinationA50xDestinationB2
+                                                     ^  Amount
+                                       ^^^^^^^^^^^^^^   Destination
+                                      ^                 Amount
+                        ^^^^^^^^^^^^^^                  Destination
+                                       ^^^^^^^^^^^^^^^  AllocationItem
+                        ^^^^^^^^^^^^^^^                 AllocationItem
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  Allocation
+                       ^                                Outcome type
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  AssetOutcome
+^^^^^^^^^^^^^^^^^^^^^^^                                 Asset Holder Address
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  OutcomeItem
+```
+
 Such an outcome specifies
 
 - at least one asset holder (which in turn is tied to a specific asset type such as ETH or an ERC20 token)
