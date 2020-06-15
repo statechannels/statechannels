@@ -99,7 +99,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:ci": "yarn build",
-    "build:netlify:production": "NODE_ENV=production yarn build",
+    "build:netlify:production": "yarn build && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
