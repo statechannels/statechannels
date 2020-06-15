@@ -104,7 +104,7 @@ class MockChannelClient implements ChannelClientInterface {
   provider = new FakeChannelProvider();
   walletVersion = 'JestMockVersion';
   signingAddress = MOCK_ADDRESS;
-  selectedAddress = MOCK_ADDRESS;
+  destinationAddress = MOCK_ADDRESS;
 
   approveBudgetAndFund = jest.fn(async function(
     playerAmount: string,

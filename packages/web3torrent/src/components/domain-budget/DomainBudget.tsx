@@ -134,7 +134,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
               />
               <div className="identity">
                 <Tooltip
-                  title={web3torrent.paymentChannelClient.myEthereumSelectedAddress || 'unknown'}
+                  title={web3torrent.paymentChannelClient.myDestinationAddress || 'unknown'}
                   interactive
                   arrow
                   placement="top"
@@ -142,7 +142,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
                   <Avatar variant="square">
                     <Blockie
                       opts={{
-                        seed: web3torrent.paymentChannelClient.myEthereumSelectedAddress,
+                        seed: web3torrent.paymentChannelClient.myDestinationAddress,
                         bgcolor: '#3531ff',
                         size: 6,
                         scale: 4,

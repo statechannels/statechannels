@@ -8,6 +8,7 @@ export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, string | undefined> = {};
+  private _destinationAddress: string | undefined;
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
   private _budgets: Record<string, DomainBudget | undefined> = {};
@@ -66,6 +67,16 @@ export class MemoryBackend implements DBBackend {
   public async deleteBudget(key: string) {
     delete this._budgets[key];
   }
+
+  public async setDestinationAddress(address: string) {
+    this._destinationAddress = address;
+    return address;
+  }
+
+  public async getDestinationAddress() {
+    return this._destinationAddress;
+  }
+
   public async setPrivateKey(key: string, value: string) {
     this._privateKeys[key] = value;
     return value;

@@ -42,6 +42,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     }
   );
 
+  await playerA.store.setDestinationAddress(playerA.signingAddress);
   await playerA.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
   await hub.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
 

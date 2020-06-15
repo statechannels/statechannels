@@ -56,7 +56,7 @@ function* rootSaga() {
     //   [client, 'approveBudgetAndFund'],
     //   tenEth,
     //   tenEth,
-    //   window.channelProvider.selectedAddress,
+    //   window.channelProvider.destinationAddress,
     //   HUB.signingAddress,
     //   HUB.outcomeAddress
     // );

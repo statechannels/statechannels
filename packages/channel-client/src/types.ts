@@ -27,7 +27,7 @@ export interface ChannelClientInterface {
   channelState: ReplaySubject<ChannelResult>;
   walletVersion?: string;
   signingAddress?: string;
-  selectedAddress?: string;
+  destinationAddress?: string;
 
   /*
     Pushing a message is meant for when the app receives a message from

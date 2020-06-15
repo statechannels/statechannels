@@ -33,7 +33,7 @@ function channelIdToTableRow(
     ? channelState.payer.outcomeAddress
     : channelState.beneficiary.outcomeAddress;
 
-  const peerSelectedAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
+  const peerDestinationAddress = '0x' + peerOutcomeAddress.slice(26).toLowerCase();
   // For now, this ^ is the ethereum address in my peer's metamask
 
   if (wire) {
@@ -74,11 +74,11 @@ function channelIdToTableRow(
         {/* temporal thing to show the true state instead of a parsed one */}
       </td>
       <td className="peer-id">
-        <Tooltip title={peerSelectedAddress} interactive arrow placement="right">
+        <Tooltip title={peerDestinationAddress} interactive arrow placement="right">
           <Avatar variant="square">
             <Blockie
               opts={{
-                seed: peerSelectedAddress,
+                seed: peerDestinationAddress,
                 bgcolor: '#3531ff',
                 size: 6,
                 scale: 4,

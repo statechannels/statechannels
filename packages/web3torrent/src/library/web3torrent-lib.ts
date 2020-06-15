@@ -58,7 +58,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (!this.pseAccount || !this.outcomeAddress) {
       await this.paymentChannelClient.enable();
       this.pseAccount = this.paymentChannelClient.mySigningAddress;
-      this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+      this.outcomeAddress = this.paymentChannelClient.myDestinationAddress;
       this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
 
       log.debug({pseAccount: this.pseAccount}, 'PSEAccount set to sc-wallet signing address');
@@ -353,7 +353,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     const seeder = peer(
       this.pseAccount,
-      this.paymentChannelClient.myEthereumSelectedAddress,
+      this.paymentChannelClient.myDestinationAddress,
       hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32)
     );
     const leecher = peer(

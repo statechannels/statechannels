@@ -170,8 +170,8 @@ export class PaymentChannelClient {
     return this.channelClient.signingAddress;
   }
 
-  get myEthereumSelectedAddress(): string | undefined {
-    return this.channelClient.selectedAddress;
+  get myDestinationAddress(): string | undefined {
+    return this.channelClient.destinationAddress;
   }
 
   constructor(readonly channelClient: ChannelClientInterface) {
