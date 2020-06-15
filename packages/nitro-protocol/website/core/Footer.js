@@ -36,33 +36,28 @@ class Footer extends React.Component {
             )}
           </a>
           <div>
-            <h5>Docs</h5>
-            <a href={this.docUrl('state-channels/overview')}>Overview</a>
-            <a href={this.docUrl('forcemove-and-nitro/account-topology')}>Account Topology</a>
+            <h5>
+              <a href={this.docUrl('state-channels/overview')}>Docs</a>
+            </h5>
+            <a href={this.docUrl('dapp-devs/quick-start')}>Dapp Developers</a>
+            <a href={this.docUrl('wallet-devs/quick-start')}>Wallet Developers</a>
+            <a href={this.docUrl('contract-devs/quick-start')}>Protocol Developers</a>
           </div>
           <div>
-            <h5>API</h5>
-            <a href={this.docUrl('api/contract-inheritance')}>Contract inheritance</a>
-            <a href={this.docUrl('natspec/ForceMove')}>ForceMove</a>
-            <a href={this.docUrl('natspec/AssetHolder')}>AssetHolder</a>
+            <h5>
+              <a href={this.docUrl('api/contract-inheritance')}>API</a>
+            </h5>
+            <a href={this.docUrl('contract-api/natspec/NitroAdjudicator')}>Nitro Adjudicator</a>
+            <a href={this.docUrl('contract-api/natspec/ETHAssetHolder')}>ETH Asset Holder</a>
           </div>
-          {/* <div>
+          <div>
             <h5>Community</h5>
-            <a href={this.pageUrl('users.html', this.props.language)}>User Showcase</a>
-            <a
-              href="https://stackoverflow.com/questions/tagged/"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Stack Overflow
-            </a>
-            <a href="https://discordapp.com/">Project Chat</a>
-            <a href="https://twitter.com/" target="_blank" rel="noreferrer noopener">
-              Twitter
-            </a>
-          </div> */}
+            <a href={'https://statechannels.org/'}>Project Homepage</a>
+            <a href={'https://statechannels.discourse.group/'}>Forum</a>
+            <a href={'https://blog.statechannels.org/'}>Blog</a>
+          </div>
           <div>
-            <h5>More</h5>
+            <h5>Code</h5>
             {/* <a href={`${this.props.config.baseUrl}blog`}>Blog</a> */}
             <a href={this.props.config.repoUrl}>GitHub</a>
             <a
@@ -76,9 +71,9 @@ class Footer extends React.Component {
             >
               Star
             </a>
+            <a href="https://www.npmjs.com/package/@statechannels/nitro-protocol">npm</a>
           </div>
         </section>
-
         <section className="copyright">{this.props.config.copyright}</section>
       </footer>
     );

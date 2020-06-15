@@ -1,43 +1,58 @@
 {
   "docs": {
-    "State Channels": ["state-channels/overview", "state-channels/quick-start"],
-    "ForceMove and Nitro": [
-      "forcemove-and-nitro/account-topology",
-      "forcemove-and-nitro/force-move",
-      "forcemove-and-nitro/consensus-app",
-      "forcemove-and-nitro/nitro-adjudicator",
-      "forcemove-and-nitro/asset-holder",
-      "forcemove-and-nitro/single-asset-payments"
+    "Overview": ["overview"],
+    "Dapp Developers": ["dapp-devs/dapp-devs-intro", "dapp-devs/quick-start"],
+    "Wallet Developers": [
+      "wallet-devs/wallet-devs-intro",
+      "wallet-devs/quick-start",
+      "wallet-devs/tutorial"
     ],
-    "Client specification": ["client-specification/auxiliary-protocols"]
+    "Wallet Dev Tutorial": [
+      "wallet-dev-tutorial/execute-state-transitions",
+      "wallet-dev-tutorial/deposit-assets",
+      "wallet-dev-tutorial/finalize-a-channel-happy",
+      "wallet-dev-tutorial/finalize-a-channel-sad",
+      "wallet-dev-tutorial/understand-channel-storage",
+      "wallet-dev-tutorial/clear-a-challenge",
+      "wallet-dev-tutorial/outcomes",
+      "wallet-dev-tutorial/release-assets"
+    ],
+    "Contract Developers": [
+      "contract-devs/contract-devs-intro",
+      "contract-devs/asset-holder",
+      "contract-devs/force-move",
+      "contract-devs/nitro-adjudicator",
+      "contract-devs/consensus-app",
+      "contract-devs/single-asset-payments"
+    ]
   },
-  "API": {
-    "Overview": ["api/contract-inheritance"],
+  "Contract API": {
+    "Overview": ["contract-api/contract-inheritance"],
     "Base Contracts": [
-      "natspec/IForceMove",
-      "natspec/ForceMove",
-      "natspec/Adjudicator",
-      "natspec/ForceMoveApp",
-      "natspec/IAssetHolder",
-      "natspec/AssetHolder"
+      "contract-api/natspec/IForceMove",
+      "contract-api/natspec/ForceMove",
+      "contract-api/natspec/Adjudicator",
+      "contract-api/natspec/ForceMoveApp",
+      "contract-api/natspec/IAssetHolder",
+      "contract-api/natspec/AssetHolder"
     ],
     "Deployed Contracts": [
-      "natspec/NitroAdjudicator",
-      "natspec/ConsensusApp",
-      "natspec/ERC20AssetHolder",
-      "natspec/ETHAssetHolder"
+      "contract-api/natspec/NitroAdjudicator",
+      "contract-api/natspec/ConsensusApp",
+      "contract-api/natspec/ERC20AssetHolder",
+      "contract-api/natspec/ETHAssetHolder"
     ],
     "ForceMove Apps": [
-      "natspec/CounterfactualAdapterApp",
-      "natspec/CountingApp",
-      "natspec/SingleAssetPayments",
-      "natspec/TrivialApp"
+      "contract-api/natspec/CounterfactualAdapterApp",
+      "contract-api/natspec/CountingApp",
+      "contract-api/natspec/SingleAssetPayments",
+      "contract-api/natspec/TrivialApp"
     ],
     "Test Contracts": [
-      "natspec/TESTAssetHolder",
-      "natspec/TESTForceMove",
-      "natspec/TESTNitroAdjudicator",
-      "natspec/Token"
+      "contract-api/natspec/TESTAssetHolder",
+      "contract-api/natspec/TESTForceMove",
+      "contract-api/natspec/TESTNitroAdjudicator",
+      "contract-api/natspec/Token"
     ]
   }
 }

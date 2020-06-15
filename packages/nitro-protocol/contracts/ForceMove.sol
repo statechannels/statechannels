@@ -256,7 +256,7 @@ contract ForceMove is IForceMove {
                 sigs,
                 whoSignedWhat
             ),
-            'Invalid signatures'
+            'Invalid signatures OR isFinal=true expected'
         );
 
         // effects

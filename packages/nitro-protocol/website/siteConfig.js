@@ -39,8 +39,8 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'state-channels/overview', label: 'Docs'},
-    {doc: 'api/contract-inheritance', label: 'API'},
+    {doc: 'overview', label: 'Docs'},
+    {doc: 'contract-api/contract-inheritance', label: 'Contract API'},
     {page: 'help', label: 'Help'},
   ],
 
@@ -48,13 +48,13 @@ const siteConfig = {
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/favicon.ico',
-  footerIcon: 'img/favicon.ico',
+  headerIcon: 'img/logo.svg',
+  footerIcon: 'img/logo.svg',
   favicon: 'img/favicon.ico',
 
   /* Colors for website */
   colors: {
-    primaryColor: '#2728e2',
+    primaryColor: '#3531FF',
     secondaryColor: '#46A5D0',
   },
 

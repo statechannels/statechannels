@@ -56,30 +56,31 @@ class Adjudicator,IAssetHolder,ForceMoveApp,IERC20 Interface;
 class ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder,SingleAssetPayments,TrivialApp,CountingApp,ERC20,ConsensusApp Contract;
 class TESTForceMove,TESTNitroAdjudicator,TESTAssetHolder,Token TestContract;
 class NitroAdjudicator,ETHAssetHolder,ERC20AssetHolder,ConsensusApp DeployedContract;
-click Adjudicator "../natspec/Adjudicator";
-click AssetHolder "../natspec/AssetHolder";
-click ConsensusApp "../natspec/ConsensusApp";
-click CountingApp "../natspec/CountingApp";
-click ERC20 "../natspec/ERC20";
-click ERC20AssetHolder "../natspec/ERC20AssetHolder";
-click ETHAssetHolder "../natspec/ETHAssetHolder";
-click ForceMove "../natspec/ForceMove";
-click ForceMoveApp "../natspec/ForceMoveApp";
-click IAssetHolder "../natspec/IAssetHolder";
-click IERC20 "../natspec/IERC20";
-click IForceMove "../natspec/IForceMove";
-click NitroAdjudicator "../natspec/NitroAdjudicator";
-click Outcome "../natspec/Outcome";
-click SafeMath "../natspec/SafeMath";
-click SingleAssetPayments "../natspec/SingleAssetPayments";
-click TESTAssetHolder "../natspec/TESTAssetHolder";
-click TESTForceMove "../natspec/TESTForceMove";
-click TESTNitroAdjudicator "../natspec/TESTNitroAdjudicator";
-click Token "../natspec/Token";
-click TrivialApp "../natspec/TrivialApp";
+click Adjudicator "./natspec/Adjudicator";
+click AssetHolder "./natspec/AssetHolder";
+click ConsensusApp "./natspec/ConsensusApp";
+click CountingApp "./natspec/CountingApp";
+click ERC20 "./natspec/ERC20";
+click ERC20AssetHolder "./natspec/ERC20AssetHolder";
+click ETHAssetHolder "./natspec/ETHAssetHolder";
+click ForceMove "./natspec/ForceMove";
+click ForceMoveApp "./natspec/ForceMoveApp";
+click IAssetHolder "./natspec/IAssetHolder";
+click IERC20 "./natspec/IERC20";
+click IForceMove "./natspec/IForceMove";
+click NitroAdjudicator "./natspec/NitroAdjudicator";
+click Outcome "./natspec/Outcome";
+click SafeMath "./natspec/SafeMath";
+click SingleAssetPayments "./natspec/SingleAssetPayments";
+click TESTAssetHolder "./natspec/TESTAssetHolder";
+click TESTForceMove "./natspec/TESTForceMove";
+click TESTNitroAdjudicator "./natspec/TESTNitroAdjudicator";
+click Token "./natspec/Token";
+click TrivialApp "./natspec/TrivialApp";
 </div>
 
 ---
+
 Key:
 
 <div class="mermaid" align="center">

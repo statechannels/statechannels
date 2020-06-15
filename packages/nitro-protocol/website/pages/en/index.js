@@ -13,6 +13,12 @@ const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
 
+const Block = props => (
+  <Container padding={['bottom', 'top']} id={props.id} background={props.background}>
+    <GridBlock align="center" contents={props.children} layout={props.layout} />
+  </Container>
+);
+
 class HomeSplash extends React.Component {
   render() {
     const {siteConfig, language = ''} = this.props;
@@ -58,19 +64,46 @@ class HomeSplash extends React.Component {
       </div>
     );
 
+    const Features = () => (
+      <Block layout="threeColumn">
+        {[
+          {
+            content: 'Bootstraps from the Ethereum blockchain',
+            image: `${baseUrl}img/ethereum-logo.svg`,
+            imageAlign: 'top',
+            title: 'Secure',
+          },
+          {
+            content: 'Allows for ultra-low latency apps',
+            image: `${baseUrl}img/motorcycle.svg`,
+            imageAlign: 'top',
+            title: 'Fast',
+          },
+          {
+            content: 'Optimized for low cost',
+            image: `${baseUrl}img/gas.svg`,
+            imageAlign: 'top',
+            title: 'Cheap',
+          },
+        ]}
+      </Block>
+    );
+
     return (
       <div>
         <SplashContainer>
           <div className="inner">
+            <img src={`${baseUrl}img/motorcycle.svg`} />
             <ProjectTitle siteConfig={siteConfig} />
           </div>
-        </SplashContainer>
-        <PromoSection>
-          <Button href={docUrl('state-channels/overview')}>Documentation</Button>
-          <Button href={siteConfig.packageUrl}>Code</Button>
-          {/* <Button href={docUrl('doc1.html')}>Example Link</Button>
+          <PromoSection>
+            <Button href={docUrl('overview')}>Documentation</Button>
+            <Button href={siteConfig.packageUrl}>Code</Button>
+            {/* <Button href={docUrl('doc1.html')}>Example Link</Button>
                 <Button href={docUrl('doc2.html')}>Example Link 2</Button> */}
-        </PromoSection>
+          </PromoSection>
+          <Features />
+        </SplashContainer>
       </div>
     );
   }
@@ -80,12 +113,6 @@ class Index extends React.Component {
   render() {
     const {config: siteConfig, language = ''} = this.props;
     const {baseUrl} = siteConfig;
-
-    const Block = props => (
-      <Container padding={['bottom', 'top']} id={props.id} background={props.background}>
-        <GridBlock align="center" contents={props.children} layout={props.layout} />
-      </Container>
-    );
 
     const FeatureCallout = () => (
       <div className="productShowcaseSection paddingBottom" style={{textAlign: 'center'}}>
@@ -136,31 +163,6 @@ class Index extends React.Component {
       </Block>
     );
 
-    const Features = () => (
-      <Block layout="threeColumn">
-        {[
-          {
-            content: 'Bootstraps from the Ethereum blockchain',
-            image: `${baseUrl}img/ethereum-logo.svg`,
-            imageAlign: 'top',
-            title: 'Secure',
-          },
-          {
-            content: 'Allows for ultra-low latency apps',
-            image: `${baseUrl}img/motorcycle.svg`,
-            imageAlign: 'top',
-            title: 'Fast',
-          },
-          {
-            content: 'Optimized for low cost',
-            image: `${baseUrl}img/gas.svg`,
-            imageAlign: 'top',
-            title: 'Cheap',
-          },
-        ]}
-      </Block>
-    );
-
     const Showcase = () => {
       if ((siteConfig.users || []).length === 0) {
         return null;
@@ -194,7 +196,7 @@ class Index extends React.Component {
       <div>
         <HomeSplash siteConfig={siteConfig} language={language} />
         {/* <div className="mainContainer"> */}
-        <Features />
+
         {/* <FeatureCallout /> */}
         {/* <LearnHow /> */}
         {/* <TryOut /> */}
