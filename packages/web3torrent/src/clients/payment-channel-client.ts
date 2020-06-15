@@ -30,8 +30,6 @@ import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
 
-import {isJsonRpcErrorResponse} from '@statechannels/channel-provider';
-
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
 
@@ -156,11 +154,13 @@ if (process.env.FAKE_CHANNEL_PROVIDER === 'true') {
   require('@statechannels/channel-provider');
 }
 
+export type ChannelCache = Record<string, ChannelState | undefined>;
+
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
-  channelCache: Record<string, ChannelState | undefined> = {};
+  channelCache: ChannelCache = {};
   budgetCache?: DomainBudget;
   _enabled = false;
   get enabled(): boolean {
@@ -170,8 +170,8 @@ export class PaymentChannelClient {
     return this.channelClient.signingAddress;
   }
 
-  get myEthereumSelectedAddress(): string | undefined {
-    return this.channelClient.selectedAddress;
+  get myDestinationAddress(): string | undefined {
+    return this.channelClient.destinationAddress;
   }
 
   constructor(readonly channelClient: ChannelClientInterface) {
@@ -255,7 +255,6 @@ export class PaymentChannelClient {
 
     const channelState = convertToChannelState(channelResult);
     this.insertIntoChannelCache(channelState);
-
     return channelState;
   }
 
@@ -464,7 +463,7 @@ export class PaymentChannelClient {
     }
   }
 
-  async getChannels(): Promise<Record<string, ChannelState | undefined>> {
+  async getChannels(): Promise<ChannelCache> {
     const channelResults = await this.channelClient.getChannels(false);
     channelResults.map(convertToChannelState).forEach(cr => (this.channelCache[cr.channelId] = cr));
     return this.channelCache;

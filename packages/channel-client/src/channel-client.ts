@@ -26,8 +26,8 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.signingAddress;
   }
 
-  get selectedAddress(): string | undefined {
-    return this.provider.selectedAddress;
+  get destinationAddress(): string | undefined {
+    return this.provider.destinationAddress;
   }
 
   get walletVersion(): string | undefined {

@@ -22,7 +22,8 @@ const STORES: ObjectStores[] = [
   ObjectStores.ledgers,
   ObjectStores.nonces,
   ObjectStores.objectives,
-  ObjectStores.privateKeys
+  ObjectStores.privateKeys,
+  ObjectStores.destinationAddress
 ];
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
@@ -147,7 +148,15 @@ export class Backend implements DBBackend {
     return this.get(ObjectStores.ledgers, key);
   }
 
+  public async getDestinationAddress() {
+    return this.get(ObjectStores.destinationAddress, 0);
+  }
+
   // Individual Setters
+
+  public async setDestinationAddress(address: string) {
+    return this.put(ObjectStores.destinationAddress, address, 0);
+  }
 
   public async setPrivateKey(signingAddress: string, privateKey: string) {
     return this.put(ObjectStores.privateKeys, privateKey, signingAddress);

@@ -5,9 +5,11 @@ title: AssetHolder.sol
 
 The asset-holder contracts describe how ETH and/or tokens are held on-chain for any given channel, and how to interpret the channel outcomes in order to determine and execute any payouts that are due.
 
+AssetHolder.sol is a base contract that it is not actually deployed. It is inherited by (for example) ETHAssetHolder.sol and ERC20AssetHolder.sol (which are deployed).
+
 In Nitro a payout is of one of two types: it is either a payout to a channel participant or it is a payout to another channel. It is this second type of payout that allows channels to fund one another in Nitro, enabling the virtual channels that are used to build state channel networks.
 
-Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../natspec/IAssetHolder) interface and
+Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../contract-api/natspec/IAssetHolder) interface and
 
 1. Interprets final outcomes supplied by adjudicator contracts
 2. Allows escrowed assets to be transferred from channels to their beneficiaries
@@ -124,7 +126,7 @@ function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) publ
 
 Checks:
 
-- `destination` must be an [external destination](#destinations).
+- `destination` must NOT be an [external destination](#destinations).
 - The holdings for `destination` must be greater than or equal to `expectedHeld`.
 - The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 

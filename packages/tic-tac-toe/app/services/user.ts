@@ -21,7 +21,7 @@ export default class UserService extends Service {
   private async requestAddresses(): Promise<void> {
     await window.channelProvider.enable();
     this.address = window.channelProvider.signingAddress as string;
-    this.outcomeAddress = window.channelProvider.selectedAddress as string;
+    this.outcomeAddress = window.channelProvider.destinationAddress as string;
   }
 }
 

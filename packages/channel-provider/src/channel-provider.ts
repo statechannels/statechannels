@@ -32,7 +32,7 @@ class ChannelProvider implements ChannelProviderInterface {
   protected url = '';
 
   public signingAddress?: string;
-  public selectedAddress?: string;
+  public destinationAddress?: string;
   public walletVersion?: string;
 
   constructor() {
@@ -66,22 +66,22 @@ class ChannelProvider implements ChannelProviderInterface {
     logger.info('Waiting for wallet ping...');
     await this.walletReady;
     logger.info('Wallet ready to receive requests');
-    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+    const {signingAddress, destinationAddress, walletVersion} = await this.send({
       method: 'GetWalletInformation',
       params: {}
     });
     this.signingAddress = signingAddress;
-    this.selectedAddress = selectedAddress;
+    this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 
   async enable() {
-    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+    const {signingAddress, destinationAddress, walletVersion} = await this.send({
       method: 'EnableEthereum',
       params: {}
     });
     this.signingAddress = signingAddress;
-    this.selectedAddress = selectedAddress;
+    this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 

@@ -113,6 +113,14 @@ export class Store {
     });
   };
 
+  public getDestinationAddress = () => this.backend.getDestinationAddress();
+  public setDestinationAddress = (destinationAddress: string) => {
+    if (!destinationAddress) {
+      logger.error('destinationAddress being set to falsy value', destinationAddress);
+    }
+    return this.backend.setDestinationAddress(destinationAddress);
+  };
+
   public async getBudget(domain: string): Promise<DomainBudget | undefined> {
     return this.backend.getBudget(domain);
   }

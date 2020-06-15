@@ -7,13 +7,13 @@ import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {PeerNetworkStats} from './peer-network-stats/PeerNetworkStats';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
-import {ChannelState} from '../../clients/payment-channel-client';
+import {ChannelCache} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 import {ChannelsList} from './channels-list/ChannelsList';
 
 export type TorrentInfoProps = {
   torrent: TorrentUI;
-  channelCache: Record<string, ChannelState>;
+  channelCache: ChannelCache;
   mySigningAddress: string;
 };
 

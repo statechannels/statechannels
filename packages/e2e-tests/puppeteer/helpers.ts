@@ -11,7 +11,8 @@ import {
   RPC_ENDPOINT,
   CHAIN_NETWORK_ID,
   LOG_DESTINATION,
-  USING_EXTERNAL_CHAIN
+  USING_EXTERNAL_CHAIN,
+  SHOW_DEVTOOLS
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -184,7 +185,7 @@ export async function setUpBrowser(
   etherlimeAccountIndex?: number,
   slowMo?: number,
   usePipe = false,
-  devtools = !headless
+  devtools = SHOW_DEVTOOLS === null ? !headless : SHOW_DEVTOOLS
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;

@@ -132,7 +132,7 @@ export type OffType = typeof eventEmitter.off;
 
 export interface ChannelProviderInterface {
   signingAddress?: string;
-  selectedAddress?: string;
+  destinationAddress?: string;
   walletVersion?: string;
   on: OnType;
   off: OffType;

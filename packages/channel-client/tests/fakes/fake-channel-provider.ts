@@ -49,7 +49,7 @@ const mockDomainBudget = {
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
   public signingAddress?: string;
-  public selectedAddress?: string;
+  public destinationAddress?: string;
   public walletVersion?: string;
 
   private events = new EventEmitter<EventType>();
@@ -68,16 +68,16 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
     this.signingAddress = this.getAddress();
     this.walletVersion = 'FakeChannelProvider@VersionTBD';
-    this.selectedAddress = '0xEthereumSelectedAddress';
+    this.destinationAddress = '0xEthereumAddress';
   }
 
   async enable(): Promise<void> {
-    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+    const {signingAddress, destinationAddress, walletVersion} = await this.send({
       method: 'EnableEthereum',
       params: {}
     });
     this.signingAddress = signingAddress;
-    this.selectedAddress = selectedAddress;
+    this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 
@@ -93,7 +93,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'EnableEthereum':
         return {
           signingAddress: this.getAddress(),
-          selectedAddress: '0xEthereumSelectedAddress',
+          destinationAddress: '0xEthereumAddress',
           walletVersion: 'FakeChannelProvider@VersionTBD'
         };
 

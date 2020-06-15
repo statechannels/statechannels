@@ -28,7 +28,7 @@ const App: React.FC = () => {
           scope.setUser({id: web3TorrentClient.paymentChannelClient.mySigningAddress});
         });
         identify(web3TorrentClient.paymentChannelClient.mySigningAddress, {
-          outcomeAddress: web3TorrentClient.paymentChannelClient.myEthereumSelectedAddress
+          outcomeAddress: web3TorrentClient.paymentChannelClient.myDestinationAddress
         });
       }
     });
