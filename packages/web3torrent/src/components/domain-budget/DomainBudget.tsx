@@ -4,7 +4,7 @@ import {ChannelState} from '../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import './DomainBudget.scss';
-import {track} from '../../analytics';
+import {track} from '../../segment-analytics';
 import {
   Avatar,
   Tooltip,

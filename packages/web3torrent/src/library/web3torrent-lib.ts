@@ -26,9 +26,9 @@ import {
 import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
-import {track} from '../analytics';
 import * as rxjs from 'rxjs';
 
+import {track} from '../segment-analytics';
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;

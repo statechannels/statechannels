@@ -11,7 +11,7 @@ import {ChannelCache} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 import {ChannelsList} from './channels-list/ChannelsList';
 
-import {track} from '../../analytics';
+import {track} from '../../segment-analytics';
 import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import {safeUnsubscribe} from '../../utils/react-utls';
 import {logger} from '../../logger';

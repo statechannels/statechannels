@@ -13,8 +13,8 @@ import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {useBudget} from '../../hooks/use-budget';
-import {track} from '../../analytics';
 import {Observable, from, noop} from 'rxjs';
+import {track} from '../../segment-analytics';
 import {throttleTime} from 'rxjs/operators';
 import {logger} from '../../logger';
 

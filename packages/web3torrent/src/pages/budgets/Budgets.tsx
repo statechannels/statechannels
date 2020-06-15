@@ -5,7 +5,7 @@ import _ from 'lodash';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {FormButton} from '../../components/form';
 import {useBudget} from '../../hooks/use-budget';
-import {track} from '../../analytics';
+import {track} from '../../segment-analytics';
 
 interface Props {
   ready: boolean;
