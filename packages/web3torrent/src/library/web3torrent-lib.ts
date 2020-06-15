@@ -40,9 +40,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
   torrents: PaidStreamingTorrent[] = [];
   paymentChannelClient: PaymentChannelClient;
-
   pseAccount: string;
   outcomeAddress: string;
+  channelIdToTorrentMap: Record<string, string> = {};
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super({tracker: {announce: defaultTrackers}, ...opts});
@@ -299,6 +299,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (!this.paymentChannelClient.amProposer(channelState)) {
         // do not pass a channelId, since this is the first we heard about this channel and it won't be cached
         // only join if counterparty proposed
+        this.updateChannelIdToTorrentMap(channelState.channelId, torrent.infoHash);
         await this.paymentChannelClient.joinChannel(channelState.channelId);
         log.debug(`<< Joined channel ${channelState.channelId}`);
       }
@@ -311,6 +312,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const isLeechingChannel = channelState.channelId === leechingChannelId;
 
       if (isSeedingChannel || isLeechingChannel) {
+        this.updateChannelIdToTorrentMap(channelState.channelId, torrent.infoHash);
         const isClosed = channelState.status === 'closed';
         if (isClosed) {
           if (isLeechingChannel) {
@@ -361,6 +363,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
     const peers: Peers = {beneficiary: seeder, payer: leecher};
     const {channelId} = await this.paymentChannelClient.createChannel(peers);
+    this.updateChannelIdToTorrentMap(channelId, torrent.infoHash);
 
     wire.paidStreamingExtension.seedingChannelId = channelId;
     this.peersList[torrent.infoHash][channelId] = {
@@ -505,6 +508,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.debug(`About to make Payment`);
     const {requests, downloaded, paidStreamingExtension} = wire;
     const {leechingChannelId, peerAccount} = paidStreamingExtension;
+    this.updateChannelIdToTorrentMap(leechingChannelId, torrent.infoHash);
 
     let numBlocksToPayFor = requests.length > PEER_TRUST ? PEER_TRUST : requests.length;
     let tailBytes = 0;
@@ -596,6 +600,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   private emitTorrentUpdated(infoHash, trigger: string) {
     // log.trace(`emitTorrentUpdate: ${trigger}`);
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));
+  }
+
+  private updateChannelIdToTorrentMap(channelId: string, torrentHash: string) {
+    this.channelIdToTorrentMap = {
+      ...this.channelIdToTorrentMap,
+      [channelId]: torrentHash
+    };
   }
 
   /** Util Method. Normalizes an event name. */
