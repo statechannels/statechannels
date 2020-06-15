@@ -27,6 +27,13 @@ export function useBudget({ready}: {ready: boolean}) {
     const onBudgetUpdatedSubscription = paymentChannelClient.channelClient.onBudgetUpdated(() =>
       getBudget().subscribe(setBudget)
     );
+
+    // Mostly works.
+    // Cleanup is not properly done for the following case:
+    // 1. onBudgetUpdated event arrives.
+    // 2. getBudget().subscribe(setBudget) is invoked.
+    // The operation from step 2 is not properly cleaned up.
+    // To fix this issue, onBudgetUpdated would need to return an observable instead of a subscription.
     return () => {
       safeUnsubscribe(getBudgetSubscription, log)();
       safeUnsubscribeFromFunction(onBudgetUpdatedSubscription, log)();
