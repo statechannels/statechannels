@@ -32,7 +32,7 @@ const App: React.FC = () => {
         });
       }
     });
-  }, [initialized]);
+  }, []);
 
   useEffect(() => {
     if (window.ethereum && typeof window.ethereum.on === 'function') {
