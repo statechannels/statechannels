@@ -12,6 +12,11 @@ import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
 import {web3TorrentClient} from './clients/web3torrent-client';
 import {identify} from './analytics';
+import {from} from 'rxjs';
+import {logger} from './logger';
+import {safeUnsubscribe} from './utils/react-utls';
+
+const log = logger.child({module: 'App'});
 
 const App: React.FC = () => {
   const [currentNetwork, setCurrentNetwork] = useState(
@@ -21,7 +26,7 @@ const App: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    web3TorrentClient.paymentChannelClient.initialize().then(() => {
+    const subscription = from(web3TorrentClient.paymentChannelClient.initialize()).subscribe(() => {
       setInitialized(true);
       if (process.env.NODE_ENV === 'production') {
         Sentry.configureScope(scope => {
@@ -32,6 +37,7 @@ const App: React.FC = () => {
         });
       }
     });
+    return safeUnsubscribe(subscription, log);
   }, []);
 
   useEffect(() => {
