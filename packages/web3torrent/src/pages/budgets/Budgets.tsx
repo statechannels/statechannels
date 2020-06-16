@@ -43,6 +43,7 @@ const CurrentBudget: React.FC<Props> = props => {
           channelCache={channelCache}
           mySigningAddress={me}
           withdraw={closeBudget}
+          allowWithdrawal={true}
         />
       )}
       {!loading && !budgetExists && (
