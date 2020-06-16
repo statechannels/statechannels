@@ -9,7 +9,7 @@ export interface MessagingServiceOptions {
 
 class RpcError extends Error {
   constructor(readonly error: ErrorResponse['error']) {
-    super('Wallet error');
+    super(error.message);
   }
 }
 
