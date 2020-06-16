@@ -475,7 +475,16 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(): Promise<DomainBudget | {}> {
-    await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
+    try {
+      await this.channelClient.closeAndWithdraw(HUB.signingAddress, HUB.outcomeAddress);
+    } catch (e) {
+      if (e.message === 'User declined') {
+        log.debug('User declined withdrawal');
+        return this.budgetCache;
+      } else {
+        throw e;
+      }
+    }
 
     this.budgetCache = undefined;
     return this.budgetCache;
