@@ -170,10 +170,11 @@ export class MessagingService implements MessagingServiceInterface {
         });
         break;
       case 'EnableEthereum':
-        if (this.store.chain.ethereumIsEnabled) {
+        const destinationAddress = await this.store.getDestinationAddress();
+        if (this.store.chain.ethereumIsEnabled && destinationAddress) {
           await this.sendResponse(requestId, {
             signingAddress: await this.store.getAddress(),
-            destinationAddress: (await this.store.getDestinationAddress()) ?? null,
+            destinationAddress,
             walletVersion: GIT_VERSION
           });
         } else {
