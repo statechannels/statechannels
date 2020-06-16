@@ -296,6 +296,7 @@ linkStyle 3,4 opacity:0.2;
 classDef external fill:#f96
 classDef defunded opacity:0.2;
 </div>
+The defunded channel A1 can now safely be discarded.
 
 ### Challenging with a deep funding tree
 
