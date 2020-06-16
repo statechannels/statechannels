@@ -71,11 +71,11 @@ So far, so standard. We have directly funded a channel, but this time we are cal
 <div class="mermaid" align="center">
 graph LR;
 linkStyle default interpolate basis;
-chain( )
+ETHAssetHolder( )
 ledger((L))
 me(( )):::external
 hub(( )):::external
-chain-->|12|ledger;
+ETHAssetHolder-->|12|ledger;
 ledger-->|6|me;
 ledger-->|6|hub;
 classDef external fill:#f96
@@ -123,13 +123,13 @@ We are now in the following situation:
 <div class="mermaid" align="center">
 graph LR;
 linkStyle default interpolate basis;
-chain( )
+ETHAssetHolder( )
 ledger((L))
 me(( )):::external
 hub(( )):::external
 me(( )):::external
 hub(( )):::external
-chain-->|12|ledger;
+ETHAssetHolder-->|12|ledger;
 ledger-->|6|me;
 ledger-->|6|hub;
 app((A1)):::defunded
@@ -187,13 +187,13 @@ Finally, we have our indirectly funded channel
 <div class="mermaid" align="center">
 graph LR;
 linkStyle default interpolate basis;
-chain( )
+ETHAssetHolder( )
 ledger((L))
 me(( )):::external
 hub(( )):::external
 me(( )):::external
 hub(( )):::external
-chain-->|12|ledger;
+ETHAssetHolder-->|12|ledger;
 ledger-->|3|me;
 ledger-->|3|hub;
 ledger-->|6|app
@@ -234,13 +234,13 @@ const threeEachStatePreFS: State = {
 <div class="mermaid" align="center">
 graph LR;
 linkStyle default interpolate basis;
-chain( )
+ETHAssetHolder( )
 ledger((L))
 me(( )):::external
 hub(( )):::external
 me(( )):::external
 hub(( )):::external
-chain-->|12|ledger;
+ETHAssetHolder-->|12|ledger;
 ledger-->|3|me;
 ledger-->|3|hub;
 ledger-->|6|app
@@ -281,13 +281,13 @@ and the funding graph now looks like this:
 <div class="mermaid" align="center">
 graph LR;
 linkStyle default interpolate basis;
-chain( )
+ETHAssetHolder( )
 ledger((L))
 me(( )):::external
 hub(( )):::external
 me(( )):::external
 hub(( )):::external
-chain-->|12|ledger;
+ETHAssetHolder-->|12|ledger;
 ledger-->|9|me;
 ledger-->|3|hub;
 app((A1)):::defunded
