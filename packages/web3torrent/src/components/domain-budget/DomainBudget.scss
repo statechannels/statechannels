@@ -15,6 +15,18 @@
   border: 1px solid $c-orange;
   margin: 15px auto 15px;
   padding: 3px 6px;
+
+  &:not(:disabled) {
+    &:hover {
+      border-color: $c-orangealt;
+      color: $c-orangealt;
+    }
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.28;
+  }
 }
 
 svg.budget-pie-chart {

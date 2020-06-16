@@ -26,6 +26,7 @@ export type DomainBudgetProps = {
   budgetCache: DomainBudgetType;
   mySigningAddress: string;
   withdraw: () => void;
+  allowWithdrawal: boolean;
 };
 
 export const DomainBudget: React.FC<DomainBudgetProps> = props => {
@@ -189,6 +190,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
           <td className="budget-button-container" colSpan={1}>
             <button
               className={'budget-button'}
+              disabled={!props.allowWithdrawal}
               id="budget-withdraw"
               onClick={() => {
                 track('Withdraw Initiated', {
