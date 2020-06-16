@@ -169,7 +169,7 @@ const threeEachAndSixForTheApp: State = {
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 1,
+  turnNum: 4,
 };
 
 // Construct the "post fund setup" state for the application channel
@@ -271,7 +271,7 @@ const nineForMe3ForTheHub: State = {
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 1,
+  turnNum: 5,
 };
 ```
 
