@@ -29,6 +29,24 @@ export const waitForWalletToBeHidden = async (page: Page): Promise<void> => {
   await walletIframe.waitForSelector(':root', {hidden: true, timeout: TX_WAIT_TIMEOUT});
 };
 
+export const expectWalletToBeHidden = async (page: Page): Promise<void> => {
+  const walletIframe = page.frames()[1];
+  await expect(walletIframe.select(':root')).rejects.toThrow();
+};
+
+export const expectSelector = async (
+  page: Page,
+  selector: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value?: any
+): Promise<typeof value> => {
+  if (value) {
+    await expect(page.waitForSelector(selector, {timeout: 1000})).resolves.toEqual(value);
+  } else {
+    await expect(page.waitForSelector(selector, {timeout: 1000})).resolves.not.toThrow();
+  }
+};
+
 const logDistinguisherCache: Record<string, true | undefined> = {};
 export async function setupLogging(
   page: Page,
@@ -166,7 +184,8 @@ export async function setUpBrowser(
   headless: boolean,
   etherlimeAccountIndex?: number,
   slowMo?: number,
-  usePipe = false
+  usePipe = false,
+  devtools = SHOW_DEVTOOLS === null ? !headless : SHOW_DEVTOOLS
 ): Promise<{browser: Browser; metamask: dappeteer.Dappeteer}> {
   let browser: Browser;
   let metamask: dappeteer.Dappeteer;
@@ -175,7 +194,7 @@ export async function setUpBrowser(
       headless,
       slowMo,
       pipe: usePipe,
-      devtools: SHOW_DEVTOOLS === null ? !headless : SHOW_DEVTOOLS,
+      devtools,
       // Keep code here for convenience... if you want to use redux-dev-tools
       // then download and unzip the release from Github and specify the location.
       // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases
@@ -345,15 +364,14 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
   const doneFunc = `done${doneFuncCounter++}`;
   const cb = `cb${doneFuncCounter}`;
 
-  return new Promise(
-    (resolve, reject) =>
-      setTimeout(() => reject(`Timed out waiting for ${done}`), 30_000) &&
-      page
-        .exposeFunction(doneFunc, resolve)
-        .then(() => {
-          page
-            .evaluate(
-              `
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(`Timed out waiting for ${done}`), 45_000);
+    page
+      .exposeFunction(doneFunc, resolve)
+      .then(() => {
+        page
+          .evaluate(
+            `
               ${cb} = channelStatus => {
                 if (${done}) {
                   window.${doneFunc}('Done');
@@ -362,11 +380,11 @@ const doneWhen = (page: Page, done: string): Promise<void> => {
               }
               window.channelProvider.on('ChannelUpdated', ${cb});
               `
-            )
-            .catch(reject);
-        })
-        .catch(reject)
-  );
+          )
+          .catch(reject);
+      })
+      .catch(reject);
+  });
 };
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
@@ -389,6 +407,10 @@ export const waitForClosedState = async (page: Page): Promise<void> => {
   return doneWhen(page, `channelStatus.status === 'closed'`);
 };
 
+export const waitForRunningState = async (page: Page): Promise<void> => {
+  return doneWhen(page, `channelStatus.status === 'running'`);
+};
+
 export async function waitForClosingChannel(page: Page): Promise<void> {
   await waitForWalletToBeDisplayed(page);
   const closingText = 'div.application-workflow-prompt > h2';
@@ -396,7 +418,7 @@ export async function waitForClosingChannel(page: Page): Promise<void> {
   await closingIframeB.waitForSelector(closingText);
 }
 
-export async function prepareStubUploadFile(path: string, repeats = 20_000): Promise<void> {
+export async function prepareStubUploadFile(path: string, repeats: number): Promise<void> {
   const uniqueContent = Date.now();
   console.log(`Make Stub file with seed ${Date.now()}`);
   const content = `web3torrent-${uniqueContent}\n`.repeat(repeats);
@@ -406,6 +428,8 @@ export async function prepareStubUploadFile(path: string, repeats = 20_000): Pro
 export async function takeScreenshot(tab: Page, file: string): Promise<void> {
   if (typeof SCREENSHOT_DIR === 'string') {
     if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR);
-    await tab.screenshot({path: path.join(SCREENSHOT_DIR, file), fullPage: true});
+    file = path.join(SCREENSHOT_DIR, file);
+    await tab.screenshot({path: `${file}.png`, fullPage: true});
+    fs.writeFileSync(`${file}.html`, await tab.content());
   }
 }

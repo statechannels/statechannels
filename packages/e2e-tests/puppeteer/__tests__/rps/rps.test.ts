@@ -54,7 +54,7 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
 
   afterAll(async () => {
     await Promise.all(
-      [rpsTabA, rpsTabB].map(async (tab, idx) => takeScreenshot(tab, `rps.${idx}.png`))
+      [rpsTabA, rpsTabB].map(async (tab, idx) => takeScreenshot(tab, `rps.${idx}`))
     );
     await Promise.all([browserA, browserB].map(async b => CLOSE_BROWSERS && b && b.close()));
   });

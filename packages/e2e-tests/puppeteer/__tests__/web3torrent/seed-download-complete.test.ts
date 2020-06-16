@@ -17,13 +17,14 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
-  waitForWalletToBeHidden,
   takeScreenshot,
-  waitForTransactionIfNecessary
+  waitForRunningState,
+  waitForClosedState,
+  expectWalletToBeHidden,
+  expectSelector
 } from '../../helpers';
 
 import {uploadFile, startDownload} from '../../scripts/web3torrent';
@@ -70,7 +71,7 @@ describe('Web3-Torrent Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download.${idx}`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
@@ -95,23 +96,18 @@ describe('Web3-Torrent Integration Tests', () => {
       await waitAndApproveDeposit(web3tTabB, metamaskB);
     }
 
-    await waitForTransactionIfNecessary(web3tTabB);
-
-    // Let the download continue for some time
-    console.log('Downloading');
-
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for Wallet to be hidden');
-    // Ensure the wallet is not visible
-    await forEachTab(waitForWalletToBeHidden);
+    console.log('Wait for the channel to be open');
+    await forEachTab(waitForRunningState);
 
-    console.log('Wait for the "Save File" button to appear');
-    await waitForFinishedOrCanceledDownload(web3tTabB);
+    await forEachTab(expectWalletToBeHidden);
+    await expectSelector(web3tTabB, '.positive.downloading');
 
-    // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
-    await forEachTab(tab => tab.waitFor(1500));
+    console.log('Wait for the channel to be closed');
+    await forEachTab(waitForClosedState);
+    await expectSelector(web3tTabB, '#download-link');
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.exchanged > .amount');

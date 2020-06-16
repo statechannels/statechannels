@@ -17,12 +17,15 @@ import {
   setUpBrowser,
   setupLogging,
   waitAndOpenChannel,
-  waitForFinishedOrCanceledDownload,
   waitAndApproveDeposit,
   waitAndApproveDepositWithHub,
   setupFakeWeb3,
   takeScreenshot,
-  waitForTransactionIfNecessary
+  waitForClosedState,
+  waitForRunningState,
+  waitForTransactionIfNecessary,
+  expectSelector,
+  waitForNthState
 } from '../../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torrent';
@@ -69,7 +72,7 @@ describe('Optional Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}.png`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
@@ -95,11 +98,12 @@ describe('Optional Integration Tests', () => {
     }
 
     await waitForTransactionIfNecessary(web3tTabB);
-
-    // Let the download continue for some time
+    await forEachTab(waitForRunningState);
     console.log('Downloading');
+    await expectSelector(web3tTabB, '.status.downloading');
 
-    await web3tTabB.waitForSelector('.positive.downloading');
+    await waitForNthState(web3tTabB, 10);
+    await expectSelector(web3tTabB, '.positive.downloading');
 
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -107,11 +111,9 @@ describe('Optional Integration Tests', () => {
     // TODO: Verify withdrawal for direct funding once it's implemented
     // see https://github.com/statechannels/monorepo/issues/1546
 
-    console.log('Wait for the "Restart Download" button to appear');
-    await waitForFinishedOrCanceledDownload(web3tTabB);
-
-    console.log('Wait for the "closed" state');
-    await forEachTab(tab => tab.waitForSelector('.channel.closed'));
+    console.log('Wait for the channel to be closed');
+    await forEachTab(waitForClosedState);
+    await expectSelector(web3tTabB, '.channel.closed');
 
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.waitForSelector('td.exchanged > .amount');
