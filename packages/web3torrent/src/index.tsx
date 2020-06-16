@@ -5,6 +5,9 @@ import App from './App';
 import {isMobile} from 'react-device-detect';
 import {VERSION} from './constants';
 import {Flash} from 'rimble-ui';
+import {logger} from './logger';
+import {UAParser} from 'ua-parser-js';
+
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://d8f6fb84518e4abe97a63dbb28b7cb27@o344922.ingest.sentry.io/5228838',
@@ -15,6 +18,10 @@ if (process.env.NODE_ENV === 'production') {
 import Drift from 'react-driftjs';
 
 import {web3TorrentClient, Web3TorrentClientContext} from './clients/web3torrent-client';
+
+const log = logger.child({module: 'index'});
+log.info(new UAParser().getResult(), 'Device info');
+
 if (isMobile) {
   ReactDOM.render(
     <Flash my={3} variant="danger">
