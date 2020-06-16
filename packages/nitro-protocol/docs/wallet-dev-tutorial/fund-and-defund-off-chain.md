@@ -34,7 +34,7 @@ const sixEachStatePreFS: State = {
   channel: ledgerChannel,
   outcome: [
     {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: me, amount: parseUnits('6', 'wei').toHexString()},
         {destination: hub, amount: parseUnits('6', 'wei').toHexString()},
@@ -102,7 +102,7 @@ const threeEachStatePreFS: State = {
   channel: applicationChannel1,
   outcome: [
     {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: me, amount: parseUnits('3', 'wei').toHexString()},
         {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
@@ -155,7 +155,7 @@ const threeEachAndSixForTheApp: State = {
   channel: ledgerChannel,
   outcome: [
     {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: me, amount: parseUnits('3', 'wei').toHexString()},
         {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
@@ -218,7 +218,7 @@ const threeEachStatePreFS: State = {
   channel: applicationChannel1,
   outcome: [
     {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [{destination: me, amount: parseUnits('6', 'wei').toHexString()}],
     },
   ],
@@ -246,9 +246,10 @@ ledger-->|3|hub;
 ledger-->|6|app
 app((A1))
 app-->|6|me;
-app-->|0|hub;
 classDef external fill:#f96
 </div>
+
+---
 
 Now
 
@@ -261,7 +262,7 @@ const nineForMe3ForTheHub: State = {
   channel: ledgerChannel,
   outcome: [
     {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: me, amount: parseUnits('9', 'wei').toHexString()},
         {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
@@ -291,8 +292,7 @@ ledger-->|9|me;
 ledger-->|3|hub;
 app((A1)):::defunded
 app-->|6|me;
-app-->|0|hub;
-linkStyle 3,4 opacity:0.2;
+linkStyle 3 opacity:0.2;
 classDef external fill:#f96
 classDef defunded opacity:0.2;
 </div>
