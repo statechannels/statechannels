@@ -23,6 +23,7 @@ const log = logger.child({module: 'File'});
 import {WEI_PER_BYTE} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
 import {safeUnsubscribe} from '../../utils/react-utls';
+import {ChannelState} from '../../clients/payment-channel-client';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -52,7 +53,7 @@ const File: React.FC<Props> = props => {
   const [loading, setLoading] = useState(false);
   const [errorLabel, setErrorLabel] = useState('');
   const [warningState, setWarningState] = useState('');
-  const [channels, setChannels] = useState(undefined);
+  const [channels, setChannels] = useState<Record<string, ChannelState>>(undefined);
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
@@ -113,7 +114,9 @@ const File: React.FC<Props> = props => {
 
   let warning = warningState;
   let buttonEnabled = true;
-  let withdrawalEnabled = false;
+
+  const withdrawalEnabled = _.values(channels).every(cs => cs.status === 'closed');
+
   if (showBudget) {
     if (
       (torrent.status === Status.Seeding || torrent.status === Status.Downloading) &&
@@ -127,14 +130,6 @@ const File: React.FC<Props> = props => {
     ) {
       warning = 'You do not have enough funds in your budget to download this file.';
       buttonEnabled = false;
-    }
-
-    if (
-      torrent.status === Status.Idle ||
-      torrent.status === Status.Completed ||
-      torrent.status === Status.Seeding
-    ) {
-      withdrawalEnabled = true;
     }
   }
 
