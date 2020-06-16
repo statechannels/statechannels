@@ -45,6 +45,10 @@ export function useBudget({ready}: {ready: boolean}) {
 
   const closeBudget = async () => {
     setLoading(true);
+    // Cancel all existing torrents
+    await Promise.all(
+      web3TorrentClient.torrents.map(torrent => web3TorrentClient.cancel(torrent.infoHash))
+    );
     await paymentChannelClient.closeAndWithdraw();
     setBudget(paymentChannelClient.budgetCache);
     setLoading(false);
