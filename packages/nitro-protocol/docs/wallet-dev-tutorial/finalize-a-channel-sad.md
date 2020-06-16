@@ -3,7 +3,7 @@ id: finalize-a-channel-sad
 title: Finalize a channel (sad)
 ---
 
-When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but `isFinal = false`) state(s) being submitted.
+When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but `isFinal = false`) state(s) being submitted to the chain.
 
 The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 

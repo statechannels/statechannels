@@ -3,6 +3,8 @@ id: release-assets
 title: Release assets
 ---
 
+If a channel has been finalized on chain, the adjudicator contract knows about the final outcome. This tutorial section covers pushing that outcome to the asset holder contract(s), which is a necessary step to releasing the assets.
+
 ## Using `pushOutcome`
 
 A finalized outcome is stored in two places on chain: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.

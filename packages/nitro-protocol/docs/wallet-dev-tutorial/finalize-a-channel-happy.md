@@ -3,11 +3,15 @@ id: finalize-a-channel-happy
 title: Finalize a channel (happy)
 ---
 
-Finalization of a state channel is a necessary step before defunding it (i.e. releasing the assets that were deposited on chain, in the case of direct funding). In the so-called 'happy' case, all participants cooperate to achieve this.
+Finalization of a state channel is a necessary step before defunding it. In the so-called 'happy' case, all participants cooperate to achieve this.
 
-A participant wishing to end the state channel will sign a state with `isFinal = true`. Then, the other participants support that state. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the `outcome` on-chain. They would do this by calling `conclude` on the adjudicator.
+A participant wishing to end the state channel will sign a state with `isFinal = true`. Then, the other participants may support that state. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) the channel is said to be 'closed' or 'finalized'.
+
+In most cases, the channel would be finalized and defunded off chain, and no contract calls are necessary.
 
 ## Call `conclude`
+
+In the case where assets were deposited against the channel on chain (the case of direct funding), anyone in possession of a finalization proof may use it to finalize the `outcome` on-chain. They would do this by calling `conclude` on the adjudicator. This enables [assets to be released](./release-assets).
 
 The conclude method allows anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire (more on that later).
 
