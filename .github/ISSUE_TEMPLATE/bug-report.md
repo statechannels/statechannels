@@ -23,10 +23,13 @@ A clear and concise description of what you expected to happen.
 **Screenshots (if applicable)**
 If applicable, add screenshots to help explain your problem.
 
-**Environment:**
- - Affected packages: [e.g., nitro-protocol]
+**Logs (if applicable)**
+If this bug report is for `web3torrent`, please run `window.saveWeb3torrentLogs()` in the browser console and attach the downloaded logs to the bug report. 
+
+**Environment (if no logs are attached)**
+ - Affected application(s) or package(s): [e.g., web3torrent, nitro-protocol]
  - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
+ - Browser [e.g. Chrome, Safari]
  - Version [e.g. 22]
 
 **Additional context**
