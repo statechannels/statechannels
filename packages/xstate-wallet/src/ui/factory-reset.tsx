@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './wallet.scss';
 import Dexie from 'dexie';
 import {Store} from '../store';
@@ -9,21 +9,31 @@ interface Props {
   store: Store;
 }
 
-export const FactoryReset = (props: Props) => (
-  <div>
-    <div>If you press this button, we will destroy your wallet. </div>
-    <div>We will dump the contents of your wallet in your console.</div>
-    <div>Contact us, and we can try to recover your funds.</div>
-    <button id="destroy" onClick={() => destroyStore(props.store)}>
-      Factory reset
-    </button>
-  </div>
-);
+export const FactoryReset = (props: Props) => {
+  const [destroyed, setDestroyed] = useState(false);
 
-const destroyStore = async (store: Store) => {
-  if (confirm('Are you sure you want to delete your store?')) {
+  return destroyed ? (
+    <div>Success! Check your console to see your old store.</div>
+  ) : (
+    <div>
+      <div>If you press this button, we will destroy your wallet. </div>
+      <div>We will dump the contents of your wallet in your console.</div>
+      <div>Contact us, and we can try to recover your funds.</div>
+      <button id="destroy" onClick={() => destroyStore(props.store, setDestroyed)}>
+        Factory reset
+      </button>
+    </div>
+  );
+};
+
+const destroyStore = async (store: Store, setDestroyed) => {
+  if (!(await Dexie.exists(DB_NAME))) {
+    logger.error('No store detected.');
+    setDestroyed(true);
+  } else if (confirm('Are you sure you want to delete your store?')) {
     logger.error({store: await (store as any).backend.dump()}, 'Wallet destroyed');
     await Dexie.delete(DB_NAME);
-    window.location.reload();
+
+    setDestroyed(true);
   }
 };
