@@ -129,7 +129,11 @@ const File: React.FC<Props> = props => {
       buttonEnabled = false;
     }
 
-    if (torrent.status === Status.Idle || torrent.status === Status.Completed) {
+    if (
+      torrent.status === Status.Idle ||
+      torrent.status === Status.Completed ||
+      torrent.status === Status.Seeding
+    ) {
       withdrawalEnabled = true;
     }
   }
