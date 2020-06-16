@@ -113,6 +113,7 @@ const File: React.FC<Props> = props => {
 
   let warning = warningState;
   let buttonEnabled = true;
+  let withdrawalEnabled = false;
   if (showBudget) {
     if (
       (torrent.status === Status.Seeding || torrent.status === Status.Downloading) &&
@@ -126,6 +127,10 @@ const File: React.FC<Props> = props => {
     ) {
       warning = 'You do not have enough funds in your budget to download this file.';
       buttonEnabled = false;
+    }
+
+    if (torrent.status === Status.Idle || torrent.status === Status.Completed) {
+      withdrawalEnabled = true;
     }
   }
 
@@ -149,6 +154,7 @@ const File: React.FC<Props> = props => {
           channelCache={channels}
           mySigningAddress={me}
           withdraw={closeBudget}
+          allowWithdrawal={withdrawalEnabled}
         />
       )}
       {(torrent.status === Status.Idle || torrent.status === Status.Paused) && (
