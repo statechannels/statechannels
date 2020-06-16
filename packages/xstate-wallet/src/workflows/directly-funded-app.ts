@@ -95,13 +95,35 @@ type Typestate =
 
 type Context = Typestate['context'];
 
-const channelStateToMachineState = (state: ChannelStoreEntry) => {};
+// need a clear way of breaking it down
+
+// instruction to close? the app doesn't have to issue an instruction to close if there's a risk
+// the app issuing the instruction is saying "I want to close regardless of the future"
+// request close / confirm close? done with an objective?
+
+// close requested [don't currently have this functionality]
+// setup -(preFS)-> funding -(postFS)-> running -> concluding -> concluded
+// noFunds / partialFunds / fullyFunded / depositInProgress
+
+// open / challenge / finalized / responsePending / challengePending
+
+const channelStateToMachineState = (state: ChannelStoreEntry) => {
+  // conclusion proof + no funds => done
+  // conclusion proof + funds => withdrawing
+  // challenge exists & is mine => challenging # what about the unfunded case?
+  // challenge exists & not mine => responding
+  //
+  //
+  // fully funded & postFS => running (my turn / not my turn)
+  // fully funded & no postFS => funding
+  // preFS but no funds => funding
+  // fully funded => running
+  // no preFS => opening
+  //
+};
 
 const channelUpdateToEvent = (previousChannelState: ChannelStoreEntry, event: ChannelUpdated) => {
   const channelState = event.storeEntry;
-
-  
-
 };
 
 // Channel Events
