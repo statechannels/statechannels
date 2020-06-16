@@ -13,30 +13,21 @@ export function useBudget({ready}: {ready: boolean}) {
 
   const [budget, setBudget] = useState<DomainBudget>(undefined);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const setBudgetUI = budget => {
-      setBudget(budget);
-      setLoading(false);
+    let cancelled = false;
+    const getAndSetBudget = async () => {
+      const budget = await paymentChannelClient.getBudget();
+
+      !cancelled && setBudget(budget);
+      !cancelled && setLoading(false);
     };
-    const getBudget = () => from(paymentChannelClient.getBudget());
+    if (ready) getAndSetBudget();
+    const unsubscribe = paymentChannelClient.channelClient.onBudgetUpdated(getAndSetBudget);
 
-    let getBudgetSubscription: Subscription;
-    if (ready) {
-      getBudgetSubscription = getBudget().subscribe(setBudgetUI);
-    }
-    const onBudgetUpdatedSubscription = paymentChannelClient.channelClient.onBudgetUpdated(() =>
-      getBudget().subscribe(setBudgetUI)
-    );
-
-    // Mostly works.
-    // Cleanup is not properly done for the following case:
-    // 1. onBudgetUpdated event arrives.
-    // 2. getBudget().subscribe(setBudget) is invoked.
-    // The operation from step 2 is not properly cleaned up.
-    // To fix this issue, onBudgetUpdated would need to return an observable instead of a subscription.
     return () => {
-      safeUnsubscribe(getBudgetSubscription, log)();
-      safeUnsubscribeFromFunction(onBudgetUpdatedSubscription, log)();
+      cancelled = true;
+      unsubscribe();
     };
   }, [ready, paymentChannelClient]);
 
