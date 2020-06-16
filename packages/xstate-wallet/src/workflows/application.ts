@@ -180,11 +180,11 @@ const generateConfig = (
           channelId: ctx.channelId,
           funding: ctx.fundingStrategy
         }),
-        onDone: 'running'
+        onDone: {target: 'running', actions: [actions.hideUi]}
       }
     },
     running: {
-      entry: [actions.hideUi, actions.spawnObservers],
+      entry: [actions.spawnObservers],
       on: {
         // TODO: It would be nice to get rid of this event, which is used
         // in testing when starting the workflow in the 'running' state.
