@@ -15,13 +15,14 @@ import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';
 import {useBudget} from '../../hooks/use-budget';
 import {track} from '../../analytics';
-import {Observable} from 'rxjs';
+import {Observable, from, noop} from 'rxjs';
 import {throttleTime} from 'rxjs/operators';
 import {logger} from '../../logger';
 
 const log = logger.child({module: 'File'});
 import {WEI_PER_BYTE} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
+import {safeUnsubscribe} from '../../utils/react-utls';
 
 async function checkTorrent(infoHash: string) {
   const testResult = await checkTorrentInTracker(infoHash);
@@ -83,32 +84,25 @@ const File: React.FC<Props> = props => {
       .pipe(throttleTime(1_000 / MAX_FPS, undefined, {trailing: true, leading: false}))
       .subscribe(onTorrentUpdate);
 
-    // It is not clear why the following error is sometimes thrown.
-    // TypeError: Cannot read property 'closed' of null
-    return () => {
-      try {
-        subscription.unsubscribe();
-      } catch (e) {
-        log.info('Unable to unsubscribe');
-      }
-    };
+    return safeUnsubscribe(subscription, log);
   }, [infoHash, torrentLength, torrentName, web3TorrentClient]);
 
   useEffect(() => {
-    const testResult = async () => {
-      const torrentCheckResult = await checkTorrent(infoHash);
-      setWarningState(torrentCheckResult);
-    };
-
     if (infoHash) {
-      testResult();
+      const subscription = from(checkTorrent(infoHash)).subscribe(setWarningState);
+      return safeUnsubscribe(subscription, log);
     }
+    return noop;
   }, [infoHash]);
 
   useEffect(() => {
     if (props.ready) {
-      web3TorrentClient.paymentChannelClient.getChannels().then(channels => setChannels(channels));
+      const subscription = from(web3TorrentClient.paymentChannelClient.getChannels()).subscribe(
+        setChannels
+      );
+      return safeUnsubscribe(subscription, log);
     }
+    return noop;
   }, [props.ready, web3TorrentClient.paymentChannelClient]);
 
   const {mySigningAddress: me} = web3TorrentClient.paymentChannelClient;
