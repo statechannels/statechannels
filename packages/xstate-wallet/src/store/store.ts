@@ -113,7 +113,14 @@ export class Store {
     });
   };
 
-  public getDestinationAddress = () => this.backend.getDestinationAddress();
+  public getDestinationAddress = () => {
+    const destinationAddress = this.backend.getDestinationAddress();
+    if (!destinationAddress && typeof this.chain.selectedAddress === 'string') {
+      return this.backend.setDestinationAddress(this.chain.selectedAddress);
+    }
+    return destinationAddress;
+  };
+
   public setDestinationAddress = (destinationAddress: string) => {
     if (!destinationAddress) {
       logger.error('destinationAddress being set to falsy value', destinationAddress);
