@@ -115,7 +115,7 @@ const File: React.FC<Props> = props => {
   let warning = warningState;
   let buttonEnabled = true;
 
-  const withdrawalEnabled = _.values(channels).every(cs => cs.status === 'closed');
+  const withdrawalEnabled = !torrent || torrent.done;
 
   if (showBudget) {
     if (
