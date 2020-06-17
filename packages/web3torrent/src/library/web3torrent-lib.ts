@@ -619,7 +619,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         wire.paidStreamingExtension.leechingChannelId = null;
         log.info(`Leechning channel ${channelId} set to null`);
       }
-      if (channelId === wire.paidStreamingExtension.leechingChannelId) {
+      if (channelId === wire.paidStreamingExtension.seedingChannelId) {
         wire.paidStreamingExtension.seedingChannelId = null;
         log.info(`Seeding channel ${channelId} set to null`);
       }
