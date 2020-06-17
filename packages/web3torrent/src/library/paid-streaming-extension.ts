@@ -163,6 +163,10 @@ export abstract class PaidStreamingExtension implements Extension {
         }
         this.isBeingChoked = true;
         break;
+      case PaidStreamingExtensionNotices.PERMANENT_STOP:
+        log.info(`PERMANENT_STOP received from ${this.peerAccount}`);
+        this.isBeingChoked = true;
+        break;
       case PaidStreamingExtensionNotices.MESSAGE:
         data = JSON.parse(data.message);
         if (data.recipient !== this.pseAccount) {
