@@ -173,7 +173,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       await this.closeTorrentChannels(torrent, false);
       await this.waitForMySeederChannelsToClose(torrent);
-      torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));
     } else {
       throw new Error('No torrent found');
     }
