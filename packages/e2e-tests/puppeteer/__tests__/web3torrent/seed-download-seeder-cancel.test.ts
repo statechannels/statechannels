@@ -32,6 +32,7 @@ import {uploadFile, startDownload, cancelDownload} from '../../scripts/web3torre
 import {Dappeteer} from 'dappeteer';
 
 jest.setTimeout(HEADLESS ? JEST_TIMEOUT : 1_000_000);
+const ARTIFACT_PREFIX = __filename.slice(__dirname.length + 1).split('.')[0];
 
 let metamaskA: Dappeteer;
 let metamaskB: Dappeteer;
@@ -64,7 +65,7 @@ describe('Optional Integration Tests', () => {
 
     console.log('Loading dapps');
     await forEachTab(async (tab, idx) => {
-      await setupLogging(tab, idx, 'seed-download-cancel', true);
+      await setupLogging(tab, idx, ARTIFACT_PREFIX, true);
       if (!USE_DAPPETEER) await setupFakeWeb3(tab, idx);
     });
 
@@ -72,11 +73,12 @@ describe('Optional Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await forEachTab((tab, idx) => takeScreenshot(tab, `seed-download-cancel.${idx}`));
+    await forEachTab((tab, idx) => takeScreenshot(tab, `${ARTIFACT_PREFIX}.${idx}`));
     await forEachBrowser(async b => CLOSE_BROWSERS && b && b.close());
   });
 
   it('Optional - Torrent a file - Cancelling', async () => {
+    console.log(ARTIFACT_PREFIX);
     await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
     await web3tTabA.bringToFront();
 
