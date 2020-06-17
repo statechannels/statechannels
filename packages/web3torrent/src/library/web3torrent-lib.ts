@@ -335,8 +335,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         if (isClosed) {
           if (isLeechingChannel) {
             wire.paidStreamingExtension.leechingChannelId = null;
+            log.info(`Leechning channel ${channelState.channelId} set to null`);
           } else {
             wire.paidStreamingExtension.seedingChannelId = null;
+            log.info(`Seeding channel ${channelState.channelId} set to null`);
           }
           log.info(`Account ${peerAccount} - ChannelId ${channelState.channelId} Channel Closed`);
         }
@@ -611,12 +613,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   private async closeChannel(wire: PaidStreamingWire, channelId: string): Promise<string> {
     try {
       await this.paymentChannelClient.closeChannel(channelId);
+      // Note: it is possible that onChannelUpdated already set the wire.paidStreamingExtention leeching or seeding id to null
+      // while we were awaiting the above promise
       if (channelId === wire.paidStreamingExtension.leechingChannelId) {
         wire.paidStreamingExtension.leechingChannelId = null;
-        log.info(`Payment Channel closed: ${channelId}`);
-      } else {
+        log.info(`Leechning channel ${channelId} set to null`);
+      }
+      if (channelId === wire.paidStreamingExtension.seedingChannelId) {
         wire.paidStreamingExtension.seedingChannelId = null;
-        log.info(`Paying Channel closed: ${channelId}`);
+        log.info(`Seeding channel ${channelId} set to null`);
       }
     } catch (error) {
       log.error({error}, 'Error closing channel');
