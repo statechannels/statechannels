@@ -33,6 +33,8 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
     const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
     return safeUnsubscribe(subscription, log);
   }, [web3TorrentClient.canWithdrawFeed]);
+
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   return (
     <>
       <section className="torrentInfo">
@@ -65,6 +67,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
         <button
           id="cancel-download-button"
           type="button"
+          disabled={buttonDisabled}
           className="button cancel"
           onClick={() => {
             track('Torrent Cancelled', {
@@ -73,6 +76,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
               filename: torrent.name,
               filesize: torrent.length
             });
+            setButtonDisabled(true);
             return web3TorrentClient.cancel(torrent.infoHash);
           }}
         >
