@@ -43,6 +43,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
   channelIdToTorrentMap: Record<string, string> = {};
+  stoppedTorrents: Record<string, boolean> = {};
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super({tracker: {announce: defaultTrackers}, ...opts});
@@ -143,6 +144,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   stopUploading(infoHash: string) {
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
+    this.stoppedTorrents[infoHash] = true;
     // there isn't a method on the torrent to stop seeding once you have started
     // setting _rechokeNumSlots = 0 has the same effect as setting upload: false initially
     // https://github.com/webtorrent/webtorrent/blob/master/lib/torrent.js#L82-L84
@@ -169,7 +171,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       (torrent as any).maxWebConns = 0; // don't start downloading from existing upload peers
       this.stopUploading(infoHash); // also stop uploading immediately
 
-      await this.closeTorrentChannels(torrent, true);
+      await this.closeTorrentChannels(torrent, false);
+      await this.waitForMySeederChannelsToClose(torrent);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));
     } else {
       throw new Error('No torrent found');
@@ -267,7 +270,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
         const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 
-        if (!knownPeer || !seedingChannelId) {
+        if (this.stoppedTorrents[torrent.infoHash]) {
+          wire.paidStreamingExtension.permanentStop();
+        } else if (!knownPeer || !seedingChannelId) {
           await this.createPaymentChannel(torrent, wire);
           log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
@@ -579,6 +584,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.trace({ids: channelsToClose.map(({channelId}) => channelId)}, 'About to close channels');
     return await Promise.all(
       channelsToClose.map(({wire, channelId}) => this.closeChannel(wire, channelId))
+    );
+  }
+
+  protected async waitForMySeederChannelsToClose(torrent: PaidStreamingTorrent) {
+    const channelsToWaitFor: {wire: PaidStreamingWire; channelId: string}[] = [];
+    torrent.wires.forEach(wire => {
+      const {seedingChannelId} = wire.paidStreamingExtension;
+      if (seedingChannelId) {
+        channelsToWaitFor.push({wire, channelId: seedingChannelId});
+      }
+    });
+    // essentially creates a list of ids to close, and wires to update.
+    log.trace(
+      {ids: channelsToWaitFor.map(({channelId}) => channelId)},
+      'Waiting for channels to close'
+    );
+    return await Promise.all(
+      channelsToWaitFor.map(({wire, channelId}) =>
+        this.paymentChannelClient.blockUntilClosed(channelId)
+      )
     );
   }
 

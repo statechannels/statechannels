@@ -280,7 +280,7 @@ export class PaymentChannelClient {
       const channelState = convertToChannelState(cr);
 
       // if we're waiting to close, have a try - we want to get in before anyone else is notified
-      if (this.waitingToClose(cr.channelId) && this.canUpdateChannel(channelState)) {
+      if (this.waitingToClose(cr.channelId) && this.canCancelChannel(channelState)) {
         await this.attemptToInitiateClose(cr.channelId);
       }
 
@@ -322,6 +322,12 @@ export class PaymentChannelClient {
       .toPromise();
   }
 
+  async blockUntilClosed(channelId: string): Promise<ChannelState> {
+    return this.channelState(channelId)
+      .pipe(first(cs => cs.status === 'closed'))
+      .toPromise();
+  }
+
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
     this.updateChannelCache(convertToChannelState(channelResult));
@@ -348,19 +354,30 @@ export class PaymentChannelClient {
    * - it's my turn to move
    */
   private canUpdateChannel(state: ChannelState): boolean {
+    return state.status === 'running' && this.isMyTurn(state);
+  }
+
+  private canCancelChannel(state: ChannelState): boolean {
+    return (
+      this.isMyTurn(state) &&
+      (state.status === 'proposed' ||
+        state.status === 'opening' ||
+        state.status === 'funding' ||
+        state.status === 'running')
+    );
+  }
+
+  private isMyTurn(state: ChannelState): boolean {
     const {payer, beneficiary} = state;
     let myRole: Index;
     if (payer.signingAddress === this.mySigningAddress) myRole = Index.Payer;
     else if (beneficiary.signingAddress === this.mySigningAddress) myRole = Index.Beneficiary;
     else throw 'Not in channel';
 
-    return (
-      state.status === 'running' &&
-      state.turnNum
-        .add(1)
-        .mod(2)
-        .eq(myRole)
-    );
+    return state.turnNum
+      .add(1)
+      .mod(2)
+      .eq(myRole);
   }
 
   get channelStates() {
