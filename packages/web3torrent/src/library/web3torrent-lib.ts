@@ -166,6 +166,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       // "Not my turn" error.
       torrent.pause(); // prevents connections to new peers
       (torrent as any).maxWebConns = 0; // don't start downloading from existing upload peers
+      this.stopUploading(infoHash); // also stop uploading immediately
 
       await this.closeTorrentChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));

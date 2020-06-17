@@ -10,6 +10,8 @@ import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelCache} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 import {ChannelsList} from './channels-list/ChannelsList';
+import {web3TorrentClient} from '../../clients/web3torrent-client';
+import {track} from '../../analytics';
 
 export type TorrentInfoProps = {
   torrent: TorrentUI;
@@ -49,6 +51,23 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
       {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
         <DownloadInfo torrent={torrent} />
       )}
+
+      <button
+        id="cancel-download-button"
+        type="button"
+        className="button cancel"
+        onClick={() => {
+          track('Torrent Cancelled', {
+            infoHash: torrent.infoHash,
+            magnetURI: torrent.magnetURI,
+            filename: torrent.name,
+            filesize: torrent.length
+          });
+          return web3TorrentClient.cancel(torrent.infoHash);
+        }}
+      >
+        Stop Torrenting
+      </button>
       <PeerNetworkStats torrent={torrent} />
       <DownloadLink torrent={torrent} />
       <ChannelsList torrent={torrent} channels={channelCache} mySigningAddress={mySigningAddress} />

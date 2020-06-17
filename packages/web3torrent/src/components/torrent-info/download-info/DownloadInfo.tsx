@@ -18,22 +18,6 @@ export const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInf
             length={torrent.length}
             status={torrent.status}
           />
-          <button
-            id="cancel-download-button"
-            type="button"
-            className="button cancel"
-            onClick={() => {
-              track('Torrent Cancelled', {
-                infoHash: torrent.infoHash,
-                magnetURI: torrent.magnetURI,
-                filename: torrent.name,
-                filesize: torrent.length
-              });
-              return web3torrent.cancel(torrent.infoHash);
-            }}
-          >
-            Cancel Download
-          </button>
         </>
       )}
     </section>
