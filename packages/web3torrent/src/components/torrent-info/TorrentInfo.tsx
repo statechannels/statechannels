@@ -1,6 +1,6 @@
 import prettier from 'prettier-bytes';
-import React from 'react';
-import {DownloadingStatuses, TorrentUI} from '../../types';
+import React, {useState, useEffect, useContext} from 'react';
+import {DownloadingStatuses, TorrentUI, Status} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
@@ -10,9 +10,12 @@ import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelCache} from '../../clients/payment-channel-client';
 import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 import {ChannelsList} from './channels-list/ChannelsList';
-import {web3TorrentClient} from '../../clients/web3torrent-client';
-import {track} from '../../analytics';
 
+import {track} from '../../analytics';
+import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
+import {safeUnsubscribe} from '../../utils/react-utls';
+import {logger} from '../../logger';
+const log = logger.child({module: 'TorrentInfo'});
 export type TorrentInfoProps = {
   torrent: TorrentUI;
   channelCache: ChannelCache;
@@ -24,6 +27,14 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }) => {
+  const web3TorrentClient = useContext(Web3TorrentClientContext);
+  const [canWithdraw, setCanWithdraw] = useState(true);
+  useEffect(() => {
+    const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
+    return safeUnsubscribe(subscription, log);
+  }, [web3TorrentClient.canWithdrawFeed]);
+
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   return (
     <>
       <section className="torrentInfo">
@@ -52,22 +63,29 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
         <DownloadInfo torrent={torrent} />
       )}
 
-      <button
-        id="cancel-download-button"
-        type="button"
-        className="button cancel"
-        onClick={() => {
-          track('Torrent Cancelled', {
-            infoHash: torrent.infoHash,
-            magnetURI: torrent.magnetURI,
-            filename: torrent.name,
-            filesize: torrent.length
-          });
-          return web3TorrentClient.cancel(torrent.infoHash);
-        }}
-      >
-        Stop Torrenting
-      </button>
+      {!!torrent && !canWithdraw && (
+        <button
+          id="cancel-download-button"
+          type="button"
+          disabled={buttonDisabled}
+          className="button cancel"
+          onClick={() => {
+            track('Torrent Cancelled', {
+              infoHash: torrent.infoHash,
+              magnetURI: torrent.magnetURI,
+              filename: torrent.name,
+              filesize: torrent.length
+            });
+            setButtonDisabled(true);
+            return web3TorrentClient.cancel(torrent.infoHash);
+          }}
+        >
+          Stop{' '}
+          {torrent && (torrent.status === Status.Seeding || torrent.status === Status.Completed)
+            ? 'Seeding'
+            : 'Downloading'}
+        </button>
+      )}
       <PeerNetworkStats torrent={torrent} />
       <DownloadLink torrent={torrent} />
       <ChannelsList torrent={torrent} channels={channelCache} mySigningAddress={mySigningAddress} />
