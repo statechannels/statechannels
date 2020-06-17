@@ -56,8 +56,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
-    this.canWithdrawSubject = new rxjs.Subject();
-    this.enableWithdrawal();
+    this.canWithdrawSubject = new rxjs.BehaviorSubject(true);
   }
 
   /** Enable the client capabilities to seed or leech torrents, enabling the paymentChannelClient
