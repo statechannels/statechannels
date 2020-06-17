@@ -163,6 +163,8 @@ export type ChannelCache = Record<string, ChannelState | undefined>;
 export class PaymentChannelClient {
   channelCache: ChannelCache = {};
   budgetCache?: DomainBudget;
+  channelsWaitingToClose: Record<string, boolean | undefined> = {};
+
   _enabled = false;
   get enabled(): boolean {
     return this._enabled;
@@ -274,7 +276,16 @@ export class PaymentChannelClient {
 
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
-    return this.channelClient.onChannelUpdated(cr => web3tCallback(convertToChannelState(cr)));
+    return this.channelClient.onChannelUpdated(async cr => {
+      const channelState = convertToChannelState(cr);
+
+      // if we're waiting to close, have a try - we want to get in before anyone else is notified
+      if (this.waitingToClose(cr.channelId) && this.canUpdateChannel(channelState)) {
+        await this.attemptToInitiateClose(cr.channelId);
+      }
+
+      web3tCallback(channelState);
+    });
   }
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
@@ -286,41 +297,28 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
-  closeChannel(channelId: string): Promise<ChannelState> {
-    const MAX_CLOSE_ATTEMPTS = 5;
-    const {unsubscribe} = this.channelState(channelId)
-      .pipe(
-        filter(cs => this.canUpdateChannel(cs)),
-        take(MAX_CLOSE_ATTEMPTS)
-      )
-      .subscribe(
-        async cs => {
-          logger.debug({channelId, cs, me: this.mySigningAddress}, 'Closing payment channel');
-          try {
-            await this.channelClient.closeChannel(channelId);
-          } catch (error) {
-            if (error.error.code === ErrorCode.CloseChannel.NotYourTurn) {
-              // Perhaps the application calls UpdateChannel around the same time as the CloseChannel call.
-              // Is a concurrent UpdateChannel occurring?
-              logger.warn({channelId}, 'Possible race condition detected');
-              return;
-            } else {
-              logger.error({error}, 'Unexpected error');
-              throw error;
-            }
-          }
-        },
-        error => logger.error({error, channelId}, 'Failed to close payment channel'),
-        () => {
-          throw new Error(`CloseChannel failed ${MAX_CLOSE_ATTEMPTS} in a row.`);
-        }
-      );
+  private async attemptToInitiateClose(channelId: string) {
+    try {
+      await this.channelClient.closeChannel(channelId);
+    } catch (error) {
+      if (error.error.code === ErrorCode.CloseChannel.NotYourTurn) {
+        logger.warn({channelId}, 'Tried to close but not your turn. Waiting instead');
+      } else {
+        logger.error({error}, 'Unexpected error');
+        throw error;
+      }
+    }
+  }
 
+  async closeChannel(channelId: string): Promise<ChannelState> {
+    this.setWaitingToClose(channelId);
+
+    // attempt to initiate close
+    await this.attemptToInitiateClose(channelId);
+
+    // and then wait until closed
     return this.channelState(channelId)
-      .pipe(
-        first(cs => cs.status === 'closed'),
-        tap(safeUnsubscribeFromFunction(unsubscribe, log))
-      )
+      .pipe(first(cs => cs.status === 'closed'))
       .toPromise();
   }
 
@@ -489,6 +487,14 @@ export class PaymentChannelClient {
 
     this.budgetCache = undefined;
     return this.budgetCache;
+  }
+
+  private setWaitingToClose(channelId: string) {
+    this.channelsWaitingToClose[channelId] = true;
+  }
+
+  private waitingToClose(channelId: string): boolean {
+    return !!this.channelsWaitingToClose[channelId];
   }
 }
 
