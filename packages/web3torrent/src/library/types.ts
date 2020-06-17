@@ -53,6 +53,7 @@ export enum PaidStreamingExtensionNotices {
   MESSAGE = 'message',
   START = 'start',
   STOP = 'stop',
+  PERMANENT_STOP = 'permanent-stop',
   ACK = 'ack'
 }
 
