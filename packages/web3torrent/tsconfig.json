@@ -13,7 +13,8 @@
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "target": "es2015"
+    "target": "es2015",
+    "noUnusedLocals": true
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }

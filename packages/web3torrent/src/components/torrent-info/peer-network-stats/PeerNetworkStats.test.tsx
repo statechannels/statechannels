@@ -52,7 +52,7 @@ describe('<PeerNetworkStats />', () => {
   });
 
   it('can be instantiated and show more info', () => {
-    const {numPeersElement, torrent, uploadingSectionElement} = PeerNetworkStats;
+    const {numPeersElement, torrent} = PeerNetworkStats;
 
     expect(numPeersElement.exists()).toEqual(true);
 

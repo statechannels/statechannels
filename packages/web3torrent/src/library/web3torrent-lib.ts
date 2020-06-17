@@ -28,7 +28,7 @@ import {utils} from 'ethers';
 import {logger} from '../logger';
 import {track} from '../analytics';
 import * as rxjs from 'rxjs';
-import _ from 'lodash';
+
 const hexZeroPad = utils.hexZeroPad;
 
 const bigNumberify = utils.bigNumberify;
@@ -95,7 +95,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.ensureEnabled();
     this.disableWithdrawal();
     let torrent: PaidStreamingTorrent;
-    let options: ExtendedTorrentOptions = {createdBy: this.pseAccount, announce: defaultTrackers};
+    let options: ExtendedTorrentOptions = {
+      createdBy: this.pseAccount,
+      announce: defaultTrackers
+    };
 
     if ((input as FileList).length && (input as FileList).length > 1) {
       options.name = 'various.zip';
@@ -608,9 +611,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       'Waiting for channels to close'
     );
     return await Promise.all(
-      channelsToWaitFor.map(({wire, channelId}) =>
-        this.paymentChannelClient.blockUntilClosed(channelId)
-      )
+      channelsToWaitFor.map(({channelId}) => this.paymentChannelClient.blockUntilClosed(channelId))
     );
   }
 
@@ -650,6 +651,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   /** Emit an event that triggers a UI re-render */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private emitTorrentUpdated(infoHash, trigger: string) {
     // log.trace(`emitTorrentUpdate: ${trigger}`);
     this.emit(WebTorrentPaidStreamingClient.torrentUpdatedEventName(infoHash));

@@ -2,7 +2,7 @@ import WebTorrent, {TorrentOptions} from 'webtorrent';
 import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
-import {createMockExtendedTorrent, createMockTorrentPeers, pseAccount} from '../utils/test-utils';
+import {createMockExtendedTorrent, pseAccount} from '../utils/test-utils';
 import {download, upload, web3TorrentClient} from './web3torrent-client';
 import {getStatus} from '../utils/torrent-status-checker';
 

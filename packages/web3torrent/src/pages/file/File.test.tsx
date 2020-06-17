@@ -1,28 +1,18 @@
 import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {WebTorrentAddInput, ExtendedTorrent} from '../../library/types';
-import {TorrentStaticData} from '../../types';
-import {testSelector, createMockExtendedTorrent, createMockTorrentUI} from '../../utils/test-utils';
-import * as TorrentStatus from '../../utils/torrent-status-checker';
+import {testSelector} from '../../utils/test-utils';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import {paymentChannelClient} from '../../clients/payment-channel-client';
 import File from './File';
-import WebTorrentPaidStreamingClient from '../../library/web3torrent-lib';
 
 Enzyme.configure({adapter: new Adapter()});
 
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
-  let torrentFile: jest.SpyInstance<Promise<ExtendedTorrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {
-    torrentFile = jest
-      .spyOn(Web3TorrentClient, 'download')
-      .mockImplementation(_pD => Promise.resolve(createMockExtendedTorrent()));
-
     jest.spyOn(paymentChannelClient, 'getChannels').mockImplementation(() => Promise.resolve({}));
 
     component = mount(

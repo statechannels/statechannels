@@ -69,7 +69,6 @@ describe('<TorrentInfo />', () => {
       fileStatusElement,
       magnetLinkButtonElement,
       sectionElement,
-      PeerNetworkStatsElement,
       torrent
     } = torrentInfo;
 

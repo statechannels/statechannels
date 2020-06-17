@@ -2,7 +2,6 @@ import {Request, Wire} from 'bittorrent-protocol';
 import {Instance as ParseTorrent} from 'parse-torrent';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import {PaidStreamingExtension} from './paid-streaming-extension';
-import _ from 'lodash';
 
 export enum ClientEvents {
   PEER_STATUS_CHANGED = 'peer_status_changed',
