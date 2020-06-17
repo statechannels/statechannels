@@ -57,7 +57,7 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
-  const [canWithdraw, setCanWithdraw] = useState(false);
+  const [canWithdraw, setCanWithdraw] = useState(true);
   useEffect(() => {
     const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
     return safeUnsubscribe(subscription, log);
