@@ -148,6 +148,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // https://github.com/webtorrent/webtorrent/blob/master/lib/torrent.js#L82-L84
     (torrent as any)._rechokeNumSlots = 0;
     (torrent as any)._rechoke();
+    torrent.wires.forEach(w => w.paidStreamingExtension.permanentStop());
   }
 
   /**
@@ -441,6 +442,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           break;
         case PaidStreamingExtensionNotices.START: // "okay, now you can continue asking for data" request
           this.jumpStart(torrent, wire);
+          break;
+        case PaidStreamingExtensionNotices.PERMANENT_STOP: // "okay, now you can continue asking for data" request
+          this.closeChannel(wire, wire.paidStreamingExtension.leechingChannelId);
           break;
         case PaidStreamingExtensionNotices.MESSAGE: // general use message
           log.info({data}, 'Message received');
