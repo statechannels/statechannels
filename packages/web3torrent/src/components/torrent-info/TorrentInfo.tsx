@@ -80,7 +80,10 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
             return web3TorrentClient.cancel(torrent.infoHash);
           }}
         >
-          Stop {torrent && torrent.status === Status.Seeding ? 'Seeding' : 'Downloading'}
+          Stop{' '}
+          {torrent && (torrent.status === Status.Seeding || torrent.status === Status.Completed)
+            ? 'Seeding'
+            : 'Downloading'}
         </button>
       )}
       <PeerNetworkStats torrent={torrent} />
