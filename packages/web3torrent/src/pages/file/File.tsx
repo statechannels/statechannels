@@ -57,6 +57,12 @@ const File: React.FC<Props> = props => {
   const torrentName = queryParams.get('name');
   const torrentLength = Number(queryParams.get('length'));
 
+  const [canWithdraw, setCanWithdraw] = useState(false);
+  useEffect(() => {
+    const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
+    return safeUnsubscribe(subscription, log);
+  }, [web3TorrentClient.canWithdrawFeed]);
+
   const [torrent, setTorrent] = useState<TorrentUI>(() =>
     getTorrentUI(web3TorrentClient, {
       infoHash,
@@ -115,10 +121,6 @@ const File: React.FC<Props> = props => {
   let warning = warningState;
   let buttonEnabled = true;
 
-  // torrent.ready will be false whenever the torrent is active in any way
-  // This means the user will have to hit stop seeding/downloading before withdrawal
-  const withdrawalEnabled = !torrent.ready;
-
   if (showBudget) {
     if (
       (torrent.status === Status.Seeding || torrent.status === Status.Downloading) &&
@@ -155,7 +157,7 @@ const File: React.FC<Props> = props => {
           channelCache={channels}
           mySigningAddress={me}
           withdraw={closeBudget}
-          allowWithdrawal={withdrawalEnabled}
+          allowWithdrawal={canWithdraw}
         />
       )}
       {(torrent.status === Status.Idle || torrent.status === Status.Paused) && (
