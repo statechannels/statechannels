@@ -172,7 +172,7 @@ expect(
 
 ### Setup states
 
-If `n` is the number of participants, then states with turn numbers 0 through `n-1` (inclusive) are known as "pre fund setup" states. They signal each participant's intention to join the channel with a particular outcome specified.
+If `n` is the number of participants, then states with turn numbers `0` through `n-1` (inclusive) are known as "pre fund setup" states. They signal each participant's intention to join the channel with a particular outcome specified.
 
 Once a pre fund setup state with turn number `n-1` is supported, it is safe for the channel to be funded.
 
