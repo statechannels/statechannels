@@ -322,6 +322,12 @@ export class PaymentChannelClient {
       .toPromise();
   }
 
+  async blockUntilClosed(channelId: string): Promise<ChannelState> {
+    return this.channelState(channelId)
+      .pipe(first(cs => cs.status === 'closed'))
+      .toPromise();
+  }
+
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
     this.updateChannelCache(convertToChannelState(channelResult));

@@ -169,7 +169,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       (torrent as any).maxWebConns = 0; // don't start downloading from existing upload peers
       this.stopUploading(infoHash); // also stop uploading immediately
 
-      await this.closeTorrentChannels(torrent, true);
+      await this.closeTorrentChannels(torrent, false);
+      await this.waitForMySeederChannelsToClose(torrent);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));
     } else {
       throw new Error('No torrent found');
@@ -579,6 +580,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.trace({ids: channelsToClose.map(({channelId}) => channelId)}, 'About to close channels');
     return await Promise.all(
       channelsToClose.map(({wire, channelId}) => this.closeChannel(wire, channelId))
+    );
+  }
+
+  protected async waitForMySeederChannelsToClose(torrent: PaidStreamingTorrent) {
+    const channelsToWaitFor: {wire: PaidStreamingWire; channelId: string}[] = [];
+    torrent.wires.forEach(wire => {
+      const {seedingChannelId} = wire.paidStreamingExtension;
+      if (seedingChannelId) {
+        channelsToWaitFor.push({wire, channelId: seedingChannelId});
+      }
+    });
+    // essentially creates a list of ids to close, and wires to update.
+    log.trace(
+      {ids: channelsToWaitFor.map(({channelId}) => channelId)},
+      'Waiting for channels to close'
+    );
+    return await Promise.all(
+      channelsToWaitFor.map(({wire, channelId}) =>
+        this.paymentChannelClient.blockUntilClosed(channelId)
+      )
     );
   }
 
