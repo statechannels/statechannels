@@ -115,7 +115,9 @@ const File: React.FC<Props> = props => {
   let warning = warningState;
   let buttonEnabled = true;
 
-  const withdrawalEnabled = !torrent || torrent.done;
+  // torrent.ready will be false whenever the torrent is active in any way
+  // This means the user will have to hit stop seeding/downloading before withdrawal
+  const withdrawalEnabled = !torrent.ready;
 
   if (showBudget) {
     if (
