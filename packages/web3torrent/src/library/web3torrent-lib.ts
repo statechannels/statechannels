@@ -141,6 +141,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     }
   }
 
+  stopUploading(infoHash: string) {
+    const torrent = this.torrents.find(t => t.infoHash === infoHash);
+    // there isn't a method on the torrent to stop seeding once you have started
+    // setting _rechokeNumSlots = 0 has the same effect as setting upload: false initially
+    // https://github.com/webtorrent/webtorrent/blob/master/lib/torrent.js#L82-L84
+    (torrent as any)._rechokeNumSlots = 0;
+    (torrent as any)._rechoke();
+  }
+
   /**
    * Cancels a Torrent (closes all channels, destroys the torrent from memory).
    *
@@ -155,7 +164,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       // If I don't pause the torrent, then I will continue to make payments, meaning the call to
       // this.closeChannels would race the `makePayment` function, and one of them would fail with a
       // "Not my turn" error.
-      torrent.pause();
+      torrent.pause(); // prevents connections to new peers
+      (torrent as any).maxWebConns = 0; // don't start downloading from existing upload peers
+      this.stopUploading(infoHash); // also stop uploading immediately
+
       await this.closeTorrentChannels(torrent, true);
       torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));
     } else {

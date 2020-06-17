@@ -11,6 +11,6 @@ export const safeUnsubscribeFromFunction = (unsubscribe: () => void, log: P.Logg
   try {
     unsubscribe();
   } catch (error) {
-    log.warn('Unable to unsubscribe');
+    log.warn({error}, 'Unable to unsubscribe');
   }
 };
