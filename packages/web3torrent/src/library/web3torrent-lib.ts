@@ -443,8 +443,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         case PaidStreamingExtensionNotices.START: // "okay, now you can continue asking for data" request
           this.jumpStart(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.PERMANENT_STOP: // "okay, now you can continue asking for data" request
-          this.closeChannel(wire, wire.paidStreamingExtension.leechingChannelId);
+        case PaidStreamingExtensionNotices.PERMANENT_STOP: // "no more data ever"
+          if (wire.paidStreamingExtension.leechingChannelId) {
+            await this.closeChannel(wire, wire.paidStreamingExtension.leechingChannelId);
+          }
           break;
         case PaidStreamingExtensionNotices.MESSAGE: // general use message
           log.info({data}, 'Message received');
