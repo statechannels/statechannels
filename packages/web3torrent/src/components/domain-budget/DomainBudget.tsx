@@ -92,6 +92,10 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
   ] = [myBalanceFree, myBalanceLocked, hubBalanceFree, hubBalanceLocked].map(percentageOfTotal);
 
   const colors = ['#ea692b', '#ea692b', '#d5dbe3', '#d5dbe3'];
+
+  const withdrawalTooltipText = !props.allowWithdrawal
+    ? 'Your torrent is still active! You need to click "Stop Torrenting" first before withdrawing.'
+    : '';
   return (
     <table>
       <tbody>
@@ -188,22 +192,27 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
         </tr>
         <tr>
           <td className="budget-button-container" colSpan={1}>
-            <button
-              className={'budget-button'}
-              disabled={!props.allowWithdrawal}
-              id="budget-withdraw"
-              onClick={() => {
-                track('Withdraw Initiated', {
-                  myBalanceFree,
-                  myBalanceLocked,
-                  hubBalanceFree,
-                  hubBalanceLocked
-                });
-                withdraw();
-              }}
-            >
-              Withdraw
-            </button>
+            <Tooltip title={withdrawalTooltipText} placement="top">
+              <span style={{width: '100%'}}>
+                <button
+                  className={'budget-button'}
+                  style={!props.allowWithdrawal ? {pointerEvents: 'none'} : {}}
+                  disabled={!props.allowWithdrawal}
+                  id="budget-withdraw"
+                  onClick={() => {
+                    track('Withdraw Initiated', {
+                      myBalanceFree,
+                      myBalanceLocked,
+                      hubBalanceFree,
+                      hubBalanceLocked
+                    });
+                    withdraw();
+                  }}
+                >
+                  Withdraw
+                </button>
+              </span>
+            </Tooltip>
           </td>
         </tr>
       </tbody>
