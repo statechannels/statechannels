@@ -27,6 +27,7 @@ import {Message} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 import {logger} from '../logger';
 import {track} from '../analytics';
+import * as rxjs from 'rxjs';
 import _ from 'lodash';
 const hexZeroPad = utils.hexZeroPad;
 
@@ -45,12 +46,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   channelIdToTorrentMap: Record<string, string> = {};
   stoppedTorrents: Record<string, boolean> = {};
 
+  private canWithdrawSubject: rxjs.Subject<boolean>;
+  public get canWithdrawFeed() {
+    return this.canWithdrawSubject as rxjs.Observable<boolean>;
+  }
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super({tracker: {announce: defaultTrackers}, ...opts});
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
     this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
+    this.canWithdrawSubject = new rxjs.Subject();
+    this.enableWithdrawal();
   }
 
   /** Enable the client capabilities to seed or leech torrents, enabling the paymentChannelClient
@@ -87,7 +94,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
     this.ensureEnabled();
-
+    this.disableWithdrawal();
     let torrent: PaidStreamingTorrent;
     let options: ExtendedTorrentOptions = {createdBy: this.pseAccount, announce: defaultTrackers};
 
@@ -113,6 +120,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
     this.ensureEnabled();
+    this.disableWithdrawal();
     let torrent: PaidStreamingTorrent;
 
     if (typeof optionsOrCallback === 'function') {
@@ -173,10 +181,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
       await this.closeTorrentChannels(torrent, false);
       await this.waitForMySeederChannelsToClose(torrent);
-      torrent.destroy(() => this.emitTorrentUpdated(infoHash, 'destroy'));
     } else {
       throw new Error('No torrent found');
     }
+
+    this.enableWithdrawal();
   }
 
   /**
@@ -650,6 +659,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       ...this.channelIdToTorrentMap,
       [channelId]: torrentHash
     };
+  }
+
+  private enableWithdrawal() {
+    this.canWithdrawSubject.next(true);
+  }
+
+  private disableWithdrawal() {
+    this.canWithdrawSubject.next(false);
   }
 
   /** Util Method. Normalizes an event name. */
