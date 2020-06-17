@@ -14,7 +14,7 @@ const log = logger.child({module: 'paid-streaming-extension'});
 
 type WTRequest = {index: number; size: number; response(allow: boolean): void};
 export abstract class PaidStreamingExtension implements Extension {
-  private _isPaidStreamingExtension = true;
+  protected _isPaidStreamingExtension = true;
   protected wire: PaidStreamingWire;
   protected messageBus: EventEmitter;
   protected pseId: string = '';

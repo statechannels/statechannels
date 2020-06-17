@@ -7,7 +7,11 @@ import {WebTorrentSeedInput, ExtendedTorrent} from '../../library/types';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import Upload from './Upload';
 import {mockMetamask} from '../../library/testing/test-utils';
+import {createMockExtendedTorrent} from '../../utils/test-utils';
+import {Status} from '../../types';
 Enzyme.configure({adapter: new Adapter()});
+
+const mockTorrent = createMockExtendedTorrent();
 
 describe('<Upload />', () => {
   let component: Enzyme.ReactWrapper;
@@ -17,6 +21,9 @@ describe('<Upload />', () => {
   });
 
   beforeEach(() => {
+    torrentUpload = jest
+      .spyOn(Web3TorrentClient, 'upload')
+      .mockImplementation(() => Promise.resolve({...mockTorrent, status: Status.Seeding}));
     component = mount(
       <Router>
         <Upload ready={true} />
