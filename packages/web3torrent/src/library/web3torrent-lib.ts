@@ -43,6 +43,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   outcomeAddress: string;
   channelIdToTorrentMap: Record<string, string> = {};
+  stoppedTorrents: Record<string, boolean> = {};
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super({tracker: {announce: defaultTrackers}, ...opts});
@@ -143,6 +144,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   stopUploading(infoHash: string) {
     const torrent = this.torrents.find(t => t.infoHash === infoHash);
+    this.stoppedTorrents[infoHash] = true;
     // there isn't a method on the torrent to stop seeding once you have started
     // setting _rechokeNumSlots = 0 has the same effect as setting upload: false initially
     // https://github.com/webtorrent/webtorrent/blob/master/lib/torrent.js#L82-L84
@@ -268,7 +270,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
         const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 
-        if (!knownPeer || !seedingChannelId) {
+        if (this.stoppedTorrents[torrent.infoHash]) {
+          wire.paidStreamingExtension.permanentStop();
+        } else if (!knownPeer || !seedingChannelId) {
           await this.createPaymentChannel(torrent, wire);
           log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
           response(false);
