@@ -7,9 +7,11 @@ This advanced section of the tutorial covers funding and defunding channels by r
 
 ## Indirect funding
 
-Let's introduce one level of indirection by setting up a ledger channel with a counterparty which we'll call "the hub". We will fund this in the same way as we have done earlier in the tutorial. A ledger channel is a special channel that runs the "null app" (meaning that all transitions are considered invalid), and whose sole purpose is to reallocate its funding to other channels and/or state channel participants.
+Let's introduce one level of indirection between the chain and the state channel we want to fund. We will first set up a ledger channel (L) with a counterparty (we'll call this counterparty "the hub"). We will fund the ledger channel "directly" -- in the same way as we have done [earlier in the tutorial](./deposit-assets).
 
-Now imagine that we want to play Rock Paper Scissors (or run some other state channel application) with that same participant. We'll open a new channel for that.
+A ledger channel is a special channel that runs the "null app" (meaning that all transitions are considered invalid, and the channel may only be updated by a state being supported by all participants signing it). The sole purpose of this ledger channel is to reallocate some or all of its funding to other channels and/or state channel participants.
+
+Now imagine that we want to play Rock Paper Scissors (or run some other state channel application) with that same participant. We'll open a new channel (A1) for that.
 
 Instead of funding it on chain, let's just divert some money from our existing ledger channel.
 
@@ -95,7 +97,7 @@ const applicationChannel1: Channel = {
 const applicationChannel1Id = getChannelId(applicationChannel1);
 
 // Construct a state that allocates 3 wei to each of us, and has turn numer n - 1
-// This is the "pre fund setup" state for the our first application channel
+// This is the "pre fund setup" state for our application channel A1
 
 const threeEachStatePreFS: State = {
   isFinal: false,
@@ -211,7 +213,6 @@ Let's say application A1 finished and between me and the hub, we finalize it off
 
 ```typescript
 // Construct a state that allocates 6 wei to me
-// This is the "pre fund setup" state for the our first application channel
 
 const threeEachStatePreFS: State = {
   isFinal: true,
