@@ -142,7 +142,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
                   <Avatar variant="square">
                     <Blockie
                       opts={{
-                        seed: web3torrent.paymentChannelClient.myDestinationAddress,
+                        seed: web3torrent.paymentChannelClient.myDestinationAddress.toLowerCase(),
                         bgcolor: '#3531ff',
                         size: 6,
                         scale: 4,

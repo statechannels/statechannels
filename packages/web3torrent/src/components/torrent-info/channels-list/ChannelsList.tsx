@@ -78,7 +78,7 @@ function channelIdToTableRow(
           <Avatar variant="square">
             <Blockie
               opts={{
-                seed: peerDestinationAddress,
+                seed: peerDestinationAddress.toLowerCase(),
                 bgcolor: '#3531ff',
                 size: 6,
                 scale: 4,
