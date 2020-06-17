@@ -16,9 +16,14 @@ Now imagine that we want to play Rock Paper Scissors (or run some other state ch
 Instead of funding it on chain, let's just divert some money from our existing ledger channel.
 
 ```typescript
+// In lesson16.test.ts
 // Construct a ledger channel with the hub
-const me = ethers.Wallet.createRandom().address;
-const hub = ethers.Wallet.createRandom().address;
+const mySigningKey = '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8';
+const hubSigningKey = '0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f';
+const me = new ethers.Wallet(mySigningKey).address;
+const hub = new ethers.Wallet(hubSigningKey).address;
+const myDestination = convertAddressToBytes32(me);
+const hubDestination = convertAddressToBytes32(hub);
 const participants = [me, hub];
 const chainId = '0x1234';
 const ledgerChannel: Channel = {
@@ -38,8 +43,8 @@ const sixEachStatePreFS: State = {
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
-        {destination: me, amount: parseUnits('6', 'wei').toHexString()},
-        {destination: hub, amount: parseUnits('6', 'wei').toHexString()},
+        {destination: myDestination, amount: parseUnits('6', 'wei').toHexString()},
+        {destination: hubDestination, amount: parseUnits('6', 'wei').toHexString()},
       ],
     },
   ],
@@ -49,7 +54,9 @@ const sixEachStatePreFS: State = {
   turnNum: 1,
 };
 
-// Support this state by providing a signature on it
+// Collect a support proof by getting all participants to sign this state
+signState(sixEachStatePreFS, mySigningKey);
+signState(sixEachStatePreFS, hubSigningKey);
 
 // Desposit plenty of funds ON CHAIN
 const amount = parseUnits('12', 'wei');
@@ -65,7 +72,9 @@ await(await tx0).wait();
 
 const sixEachStatePostFS: State = {...sixEachStatePreFS, turnNum: 3};
 
-// Support this state by providing a signature on it
+// Collect a support proof by getting all participants to sign this state
+signState(sixEachStatePostFS, mySigningKey);
+signState(sixEachStatePostFS, hubSigningKey);
 ```
 
 So far, so standard. We have directly funded a channel, but this time we are calling it a ledger channel, L. The funding graph looks like this:
@@ -106,8 +115,8 @@ const threeEachStatePreFS: State = {
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
-        {destination: me, amount: parseUnits('3', 'wei').toHexString()},
-        {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
+        {destination: myDestination, amount: parseUnits('3', 'wei').toHexString()},
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
       ],
     },
   ],
@@ -117,7 +126,9 @@ const threeEachStatePreFS: State = {
   turnNum: 1,
 };
 
-// Support this state by providing a signature on it
+// Collect a support proof by getting all participants to sign this state
+signState(threeEachStatePreFS, mySigningKey);
+signState(threeEachStatePreFS, hubSigningKey);
 ```
 
 We are now in the following situation:
@@ -159,8 +170,8 @@ const threeEachAndSixForTheApp: State = {
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
-        {destination: me, amount: parseUnits('3', 'wei').toHexString()},
-        {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
+        {destination: myDestination, amount: parseUnits('3', 'wei').toHexString()},
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
         {
           destination: applicationChannel1Id,
           amount: parseUnits('6', 'wei').toHexString(),
@@ -181,7 +192,9 @@ const threeEachStatePostFS: State = {
   turnNum: 3,
 };
 
-// Support this state by providing a signature on it
+// Collect a support proof by getting all participants to sign this state
+signState(threeEachStatePostFS, mySigningKey);
+signState(threeEachStatePostFS, hubSigningKey);
 ```
 
 Finally, we have our indirectly funded channel
@@ -214,13 +227,13 @@ Let's say application A1 finished and between me and the hub, we finalize it off
 ```typescript
 // Construct a state that allocates 6 wei to me
 
-const threeEachStatePreFS: State = {
+const sixForMe: State = {
   isFinal: true,
   channel: applicationChannel1,
   outcome: [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocationItems: [{destination: me, amount: parseUnits('6', 'wei').toHexString()}],
+      allocationItems: [{destination: myDestination, amount: parseUnits('6', 'wei').toHexString()}],
     },
   ],
   appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
@@ -229,7 +242,9 @@ const threeEachStatePreFS: State = {
   turnNum: 100,
 };
 
-// Support this state by providing a signature on it
+// Collect a support proof by getting all participants to sign this state
+signState(sixForMe, mySigningKey);
+signState(sixForMe, hubSigningKey);
 ```
 
 <div class="mermaid" align="center">
@@ -258,15 +273,15 @@ Now
 // Fund our first application channel OFF CHAIN
 // simply by collecting a support proof for a state such as this:
 
-const nineForMe3ForTheHub: State = {
+const nineForMeThreeForTheHub: State = {
   isFinal: false,
   channel: ledgerChannel,
   outcome: [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
-        {destination: me, amount: parseUnits('9', 'wei').toHexString()},
-        {destination: hub, amount: parseUnits('3', 'wei').toHexString()},
+        {destination: myDestination, amount: parseUnits('9', 'wei').toHexString()},
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
       ],
     },
   ],
@@ -275,6 +290,10 @@ const nineForMe3ForTheHub: State = {
   challengeDuration: 1,
   turnNum: 5,
 };
+
+// Collect a support proof by getting all participants to sign this state
+signState(nineForMeThreeForTheHub, mySigningKey);
+signState(nineForMeThreeForTheHub, hubSigningKey);
 ```
 
 and the funding graph now looks like this:
@@ -301,4 +320,4 @@ The defunded channel A1 can now safely be discarded.
 
 ### Challenging with a deep funding tree
 
-If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-dchannel-sad).
+If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-channel-sad).
