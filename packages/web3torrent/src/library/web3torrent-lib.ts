@@ -262,43 +262,40 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.emitTorrentUpdated(torrent.infoHash, WireEvents.KEEP_ALIVE);
     });
 
-    wire.paidStreamingExtension.on(
-      PaidStreamingExtensionEvents.REQUEST,
-      async (index: number, size: number, response: (allow: boolean) => void) => {
-        const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
-        const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
-        const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
+    wire.paidStreamingExtension.requestFeed.subscribe(async ({index, size, response}) => {
+      const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
+      const {seedingChannelId, peerAccount: peer, isForceChoking} = wire.paidStreamingExtension;
+      const knownPeer = this.peersList[torrent.infoHash][seedingChannelId];
 
-        if (this.stoppedTorrents[torrent.infoHash]) {
-          wire.paidStreamingExtension.permanentStop();
-        } else if (!knownPeer || !seedingChannelId) {
-          await this.createPaymentChannel(torrent, wire);
-          log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
-          response(false);
-          this.blockPeer(torrent.infoHash, wire);
-        } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
-          log.debug(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
-          response(false);
-          this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
-        } else {
-          this.peersList[torrent.infoHash][seedingChannelId] = {
-            ...knownPeer,
-            wire,
-            buffer: bigNumberify(knownPeer.buffer)
-              .sub(reqPrice) // decrease buffer by the price of this request
-              .toString(),
-            uploaded: knownPeer.uploaded + size
-          };
+      if (this.stoppedTorrents[torrent.infoHash]) {
+        wire.paidStreamingExtension.permanentStop();
+      } else if (!knownPeer || !seedingChannelId) {
+        await this.createPaymentChannel(torrent, wire);
+        log.debug(`${peer} >> REQUEST BLOCKED (NEW WIRE): ${index}`);
+        response(false);
+        this.blockPeer(torrent.infoHash, wire);
+      } else if (isForceChoking || reqPrice.gt(knownPeer.buffer)) {
+        log.debug(`${peer} >> REQUEST BLOCKED: ${index} UPLOADED: ${knownPeer.uploaded}`);
+        response(false);
+        this.blockPeer(torrent.infoHash, wire); // As soon as buffer is empty, block
+      } else {
+        this.peersList[torrent.infoHash][seedingChannelId] = {
+          ...knownPeer,
+          wire,
+          buffer: bigNumberify(knownPeer.buffer)
+            .sub(reqPrice) // decrease buffer by the price of this request
+            .toString(),
+          uploaded: knownPeer.uploaded + size
+        };
 
-          const {buffer, uploaded} = this.peersList[torrent.infoHash][seedingChannelId];
-          log.debug(
-            {seedingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
-            `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
-          );
-          response(true);
-        }
+        const {buffer, uploaded} = this.peersList[torrent.infoHash][seedingChannelId];
+        log.debug(
+          {seedingChannelId, peerAccout: peer, reqPrice, index, buffer, uploaded},
+          `${peer} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOADED: ${uploaded}`
+        );
+        response(true);
       }
-    );
+    });
 
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice => {
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice);
