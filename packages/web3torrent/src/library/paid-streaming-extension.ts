@@ -8,9 +8,11 @@ import {
   PaidStreamingExtensionNotices,
   PaidStreamingWire
 } from './types';
+import {Observable} from 'rxjs';
 
 const log = logger.child({module: 'paid-streaming-extension'});
 
+type WTRequest = {index: number; size: number; response(allow: boolean): void};
 export abstract class PaidStreamingExtension implements Extension {
   private _isPaidStreamingExtension = true;
   protected wire: PaidStreamingWire;
@@ -41,6 +43,16 @@ export abstract class PaidStreamingExtension implements Extension {
   // and incremented every time a keep-alive is sent; useful for
   // detecting if there has been progress over a keep-alive period
   _keepAliveIncrementalDownloaded: number = 0;
+
+  get requestFeed(): Observable<WTRequest> {
+    return new Observable(sub =>
+      this.on(
+        PaidStreamingExtensionEvents.REQUEST,
+        (index: number, size: number, response: (allow: boolean) => void) =>
+          sub.next({index, size, response})
+      )
+    );
+  }
 
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
