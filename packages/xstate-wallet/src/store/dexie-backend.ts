@@ -50,7 +50,7 @@ export class Backend implements DBBackend {
 
   private async create(databaseName: string) {
     this._db = new Dexie(databaseName, {indexedDB});
-    this._db.version(1).stores(
+    this._db.version(2).stores(
       _.reduce(
         STORES.map(s => ({[s]: ''})),
         _.merge
@@ -79,6 +79,7 @@ export class Backend implements DBBackend {
   public async objectives() {
     return this.getAll(ObjectStores.objectives);
   }
+
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
     for (const key in nonces) {
