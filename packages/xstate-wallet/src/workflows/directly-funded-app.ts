@@ -101,11 +101,14 @@ type Context = Typestate['context'];
 // the app issuing the instruction is saying "I want to close regardless of the future"
 // request close / confirm close? done with an objective?
 
-// close requested [don't currently have this functionality]
-// setup -(preFS)-> funding -(postFS)-> running -> concluding -> concluded
-// noFunds / partialFunds / fullyFunded / depositInProgress
+// Off-chain state: setup -(preFS)-> funding -(postFS)-> running -> concluding -> concluded
+// Asset Holder state: noFunds / partiallyFundedByOthers / myDepositPending / partiallyFundedIncMe / fullyFunded
+// Adjudicator State: open / challenge / finalized / responsePending / challengePending
 
-// open / challenge / finalized / responsePending / challengePending
+// Andrew: xstate gives you a way to visualize the logic: what you do and what you're listening for
+// the more logic that there is in the machine the easier it is to verify
+
+// close requested [don't currently have this functionality]
 
 const channelStateToMachineState = (state: ChannelStoreEntry) => {
   // conclusion proof + no funds => done
