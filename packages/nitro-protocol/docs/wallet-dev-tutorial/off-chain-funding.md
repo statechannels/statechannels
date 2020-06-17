@@ -1,5 +1,5 @@
 ---
-id: fund-and-defund-off-chain
+id: off-chain-funding
 title: Off-chain funding
 ---
 

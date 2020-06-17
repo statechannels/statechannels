@@ -16,7 +16,7 @@
       "wallet-dev-tutorial/clear-a-challenge",
       "wallet-dev-tutorial/outcomes",
       "wallet-dev-tutorial/release-assets",
-      "wallet-dev-tutorial/fund-and-defund-off-chain"
+      "wallet-dev-tutorial/off-chain-funding"
     ],
     "Contract Developers": [
       "contract-devs/contract-devs-intro",
