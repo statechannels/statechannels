@@ -8,7 +8,8 @@ import {
   waitForEmptyBudget,
   setupLogging,
   setupFakeWeb3,
-  takeScreenshot
+  takeScreenshot,
+  waitForAndClickButton
 } from '../../helpers';
 import {
   JEST_TIMEOUT,
@@ -55,6 +56,7 @@ describe('withdrawal from a ledger channel', () => {
 
     await waitForBudgetEntry(web3tTabA);
 
+    await waitForAndClickButton(web3tTabA, web3tTabA.frames()[0], '#cancel-download-button');
     await withdrawAndWait(web3tTabA, metamask);
 
     await waitForEmptyBudget(web3tTabA);
