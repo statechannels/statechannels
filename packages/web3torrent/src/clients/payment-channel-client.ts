@@ -29,6 +29,7 @@ import {map, filter, first, tap, take} from 'rxjs/operators';
 import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
+import {safeUnsubscribeFromFunction} from '../utils/react-utls';
 
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
@@ -285,7 +286,7 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
-  async closeChannel(channelId: string): Promise<ChannelState> {
+  closeChannel(channelId: string): Promise<ChannelState> {
     const MAX_CLOSE_ATTEMPTS = 5;
     const {unsubscribe} = this.channelState(channelId)
       .pipe(
@@ -318,7 +319,7 @@ export class PaymentChannelClient {
     return this.channelState(channelId)
       .pipe(
         first(cs => cs.status === 'closed'),
-        tap(unsubscribe)
+        tap(safeUnsubscribeFromFunction(unsubscribe, log))
       )
       .toPromise();
   }
