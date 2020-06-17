@@ -2,8 +2,7 @@ import {web3TorrentClient} from '../clients/web3torrent-client';
 import {INITIAL_BUDGET_AMOUNT} from '../constants';
 import {useState, useEffect} from 'react';
 import {DomainBudget} from '@statechannels/client-api-schema';
-import {from, noop, Subscription} from 'rxjs';
-import {safeUnsubscribe, safeUnsubscribeFromFunction} from '../utils/react-utls';
+import {safeUnsubscribeFromFunction} from '../utils/react-utls';
 import {logger} from '../logger';
 
 const log = logger.child({module: 'use-budget'});
@@ -27,7 +26,7 @@ export function useBudget({ready}: {ready: boolean}) {
 
     return () => {
       cancelled = true;
-      unsubscribe();
+      safeUnsubscribeFromFunction(unsubscribe, log);
     };
   }, [ready, paymentChannelClient]);
 
