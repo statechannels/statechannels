@@ -30,12 +30,13 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
 }) => {
   const web3TorrentClient = useContext(Web3TorrentClientContext);
   const [canWithdraw, setCanWithdraw] = useState(true);
+
   useEffect(() => {
     const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
     return safeUnsubscribe(subscription, log);
   }, [web3TorrentClient.canWithdrawFeed]);
 
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false);
   return (
     <>
       <section className="torrentInfo">
@@ -63,9 +64,14 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
       {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
         <DownloadInfo torrent={torrent} />
       )}
+      {canWithdraw && buttonClicked && torrent.status === Status.Completed && (
+        <Flash my={3} variant="info">
+          You are no longer seeding the file!
+        </Flash>
+      )}
 
       {!canWithdraw && (torrent.status === Status.Completed || torrent.status === Status.Seeding) && (
-        <Flash variant="info">
+        <Flash my={3} variant="info">
           {torrent.status === Status.Completed && 'Your download is complete. '}You're now earning
           fees by seeding the file to others. Why not share the{' '}
           <MagnetLinkButton linkText="link?" hideImage={true} />
@@ -78,7 +84,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           <button
             id="cancel-download-button"
             type="button"
-            disabled={buttonDisabled}
+            disabled={buttonClicked}
             className="button cancel"
             onClick={() => {
               track('Torrent Cancelled', {
@@ -87,8 +93,13 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
                 filename: torrent.name,
                 filesize: torrent.length
               });
-              setButtonDisabled(true);
-              torrent.status = Status.Idle;
+              setButtonClicked(true);
+              if (torrent.status === Status.Downloading || torrent.status === Status.Connecting) {
+                torrent.status = Status.Idle;
+              } else {
+                torrent.status = Status.Completed;
+              }
+
               return web3TorrentClient.cancel(torrent.infoHash);
             }}
           >
