@@ -6,5 +6,5 @@ import _ from 'lodash';
  * or worry about undefined functions
  */
 
-export const track = (window as any).analytics.track ?? _.noop;
-export const identify = (window as any).analytics.identify ?? _.noop;
+export const track = window.analytics?.track ?? _.noop;
+export const identify = window.analytics?.identify ?? _.noop;

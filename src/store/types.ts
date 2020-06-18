@@ -224,3 +224,11 @@ export const enum ObjectStores {
   ledgers = 'ledgers',
   budgets = 'budgets'
 }
+
+declare global {
+  interface Window {
+    analytics: SegmentAnalytics.AnalyticsJS;
+    channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
+    ethereum: any;
+  }
+}
