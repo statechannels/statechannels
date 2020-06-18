@@ -5,6 +5,7 @@ import {Link, useHistory} from 'react-router-dom';
 import {RoutePath} from '../../../routes';
 
 import './LayoutHeader.scss';
+import {track} from '../../../analytics';
 
 export const LayoutHeader: React.FC = () => {
   const history = useHistory();
@@ -18,18 +19,22 @@ export const LayoutHeader: React.FC = () => {
         <div className="actions-container">
           <FormButton
             name="github"
-            onClick={() => window.open('https://github.com/statechannels/monorepo/', '_blank)')}
+            onClick={() => {
+              track('Github Nav');
+              window.open('https://github.com/statechannels/monorepo/', '_blank)');
+            }}
           >
             GitHub
           </FormButton>
           <FormButton
             name="faq"
-            onClick={() =>
+            onClick={() => {
+              track('FAQ Nav');
               window.open(
                 'https://www.notion.so/web3Torrent-FAQ-9f384d9dbadc4828aa81e14fcc360466',
                 '_blank)'
-              )
-            }
+              );
+            }}
           >
             FAQ
           </FormButton>
@@ -45,7 +50,13 @@ export const LayoutHeader: React.FC = () => {
           >
             {history.location.pathname === RoutePath.Budgets ? 'Back' : 'Your budget'}
           </FormButton> */}
-          <FormButton name="upload" onClick={() => history.push(RoutePath.Upload)}>
+          <FormButton
+            name="upload"
+            onClick={() => {
+              track('Upload Nav');
+              history.push(RoutePath.Upload);
+            }}
+          >
             Upload
           </FormButton>
         </div>
