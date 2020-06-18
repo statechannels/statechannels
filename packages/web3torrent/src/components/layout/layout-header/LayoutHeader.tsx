@@ -33,7 +33,7 @@ export const LayoutHeader: React.FC = () => {
           >
             FAQ
           </FormButton>
-          <FormButton
+          {/* <FormButton
             name="budgets"
             onClick={() => {
               if (history.location.pathname === RoutePath.Budgets) {
@@ -44,7 +44,7 @@ export const LayoutHeader: React.FC = () => {
             }}
           >
             {history.location.pathname === RoutePath.Budgets ? 'Back' : 'Your budget'}
-          </FormButton>
+          </FormButton> */}
           <FormButton name="upload" onClick={() => history.push(RoutePath.Upload)}>
             Upload
           </FormButton>
