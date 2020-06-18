@@ -16,8 +16,8 @@ const Welcome: React.FC<Props> = () => {
   return (
     <section className="section fill">
       <div className="jumbotron">
-        <h1>Streaming file transfer over WebTorrent</h1>
-        <h2>TORRENTS ON THE WEB</h2>
+        <h1>Peer-to-peer file sharing</h1>
+        <h2>WITH MICROPAYMENTS</h2>
       </div>
       <div className="subtitle">
         <p>
