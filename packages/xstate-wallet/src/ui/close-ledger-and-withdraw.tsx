@@ -1,11 +1,10 @@
 import React from 'react';
 import './wallet.scss';
-
 import {useService} from '@xstate/react';
 import {track} from '../segment-analytics';
 
 import {formatEther} from '@ethersproject/units';
-import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
 import {DomainBudget} from '../store';
@@ -54,6 +53,10 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
       <Heading>Withdraw funds</Heading>
 
       <Text textAlign="center">Communicating with the hub</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
   const working = (
@@ -84,6 +87,10 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
           here
         </Link>{' '}
         to follow the progress on etherscan.
+      </Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
       </Text>
     </Flex>
   );
