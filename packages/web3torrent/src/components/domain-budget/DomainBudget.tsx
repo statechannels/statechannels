@@ -95,7 +95,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
   const colors = ['#ea692b', '#ea692b', '#d5dbe3', '#d5dbe3'];
 
   const withdrawalTooltipText = !props.allowWithdrawal
-    ? 'Your torrent is still active! You need to click "Stop Torrenting" first before withdrawing.'
+    ? 'Your torrent is still active! You need to stop seeding or downloading first before withdrawing.'
     : '';
   return (
     <table>
