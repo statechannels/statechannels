@@ -150,6 +150,33 @@ const File: React.FC<Props> = props => {
           </div>
         )}
       <br />
+      {(torrent.status === Status.Idle || torrent.status === Status.Paused) && (
+        <FormButton
+          name="download"
+          spinner={loading}
+          disabled={!props.ready || loading || !buttonEnabled}
+          onClick={async () => {
+            track('Torrent Started', {
+              infoHash,
+              magnetURI: torrent.magnetURI,
+              filename: torrentName,
+              filesize: torrentLength
+            });
+            setLoading(true);
+            setErrorLabel('');
+            try {
+              await download(torrent.magnetURI);
+              await getBudget();
+            } catch (error) {
+              setLoading(false);
+              setErrorLabel(getUserFriendlyError(error.code));
+            }
+            setLoading(false);
+          }}
+        >
+          {buttonLabel(loading)}
+        </FormButton>
+      )}
       {showBudget && (
         <DomainBudget
           budgetCache={budget}
@@ -161,31 +188,6 @@ const File: React.FC<Props> = props => {
       )}
       {(torrent.status === Status.Idle || torrent.status === Status.Paused) && (
         <>
-          <FormButton
-            name="download"
-            spinner={loading}
-            disabled={!props.ready || loading || !buttonEnabled}
-            onClick={async () => {
-              track('Torrent Started', {
-                infoHash,
-                magnetURI: torrent.magnetURI,
-                filename: torrentName,
-                filesize: torrentLength
-              });
-              setLoading(true);
-              setErrorLabel('');
-              try {
-                await download(torrent.magnetURI);
-                await getBudget();
-              } catch (error) {
-                setLoading(false);
-                setErrorLabel(getUserFriendlyError(error.code));
-              }
-              setLoading(false);
-            }}
-          >
-            {buttonLabel(loading)}
-          </FormButton>
           {errorLabel && errorLabel !== '' && <Flash variant="danger">{errorLabel}</Flash>}
           <div className="subtitle">
             <p>
