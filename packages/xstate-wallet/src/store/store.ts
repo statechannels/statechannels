@@ -29,6 +29,7 @@ import {
 } from './types';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
+import {track, identify} from '../segment-analytics';
 
 interface DirectFunding {
   type: 'Direct';
@@ -101,7 +102,10 @@ export class Store {
     await this.backend.initialize(cleanSlate, dbName);
 
     await this.backend.transaction('readwrite', [ObjectStores.privateKeys], async () => {
-      if (!privateKeys?.length && !(await this.getAddress())) {
+      const currentAddress = await this.getAddress();
+      let segmentId = currentAddress;
+
+      if (!privateKeys?.length && !currentAddress) {
         // generate the first private key
         const {privateKey} = Wallet.createRandom();
         privateKeys = [privateKey];
@@ -110,6 +114,16 @@ export class Store {
       await Promise.all(
         privateKeys?.map(pk => this.backend.setPrivateKey(new Wallet(pk).address, pk)) || []
       );
+
+      if (!segmentId) {
+        segmentId = await this.getAddress();
+        identify(segmentId);
+        track('created a wallet');
+      } else {
+        identify(segmentId);
+      }
+
+      track('initialized a wallet');
     });
   };
 
