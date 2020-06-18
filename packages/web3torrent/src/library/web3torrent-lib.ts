@@ -175,6 +175,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       // torrent instead of calling the destroy() method.
       (torrent as any).destroyed = true;
 
+      // setting done will stop us connecting to new peers. Otherwise, we will attempt to
+      // add a new peers when destroyed, which throws errors
+      (torrent as any).done = true;
+
       this.stopUploading(infoHash); // also stop uploading immediately
 
       await this.closeTorrentChannels(torrent, false);
