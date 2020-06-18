@@ -170,14 +170,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.debug({torrent}, '> Cancelling download');
 
     if (torrent) {
+      // if we don't stop discovery, we'll still try to connect to new peers after we've
+      // turned off torrenting, which will lead to "Error: torrent is destroyed"
+      await new Promise(resolve => (torrent as any).discovery.destroy(resolve));
+
       // We want to stop all torrenting, but don't want to close the wires, as we need them
       // to close the channels. We therefore manually set the destroyed flag on the
       // torrent instead of calling the destroy() method.
       (torrent as any).destroyed = true;
-
-      // setting done will stop us connecting to new peers. Otherwise, we will attempt to
-      // add a new peers when destroyed, which throws errors
-      (torrent as any).done = true;
 
       this.stopUploading(infoHash); // also stop uploading immediately
 
