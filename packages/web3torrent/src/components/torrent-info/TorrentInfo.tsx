@@ -35,8 +35,17 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
     const subscription = web3TorrentClient.canWithdrawFeed.subscribe(setCanWithdraw);
     return safeUnsubscribe(subscription, log);
   }, [web3TorrentClient.canWithdrawFeed]);
-
+  const [wasDownloading, setWasDownloading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
+  // TODO: Currently we can't seem to set the torrent status when canceling an active download
+  const downloadCancelled =
+    canWithdraw &&
+    buttonClicked &&
+    wasDownloading &&
+    (torrent.status === Status.Downloading || torrent.status === Status.Connecting);
+
+  const seedingCancelled =
+    canWithdraw && buttonClicked && !wasDownloading && torrent.status === Status.Completed;
   return (
     <>
       <section className="torrentInfo">
@@ -57,14 +66,25 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           <span className="fileCost">
             Cost: {torrent.length ? prettyPrintWei(calculateWei(torrent.length)) : 'unknown'}
           </span>
-          {torrent.status && <span className="fileStatus">Status: {torrent.status}</span>}
+          {torrent.status && (
+            <span className="fileStatus">
+              Status: {downloadCancelled ? 'Cancelled' : torrent.status}
+            </span>
+          )}
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>
       </section>
-      {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
-        <DownloadInfo torrent={torrent} />
+      {DownloadingStatuses.includes(torrent.status) &&
+        !torrent.originalSeed &&
+        !downloadCancelled && <DownloadInfo torrent={torrent} />}
+
+      {downloadCancelled && (
+        <Flash my={3} variant="info">
+          Download cancelled!
+        </Flash>
       )}
-      {canWithdraw && buttonClicked && torrent.status === Status.Completed && (
+
+      {seedingCancelled && (
         <Flash my={3} variant="info">
           You are no longer seeding the file!
         </Flash>
@@ -86,7 +106,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
             type="button"
             disabled={buttonClicked}
             className="button cancel"
-            onClick={() => {
+            onClick={async () => {
               track('Torrent Cancelled', {
                 infoHash: torrent.infoHash,
                 magnetURI: torrent.magnetURI,
@@ -94,13 +114,12 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
                 filesize: torrent.length
               });
               setButtonClicked(true);
-              if (torrent.status === Status.Downloading || torrent.status === Status.Connecting) {
-                torrent.status = Status.Idle;
-              } else {
-                torrent.status = Status.Completed;
+              const wasDownloading =
+                torrent.status === Status.Downloading || torrent.status === Status.Connecting;
+              await web3TorrentClient.cancel(torrent.infoHash);
+              if (wasDownloading) {
+                setWasDownloading(true);
               }
-
-              return web3TorrentClient.cancel(torrent.infoHash);
             }}
           >
             Stop{' '}
@@ -110,7 +129,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           </button>
         )}
       </div>
-      <PeerNetworkStats torrent={torrent} />
+      {!downloadCancelled && !seedingCancelled && <PeerNetworkStats torrent={torrent} />}
 
       <ChannelsList torrent={torrent} channels={channelCache} mySigningAddress={mySigningAddress} />
     </>
