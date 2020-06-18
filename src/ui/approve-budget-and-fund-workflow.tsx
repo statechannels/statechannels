@@ -4,7 +4,7 @@ import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund'
 import {useService} from '@xstate/react';
 
 import {formatEther} from '@ethersproject/units';
-import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Box, Link, Loader} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
 import {utils} from 'ethers';
@@ -93,6 +93,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Waiting for the hub to respond.</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -101,6 +105,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Querying blockchain</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -119,6 +127,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
           here
         </Link>{' '}
         to follow the progress on etherscan.
+      </Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
       </Text>
     </Flex>
   );
@@ -146,6 +158,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
         </Link>{' '}
         to follow the progress on etherscan.
       </Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -166,6 +182,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Waiting for hub to deposit</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
