@@ -60,6 +60,9 @@ div.subtitle {
   box-shadow: $c-orange;
   animation: pulse 1.5s infinite;
 }
+.thick-border {
+  border: 2px #ea692b solid;
+}
 .pulse:hover {
   animation: none;
 }
