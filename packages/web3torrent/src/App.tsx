@@ -15,6 +15,7 @@ import {identify} from './analytics';
 import {from} from 'rxjs';
 import {logger} from './logger';
 import {safeUnsubscribe} from './utils/react-utls';
+import {useLocation} from 'react-router-dom';
 
 const log = logger.child({module: 'App'});
 
@@ -55,6 +56,7 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <main>
         <ConnectionBanner
           currentNetwork={currentNetwork}
@@ -87,3 +89,14 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+// Scrolling
+function ScrollToTop() {
+  const {pathname} = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
