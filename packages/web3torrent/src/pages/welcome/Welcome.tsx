@@ -5,6 +5,7 @@ import {ShareList} from '../../components/share-list/ShareList';
 import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
+import {generateURL} from '../../utils/url';
 
 interface Props {
   ready: boolean;
@@ -35,17 +36,17 @@ const Welcome: React.FC<Props> = () => {
           provide.
         </p>
       </div>
-      <h2>Download a sample file</h2>
-      <ShareList torrents={preseededTorrentsUI} />
-      <h2>Or share a file</h2>
-      <FormButton
-        name="upload"
-        block={true}
-        disabled={false}
-        onClick={() => history.push(RoutePath.Upload)}
-      >
-        Upload
-      </FormButton>
+      <div className="actions-container">
+        <FormButton
+          name="download"
+          onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
+        >
+          Download a sample file
+        </FormButton>
+        <FormButton name="download" onClick={() => history.push(RoutePath.Upload)}>
+          Upload your own file
+        </FormButton>
+      </div>
     </section>
   );
 };
