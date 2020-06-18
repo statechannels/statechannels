@@ -1,6 +1,7 @@
 import puppeteer, {Browser, Page, Frame} from 'puppeteer';
 import * as dappeteer from 'dappeteer';
 
+import {parseBittorrentLog} from './parseBittorrentProtocolLogs';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -87,9 +88,13 @@ export async function setupLogging(
     const regex = new RegExp(`"name":"${name}"`);
     return (text: string): boolean => regex.test(text);
   };
+  const isDebugLog = (debugTag: string) => (name: string): boolean => !!name.match(debugTag);
+
   const isXstateWalletLog = isPinoLog('xstate-wallet');
   const isWeb3torrentLog = isPinoLog('web3torrent');
   const isChannelProviderLog = isPinoLog('channel-provider');
+  const isBittorrentProtocolLog = isDebugLog('bittorrent-protocol');
+
   const withGanacheIndex = (text: string): string =>
     JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
 
@@ -101,7 +106,19 @@ export async function setupLogging(
     const text = msg.text();
     if (isXstateWalletLog(text) || isWeb3torrentLog(text) || isChannelProviderLog(text))
       pinoLog.write(withGanacheIndex(text));
-    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
+    else if (isBittorrentProtocolLog(text)) {
+      const time = Date.now();
+      // To parse the bittorrent logs, we must first await the arguments from the handle that
+      // puppeteer gives us
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Promise.all(msg.args().map(arg => arg.jsonValue())).then((args: any) => {
+        const [logLine, ...values] = args;
+        const line = {time, ...parseBittorrentLog(logLine, ...values)};
+        pinoLog.write(JSON.stringify(line) + '\n');
+      });
+    } else {
+      browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
+    }
   });
 }
 
