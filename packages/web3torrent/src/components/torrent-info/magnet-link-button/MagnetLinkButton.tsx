@@ -1,7 +1,11 @@
 import React, {useState} from 'react';
 import {clipboardCopy} from '../../../utils/copy-to-clipboard';
 
-export const MagnetLinkButton: React.FC<{}> = () => {
+export interface MagnetLinkProps {
+  linkText?: string;
+  hideImage?: boolean;
+}
+export const MagnetLinkButton: React.FC<MagnetLinkProps> = props => {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -20,8 +24,8 @@ export const MagnetLinkButton: React.FC<{}> = () => {
       <span className={'tooltiptext ' + copied}>
         {copied ? 'Great! Copied to your clipboard' : 'Copy to clipboard'}
       </span>
-      Share Link
-      <img src="/assets/share-icon.svg" alt="Share Link icon" />
+      {props.linkText ?? 'Share Link'}
+      {!props.hideImage && <img src="/assets/share-icon.svg" alt="Share Link icon" />}
     </a>
   );
 };

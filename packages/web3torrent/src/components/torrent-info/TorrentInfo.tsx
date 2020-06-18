@@ -16,6 +16,7 @@ import {Web3TorrentClientContext} from '../../clients/web3torrent-client';
 import {safeUnsubscribe} from '../../utils/react-utls';
 import {logger} from '../../logger';
 const log = logger.child({module: 'TorrentInfo'});
+import {Flash} from 'rimble-ui';
 export type TorrentInfoProps = {
   torrent: TorrentUI;
   channelCache: ChannelCache;
@@ -63,31 +64,42 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
         <DownloadInfo torrent={torrent} />
       )}
 
-      {!!torrent && !canWithdraw && (
-        <button
-          id="cancel-download-button"
-          type="button"
-          disabled={buttonDisabled}
-          className="button cancel"
-          onClick={() => {
-            track('Torrent Cancelled', {
-              infoHash: torrent.infoHash,
-              magnetURI: torrent.magnetURI,
-              filename: torrent.name,
-              filesize: torrent.length
-            });
-            setButtonDisabled(true);
-            return web3TorrentClient.cancel(torrent.infoHash);
-          }}
-        >
-          Stop{' '}
-          {torrent && (torrent.status === Status.Seeding || torrent.status === Status.Completed)
-            ? 'Seeding'
-            : 'Downloading'}
-        </button>
+      {!canWithdraw && (torrent.status === Status.Completed || torrent.status === Status.Seeding) && (
+        <Flash variant="info">
+          {torrent.status === Status.Completed && 'Your download is complete. '}You're now earning
+          fees by seeding the file to others. Why not share the{' '}
+          <MagnetLinkButton linkText="link?" hideImage={true} />
+        </Flash>
       )}
+      <div className="buttonContainer">
+        <DownloadLink torrent={torrent} />
+
+        {!!torrent && !canWithdraw && (
+          <button
+            id="cancel-download-button"
+            type="button"
+            disabled={buttonDisabled}
+            className="button cancel"
+            onClick={() => {
+              track('Torrent Cancelled', {
+                infoHash: torrent.infoHash,
+                magnetURI: torrent.magnetURI,
+                filename: torrent.name,
+                filesize: torrent.length
+              });
+              setButtonDisabled(true);
+              return web3TorrentClient.cancel(torrent.infoHash);
+            }}
+          >
+            Stop{' '}
+            {torrent && (torrent.status === Status.Seeding || torrent.status === Status.Completed)
+              ? 'Seeding'
+              : 'Downloading'}
+          </button>
+        )}
+      </div>
       <PeerNetworkStats torrent={torrent} />
-      <DownloadLink torrent={torrent} />
+
       <ChannelsList torrent={torrent} channels={channelCache} mySigningAddress={mySigningAddress} />
     </>
   );
