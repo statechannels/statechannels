@@ -170,6 +170,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.debug({torrent}, '> Cancelling download');
 
     if (torrent) {
+      // This is all super-hacky. The problem is that we've integrated payments at the wire
+      // level, instead of at the torrent level. In order to close the channels we need to
+      // (1) first stop downloading, and then (2) exchange the close messages. If we do 1
+      // via the torrent api, then we also kill the communication, so can't do 2. So instead
+      // we're reaching into the torrent internals and disabling specific parts ... :/
+
       // if we don't stop discovery, we'll still try to connect to new peers after we've
       // turned off torrenting, which will lead to "Error: torrent is destroyed"
       await new Promise(resolve => (torrent as any).discovery.destroy(resolve));
