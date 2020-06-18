@@ -4,7 +4,7 @@ import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund'
 import {useService} from '@xstate/react';
 
 import {formatEther} from '@ethersproject/units';
-import {Button, Heading, Flex, Text, Box, Link} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
 import {utils} from 'ethers';
@@ -61,7 +61,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
       </Heading>
 
       <Text fontSize={1} pb={2}>
-        Approve budget for <strong>{budget.domain}</strong>?
+        Approve budget?
       </Text>
 
       <Flex justifyContent="center" pb={2}>
@@ -71,11 +71,14 @@ export const ApproveBudgetAndFund = (props: Props) => {
         </Box>
       </Flex>
       <Text fontSize={1} pb={2}>
-        The app will have full control to manage these funds on your behalf.
+        <strong>{budget.domain}</strong> will manage these funds.
       </Text>
       <Text pb={3} fontSize={1}>
-        You will need to deposit {formatEther(playerAmount)} ETH into a channel with a state channel
-        hub.
+        You will deposit {formatEther(playerAmount)} ETH into a channel. Our hub will also make a
+        deposit.
+        <Tooltip message="This allows you to transact with anyone else connected to the same hub.">
+          <Icon name="Info" size="20" />
+        </Tooltip>
       </Text>
       <Button
         disabled={waiting}
@@ -93,6 +96,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Waiting for the hub to respond.</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -101,6 +108,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Querying blockchain</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -119,6 +130,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
           here
         </Link>{' '}
         to follow the progress on etherscan.
+      </Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
       </Text>
     </Flex>
   );
@@ -146,6 +161,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
         </Link>{' '}
         to follow the progress on etherscan.
       </Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 
@@ -166,6 +185,10 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading>Deposit funds</Heading>
 
       <Text textAlign="center">Waiting for hub to deposit</Text>
+      <Text>
+        <br></br>
+        <Loader color="#2728e2" size="60px" />
+      </Text>
     </Flex>
   );
 

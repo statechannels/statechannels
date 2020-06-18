@@ -13,6 +13,7 @@ import {
   Typography,
   LinearProgressProps
 } from '@material-ui/core';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import {Blockie} from 'rimble-ui';
 import {PieChart} from 'react-minimal-pie-chart';
 import {prettyPrintWei} from '../../utils/calculateWei';
@@ -100,6 +101,41 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
     <table>
       <tbody>
         <tr>
+          <td>
+            <p>
+              <Tooltip
+                title="A budget represents the funds that web3torrent is managing on your behalf. These funds can
+          be used to pay for parts of a file."
+              >
+                <HelpOutlineIcon style={{color: '#ea692b', fontSize: 20}} />
+              </Tooltip>
+              <br></br>
+              Your Budget: <br></br>
+              <td className="budget-button-container" colSpan={1}>
+                <Tooltip title={withdrawalTooltipText} placement="top">
+                  <span style={{width: '100%'}}>
+                    <button
+                      className={'budget-button'}
+                      style={!props.allowWithdrawal ? {pointerEvents: 'none'} : {}}
+                      disabled={!props.allowWithdrawal}
+                      id="budget-withdraw"
+                      onClick={() => {
+                        track('Withdraw Initiated', {
+                          myBalanceFree,
+                          myBalanceLocked,
+                          hubBalanceFree,
+                          hubBalanceLocked
+                        });
+                        withdraw();
+                      }}
+                    >
+                      Withdraw
+                    </button>
+                  </span>
+                </Tooltip>
+              </td>
+            </p>
+          </td>
           <td>
             <div className="pie-chart-and-identity-container">
               <PieChart
@@ -190,31 +226,7 @@ export const DomainBudget: React.FC<DomainBudgetProps> = props => {
             />
           </td>
         </tr>
-        <tr>
-          <td className="budget-button-container" colSpan={1}>
-            <Tooltip title={withdrawalTooltipText} placement="top">
-              <span style={{width: '100%'}}>
-                <button
-                  className={'budget-button'}
-                  style={!props.allowWithdrawal ? {pointerEvents: 'none'} : {}}
-                  disabled={!props.allowWithdrawal}
-                  id="budget-withdraw"
-                  onClick={() => {
-                    track('Withdraw Initiated', {
-                      myBalanceFree,
-                      myBalanceLocked,
-                      hubBalanceFree,
-                      hubBalanceLocked
-                    });
-                    withdraw();
-                  }}
-                >
-                  Withdraw
-                </button>
-              </span>
-            </Tooltip>
-          </td>
-        </tr>
+        <tr></tr>
       </tbody>
     </table>
   );

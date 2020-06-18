@@ -1,10 +1,10 @@
 import React from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
-import {ShareList} from '../../components/share-list/ShareList';
 import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
+import {generateURL} from '../../utils/url';
 
 interface Props {
   ready: boolean;
@@ -16,8 +16,24 @@ const Welcome: React.FC<Props> = () => {
   return (
     <section className="section fill">
       <div className="jumbotron">
-        <h1>Streaming file transfer over WebTorrent</h1>
-        <h2>TORRENTS ON THE WEB</h2>
+        <h1>Peer-to-peer file sharing</h1>
+        <h2>WITH MICROPAYMENTS</h2>
+      </div>
+      <div className="subtitle">
+        <p>
+          <div className="actions-container">
+            <FormButton
+              className="button pulse"
+              name="download"
+              onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
+            >
+              Download a sample file
+            </FormButton>
+            <FormButton name="download" onClick={() => history.push(RoutePath.Upload)}>
+              Upload your own file
+            </FormButton>
+          </div>
+        </p>
       </div>
       <div className="subtitle">
         <p>
@@ -35,17 +51,6 @@ const Welcome: React.FC<Props> = () => {
           provide.
         </p>
       </div>
-      <h2>Download a sample file</h2>
-      <ShareList torrents={preseededTorrentsUI} />
-      <h2>Or share a file</h2>
-      <FormButton
-        name="upload"
-        block={true}
-        disabled={false}
-        onClick={() => history.push(RoutePath.Upload)}
-      >
-        Upload
-      </FormButton>
     </section>
   );
 };
