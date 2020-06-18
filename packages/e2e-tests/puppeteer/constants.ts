@@ -17,6 +17,7 @@ export const CHAIN_NETWORK_ID = process.env.CHAIN_NETWORK_ID;
 export const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;
 export const SHOW_DEVTOOLS = process.env.SHOW_DEVTOOLS ? getEnvBool('SHOW_DEVTOOLS') : null;
+export const DEBUG_FILTER = process.env.DEBUG_FILTER;
 
 export const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR;
 

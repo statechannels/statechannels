@@ -1,6 +1,7 @@
 import puppeteer, {Browser, Page, Frame} from 'puppeteer';
 import * as dappeteer from 'dappeteer';
 
+import {parseBittorrentLog} from './parseBittorrentProtocolLogs';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -12,7 +13,8 @@ import {
   CHAIN_NETWORK_ID,
   LOG_DESTINATION,
   USING_EXTERNAL_CHAIN,
-  SHOW_DEVTOOLS
+  SHOW_DEVTOOLS,
+  DEBUG_FILTER
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -58,6 +60,12 @@ export async function setupLogging(
     throw error;
   });
 
+  if (DEBUG_FILTER) {
+    console.log(`Setting DEBUG filter for ${ganacheAccountIndex}`);
+    await page.goto('http://localhost:3000'); // Can be any page
+    await page.evaluate(`localStorage.setItem('debug', '${DEBUG_FILTER}')`);
+  }
+
   const filename = `${logPrefix}.${ganacheAccountIndex}`;
 
   if (logDistinguisherCache[filename]) throw `Ambiguous log config detected: ${filename}`;
@@ -80,11 +88,17 @@ export async function setupLogging(
     const regex = new RegExp(`"name":"${name}"`);
     return (text: string): boolean => regex.test(text);
   };
+  const isDebugLog = (debugTag: string) => (name: string): boolean => !!name.match(debugTag);
+
   const isXstateWalletLog = isPinoLog('xstate-wallet');
   const isWeb3torrentLog = isPinoLog('web3torrent');
   const isChannelProviderLog = isPinoLog('channel-provider');
+  const isBittorrentProtocolLog = isDebugLog('bittorrent-protocol');
+
+  const browserId = ganacheAccountIndex;
+
   const withGanacheIndex = (text: string): string =>
-    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
+    JSON.stringify({...JSON.parse(text), browserId}) + '\n';
 
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
@@ -94,7 +108,20 @@ export async function setupLogging(
     const text = msg.text();
     if (isXstateWalletLog(text) || isWeb3torrentLog(text) || isChannelProviderLog(text))
       pinoLog.write(withGanacheIndex(text));
-    else browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
+    else if (isBittorrentProtocolLog(text)) {
+      const time = Date.now();
+      // To parse the bittorrent logs, we must first await the arguments from the handle that
+      // puppeteer gives us
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Promise.all(msg.args().map(arg => arg.jsonValue())).then((args: any) => {
+        const [logLine, ...values] = args;
+        const TRACE = 10;
+        const line = {time, browserId, level: TRACE, ...parseBittorrentLog(logLine, ...values)};
+        pinoLog.write(JSON.stringify(line) + '\n');
+      });
+    } else {
+      browserConsoleLog.write(`Browser ${browserId} logged ${text}` + '\n');
+    }
   });
 }
 
