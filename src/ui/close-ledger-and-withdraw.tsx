@@ -19,7 +19,7 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
   const [current, _send] = useService(props.service);
 
   const send = (event: 'USER_APPROVES_CLOSE' | 'USER_REJECTS_CLOSE') => () => {
-    track(event);
+    track(event, {domain: current.context.domain});
     _send(event);
   };
 

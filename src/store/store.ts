@@ -118,12 +118,12 @@ export class Store {
       if (!segmentId) {
         segmentId = await this.getAddress();
         identify(segmentId);
-        track('created a wallet');
+        track('created a wallet', {address: segmentId});
       } else {
         identify(segmentId);
       }
 
-      track('initialized a wallet');
+      track('initialized a wallet', {address: segmentId});
     });
   };
 
