@@ -6,16 +6,5 @@ import _ from 'lodash';
  * or worry about undefined functions
  */
 
-// TODO: Why are SegmentAnalytics types not usable?
-const analytics: {
-  track(
-    event: string,
-    properties?: Record<string, any>,
-    options?: any,
-    callback?: () => void
-  ): void;
-  identify(userId: string, callback?: () => void): void;
-} = (window as any).analytics ?? {};
-
-export const track = analytics.track ?? _.noop;
-export const identify = analytics.identify ?? _.noop;
+export const track = (window as any).analytics.track ?? _.noop;
+export const identify = (window as any).analytics.identify ?? _.noop;
