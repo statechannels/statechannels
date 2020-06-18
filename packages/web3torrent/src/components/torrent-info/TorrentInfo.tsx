@@ -88,6 +88,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
                 filesize: torrent.length
               });
               setButtonDisabled(true);
+              torrent.status = Status.Idle;
               return web3TorrentClient.cancel(torrent.infoHash);
             }}
           >
