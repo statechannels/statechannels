@@ -8,6 +8,7 @@ import RimbleUtils from '@rimble/utils';
 import {WorkflowState} from '../workflows/ethereum-enable';
 import {WindowContext} from './window-context';
 import {CHAIN_NETWORK_ID} from '../config';
+import {track} from '../segment-analytics';
 
 interface Props {
   current: WorkflowState;
@@ -15,7 +16,12 @@ interface Props {
 }
 
 export const EnableEthereum = (props: Props) => {
-  const currentState = props.current;
+  const {current: currentState, send: _send} = props;
+  const send = (event: 'USER_APPROVES_ENABLE' | 'USER_REJECTS_ENABLE') => () => {
+    track(event);
+    _send(event);
+  };
+
   const targetNetwork = Number(CHAIN_NETWORK_ID);
 
   const window = useContext(WindowContext);
@@ -26,7 +32,7 @@ export const EnableEthereum = (props: Props) => {
     <MetaMaskButton.Outline
       disabled={disabled}
       id="connect-with-metamask-button"
-      onClick={() => props.send('USER_APPROVES_ENABLE')}
+      onClick={send('USER_APPROVES_ENABLE')}
     >
       {message}
     </MetaMaskButton.Outline>
@@ -140,7 +146,7 @@ export const EnableEthereum = (props: Props) => {
 
       <div>{button()}</div>
       <div>
-        <Button.Text onClick={() => props.send('USER_REJECTS_ENABLE')}>Cancel</Button.Text>
+        <Button.Text onClick={send('USER_REJECTS_ENABLE')}>Cancel</Button.Text>
       </div>
     </Flex>
   );

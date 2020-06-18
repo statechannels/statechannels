@@ -5,6 +5,7 @@ import {useService} from '@xstate/react';
 
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon} from 'rimble-ui';
+import {track} from '../segment-analytics';
 import {getAmountsFromBudget} from './selectors';
 import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
 import {utils} from 'ethers';
@@ -13,9 +14,20 @@ interface Props {
 }
 
 export const ApproveBudgetAndFund = (props: Props) => {
-  const [current, send] = useService(props.service);
+  const [current, _send] = useService(props.service);
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
+
+  const send = (
+    event:
+      | 'USER_APPROVES_BUDGET'
+      | 'USER_REJECTS_BUDGET'
+      | 'USER_APPROVES_RETRY'
+      | 'USER_REJECTS_RETRY'
+  ) => () => {
+    track(event);
+    _send(event);
+  };
 
   // Sets a timer that expires after 1.5 minutes
   // Used to determine if we've timed out waiting for the hub
@@ -82,12 +94,12 @@ export const ApproveBudgetAndFund = (props: Props) => {
       </Text>
       <Button
         disabled={waiting}
-        onClick={() => send('USER_APPROVES_BUDGET')}
+        onClick={send('USER_APPROVES_BUDGET')}
         className="approve-budget-button"
       >
         Approve budget
       </Button>
-      <Button.Text onClick={() => send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
+      <Button.Text onClick={send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
     </Flex>
   );
 
@@ -174,8 +186,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Text pb={4}>Your deposit transaction failed. Do you want to retry?</Text>
 
-      <Button onClick={() => send('USER_APPROVES_RETRY')}>Resubmit transaction</Button>
-      <Button.Text onClick={() => send('USER_REJECTS_RETRY')}>Cancel</Button.Text>
+      <Button onClick={send('USER_APPROVES_RETRY')}>Resubmit transaction</Button>
+      <Button.Text onClick={send('USER_REJECTS_RETRY')}>Cancel</Button.Text>
     </Flex>
   );
 

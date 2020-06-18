@@ -2,6 +2,7 @@ import React from 'react';
 import './wallet.scss';
 
 import {useService} from '@xstate/react';
+import {track} from '../segment-analytics';
 
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link} from 'rimble-ui';
@@ -15,7 +16,12 @@ interface Props {
 }
 
 export const CloseLedgerAndWithdraw = (props: Props) => {
-  const [current, send] = useService(props.service);
+  const [current, _send] = useService(props.service);
+
+  const send = (event: 'USER_APPROVES_CLOSE' | 'USER_REJECTS_CLOSE') => () => {
+    track(event);
+    _send(event);
+  };
 
   const waitForUserApproval = ({waiting, budget}: {waiting: boolean; budget: DomainBudget}) => {
     const {playerAmount} = getAmountsFromBudget(budget);
@@ -35,14 +41,10 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
           You will receive {formatEther(playerAmount)} ETH and the budget will be closed with the
           channel hub.
         </Text>
-        <Button
-          disabled={waiting}
-          onClick={() => send('USER_APPROVES_CLOSE')}
-          id="approve-withdraw"
-        >
+        <Button disabled={waiting} onClick={send('USER_APPROVES_CLOSE')} id="approve-withdraw">
           Close and Withdraw
         </Button>
-        <Button.Text onClick={() => send('USER_REJECTS_CLOSE')}>Cancel</Button.Text>
+        <Button.Text onClick={send('USER_REJECTS_CLOSE')}>Cancel</Button.Text>
       </Flex>
     );
   };
