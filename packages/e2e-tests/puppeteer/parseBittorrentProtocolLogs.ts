@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  // Example:
  const first = '%cbittorrent-protocol %c[5e0cb699] handshake i=%s p=%s exts=%o%c +11s';
@@ -57,7 +59,6 @@ export const parseBittorrentLog = (
         return values[idx] as string;
     }
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatted = logLine.replace(/%(s|i|d|f|o|O|c)/g, replacer as any);
 
   const [tag, id, ...rest] = formatted.split(' ');
