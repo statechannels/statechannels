@@ -18,7 +18,7 @@ interface Props {
 export const EnableEthereum = (props: Props) => {
   const {current: currentState, send: _send} = props;
   const send = (event: 'USER_APPROVES_ENABLE' | 'USER_REJECTS_ENABLE') => () => {
-    track(event);
+    track(event, {enabledAddress: currentState.context.enabledAddress});
     _send(event);
   };
 

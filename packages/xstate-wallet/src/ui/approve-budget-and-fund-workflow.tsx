@@ -25,7 +25,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
       | 'USER_APPROVES_RETRY'
       | 'USER_REJECTS_RETRY'
   ) => () => {
-    track(event);
+    track(event, {domain: current.context.budget.domain});
     _send(event);
   };
 
