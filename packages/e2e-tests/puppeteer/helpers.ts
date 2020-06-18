@@ -115,7 +115,8 @@ export async function setupLogging(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Promise.all(msg.args().map(arg => arg.jsonValue())).then((args: any) => {
         const [logLine, ...values] = args;
-        const line = {time, browserId, ...parseBittorrentLog(logLine, ...values)};
+        const TRACE = 10;
+        const line = {time, browserId, level: TRACE, ...parseBittorrentLog(logLine, ...values)};
         pinoLog.write(JSON.stringify(line) + '\n');
       });
     } else {
