@@ -170,12 +170,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log.debug({torrent}, '> Cancelling download');
 
     if (torrent) {
-      // I am only allowed to close the channel on my turn.
-      // If I don't pause the torrent, then I will continue to make payments, meaning the call to
-      // this.closeChannels would race the `makePayment` function, and one of them would fail with a
-      // "Not my turn" error.
-      torrent.pause(); // prevents connections to new peers
-      (torrent as any).maxWebConns = 0; // don't start downloading from existing upload peers
+      // We want to stop all torrenting, but don't want to close the wires, as we need them
+      // to close the channels. We therefore manually set the destroyed flag on the
+      // torrent instead of calling the destroy() method.
+      (torrent as any).destroyed = true;
+
       this.stopUploading(infoHash); // also stop uploading immediately
 
       await this.closeTorrentChannels(torrent, false);
