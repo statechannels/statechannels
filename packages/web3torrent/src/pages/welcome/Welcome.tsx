@@ -1,7 +1,6 @@
 import React from 'react';
 import {useHistory} from 'react-router-dom';
 import {FormButton} from '../../components/form';
-import {ShareList} from '../../components/share-list/ShareList';
 import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
