@@ -15,7 +15,7 @@ const analytics: {
     callback?: () => void
   ): void;
   identify(userId: string, callback?: () => void): void;
-} = (window as any).analytics;
+} = (window as any).analytics ?? {};
 
 export const track = analytics.track ?? _.noop;
-export const identify = analytics?.identify ?? _.noop;
+export const identify = analytics.identify ?? _.noop;
