@@ -38,6 +38,7 @@ const Welcome: React.FC<Props> = () => {
       </div>
       <div className="actions-container">
         <FormButton
+          className="button pulse"
           name="download"
           onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
         >
