@@ -13,6 +13,9 @@ section.fill {
   width: 100%;
   padding-top: 52.55%;
   position: relative;
+
+  margin-bottom: 10px;
+
   h1,
   h2 {
     font-size: 25px;
@@ -31,19 +34,28 @@ section.fill {
   }
 }
 
-.subtitle {
+div.subtitle {
   font-size: 18px;
   line-height: 32px;
   text-align: center;
-  margin: 43px auto 20px;
+  margin: 20px auto 10px auto;
+
+  p {
+    margin: 0;
+  }
+  .actions-container {
+    margin-bottom: 0;
+    button {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
 }
 
 .pulse {
-  // margin: 100px;
   display: block;
-  // width: 22px;
-  // height: 22px;
-  // border-radius: 50%;
   cursor: pointer;
   box-shadow: $c-orange;
   animation: pulse 1.5s infinite;

@@ -22,6 +22,22 @@ const Welcome: React.FC<Props> = () => {
       </div>
       <div className="subtitle">
         <p>
+          <div className="actions-container">
+            <FormButton
+              className="button pulse"
+              name="download"
+              onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
+            >
+              Download a sample file
+            </FormButton>
+            <FormButton name="download" onClick={() => history.push(RoutePath.Upload)}>
+              Upload your own file
+            </FormButton>
+          </div>
+        </p>
+      </div>
+      <div className="subtitle">
+        <p>
           Web3Torrent brings crypto payments to the torrenting world. <br />
           Under the hood it uses a paid-streaming extension to the{' '}
           <a href="https://webtorrent.io/" target="_blank" rel="noopener noreferrer">
@@ -35,18 +51,6 @@ const Welcome: React.FC<Props> = () => {
           files in a torrent swarm and downloaders make micropayments to uploaders for the data they
           provide.
         </p>
-      </div>
-      <div className="actions-container">
-        <FormButton
-          className="button pulse"
-          name="download"
-          onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
-        >
-          Download a sample file
-        </FormButton>
-        <FormButton name="download" onClick={() => history.push(RoutePath.Upload)}>
-          Upload your own file
-        </FormButton>
       </div>
     </section>
   );
