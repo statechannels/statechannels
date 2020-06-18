@@ -58,7 +58,7 @@ div.subtitle {
   display: block;
   cursor: pointer;
   box-shadow: $c-orange;
-  animation: pulse 1.5s infinite;
+  animation: pulse 5s infinite;
 }
 .thick-border {
   border: 2px #ea692b solid;
@@ -75,7 +75,7 @@ div.subtitle {
     -webkit-box-shadow: 0 0 0 3px $c-orangealt;
   }
   100% {
-    -webkit-box-shadow: 0 0 0 0 $c-orangealt;
+    -webkit-box-shadow: 0 0 0 0 $c-orange;
   }
 }
 @keyframes pulse {
@@ -83,12 +83,24 @@ div.subtitle {
     -moz-box-shadow: 0 0 0 0 $c-orange;
     box-shadow: 0 0 0 0 $c-orange;
   }
-  70% {
+  5% {
     -moz-box-shadow: 0 0 0 3px $c-orangealt;
     box-shadow: 0 0 0 3px $c-orangealt;
   }
+  20% {
+    -moz-box-shadow: 0 0 0 0 $c-orange;
+    box-shadow: 0 0 0 0 $c-orange;
+  }
+  25% {
+    -moz-box-shadow: 0 0 0 3px $c-orangealt;
+    box-shadow: 0 0 0 3px $c-orangealt;
+  }
+  40% {
+    -moz-box-shadow: 0 0 0 0 $c-orange;
+    box-shadow: 0 0 0 0 $c-orange;
+  }
   100% {
-    -moz-box-shadow: 0 0 0 0 $c-orangealt;
-    box-shadow: 0 0 0 0 $c-orangealt;
+    -moz-box-shadow: 0 0 0 0 $c-orange;
+    box-shadow: 0 0 0 0 $c-orange;
   }
 }
