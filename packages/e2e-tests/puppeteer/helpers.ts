@@ -12,7 +12,8 @@ import {
   CHAIN_NETWORK_ID,
   LOG_DESTINATION,
   USING_EXTERNAL_CHAIN,
-  SHOW_DEVTOOLS
+  SHOW_DEVTOOLS,
+  DEBUG_FILTER
 } from './constants';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {promisify} from 'util';
@@ -57,6 +58,12 @@ export async function setupLogging(
   page.on('pageerror', error => {
     throw error;
   });
+
+  if (DEBUG_FILTER) {
+    console.log(`Setting DEBUG filter for ${ganacheAccountIndex}`);
+    await page.goto('http://localhost:3000'); // Can be any page
+    await page.evaluate(`localStorage.setItem('debug', '${DEBUG_FILTER}')`);
+  }
 
   const filename = `${logPrefix}.${ganacheAccountIndex}`;
 
