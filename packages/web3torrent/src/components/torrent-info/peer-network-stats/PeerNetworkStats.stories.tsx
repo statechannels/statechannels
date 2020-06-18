@@ -8,7 +8,6 @@ import {PeerNetworkStats} from './PeerNetworkStats';
 import './PeerNetworkStats.scss';
 import {createMockTorrentPeers} from '../../../utils/test-utils';
 
-const a = '0xFb4A85D4bBf25e10Fc0Bed72f864dD1ead0006e7';
 const b = '0xBaaed72f864dD1ead0006e7Fb4A85D4bBf25e10F';
 const d = '0xf864dD1ead0006e7Fb4A85D4bBf25e10Fc0Bed72';
 

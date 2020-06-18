@@ -9,7 +9,6 @@ import {useQuery} from '../../utils/url';
 import {getTorrentUI} from '../../utils/torrent-status-checker';
 import './File.scss';
 import WebTorrentPaidStreamingClient, {TorrentTestResult} from '../../library/web3torrent-lib';
-import _ from 'lodash';
 import {Flash} from 'rimble-ui';
 import {checkTorrentInTracker} from '../../utils/check-torrent-in-tracker';
 import {getUserFriendlyError} from '../../utils/error';

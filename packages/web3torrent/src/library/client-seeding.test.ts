@@ -98,7 +98,7 @@ describe('Seeding and Leeching', () => {
 
   it('should be able to unchoke and finish a download', async done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount, seedingChannelId}) => {
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({seedingChannelId}) => {
         seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers, seedingChannelId}) => {
           expect(torrentPeers[seedingChannelId].wire.paidStreamingExtension.isForceChoking).toEqual(
             true

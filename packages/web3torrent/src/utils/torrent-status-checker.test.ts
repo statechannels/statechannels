@@ -1,6 +1,6 @@
 import {web3TorrentClient} from '../clients/web3torrent-client';
 import {Status, TorrentStaticData} from '../types';
-import {createMockTorrentUI, infoHash, createMockExtendedTorrent, pseAccount} from './test-utils';
+import {infoHash, createMockExtendedTorrent} from './test-utils';
 import {getFormattedETA, getStatus, getTorrentUI} from './torrent-status-checker';
 import {mockMetamask} from '../library/testing/test-utils';
 import {getStaticTorrentUI} from '../constants';

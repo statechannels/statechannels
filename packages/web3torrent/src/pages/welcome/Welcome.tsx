@@ -10,7 +10,7 @@ interface Props {
   ready: boolean;
 }
 
-const Welcome: React.FC<Props> = props => {
+const Welcome: React.FC<Props> = () => {
   const history = useHistory();
 
   return (

@@ -25,7 +25,7 @@ export const prettyPrintWei = (wei: utils.BigNumber): string => {
     return '0 wei';
   } else {
     let formattedString;
-    decimals.forEach((decimal, index, array) => {
+    decimals.forEach((decimal, index) => {
       if (wei.gte(utils.bigNumberify(10).pow(decimal))) {
         formattedString =
           bigDecimal.divide(wei.toString(), utils.bigNumberify(10).pow(decimal), PRECISION) +

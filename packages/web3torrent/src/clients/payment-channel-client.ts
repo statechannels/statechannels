@@ -25,11 +25,10 @@ import {
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import {map, filter, first, tap, take} from 'rxjs/operators';
+import {map, filter, first} from 'rxjs/operators';
 import {logger} from '../logger';
 import {concat, of, Observable} from 'rxjs';
 import _ from 'lodash';
-import {safeUnsubscribeFromFunction} from '../utils/react-utls';
 
 const log = logger.child({module: 'payment-channel-client'});
 const hexZeroPad = utils.hexZeroPad;
