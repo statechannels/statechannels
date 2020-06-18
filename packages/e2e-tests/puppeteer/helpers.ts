@@ -95,8 +95,10 @@ export async function setupLogging(
   const isChannelProviderLog = isPinoLog('channel-provider');
   const isBittorrentProtocolLog = isDebugLog('bittorrent-protocol');
 
+  const browserId = ganacheAccountIndex;
+
   const withGanacheIndex = (text: string): string =>
-    JSON.stringify({...JSON.parse(text), browserId: ganacheAccountIndex}) + '\n';
+    JSON.stringify({...JSON.parse(text), browserId}) + '\n';
 
   page.on('console', msg => {
     if (msg.type() === 'error' && !ignoreConsoleError) {
@@ -113,11 +115,11 @@ export async function setupLogging(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Promise.all(msg.args().map(arg => arg.jsonValue())).then((args: any) => {
         const [logLine, ...values] = args;
-        const line = {time, ...parseBittorrentLog(logLine, ...values)};
+        const line = {time, browserId, ...parseBittorrentLog(logLine, ...values)};
         pinoLog.write(JSON.stringify(line) + '\n');
       });
     } else {
-      browserConsoleLog.write(`Browser ${ganacheAccountIndex} logged ${text}` + '\n');
+      browserConsoleLog.write(`Browser ${browserId} logged ${text}` + '\n');
     }
   });
 }
