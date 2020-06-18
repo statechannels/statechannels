@@ -21,10 +21,10 @@ export const ConfirmCreateChannel = (props: Props) => {
       <Text fontSize={2} pb={2}>
         Do you wish to create a channel?
       </Text>
-      <Button id="yes" onClick={() => send('USER_APPROVES')}>
+      <Button id="yes" onClick={send('USER_APPROVES')}>
         Yes
       </Button>
-      <Button.Text onClick={() => send('USER_REJECTS')}>No</Button.Text>
+      <Button.Text onClick={send('USER_REJECTS')}>No</Button.Text>
     </Flex>
   );
   if (current?.value.toString() === 'waitForUserConfirmation') {
