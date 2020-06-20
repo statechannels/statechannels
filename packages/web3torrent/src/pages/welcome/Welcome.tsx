@@ -24,7 +24,7 @@ const Welcome: React.FC<Props> = () => {
         <p>
           <div className="actions-container">
             <FormButton
-              className="button pulse"
+              className="button shadow"
               name="download"
               onClick={() => {
                 track('Sample Download Nav');
