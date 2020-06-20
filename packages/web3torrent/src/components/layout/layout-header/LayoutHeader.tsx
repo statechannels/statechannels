@@ -5,7 +5,7 @@ import {Link, useHistory} from 'react-router-dom';
 import {RoutePath} from '../../../routes';
 
 import './LayoutHeader.scss';
-import {track} from '../../../analytics';
+import {track} from '../../../segment-analytics';
 
 export const LayoutHeader: React.FC = () => {
   const history = useHistory();
