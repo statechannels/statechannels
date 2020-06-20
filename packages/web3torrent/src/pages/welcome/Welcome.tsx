@@ -5,6 +5,7 @@ import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {generateURL} from '../../utils/url';
+import {track} from '../../analytics';
 
 interface Props {
   ready: boolean;
@@ -25,11 +26,20 @@ const Welcome: React.FC<Props> = () => {
             <FormButton
               className="button pulse"
               name="download"
-              onClick={() => history.push(generateURL(preseededTorrentsUI[0]))}
+              onClick={() => {
+                track('Sample Download Nav');
+                history.push(generateURL(preseededTorrentsUI[0]));
+              }}
             >
               Download a sample file
             </FormButton>
-            <FormButton name="download" onClick={() => history.push(RoutePath.Upload)}>
+            <FormButton
+              name="download"
+              onClick={() => {
+                track('Upload Your Own Nav');
+                history.push(RoutePath.Upload);
+              }}
+            >
               Upload your own file
             </FormButton>
           </div>

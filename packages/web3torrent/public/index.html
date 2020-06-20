@@ -3,10 +3,59 @@
   <head>
     <% if (process.env.NODE_ENV === 'production') { %>
     <script>
-      !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var t=analytics.methods[e];analytics[t]=analytics.factory(t)}analytics.load=function(e,t){var n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src="https://cdn.segment.com/analytics.js/v1/"+e+"/analytics.min.js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(n,a);analytics._loadOptions=t};analytics.SNIPPET_VERSION="4.1.0";
-      analytics.load("8UQNeFzEuJ25kw99YSrQqvTbP3zsTfiZ");
-      analytics.page();
-      }}();
+      !(function() {
+        var analytics = (window.analytics = window.analytics || []);
+        if (!analytics.initialize)
+          if (analytics.invoked)
+            window.console && console.error && console.error('Segment snippet included twice.');
+          else {
+            analytics.invoked = !0;
+            analytics.methods = [
+              'trackSubmit',
+              'trackClick',
+              'trackLink',
+              'trackForm',
+              'pageview',
+              'identify',
+              'reset',
+              'group',
+              'track',
+              'ready',
+              'alias',
+              'debug',
+              'page',
+              'once',
+              'off',
+              'on',
+              'addSourceMiddleware',
+              'addIntegrationMiddleware'
+            ];
+            analytics.factory = function(e) {
+              return function() {
+                var t = Array.prototype.slice.call(arguments);
+                t.unshift(e);
+                analytics.push(t);
+                return analytics;
+              };
+            };
+            for (var e = 0; e < analytics.methods.length; e++) {
+              var t = analytics.methods[e];
+              analytics[t] = analytics.factory(t);
+            }
+            analytics.load = function(e, t) {
+              var n = document.createElement('script');
+              n.type = 'text/javascript';
+              n.async = !0;
+              n.src = 'https://cdn.segment.com/analytics.js/v1/' + e + '/analytics.min.js';
+              var a = document.getElementsByTagName('script')[0];
+              a.parentNode.insertBefore(n, a);
+              analytics._loadOptions = t;
+            };
+            analytics.SNIPPET_VERSION = '4.1.0';
+            analytics.load('8UQNeFzEuJ25kw99YSrQqvTbP3zsTfiZ');
+            analytics.page();
+          }
+      })();
     </script>
     <% } %>
 
@@ -27,14 +76,14 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    
+
     <!-- Twitter Card data -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@statechannels">
-    <meta name="twitter:title" content="Web3Torrent - State Channels">
-    <meta name="twitter:description" content="Earn cryptocurrency for seeding torrents.">
-    <meta name="twitter:creator" content="@statechannels">
-    <meta name="twitter:image" content="%PUBLIC_URL%/social.png">
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@statechannels" />
+    <meta name="twitter:title" content="Web3Torrent - State Channels" />
+    <meta name="twitter:description" content="Earn cryptocurrency for seeding torrents." />
+    <meta name="twitter:creator" content="@statechannels" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/social.png" />
 
     <!-- Open Graph data -->
     <meta property="og:title" content="Web3Torrent - State Channels" />
