@@ -5,7 +5,7 @@ import {preseededTorrentsUI} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {generateURL} from '../../utils/url';
-import {track} from '../../analytics';
+import {track} from '../../segment-analytics';
 
 interface Props {
   ready: boolean;
