@@ -5,7 +5,7 @@ import './DownloadLink.scss';
 import {TorrentUI} from '../../../types';
 import {track} from '../../../segment-analytics';
 
-export type DownloadLinkProps = {torrent: TorrentUI};
+export type DownloadLinkProps = {torrent: TorrentUI; text?: string};
 
 export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   const [file, setFile] = useState({} as SavingData);

@@ -47,59 +47,65 @@ section {
       width: 35%;
       text-align: center;
     }
+  }
+}
+.buttonContainer {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: baseline;
+  width: 300px;
+}
 
-    .fileLink {
-      min-width: 70px;
-      width: 23%;
-      text-align: right;
-      color: $c-orange;
-      margin-top: 0px;
-      font-size: 18px;
-      position: relative;
-      outline: 0;
-      max-height: 26px;
-      .tooltiptext {
-        font-family: 'Nunito Sans', sans-serif;
-        font-size: 14px;
-        visibility: hidden;
-        width: 140px;
-        background-color: $c-white;
-        border: 1px $c-orange solid;
-        color: $c-orange;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px;
-        position: absolute;
-        z-index: 2;
-        top: 120%;
-        left: 70%;
-        margin-left: -75px;
-        opacity: 0;
-        transition: opacity 0.3s;
-      }
+.fileLink {
+  min-width: 70px;
+  width: 23%;
+  text-align: right;
+  color: $c-orange;
+  margin-top: 0px;
+  font-size: 18px;
+  position: relative;
+  outline: 0;
+  max-height: 26px;
+  .tooltiptext {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    visibility: hidden;
+    width: 140px;
+    background-color: $c-white;
+    border: 1px $c-orange solid;
+    color: $c-orange;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 2;
+    top: 120%;
+    left: 70%;
+    margin-left: -75px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
 
-      img {
-        width: 18px;
-        margin-left: 5px;
-      }
+  img {
+    width: 18px;
+    margin-left: 5px;
+  }
 
-      .tooltiptext::after {
-        content: '';
-        position: absolute;
-        bottom: 100%;
-        right: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent transparent $c-orange transparent;
-      }
+  .tooltiptext::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent $c-orange transparent;
+  }
 
-      &:hover .tooltiptext,
-      .tooltiptext.true {
-        visibility: visible;
-        opacity: 1;
-      }
-    }
+  &:hover .tooltiptext,
+  .tooltiptext.true {
+    visibility: visible;
+    opacity: 1;
   }
 }
 
