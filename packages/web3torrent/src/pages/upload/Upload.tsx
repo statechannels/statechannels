@@ -6,7 +6,7 @@ import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 import {getUserFriendlyError} from '../../utils/error';
 import {Flash} from 'rimble-ui';
-import {track} from '../../analytics';
+import {track} from '../../segment-analytics';
 import {MAX_FILE_SIZE} from '../../constants';
 import prettier from 'prettier-bytes';
 

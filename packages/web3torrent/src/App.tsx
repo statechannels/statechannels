@@ -11,7 +11,7 @@ import {RoutePath} from './routes';
 import {requiredNetwork} from './constants';
 import {Budgets} from './pages/budgets/Budgets';
 import {web3TorrentClient} from './clients/web3torrent-client';
-import {identify} from './analytics';
+import {identify} from './segment-analytics';
 import {from} from 'rxjs';
 import {logger} from './logger';
 import {safeUnsubscribe} from './utils/react-utls';

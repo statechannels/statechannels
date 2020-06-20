@@ -3,7 +3,7 @@ import {getFileSavingData, SavingData} from '../../../utils/file-saver';
 
 import './DownloadLink.scss';
 import {TorrentUI} from '../../../types';
-import {track} from '../../../analytics';
+import {track} from '../../../segment-analytics';
 
 export type DownloadLinkProps = {torrent: TorrentUI};
 
