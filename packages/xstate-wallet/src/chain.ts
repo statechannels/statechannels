@@ -19,7 +19,7 @@ import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/st
 
 import {getProvider} from './utils/contract-utils';
 import {State, SignedState} from './store/types';
-import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
+import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS, FAKE_WEB3_PK} from './config';
 import {logger} from './logger';
 
 export interface ChannelChainInfo {
@@ -247,10 +247,7 @@ export class ChainWatcher implements Chain {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
 
     if (window.ethereum.mockingInfuraProvider) {
-      return new Wallet(
-        '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce',
-        this.provider
-      );
+      return new Wallet(FAKE_WEB3_PK, this.provider);
     }
 
     return this.provider.getSigner(this.selectedAddress as string);

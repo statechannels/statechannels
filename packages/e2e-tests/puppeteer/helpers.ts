@@ -172,7 +172,11 @@ class FakeMetaMask implements dappeteer.Dappeteer {
   approve: () => Promise<void> = () => new Promise<void>(res => res());
 }
 
-export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Promise<void> {
+export async function setupFakeWeb3(
+  page: Page,
+  ganacheAccountIndex: number,
+  pk = '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce'
+): Promise<void> {
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
@@ -180,11 +184,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`
     window.web3 = new Web3(new Web3.providers.HttpProvider("${RPC_ENDPOINT}"));
-    ${
-      USING_EXTERNAL_CHAIN
-        ? 'window.web3.eth.accounts.wallet.add("0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce");'
-        : ''
-    }
+  ${USING_EXTERNAL_CHAIN ? `window.web3.eth.accounts.wallet.add("${pk}");` : ''}
 
     window.ethereum = window.web3.currentProvider;
     ${USING_EXTERNAL_CHAIN ? 'window.ethereum.mockingInfuraProvider = true;' : ''}
@@ -192,11 +192,7 @@ export async function setupFakeWeb3(page: Page, ganacheAccountIndex: number): Pr
     window.ethereum.enable = () => new Promise(r => {
       console.log("[puppeteer] window.ethereum.enable() was called");
       web3.eth.getAccounts().then(lst => {
-        web3.eth.defaultAccount = ${
-          USING_EXTERNAL_CHAIN
-            ? '"0x7e4ABd63A7C8314Cc28D388303472353D884f292"'
-            : `lst[${ganacheAccountIndex}]`
-        };
+        web3.eth.defaultAccount = lst[${USING_EXTERNAL_CHAIN ? 0 : ganacheAccountIndex}];
         console.log("Using address " + web3.eth.defaultAccount);
         window.ethereum.selectedAddress = web3.eth.defaultAccount;
         r([window.ethereum.selectedAddress]);

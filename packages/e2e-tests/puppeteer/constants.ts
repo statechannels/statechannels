@@ -18,7 +18,8 @@ export const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 export const CLOSE_BROWSERS = process.env.CLOSE_BROWSERS ? getEnvBool('CLOSE_BROWSERS') : true;
 export const SHOW_DEVTOOLS = process.env.SHOW_DEVTOOLS ? getEnvBool('SHOW_DEVTOOLS') : null;
 export const DEBUG_FILTER = process.env.DEBUG_FILTER;
-
+export const FAKE_WEB3_PK =
+  process.env.FAKE_WEB3_PK || '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce';
 export const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR;
 
 export const LOG_DESTINATION =

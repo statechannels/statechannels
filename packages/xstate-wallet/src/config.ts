@@ -54,6 +54,9 @@ export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION 
 
 export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
 
+export const FAKE_WEB3_PK: string =
+  process.env.FAKE_WEB3_PK || '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce';
+
 export const ADD_LOGS = !!LOG_DESTINATION;
 export const LOG_LEVEL = ADD_LOGS
   ? process.env.LOG_LEVEL
