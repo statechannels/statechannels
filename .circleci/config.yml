@@ -477,15 +477,15 @@ workflows:
           filters:
             branches:
               only: deploy
-
-  scheduled-release:
-    triggers:
-      - schedule:
-          # Run once a day at midnight UTC
-          cron: '0 0 * * *'
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - push-master-to-deploy
+  ## We are chosing to disable the daily release for now.
+  # scheduled-release:
+  #   triggers:
+  #     - schedule:
+  #         # Run once a day at midnight UTC
+  #         cron: '0 0 * * *'
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
+  #   jobs:
+  #     - push-master-to-deploy
