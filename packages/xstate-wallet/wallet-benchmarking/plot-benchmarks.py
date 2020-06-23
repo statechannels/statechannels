@@ -18,6 +18,7 @@ with open('./times.json') as json_file:
 ax.set_ylim([-1, 20])
 plt.boxplot(values_list)
 plt.xticks(np.arange(1, len(labels)+1), labels)
+plt.xticks(rotation=60)
 ax.set_ylabel('ms')
 fig.tight_layout()
 plt.savefig("./benchmark.svg")

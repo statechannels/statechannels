@@ -1,6 +1,6 @@
 const {ethers} = require('ethers');
 const fs = require('fs');
-const {signState} = require('@statechannels/nitro-protocol');
+const {signState, getStateSignerAddress} = require('@statechannels/nitro-protocol');
 const {HashZero, AddressZero} = ethers.constants;
 
 const SAMPLES = 1000;
@@ -53,6 +53,34 @@ for (let i = 0; i < SAMPLES; i++) {
   times.push(after - before);
 }
 results['nitro.signState'] = [...times];
+
+times = [];
+for (let i = 0; i < SAMPLES; i++) {
+  const state = {
+    isFinal: false,
+    channel: {
+      chainId: '0x0',
+      channelNonce: '0x0',
+      participants: [wallet.address]
+    },
+    outcome: [
+      {
+        assetHolderAddress: AddressZero,
+        allocationItems: []
+      }
+    ],
+    appDefinition: AddressZero,
+    appData: HashZero,
+    challengeDuration: 1,
+    turnNum: 1
+  };
+  const signedState = signState(state, wallet.privateKey);
+  const before = process.hrtime()[1]; // in ns
+  getStateSignerAddress(signedState, wallet.privateKey);
+  const after = process.hrtime()[1];
+  times.push(after - before);
+}
+results['nitro.getStateSignerAddress'] = [...times];
 
 fs.writeFile('times.json', JSON.stringify(results), err => {
   if (err) throw err;
