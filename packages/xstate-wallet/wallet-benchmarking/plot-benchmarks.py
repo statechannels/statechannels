@@ -3,28 +3,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import EngFormatter
 import os
-import csv
+import json
 
 fig, ax = plt.subplots()
 
 labels = []
-with open('./times.csv') as csv_file:
-    data = csv.reader(csv_file)
-    for index, row in enumerate(data):
-        if index == 0:
-            labels.append(row[0])
-        if index == 1:
-            values = np.array(
-                map(lambda x: float(x)*1e-6, row[0][1:-1].split(',')))  # in ms
-            plt.boxplot(values)
+values_list = []
+with open('./times.json') as json_file:
+    data = json.load(json_file)
+    print(data)
+    for key in data:
+        labels.append(key)
+        values_list.append(map(lambda x: float(x)*1e-6, data[key]))
 
-ax.set_ylim([-1, 5])
-ax.set_xlabel(labels)
+plt.boxplot(values_list)
+plt.xticks([1, 2], labels)
 ax.set_ylabel('ms')
-plt.show()
-
-# fig.tight_layout()
-plt.savefig(dir_path + "/benchmark.svg")
-plt.savefig(dir_path + "/benchmark.png")
+fig.tight_layout()
+plt.savefig("./benchmark.svg")
+plt.savefig("./benchmark.png")
 
 # plt.show()
