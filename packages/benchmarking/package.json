@@ -1,0 +1,17 @@
+{
+  "name": "benchmarking",
+  "version": "0.0.0",
+  "description": "Scripts used to time the xstate wallet",
+  "main": "index.js",
+  "author": "George Knee",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@statechannels/nitro-protocol": "^0.1.2",
+    "ethers": "5.0.0-beta.191"
+  },
+  "scripts": {
+    "start": "npx http-server"
+  }
+}
