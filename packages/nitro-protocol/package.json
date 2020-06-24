@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
