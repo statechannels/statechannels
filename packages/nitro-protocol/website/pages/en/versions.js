@@ -18,9 +18,7 @@ const versions = require(`${CWD}/versions.json`);
 function Versions(props) {
   const {config: siteConfig} = props;
   const latestVersion = versions[0];
-  const repoUrl = `https://github.com/${siteConfig.organizationName}/${
-    siteConfig.projectName
-  }`;
+  const repoUrl = siteConfig.repoUrl;
   return (
     <div className="docMainWrapper wrapper">
       <Container className="mainContainer versionsContainer">
@@ -40,19 +38,20 @@ function Versions(props) {
                   <a
                     href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
                       props.language ? props.language + '/' : ''
-                    }doc1`}>
+                    }overview`}
+                  >
                     Documentation
                   </a>
                 </td>
                 <td>
-                  <a href="">Release Notes</a>
+                  <a href={siteConfig.packageUrl}>Release Notes</a>
                 </td>
               </tr>
             </tbody>
           </table>
           <p>
-            This is the version that is configured automatically when you first
-            install this project.
+            This is the version that is configured automatically when you first install this
+            project.
           </p>
           <h3 id="rc">Pre-release versions</h3>
           <table className="versions">
@@ -65,7 +64,8 @@ function Versions(props) {
                   <a
                     href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
                       props.language ? props.language + '/' : ''
-                    }next/doc1`}>
+                    }next/overview`}
+                  >
                     Documentation
                   </a>
                 </td>
@@ -91,23 +91,21 @@ function Versions(props) {
                         <a
                           href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
                             props.language ? props.language + '/' : ''
-                          }${version}/doc1`}>
+                          }${version}/doc1`}
+                        >
                           Documentation
                         </a>
                       </td>
                       <td>
-                        <a href={`${repoUrl}/releases/tag/v${version}`}>
-                          Release Notes
-                        </a>
+                        <a href={`${repoUrl}/releases/tag/v${version}`}>Release Notes</a>
                       </td>
                     </tr>
-                  ),
+                  )
               )}
             </tbody>
           </table>
           <p>
-            You can find past versions of this project on{' '}
-            <a href={repoUrl}>GitHub</a>.
+            You can find past versions of this project on <a href={repoUrl}>GitHub</a>.
           </p>
         </div>
       </Container>
