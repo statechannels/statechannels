@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
+    "eventemitter3": "4.0.0",
     "@statechannels/channel-provider": "*",
     "@statechannels/client-api-schema": "0.0.1",
     "ethers": "4.0.45"
