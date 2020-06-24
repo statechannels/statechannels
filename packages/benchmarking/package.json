@@ -8,8 +8,12 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
+    "@statechannels/channel-provider": "*",
     "@statechannels/nitro-protocol": "^0.1.1",
     "ethers": "5.0.0-beta.191"
   },
-  "scripts": {"start": "npx http-server"}
+  "scripts": {
+    "start": "npx browserify index.js -o bundle.js && npx http-server",
+    "node-benchmark": "node signatures.js && python plot-benchmarks.py"
+  }
 }
