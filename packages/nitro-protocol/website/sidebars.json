@@ -15,7 +15,8 @@
       "wallet-dev-tutorial/understand-channel-storage",
       "wallet-dev-tutorial/clear-a-challenge",
       "wallet-dev-tutorial/outcomes",
-      "wallet-dev-tutorial/release-assets"
+      "wallet-dev-tutorial/release-assets",
+      "wallet-dev-tutorial/off-chain-funding"
     ],
     "Contract Developers": [
       "contract-devs/contract-devs-intro",

@@ -133,6 +133,8 @@ function validTransition(a, b) <=>
      b.app.validTransition(a, b)
 ```
 
+### Application logic
+
 Note the use of `app.ValidTransition`. This function should be written by third party DApp developers. We provide a `TrivialApp` contract which always returns `true`, to aid in testing:
 
 ```typescript
@@ -167,6 +169,14 @@ expect(
   )
 ).toBe(true);
 ```
+
+### Setup states
+
+If `n` is the number of participants, then states with turn numbers `0` through `n-1` (inclusive) are known as "pre fund setup" states. They signal each participant's intention to join the channel with a particular outcome specified.
+
+Once a pre fund setup state with turn number `n-1` is supported, it is safe for the channel to be funded.
+
+States with turn numbers `n` through `2n-1` (inclusive) are known as "post fund setup" states. They signal each participant's agreement that the channel is fully funded. Once a post fund setup state with turn number `2n-1` is supported, the state channel can begin execution in earnest (updating the `appData` and `outcome`).
 
 ## Support a state in several different ways
 

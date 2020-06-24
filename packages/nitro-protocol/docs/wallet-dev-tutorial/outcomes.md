@@ -8,29 +8,18 @@ So far during this tutorial we have not concerned ourselves with specifying mean
 The time has come to tackle this issue!
 Nitro protocol is an extension of ForceMove protocol that we have dealt with so far. ForceMove specifies only that a state should have a default `outcome` but does not specify the format of that `outcome`, and simply treats it as an unstructured `bytes` field. In this section we look at the outcome formats needed for Nitro.
 
-## Outcomes that allocate
-
-The following table illustrates an example data structure for an outcome, which features an _allocation_ asset outcome. (For those interested, the giveaway is the `0` in the `AssetOutcome` property. Guarantee asset outcomes, which we will get to shortly, have a `1` there).
-
 :::tip
 Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being held in the same channel.
 :::
 
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA     | 5      | 0xDestB     | 2      | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------- | ------ | ----------- | ------ | ---------------- | --- |
-|                                                                                                 |                                                  |                                                                                                       | Destination | Amount | Destination | Amount |                  |     |
-|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |             |        |
-|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |             |        |
-|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |             |
-| <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
-| <td colspan="8" align="center">Outcome</td>                                                     |
+## Outcomes that allocate
 
-Such an outcome specifies
+An Allocation outcome specifies
 
 - at least one asset holder (which in turn is tied to a specific asset type such as ETH or an ERC20 token)
 - for each asset holder, an array of (destination, amount) pairs known as an `Allocation`, and indicating a payout of amount tokens to destination.
 
-The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId.
+The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToBytes32` to convert an ethereum address to an external destination.
 
 :::tip
 In nitro protocol, channels can allocate funds to other channels!
@@ -41,7 +30,15 @@ To construct an outcome, you can import the `Outcome` type to ensure you're gett
 ```typescript
 // In lesson11.test.ts
 
-import { AllocationAssetOutcome, Outcome, encodeOutcome, decodeOutcome } from '@statechannels/nitro-protocol';
+import {
+  AllocationAssetOutcome,
+  Outcome,
+  encodeOutcome,
+  decodeOutcome,
+  convertAddressToBytes32
+  } from '@statechannels/nitro-protocol';
+
+const externalDestination(convertAddressToBytes32(AddressZero));
 
 const assetOutcome: AllocationAssetOutcome = {
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
@@ -65,16 +62,6 @@ expect(decodeOutcome(encodedOutcome)).toEqual(outcome);
 ## Outcomes that guarantee
 
 Guarantee Asset Outcomes are similar to Allocation Asset Outcomes, only they not have any amounts. Their purpose is to simply express an ordering of destinations for a given asset holder (say, a given token).
-
-The following table illustrates an example data structure for an outcome, which features an _guarantee_ asset outcome. (This time the giveaway is the `1` in the `AssetOutcome` property).
-
-| >                                                                                               | 0xETHAssetHolder                                 | 1                                             | 0xchannelA                                                       | 0xBob | 0xAlice | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- | ---------------------------------------------------------------- | ----- | ------- | ---------------- | --- |
-|                                                                                                 |                                                  |                                               | TargetChannelId <td colspan="2" align="center">Destinations</td> |       |         |
-|                                                                                                 |                                                  | <td colspan="3" align="center">Guarantee</td> |                                                                  |       |
-|                                                                                                 | <td colspan="4" align="center">AssetOutcome</td> |                                               |                                                                  |
-| <td colspan="5" align="center">OutcomeItem</td> <td colspan="5" align="center">OutcomeItem</td> |
-| <td colspan="7" align="center">Outcome</td>                                                     |
 
 A channel that has a guarantee outcome is said to be a guarantor channel.
 
