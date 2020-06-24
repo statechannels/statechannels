@@ -53,7 +53,7 @@
   },
   "engines": {
     "yarn": "^1.17.0",
-    "node": "^10.16.3"
+    "node": "^12.16.3"
   },
   "files": [
     "contracts/*",
