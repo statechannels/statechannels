@@ -1,0 +1,9 @@
+{
+  "name": "benchmarking",
+  "version": "0.0.0",
+  "description": "Scripts used to time the xstate wallet",
+  "main": "index.js",
+  "author": "George Knee",
+  "license": "MIT",
+  "private": true
+}
