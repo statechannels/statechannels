@@ -17,7 +17,7 @@ integration_test_settings: &integration_test_settings
   resource_class: large
   working_directory: /home/circleci/project
   docker:
-    - image: circleci/node:10.16.3-browsers
+    - image: circleci/node:12.16.3-browsers
   environment:
     SC_ENV: << parameters.sc_env >>
 
