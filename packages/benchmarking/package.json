@@ -5,5 +5,10 @@
   "main": "index.js",
   "author": "George Knee",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@statechannels/nitro-protocol": "^0.1.1",
+    "ethers": "5.0.0-beta.191"
+  }
 }
