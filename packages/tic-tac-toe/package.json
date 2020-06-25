@@ -127,7 +127,7 @@
     "eslint-plugin-ember": "7.7.2",
     "eslint-plugin-node": "11.0.0",
     "eslint-plugin-prettier": "3.1.2",
-    "etherlime": "2.2.6",
+    "etherlime": "2.3.3",
     "firebase": "7.11.0",
     "ganache-cli": "6.8.2",
     "jest": "25.1.0",
