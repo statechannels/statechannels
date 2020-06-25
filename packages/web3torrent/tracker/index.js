@@ -1,6 +1,7 @@
 const Server = require('bittorrent-tracker').Server;
 const log = require('pino')({prettyPrint: true, translateTime: true, name: 'w3t-tracker'});
-const isAddress = require('web3').utils.isAddress;
+const { ethers } = require('ethers');
+
 const port = process.env.PORT || 8000;
 
 const ACTIONS = {CONNECT: 0, ANNOUNCE: 1, SCRAPE: 2, ERROR: 3};
@@ -18,7 +19,7 @@ const server = new Server({
      * existence and validity of the value. It's use is to filter other clients of using this tracker.
      */
     if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
-      if (!params.pseAccount || !isAddress(params.pseAccount)) {
+      if (!params.pseAccount || !ethers.utils.isAddress((params.pseAccount)) {
         cb(new Error('401 - Unauthorized client - This tracker is for Web3Torrents only'));
       } else {
         cb(null);
