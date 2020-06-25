@@ -101,3 +101,5 @@ To get started:
 See https://docusaurus.io/docs/en/installation for more information.
 
 NB: you may run into difficulty running `docgen / solidoc` if you have the native solc compiler installed at the incorrect version number. You may refer to the circle `config.yml` at the monorepo root to check which version is being used as a part of our continuous integration.
+
+To add a new version of the docs, follow the instructions at https://docusaurus.io/docs/en/tutorial-version. We try to keep the documentation version in sync with the @statechannels/nitro-protocol npm package.
