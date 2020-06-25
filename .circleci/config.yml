@@ -11,7 +11,7 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: geoknee/statechannels:node12.16-solc0.6.9 # Fast contract compilation with solc installed
+    - image: geoknee/statechannels:node12.16-solc0.6.2 # Fast contract compilation with solc installed
 
 integration_test_settings: &integration_test_settings
   resource_class: large
