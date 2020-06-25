@@ -19,7 +19,7 @@ const server = new Server({
      * existence and validity of the value. It's use is to filter other clients of using this tracker.
      */
     if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
-      if (!params.pseAccount || !ethers.utils.isAddress((params.pseAccount)) {
+      if (!params.pseAccount || !ethers.utils.isAddress((params.pseAccount))) {
         cb(new Error('401 - Unauthorized client - This tracker is for Web3Torrents only'));
       } else {
         cb(null);
