@@ -11,19 +11,19 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: counterfactual/statechannels:0.6.9 # Fast contract compilation with solc installed
+    - image: geoknee/statechannels:node12.16-solc0.6.9 # Fast contract compilation with solc installed
 
 integration_test_settings: &integration_test_settings
   resource_class: large
   working_directory: /home/circleci/project
   docker:
-    - image: circleci/node:10.16.3-browsers
+    - image: circleci/node:12.16.3-browsers
   environment:
     SC_ENV: << parameters.sc_env >>
 
 save_dep: &save_dep
   save_cache:
-    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v5-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/channel-client/node_modules
@@ -42,7 +42,7 @@ save_dep: &save_dep
 
 restore_dep: &restore_dep
   restore_cache:
-    key: v4-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v5-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_built_artifacts: &save_built_artifacts
   save_cache:

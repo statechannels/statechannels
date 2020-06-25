@@ -1,7 +1,8 @@
-FROM node:10.16-slim
+FROM node:12.16-slim
 
 RUN apt-get update
 RUN apt-get install -y \
+    curl \
     ca-certificates \
     g++ \
     gcc \
@@ -19,5 +20,3 @@ RUN apt-get install -y \
 RUN curl -o /usr/bin/solc -fL https://github.com/ethereum/solidity/releases/download/v0.6.9/solc-static-linux \
     && chmod u+x /usr/bin/solc
 
-# install node 10.x and yarn 1.17.3
-RUN npm install -g yarn@1.17.3
