@@ -7,7 +7,7 @@ orbs:
 
 defaults: &defaults
   environment:
-    USE_NATIVE_SOLC: true
+    USE_NATIVE_SOLC: false
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
