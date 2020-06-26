@@ -7,13 +7,11 @@ const port = process.env.PORT || 8000;
 const ACTIONS = {CONNECT: 0, ANNOUNCE: 1, SCRAPE: 2, ERROR: 3};
 const EVENTS = {START: 'started', COMPLETE: 'completed', UPDATE: undefined, STOP: undefined};
 
-
-
 function isAddress(input) {
   try {
-    return !!utils.getAddress(input)
+    return !!utils.getAddress(input);
   } catch {
-    return false
+    return false;
   }
 }
 
