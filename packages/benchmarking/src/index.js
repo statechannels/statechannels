@@ -1,4 +1,4 @@
 require('@statechannels/channel-provider');
-function createChannel() {
+window.createChannel = function() {
   document.getElementById('create-channel-time').innerText = '200ms';
 }
