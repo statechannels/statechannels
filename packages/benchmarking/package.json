@@ -9,6 +9,7 @@
   "dependencies": {},
   "devDependencies": {
     "@statechannels/channel-provider": "*",
+    "@statechannels/channel-client": "*",
     "@statechannels/nitro-protocol": "^0.1.1",
     "ethers": "5.0.0-beta.191",
     "http-server": "^0.12.3",

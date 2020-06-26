@@ -1,5 +1,7 @@
 <script src="./dist/main.js"></script>
-<button onClick="window.channelProvider.mountWalletComponent('localhost:3055')">1. MountWalletComponent</button><br></br>
+<button onClick="window.channelProvider.mountWalletComponent('http://127.0.0.1:3055')">1. MountWalletComponent</button><br></br>
 <button onClick="window.channelProvider.enable()">2. Enable channel provider</button><br></br>
 <button onClick="window.createChannel()">3. createChannel</button><br></br>
 <div id="create-channel-time"></div>
+<button onClick="window.signMessage()">4. ethers.signMessage</button><br></br>
+<div id="sign-message-time"></div>

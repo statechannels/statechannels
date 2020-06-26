@@ -1,36 +1,33 @@
 require('@statechannels/channel-provider');
-window.createChannel = function() {
-  var request = { // TODO this is mocked out...
-    "jsonrpc": "2.0",
-    "method": "CreateChannel",
-    "id": 1,
-    "params": {
-      "participants": [
-        {
-          "participantId": "user123",
-          "signingAddress": "0x...",
-          "destination": "0xa..."
-        },
-        {
-          "participantId": "user456",
-          "signingAddress": "0x...",
-          "destination": "0xb..."
-        }
-      ],
-      "allocations": [
-        {
-          "token": "0x...", // 0x0 for ETH
-          "allocationItems": [
-            {"destination": "0xa...", "amount": "0x1a"},
-            {"destination": "0xb...", "amount": "0x1a"}
-          ]
-        }
-      ],
-      "appDefinition": "0x...",
-      "appData": "0x...."
-    }
-  };
-  window.channelProvider.send(JSON.stringify(request));
-  // TODO use the channel client to make this easier. Then measure time taken to get response. 
+import {
+  ChannelClient,
+} from '@statechannels/channel-client';
+const {ethers} = require('ethers');
+
+const channelClient = new ChannelClient(window.channelProvider);
+
+window.createChannel = async function() {
+
+  const participants = [
+      ethers.Wallet.createRandom().address,
+      ethers.Wallet.createRandom().address,
+    ];
+
+  const allocations = [];
+  const appDefinition = '0x0';
+  // TODO format this properly
+  await channelClient.createChannel(participants,allocations,appDefinition,appData,fundingStrategy);
+
+  // TODO measure time taken to get response. 
   document.getElementById('create-channel-time').innerText = '200ms'; // TODO echo correct delay
+}
+
+window.signMessage = async function() {
+  const wallet = ethers.Wallet.createRandom();
+  const before = Date.now();
+  wallet.signMessage('test message');
+  const after = Date.now();
+  const time = after-before;
+  // TODO measure time taken to get response. 
+  document.getElementById('sign-message-time').innerText = time.toFixed(2) + 'ms';
 }
