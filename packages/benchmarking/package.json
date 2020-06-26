@@ -6,7 +6,9 @@
   "author": "George Knee",
   "license": "MIT",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "webpack": "4.41.5"
+  },
   "devDependencies": {
     "@statechannels/channel-provider": "*",
     "@statechannels/nitro-protocol": "^0.1.1",
