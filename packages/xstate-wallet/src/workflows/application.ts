@@ -132,6 +132,8 @@ const generateConfig = (
   initial: 'joiningChannel',
   on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
   states: {
+    // go into this state when the workflow is created
+    // due to a joinChannel
     joiningChannel: {
       initial: 'joining',
       states: {
@@ -142,8 +144,11 @@ const generateConfig = (
               {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
               {target: 'done', cond: guards.amCreator}
             ],
+            // when the app says it wants to join
             JOIN_CHANNEL: {
               target: 'settingDomain',
+              // looks like we respond straight away
+              // but later ask the user to join
               actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
           }

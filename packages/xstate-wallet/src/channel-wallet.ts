@@ -7,15 +7,16 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
-import {filter, take} from 'rxjs/operators';
+import {filter} from 'rxjs/operators';
 import {Message, isOpenChannel, OpenChannel} from './store/types';
 
-import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
+import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
-import {serializeChannelEntry} from './serde/app-messages/serialize';
+// import {serializeChannelEntry} from './serde/app-messages/serialize';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
+import {ChannelManager} from './channel-manager';
 
 export interface Workflow {
   id: string;
@@ -24,6 +25,7 @@ export interface Workflow {
 }
 export class ChannelWallet {
   public workflows: Workflow[];
+  public managers: Record<string, any> = {};
 
   constructor(
     private store: Store,
@@ -40,36 +42,39 @@ export class ChannelWallet {
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
     this.store.objectiveFeed.pipe(filter(isOpenChannel)).subscribe(async objective => {
-      const channelEntry = await this.store
-        .channelUpdatedFeed(objective.data.targetChannelId)
-        .pipe(take(1))
-        .toPromise();
+      const channelId = objective.data.targetChannelId;
+
+      if (this.managers[channelId]) {
+        throw Error(`Manager already exists for ${channelId}`);
+      }
+
+      this.managers[channelId] = new ChannelManager(channelId, store, messagingService);
 
       // TODO: Currently receiving a duplicate JOIN_CHANNEL event
-      if (this.isWorkflowIdInUse(this.calculateWorkflowId(objective))) {
-        logger.warn(
-          `There is already a workflow running with id ${this.calculateWorkflowId(
-            objective
-          )}, no new workflow will be spawned`
-        );
-      } else {
-        // Note that it's important to start the workflow first, before sending ChannelProposed.
-        // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
-        this.startWorkflow(
-          Application.workflow(this.store, this.messagingService, {
-            type: 'JOIN_CHANNEL',
-            fundingStrategy: objective.data.fundingStrategy,
-            channelId: objective.data.targetChannelId,
-            applicationDomain: 'TODO' // FIXME
-          }),
-          this.calculateWorkflowId(objective)
-        );
+      // if (this.isWorkflowIdInUse(this.calculateWorkflowId(objective))) {
+      //   logger.warn(
+      //     `There is already a workflow running with id ${this.calculateWorkflowId(
+      //       objective
+      //     )}, no new workflow will be spawned`
+      //   );
+      // } else {
+      //   // Note that it's important to start the workflow first, before sending ChannelProposed.
+      //   // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
+      //   this.startWorkflow(
+      //     Application.workflow(this.store, this.messagingService, {
+      //       type: 'JOIN_CHANNEL',
+      //       fundingStrategy: objective.data.fundingStrategy,
+      //       channelId: objective.data.targetChannelId,
+      //       applicationDomain: 'TODO' // FIXME
+      //     }),
+      //     this.calculateWorkflowId(objective)
+      //   );
 
-        this.messagingService.sendChannelNotification('ChannelProposed', {
-          ...serializeChannelEntry(channelEntry),
-          fundingStrategy: objective.data.fundingStrategy
-        });
-      }
+      //   this.messagingService.sendChannelNotification('ChannelProposed', {
+      //     ...serializeChannelEntry(channelEntry),
+      //     fundingStrategy: objective.data.fundingStrategy
+      //   });
+      // }
     });
 
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
@@ -98,26 +103,33 @@ export class ChannelWallet {
         return `${request.type}-${Guid.create().toString()}`;
     }
   }
-  private handleRequest(request: AppRequestEvent) {
+  private async handleRequest(request: AppRequestEvent) {
     const workflowId = this.calculateWorkflowId(request);
     switch (request.type) {
       case 'CREATE_CHANNEL': {
-        if (!this.isWorkflowIdInUse(workflowId)) {
-          this.startWorkflow(
-            Application.workflow(this.store, this.messagingService, request),
-            workflowId
-          );
-        } else {
-          // TODO: To allow RPS to keep working we just warn about duplicate events
-          // Eventually this could probably be an error
-          logger.warn(
-            `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
-          );
-        }
+        const manager = await ChannelManager.fromCreateRequest(
+          request,
+          this.store,
+          this.messagingService
+        );
+        this.managers[manager.channelId] = manager;
+
+        // if (!this.isWorkflowIdInUse(workflowId)) {
+        //   this.startWorkflow(
+        //     Application.workflow(this.store, this.messagingService, request),
+        //     workflowId
+        //   );
+        // } else {
+        //   // TODO: To allow RPS to keep working we just warn about duplicate events
+        //   // Eventually this could probably be an error
+        //   logger.warn(
+        //     `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
+        //   );
+        // }
         break;
       }
       case 'JOIN_CHANNEL':
-        this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
+        // this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
         break;
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(

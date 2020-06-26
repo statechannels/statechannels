@@ -34,6 +34,7 @@ import {BigNumber} from 'ethers';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 import {Store} from './store';
+import {filter} from 'rxjs/operators';
 
 type ChannelRequest =
   | ChallengeChannelRequest
@@ -58,6 +59,8 @@ export const isChannelProposed = (m: Response | Notification): m is ChannelPropo
 export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification | ErrorResponse>;
   readonly requestFeed: Observable<AppRequestEvent>;
+
+  channelRequestFeed(channelId: string): Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: DomainBudget): Promise<void>;
@@ -88,6 +91,11 @@ export class MessagingService implements MessagingServiceInterface {
 
   get requestFeed(): Observable<AppRequestEvent> {
     return fromEvent(this.eventEmitter, 'AppRequest');
+  }
+
+  public channelRequestFeed(channelId): Observable<AppRequestEvent> {
+    // only CreateChannel requests don't have a channelId
+    return this.requestFeed.pipe(filter(cs => 'channelId' in cs && cs.channelId === channelId));
   }
 
   public async sendResponse(id: number, result: Response['result']) {

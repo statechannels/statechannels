@@ -44,7 +44,11 @@ module.exports = {
         patterns: ['**/lib/**', '**/src/**']
       }
     ],
-    'arrow-body-style': 'error'
+    'arrow-body-style': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {varsIgnorePattern: '^_', argsIgnorePattern: '^_'}
+    ]
   },
 
   overrides: [

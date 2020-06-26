@@ -102,8 +102,8 @@ type Context = Typestate['context'];
 // request close / confirm close? done with an objective?
 
 // Off-chain state: setup -(preFS)-> funding -(postFS)-> running -> concluding -> concluded
-// Asset Holder state: noFunds / partiallyFundedByOthers / myDepositPending / partiallyFundedIncMe / fullyFunded
-// Adjudicator State: open / challenge / finalized / responsePending / challengePending
+// Asset Holder state(s): noFunds / depositPending / fundedX / outcomeRegistered / unknownOutcomeRegistered / fundsDisbursed
+// Adjudicator State: open / challenge / finalized / responsePending / challengePending / unknownOutcomeFinalized / unknownChallenge
 
 // Andrew: xstate gives you a way to visualize the logic: what you do and what you're listening for
 // the more logic that there is in the machine the easier it is to verify
@@ -111,11 +111,17 @@ type Context = Typestate['context'];
 // close requested [don't currently have this functionality]
 
 const channelStateToMachineState = (state: ChannelStoreEntry) => {
-  // conclusion proof + no funds => done
-  // conclusion proof + funds => withdrawing
+  // adjudicator state
+
+  // finalized on-chain
+
+  if (state.hasConclusionProof) {
+    // conclusion proof + no funds => done
+    // conclusion proof and challenge
+    // conclusion proof + funds => withdrawing
+  }
   // challenge exists & is mine => challenging # what about the unfunded case?
   // challenge exists & not mine => responding
-  //
   //
   // fully funded & postFS => running (my turn / not my turn)
   // fully funded & no postFS => funding
@@ -124,6 +130,61 @@ const channelStateToMachineState = (state: ChannelStoreEntry) => {
   // no preFS => opening
   //
 };
+
+// we have a state machine where events never transition state
+// there's just an action, and/or a wakeup call <- only needs to be one, as you just take the earliest
+// check state at the beginning, check state at end, if different, run again
+
+// how do we use these?
+
+// possible events <--- things that the app asks
+
+// From the api:
+// CREATE_CHANNEL
+// JOIN_CHANNEL
+// - adjudicator open, (=>) no outcome in asset holder
+
+// running = fully funded, have potsfs, chain empty
+
+// UPDATE_CHANNEL
+// if running and my turn: update store
+// if notFullyFunded - fail
+
+// PLAYER_REQUEST_CONCLUDE
+// if starting or running and my turn: start conclude
+// else fail
+
+// CLOSE_CHANNEL
+// WITHDRAW_FUNDS
+//
+// Internal to wallet:
+// USER_APPROVES_OPENING
+// USER_APPROVES_WITHDRAW
+
+// how to manage the UI?
+// I guess something should observe the state and decide whether to show it?
+
+// handle a CHECK_FOR_ACTION
+// - if challenge, respond (or mark dnr)
+
+// how to manage transactions -> put it all in the store
+// how to manage confirmation workflows? put in store?
+
+// on CHECK_FOR_ACTION
+
+// process an incoming message, update store, crank, [update store, crank, ...], send messages, update UI state
+// here 'CRANK' is basically the same as processing a message
+
+// how do we tell if the store changed? => we have to detect this anyway
+
+// controller - listens to 'channel updated' events and spins up channel managers(?)
+// channel manager has a process(channelId, event)
+
+// what happens if my crank fails? can it fail?
+// maybe more important is what happens if a user action fails?
+// are user actions managed 'off-workflow'?
+
+// challenge: get two channels to open.
 
 const channelUpdateToEvent = (previousChannelState: ChannelStoreEntry, event: ChannelUpdated) => {
   const channelState = event.storeEntry;

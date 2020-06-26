@@ -172,6 +172,18 @@ export class ChannelStoreEntry {
     return !!this._latestSupportedByMe;
   }
 
+  get turnNum() {
+    return this.latest.turnNum;
+  }
+
+  get numParticipants() {
+    return this.participants.length;
+  }
+
+  get inPreFundSetupStage() {
+    return this.turnNum.lt(this.numParticipants);
+  }
+
   private get _signedByMe() {
     return this.signedStates.filter(s => this.mySignature(s, s.signatures));
   }
