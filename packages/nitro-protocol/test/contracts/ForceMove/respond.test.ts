@@ -18,9 +18,9 @@ import {
   getPlaceHolderContractAddress,
   getTestProvider,
   setupContracts,
-  sign,
   writeGasConsumption,
 } from '../../test-helpers';
+import {sign} from '../../../src/signatures';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
