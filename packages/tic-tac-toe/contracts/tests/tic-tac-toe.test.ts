@@ -7,19 +7,12 @@ declare global {
 
 import {expectRevert, DeployedArtifact} from '@statechannels/devtools';
 import TicTacToeArtifact from '../../build/contracts/TicTacToe.json';
-import * as ethers from 'ethers';
-import {Contract} from 'ethers';
+import {ethers, Contract, utils} from 'ethers';
 import {bigNumberify, Interface} from 'ethers/utils';
 import dotEnvExtended from 'dotenv-extended';
 import {AddressZero} from 'ethers/constants';
 import {TransactionRequest} from 'ethers/providers';
-import {
-  Allocation,
-  encodeOutcome,
-  AssetOutcomeShortHand,
-  replaceAddressesAndBigNumberify,
-  randomExternalDestination
-} from '@statechannels/nitro-protocol';
+import {Allocation, encodeOutcome} from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
 
 window.ethers = ethers; // Needed because core/app-data uses global ethers
@@ -28,6 +21,55 @@ import {TTTData, PositionType, encodeTTTData} from '../../app/core/app-data';
 dotEnvExtended.load();
 
 jest.setTimeout(20000);
+
+export interface AssetOutcomeShortHand {
+  [destination: string]: utils.BigNumberish;
+}
+
+// E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+export interface OutcomeShortHand {
+  [assetHolder: string]: AssetOutcomeShortHand;
+}
+
+export interface AddressesLookup {
+  [shorthand: string]: string | undefined;
+}
+
+// Recursively replaces any key with the value of that key in the addresses object
+// BigNumberify all numbers
+export function replaceAddressesAndBigNumberify(
+  object: AssetOutcomeShortHand | OutcomeShortHand | string,
+  addresses: AddressesLookup
+): AssetOutcomeShortHand | OutcomeShortHand | string {
+  const newObject = {};
+  Object.keys(object).forEach(key => {
+    if (
+      typeof object === 'object' &&
+      typeof addresses === 'object' &&
+      typeof object[key] === 'object'
+    ) {
+      // Recurse
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
+    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    if (typeof object[key] === 'number') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      newObject[addresses[key]] = utils.bigNumberify(object[key]);
+    }
+  });
+  return newObject;
+}
+
+export const randomExternalDestination = (): string =>
+  '0x' +
+  ethers.Wallet.createRandom()
+    .address.slice(2, 42)
+    .padStart(64, '0')
+    .toLowerCase();
 
 const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
@@ -46,7 +88,7 @@ export function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
   artifact: DeployedArtifact,
   address: string
-): ethers.ethers.Contract {
+): ethers.Contract {
   const signer = provider.getSigner(0);
 
   const contract = new ethers.Contract(address, artifact.abi, signer);
