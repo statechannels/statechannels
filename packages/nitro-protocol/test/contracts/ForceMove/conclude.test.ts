@@ -20,8 +20,8 @@ import {
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
-  signStates,
 } from '../../test-helpers';
+import {signStates} from '../../../src';
 
 const provider = getTestProvider();
 let ForceMove: Contract;

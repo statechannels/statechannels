@@ -14,7 +14,7 @@ export const ContractArtifacts = {
   ConsensusAppArtifact,
 };
 
-export {randomChannelId, randomExternalDestination, signStates} from '../test/test-helpers';
+export {randomChannelId, randomExternalDestination} from '../test/test-helpers';
 
 export {
   getAssetTransferredEvent,
@@ -60,7 +60,7 @@ import {State} from './contract/state';
 export {hashState} from './contract/state';
 
 import {Signature} from 'ethers/utils';
-export {signState, getStateSignerAddress, signChallengeMessage} from './signatures';
+export {signState, getStateSignerAddress, signChallengeMessage, signStates} from './signatures';
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';

@@ -14,7 +14,7 @@ import {
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {SignedState} from '../../../src/index';
-import {signChallengeMessage, signState} from '../../../src/signatures';
+import {signChallengeMessage, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
   clearedChallengeHash,
@@ -23,7 +23,6 @@ import {
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
-  signStates,
   writeGasConsumption,
 } from '../../test-helpers';
 import {createForceMoveTransaction} from '../../../src/transactions';
