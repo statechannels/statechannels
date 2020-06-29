@@ -15,12 +15,8 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-import {
-  getPlaceHolderContractAddress,
-  getTestProvider,
-  setupContracts,
-  signStates,
-} from '../../test-helpers';
+import {getPlaceHolderContractAddress, getTestProvider, setupContracts} from '../../test-helpers';
+import {signStates} from '../../../src';
 
 const provider = getTestProvider();
 let ForceMove: Contract;

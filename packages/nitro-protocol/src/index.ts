@@ -68,7 +68,7 @@ import {State} from './contract/state';
 export {hashState} from './contract/state';
 
 import {Signature} from 'ethers/utils';
-export {signState, getStateSignerAddress, signChallengeMessage} from './signatures';
+export {signState, getStateSignerAddress, signChallengeMessage, signStates} from './signatures';
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';

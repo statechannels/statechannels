@@ -32,6 +32,22 @@ export function signState(state: State, privateKey: string): SignedState {
   return {state, signature};
 }
 
+export async function sign(wallet: Wallet, msgHash: string | Uint8Array) {
+  // MsgHash is a hex string
+  // Returns an object with v, r, and s properties.
+  return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
+}
+
+export async function signStates(
+  states: State[],
+  wallets: Wallet[],
+  whoSignedWhat: number[]
+): Promise<utils.Signature[]> {
+  const stateHashes = states.map(s => hashState(s));
+  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
+  return Promise.all(promises);
+}
+
 export function signChallengeMessage(
   signedStates: SignedState[],
   privateKey: string
