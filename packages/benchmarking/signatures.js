@@ -5,6 +5,25 @@ const {HashZero, AddressZero} = ethers.constants;
 
 const SAMPLES = 1000;
 const wallet = ethers.Wallet.createRandom();
+const state = {
+  isFinal: false,
+  channel: {
+    chainId: '0x0',
+    channelNonce: '0x0',
+    participants: [wallet.address]
+  },
+  outcome: [
+    {
+      assetHolderAddress: AddressZero,
+      allocationItems: []
+    }
+  ],
+  appDefinition: AddressZero,
+  appData: HashZero,
+  challengeDuration: 1,
+  turnNum: 1
+};
+
 const results = {};
 let times;
 times = [];
@@ -29,24 +48,6 @@ results['ethers.signMessage2'] = [...times];
 
 times = [];
 for (let i = 0; i < SAMPLES; i++) {
-  const state = {
-    isFinal: false,
-    channel: {
-      chainId: '0x0',
-      channelNonce: '0x0',
-      participants: [wallet.address]
-    },
-    outcome: [
-      {
-        assetHolderAddress: AddressZero,
-        allocationItems: []
-      }
-    ],
-    appDefinition: AddressZero,
-    appData: HashZero,
-    challengeDuration: 1,
-    turnNum: 1
-  };
   const before = process.hrtime()[1]; // in ns
   signState(state, wallet.privateKey);
   const after = process.hrtime()[1];
@@ -56,24 +57,6 @@ results['nitro.signState'] = [...times];
 
 times = [];
 for (let i = 0; i < SAMPLES; i++) {
-  const state = {
-    isFinal: false,
-    channel: {
-      chainId: '0x0',
-      channelNonce: '0x0',
-      participants: [wallet.address]
-    },
-    outcome: [
-      {
-        assetHolderAddress: AddressZero,
-        allocationItems: []
-      }
-    ],
-    appDefinition: AddressZero,
-    appData: HashZero,
-    challengeDuration: 1,
-    turnNum: 1
-  };
   const signedState = signState(state, wallet.privateKey);
   const before = process.hrtime()[1]; // in ns
   getStateSignerAddress(signedState, wallet.privateKey);
@@ -85,7 +68,6 @@ results['nitro.getStateSignerAddress'] = [...times];
 fs.writeFile('times.json', JSON.stringify(results), err => {
   if (err) throw err;
 });
-
 
 // var FileSaver = require('file-saver');
 // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
