@@ -1,21 +1,14 @@
 import {expectRevert} from '@statechannels/devtools';
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
-import * as ethers from 'ethers';
+import {ethers, utils} from 'ethers';
 import {defaultAbiCoder, bigNumberify, keccak256, Interface, BigNumberish} from 'ethers/utils';
 import dotEnvExtended from 'dotenv-extended';
 import path from 'path';
 import {AddressZero} from 'ethers/constants';
-import {
-  Allocation,
-  encodeOutcome,
-  AssetOutcomeShortHand,
-  replaceAddressesAndBigNumberify,
-  randomExternalDestination,
-} from '@statechannels/nitro-protocol';
+import {Allocation, encodeOutcome} from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
 import {RPSData, PositionType, encodeRPSData} from '../core/app-data';
 import {Weapon} from '../core/weapons';
-
 import loadJsonFile from 'load-json-file';
 
 import {randomHex} from '../utils/randomHex';
@@ -24,6 +17,55 @@ import fs from 'fs';
 dotEnvExtended.load();
 
 jest.setTimeout(20000);
+
+export interface AssetOutcomeShortHand {
+  [destination: string]: utils.BigNumberish;
+}
+
+// E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+export interface OutcomeShortHand {
+  [assetHolder: string]: AssetOutcomeShortHand;
+}
+
+export interface AddressesLookup {
+  [shorthand: string]: string | undefined;
+}
+
+// Recursively replaces any key with the value of that key in the addresses object
+// BigNumberify all numbers
+export function replaceAddressesAndBigNumberify(
+  object: AssetOutcomeShortHand | OutcomeShortHand | string,
+  addresses: AddressesLookup
+): AssetOutcomeShortHand | OutcomeShortHand | string {
+  const newObject = {};
+  Object.keys(object).forEach(key => {
+    if (
+      typeof object === 'object' &&
+      typeof addresses === 'object' &&
+      typeof object[key] === 'object'
+    ) {
+      // Recurse
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
+    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    if (typeof object[key] === 'number') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      newObject[addresses[key]] = utils.bigNumberify(object[key]);
+    }
+  });
+  return newObject;
+}
+
+export const randomExternalDestination = (): string =>
+  '0x' +
+  ethers.Wallet.createRandom()
+    .address.slice(2, 42)
+    .padStart(64, '0')
+    .toLowerCase();
 
 const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
@@ -98,7 +140,10 @@ describe('validTransition', () => {
       toBalances: AssetOutcomeShortHand;
       description: string;
     }) => {
-      fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses) as AssetOutcomeShortHand;
+      fromBalances = replaceAddressesAndBigNumberify(
+        fromBalances,
+        addresses
+      ) as AssetOutcomeShortHand;
       toBalances = replaceAddressesAndBigNumberify(toBalances, addresses) as AssetOutcomeShortHand;
 
       const fromAllocation: Allocation = [];
