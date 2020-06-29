@@ -384,7 +384,7 @@ jobs:
     working_directory: /home/circleci/project
     resource_class: large
     docker:
-      - image: circleci/node:10.16.3-browsers
+      - image: circleci/node:12.16.3-browsers
     steps:
       - setup_remote_docker
       - checkout

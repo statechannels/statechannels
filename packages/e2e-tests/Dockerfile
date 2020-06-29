@@ -1,4 +1,4 @@
-FROM node:10.16.3
+FROM node:12.16.3
 
 ARG BRANCH=master
 # this allows us to make an image with whatever branch we want
