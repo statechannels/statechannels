@@ -14,16 +14,8 @@ export const ContractArtifacts = {
   ConsensusAppArtifact,
 };
 
-export {
-  AssetOutcomeShortHand,
-  getTestProvider,
-  OutcomeShortHand,
-  randomChannelId,
-  randomExternalDestination,
-  replaceAddressesAndBigNumberify,
-  setupContracts,
-  signStates,
-} from '../test/test-helpers';
+export {randomChannelId, randomExternalDestination, signStates} from '../test/test-helpers';
+
 export {
   getAssetTransferredEvent,
   getDepositedEvent,
