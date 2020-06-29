@@ -2,8 +2,8 @@
 import {Contract, Wallet} from 'ethers';
 import {id} from 'ethers/utils';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {getTestProvider, setupContracts, sign} from '../../test-helpers';
-
+import {getTestProvider, setupContracts} from '../../test-helpers';
+import {sign} from '../../../src/signatures';
 const provider = getTestProvider();
 let ForceMove: Contract;
 
