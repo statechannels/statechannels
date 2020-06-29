@@ -52,7 +52,7 @@ The first rule prevents funds being escrowed against something other than a chan
 Because we are depositing ETH, we must remember to send the right amount of ETH with the transaction. Depositing ERC20 tokens will be covered in a future tutorial.
 
 ```typescript
-import {parseUnits} from 'ethers/utils';
+const {parseUnits} = ethers.utils;
 import {randomChannelId} from '@statechannels/nitro-protocol';
 
 // In lesson5.test.ts

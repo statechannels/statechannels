@@ -1,4 +1,5 @@
-import {bigNumberify} from 'ethers/utils';
+import {utils} from 'ethers';
+const {bigNumberify} = utils;
 
 export function addHex(a: string, b: string): string {
   return bigNumberify(a)

@@ -1,8 +1,23 @@
-import {Wallet, utils} from 'ethers';
+import {ethers, Wallet, utils} from 'ethers';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
-import {SignedState} from '.';
+
+// This is the same as the ethers Signature type
+// But we redefine it here to prevent the below issue
+// for consumers of this package:
+// https://github.com/ethers-io/ethers.js/issues/349
+export interface Signature {
+  r: string;
+  s: string;
+  recoveryParam?: number;
+  v?: number;
+}
+
+export interface SignedState {
+  state: State;
+  signature: Signature;
+}
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);

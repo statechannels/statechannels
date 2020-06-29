@@ -15,8 +15,8 @@ A state channel can be thought of as an emergent property of data (which we call
 
 /* Import ethereum wallet utilities  */
 import {ethers} from 'ethers';
-import {bigNumberify} from 'ethers/utils';
-import {AddressZero, HashZero} from 'ethers/constants';
+const {bigNumberify} = ethers.utils;
+const {AddressZero, HashZero} = ethers.constants;
 
 /* Import statechannels wallet utilities  */
 import {Channel, Outcome, State} from '@statechannels/nitro-protocol';
@@ -286,7 +286,7 @@ const signedState: SignedState = signState(state, wallet.privateKey);
 it returns an object of the `SignedState` type:
 
 ```typescript
-import {Signature} from 'ethers/utils';
+import {Signature} from '@statehchannels/nitro-protocol;
 export interface SignedState {
   state: State;
   signature: Signature;
