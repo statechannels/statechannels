@@ -10,7 +10,7 @@
     "@openzeppelin/contracts": "3.0.1",
     "@statechannels/channel-client": "0.0.1",
     "@statechannels/channel-provider": "*",
-    "@statechannels/nitro-protocol": "0.1.1",
+    "@statechannels/nitro-protocol": "0.1.2",
     "ajv": "6.11.0",
     "aphrodite": "2.2.2",
     "autoprefixer": "9.7.4",
