@@ -56,27 +56,31 @@ export {
 } from './contract/outcome';
 export {channelDataToChannelStorageHash} from './contract/channel-storage';
 
-export {State, VariablePart, getVariablePart, getFixedPart, hashAppPart} from './contract/state';
+export {
+  State,
+  VariablePart,
+  getVariablePart,
+  getFixedPart,
+  hashAppPart,
+  hashState,
+} from './contract/state';
 export {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 export {
   createDepositTransaction as createETHDepositTransaction,
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
 
-// TODO: Move these to their own interface files once they've stabilized
-import {State} from './contract/state';
-export {hashState} from './contract/state';
-
-import {Signature} from 'ethers/utils';
-export {signState, getStateSignerAddress, signChallengeMessage, signStates} from './signatures';
+export {
+  signState,
+  getStateSignerAddress,
+  signChallengeMessage,
+  signStates,
+  SignedState,
+} from './signatures';
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
 export {Signatures, Transactions};
-export interface SignedState {
-  state: State;
-  signature: Signature;
-}
 
 // types
 export {Uint256, Bytes32} from './contract/types';

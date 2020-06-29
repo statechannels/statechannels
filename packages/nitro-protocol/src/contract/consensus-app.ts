@@ -1,9 +1,9 @@
-import {Contract, Signer} from 'ethers';
-import {Interface} from 'ethers/utils';
+import {Contract, Signer, utils} from 'ethers';
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
 import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
+const {Interface} = utils;
 
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);

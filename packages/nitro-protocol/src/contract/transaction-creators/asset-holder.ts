@@ -1,5 +1,4 @@
-import {TransactionRequest} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
+import {ethers} from 'ethers';
 import {
   Allocation,
   encodeAllocation,
@@ -10,10 +9,10 @@ import {
 } from '../outcome';
 
 export function createTransferAllTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: ethers.utils.Interface,
   channelId: string,
   allocation: Allocation
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   const data = assetHolderContractInterface.functions.transferAll.encode([
     channelId,
     encodeAllocation(allocation),
@@ -30,11 +29,11 @@ export function claimAllArgs(
 }
 
 export function createClaimAllTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: ethers.utils.Interface,
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   const data = assetHolderContractInterface.functions.claimAll.encode(
     claimAllArgs(channelId, guarantee, allocation)
   );
@@ -42,10 +41,10 @@ export function createClaimAllTransaction(
 }
 
 export function createSetOutcomeTransaction(
-  assetHolderContractInterface: Interface,
+  assetHolderContractInterface: ethers.utils.Interface,
   channelId: string,
   outcome: Outcome
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   const data = assetHolderContractInterface.functions.setOutcome.encode([
     channelId,
     hashOutcome(outcome),
