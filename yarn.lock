@@ -7010,6 +7010,18 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
+"@types/webpack@4.41.5":
+  version "4.41.5"
+  resolved "https://registry.npmjs.org/@types/webpack/-/webpack-4.41.5.tgz#70c1253b008c3e293497cff557fbacdca03c66f0"
+  integrity sha512-693JfV/83UZxpQY8vutDSwkDjNujy2327UrFqQciJWXh761B/aUIZIM5N05IRIZ17WwsG8VfUSE3edwXvkehiQ==
+  dependencies:
+    "@types/anymatch" "*"
+    "@types/node" "*"
+    "@types/tapable" "*"
+    "@types/uglify-js" "*"
+    "@types/webpack-sources" "*"
+    source-map "^0.6.0"
+
 "@types/webtorrent@0.107.0":
   version "0.107.0"
   resolved "https://registry.npmjs.org/@types/webtorrent/-/webtorrent-0.107.0.tgz#d5068cf95e092ed2ecad291a89bb51525044d4dc"
@@ -30899,10 +30911,10 @@ ts-json-schema-generator@0.60.0:
     json-stable-stringify "^1.0.1"
     typescript "~3.7.5"
 
-ts-loader@6.2.1:
-  version "6.2.1"
-  resolved "https://registry.npmjs.org/ts-loader/-/ts-loader-6.2.1.tgz#67939d5772e8a8c6bdaf6277ca023a4812da02ef"
-  integrity sha512-Dd9FekWuABGgjE1g0TlQJ+4dFUfYGbYcs52/HQObE0ZmUNjQlmLAS7xXsSzy23AMaMwipsx5sNHvoEpT2CZq1g==
+ts-loader@7.0.5:
+  version "7.0.5"
+  resolved "https://registry.npmjs.org/ts-loader/-/ts-loader-7.0.5.tgz#789338fb01cb5dc0a33c54e50558b34a73c9c4c5"
+  integrity sha512-zXypEIT6k3oTc+OZNx/cqElrsbBtYqDknf48OZos0NQ3RTt045fBIU8RRSu+suObBzYB355aIPGOe/3kj9h7Ig==
   dependencies:
     chalk "^2.3.0"
     enhanced-resolve "^4.0.0"
