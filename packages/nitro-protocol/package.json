@@ -75,6 +75,7 @@
   "lint-staged": {
     "{src,test}/**/*.{ts,tsx}": "eslint"
   },
+  "browser": "dist/nitro-protocol.min.js",
   "main": "lib/src/index.js",
   "private": false,
   "repository": "statechannels/monorepo.git",
