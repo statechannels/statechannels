@@ -80,9 +80,10 @@
   "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
-    "build": "run-s contract:compile build:typescript",
+    "build": "run-s contract:compile build:typescript build:webpack",
     "build:netlify": "yarn website:deploy",
     "build:typescript": "tsc -b .",
+    "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
     "docgen": "solidoc",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
