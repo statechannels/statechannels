@@ -1,4 +1,4 @@
-FROM circleci/node:10.16.3-browsers
+FROM circleci/node:12.16.3-browsers
 USER root
 ENV DISPLAY :99.0
 

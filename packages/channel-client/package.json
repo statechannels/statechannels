@@ -6,7 +6,8 @@
   "dependencies": {
     "@statechannels/channel-provider": "*",
     "@statechannels/client-api-schema": "0.0.1",
-    "ethers": "4.0.45"
+    "ethers": "4.0.45",
+    "eventemitter3": "4.0.0"
   },
   "devDependencies": {
     "@types/eslint": "6.1.7",

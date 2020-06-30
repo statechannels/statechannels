@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
@@ -29,7 +29,7 @@
     "eslint-plugin-import": "2.20.0",
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
-    "etherlime": "2.2.6",
+    "etherlime": "2.3.3",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.8.2",
     "ganache-core": "2.8.0",
@@ -53,7 +53,7 @@
   },
   "engines": {
     "yarn": "^1.17.0",
-    "node": "^10.16.3"
+    "node": "^12.16.3"
   },
   "files": [
     "contracts/*",
