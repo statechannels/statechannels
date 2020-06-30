@@ -22,7 +22,6 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
-  signStates,
 } from '../test/test-helpers';
 export {
   getAssetTransferredEvent,
