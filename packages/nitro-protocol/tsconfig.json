@@ -1,8 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-
   "compilerOptions": {
-    "composite": false,
     /* Basic Options */
     "lib": ["es5", "es6"],
     "outDir": "lib" /* Redirect output structure to the directory. */,
