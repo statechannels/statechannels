@@ -9,7 +9,7 @@ const config = {
   mode: 'production',
   output: {
     filename: 'nitro-protocol.min.js',
-    libraryTarget: 'window',
+    libraryTarget: 'commonjs',
     path: path.resolve(__dirname, 'dist'),
   },
   node: {
