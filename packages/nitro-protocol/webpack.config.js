@@ -5,7 +5,7 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.(ts|json)$/,
         use: 'ts-loader',
         include: [
           path.resolve(__dirname, 'src'),
