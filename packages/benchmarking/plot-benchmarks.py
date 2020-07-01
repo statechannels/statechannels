@@ -44,8 +44,16 @@ plt.xticks(np.arange(0.5, len(labels_node)+0.5), labels_node)
 plt.xticks(rotation=60)
 plt.xlim(0,3.5)
 ax.set_ylabel('ms')
+
+from matplotlib.patches import Patch
+legend_elements = [
+                   Patch(facecolor=c1, edgecolor=c1),
+                   Patch(facecolor=c2, edgecolor=c2)]
+ax.legend(legend_elements, ['node-js','browser'])
+
 fig.tight_layout()
 plt.savefig("./benchmark.svg")
 plt.savefig("./benchmark.png")
 
-# plt.show()
+
+
