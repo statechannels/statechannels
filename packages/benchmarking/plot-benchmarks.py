@@ -25,7 +25,7 @@ with open('./times-browser.json') as json_file:
 
 ax.set_ylim([-1, 20])
 
-node_boxplot = plt.boxplot(values_list_node,positions=[1.5,2.5,3.5,4.5],patch_artist=True)
+node_boxplot = plt.boxplot(values_list_node,positions=[0.5,1.5,2.5],patch_artist=True)
 c1 = "red"
 for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
     plt.setp(node_boxplot[item], color=c1)
@@ -33,16 +33,16 @@ plt.setp(node_boxplot["boxes"], facecolor=c1)
 plt.setp(node_boxplot["fliers"], markeredgecolor=c1)
 
 c2 = "purple"
-browser_boxplot = plt.boxplot(values_list_browser,positions=[1,2,3,4],patch_artist=True)
+browser_boxplot = plt.boxplot(values_list_browser,positions=[1,2,3],patch_artist=True)
 for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
     plt.setp(browser_boxplot[item], color=c2)
 plt.setp(browser_boxplot["boxes"], facecolor=c2)
 plt.setp(browser_boxplot["fliers"], markeredgecolor=c2)
 
 
-plt.xticks(np.arange(1, len(labels_node)+1), labels_node)
+plt.xticks(np.arange(0.5, len(labels_node)+0.5), labels_node)
 plt.xticks(rotation=60)
-plt.xlim(0.5,5)
+plt.xlim(0,3.5)
 ax.set_ylabel('ms')
 fig.tight_layout()
 plt.savefig("./benchmark.svg")

@@ -43,7 +43,6 @@ const signedState = signState(state, wallet.privateKey);
 async function runBenchmark() {
   const results = {
     'ethers.signMessage': [],
-    'ethers.signMessage2': [],
     'nitro.signState': [],
     'nitro.getStateSignerAddress': []
   };
