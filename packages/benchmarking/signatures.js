@@ -18,7 +18,7 @@ async function time(fn, args, thisArg) {
   return after - before;
 }
 
-const SAMPLES = 100;
+const SAMPLES = 1000;
 
 const state = {
   isFinal: false,
@@ -49,15 +49,6 @@ async function runBenchmark() {
   };
   for (let i = 0; i < SAMPLES; i++) {
     results['ethers.signMessage'].push(await time(wallet.signMessage, ['test message'], wallet));
-    results['ethers.signMessage2'].push(
-      await time(
-        wallet.signMessage,
-        [
-          'a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message '
-        ],
-        wallet
-      )
-    );
     results['nitro.signState'].push(await time(signState, [state, wallet.privateKey]));
     results['nitro.getStateSignerAddress'].push(
       await time(getStateSignerAddress, [signedState, wallet.privateKey])
