@@ -3,7 +3,7 @@ import {ChannelClient} from '@statechannels/channel-client';
 const {ethers} = require('ethers');
 import {signState, getStateSignerAddress} from '@statechannels/nitro-protocol';
 const {HashZero, AddressZero} = ethers.constants;
-const {runBenchmark} = require('./signatures');
+const {runBenchmark} = require('../signatures');
 
 const channelClient = new ChannelClient(window.channelProvider);
 
@@ -40,9 +40,6 @@ window.createChannel = async function() {
     appData,
     fundingStrategy
   );
-
-  // TODO measure time taken to get response.
-  document.getElementById('create-channel-time').innerText = '200ms'; // TODO echo correct delay
 };
 
 window.signMessage = async function() {
@@ -73,9 +70,15 @@ window.getStateSignerAddress = async function() {
 };
 
 window.runBenchmark = async function() {
-  const results = runBenchmark();
-  console.log('filesaver not implemented');
-  // var FileSaver = require('file-saver');
-  // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
-  // FileSaver.saveAs(blob, "hello world.txt");
+  console.log('running benchmark...');
+  const results = await runBenchmark();
+  console.log('ran benchmark');
+  const json = JSON.stringify(results);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.appendChild(document.createElement('a'));
+  a.download = 'times-browser.json';
+  a.href = url;
+  a.textContent = 'Download results-browser.json';
+  a.click();
 };

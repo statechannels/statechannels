@@ -9,7 +9,13 @@ fig, ax = plt.subplots()
 
 labels = []
 values_list = []
-with open('./times.json') as json_file:
+values_list_browser = []
+with open('./times-node.json') as json_file:
+    data = json.load(json_file)
+    for key in data:
+        labels.append(key)
+        values_list.append(map(lambda x: float(x)*1e-6, data[key]))
+with open('./times-browser.json') as json_file:
     data = json.load(json_file)
     for key in data:
         labels.append(key)

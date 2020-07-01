@@ -2,8 +2,24 @@ const {ethers} = require('ethers');
 const {signState, getStateSignerAddress} = require('@statechannels/nitro-protocol');
 const {HashZero, AddressZero} = ethers.constants;
 
-const SAMPLES = 1000;
 const wallet = ethers.Wallet.createRandom();
+
+async function time(fn, args, thisArg) {
+  let before, after;
+  if (typeof window === 'undefined') {
+    before = process.hrtime()[1]; // higher precision (in ns)
+    await fn.apply(thisArg, args);
+    after = process.hrtime()[1]; // higher precision (in ns)
+  } else {
+    before = performance.now() * 1e6; // in ns
+    await fn.apply(thisArg, args);
+    after = performance.now() * 1e6; // in ns
+  }
+  return after - before;
+}
+
+const SAMPLES = 100;
+
 const state = {
   isFinal: false,
   channel: {
@@ -22,49 +38,31 @@ const state = {
   challengeDuration: 1,
   turnNum: 1
 };
+const signedState = signState(state, wallet.privateKey);
 
-function runBenchmark() {
-  const results = {};
-  let times;
-  times = [];
+async function runBenchmark() {
+  const results = {
+    'ethers.signMessage': [],
+    'ethers.signMessage2': [],
+    'nitro.signState': [],
+    'nitro.getStateSignerAddress': []
+  };
   for (let i = 0; i < SAMPLES; i++) {
-    const before = process.hrtime()[1]; // in ns
-    wallet.signMessage('test message');
-    const after = process.hrtime()[1];
-    times.push(after - before);
-  }
-  results['ethers.signMessage'] = [...times];
-
-  times = [];
-  for (let i = 0; i < SAMPLES; i++) {
-    const before = process.hrtime()[1]; // in ns
-    wallet.signMessage(
-      'a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message '
+    results['ethers.signMessage'].push(await time(wallet.signMessage, ['test message'], wallet));
+    results['ethers.signMessage2'].push(
+      await time(
+        wallet.signMessage,
+        [
+          'a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message '
+        ],
+        wallet
+      )
     );
-    const after = process.hrtime()[1];
-    times.push(after - before);
+    results['nitro.signState'].push(await time(signState, [state, wallet.privateKey]));
+    results['nitro.getStateSignerAddress'].push(
+      await time(getStateSignerAddress, [signedState, wallet.privateKey])
+    );
   }
-  results['ethers.signMessage2'] = [...times];
-
-  times = [];
-  for (let i = 0; i < SAMPLES; i++) {
-    const before = process.hrtime()[1]; // in ns
-    signState(state, wallet.privateKey);
-    const after = process.hrtime()[1];
-    times.push(after - before);
-  }
-  results['nitro.signState'] = [...times];
-
-  times = [];
-  for (let i = 0; i < SAMPLES; i++) {
-    const signedState = signState(state, wallet.privateKey);
-    const before = process.hrtime()[1]; // in ns
-    getStateSignerAddress(signedState, wallet.privateKey);
-    const after = process.hrtime()[1];
-    times.push(after - before);
-  }
-  results['nitro.getStateSignerAddress'] = [...times];
-
   return results;
 }
 
