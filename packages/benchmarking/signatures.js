@@ -1,5 +1,4 @@
 const {ethers} = require('ethers');
-const fs = require('fs');
 const {signState, getStateSignerAddress} = require('@statechannels/nitro-protocol');
 const {HashZero, AddressZero} = ethers.constants;
 
@@ -24,51 +23,49 @@ const state = {
   turnNum: 1
 };
 
-const results = {};
-let times;
-times = [];
-for (let i = 0; i < SAMPLES; i++) {
-  const before = process.hrtime()[1]; // in ns
-  wallet.signMessage('test message');
-  const after = process.hrtime()[1];
-  times.push(after - before);
+function runBenchmark() {
+  const results = {};
+  let times;
+  times = [];
+  for (let i = 0; i < SAMPLES; i++) {
+    const before = process.hrtime()[1]; // in ns
+    wallet.signMessage('test message');
+    const after = process.hrtime()[1];
+    times.push(after - before);
+  }
+  results['ethers.signMessage'] = [...times];
+
+  times = [];
+  for (let i = 0; i < SAMPLES; i++) {
+    const before = process.hrtime()[1]; // in ns
+    wallet.signMessage(
+      'a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message '
+    );
+    const after = process.hrtime()[1];
+    times.push(after - before);
+  }
+  results['ethers.signMessage2'] = [...times];
+
+  times = [];
+  for (let i = 0; i < SAMPLES; i++) {
+    const before = process.hrtime()[1]; // in ns
+    signState(state, wallet.privateKey);
+    const after = process.hrtime()[1];
+    times.push(after - before);
+  }
+  results['nitro.signState'] = [...times];
+
+  times = [];
+  for (let i = 0; i < SAMPLES; i++) {
+    const signedState = signState(state, wallet.privateKey);
+    const before = process.hrtime()[1]; // in ns
+    getStateSignerAddress(signedState, wallet.privateKey);
+    const after = process.hrtime()[1];
+    times.push(after - before);
+  }
+  results['nitro.getStateSignerAddress'] = [...times];
+
+  return results;
 }
-results['ethers.signMessage'] = [...times];
 
-times = [];
-for (let i = 0; i < SAMPLES; i++) {
-  const before = process.hrtime()[1]; // in ns
-  wallet.signMessage(
-    'a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message a much longer message '
-  );
-  const after = process.hrtime()[1];
-  times.push(after - before);
-}
-results['ethers.signMessage2'] = [...times];
-
-times = [];
-for (let i = 0; i < SAMPLES; i++) {
-  const before = process.hrtime()[1]; // in ns
-  signState(state, wallet.privateKey);
-  const after = process.hrtime()[1];
-  times.push(after - before);
-}
-results['nitro.signState'] = [...times];
-
-times = [];
-for (let i = 0; i < SAMPLES; i++) {
-  const signedState = signState(state, wallet.privateKey);
-  const before = process.hrtime()[1]; // in ns
-  getStateSignerAddress(signedState, wallet.privateKey);
-  const after = process.hrtime()[1];
-  times.push(after - before);
-}
-results['nitro.getStateSignerAddress'] = [...times];
-
-fs.writeFile('times.json', JSON.stringify(results), err => {
-  if (err) throw err;
-});
-
-// var FileSaver = require('file-saver');
-// var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
-// FileSaver.saveAs(blob, "hello world.txt");
+module.exports = {runBenchmark};

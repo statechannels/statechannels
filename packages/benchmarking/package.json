@@ -19,6 +19,6 @@
   },
   "scripts": {
     "start": "yarn webpack && yarn http-server",
-    "node-benchmark": "node signatures.js && python plot-benchmarks.py"
+    "node-benchmark": "node node-benchmark.js && python plot-benchmarks.py"
   }
 }

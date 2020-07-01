@@ -3,6 +3,7 @@ import {ChannelClient} from '@statechannels/channel-client';
 const {ethers} = require('ethers');
 import {signState, getStateSignerAddress} from '@statechannels/nitro-protocol';
 const {HashZero, AddressZero} = ethers.constants;
+const {runBenchmark} = require('./signatures');
 
 const channelClient = new ChannelClient(window.channelProvider);
 
@@ -69,4 +70,12 @@ window.getStateSignerAddress = async function() {
   const after = Date.now();
   const time = after - before;
   document.getElementById('get-state-signer-address-time').innerText = time.toFixed(2) + 'ms';
+};
+
+window.runBenchmark = async function() {
+  const results = runBenchmark();
+  console.log('filesaver not implemented');
+  // var FileSaver = require('file-saver');
+  // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+  // FileSaver.saveAs(blob, "hello world.txt");
 };
