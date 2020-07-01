@@ -11,7 +11,7 @@ export async function persistentSeeder(): Promise<void> {
 
   await setupFakeWeb3(web3tTabA, -1);
 
-  await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'load'});
+  await web3tTabA.goto(WEB3TORRENT_URL + '/upload', {waitUntil: 'networkidle2'});
   await web3tTabA.bringToFront();
 
   const url = await uploadFile(web3tTabA, true, metamask, {filePath: './nitro-protocol.pdf'});
