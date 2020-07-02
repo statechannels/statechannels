@@ -32,7 +32,6 @@
     "etherlime": "2.3.3",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.8.2",
-    "ganache-core": "2.8.0",
     "jest": "25.1.0",
     "koa": "2.11.0",
     "koa-router": "7.4.0",
