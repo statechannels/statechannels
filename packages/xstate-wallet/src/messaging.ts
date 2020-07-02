@@ -41,9 +41,8 @@ import {
 } from '@statechannels/wallet-components/src/serde/app-messages/deserialize';
 
 import {BigNumber} from 'ethers';
-import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
-
 import {Store} from '@statechannels/wallet-components/src/store';
+import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 type ChannelRequest =
   | ChallengeChannelRequest

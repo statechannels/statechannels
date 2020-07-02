@@ -24,10 +24,10 @@ import {
 } from '@statechannels/wallet-components/src/utils';
 import {Store} from '@statechannels/wallet-components/src/store';
 
-import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
+import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
 const PROTOCOL = 'create-and-fund';
 

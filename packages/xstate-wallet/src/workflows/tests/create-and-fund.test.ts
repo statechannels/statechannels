@@ -1,8 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {Init, machine} from '../create-and-fund';
-
 import {Store} from '@statechannels/wallet-components/src/store';
 import {BigNumber} from 'ethers';
 
@@ -15,6 +13,8 @@ import {ChannelConstants, Outcome, State} from '@statechannels/wallet-components
 import {AddressZero, Zero} from '@ethersproject/constants';
 import {checkThat, isSimpleEthAllocation, add} from '@statechannels/wallet-components/src/utils';
 
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
 import {
   wallet1,
   wallet2,
@@ -29,11 +29,10 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 
 import {SimpleHub} from './simple-hub';
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {Init, machine} from '../create-and-fund';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);

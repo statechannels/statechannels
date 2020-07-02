@@ -2,8 +2,6 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {add, checkThat, isSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 
-import {Init, machine, Errors} from '../ledger-funding';
-
 import {SignedState} from '@statechannels/wallet-components/src/store';
 
 import _ from 'lodash';
@@ -16,11 +14,12 @@ import {ChannelConstants, Outcome, State} from '@statechannels/wallet-components
 import {AddressZero, Zero} from '@ethersproject/constants';
 
 import {FakeChain, Chain} from '@statechannels/wallet-components/src/chain';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {BigNumber} from 'ethers';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
-import {BigNumber} from 'ethers';
+import {Init, machine, Errors} from '../ledger-funding';
 
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;

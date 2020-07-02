@@ -1,8 +1,5 @@
 import {interpret} from 'xstate';
 
-import {Init, machine as createChannel} from '../create-and-fund';
-import {machine as concludeChannel} from '../conclude-channel';
-
 import {Store, SignedState} from '@statechannels/wallet-components/src/store';
 
 import {
@@ -13,15 +10,17 @@ import {
 import {ChannelConstants, Outcome, State} from '@statechannels/wallet-components/src/store/types';
 import {AddressZero, Zero} from '@ethersproject/constants';
 
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {BigNumber} from 'ethers';
 import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
 
 import {subscribeToMessages} from './message-service';
 
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
-import {BigNumber} from 'ethers';
+import {machine as concludeChannel} from '../conclude-channel';
+import {Init, machine as createChannel} from '../create-and-fund';
 
 jest.setTimeout(5000);
 

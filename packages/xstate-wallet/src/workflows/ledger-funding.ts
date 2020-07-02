@@ -1,7 +1,6 @@
 import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
 import {ChannelLock} from '@statechannels/wallet-components/src/store/store';
 
-import {SupportState} from '.';
 import {Store, Funding} from '@statechannels/wallet-components/src/store';
 import {
   allocateToTarget,
@@ -10,8 +9,9 @@ import {
   checkThat,
   add
 } from '@statechannels/wallet-components/src/utils';
-import {assignError} from '../utils/workflow-utils';
 import {AllocationItem} from '@statechannels/wallet-components/src/store/types';
+import {assignError} from '../utils/workflow-utils';
+import {SupportState} from '.';
 
 import {escalate} from '../actions';
 

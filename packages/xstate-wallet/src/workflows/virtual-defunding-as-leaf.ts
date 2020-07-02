@@ -5,9 +5,6 @@ import {
   simpleEthAllocation
 } from '@statechannels/wallet-components/src/utils';
 
-import {SupportState} from '.';
-
-import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
 
 import {
@@ -18,8 +15,10 @@ import {
 } from '@statechannels/wallet-components/src/store';
 import {nextState} from '@statechannels/wallet-components/src/store/state-utils';
 import _ from 'lodash';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {ChannelLock} from '@statechannels/wallet-components/src/store/store';
+import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {SupportState} from '.';
 import {MessagingServiceInterface} from '../messaging';
 
 export type Init = {targetChannelId: string};

@@ -3,15 +3,12 @@ import _ from 'lodash';
 import {BigNumber} from 'ethers';
 import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
 
-import * as Depositing from './depositing';
-import * as SupportState from './support-state';
 import {
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat
 } from '@statechannels/wallet-components/src/utils';
-import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '@statechannels/wallet-components/src/store';
 import {
   Outcome,
@@ -19,6 +16,9 @@ import {
   AllocationItem,
   Destination
 } from '@statechannels/wallet-components/src/store/types';
+import * as Depositing from './depositing';
+import * as SupportState from './support-state';
+import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
 
 const WORKFLOW = 'direct-funding';
 

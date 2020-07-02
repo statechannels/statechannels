@@ -1,10 +1,10 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
-import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '@statechannels/wallet-components/src/store';
 import {map, filter} from 'rxjs/operators';
 import {exists} from '@statechannels/wallet-components/src/utils';
 import {ChannelChainInfo} from '@statechannels/wallet-components/src/chain';
 import {BigNumber} from 'ethers';
+import {MachineFactory} from '../utils/workflow-utils';
 
 export type Init = {
   channelId: string;

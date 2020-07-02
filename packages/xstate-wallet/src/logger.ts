@@ -1,7 +1,7 @@
 import pino from 'pino';
 
-import {LOG_DESTINATION, ADD_LOGS, JEST_WORKER_ID, LOG_LEVEL} from './config';
 import _ from 'lodash';
+import {LOG_DESTINATION, ADD_LOGS, JEST_WORKER_ID, LOG_LEVEL} from './config';
 
 const IS_BROWSER_CONTEXT = JEST_WORKER_ID === undefined;
 

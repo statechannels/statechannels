@@ -10,9 +10,7 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {assignError} from '../utils/workflow-utils';
 import {Store, supportedStateFeed} from '@statechannels/wallet-components/src/store';
-import {SupportState, LedgerFunding} from '.';
 import {
   checkThat,
   getDataAndInvoke,
@@ -25,10 +23,12 @@ import {
 import {FundGuarantor, AllocationItem} from '@statechannels/wallet-components/src/store/types';
 
 import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 import {CHALLENGE_DURATION} from '../config';
 
 import {escalate} from '../actions';
-import {Zero} from '@ethersproject/constants';
+import {SupportState, LedgerFunding} from '.';
+import {assignError} from '../utils/workflow-utils';
 
 export const enum OutcomeIdx {
   A = 0,

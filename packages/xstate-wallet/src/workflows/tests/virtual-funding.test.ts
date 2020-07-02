@@ -1,8 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {SimpleHub} from './simple-hub';
-
 import {
   firstState,
   createSignatureEntry,
@@ -17,6 +15,9 @@ import {
   simpleEthGuarantee
 } from '@statechannels/wallet-components/src/utils';
 
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {BigNumber} from 'ethers';
 import {
   wallet1,
   wallet2,
@@ -30,10 +31,8 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
+import {SimpleHub} from './simple-hub';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
-import {BigNumber} from 'ethers';
 
 jest.setTimeout(20000);
 

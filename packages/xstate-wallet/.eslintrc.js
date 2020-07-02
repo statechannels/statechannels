@@ -42,7 +42,16 @@ module.exports = {
       'error',
       {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-components/**']}
     ],
-    'arrow-body-style': 'error'
+    'arrow-body-style': 'error',
+    'import/order': [
+      'error',
+      {
+        groups: [
+          ['external', 'builtin'],
+          ['internal', 'index', 'sibling', 'parent']
+        ]
+      }
+    ]
   },
 
   overrides: [

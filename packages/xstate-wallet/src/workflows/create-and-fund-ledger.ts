@@ -17,16 +17,16 @@ import {
   StateVariables
 } from '@statechannels/wallet-components/src/store/types';
 import {Store} from '@statechannels/wallet-components/src/store';
-import {SupportState} from '.';
-import {CHALLENGE_DURATION} from '../config';
 import {Zero} from '@ethersproject/constants';
-import * as Depositing from './depositing';
 import {
   getDataAndInvoke,
   checkThat,
   isSimpleEthAllocation,
   add
 } from '@statechannels/wallet-components/src/utils';
+import {SupportState} from '.';
+import {CHALLENGE_DURATION} from '../config';
+import * as Depositing from './depositing';
 
 type WorkflowActions = {
   assignChannelId: AssignAction<WorkflowContext, DoneInvokeEvent<string>>;

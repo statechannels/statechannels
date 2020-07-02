@@ -12,16 +12,13 @@ import {
   State
 } from 'xstate';
 
-import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-import {createMockGuard} from '../utils/workflow-utils';
 import {unreachable} from '@statechannels/wallet-components/src/utils';
 
 import {Store, Errors} from '@statechannels/wallet-components/src/store';
 import {StateVariables} from '@statechannels/wallet-components/src/store/types';
 import {ChannelStoreEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
 import {BigNumber} from 'ethers';
-import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
   PlayerStateUpdate,
@@ -33,9 +30,12 @@ import {
 } from '@statechannels/wallet-components/src/event-types';
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '@statechannels/wallet-components/src/serde/app-messages/serialize';
-import {CONCLUDE_TIMEOUT} from '../constants';
 import _ from 'lodash';
 import {Zero} from '@ethersproject/constants';
+import {CONCLUDE_TIMEOUT} from '../constants';
+import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
+import {createMockGuard} from '../utils/workflow-utils';
+import {MessagingServiceInterface} from '../messaging';
 
 export interface WorkflowContext {
   applicationDomain: string;

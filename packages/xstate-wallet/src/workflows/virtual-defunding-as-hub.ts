@@ -1,7 +1,4 @@
 const PROTOCOL = 'virtual-defunding-as-hub';
-import {SupportState} from '.';
-import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
-import {OutcomeIdx} from './virtual-funding-as-leaf';
 import {
   checkThat,
   getDataAndInvoke,
@@ -15,6 +12,9 @@ import {map, filter, tap, first} from 'rxjs/operators';
 import {ChannelStoreEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
 import _ from 'lodash';
 import {AllocationItem} from '@statechannels/wallet-components/src/store/types';
+import {OutcomeIdx} from './virtual-funding-as-leaf';
+import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
+import {SupportState} from '.';
 
 export type Init = {jointChannelId: string};
 

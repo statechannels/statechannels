@@ -10,8 +10,8 @@ import {
   ServiceConfig,
   assign
 } from 'xstate';
-import {MessagingServiceInterface} from '../messaging';
 import {Store} from '@statechannels/wallet-components/src/store';
+import {MessagingServiceInterface} from '../messaging';
 import {GIT_VERSION} from '../config';
 
 interface UserApproves {

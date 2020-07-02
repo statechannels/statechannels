@@ -9,9 +9,7 @@ import {
   AssignAction,
   Interpreter
 } from 'xstate';
-import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 import {getDataAndInvoke} from '@statechannels/wallet-components/src/utils';
-import {SupportState} from '.';
 import {Store, DomainBudget} from '@statechannels/wallet-components/src/store';
 import {outcomesEqual} from '@statechannels/wallet-components/src/store/state-utils';
 import {
@@ -19,10 +17,12 @@ import {
   Objective,
   CloseLedger
 } from '@statechannels/wallet-components/src/store/types';
-import {MessagingServiceInterface} from '../messaging';
 
 import {ChannelChainInfo} from '@statechannels/wallet-components/src/chain';
 import {map, filter} from 'rxjs/operators';
+import {MessagingServiceInterface} from '../messaging';
+import {SupportState} from '.';
+import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 
 interface Initial {
   requestId: number;
