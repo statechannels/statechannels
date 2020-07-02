@@ -28,7 +28,7 @@ contract CountingApp is ForceMoveApp {
     VariablePart memory b,
     uint256 turnNumB,
     uint256 nParticipants
-  ) public pure returns (bool) {
+  ) public pure override returns (bool) {
     require(
       appData(b.appData).counter == appData(a.appData).counter + 1,
       'CountingApp: Counter must be incremented'

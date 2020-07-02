@@ -33,18 +33,17 @@ contract MyStateChannelApp is ForceMoveApp {
         VariablePart memory b,
         uint256 turnNumB,
         uint256 nParticipants
-    ) public pure returns (bool) {
+    ) override public pure returns (bool) {
 
         Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
         Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
-
-        require(assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),'outcomeA: AssetOutcomeType must be Allocation');
 
         /* The rest of your logic */
 
         return true;
     }
 }
+
 
 ```
 
