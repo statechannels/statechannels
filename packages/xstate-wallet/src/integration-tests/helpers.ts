@@ -1,8 +1,8 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers';
 import {ChannelWallet, logTransition} from '../channel-wallet';
-import {Participant, DBBackend} from '../store/types';
-import {Chain} from '../chain';
+import {Participant, DBBackend} from '@statechannels/wallet-components/src/store/types';
+import {Chain} from '@statechannels/wallet-components/src/chain';
 import {
   isNotification,
   PushMessageRequest,
@@ -17,15 +17,15 @@ import {interpret, Interpreter} from 'xstate';
 import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
-import {TestStore} from '../workflows/tests/store';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
 import {ADD_LOGS} from '../config';
-import {makeDestination} from '../utils';
+import {makeDestination} from '@statechannels/wallet-components/src/utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {logger} from '../logger';
 import {ETH_TOKEN} from '../constants';
-import {SignedState} from '../store';
-import {signState} from '../store/state-utils';
-import {SignatureEntry} from '../store/channel-store-entry';
+import {SignedState} from '@statechannels/wallet-components/src/store';
+import {signState} from '@statechannels/wallet-components/src/store/state-utils';
+import {SignatureEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
 import _ from 'lodash';
 
 const log = logger.info.bind(logger);

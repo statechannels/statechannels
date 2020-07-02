@@ -1,8 +1,8 @@
-import {ChannelStoreEntry} from '../../store/channel-store-entry';
-import {SignedState} from '../../store/types';
-import {hashState} from '../../store/state-utils';
+import {ChannelStoreEntry} from './store/channel-store-entry';
+import {SignedState} from './store/types';
+import {hashState} from './store/state-utils';
 import {Guid} from 'guid-typescript';
-import {Store, Funding} from '../../store';
+import {Store, Funding} from './store';
 import {Wallet} from 'ethers';
 
 export class TestStore extends Store {

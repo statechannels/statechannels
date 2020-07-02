@@ -10,7 +10,8 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '../store';
+import {assignError} from '../utils/workflow-utils';
+import {Store, supportedStateFeed} from '@statechannels/wallet-components/src/store';
 import {SupportState, LedgerFunding} from '.';
 import {
   checkThat,
@@ -18,11 +19,10 @@ import {
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination,
-  assignError
-} from '../utils';
+  makeDestination
+} from '@statechannels/wallet-components/src/utils';
 
-import {FundGuarantor, AllocationItem} from '../store/types';
+import {FundGuarantor, AllocationItem} from '@statechannels/wallet-components/src/store/types';
 
 import {BigNumber} from 'ethers';
 import {CHALLENGE_DURATION} from '../config';

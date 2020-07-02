@@ -2,13 +2,13 @@ import * as Sentry from '@sentry/browser';
 
 import {ChannelWallet} from './channel-wallet';
 import {MessagingService} from './messaging';
-import {ChainWatcher} from './chain';
-import {MemoryBackend} from './store/memory-backend';
-import {Store} from './store';
+import {ChainWatcher} from '@statechannels/wallet-components/src/chain';
+import {MemoryBackend} from '@statechannels/wallet-components/src/store/memory-backend';
+import {Store} from '@statechannels/wallet-components/src/store';
 
 import Url from 'url-parse';
 import {logger} from './logger';
-import {Backend} from './store/dexie-backend';
+import {Backend} from '@statechannels/wallet-components/src/store/dexie-backend';
 import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, GIT_VERSION} from './config';
 import ReactDOM from 'react-dom';
 import App from './ui/app';

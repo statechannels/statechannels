@@ -1,21 +1,25 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add, checkThat, isSimpleEthAllocation} from '../../utils';
+import {add, checkThat, isSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
-import {SignedState} from '../../store';
+import {SignedState} from '@statechannels/wallet-components/src/store';
 
 import _ from 'lodash';
-import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {ChannelConstants, Outcome, State} from '../../store/types';
+import {
+  firstState,
+  calculateChannelId,
+  createSignatureEntry
+} from '@statechannels/wallet-components/src/store/state-utils';
+import {ChannelConstants, Outcome, State} from '@statechannels/wallet-components/src/store/types';
 import {AddressZero, Zero} from '@ethersproject/constants';
 
-import {FakeChain, Chain} from '../../chain';
+import {FakeChain, Chain} from '@statechannels/wallet-components/src/chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {TestStore} from './store';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
 import {BigNumber} from 'ethers';
 
 jest.setTimeout(10000);

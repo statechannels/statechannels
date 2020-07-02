@@ -1,4 +1,4 @@
-import {ChainWatcher, FakeChain} from '../chain';
+import {ChainWatcher, FakeChain} from '@statechannels/wallet-components/src/chain';
 import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {
@@ -8,12 +8,12 @@ import {
   TRIVIAL_APP_ADDRESS
 } from '../config';
 import {first} from 'rxjs/operators';
-import {Store, SignedState, State} from '../store';
+import {Store, SignedState, State} from '@statechannels/wallet-components/src/store';
 import {parseUnits} from '@ethersproject/units';
 import {JsonRpcProvider} from '@ethersproject/providers';
-import {simpleEthAllocation} from '../utils';
+import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 import {Player} from '../integration-tests/helpers';
-import {createSignatureEntry} from '../store/state-utils';
+import {createSignatureEntry} from '@statechannels/wallet-components/src/store/state-utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {Zero} from '@ethersproject/constants';
 

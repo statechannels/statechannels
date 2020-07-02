@@ -1,12 +1,12 @@
-import {FakeChain} from '../chain';
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
-import {CHALLENGE_DURATION} from '../config';
-import {simpleEthAllocation} from '../utils';
+import {CHALLENGE_DURATION} from '@statechannels/wallet-components/src/config';
+import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 import {BigNumber} from 'ethers';
-import {isCloseLedger, CloseLedger} from '../store/types';
+import {isCloseLedger, CloseLedger} from '@statechannels/wallet-components/src/store/types';
 import waitForExpect from 'wait-for-expect';
 import {TEST_APP_DOMAIN, budget} from '../workflows/tests/data';
 jest.setTimeout(30000);

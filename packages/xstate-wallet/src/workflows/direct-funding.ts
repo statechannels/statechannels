@@ -6,15 +6,19 @@ import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {
-  getDataAndInvoke2,
-  MachineFactory,
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat
-} from '../utils';
-import {Store} from '../store';
-import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
+} from '@statechannels/wallet-components/src/utils';
+import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
+import {Store} from '@statechannels/wallet-components/src/store';
+import {
+  Outcome,
+  SimpleAllocation,
+  AllocationItem,
+  Destination
+} from '@statechannels/wallet-components/src/store/types';
 
 const WORKFLOW = 'direct-funding';
 

@@ -3,9 +3,9 @@ import {
   StateValue as AppStateValue
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
-import {DomainBudget} from '../store/types';
+import {DomainBudget} from '@statechannels/wallet-components/src/store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {unreachable} from '../utils';
+import {unreachable} from '@statechannels/wallet-components/src/utils';
 import {Interpreter} from 'xstate';
 import {BigNumber} from 'ethers';
 

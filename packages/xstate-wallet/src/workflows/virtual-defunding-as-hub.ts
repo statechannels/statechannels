@@ -2,14 +2,19 @@ const PROTOCOL = 'virtual-defunding-as-hub';
 import {SupportState} from '.';
 import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
 import {OutcomeIdx} from './virtual-funding-as-leaf';
-import {checkThat, getDataAndInvoke, isSimpleEthAllocation, add} from '../utils';
+import {
+  checkThat,
+  getDataAndInvoke,
+  isSimpleEthAllocation,
+  add
+} from '@statechannels/wallet-components/src/utils';
 
-import {isGuarantees, isIndirectFunding, Store} from '../store';
+import {isGuarantees, isIndirectFunding, Store} from '@statechannels/wallet-components/src/store';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 import {map, filter, tap, first} from 'rxjs/operators';
-import {ChannelStoreEntry} from '../store/channel-store-entry';
+import {ChannelStoreEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
 import _ from 'lodash';
-import {AllocationItem} from '../store/types';
+import {AllocationItem} from '@statechannels/wallet-components/src/store/types';
 
 export type Init = {jointChannelId: string};
 

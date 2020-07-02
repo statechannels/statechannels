@@ -40,9 +40,7 @@ module.exports = {
 
     'no-restricted-imports': [
       'error',
-      {
-        patterns: ['**/lib/**', '**/src/**']
-      }
+      {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-components/**']}
     ],
     'arrow-body-style': 'error'
   },

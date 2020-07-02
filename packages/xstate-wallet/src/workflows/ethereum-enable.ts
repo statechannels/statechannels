@@ -11,7 +11,7 @@ import {
   assign
 } from 'xstate';
 import {MessagingServiceInterface} from '../messaging';
-import {Store} from '../store';
+import {Store} from '@statechannels/wallet-components/src/store';
 import {GIT_VERSION} from '../config';
 
 interface UserApproves {

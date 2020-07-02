@@ -9,19 +9,19 @@ import {
   AssignAction,
   Interpreter
 } from 'xstate';
-import {
-  getDataAndInvoke,
-  CommonWorkflowActions,
-  commonWorkflowActions,
-  CommonActions
-} from '../utils';
+import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
+import {getDataAndInvoke} from '@statechannels/wallet-components/src/utils';
 import {SupportState} from '.';
-import {Store, DomainBudget} from '../store';
-import {outcomesEqual} from '../store/state-utils';
-import {Participant, Objective, CloseLedger} from '../store/types';
+import {Store, DomainBudget} from '@statechannels/wallet-components/src/store';
+import {outcomesEqual} from '@statechannels/wallet-components/src/store/state-utils';
+import {
+  Participant,
+  Objective,
+  CloseLedger
+} from '@statechannels/wallet-components/src/store/types';
 import {MessagingServiceInterface} from '../messaging';
 
-import {ChannelChainInfo} from '../chain';
+import {ChannelChainInfo} from '@statechannels/wallet-components/src/chain';
 import {map, filter} from 'rxjs/operators';
 
 interface Initial {

@@ -1,8 +1,11 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
 import {filter, map} from 'rxjs/operators';
-import {Store} from '../store';
-import {statesEqual, calculateChannelId} from '../store/state-utils';
-import {State} from '../store/types';
+import {Store} from '@statechannels/wallet-components/src/store';
+import {
+  statesEqual,
+  calculateChannelId
+} from '@statechannels/wallet-components/src/store/state-utils';
+import {State} from '@statechannels/wallet-components/src/store/types';
 const WORKFLOW = 'support-state';
 
 export type Init = {state: State; observer?: Actor<any, any>};

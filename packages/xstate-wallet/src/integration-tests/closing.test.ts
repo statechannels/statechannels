@@ -1,15 +1,15 @@
-import {FakeChain} from '../chain';
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 
 import waitForExpect from 'wait-for-expect';
-import {simpleEthAllocation} from '../utils';
-import {State, SignedState} from '../store/types';
-import {createSignatureEntry} from '../store/state-utils';
+import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {State, SignedState} from '@statechannels/wallet-components/src/store/types';
+import {createSignatureEntry} from '@statechannels/wallet-components/src/store/state-utils';
 import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
 import {AddressZero, Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 require('fake-indexeddb/auto');
-import {Backend} from '../store/dexie-backend';
+import {Backend} from '@statechannels/wallet-components/src/store/dexie-backend';
 import {BigNumber} from 'ethers';
 
 jest.setTimeout(30000);

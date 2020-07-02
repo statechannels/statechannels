@@ -1,15 +1,25 @@
-import {checkThat, getDataAndInvoke, isSimpleEthAllocation, simpleEthAllocation} from '../utils';
+import {
+  checkThat,
+  getDataAndInvoke,
+  isSimpleEthAllocation,
+  simpleEthAllocation
+} from '@statechannels/wallet-components/src/utils';
 
 import {SupportState} from '.';
 
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
 
-import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
-import {nextState} from '../store/state-utils';
+import {
+  Store,
+  isVirtualFunding,
+  isIndirectFunding,
+  isGuarantee
+} from '@statechannels/wallet-components/src/store';
+import {nextState} from '@statechannels/wallet-components/src/store/state-utils';
 import _ from 'lodash';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {ChannelLock} from '../store/store';
+import {ChannelLock} from '@statechannels/wallet-components/src/store/store';
 import {MessagingServiceInterface} from '../messaging';
 
 export type Init = {targetChannelId: string};

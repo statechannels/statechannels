@@ -6,9 +6,9 @@ import {
 } from './data';
 import {BigNumber} from 'ethers';
 
-import {ethBudget} from '../../utils/budget-utils';
-import {FakeChain} from '../../chain';
-import {TestStore} from './store';
+import {ethBudget} from '@statechannels/wallet-components/src/utils/budget-utils';
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
 import {SimpleHub} from './simple-hub';
 import {subscribeToMessages} from './message-service';
 

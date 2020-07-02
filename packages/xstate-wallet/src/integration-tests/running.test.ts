@@ -1,6 +1,6 @@
-import {FakeChain} from '../chain';
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
-import {simpleEthAllocation} from '../utils';
+import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 import {CHAIN_NETWORK_ID} from '../config';
 import {BigNumber, constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';

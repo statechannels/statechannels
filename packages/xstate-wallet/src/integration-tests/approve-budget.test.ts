@@ -1,8 +1,8 @@
 import {filter, map, first} from 'rxjs/operators';
-import {FakeChain} from '../chain';
+import {FakeChain} from '@statechannels/wallet-components/src/chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
-import {FundLedger} from '../store/types';
-import {assertSimpleEthAllocation} from '../utils';
+import {FundLedger} from '@statechannels/wallet-components/src/store/types';
+import {assertSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
 import {TEST_APP_DOMAIN} from '../workflows/tests/data';

@@ -1,4 +1,4 @@
-import {Store} from './store';
+import {Store} from '@statechannels/wallet-components/src/store';
 import {MessagingServiceInterface} from './messaging';
 
 import ReactDOM from 'react-dom';
@@ -8,12 +8,16 @@ import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, isOpenChannel, OpenChannel} from './store/types';
+import {
+  Message,
+  isOpenChannel,
+  OpenChannel
+} from '@statechannels/wallet-components/src/store/types';
 
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-import {AppRequestEvent} from './event-types';
-import {serializeChannelEntry} from './serde/app-messages/serialize';
+import {AppRequestEvent} from '@statechannels/wallet-components/src/event-types';
+import {serializeChannelEntry} from '@statechannels/wallet-components/src/serde/app-messages/serialize';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
 

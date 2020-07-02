@@ -10,13 +10,23 @@ import {
   ConditionPredicate,
   ActionTypes
 } from 'xstate';
-import {SimpleAllocation, Objective, Participant, StateVariables} from '../store/types';
-import {Store} from '../store';
+import {
+  SimpleAllocation,
+  Objective,
+  Participant,
+  StateVariables
+} from '@statechannels/wallet-components/src/store/types';
+import {Store} from '@statechannels/wallet-components/src/store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
 import {Zero} from '@ethersproject/constants';
 import * as Depositing from './depositing';
-import {getDataAndInvoke, checkThat, isSimpleEthAllocation, add} from '../utils';
+import {
+  getDataAndInvoke,
+  checkThat,
+  isSimpleEthAllocation,
+  add
+} from '@statechannels/wallet-components/src/utils';
 
 type WorkflowActions = {
   assignChannelId: AssignAction<WorkflowContext, DoneInvokeEvent<string>>;

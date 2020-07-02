@@ -3,10 +3,24 @@ import waitForExpect from 'wait-for-expect';
 
 import {SimpleHub} from './simple-hub';
 
-import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {Participant, Outcome, SignedState, ChannelConstants, DomainBudget} from '../../store/types';
+import {
+  calculateChannelId,
+  createSignatureEntry
+} from '@statechannels/wallet-components/src/store/state-utils';
+import {
+  Participant,
+  Outcome,
+  SignedState,
+  ChannelConstants,
+  DomainBudget
+} from '@statechannels/wallet-components/src/store/types';
 import {AddressZero, HashZero} from '@ethersproject/constants';
-import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
+import {
+  add,
+  simpleEthAllocation,
+  simpleEthGuarantee,
+  makeDestination
+} from '@statechannels/wallet-components/src/utils';
 
 import {
   wallet1,
@@ -18,7 +32,7 @@ import {
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
-import {TestStore} from './store';
+import {TestStore} from '@statechannels/wallet-components/src/test-store';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 import {BigNumber, BigNumberish} from 'ethers';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
