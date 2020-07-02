@@ -4,7 +4,7 @@
   "version": "0.0.2",
   "author": "Alex Gap <alex@magmo.com>",
   "dependencies": {
-    "@statechannels/devtools": "0.1.1",
+    "@statechannels/devtools": "0.1.2",
     "easy-table": "1.1.1",
     "ethers": "4.0.45",
     "path": "0.12.7",

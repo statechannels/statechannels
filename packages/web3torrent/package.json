@@ -20,7 +20,7 @@
     "@rimble/connection-banner": "1.2.3",
     "@sentry/browser": "5.15.5",
     "@statechannels/channel-client": "0.0.1",
-    "@statechannels/devtools": "0.1.1",
+    "@statechannels/devtools": "0.1.2",
     "@svgr/webpack": "4.3.2",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",

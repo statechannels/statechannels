@@ -8,7 +8,7 @@
     "@firebase/app": "0.5.2",
     "@firebase/database": "0.5.19",
     "@sentry/node": "5.15.5",
-    "@statechannels/nitro-protocol": "0.1.2",
+    "@statechannels/nitro-protocol": "0.1.3",
     "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "8.2.0",
@@ -22,7 +22,7 @@
     "rxjs": "6.5.5"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.1",
+    "@statechannels/devtools": "0.1.2",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
