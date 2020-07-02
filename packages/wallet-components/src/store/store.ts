@@ -82,7 +82,8 @@ export type ChannelLock = {
 };
 
 //FIXME
-const {track, identify} = {} as any;
+const track = _.noop;
+const identify = _.noop;
 
 export class Store {
   protected backend: DBBackend = new MemoryBackend();
