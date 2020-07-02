@@ -1,7 +1,7 @@
 import {filter, map, first} from 'rxjs/operators';
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
-import {FundLedger} from '@statechannels/wallet-components/src/store/types';
-import {assertSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {FakeChain} from '@statechannels/wallet-components/lib/src/chain';
+import {FundLedger} from '@statechannels/wallet-components/lib/src/store/types';
+import {assertSimpleEthAllocation} from '@statechannels/wallet-components/lib/src/utils';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
 import {BigNumber} from 'ethers';

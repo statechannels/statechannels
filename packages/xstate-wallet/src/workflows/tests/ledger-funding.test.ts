@@ -1,20 +1,28 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add, checkThat, isSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {
+  add,
+  checkThat,
+  isSimpleEthAllocation
+} from '@statechannels/wallet-components/lib/src/utils';
 
-import {SignedState} from '@statechannels/wallet-components/src/store';
+import {SignedState} from '@statechannels/wallet-components/lib/src/store';
 
 import _ from 'lodash';
 import {
   firstState,
   calculateChannelId,
   createSignatureEntry
-} from '@statechannels/wallet-components/src/store/state-utils';
-import {ChannelConstants, Outcome, State} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/state-utils';
+import {
+  ChannelConstants,
+  Outcome,
+  State
+} from '@statechannels/wallet-components/lib/src/store/types';
 import {AddressZero, Zero} from '@ethersproject/constants';
 
-import {FakeChain, Chain} from '@statechannels/wallet-components/src/chain';
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {FakeChain, Chain} from '@statechannels/wallet-components/lib/src/chain';
+import {TestStore} from '@statechannels/wallet-components/lib/src/test-store';
 import {BigNumber} from 'ethers';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';

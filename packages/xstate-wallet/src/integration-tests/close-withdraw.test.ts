@@ -1,11 +1,11 @@
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
+import {FakeChain} from '@statechannels/wallet-components/lib/src/chain';
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
-import {CHALLENGE_DURATION} from '@statechannels/wallet-components/src/config';
-import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {CHALLENGE_DURATION} from '@statechannels/wallet-components/lib/src/config';
+import {simpleEthAllocation} from '@statechannels/wallet-components/lib/src/utils';
 import {BigNumber} from 'ethers';
-import {isCloseLedger, CloseLedger} from '@statechannels/wallet-components/src/store/types';
+import {isCloseLedger, CloseLedger} from '@statechannels/wallet-components/lib/src/store/types';
 import waitForExpect from 'wait-for-expect';
 import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 import {TEST_APP_DOMAIN, budget} from '../workflows/tests/data';

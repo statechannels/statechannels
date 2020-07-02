@@ -7,7 +7,7 @@ import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
-import {DomainBudget} from '@statechannels/wallet-components/src/store';
+import {DomainBudget} from '@statechannels/wallet-components/lib/src/store';
 import {TARGET_NETWORK} from '../config';
 
 interface Props {

@@ -26,22 +26,26 @@ import {
   unreachable,
   isSimpleEthAllocation,
   makeDestination
-} from '@statechannels/wallet-components/src/utils';
-import {Message, DomainBudget, Participant} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/utils';
+import {
+  Message,
+  DomainBudget,
+  Participant
+} from '@statechannels/wallet-components/lib/src/store/types';
 import {
   serializeDomainBudget,
   serializeChannelEntry
-} from '@statechannels/wallet-components/src/serde/app-messages/serialize';
-import {deserializeMessage} from '@statechannels/wallet-components/src/serde/wire-format/deserialize';
-import {serializeMessage} from '@statechannels/wallet-components/src/serde/wire-format/serialize';
-import {AppRequestEvent} from '@statechannels/wallet-components/src/event-types';
+} from '@statechannels/wallet-components/lib/src/serde/app-messages/serialize';
+import {deserializeMessage} from '@statechannels/wallet-components/lib/src/serde/wire-format/deserialize';
+import {serializeMessage} from '@statechannels/wallet-components/lib/src/serde/wire-format/serialize';
+import {AppRequestEvent} from '@statechannels/wallet-components/lib/src/event-types';
 import {
   deserializeAllocations,
   deserializeBudgetRequest
-} from '@statechannels/wallet-components/src/serde/app-messages/deserialize';
+} from '@statechannels/wallet-components/lib/src/serde/app-messages/deserialize';
 
 import {BigNumber} from 'ethers';
-import {Store} from '@statechannels/wallet-components/src/store';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 type ChannelRequest =

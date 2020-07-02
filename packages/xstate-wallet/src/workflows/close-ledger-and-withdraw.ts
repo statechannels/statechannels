@@ -9,16 +9,16 @@ import {
   AssignAction,
   Interpreter
 } from 'xstate';
-import {getDataAndInvoke} from '@statechannels/wallet-components/src/utils';
-import {Store, DomainBudget} from '@statechannels/wallet-components/src/store';
-import {outcomesEqual} from '@statechannels/wallet-components/src/store/state-utils';
+import {getDataAndInvoke} from '@statechannels/wallet-components/lib/src/utils';
+import {Store, DomainBudget} from '@statechannels/wallet-components/lib/src/store';
+import {outcomesEqual} from '@statechannels/wallet-components/lib/src/store/state-utils';
 import {
   Participant,
   Objective,
   CloseLedger
-} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/types';
 
-import {ChannelChainInfo} from '@statechannels/wallet-components/src/chain';
+import {ChannelChainInfo} from '@statechannels/wallet-components/lib/src/chain';
 import {map, filter} from 'rxjs/operators';
 import {MessagingServiceInterface} from '../messaging';
 import {SupportState} from '.';

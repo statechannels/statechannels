@@ -12,15 +12,15 @@ import {
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {Store, State} from '@statechannels/wallet-components/src/store';
-import {checkThat, isSimpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {Store, State} from '@statechannels/wallet-components/lib/src/store';
+import {checkThat, isSimpleEthAllocation} from '@statechannels/wallet-components/lib/src/utils';
 
 import {
   FundGuarantor,
   AllocationItem,
   isFundGuarantor,
   Participant
-} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/types';
 
 import {Observable} from 'rxjs';
 import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';

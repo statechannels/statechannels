@@ -13,7 +13,7 @@ import {
   isVirtuallyFund,
   StateVariables,
   Outcome
-} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/types';
 
 import {
   add,
@@ -21,8 +21,8 @@ import {
   simpleEthAllocation,
   checkThat,
   getDataAndInvoke
-} from '@statechannels/wallet-components/src/utils';
-import {Store} from '@statechannels/wallet-components/src/store';
+} from '@statechannels/wallet-components/lib/src/utils';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
 
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';

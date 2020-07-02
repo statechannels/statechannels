@@ -4,14 +4,18 @@ import {
   getDataAndInvoke,
   isSimpleEthAllocation,
   add
-} from '@statechannels/wallet-components/src/utils';
+} from '@statechannels/wallet-components/lib/src/utils';
 
-import {isGuarantees, isIndirectFunding, Store} from '@statechannels/wallet-components/src/store';
+import {
+  isGuarantees,
+  isIndirectFunding,
+  Store
+} from '@statechannels/wallet-components/lib/src/store';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 import {map, filter, tap, first} from 'rxjs/operators';
-import {ChannelStoreEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
+import {ChannelStoreEntry} from '@statechannels/wallet-components/lib/src/store/channel-store-entry';
 import _ from 'lodash';
-import {AllocationItem} from '@statechannels/wallet-components/src/store/types';
+import {AllocationItem} from '@statechannels/wallet-components/lib/src/store/types';
 import {OutcomeIdx} from './virtual-funding-as-leaf';
 import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
 import {SupportState} from '.';

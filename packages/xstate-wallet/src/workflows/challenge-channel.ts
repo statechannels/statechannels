@@ -12,8 +12,8 @@ import {
 import {map} from 'rxjs/operators';
 import {Zero} from '@ethersproject/constants';
 
-import {Store} from '@statechannels/wallet-components/src/store';
-import {ChannelChainInfo} from '@statechannels/wallet-components/src/chain';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
+import {ChannelChainInfo} from '@statechannels/wallet-components/lib/src/chain';
 import {BigNumber} from 'ethers';
 
 const {log} = actions;

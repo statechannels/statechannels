@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import './wallet.scss';
 import Dexie from 'dexie';
-import {Store} from '@statechannels/wallet-components/src/store';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
 import {track} from '../segment-analytics';

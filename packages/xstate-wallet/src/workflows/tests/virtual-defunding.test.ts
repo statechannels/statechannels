@@ -4,23 +4,23 @@ import waitForExpect from 'wait-for-expect';
 import {
   calculateChannelId,
   createSignatureEntry
-} from '@statechannels/wallet-components/src/store/state-utils';
+} from '@statechannels/wallet-components/lib/src/store/state-utils';
 import {
   Participant,
   Outcome,
   SignedState,
   ChannelConstants,
   DomainBudget
-} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/types';
 import {AddressZero, HashZero} from '@ethersproject/constants';
 import {
   add,
   simpleEthAllocation,
   simpleEthGuarantee,
   makeDestination
-} from '@statechannels/wallet-components/src/utils';
+} from '@statechannels/wallet-components/lib/src/utils';
 
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
+import {TestStore} from '@statechannels/wallet-components/lib/src/test-store';
 import {BigNumber, BigNumberish} from 'ethers';
 import {
   wallet1,

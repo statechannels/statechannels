@@ -8,14 +8,14 @@ import {
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat
-} from '@statechannels/wallet-components/src/utils';
-import {Store} from '@statechannels/wallet-components/src/store';
+} from '@statechannels/wallet-components/lib/src/utils';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
 import {
   Outcome,
   SimpleAllocation,
   AllocationItem,
   Destination
-} from '@statechannels/wallet-components/src/store/types';
+} from '@statechannels/wallet-components/lib/src/store/types';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';

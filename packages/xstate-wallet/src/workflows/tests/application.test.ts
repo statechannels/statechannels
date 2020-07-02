@@ -1,12 +1,15 @@
 import {interpret} from 'xstate';
 import {ethers, BigNumber} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {Store} from '@statechannels/wallet-components/src/store';
-import {StateVariables, isOpenChannel} from '@statechannels/wallet-components/src/store/types';
-import {ChannelStoreEntry} from '@statechannels/wallet-components/src/store/channel-store-entry';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
+import {StateVariables, isOpenChannel} from '@statechannels/wallet-components/lib/src/store/types';
+import {ChannelStoreEntry} from '@statechannels/wallet-components/lib/src/store/channel-store-entry';
 
-import {simpleEthAllocation, exists} from '@statechannels/wallet-components/src/utils';
-import {ChannelUpdated, JoinChannelEvent} from '@statechannels/wallet-components/src/event-types';
+import {simpleEthAllocation, exists} from '@statechannels/wallet-components/lib/src/utils';
+import {
+  ChannelUpdated,
+  JoinChannelEvent
+} from '@statechannels/wallet-components/lib/src/event-types';
 import {filter, first, map} from 'rxjs/operators';
 import {participants, wallet1} from './data';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';

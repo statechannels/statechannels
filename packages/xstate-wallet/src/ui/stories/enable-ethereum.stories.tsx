@@ -7,7 +7,7 @@ import React from 'react';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ethereumEnableWorkflow} from '../../workflows/ethereum-enable';
 import {EnableEthereum} from '../enable-ethereum-workflow';
-import {Store} from '@statechannels/wallet-components/src/store';
+import {Store} from '@statechannels/wallet-components/lib/src/store';
 import {WindowContext} from '../window-context';
 import {logger} from '../../logger';
 

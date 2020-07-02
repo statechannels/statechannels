@@ -4,11 +4,11 @@ import {useMachine} from '@xstate/react';
 
 import {machine} from './workflows/approve-budget-and-fund';
 import {ethers} from 'ethers';
-import {ChainWatcher} from '@statechannels/wallet-components/src/chain';
-import {MemoryBackend} from '@statechannels/wallet-components/src/store/memory-backend';
-import {TestStore} from '@statechannels/wallet-components/src/test-store';
-import {MessagingService} from '@statechannels/wallet-components/src/messaging';
-import {ethBudget} from '@statechannels/wallet-components/src/utils/budget-utils';
+import {ChainWatcher} from '@statechannels/wallet-components/lib/src/chain';
+import {MemoryBackend} from '@statechannels/wallet-components/lib/src/store/memory-backend';
+import {TestStore} from '@statechannels/wallet-components/lib/src/test-store';
+import {MessagingService} from '@statechannels/wallet-components/lib/src/messaging';
+import {ethBudget} from '@statechannels/wallet-components/lib/src/utils/budget-utils';
 
 const {privateKey} = ethers.Wallet.createRandom();
 const chain = new ChainWatcher();

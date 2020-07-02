@@ -1,5 +1,5 @@
-import {FakeChain} from '@statechannels/wallet-components/src/chain';
-import {simpleEthAllocation} from '@statechannels/wallet-components/src/utils';
+import {FakeChain} from '@statechannels/wallet-components/lib/src/chain';
+import {simpleEthAllocation} from '@statechannels/wallet-components/lib/src/utils';
 import {BigNumber, constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';
 import {CHAIN_NETWORK_ID} from '../config';
