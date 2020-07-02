@@ -227,7 +227,6 @@ export const enum ObjectStores {
 
 declare global {
   interface Window {
-    analytics: SegmentAnalytics.AnalyticsJS;
     channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
     ethereum: any;
   }

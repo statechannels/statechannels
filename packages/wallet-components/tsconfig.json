@@ -4,7 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": "src",
     "esModuleInterop": true,
-    "lib": ["es6", "ES2019"],
+    "lib": ["es6", "ES2019", "dom"],
     "module": "commonjs",
     "noImplicitAny": false,
     "noImplicitReturns": true,
