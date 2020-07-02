@@ -286,7 +286,7 @@ const signedState: SignedState = signState(state, wallet.privateKey);
 it returns an object of the `SignedState` type:
 
 ```typescript
-import {Signature} from '@statehchannels/nitro-protocol;
+import {Signature} from '@statechannels/nitro-protocol;
 export interface SignedState {
   state: State;
   signature: Signature;
