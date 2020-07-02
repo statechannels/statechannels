@@ -1,16 +1,20 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {Init, machine} from '../create-and-fund';
-
-import {Store} from '../../store';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {BigNumber} from 'ethers';
 
-import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {ChannelConstants, Outcome, State} from '../../store/types';
+import {
+  firstState,
+  calculateChannelId,
+  createSignatureEntry
+} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
 import {AddressZero, Zero} from '@ethersproject/constants';
-import {checkThat, isSimpleEthAllocation, add} from '../../utils';
+import {checkThat, isSimpleEthAllocation, add} from '@statechannels/wallet-core/lib/src/utils';
 
+import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {
   wallet1,
   wallet2,
@@ -25,11 +29,10 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 
-import {FakeChain} from '../../chain';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 
 import {SimpleHub} from './simple-hub';
-import {TestStore} from './store';
+import {Init, machine} from '../create-and-fund';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);

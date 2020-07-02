@@ -1,13 +1,27 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {SimpleHub} from './simple-hub';
-
-import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
-import {Participant, Outcome, SignedState, ChannelConstants, DomainBudget} from '../../store/types';
+import {
+  calculateChannelId,
+  createSignatureEntry
+} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {
+  Participant,
+  Outcome,
+  SignedState,
+  ChannelConstants,
+  DomainBudget
+} from '@statechannels/wallet-core/lib/src/store/types';
 import {AddressZero, HashZero} from '@ethersproject/constants';
-import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
+import {
+  add,
+  simpleEthAllocation,
+  simpleEthGuarantee,
+  makeDestination
+} from '@statechannels/wallet-core/lib/src/utils';
 
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
+import {BigNumber, BigNumberish} from 'ethers';
 import {
   wallet1,
   wallet2,
@@ -17,11 +31,10 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
-import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
-import {TestStore} from './store';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
-import {BigNumber, BigNumberish} from 'ethers';
+import {SimpleHub} from './simple-hub';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;

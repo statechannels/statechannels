@@ -10,25 +10,25 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '../store';
-import {SupportState, LedgerFunding} from '.';
+import {Store, supportedStateFeed} from '@statechannels/wallet-core/lib/src/store';
 import {
   checkThat,
   getDataAndInvoke,
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination,
-  assignError
-} from '../utils';
+  makeDestination
+} from '@statechannels/wallet-core/lib/src/utils';
 
-import {FundGuarantor, AllocationItem} from '../store/types';
+import {FundGuarantor, AllocationItem} from '@statechannels/wallet-core/lib/src/store/types';
 
 import {BigNumber} from 'ethers';
+import {Zero} from '@ethersproject/constants';
 import {CHALLENGE_DURATION} from '../config';
 
 import {escalate} from '../actions';
-import {Zero} from '@ethersproject/constants';
+import {SupportState, LedgerFunding} from '.';
+import {assignError} from '../utils/workflow-utils';
 
 export const enum OutcomeIdx {
   A = 0,

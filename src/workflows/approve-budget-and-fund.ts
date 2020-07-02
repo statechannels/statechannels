@@ -8,25 +8,24 @@ import {
   DoneInvokeEvent,
   Interpreter
 } from 'xstate';
-import {DomainBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
-
-import {Store, State as ChannelState} from '../store';
-import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {
-  checkThat,
-  exists,
-  simpleEthAllocation,
-  sendUserDeclinedResponse,
-  hideUI,
-  displayUI
-} from '../utils';
-import {MessagingServiceInterface} from '../messaging';
-import {serializeDomainBudget} from '../serde/app-messages/serialize';
+  DomainBudget,
+  Participant,
+  SimpleAllocation,
+  AssetBudget
+} from '@statechannels/wallet-core/lib/src/store/types';
+
+import {Store, State as ChannelState} from '@statechannels/wallet-core/lib/src/store';
+import {checkThat, exists, simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
-import {statesEqual} from '../store/state-utils';
-import {ChannelChainInfo} from '../chain';
+import {statesEqual} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
+import {MessagingServiceInterface} from '../messaging';
+import {sendUserDeclinedResponse, hideUI, displayUI} from '../utils/workflow-utils';
+import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: BigNumber;

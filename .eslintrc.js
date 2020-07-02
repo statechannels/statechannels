@@ -40,11 +40,18 @@ module.exports = {
 
     'no-restricted-imports': [
       'error',
-      {
-        patterns: ['**/lib/**', '**/src/**']
-      }
+      {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-core/**']}
     ],
-    'arrow-body-style': 'error'
+    'arrow-body-style': 'error',
+    'import/order': [
+      'error',
+      {
+        groups: [
+          ['external', 'builtin'],
+          ['internal', 'index', 'sibling', 'parent']
+        ]
+      }
+    ]
   },
 
   overrides: [

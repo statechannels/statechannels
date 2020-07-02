@@ -1,19 +1,19 @@
-import {Store} from './store';
-import {MessagingServiceInterface} from './messaging';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, isOpenChannel, OpenChannel} from './store/types';
+import {Message, isOpenChannel, OpenChannel} from '@statechannels/wallet-core/lib/src/store/types';
 
+import {AppRequestEvent} from '@statechannels/wallet-core/lib/src/event-types';
+import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-import {AppRequestEvent} from './event-types';
-import {serializeChannelEntry} from './serde/app-messages/serialize';
+import {Wallet as WalletUi} from './ui/wallet';
+import {MessagingServiceInterface} from './messaging';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
 

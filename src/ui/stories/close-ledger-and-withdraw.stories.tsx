@@ -7,13 +7,13 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
-import {Store, DomainBudget} from '../../store';
+import {Store, DomainBudget} from '@statechannels/wallet-core/lib/src/store';
 import React from 'react';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {Participant} from '../../store/types';
+import {Participant} from '@statechannels/wallet-core/lib/src/store/types';
 import {parseEther} from '@ethersproject/units';
-import {ethBudget} from '../../utils';
+import {ethBudget} from '@statechannels/wallet-core/lib/src/utils';
 import {logger} from '../../logger';
 
 const store = new Store();

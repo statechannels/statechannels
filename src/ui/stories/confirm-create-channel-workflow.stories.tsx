@@ -5,10 +5,10 @@ import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
 
-import {simpleEthAllocation} from '../../utils';
+import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
-import {Store} from '../../store';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {logger} from '../../logger';
 import {BigNumber} from 'ethers';
 

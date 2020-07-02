@@ -1,9 +1,9 @@
-import {FakeChain} from '../chain';
-import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
-import {simpleEthAllocation} from '../utils';
-import {CHAIN_NETWORK_ID} from '../config';
+import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import {BigNumber, constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';
+import {CHAIN_NETWORK_ID} from '../config';
+import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 jest.setTimeout(30000);
 
 const resolveOnError = (player: Player, errorCode: ErrorResponse['error']['code']) =>

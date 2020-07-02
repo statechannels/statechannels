@@ -9,6 +9,7 @@
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "preserveSymlinks": true,
 
     "noUnusedLocals": true,
     "outDir": "lib",

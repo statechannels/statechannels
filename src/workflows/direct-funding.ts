@@ -3,18 +3,22 @@ import _ from 'lodash';
 import {BigNumber} from 'ethers';
 import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
 
-import * as Depositing from './depositing';
-import * as SupportState from './support-state';
 import {
-  getDataAndInvoke2,
-  MachineFactory,
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat
-} from '../utils';
-import {Store} from '../store';
-import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
+} from '@statechannels/wallet-core/lib/src/utils';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
+import {
+  Outcome,
+  SimpleAllocation,
+  AllocationItem,
+  Destination
+} from '@statechannels/wallet-core/lib/src/store/types';
+import * as Depositing from './depositing';
+import * as SupportState from './support-state';
+import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
 
 const WORKFLOW = 'direct-funding';
 

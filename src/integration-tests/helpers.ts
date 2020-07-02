@@ -1,8 +1,6 @@
-import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers';
-import {ChannelWallet, logTransition} from '../channel-wallet';
-import {Participant, DBBackend} from '../store/types';
-import {Chain} from '../chain';
+import {Participant, DBBackend} from '@statechannels/wallet-core/lib/src/store/types';
+import {Chain} from '@statechannels/wallet-core/lib/src/chain';
 import {
   isNotification,
   PushMessageRequest,
@@ -14,19 +12,21 @@ import {
   CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
-import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
-import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
-import {TestStore} from '../workflows/tests/store';
-import {ADD_LOGS} from '../config';
-import {makeDestination} from '../utils';
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
+import {makeDestination} from '@statechannels/wallet-core/lib/src/utils';
 import {hexZeroPad} from '@ethersproject/bytes';
-import {logger} from '../logger';
-import {ETH_TOKEN} from '../constants';
-import {SignedState} from '../store';
-import {signState} from '../store/state-utils';
-import {SignatureEntry} from '../store/channel-store-entry';
+import {SignedState} from '@statechannels/wallet-core/lib/src/store';
+import {signState} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {SignatureEntry} from '@statechannels/wallet-core/lib/src/store/channel-store-entry';
 import _ from 'lodash';
+import {ETH_TOKEN} from '../constants';
+import {logger} from '../logger';
+import {ADD_LOGS} from '../config';
+import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
+import {CreateAndFundLedger, Application as App} from '../workflows';
+import {ChannelWallet, logTransition} from '../channel-wallet';
+import {MessagingServiceInterface, MessagingService} from '../messaging';
 
 const log = logger.info.bind(logger);
 

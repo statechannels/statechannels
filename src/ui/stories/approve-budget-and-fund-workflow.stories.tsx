@@ -6,10 +6,10 @@ import {renderComponentInFrontOfApp} from './helpers';
 
 import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
-import {DomainBudget, Participant} from '../../store/types';
+import {DomainBudget, Participant} from '@statechannels/wallet-core/lib/src/store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
-import {Store} from '../../store';
-import {ethBudget} from '../../utils';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
+import {ethBudget} from '@statechannels/wallet-core/lib/src/utils';
 import {parseEther} from '@ethersproject/units';
 import {logger} from '../../logger';
 import {BigNumber} from 'ethers';

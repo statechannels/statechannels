@@ -1,17 +1,17 @@
 import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
-import {ChannelLock} from '../store/store';
+import {ChannelLock} from '@statechannels/wallet-core/lib/src/store/store';
 
-import {SupportState} from '.';
-import {Store, Funding} from '../store';
+import {Store, Funding} from '@statechannels/wallet-core/lib/src/store';
 import {
   allocateToTarget,
   isSimpleEthAllocation,
   getDataAndInvoke,
   checkThat,
-  add,
-  assignError
-} from '../utils';
-import {AllocationItem} from '../store/types';
+  add
+} from '@statechannels/wallet-core/lib/src/utils';
+import {AllocationItem} from '@statechannels/wallet-core/lib/src/store/types';
+import {assignError} from '../utils/workflow-utils';
+import {SupportState} from '.';
 
 import {escalate} from '../actions';
 
