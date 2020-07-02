@@ -12,15 +12,13 @@ import {
   State
 } from 'xstate';
 
-import {MessagingServiceInterface} from '../messaging';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-import {createMockGuard, unreachable} from '../utils';
+import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
 
-import {Store, Errors} from '../store';
-import {StateVariables} from '../store/types';
-import {ChannelStoreEntry} from '../store/channel-store-entry';
+import {Store, Errors} from '@statechannels/wallet-core/lib/src/store';
+import {StateVariables} from '@statechannels/wallet-core/lib/src/store/types';
+import {ChannelStoreEntry} from '@statechannels/wallet-core/lib/src/store/channel-store-entry';
 import {BigNumber} from 'ethers';
-import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 import {
   PlayerStateUpdate,
@@ -29,12 +27,15 @@ import {
   CreateChannelEvent,
   PlayerRequestConclude,
   OpenEvent
-} from '../event-types';
+} from '@statechannels/wallet-core/lib/src/event-types';
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
-import {serializeChannelEntry} from '../serde/app-messages/serialize';
-import {CONCLUDE_TIMEOUT} from '../constants';
+import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {Zero} from '@ethersproject/constants';
+import {CONCLUDE_TIMEOUT} from '../constants';
+import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
+import {createMockGuard} from '../utils/workflow-utils';
+import {MessagingServiceInterface} from '../messaging';
 
 export interface WorkflowContext {
   applicationDomain: string;

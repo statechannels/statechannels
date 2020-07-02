@@ -1,13 +1,13 @@
+import {DomainBudget} from '@statechannels/wallet-core/lib/src/store/types';
+import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
+import {Interpreter} from 'xstate';
+import {BigNumber} from 'ethers';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {
   WorkflowState as AppWorkflowState,
   StateValue as AppStateValue
 } from '../workflows/application';
-import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
-import {DomainBudget} from '../store/types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {unreachable} from '../utils';
-import {Interpreter} from 'xstate';
-import {BigNumber} from 'ethers';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState

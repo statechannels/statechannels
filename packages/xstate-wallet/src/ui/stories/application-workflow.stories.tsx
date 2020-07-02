@@ -6,7 +6,7 @@ import {renderComponentInFrontOfApp} from './helpers';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import React from 'react';
 import {ApplicationWorkflow} from '../application-workflow';
-import {Store} from '../../store';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {Application} from '../../workflows';
 
 const store = new Store();

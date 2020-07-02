@@ -22,18 +22,27 @@ import {
 
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
-import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
-import {Message, DomainBudget, Participant} from './store/types';
-import {serializeDomainBudget, serializeChannelEntry} from './serde/app-messages/serialize';
-import {deserializeMessage} from './serde/wire-format/deserialize';
-import {serializeMessage} from './serde/wire-format/serialize';
-import {AppRequestEvent} from './event-types';
-import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
+import {
+  unreachable,
+  isSimpleEthAllocation,
+  makeDestination
+} from '@statechannels/wallet-core/lib/src/utils';
+import {Message, DomainBudget, Participant} from '@statechannels/wallet-core/lib/src/store/types';
+import {
+  serializeDomainBudget,
+  serializeChannelEntry
+} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+import {deserializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/deserialize';
+import {serializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/serialize';
+import {AppRequestEvent} from '@statechannels/wallet-core/lib/src/event-types';
+import {
+  deserializeAllocations,
+  deserializeBudgetRequest
+} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 
 import {BigNumber} from 'ethers';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
-
-import {Store} from './store';
 
 type ChannelRequest =
   | ChallengeChannelRequest

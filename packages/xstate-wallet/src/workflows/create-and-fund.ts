@@ -9,7 +9,11 @@ import {
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {isVirtuallyFund, StateVariables, Outcome} from '../store/types';
+import {
+  isVirtuallyFund,
+  StateVariables,
+  Outcome
+} from '@statechannels/wallet-core/lib/src/store/types';
 
 import {
   add,
@@ -17,13 +21,13 @@ import {
   simpleEthAllocation,
   checkThat,
   getDataAndInvoke
-} from '../utils';
-import {Store} from '../store';
+} from '@statechannels/wallet-core/lib/src/utils';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 
-import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
+import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
 const PROTOCOL = 'create-and-fund';
 

@@ -29,7 +29,6 @@ import {
 } from './types';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
-import {track, identify} from '../segment-analytics';
 
 interface DirectFunding {
   type: 'Direct';
@@ -81,6 +80,10 @@ export type ChannelLock = {
   channelId: string;
   release: () => void;
 };
+
+//FIXME
+const track = _.noop;
+const identify = _.noop;
 
 export class Store {
   protected backend: DBBackend = new MemoryBackend();

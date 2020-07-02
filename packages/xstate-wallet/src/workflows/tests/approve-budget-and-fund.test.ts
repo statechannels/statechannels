@@ -1,21 +1,21 @@
+import {BigNumber} from 'ethers';
+
+import {ethBudget} from '@statechannels/wallet-core/lib/src/utils/budget-utils';
+import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
+import {interpret} from 'xstate';
+import waitForExpect from 'wait-for-expect';
+import {SimpleHub} from './simple-hub';
+import {subscribeToMessages} from './message-service';
+
+import {machine as approveBudgetAndFund} from '../approve-budget-and-fund';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {
   wallet1 as playerWallet,
   wallet2 as hubWallet,
   first as player,
   second as hub
 } from './data';
-import {BigNumber} from 'ethers';
-
-import {ethBudget} from '../../utils/budget-utils';
-import {FakeChain} from '../../chain';
-import {TestStore} from './store';
-import {SimpleHub} from './simple-hub';
-import {subscribeToMessages} from './message-service';
-
-import {machine as approveBudgetAndFund} from '../approve-budget-and-fund';
-import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {interpret} from 'xstate';
-import waitForExpect from 'wait-for-expect';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 5000;

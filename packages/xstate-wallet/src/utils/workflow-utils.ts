@@ -10,7 +10,7 @@ import {
   ActionFunction,
   ActionFunctionMap
 } from 'xstate';
-import {Store} from '../store';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {MessagingServiceInterface} from '../messaging';
 
 // export interface WorkflowStateSchema<T extends {value:any; context:any}> {

@@ -9,20 +9,16 @@ import {
   AssignAction,
   Interpreter
 } from 'xstate';
-import {
-  getDataAndInvoke,
-  CommonWorkflowActions,
-  commonWorkflowActions,
-  CommonActions
-} from '../utils';
-import {SupportState} from '.';
-import {Store, DomainBudget} from '../store';
-import {outcomesEqual} from '../store/state-utils';
-import {Participant, Objective, CloseLedger} from '../store/types';
-import {MessagingServiceInterface} from '../messaging';
+import {getDataAndInvoke} from '@statechannels/wallet-core/lib/src/utils';
+import {Store, DomainBudget} from '@statechannels/wallet-core/lib/src/store';
+import {outcomesEqual} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {Participant, Objective, CloseLedger} from '@statechannels/wallet-core/lib/src/store/types';
 
-import {ChannelChainInfo} from '../chain';
+import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
 import {map, filter} from 'rxjs/operators';
+import {MessagingServiceInterface} from '../messaging';
+import {SupportState} from '.';
+import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 
 interface Initial {
   requestId: number;

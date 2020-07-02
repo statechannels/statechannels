@@ -1,0 +1,54 @@
+{
+  "name": "@statechannels/wallet-core",
+  "description": "State channel wallet components.",
+  "version": "0.0.1",
+  "author": "Alex Gap",
+  "dependencies": {
+    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/nitro-protocol": "0.1.2",
+    "@statechannels/wire-format": "0.0.1",
+    "async-lock": "1.2.2",
+    "dexie": "3.0.0",
+    "ethers": "5.0.0-beta.191",
+    "eventemitter3": "4.0.0",
+    "filter-async-rxjs-pipe": "0.1.5",
+    "guid-typescript": "1.0.9",
+    "jsonrpc-lite": "2.1.0",
+    "pino": "6.2.0",
+    "rxjs": "6.5.5",
+    "url-parse": "1.4.7"
+  },
+  "devDependencies": {
+    "@babel/core": "7.8.3",
+    "@statechannels/devtools": "0.1.1",
+    "@types/async-lock": "1.1.1",
+    "@types/babel__core": "7.1.7",
+    "@types/git-revision-webpack-plugin": "3.0.0",
+    "@types/html-webpack-plugin": "3.2.2",
+    "@types/pino": "6.0.0",
+    "@types/url-parse": "1.4.3",
+    "awesome-typescript-loader": "5.2.1",
+    "fake-indexeddb": "3.0.0",
+    "jest": "25.1.0",
+    "pino-pretty": "4.0.0",
+    "ts-jest": "25.0.0",
+    "typescript": "3.7.5",
+    "wait-for-expect": "3.0.2"
+  },
+  "engines": {
+    "node": "^12.16.3"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "prepare": "yarn build",
+    "build": "yarn tsc -b",
+    "build:ci": "yarn build",
+    "lint:check": "eslint . --ext .ts --cache",
+    "lint:write": "eslint . --ext .ts --fix",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "test": "jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn test --ci --runInBand"
+  }
+}

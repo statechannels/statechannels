@@ -1,6 +1,6 @@
 import {AddressZero} from '@ethersproject/constants';
 import {BigNumber} from 'ethers';
-import {Destination} from './store';
+import {Destination} from '@statechannels/wallet-core/lib/src/store';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {

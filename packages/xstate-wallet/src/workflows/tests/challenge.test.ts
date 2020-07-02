@@ -3,16 +3,16 @@ import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 
-import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../../config';
-import {FakeChain} from '../../chain';
-import {machine as challengeMachine} from '../challenge-channel';
-import {Player} from '../../integration-tests/helpers';
-import {signState} from '../../store/state-utils';
-import {simpleEthAllocation} from '../../utils/outcome';
-import {State} from '../../store/types';
+import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {signState} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils/outcome';
+import {State} from '@statechannels/wallet-core/lib/src/store/types';
 
-import {TestStore} from './store';
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {BigNumber} from 'ethers';
+import {Player} from '../../integration-tests/helpers';
+import {machine as challengeMachine} from '../challenge-channel';
+import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../../config';
 
 jest.setTimeout(50000);
 

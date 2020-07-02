@@ -1,21 +1,21 @@
-import {ChainWatcher, FakeChain} from '../chain';
+import {ChainWatcher, FakeChain} from '@statechannels/wallet-core/lib/src/chain';
 import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
+import {first} from 'rxjs/operators';
+import {Store, SignedState, State} from '@statechannels/wallet-core/lib/src/store';
+import {parseUnits} from '@ethersproject/units';
+import {JsonRpcProvider} from '@ethersproject/providers';
+import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {Zero} from '@ethersproject/constants';
+import {Player} from '../integration-tests/helpers';
 import {
   ETH_ASSET_HOLDER_ADDRESS,
   CHAIN_NETWORK_ID,
   CHALLENGE_DURATION,
   TRIVIAL_APP_ADDRESS
 } from '../config';
-import {first} from 'rxjs/operators';
-import {Store, SignedState, State} from '../store';
-import {parseUnits} from '@ethersproject/units';
-import {JsonRpcProvider} from '@ethersproject/providers';
-import {simpleEthAllocation} from '../utils';
-import {Player} from '../integration-tests/helpers';
-import {createSignatureEntry} from '../store/state-utils';
-import {hexZeroPad} from '@ethersproject/bytes';
-import {Zero} from '@ethersproject/constants';
 
 jest.setTimeout(10_000);
 
