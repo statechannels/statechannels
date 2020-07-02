@@ -3,18 +3,6 @@
   "description": "State channel wallet components.",
   "version": "0.0.1",
   "author": "Alex Gap",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.1.2",
@@ -26,7 +14,6 @@
     "eventemitter3": "4.0.0",
     "filter-async-rxjs-pipe": "0.1.5",
     "guid-typescript": "1.0.9",
-    "jest": "25.1.0",
     "jsonrpc-lite": "2.1.0",
     "pino": "6.2.0",
     "rxjs": "6.5.5",
