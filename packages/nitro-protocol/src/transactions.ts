@@ -4,9 +4,7 @@ import {utils} from 'ethers';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
-import {getStateSignerAddress} from './signatures';
-import {SignedState} from '.';
-import {Signature} from 'ethers/utils';
+import {getStateSignerAddress, SignedState, Signature} from './signatures';
 
 export async function getChannelStorage(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(

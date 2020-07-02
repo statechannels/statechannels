@@ -1,9 +1,6 @@
-// @ts-ignore
-import * as ethers from 'ethers';
-import {TransactionRequest} from 'ethers/providers';
-import {Signature} from 'ethers/utils';
+import {ethers} from 'ethers';
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
-import {signChallengeMessage} from '../../signatures';
+import {signChallengeMessage, Signature} from '../../signatures';
 import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
@@ -22,7 +19,7 @@ export function createForceMoveTransaction(
   signatures: Signature[], // in participant order: [sig-from-p0, sig-from-p1, ...]
   whoSignedWhat: number[],
   challengerPrivateKey: string
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   // Sanity checks on expected lengths
   if (states.length === 0) {
     throw new Error('No states provided');
@@ -77,7 +74,7 @@ export function respondArgs({
   return [challengerAddress, isFinalAB, fixedPart, variablePartAB, responseSignature];
 }
 
-export function createRespondTransaction(args: RespondArgs): TransactionRequest {
+export function createRespondTransaction(args: RespondArgs): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.functions.respond.encode(respondArgs(args));
   return {data};
 }
@@ -86,7 +83,7 @@ export function createCheckpointTransaction({
   states,
   signatures,
   whoSignedWhat,
-}: CheckpointData): TransactionRequest {
+}: CheckpointData): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.functions.checkpoint.encode(
     checkpointArgs({states, signatures, whoSignedWhat})
   );
@@ -107,7 +104,7 @@ export function createConcludeTransaction(
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[]
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.functions.conclude.encode(
     concludeArgs(states, signatures, whoSignedWhat)
   );

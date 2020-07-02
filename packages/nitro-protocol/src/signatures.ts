@@ -1,8 +1,23 @@
-import {Wallet, utils} from 'ethers';
+import {ethers, Wallet, utils} from 'ethers';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
-import {SignedState} from '.';
+
+// This is the same as the ethers Signature type
+// But we redefine it here to prevent the below issue
+// for consumers of this package:
+// https://github.com/ethers-io/ethers.js/issues/349
+export interface Signature {
+  r: string;
+  s: string;
+  recoveryParam?: number;
+  v?: number;
+}
+
+export interface SignedState {
+  state: State;
+  signature: Signature;
+}
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
@@ -30,6 +45,22 @@ export function signState(state: State, privateKey: string): SignedState {
 
   const signature = signData(hashedState, privateKey);
   return {state, signature};
+}
+
+export async function sign(wallet: Wallet, msgHash: string | Uint8Array) {
+  // MsgHash is a hex string
+  // Returns an object with v, r, and s properties.
+  return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
+}
+
+export async function signStates(
+  states: State[],
+  wallets: Wallet[],
+  whoSignedWhat: number[]
+): Promise<utils.Signature[]> {
+  const stateHashes = states.map(s => hashState(s));
+  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
+  return Promise.all(promises);
 }
 
 export function signChallengeMessage(

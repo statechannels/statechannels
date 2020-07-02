@@ -27,9 +27,9 @@ import {
   replaceAddressesAndBigNumberify,
   resetMultipleHoldings,
   setupContracts,
-  signStates,
   writeGasConsumption,
 } from '../../test-helpers';
+import {signStates} from '../../../src';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;

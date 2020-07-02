@@ -1,7 +1,5 @@
 import {utils} from 'ethers';
-
 import {parseEventResult} from '../ethers-utils';
-import {hexZeroPad} from 'ethers/utils';
 
 export interface DepositedEvent {
   destination: string;
@@ -50,5 +48,5 @@ export function convertAddressToBytes32(address: string): string {
   }
 
   // We pad to 66 = (32*2) + 2('0x')
-  return hexZeroPad(normalizedAddress, 32);
+  return utils.hexZeroPad(normalizedAddress, 32);
 }

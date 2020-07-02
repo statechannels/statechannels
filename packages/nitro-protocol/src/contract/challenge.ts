@@ -1,18 +1,13 @@
-import {
-  Transaction,
-  Interface,
-  bigNumberify,
-  keccak256,
-  defaultAbiCoder,
-  Signature,
-} from 'ethers/utils';
+import {ethers, utils} from 'ethers';
+const {Interface, bigNumberify, keccak256, defaultAbiCoder} = utils;
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
-import {Channel, SignedState} from '..';
+import {Channel} from '..';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
 import {Address, Bytes32, Uint256, Uint8} from './types';
+import {SignedState, Signature} from '../signatures';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(
@@ -95,7 +90,10 @@ export interface RespondTransactionArguments {
   variablePartAB: [VariablePart, VariablePart];
   sig: Signature;
 }
-export function getChallengeClearedEvent(tx: Transaction, eventResult): ChallengeClearedEvent {
+export function getChallengeClearedEvent(
+  tx: ethers.utils.Transaction,
+  eventResult
+): ChallengeClearedEvent {
   const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
 
   // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078

@@ -1,17 +1,16 @@
-import {TransactionRequest} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
+import {ethers} from 'ethers';
 
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
 // @ts-ignore
-const Erc20AssetHolderContractInterface = new Interface(Erc20AssetHolderArtifact.abi);
+const Erc20AssetHolderContractInterface = new ethers.utils.Interface(Erc20AssetHolderArtifact.abi);
 
 export function createTransferAllTransaction(
   channelId: string,
   allocation: Allocation
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   return assetHolderTransactionCreator.createTransferAllTransaction(
     Erc20AssetHolderContractInterface,
     channelId,
@@ -23,7 +22,7 @@ export function createClaimAllTransaction(
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   return assetHolderTransactionCreator.createClaimAllTransaction(
     Erc20AssetHolderContractInterface,
     channelId,
@@ -34,7 +33,7 @@ export function createClaimAllTransaction(
 export function createSetOutcomeTransaction(
   channelId: string,
   outcome: Outcome
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   return assetHolderTransactionCreator.createSetOutcomeTransaction(
     Erc20AssetHolderContractInterface,
     channelId,
@@ -45,7 +44,7 @@ export function createDepositTransaction(
   destination: string,
   expectedHeld: string,
   amount: string
-): TransactionRequest {
+): ethers.providers.TransactionRequest {
   const data = Erc20AssetHolderContractInterface.functions.deposit.encode([
     destination,
     expectedHeld,

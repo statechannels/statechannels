@@ -51,19 +51,18 @@ The first rule prevents funds being escrowed against something other than a chan
 Because we are depositing ETH, we must remember to send the right amount of ETH with the transaction. Depositing ERC20 tokens will be covered in a future tutorial.
 
 ```typescript
-import {parseUnits} from 'ethers/utils';
+import {ethers} from 'ethers';
 import {randomChannelId} from '@statechannels/nitro-protocol';
 
 // In lesson5.test.ts
 
 /*
-    Get an appropriate representation of 1 wei, and
-    use one of our helpers to quickly create a 
-    random channel id for our deposit destination.
-    WARNING: don't do this in the wild: you won't be able to recover these funds.
-*/
-const amount = parseUnits('1', 'wei');
-const destination = randomChannelId();
+      Get an appropriate representation of 1 wei, and
+      use ethers.HashZero = 0x000...0 as a dummy channelId.
+      WARNING: don't do this in the wild: you won't be able to recover these funds.
+  */
+const amount = ethers.utils.parseUnits('1', 'wei');
+const destination = ethers.constants.HashZero;
 
 /*
     Attempt to deposit 1 wei against the channel id we created.

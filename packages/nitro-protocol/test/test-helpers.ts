@@ -12,7 +12,6 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
-import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
 
 // Interfaces
@@ -52,12 +51,6 @@ export async function setupContracts(
 
 export function getPlaceHolderContractAddress(): string {
   return process.env.COUNTING_APP_ADDRESS;
-}
-
-export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
-  // MsgHash is a hex string
-  // Returns an object with v, r, and s properties.
-  return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
 }
 
 export const nonParticipant = ethers.Wallet.createRandom();
@@ -219,16 +212,6 @@ export function guaranteeToParams(guarantee: Guarantee) {
 
   const assetOutcomeHash = hashAssetOutcome(guarantee);
   return [guaranteeBytes, assetOutcomeHash];
-}
-
-export async function signStates(
-  states: State[],
-  wallets: Wallet[],
-  whoSignedWhat: number[]
-): Promise<utils.Signature[]> {
-  const stateHashes = states.map(s => hashState(s));
-  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
-  return Promise.all(promises);
 }
 
 // Recursively replaces any key with the value of that key in the addresses object
