@@ -40,7 +40,7 @@ module.exports = {
 
     'no-restricted-imports': [
       'error',
-      {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-components/**']}
+      {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-core/**']}
     ],
     'arrow-body-style': 'error',
     'import/order': [

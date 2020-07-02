@@ -13,18 +13,14 @@ import {
   Participant,
   SimpleAllocation,
   AssetBudget
-} from '@statechannels/wallet-components/lib/src/store/types';
+} from '@statechannels/wallet-core/lib/src/store/types';
 
-import {Store, State as ChannelState} from '@statechannels/wallet-components/lib/src/store';
-import {
-  checkThat,
-  exists,
-  simpleEthAllocation
-} from '@statechannels/wallet-components/lib/src/utils';
-import {serializeDomainBudget} from '@statechannels/wallet-components/lib/src/serde/app-messages/serialize';
+import {Store, State as ChannelState} from '@statechannels/wallet-core/lib/src/store';
+import {checkThat, exists, simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
-import {statesEqual} from '@statechannels/wallet-components/lib/src/store/state-utils';
-import {ChannelChainInfo} from '@statechannels/wallet-components/lib/src/chain';
+import {statesEqual} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
 import {MessagingServiceInterface} from '../messaging';

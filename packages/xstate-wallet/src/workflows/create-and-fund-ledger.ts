@@ -15,15 +15,15 @@ import {
   Objective,
   Participant,
   StateVariables
-} from '@statechannels/wallet-components/lib/src/store/types';
-import {Store} from '@statechannels/wallet-components/lib/src/store';
+} from '@statechannels/wallet-core/lib/src/store/types';
+import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {Zero} from '@ethersproject/constants';
 import {
   getDataAndInvoke,
   checkThat,
   isSimpleEthAllocation,
   add
-} from '@statechannels/wallet-components/lib/src/utils';
+} from '@statechannels/wallet-core/lib/src/utils';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
 import * as Depositing from './depositing';

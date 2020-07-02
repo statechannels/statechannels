@@ -1,10 +1,6 @@
-import {
-  Participant,
-  State,
-  DomainBudget
-} from '@statechannels/wallet-components/lib/src/store/types';
+import {Participant, State, DomainBudget} from '@statechannels/wallet-core/lib/src/store/types';
 import {ethers, BigNumberish, BigNumber} from 'ethers';
-import {simpleEthAllocation, makeDestination} from '@statechannels/wallet-components/lib/src/utils';
+import {simpleEthAllocation, makeDestination} from '@statechannels/wallet-core/lib/src/utils';
 import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 
 export const wallet1 = new ethers.Wallet(

@@ -1,5 +1,5 @@
 {
-  "name": "@statechannels/wallet-components",
+  "name": "@statechannels/wallet-core",
   "description": "State channel wallet components.",
   "version": "0.0.1",
   "author": "Alex Gap",

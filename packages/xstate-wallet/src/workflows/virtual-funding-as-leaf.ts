@@ -10,7 +10,7 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '@statechannels/wallet-components/lib/src/store';
+import {Store, supportedStateFeed} from '@statechannels/wallet-core/lib/src/store';
 import {
   checkThat,
   getDataAndInvoke,
@@ -18,9 +18,9 @@ import {
   isSimpleEthAllocation,
   simpleEthAllocation,
   makeDestination
-} from '@statechannels/wallet-components/lib/src/utils';
+} from '@statechannels/wallet-core/lib/src/utils';
 
-import {FundGuarantor, AllocationItem} from '@statechannels/wallet-components/lib/src/store/types';
+import {FundGuarantor, AllocationItem} from '@statechannels/wallet-core/lib/src/store/types';
 
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';

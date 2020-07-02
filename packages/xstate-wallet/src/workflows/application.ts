@@ -13,11 +13,11 @@ import {
 } from 'xstate';
 
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-import {unreachable} from '@statechannels/wallet-components/lib/src/utils';
+import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
 
-import {Store, Errors} from '@statechannels/wallet-components/lib/src/store';
-import {StateVariables} from '@statechannels/wallet-components/lib/src/store/types';
-import {ChannelStoreEntry} from '@statechannels/wallet-components/lib/src/store/channel-store-entry';
+import {Store, Errors} from '@statechannels/wallet-core/lib/src/store';
+import {StateVariables} from '@statechannels/wallet-core/lib/src/store/types';
+import {ChannelStoreEntry} from '@statechannels/wallet-core/lib/src/store/channel-store-entry';
 import {BigNumber} from 'ethers';
 
 import {
@@ -27,9 +27,9 @@ import {
   CreateChannelEvent,
   PlayerRequestConclude,
   OpenEvent
-} from '@statechannels/wallet-components/lib/src/event-types';
+} from '@statechannels/wallet-core/lib/src/event-types';
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
-import {serializeChannelEntry} from '@statechannels/wallet-components/lib/src/serde/app-messages/serialize';
+import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {Zero} from '@ethersproject/constants';
 import {CONCLUDE_TIMEOUT} from '../constants';

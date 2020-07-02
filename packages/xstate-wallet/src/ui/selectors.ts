@@ -1,5 +1,5 @@
-import {DomainBudget} from '@statechannels/wallet-components/lib/src/store/types';
-import {unreachable} from '@statechannels/wallet-components/lib/src/utils';
+import {DomainBudget} from '@statechannels/wallet-core/lib/src/store/types';
+import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
 import {Interpreter} from 'xstate';
 import {BigNumber} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';

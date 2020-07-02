@@ -3,12 +3,12 @@ import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 
-import {FakeChain} from '@statechannels/wallet-components/lib/src/chain';
-import {signState} from '@statechannels/wallet-components/lib/src/store/state-utils';
-import {simpleEthAllocation} from '@statechannels/wallet-components/lib/src/utils/outcome';
-import {State} from '@statechannels/wallet-components/lib/src/store/types';
+import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {signState} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils/outcome';
+import {State} from '@statechannels/wallet-core/lib/src/store/types';
 
-import {TestStore} from '@statechannels/wallet-components/lib/src/test-store';
+import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {BigNumber} from 'ethers';
 import {Player} from '../../integration-tests/helpers';
 import {machine as challengeMachine} from '../challenge-channel';
