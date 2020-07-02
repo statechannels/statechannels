@@ -4497,6 +4497,29 @@
   dependencies:
     type-detect "4.0.8"
 
+"@statechannels/devtools@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.npmjs.org/@statechannels/devtools/-/devtools-0.1.2.tgz#6be6d08c25d79d19d46dd28aa494b2311ec3d424"
+  integrity sha512-2Dj3t0vCzSaB+bR9r9ks2A7JExzyC3/uJETzxtDje01lWA6K5dq9aM6vgaMJrO1qz8FK2tFk/3beEzydhgLdJQ==
+  dependencies:
+    chai "4.2.0"
+    detect-port "1.3.0"
+    dotenv "8.2.0"
+    dotenv-expand "5.1.0"
+    etherlime "2.3.3"
+    ethers "4.0.45"
+    fs-extra "8.1.0"
+    ganache-cli "6.9.1"
+    jest "25.1.0"
+    lockfile "1.0.4"
+    pino "6.2.0"
+    pino-pretty "^4.0.0"
+    solc "0.6.1"
+    tcp-port-used "1.0.1"
+    tree-kill "1.2.1"
+    write-json-file "4.2.0"
+    yargs "15.1.0"
+
 "@storybook/addon-actions@5.3.9":
   version "5.3.9"
   resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"

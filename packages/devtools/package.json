@@ -15,6 +15,7 @@
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
     "etherlime": "2.3.3",
+    "etherlime-lib": "1.1.5",
     "ethers": "4.0.45",
     "fs-extra": "8.1.0",
     "ganache-cli": "6.9.1",
