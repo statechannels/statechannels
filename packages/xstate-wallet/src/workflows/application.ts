@@ -32,6 +32,7 @@ import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {Zero} from '@ethersproject/constants';
+import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 import {createMockGuard} from '../utils/workflow-utils';
@@ -336,7 +337,7 @@ export const workflow = (
           else if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
           else {
             message = {code: 500, message: 'Wallet error'};
-            console.error({error}, 'UpdateChannel call failed with error 500');
+            logger.error({error}, 'UpdateChannel call failed with error 500');
           }
 
           messagingService.sendError(event.requestId, message);
@@ -360,7 +361,7 @@ export const workflow = (
             message = {code: 301, message: 'Channel not found'};
           else {
             message = {code: 500, message: 'Wallet error'};
-            console.error({error}, 'CloseChannel call failed with error 500');
+            logger.error({error}, 'CloseChannel call failed with error 500');
           }
 
           messagingService.sendError(event.requestId, message);

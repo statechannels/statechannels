@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable jest/no-disabled-tests */
 import {Store} from '../store';
 import {State, Objective, DomainBudget, AssetBudget, ObjectStores} from '../types';
