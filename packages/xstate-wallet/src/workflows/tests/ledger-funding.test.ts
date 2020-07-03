@@ -11,7 +11,7 @@ import {
   createSignatureEntry
 } from '@statechannels/wallet-core/lib/src/store/state-utils';
 import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 
 import {FakeChain, Chain} from '@statechannels/wallet-core/lib/src/chain';
 import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
@@ -25,11 +25,11 @@ jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: Zero,
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants,
@@ -38,7 +38,7 @@ const targetChannel: ChannelConstants = {
 const targetChannelId = calculateChannelId(targetChannel);
 
 const ledgerChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(1),
+  channelNonce: 1,
   chainId,
   challengeDuration,
   participants,
@@ -221,9 +221,7 @@ describe('failure modes', () => {
     chainInfo.finalized && _chain.finalizeSync(ledgerChannelId);
     (aStore as any).chain = _chain;
 
-    aStore.createEntry(
-      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: BigNumber.from(1)})
-    );
+    aStore.createEntry(allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: 1}));
     aStore.chain.initialize();
 
     const aService = interpret(machine(aStore).withContext(context), {

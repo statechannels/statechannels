@@ -40,7 +40,6 @@ import {
   deserializeBudgetRequest
 } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 
-import {BigNumber} from 'ethers';
 import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
@@ -305,7 +304,7 @@ async function convertToInternalEvent(
         ...request.params,
         participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
-        challengeDuration: BigNumber.from(CHALLENGE_DURATION),
+        challengeDuration: CHALLENGE_DURATION,
         chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
         applicationDomain: domain

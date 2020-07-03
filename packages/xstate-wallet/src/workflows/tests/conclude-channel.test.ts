@@ -9,7 +9,7 @@ import {
   createSignatureEntry
 } from '@statechannels/wallet-core/lib/src/store/state-utils';
 import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {add} from '@statechannels/wallet-core/lib/src/utils';
 
 import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
@@ -39,11 +39,11 @@ import {MessagingService} from '../../messaging';
 jest.setTimeout(20000);
 
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: Zero,
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants,
@@ -53,13 +53,7 @@ const targetChannelId = calculateChannelId(targetChannel);
 
 const destinations = participants.map(p => p.destination);
 
-const ledgerChannel: ChannelConstants = {
-  channelNonce: BigNumber.from(1),
-  chainId,
-  challengeDuration,
-  participants,
-  appDefinition
-};
+const ledgerChannel: ChannelConstants = {...targetChannel, channelNonce: 1};
 
 const amounts = [BigNumber.from(7), BigNumber.from(5)];
 const ledgerAmounts = amounts.map(a => a.add(2));
@@ -232,7 +226,7 @@ async function signFinalState(finalizer: Store, other: Store) {
   const targetChannelState = (await finalizer.getEntry(targetChannelId)).supported;
   const {supported: finalState} = await finalizer.signAndAddState(targetChannelId, {
     ...targetChannelState,
-    turnNum: targetChannelState.turnNum.add(1),
+    turnNum: targetChannelState.turnNum + 1,
     isFinal: true
   });
 

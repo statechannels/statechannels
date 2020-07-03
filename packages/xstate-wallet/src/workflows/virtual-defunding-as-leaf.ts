@@ -71,7 +71,7 @@ const checkChannels: StateNodeConfig<ChannelsSet, any, any> = {
 
 const finalTargetState = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
   const {supported} = await store.getEntry(ctx.targetChannelId);
-  return {state: {...supported, turnNum: supported.turnNum.add(1), isFinal: true}};
+  return {state: {...supported, turnNum: supported.turnNum + 1, isFinal: true}};
 };
 
 const closeTarget: StateNodeConfig<any, any, any> = getDataAndInvoke(

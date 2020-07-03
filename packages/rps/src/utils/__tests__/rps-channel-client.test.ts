@@ -51,7 +51,7 @@ const mockChannelResult: ChannelResult = {
   appDefinition,
   channelId: MOCK_CHANNEL_ID,
   status: 'opening',
-  turnNum: bigNumberify(0).toString(),
+  turnNum: 0,
 };
 // ^ In the wild there will be different ChannelResults t: e.g. the status will not always be 'opening'. But we are only testing that the RPSChannelClient is wrapping the ChannelClient correctly. Getting the right data back is partly (mostly) the responsibility of the inner class instance. Therefore in this test we can reuse the same object, since it only needs to be the right type in order to be encoded and decoded properly.
 

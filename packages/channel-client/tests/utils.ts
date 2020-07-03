@@ -6,7 +6,6 @@ import {
 } from '@statechannels/client-api-schema';
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
-import {bigNumberify, BigNumberish} from 'ethers/utils';
 
 export function setProviderStates(providers: FakeChannelProvider[], state: ChannelResult): void {
   providers.forEach(provider => {
@@ -23,7 +22,7 @@ export class ChannelResultBuilder {
     appDefinition: string,
     appData: string,
     channelId: string,
-    turnNum: BigNumberish,
+    turnNum: number,
     status: ChannelStatus
   ) {
     this.channelResult = {
@@ -32,7 +31,7 @@ export class ChannelResultBuilder {
       appDefinition,
       appData,
       channelId,
-      turnNum: bigNumberify(turnNum).toString(),
+      turnNum,
       status
     };
   }
@@ -65,7 +64,7 @@ export class ChannelResultBuilder {
   }
 
   setTurnNum(turnNum: number): ChannelResultBuilder {
-    this.channelResult.turnNum = bigNumberify(turnNum).toString();
+    this.channelResult.turnNum = turnNum;
     return this;
   }
 

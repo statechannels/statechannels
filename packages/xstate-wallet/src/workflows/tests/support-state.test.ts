@@ -8,7 +8,7 @@ import {
   createSignatureEntry
 } from '@statechannels/wallet-core/lib/src/store/state-utils';
 import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 
 import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
 import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
@@ -25,11 +25,11 @@ import {Init, machine as createChannel} from '../create-and-fund';
 jest.setTimeout(5000);
 
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: Zero,
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants,

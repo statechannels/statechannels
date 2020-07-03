@@ -46,11 +46,11 @@ const second: Participant = {
 export const participants: [Participant, Participant, Participant] = [first, hub, second];
 
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 
 const channel: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants: _.slice(0, 2, participants),
@@ -58,7 +58,7 @@ const channel: ChannelConstants = {
 };
 
 const channel3: ChannelConstants = {
-  channelNonce: BigNumber.from(0),
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants,
@@ -102,7 +102,7 @@ export const ledgerStateResponse: SignedState = {
 
 export const ledgerStateResponse2: SignedState = {
   ...ledgerState,
-  turnNum: ethers.constants.One,
+  turnNum: 1,
   signatures: [signState(ledgerState, wallet1.privateKey), signState(ledgerState, cHubChannelPK)]
 };
 
@@ -117,7 +117,7 @@ export const ledgerStateResponse3: SignedState = {
   signatures: [signState(ledgerState3, wallet1.privateKey), signState(ledgerState3, cHubChannelPK)]
 };
 
-const ledgerState3_2: State = {...ledgerState3, turnNum: ethers.constants.One};
+const ledgerState3_2: State = {...ledgerState3, turnNum: 1};
 export const ledgerStateIncoming3_2: SignedState = {
   ...ledgerState3_2,
   signatures: [signState(ledgerState3_2, wallet1.privateKey)]

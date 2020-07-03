@@ -100,7 +100,7 @@ export class ChannelStoreEntry {
   // We will eventually want to perform a proper validTransition check
   // but we will have to be careful where we do that to prevent eating up a ton of cpu
   private validChain(firstState: SignedState, secondState: SignedState): boolean {
-    if (!(firstState.turnNum + 1 === secondState.turnNum)) {
+    if (firstState.turnNum + 1 !== secondState.turnNum) {
       return false;
     }
     if (secondState.isFinal) {
@@ -314,8 +314,6 @@ export class ChannelStoreEntry {
 
     const {channelConstants, funding, myIndex, applicationDomain} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
-    channelConstants.challengeDuration = BigNumber.from(channelConstants.challengeDuration);
-    channelConstants.channelNonce = BigNumber.from(channelConstants.channelNonce);
 
     return new ChannelStoreEntry({
       channelConstants,
