@@ -93,7 +93,7 @@ export class ChannelStoreEntry {
   }
 
   public get support(): Array<SignedState> {
-    return this._support.map(s => ({...s, ...this.channelConstants}));
+    return this._support.map(s => ({...this.channelConstants, ...s}));
   }
 
   // This is a simple check based on _requireValidTransition from NitroProtocol
