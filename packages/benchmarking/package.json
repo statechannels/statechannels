@@ -1,0 +1,24 @@
+{
+  "name": "benchmarking",
+  "version": "0.0.0",
+  "description": "Scripts used to time the xstate wallet",
+  "main": "index.js",
+  "author": "George Knee",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@statechannels/channel-client": "*",
+    "@statechannels/channel-provider": "*",
+    "@statechannels/nitro-protocol": "0.1.2",
+    "@types/http-server": "^0.10.0",
+    "@types/webpack": "4.41.5",
+    "ethers": "4.0.45",
+    "http-server": "^0.12.3",
+    "webpack": "4.41.5"
+  },
+  "scripts": {
+    "start": "yarn webpack && yarn http-server",
+    "node-benchmark": "node node-benchmark.js && python plot-benchmarks.py"
+  }
+}
