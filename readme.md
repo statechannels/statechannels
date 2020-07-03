@@ -30,6 +30,7 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
+- [benchmarking](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
 - [client-api-docs](./packages/client-api-docs) : API docs for the interface betwen a state channel Dapp and the wallet
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
 - [channel-provider](./packages/channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
@@ -41,6 +42,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [rps](./packages/rps) : Rock paper scissors DApp
 - [simple-hub](./packages/simple-hub) : Simple server wallet for mediating virtual channels
 - [tic-tac-toe](./packages/tic-tac-toe) : Tic-tac-toe DApp
+- [wallet-core](./packages/wallet-core) : Core wallet code that works in node-js and browser contexts
 - [web3torrent](./packages/web3torrent) : DApp extension of webtorrent including micropayments
 - [wire-format](./packages/wire-format) : Format of messages that are sent over the wire between wallets
 - [xstate-wallet](./packages/xstate-wallet) : A browser wallet implementation
