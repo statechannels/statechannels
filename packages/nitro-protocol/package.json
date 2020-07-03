@@ -65,6 +65,7 @@
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build": "run-s contract:compile build:typescript build:webpack",
+    "build:ci": "yarn build",
     "build:netlify": "yarn website:deploy",
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
