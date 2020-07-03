@@ -32,6 +32,7 @@ import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {Zero} from '@ethersproject/constants';
+import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 import {createMockGuard} from '../utils/workflow-utils';
