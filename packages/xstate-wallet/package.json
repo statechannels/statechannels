@@ -35,7 +35,6 @@
     "eventemitter3": "4.0.0",
     "filter-async-rxjs-pipe": "0.1.5",
     "guid-typescript": "1.0.9",
-    "jest": "25.1.0",
     "jsonrpc-lite": "2.1.0",
     "pino": "6.2.0",
     "react": "16.12.0",
