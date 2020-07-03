@@ -1,10 +1,10 @@
 /// <reference types="../src/global" />
+/* eslint-disable no-console */
 
 import * as fs from 'fs';
 import path from 'path';
 
 import serialize from 'serialize-javascript';
-// TODO: Sync with wallet-spec
 function saveConfig(
   config: any,
   workflowPath = '/null', // TODO: make this required
