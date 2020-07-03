@@ -58,7 +58,8 @@
   "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
-    "build:typescript": "tsc -b",
+    "clean-build-folder": "rm -rf ./lib",
+    "build:typescript": "yarn run clean-build-folder && tsc -b",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
