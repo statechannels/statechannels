@@ -30,7 +30,7 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
-- [benchmakring](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
+- [benchmarking](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
 - [client-api-docs](./packages/client-api-docs) : API docs for the interface betwen a state channel Dapp and the wallet
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
 - [channel-provider](./packages/channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
