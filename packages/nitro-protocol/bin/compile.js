@@ -36,7 +36,7 @@ compile.on('close', code => {
 // strip out uneeded entries from artifacts
 function stripArtifacts() {
   const files = fs.readdirSync(path.resolve(__dirname, '../build/contracts'));
-  console.log('Stripping uneeded entried from the following artifacts: ', files);
+  console.log('Stripping uneeded entries from the following artifacts: ', files);
   for (file in files) {
     let artifact = require(path.resolve(__dirname, '../build/contracts/' + files[file]));
     // delete artifact['ast']; // we need this to generate documentation
