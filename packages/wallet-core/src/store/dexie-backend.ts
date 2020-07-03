@@ -83,11 +83,7 @@ export class Backend implements DBBackend {
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
     for (const key in nonces) {
-      if (nonces[key]) {
-        nonces[key] = BigNumber.from(-1);
-      } else {
-        nonces[key] = BigNumber.from(nonces[key]);
-      }
+      nonces[key] = nonces[key] ?? -1;
     }
     return nonces;
   }
