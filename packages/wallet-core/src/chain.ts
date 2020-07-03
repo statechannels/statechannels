@@ -174,8 +174,8 @@ export class FakeChain implements Chain {
     const {amount, channelStorage} = this.channelStatus[channelId] || {};
     return {
       channelStorage: channelStorage || {
-        turnNumRecord: Zero,
-        finalizesAt: Zero
+        turnNumRecord: 0,
+        finalizesAt: 0
       },
       finalized:
         channelStorage &&
