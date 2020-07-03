@@ -39,7 +39,7 @@ function stripArtifacts() {
   console.log('Stripping uneeded entried from the following artifacts: ', files);
   for (file in files) {
     let artifact = require(path.resolve(__dirname, '../build/contracts/' + files[file]));
-    delete artifact['ast'];
+    // delete artifact['ast']; // we need this to generate documentation
     delete artifact['legacyAst'];
     delete artifact['source'];
     fs.writeFileSync(
