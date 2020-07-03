@@ -4903,15 +4903,6 @@
     write-json-file "4.2.0"
     yargs "15.1.0"
 
-"@statechannels/nitro-protocol@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/@statechannels/nitro-protocol/-/nitro-protocol-0.1.2.tgz#57b57e98eba0ee8d97ad1befe196716523925d2c"
-  integrity sha512-yfV97g6io0wuIvY92l9JiSDtZOpDcVPpfT2fbkmanxNEeZ++T6jRom0uA60QcOw10tBJqzKovqoTZOKYZYC8nA==
-  dependencies:
-    "@counterfactual/cf-adjudicator-contracts" "0.0.11"
-    "@openzeppelin/contracts" "3.0.1"
-    ethers "4.0.45"
-
 "@storybook/addon-actions@5.3.9":
   version "5.3.9"
   resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"

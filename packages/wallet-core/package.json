@@ -5,8 +5,8 @@
   "author": "Alex Gap",
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/nitro-protocol": "0.1.2",
     "@statechannels/channel-provider": "0.0.3",
+    "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
     "dexie": "3.0.0",
