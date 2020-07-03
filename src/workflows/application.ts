@@ -336,7 +336,7 @@ export const workflow = (
           else if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
           else {
             message = {code: 500, message: 'Wallet error'};
-            console.error({error}, 'UpdateChannel call failed with error 500');
+            logger.error({error}, 'UpdateChannel call failed with error 500');
           }
 
           messagingService.sendError(event.requestId, message);
@@ -360,7 +360,7 @@ export const workflow = (
             message = {code: 301, message: 'Channel not found'};
           else {
             message = {code: 500, message: 'Wallet error'};
-            console.error({error}, 'CloseChannel call failed with error 500');
+            logger.error({error}, 'CloseChannel call failed with error 500');
           }
 
           messagingService.sendError(event.requestId, message);
