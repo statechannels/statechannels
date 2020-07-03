@@ -33,13 +33,7 @@ export class ChannelStoreEntry {
   public readonly applicationDomain?: string;
 
   constructor(channelData: ChannelStoredData) {
-    const {
-      myIndex,
-      stateVariables,
-      funding,
-      applicationDomain,
-      channelConstants: {chainId, participants, appDefinition, challengeDuration, channelNonce}
-    } = channelData;
+    const {myIndex, stateVariables, funding, applicationDomain, channelConstants} = channelData;
 
     this.myIndex = myIndex;
     this.stateVariables = stateVariables;
@@ -48,13 +42,7 @@ export class ChannelStoreEntry {
 
     this.myIndex = channelData.myIndex;
 
-    this.channelConstants = {
-      chainId,
-      participants,
-      appDefinition,
-      challengeDuration: BigNumber.from(challengeDuration),
-      channelNonce: BigNumber.from(channelNonce)
-    };
+    this.channelConstants = channelConstants;
 
     this.stateVariables = channelData.stateVariables;
   }
@@ -76,10 +64,7 @@ export class ChannelStoreEntry {
   }
 
   public get myTurn(): boolean {
-    return this.supported.turnNum
-      .add(1)
-      .mod(this.participants.length)
-      .eq(this.myIndex);
+    return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
   }
 
   private get signedStates(): Array<SignedStateWithHash> {
@@ -115,13 +100,13 @@ export class ChannelStoreEntry {
   // We will eventually want to perform a proper validTransition check
   // but we will have to be careful where we do that to prevent eating up a ton of cpu
   private validChain(firstState: SignedState, secondState: SignedState): boolean {
-    if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
+    if (!(firstState.turnNum + 1 === secondState.turnNum)) {
       return false;
     }
     if (secondState.isFinal) {
       return outcomesEqual(firstState.outcome, secondState.outcome);
     }
-    if (secondState.turnNum.lt(2 * this.nParticipants())) {
+    if (secondState.turnNum < 2 * this.nParticipants()) {
       return (
         outcomesEqual(firstState.outcome, secondState.outcome) &&
         firstState.appData === secondState.appData
@@ -143,7 +128,7 @@ export class ChannelStoreEntry {
         support = [];
         participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
       }
-      const moverIndex = signedState.turnNum.mod(this.nParticipants()).toNumber();
+      const moverIndex = signedState.turnNum % this.nParticipants();
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
       // If the mover hasn't signed the state then we know it cannot be part of the support
@@ -203,7 +188,7 @@ export class ChannelStoreEntry {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    if (this.isSupportedByMe && this.latestSignedByMe.turnNum.gte(stateVars.turnNum)) {
+    if (this.isSupportedByMe && this.latestSignedByMe.turnNum >= stateVars.turnNum) {
       logger.error({entry: this.data(), stateVars}, Errors.staleState);
       throw Error(Errors.staleState);
     }
@@ -262,7 +247,7 @@ export class ChannelStoreEntry {
     }
 
     const {signedStates} = this;
-    const turnNums = _.map(signedStates, s => parseInt(s.turnNum.toHexString(), 16));
+    const turnNums = _.map(signedStates, s => s.turnNum);
 
     const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
     if (duplicateTurnNums) {
@@ -270,7 +255,7 @@ export class ChannelStoreEntry {
       throw Error(Errors.duplicateTurnNums);
     }
     if (!isReverseSorted(turnNums)) {
-      logger.error({signedStates: _.map(signedStates, s => s.turnNum.toHexString())});
+      logger.error({signedStates: _.map(signedStates, s => s.turnNum)});
       throw Error(Errors.notSorted);
     }
   }
@@ -280,9 +265,7 @@ export class ChannelStoreEntry {
   }
 
   private clearOldStates() {
-    this.stateVariables = _.reverse(
-      _.sortBy(this.stateVariables, s => parseInt(s.turnNum.toHexString(), 16))
-    );
+    this.stateVariables = _.reverse(_.sortBy(this.stateVariables, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
@@ -304,8 +287,8 @@ export class ChannelStoreEntry {
   public data(): ChannelStoredData {
     const channelConstants = {
       ...this.channelConstants,
-      challengeDuration: this.channelConstants.challengeDuration.toString(),
-      channelNonce: this.channelConstants.channelNonce.toString()
+      challengeDuration: this.channelConstants.challengeDuration,
+      channelNonce: this.channelConstants.channelNonce
     };
 
     const stateVariables = ChannelStoreEntry.prepareStateVariables(

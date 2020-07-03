@@ -10,6 +10,8 @@ export type Address = string;
  */
 export type Bytes32 = string;
 
+export type Uint48 = number;
+
 /**
  * Uint256
  * @pattern  ^0x([a-fA-F0-9]{64})$
@@ -62,11 +64,11 @@ export function isAllocations(outcome: Outcome): outcome is Allocations {
 export interface SignedState {
   chainId: string;
   participants: Participant[];
-  channelNonce: Uint256;
+  channelNonce: Uint48;
   appDefinition: Address;
-  challengeDuration: Uint256;
+  challengeDuration: Uint48;
   outcome: Outcome;
-  turnNum: Uint256;
+  turnNum: Uint48;
   appData: Bytes;
   isFinal: boolean;
   channelId: Bytes32;

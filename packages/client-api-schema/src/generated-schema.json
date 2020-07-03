@@ -147,7 +147,7 @@
           "$ref": "#/definitions/ChannelStatus"
         },
         "turnNum": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint48"
         }
       },
       "required": [
@@ -339,7 +339,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-1821-2067-src%2Fdata-types.ts-0-2325%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-1851-2096-src%2Fdata-types.ts-0-2354%5B%5D%3E"
     },
     "GetStateParams": {
       "additionalProperties": false,
@@ -1530,7 +1530,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-1821-2067-src/data-types.ts-0-2325[]>": {
+    "JsonRpcResponse<def-interface-src/data-types.ts-1851-2096-src/data-types.ts-0-2354[]>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1877,6 +1877,9 @@
       "description": "Uint256",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
+    },
+    "Uint48": {
+      "type": "number"
     },
     "UpdateChannelError": {
       "anyOf": [

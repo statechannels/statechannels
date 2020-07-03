@@ -10,7 +10,7 @@ describe('signatures', () => {
     it('signs a state', async () => {
       const wallet = Wallet.createRandom();
       const state: State = {
-        channel: {chainId: '0x1', channelNonce: '0x1', participants: [wallet.address]},
+        channel: {chainId: '0x1', channelNonce: 0x01, participants: [wallet.address]},
         outcome: [],
         turnNum: 1,
         isFinal: false,
@@ -36,7 +36,7 @@ describe('signatures', () => {
       const state: State = {
         channel: {
           chainId: '0x1',
-          channelNonce: '0x1',
+          channelNonce: 0x01,
           participants: [Wallet.createRandom().address],
         },
         outcome: [],
@@ -55,7 +55,7 @@ describe('signatures', () => {
   describe('signChallengeMessage', () => {
     it('signs a challenge message', async () => {
       const wallet = Wallet.createRandom();
-      const channel = {chainId: '0x1', channelNonce: '0x1', participants: [wallet.address]};
+      const channel = {chainId: '0x1', channelNonce: 0x01, participants: [wallet.address]};
       const state: State = {
         channel,
         outcome: [],
@@ -80,7 +80,7 @@ describe('signatures', () => {
       const state: State = {
         channel: {
           chainId: '0x1',
-          channelNonce: '0x1',
+          channelNonce: 0x01,
           participants: [Wallet.createRandom().address],
         },
         outcome: [],
@@ -101,7 +101,7 @@ describe('signatures', () => {
     it('correctly recovers a state signer address', async () => {
       const wallet = Wallet.createRandom();
       const state: State = {
-        channel: {chainId: '0x1', channelNonce: '0x1', participants: [wallet.address]},
+        channel: {chainId: '0x1', channelNonce: 0x1, participants: [wallet.address]},
         outcome: [],
         turnNum: 1,
         isFinal: false,
@@ -120,7 +120,7 @@ describe('signatures', () => {
       const state: State = {
         channel: {
           chainId: '0x1',
-          channelNonce: '0x1',
+          channelNonce: 0x1,
           participants: [Wallet.createRandom().address],
         },
         outcome: [],

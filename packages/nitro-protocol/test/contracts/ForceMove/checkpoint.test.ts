@@ -96,7 +96,7 @@ describe('checkpoint', () => {
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
   `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
     const {appDatas, whoSignedWhat} = support;
-    const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+    const channel: Channel = {chainId, channelNonce, participants};
     const channelId = getChannelId(channel);
 
     const states = appDatas.map((data, idx) => ({

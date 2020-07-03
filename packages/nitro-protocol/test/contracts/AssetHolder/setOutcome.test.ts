@@ -13,7 +13,7 @@ let channelId;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const chainId = '0x1234';
-const channelNonce = '0x9999';
+const channelNonce = 0x9999;
 const outcomeContent = id('some outcome data');
 
 // Populate wallets and participants array

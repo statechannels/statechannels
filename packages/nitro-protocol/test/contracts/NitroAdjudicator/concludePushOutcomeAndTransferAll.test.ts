@@ -115,7 +115,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
+      const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const support = oneState;

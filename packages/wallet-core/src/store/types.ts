@@ -27,7 +27,7 @@ export interface Participant {
 
 export interface StateVariables {
   outcome: Outcome;
-  turnNum: BigNumber;
+  turnNum: number;
   appData: string;
   isFinal: boolean;
 }
@@ -64,9 +64,9 @@ export function isAllocation(outcome: Outcome): outcome is Allocation {
 export interface ChannelConstants {
   chainId: string;
   participants: Participant[];
-  channelNonce: BigNumber;
+  channelNonce: number;
   appDefinition: string;
-  challengeDuration: BigNumber;
+  challengeDuration: number;
 }
 
 export interface State extends ChannelConstants, StateVariables {}
@@ -140,8 +140,8 @@ export interface Message {
 export type ChannelStoredData = {
   stateVariables: Array<SignedStateWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
-    challengeDuration: BigNumber | string; // TODO: This probably shouldn't be a BigNumber
-    channelNonce: BigNumber | string;
+    challengeDuration: number;
+    channelNonce: number;
   };
   funding: Funding | undefined;
   applicationDomain: string | undefined;
@@ -154,7 +154,7 @@ export interface DBBackend {
   // privateKeys(): Promise<Array<{signingAddress: string; privateKey: string}>>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
-  nonces(): Promise<Record<string, BigNumber | undefined>>;
+  nonces(): Promise<Record<string, number | undefined>>;
   objectives(): Promise<Objective[]>;
   channels(): Promise<Record<string, ChannelStoreEntry | undefined>>;
 
@@ -174,8 +174,8 @@ export interface DBBackend {
   setLedger(key: string, value: string): Promise<string>;
   getLedger(key: string): Promise<string | undefined>;
 
-  setNonce(key: string, value: BigNumber): Promise<BigNumber>;
-  getNonce(key: string): Promise<BigNumber | undefined>;
+  setNonce(key: string, value: number): Promise<number>;
+  getNonce(key: string): Promise<number | undefined>;
 
   setObjective(key: number, value: Objective): Promise<Objective>;
   getObjective(key: number): Promise<Objective | undefined>;

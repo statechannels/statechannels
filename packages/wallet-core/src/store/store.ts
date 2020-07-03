@@ -266,7 +266,7 @@ export class Store {
 
   public createChannel = (
     participants: Participant[],
-    challengeDuration: BigNumber,
+    challengeDuration: number,
     stateVars: StateVariables,
     appDefinition = AddressZero,
     applicationDomain?: string
@@ -284,7 +284,7 @@ export class Store {
             throw Error(Errors.notInChannel);
           }
 
-          const channelNonce = (await this.getNonce(addresses)).add(1);
+          const channelNonce = (await this.getNonce(addresses)) + 1;
           const chainId = CHAIN_NETWORK_ID;
 
           const entry = await this.initializeChannel(
@@ -303,14 +303,12 @@ export class Store {
       )
       .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
-  private async getNonce(addresses: string[]): Promise<BigNumber> {
-    const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
-    return nonce || BigNumber.from(-1);
+  private async getNonce(addresses: string[]): Promise<number> {
+    return (await this.backend.getNonce(this.nonceKeyFromAddresses(addresses))) ?? -1;
   }
 
-  private async setNonce(addresses: string[], value: BigNumber) {
-    // TODO: Figure out why the lte check is failing
-    if (value.lt(await this.getNonce(addresses))) throw Error(Errors.invalidNonce);
+  private async setNonce(addresses: string[], value: number) {
+    if (value <= (await this.getNonce(addresses))) throw Error(Errors.invalidNonce);
 
     await this.backend.setNonce(this.nonceKeyFromAddresses(addresses), value);
   }
@@ -336,7 +334,7 @@ export class Store {
         }
 
         const newState = _.merge(existingState, {
-          turnNum: existingState.turnNum.add(1),
+          turnNum: existingState.turnNum + 1,
           ...updateData
         });
 
@@ -349,7 +347,7 @@ export class Store {
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
         const {supported, latestSignedByMe} = await this.getEntry(channelId);
         if (!supported.isFinal) throw new Error('Supported state not final');
-        if (latestSignedByMe.turnNum.eq(supported.turnNum)) return; // already signed
+        if (latestSignedByMe.turnNum === supported.turnNum) return; // already signed
         return await this.signAndAddStateWithinTx(channelId, supported);
       })
       .then(result => {

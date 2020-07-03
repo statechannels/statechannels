@@ -1,5 +1,3 @@
-import {BigNumber} from 'ethers';
-
 import {Objective, DBBackend, DomainBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
 import {ChannelStoreEntry} from './channel-store-entry';
@@ -7,7 +5,7 @@ import {ChannelStoreEntry} from './channel-store-entry';
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
   private _objectives: Objective[] = [];
-  private _nonces: Record<string, string | undefined> = {};
+  private _nonces: Record<string, number | undefined> = {};
   private _destinationAddress: string | undefined;
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
@@ -44,15 +42,13 @@ export class MemoryBackend implements DBBackend {
     return channels as Record<string, ChannelStoreEntry | undefined>;
   }
   public async nonces() {
-    const nonces: Record<string, BigNumber | string | undefined> = this._nonces;
+    const nonces: Record<string, number | undefined> = this._nonces;
     for (const key in nonces) {
       if (!this._nonces[key]) {
-        nonces[key] = BigNumber.from(-1);
-      } else {
-        nonces[key] = BigNumber.from(nonces[key] as string);
+        nonces[key] = -1;
       }
     }
-    return nonces as Record<string, BigNumber | undefined>;
+    return nonces;
   }
 
   // Individual Getters/setters
@@ -106,16 +102,12 @@ export class MemoryBackend implements DBBackend {
     return this._ledgers[key];
   }
 
-  public async setNonce(key: string, value: BigNumber) {
-    this._nonces[key] = value.toString();
-    return BigNumber.from(this._nonces[key] as string);
+  public async setNonce(key: string, value: number) {
+    return (this._nonces[key] = value);
   }
 
   public async getNonce(key: string) {
-    if (!this._nonces[key]) {
-      return BigNumber.from(-1);
-    }
-    return BigNumber.from(this._nonces[key] as string);
+    return this._nonces[key] ?? -1;
   }
 
   public async setObjective(key: number, value: Objective) {

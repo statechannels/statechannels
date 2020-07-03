@@ -136,11 +136,7 @@ export class Backend implements DBBackend {
     return this.get(ObjectStores.objectives, key);
   }
   public async getNonce(key: string) {
-    const nonce = await this.get(ObjectStores.nonces, key);
-    if (!nonce) {
-      return BigNumber.from(-1);
-    }
-    return BigNumber.from(nonce);
+    return (await this.get(ObjectStores.nonces, key)) ?? -1;
   }
   public async getPrivateKey(key: string) {
     return this.get(ObjectStores.privateKeys, key);
@@ -170,8 +166,8 @@ export class Backend implements DBBackend {
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
-  public async setNonce(key: string, value: BigNumber) {
-    await this.put(ObjectStores.nonces, value.toString(), key);
+  public async setNonce(key: string, value: number) {
+    await this.put(ObjectStores.nonces, value, key);
 
     return await this._db[ObjectStores.nonces].get(key);
   }

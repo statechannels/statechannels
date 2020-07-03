@@ -17,7 +17,7 @@ const wallet = Wallet.createRandom();
 
 const channel: Channel = {
   chainId: '0x1',
-  channelNonce: '0x1',
+  channelNonce: 0x1,
   participants: [wallet.address],
 };
 

@@ -88,7 +88,7 @@ describe('respond', () => {
       slotEmpty,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+      const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
       const challengeState: State = {

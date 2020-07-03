@@ -6,7 +6,7 @@ import {Channel} from '..';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
-import {Address, Bytes32, Uint256, Uint8} from './types';
+import {Address, Bytes32, Uint8, Uint48} from './types';
 import {SignedState, Signature} from '../signatures';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
@@ -17,13 +17,13 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
 
 export interface ChallengeRegisteredEvent {
   challengerAddress: string;
-  finalizesAt: string;
+  finalizesAt: number;
   challengeStates: SignedState[];
 }
 export interface ChallengeRegisteredStruct {
   channelId: Bytes32;
-  turnNumRecord: Uint256;
-  finalizesAt: Uint256;
+  turnNumRecord: Uint48;
+  finalizesAt: Uint48;
   challenger: Address;
   isFinal: boolean;
   fixedPart: FixedPart;
@@ -46,7 +46,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
   // Fixed part
   const chainId = bigNumberify(fixedPart[0]).toHexString();
   const participants = fixedPart[1].map(p => bigNumberify(p).toHexString());
-  const channelNonce = bigNumberify(fixedPart[2]).toHexString();
+  const channelNonce = fixedPart[2];
   const appDefinition = fixedPart[3];
   const challengeDuration = bigNumberify(fixedPart[4]).toNumber();
 
@@ -117,11 +117,7 @@ export function getChallengeClearedEvent(
         isFinal,
         outcome,
         appData,
-        channel: {
-          chainId: bigNumberify(chainId).toHexString(),
-          channelNonce: bigNumberify(channelNonce).toHexString(),
-          participants,
-        },
+        channel: {chainId: bigNumberify(chainId).toHexString(), channelNonce, participants},
         turnNum: bigNumberify(newTurnNumRecord).toNumber(),
       },
     };

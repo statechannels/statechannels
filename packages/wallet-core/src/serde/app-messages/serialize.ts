@@ -83,9 +83,9 @@ export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelR
   }
 
   let status: ChannelStatus = 'running';
-  if (turnNum.eq(0)) {
+  if (turnNum == 0) {
     status = 'proposed';
-  } else if (turnNum.lt(2 * participants.length - 1)) {
+  } else if (turnNum < 2 * participants.length - 1) {
     status = 'opening';
   } else if (channelEntry.hasConclusionProof) {
     status = 'closed';
@@ -99,7 +99,7 @@ export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelR
     appDefinition,
     appData,
     status,
-    turnNum: formatAmount(turnNum),
+    turnNum,
     channelId
   };
 }
