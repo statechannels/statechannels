@@ -9,8 +9,8 @@
     {"directory": "packages/channel-client", "changeProcessCWD": true},
     {"directory": "packages/rps", "changeProcessCWD": true},
     {"directory": "packages/tic-tac-toe", "changeProcessCWD": true},
-    {"directory": "packages/wallet", "changeProcessCWD": true},
-    {"directory": "packages/wallet-specs", "changeProcessCWD": true}
+    {"directory": "packages/xstate-wallet", "changeProcessCWD": true},
+    {"directory": "packages/wallet-core", "changeProcessCWD": true}
   ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
