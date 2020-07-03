@@ -31,7 +31,8 @@
   "private": true,
   "resolutions": {
     "broccoli": "3.3.3",
-    "ethereum-transaction-debugger": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
+    "ethereum-transaction-debugger": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz",
+    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
   },
   "scripts": {
     "build": "lerna run build",
