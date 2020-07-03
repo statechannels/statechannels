@@ -28,8 +28,26 @@ export function serializeMessage(message: Message, recipient: string, sender: st
 }
 
 export function serializeState(state: SignedState): SignedStateWire {
+  const {
+    chainId,
+    participants,
+    channelNonce,
+    appDefinition,
+    challengeDuration,
+    turnNum,
+    appData,
+    isFinal
+  } = state;
+
   return {
-    ...state,
+    chainId,
+    participants,
+    channelNonce,
+    appDefinition,
+    challengeDuration,
+    turnNum,
+    appData,
+    isFinal,
     outcome: serializeOutcome(state.outcome),
     channelId: calculateChannelId(state),
     signatures: state.signatures.map(s => s.signature)
