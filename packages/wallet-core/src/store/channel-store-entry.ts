@@ -193,7 +193,7 @@ export class ChannelStoreEntry {
       throw Error(Errors.staleState);
     }
 
-    const state = {...stateVars, ...this.channelConstants};
+    const state = {...this.channelConstants, ...stateVars};
 
     const signatureEntry = createSignatureEntry(state, privateKey);
 
@@ -329,15 +329,6 @@ export class ChannelStoreEntry {
     parserFunction: (data: string | BigNumber) => BigNumber | string = v => BigNumber.from(v)
   ): Array<SignedStateWithHash> {
     for (const state of stateVariables) {
-      if (state.turnNum) {
-        state.turnNum = parserFunction(state.turnNum);
-      }
-      if (state.channelNonce) {
-        state.channelNonce = parserFunction(state.channelNonce);
-      }
-      if (state.challengeDuration) {
-        state.challengeDuration = parserFunction(state.challengeDuration);
-      }
       state.outcome = ChannelStoreEntry.toggleBigNumberOutcome(state.outcome, parserFunction);
     }
     return stateVariables;
