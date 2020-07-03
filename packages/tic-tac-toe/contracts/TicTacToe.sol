@@ -6,20 +6,20 @@ import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
-  * @dev The TicTacToe contract complies with the ForceMoveApp interface and implements a game of Tic Tac Toe (henceforth TTT).
-  * The following transitions are allowed:
-  *
-  * Start -> XPlaying  [ START ]
-  * XPlaying -> OPlaying  [ XPLAYING ]
-  * XPlaying -> Victory  [ VICTORY ]
-  * OPlaying -> XPlaying [ OPLAYING ]
-  * OPlaying -> Victory [ VICTORY ]
-  * OPlaying -> Draw [ DRAW ]
-  * Victory -> Switching [ SWITCH ] // Not implemented yet
-  * Draw -> Switching [ SWITCH ] // Not implemented yet
-  * Switching -> Start [ FINISH ] // Not implemented yet
-  *
-*/
+ * @dev The TicTacToe contract complies with the ForceMoveApp interface and implements a game of Tic Tac Toe (henceforth TTT).
+ * The following transitions are allowed:
+ *
+ * Start -> XPlaying  [ START ]
+ * XPlaying -> OPlaying  [ XPLAYING ]
+ * XPlaying -> Victory  [ VICTORY ]
+ * OPlaying -> XPlaying [ OPLAYING ]
+ * OPlaying -> Victory [ VICTORY ]
+ * OPlaying -> Draw [ DRAW ]
+ * Victory -> Switching [ SWITCH ] // Not implemented yet
+ * Draw -> Switching [ SWITCH ] // Not implemented yet
+ * Switching -> Start [ FINISH ] // Not implemented yet
+ *
+ */
 contract TicTacToe is ForceMoveApp {
     using SafeMath for uint256;
 
@@ -33,29 +33,29 @@ contract TicTacToe is ForceMoveApp {
     }
 
     /**
-    * @notice Decodes the appData.
-    * @dev Decodes the appData.
-    * @param appDataBytes The abi.encode of a TTTData struct describing the application-specific data.
-    * @return An TTTData struct containing the application-specific data.
-    */
+     * @notice Decodes the appData.
+     * @dev Decodes the appData.
+     * @param appDataBytes The abi.encode of a TTTData struct describing the application-specific data.
+     * @return An TTTData struct containing the application-specific data.
+     */
     function appData(bytes memory appDataBytes) internal pure returns (TTTData memory) {
         return abi.decode(appDataBytes, (TTTData));
     }
 
     /**
-    * @notice Encodes the TTT update rules.
-    * @dev Encodes the TTT update rules.
-    * @param fromPart State being transitioned from.
-    * @param toPart State being transitioned to.
-    * @param nParticipants Amount of players. Must be 2
-    * @return true if the transition conforms to the rules, false otherwise.
-    */
+     * @notice Encodes the TTT update rules.
+     * @dev Encodes the TTT update rules.
+     * @param fromPart State being transitioned from.
+     * @param toPart State being transitioned to.
+     * @param nParticipants Amount of players. Must be 2
+     * @return true if the transition conforms to the rules, false otherwise.
+     */
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256, // turnNumB, (Not implemented)
+        uint48, // turnNumB, (Not implemented)
         uint256 nParticipants
-    ) public pure override returns (bool) {
+    ) public override pure returns (bool) {
         require(nParticipants == 2, 'There should be 2 participants');
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
@@ -70,12 +70,7 @@ contract TicTacToe is ForceMoveApp {
                 toGameData.positionType == PositionType.XPlaying,
                 'Start may only transition to XPlaying'
             );
-            requireValidSTARTtoXPLAYING(
-                fromAllocation,
-                toAllocation,
-                fromGameData,
-                toGameData
-            );
+            requireValidSTARTtoXPLAYING(fromAllocation, toAllocation, fromGameData, toGameData);
             return true;
         } else if (fromGameData.positionType == PositionType.XPlaying) {
             if (toGameData.positionType == PositionType.OPlaying) {
@@ -176,7 +171,10 @@ contract TicTacToe is ForceMoveApp {
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Xs == fromGameData.Xs, 'There should be no new Xs added to board');
-        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'There should be one new O placed');
+        require(
+            madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
+            'There should be one new O placed'
+        );
 
         // Current O Player should get all the stake. This is to decrease griefing. We assume that O Player is Player B
         require(
@@ -202,15 +200,18 @@ contract TicTacToe is ForceMoveApp {
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'There should be one new X placed');
+        require(
+            madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
+            'There should be one new X placed'
+        );
 
         // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
         require(
-            toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake*2),
+            toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake * 2),
             'Allocation for player A should be incremented by 1x stake'
         );
         require(
-            toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake*2),
+            toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake * 2),
             'Allocation for player B should be decremented by 1x stake.'
         );
     }
@@ -220,14 +221,12 @@ contract TicTacToe is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
-    )
-        private
-        pure
-        disjointMarks(toGameData)
-        stakeUnchanged(fromGameData, toGameData)
-    {
+    ) private pure disjointMarks(toGameData) stakeUnchanged(fromGameData, toGameData) {
         require(toGameData.Xs == fromGameData.Xs, 'There should be no new Xs added to board');
-        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'There should be one new O placed');
+        require(
+            madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
+            'There should be one new O placed'
+        );
         require(hasWon(toGameData.Os), 'The move should result in O winning');
 
         uint256 currentOsPlayer = 1; // Need to calculate this
@@ -236,7 +235,7 @@ contract TicTacToe is ForceMoveApp {
         // First, undo this
         uint256 correctAmountA = fromAllocation[0].amount.sub(fromGameData.stake);
         uint256 correctAmountB = fromAllocation[1].amount.add(fromGameData.stake);
-    
+
         if (currentOsPlayer == 0) {
             // player A won
             correctAmountA = correctAmountA.add(fromGameData.stake);
@@ -262,14 +261,12 @@ contract TicTacToe is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
-    )
-        private
-        pure
-        disjointMarks(toGameData)
-        stakeUnchanged(fromGameData, toGameData)
-    {
+    ) private pure disjointMarks(toGameData) stakeUnchanged(fromGameData, toGameData) {
         require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'There should be one new X placed');
+        require(
+            madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
+            'There should be one new X placed'
+        );
         require(hasWon(toGameData.Xs), 'The move should result in X winning');
 
         uint256 currentXsPlayer = 0; // Need to calculate this
@@ -278,7 +275,7 @@ contract TicTacToe is ForceMoveApp {
         // First, undo this
         uint256 correctAmountA = fromAllocation[0].amount.add(fromGameData.stake);
         uint256 correctAmountB = fromAllocation[1].amount.sub(fromGameData.stake);
-    
+
         if (currentXsPlayer == 0) {
             // player A won
             correctAmountA = correctAmountA.add(fromGameData.stake);
@@ -304,15 +301,16 @@ contract TicTacToe is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
-    )
-        private
-        pure
-        disjointMarks(toGameData)
-        stakeUnchanged(fromGameData, toGameData)
-    {
-        require(isDraw(toGameData.Os, toGameData.Xs), "The board should be full and result in a draw");
+    ) private pure disjointMarks(toGameData) stakeUnchanged(fromGameData, toGameData) {
+        require(
+            isDraw(toGameData.Os, toGameData.Xs),
+            'The board should be full and result in a draw'
+        );
         require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), "There should be one new X placed");
+        require(
+            madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
+            'There should be one new X placed'
+        );
 
         // Recall that in the past state, the allocations are as if Player A has lost.
         // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
@@ -321,8 +319,7 @@ contract TicTacToe is ForceMoveApp {
             "Player A's allocation should reflect the result of the game."
         );
         require(
-            toAllocation[1].amount ==
-                fromAllocation[1].amount.sub(toGameData.stake),
+            toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake),
             "Player B's allocation should reflect the result of the game."
         );
     }
@@ -362,7 +359,10 @@ contract TicTacToe is ForceMoveApp {
         pure
         returns (Outcome.AllocationItem[] memory)
     {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(variablePart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcome = abi.decode(
+            variablePart.outcome,
+            (Outcome.OutcomeItem[])
+        );
         require(outcome.length == 1, 'TicTacToe: Only one asset allowed');
 
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
@@ -414,10 +414,7 @@ contract TicTacToe is ForceMoveApp {
     }
 
     modifier stakeUnchanged(TTTData memory fromGameData, TTTData memory toGameData) {
-        require(
-            fromGameData.stake == toGameData.stake,
-            'The stake should be the same'
-        );
+        require(fromGameData.stake == toGameData.stake, 'The stake should be the same');
         _;
     }
 

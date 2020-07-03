@@ -22,7 +22,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
      */
     function pushOutcome(
         bytes32 channelId,
-        uint256 turnNumRecord,
+        uint48 turnNumRecord,
         uint48 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
@@ -62,7 +62,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
      */
     function pushOutcomeAndTransferAll(
         bytes32 channelId,
-        uint256 turnNumRecord,
+        uint48 turnNumRecord,
         uint48 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
@@ -110,7 +110,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         bytes32[] memory stateHashes = new bytes32[](numStates);
 
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
-        for (uint256 i = 0; i < numStates; i++) {
+        for (uint48 i = 0; i < numStates; i++) {
             stateHashes[i] = keccak256(
                 abi.encode(
                     State(
@@ -138,7 +138,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         // effects
 
         channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, now, bytes32(0), address(0), outcomeHash)
+            ChannelData(0, uint48(now), bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
 
@@ -187,7 +187,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         ForceMoveApp.VariablePart[2] memory ab, // [a,b]
-        uint256 turnNumB,
+        uint48 turnNumB,
         address appDefinition
     ) public pure returns (bool) {
         return _requireValidTransition(nParticipants, isFinalAB, ab, turnNumB, appDefinition);

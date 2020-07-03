@@ -17,7 +17,7 @@ interface Adjudicator {
      */
     function pushOutcome(
         bytes32 channelId,
-        uint256 turnNumRecord,
+        uint48 turnNumRecord,
         uint48 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
