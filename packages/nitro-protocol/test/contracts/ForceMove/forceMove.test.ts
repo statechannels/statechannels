@@ -205,13 +205,13 @@ describe('forceMove', () => {
 
         // Check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
+        expect(eventTurnNumRecord).toEqual(largestTurnNum);
         expect(eventChallenger).toEqual(challenger.address);
         expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
         expect(eventFixedPart[1]).toEqual(fixedPart.participants);
-        expect(eventFixedPart[2]._hex).toEqual(hexlify(fixedPart.channelNonce));
+        expect(eventFixedPart[2]).toEqual(fixedPart.channelNonce);
         expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
-        expect(eventFixedPart[4]._hex).toEqual(hexlify(fixedPart.challengeDuration));
+        expect(eventFixedPart[4]).toEqual(fixedPart.challengeDuration);
         expect(eventIsFinal).toEqual(isFinalCount > 0);
         expect(eventVariableParts[eventVariableParts.length - 1][0]).toEqual(
           variableParts[variableParts.length - 1].outcome
