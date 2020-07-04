@@ -137,7 +137,7 @@ test('it uses direct funding when told', async () => {
   expect((await aStore.chain.getChainInfo(targetChannelId)).amount).toMatchObject(totalAmount);
 });
 
-// eslint-disable-next-line jest/no-focused-tests
+// eslint-disable-next-line jest/no-disabled-tests
 test.skip('it uses virtual funding when enabled', async () => {
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
