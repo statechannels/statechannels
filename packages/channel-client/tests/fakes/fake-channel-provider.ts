@@ -24,9 +24,7 @@ import {
   Message
 } from '@statechannels/client-api-schema';
 import {calculateChannelId} from '../../src/utils';
-import {Wallet, utils} from 'ethers';
-
-const bigNumberify = utils.bigNumberify;
+import {Wallet} from 'ethers';
 
 type ChannelId = string;
 
