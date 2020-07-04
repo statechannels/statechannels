@@ -679,7 +679,7 @@ contract ForceMove is IForceMove {
         result = uint256(channelData.turnNumRecord) << (cursor -= 48);
 
         // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
-        result |= (channelData.finalizesAt << (cursor -= 48));
+        result |= (uint256(channelData.finalizesAt) << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
         result |= uint256(uint160(uint256(keccak256(abi.encode(channelData)))));
