@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/devtools",
   "description": "Scripts used for our team development processes",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "statechannels",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
@@ -58,7 +58,8 @@
   "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
-    "build:typescript": "tsc -b",
+    "clean-build-folder": "rm -rf ./lib",
+    "build:typescript": "yarn run clean-build-folder && tsc -b",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
