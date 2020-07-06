@@ -178,7 +178,7 @@ const constructFinalState = (store: Store) => async ({opponent: hub}) => {
   return {
     state: {
       ...latestSupportedByMe,
-      turnNum: latestSupportedByMe.turnNum.add(1),
+      turnNum: latestSupportedByMe.turnNum + 1,
       isFinal: true
     }
   };

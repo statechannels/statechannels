@@ -8,7 +8,6 @@ import {JsonRpcProvider} from '@ethersproject/providers';
 import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/store/state-utils';
 import {hexZeroPad} from '@ethersproject/bytes';
-import {Zero} from '@ethersproject/constants';
 import {Player} from '../integration-tests/helpers';
 import {
   ETH_ASSET_HOLDER_ADDRESS,
@@ -88,12 +87,12 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
 
   const state: State = {
     outcome,
-    turnNum: BigNumber.from(5),
+    turnNum: 5,
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: Zero,
+    channelNonce: 0,
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
@@ -133,12 +132,12 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
 
   const state5: State = {
     outcome,
-    turnNum: BigNumber.from(4),
+    turnNum: 4,
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: BigNumber.from(1),
+    channelNonce: 1,
     appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
@@ -146,12 +145,12 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
 
   const state6: State = {
     outcome,
-    turnNum: BigNumber.from(5),
+    turnNum: 5,
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: BigNumber.from(1),
+    channelNonce: 1,
     appDefinition: TRIVIAL_APP_ADDRESS,
     participants: [playerA.participant, playerB.participant]
   };

@@ -53,7 +53,7 @@ const finalJointChannelUpdate = (store: Store) => async ({
     .channelUpdatedFeed(jointChannelId)
     .pipe(
       // Wait for the new update
-      filter(({latest, supported}) => latest.turnNum.gt(supported.turnNum)),
+      filter(({latest, supported}) => latest.turnNum > supported.turnNum),
       // Validate the update
       tap(({latest, supported}: ChannelStoreEntry) => {
         const newItems = checkThat(latest.outcome, isSimpleEthAllocation).allocationItems;

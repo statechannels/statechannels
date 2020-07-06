@@ -1,4 +1,4 @@
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
@@ -53,12 +53,12 @@ beforeEach(async () => {
         amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
       }
     ]),
-    turnNum: BigNumber.from(5),
+    turnNum: 5,
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: Zero,
+    channelNonce: 0,
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]
   };
@@ -82,8 +82,8 @@ it('initializes and starts challenge thing', async () => {
     const {
       channelStorage: {finalizesAt, turnNumRecord}
     } = await fakeChain.getChainInfo(channelId);
-    expect(finalizesAt).toStrictEqual(state.challengeDuration.add(1));
-    expect(turnNumRecord).toStrictEqual(state.turnNum);
+    expect(finalizesAt).toEqual(state.challengeDuration + 1);
+    expect(turnNumRecord).toEqual(state.turnNum);
   }, 10000);
 });
 

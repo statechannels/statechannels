@@ -21,7 +21,7 @@ import {
 } from '@statechannels/wallet-core/lib/src/utils';
 
 import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
-import {BigNumber, BigNumberish} from 'ethers';
+import {BigNumber} from 'ethers';
 import {
   wallet1,
   wallet2,
@@ -39,7 +39,7 @@ import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 const alice = participants[ParticipantIdx.A];
 const bob = participants[ParticipantIdx.B];
@@ -50,7 +50,7 @@ const bobAndHub = [bob, hub];
 
 let channelNonce = 0;
 const channelConstants = (participants: Participant[]): ChannelConstants => ({
-  channelNonce: BigNumber.from(channelNonce++),
+  channelNonce: channelNonce++,
   chainId,
   challengeDuration,
   participants,
@@ -63,18 +63,8 @@ const privateKeys: Record<string, string> = {
   [hub.participantId]: wallet3.privateKey
 };
 
-const state = (
-  constants: ChannelConstants,
-  outcome: Outcome,
-  turnNum: BigNumberish = 0
-): SignedState => {
-  const state = {
-    ...constants,
-    isFinal: false,
-    turnNum: BigNumber.from(turnNum),
-    appData: HashZero,
-    outcome
-  };
+const state = (constants: ChannelConstants, outcome: Outcome, turnNum = 0): SignedState => {
+  const state = {...constants, isFinal: false, turnNum, appData: HashZero, outcome};
 
   return {
     ...state,

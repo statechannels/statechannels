@@ -18,7 +18,6 @@ import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
 import {Store, Errors} from '@statechannels/wallet-core/lib/src/store';
 import {StateVariables} from '@statechannels/wallet-core/lib/src/store/types';
 import {ChannelStoreEntry} from '@statechannels/wallet-core/lib/src/store/channel-store-entry';
-import {BigNumber} from 'ethers';
 
 import {
   PlayerStateUpdate,
@@ -31,7 +30,6 @@ import {
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
-import {Zero} from '@ethersproject/constants';
 import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
@@ -406,12 +404,12 @@ export const workflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: Zero,
+        turnNum: 0,
         isFinal: false
       };
       const {channelId: targetChannelId} = await store.createChannel(
         participants,
-        BigNumber.from(challengeDuration),
+        challengeDuration,
         stateVars,
         appDefinition,
         applicationDomain

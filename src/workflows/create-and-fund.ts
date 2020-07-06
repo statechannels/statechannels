@@ -24,7 +24,6 @@ import {
 } from '@statechannels/wallet-core/lib/src/utils';
 import {Store} from '@statechannels/wallet-core/lib/src/store';
 
-import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
@@ -78,12 +77,7 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
     allocationItems[1]
   ]);
 
-  const stateVars: StateVariables = {
-    turnNum: Zero,
-    outcome,
-    appData: '0x',
-    isFinal: false
-  };
+  const stateVars: StateVariables = {turnNum: 0, outcome, appData: '0x', isFinal: false};
 
   const {channelId: jointChannelId} = await store.createChannel(
     participants,
@@ -218,7 +212,7 @@ const getPreFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Init
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
       map(e => _.sortBy(e.sortedStates, s => s.turnNum)[0]),
-      filter(s => s.turnNum.eq(0)),
+      filter(s => s.turnNum === 0),
       map(state => ({state})),
       first()
     )
@@ -229,8 +223,8 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
       map(e => _.sortBy(e.sortedStates, s => s.turnNum)[0]),
-      filter(s => s.turnNum.eq(0)),
-      map(s => ({state: {...s, turnNum: BigNumber.from(3)}})),
+      filter(s => s.turnNum === 0),
+      map(s => ({state: {...s, turnNum: 3}})),
       first()
     )
     .toPromise();
