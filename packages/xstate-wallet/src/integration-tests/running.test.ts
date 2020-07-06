@@ -55,7 +55,7 @@ test('accepts states when running', async () => {
     Promise.all(
       players.map(async player => {
         expect(player.workflowState).toEqual('running');
-        expect((await player.store.getEntry(channelId)).latest.turnNum.toNumber()).toBe(n);
+        expect((await player.store.getEntry(channelId)).latest.turnNum).toBe(n);
       })
     );
 
@@ -64,17 +64,17 @@ test('accepts states when running', async () => {
 
   hookUpMessaging(playerA, playerB);
 
-  const turnNum = BigNumber.from(5);
+  const turnNum = 5;
   const signedState = players.reduce((state, player) => player.signState(state), {
     outcome,
     turnNum,
     appData: '0x0',
     isFinal: false,
     participants: [playerA.participant, playerB.participant],
-    challengeDuration: BigNumber.from(4),
+    challengeDuration: 4,
     chainId: CHAIN_NETWORK_ID,
     appDefinition: constants.AddressZero,
-    channelNonce: BigNumber.from(4),
+    channelNonce: 4,
     signatures: []
   });
   const {channelId} = await players.map(({store}) => store.addState(signedState))[0];
@@ -96,11 +96,11 @@ test('accepts states when running', async () => {
   await resolveOnResponse(playerA);
   await resolveOnNotification(playerB);
 
-  await expectTurnNumber(turnNum.add(1).toNumber());
+  await expectTurnNumber(turnNum + 1);
 
   await playerB.messagingService.receiveRequest(update, applicationDomain);
   await resolveOnResponse(playerB);
   await resolveOnNotification(playerA);
 
-  await expectTurnNumber(turnNum.add(2).toNumber());
+  await expectTurnNumber(turnNum + 2);
 });

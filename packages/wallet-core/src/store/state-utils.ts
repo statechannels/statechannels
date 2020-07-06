@@ -24,23 +24,15 @@ import _ from 'lodash';
 import {Wallet, BigNumber} from 'ethers';
 import {SignatureEntry} from './channel-store-entry';
 import {logger} from '../logger';
-import {Zero} from '@ethersproject/constants';
+
 function toNitroState(state: State): NitroState {
-  const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
-  const channel = {
-    channelNonce: channelNonce.toString(),
-    chainId,
-    participants: participants.map(x => x.signingAddress)
-  };
+  const {channelNonce, participants, chainId} = state;
+  const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
 
   return {
-    appData: state.appData,
-    isFinal: state.isFinal,
+    ..._.pick(state, 'appData', 'isFinal', 'challengeDuration', 'appDefinition', 'turnNum'),
     outcome: convertToNitroOutcome(state.outcome),
-    challengeDuration: challengeDuration.toNumber(),
-    appDefinition,
-    channel,
-    turnNum: state.turnNum.toNumber()
+    channel
   };
 }
 
@@ -52,9 +44,9 @@ export function fromNitroState(state: NitroState): State {
     isFinal,
     appData,
     outcome: fromNitroOutcome(outcome),
-    turnNum: BigNumber.from(turnNum),
-    challengeDuration: BigNumber.from(challengeDuration),
-    channelNonce: BigNumber.from(channel.channelNonce),
+    turnNum: turnNum,
+    challengeDuration: challengeDuration,
+    channelNonce: Number(channel.channelNonce),
     chainId: channel.chainId,
     participants: channel.participants.map(x => ({
       signingAddress: x,
@@ -76,11 +68,7 @@ export function toNitroSignedState(signedState: SignedState): NitroSignedState[]
 export function calculateChannelId(channelConstants: ChannelConstants): string {
   const {chainId, channelNonce, participants} = channelConstants;
   const addresses = participants.map(p => p.signingAddress);
-  return getChannelId({
-    chainId,
-    channelNonce: channelNonce.toString(),
-    participants: addresses
-  });
+  return getChannelId({chainId, channelNonce, participants: addresses});
 }
 
 export function createSignatureEntry(state: State, privateKey: string): SignatureEntry {
@@ -147,7 +135,7 @@ export const firstState = (
 ): State => ({
   appData: appData || '0x',
   isFinal: false,
-  turnNum: Zero,
+  turnNum: 0,
   chainId: chainId || '0x01',
   channelNonce,
   challengeDuration,
@@ -233,5 +221,5 @@ export function nextState(state: State, outcome: Outcome) {
     throw new Error('Attempting to change outcome type');
   }
 
-  return {...state, turnNum: state.turnNum.add(1), outcome};
+  return {...state, turnNum: state.turnNum + 1, outcome};
 }

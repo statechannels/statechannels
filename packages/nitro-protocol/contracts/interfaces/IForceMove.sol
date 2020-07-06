@@ -3,7 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
 
-
 /**
  * @dev The IForceMove contract abstraction defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
  */
@@ -17,14 +16,14 @@ abstract contract IForceMove {
     struct FixedPart {
         uint256 chainId;
         address[] participants;
-        uint256 channelNonce;
+        uint48 channelNonce;
         address appDefinition;
-        uint256 challengeDuration;
+        uint48 challengeDuration;
     }
 
     struct State {
         // participants sign the hash of this
-        uint256 turnNum;
+        uint48 turnNum;
         bool isFinal;
         bytes32 channelId; // keccack(chainId,participants,channelNonce)
         bytes32 appPartHash;
@@ -38,8 +37,8 @@ abstract contract IForceMove {
     }
 
     struct ChannelData {
-        uint256 turnNumRecord;
-        uint256 finalizesAt;
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
         address challengerAddress;
         bytes32 outcomeHash;
@@ -144,8 +143,8 @@ abstract contract IForceMove {
     event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or checkpoint
-        uint256 turnNumRecord,
-        uint256 finalizesAt,
+        uint48 turnNumRecord,
+        uint48 finalizesAt,
         address challenger,
         bool isFinal,
         FixedPart fixedPart,
@@ -159,7 +158,7 @@ abstract contract IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @param newTurnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      */
-    event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+    event ChallengeCleared(bytes32 indexed channelId, uint48 newTurnNumRecord);
 
     /**
      * @dev Indicates that a challenge has been registered against `channelId`.

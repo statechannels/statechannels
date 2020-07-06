@@ -99,7 +99,7 @@ const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportSta
     state: {
       ...channelConstants,
       ...ledgerState,
-      turnNum: ledgerState.turnNum.add(1),
+      turnNum: ledgerState.turnNum + 1,
       outcome: allocateToTarget(ledgerState.outcome, deductions, targetChannelId)
     }
   };

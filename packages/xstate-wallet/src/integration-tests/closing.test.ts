@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import {State, SignedState} from '@statechannels/wallet-core/lib/src/store/types';
 import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 require('fake-indexeddb/auto');
 import {Backend} from '@statechannels/wallet-core/lib/src/store/dexie-backend';
@@ -43,12 +43,12 @@ test('concludes on their turn', async () => {
   hookUpMessaging(playerA, playerB);
   const state: State = {
     outcome,
-    turnNum: BigNumber.from(5),
+    turnNum: 5,
     appData: '0x0',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
-    channelNonce: Zero,
+    channelNonce: 0,
     appDefinition: AddressZero,
     participants: [playerA.participant, playerB.participant]
   };

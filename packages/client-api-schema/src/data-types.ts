@@ -22,6 +22,8 @@ export type ExternalDestination = string; // currently unused in this schema
  */
 export type Bytes32 = string;
 
+export type Uint48 = number;
+
 /**
  * Uint256
  * @pattern  ^0x([a-fA-F0-9]{64})$
@@ -85,7 +87,7 @@ export interface ChannelResult {
   appDefinition: Address;
   channelId: ChannelId;
   status: ChannelStatus;
-  turnNum: Uint256;
+  turnNum: Uint48;
   challengeExpirationTime?: number;
 }
 

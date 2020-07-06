@@ -7,7 +7,7 @@ import {
   calculateChannelId
 } from '@statechannels/wallet-core/lib/src/store/state-utils';
 import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
-import {AddressZero, Zero} from '@ethersproject/constants';
+import {AddressZero} from '@ethersproject/constants';
 import {
   add,
   simpleEthAllocation,
@@ -38,11 +38,11 @@ jest.setTimeout(20000);
 
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
-const challengeDuration = BigNumber.from(10);
+const challengeDuration = 10;
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: Zero,
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants: targetParticipants,
@@ -50,7 +50,7 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 const jointChannel: ChannelConstants = {
-  channelNonce: Zero,
+  channelNonce: 0,
   chainId,
   challengeDuration,
   participants: jointParticipants,

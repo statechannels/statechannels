@@ -6,11 +6,11 @@ import {
   ChallengeRegisteredEvent,
   SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
-import {Contract, Wallet, BigNumber, BigNumberish, utils} from 'ethers';
+import {Contract, Wallet, BigNumber, utils} from 'ethers';
 
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
-import {One, Zero} from '@ethersproject/constants';
+import {Zero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
@@ -25,12 +25,12 @@ import {logger} from './logger';
 export interface ChannelChainInfo {
   readonly amount: BigNumber;
   readonly channelStorage: {
-    turnNumRecord: BigNumber;
-    finalizesAt: BigNumber;
+    turnNumRecord: number;
+    finalizesAt: number;
     /* fingerprint: string */
   };
   readonly finalized: boolean; // this is a check on 0 < finalizesAt <= now
-  readonly blockNum: BigNumber; // blockNum that the information is from
+  readonly blockNum: number; // blockNum that the information is from
 }
 
 export interface Chain {
@@ -47,7 +47,7 @@ export interface Chain {
   initialize(): Promise<void>;
 
   // Chain Methods
-  getBlockNumber: () => Promise<BigNumber>;
+  getBlockNumber: () => Promise<number>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<string | undefined>;
   challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
@@ -57,12 +57,12 @@ export interface Chain {
 
 type Updated = ChannelChainInfo & {channelId: string};
 
-type ChallengeRegistered = {channelId: string; challengeState: State; challengeExpiry: BigNumber};
+type ChallengeRegistered = {channelId: string; challengeState: State; challengeExpiry: number};
 // type ChallengeCleared = {channelId: string};
 // type Concluded = {channelId: string};
 
 export class FakeChain implements Chain {
-  private blockNumber: BigNumber = One;
+  private blockNumber = 1;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
     updated: [Updated];
@@ -82,14 +82,15 @@ export class FakeChain implements Chain {
     return this.blockNumber;
   }
 
-  public setBlockNumber(blockNumber: BigNumberish) {
-    this.blockNumber = BigNumber.from(blockNumber);
+  public setBlockNumber(blockNumber: number) {
+    this.blockNumber = blockNumber;
 
     for (const channelId in this.channelStatus) {
       const {
         channelStorage: {finalizesAt}
       } = this.channelStatus[channelId];
-      if (finalizesAt.gt(0) && finalizesAt.lte(blockNumber)) {
+      // FIXME: shouldn't this be block timestamp?
+      if (finalizesAt > 0 && finalizesAt <= blockNumber) {
         this.channelStatus[channelId] = {...this.channelStatus[channelId], finalized: true};
         this.eventEmitter.emit('updated', {channelId, ...this.channelStatus[channelId]});
       }
@@ -110,9 +111,9 @@ export class FakeChain implements Chain {
       ...(this.channelStatus[channelId] || {}),
       channelStorage: {
         turnNumRecord: turnNum,
-        finalizesAt: this.blockNumber.add(challengeDuration)
+        finalizesAt: this.blockNumber + challengeDuration
       },
-      finalized: challengeDuration.eq(0)
+      finalized: challengeDuration === 0
     };
 
     this.eventEmitter.emit('updated', {channelId, ...this.channelStatus[channelId]});
@@ -120,7 +121,7 @@ export class FakeChain implements Chain {
     this.eventEmitter.emit('challengeRegistered', {
       channelId,
       challengeState: support[support.length - 1],
-      challengeExpiry: this.blockNumber.add(challengeDuration)
+      challengeExpiry: this.blockNumber + challengeDuration
     });
 
     return 'fake-transaction-id';
@@ -144,7 +145,7 @@ export class FakeChain implements Chain {
     return;
   }
 
-  public finalizeSync(channelId: string, turnNum: BigNumber = Zero) {
+  public finalizeSync(channelId: string, turnNum = 0) {
     this.channelStatus[channelId] = {
       ...(this.channelStatus[channelId] || {}),
       channelStorage: {
@@ -173,13 +174,13 @@ export class FakeChain implements Chain {
     const {amount, channelStorage} = this.channelStatus[channelId] || {};
     return {
       channelStorage: channelStorage || {
-        turnNumRecord: Zero,
-        finalizesAt: Zero
+        turnNumRecord: 0,
+        finalizesAt: 0
       },
       finalized:
         channelStorage &&
-        channelStorage.finalizesAt.gt(0) &&
-        channelStorage.finalizesAt.lte(this.blockNumber),
+        channelStorage.finalizesAt > 0 &&
+        channelStorage.finalizesAt <= this.blockNumber,
       blockNum: this.blockNumber,
       amount: amount || Zero
     };
@@ -295,7 +296,7 @@ export class ChainWatcher implements Chain {
   }
 
   public async getBlockNumber() {
-    return BigNumber.from(await this.provider.getBlockNumber());
+    return this.provider.getBlockNumber();
   }
 
   public async ethereumEnable(): Promise<string> {
@@ -400,7 +401,7 @@ export class ChainWatcher implements Chain {
 
     const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
 
-    const blockNum = BigNumber.from(await this.provider.getBlockNumber());
+    const blockNum = await this.provider.getBlockNumber();
     chainLogger.trace(
       {
         amount,
@@ -474,7 +475,7 @@ export class ChainWatcher implements Chain {
       map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) => ({
         channelId,
         challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state),
-        challengeExpiry: BigNumber.from(finalizesAt)
+        challengeExpiry: finalizesAt
       }))
     );
 

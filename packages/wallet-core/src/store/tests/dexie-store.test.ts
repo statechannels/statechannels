@@ -10,7 +10,6 @@ import {simpleEthAllocation, makeDestination} from '../../utils';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {Errors} from '..';
-import {Zero} from '@ethersproject/constants';
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -26,7 +25,7 @@ const outcome = simpleEthAllocation([
   {destination: aDestination, amount: BigNumber.from(5)},
   {destination: bDestination, amount: BigNumber.from(6)}
 ]);
-const turnNum = BigNumber.from(4);
+const turnNum = 4;
 const appData = '0xabc';
 const isFinal = false;
 const chainId = CHAIN_NETWORK_ID;
@@ -35,10 +34,10 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = Zero;
+const channelNonce = 0;
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
-const challengeDuration = BigNumber.from(CHALLENGE_DURATION);
+const challengeDuration = CHALLENGE_DURATION;
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
@@ -149,7 +148,7 @@ describe('signAndAdd', () => {
   it('returns the new entry when successful', async () => {
     const {channelId, latest} = entry;
 
-    const turnNum = latest.turnNum.add(5);
+    const turnNum = latest.turnNum + 5;
     const newEntry = await store.signAndAddState(channelId, {...latest, turnNum});
 
     expect(newEntry.latestSignedByMe.turnNum.toString()).toMatch(turnNum.toString());
@@ -158,24 +157,22 @@ describe('signAndAdd', () => {
   it('reverts if the state is stale', async () => {
     const {channelId, latest} = entry;
     const expectStateTurnNums = async turnNums =>
-      expect((await store.getEntry(channelId)).sortedStates.map(s => s.turnNum.toNumber())).toEqual(
-        turnNums
-      );
+      expect((await store.getEntry(channelId)).sortedStates.map(s => s.turnNum)).toEqual(turnNums);
 
-    await expectStateTurnNums([latest.turnNum.toNumber()]);
+    await expectStateTurnNums([latest.turnNum]);
 
-    const turnNum = latest.turnNum.add(5);
+    const turnNum = latest.turnNum + 5;
     const {latestSignedByMe} = await store.signAndAddState(channelId, {...latest, turnNum});
-    await expectStateTurnNums([turnNum.toNumber(), latest.turnNum.toNumber()]);
+    await expectStateTurnNums([turnNum, latest.turnNum]);
 
-    const staleTurnNum = latestSignedByMe.turnNum.sub(2);
+    const staleTurnNum = latestSignedByMe.turnNum - 2;
 
     await expect(store.signAndAddState(channelId, latest)).rejects.toThrow(Errors.staleState);
     await expect(
       store.signAndAddState(channelId, {...latest, turnNum: staleTurnNum})
     ).rejects.toThrow(Errors.staleState);
 
-    await expectStateTurnNums([turnNum.toNumber(), latest.turnNum.toNumber()]);
+    await expectStateTurnNums([turnNum, latest.turnNum]);
   });
 });
 
@@ -185,11 +182,11 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: Zero},
+      {...signedState, turnNum: 0},
       signedState.appDefinition
     );
 
-    const nextState = {...state, turnNum: state.turnNum.add(2)};
+    const nextState = {...state, turnNum: state.turnNum + 2};
     await store.pushMessage({
       signedStates: [{...nextState, signatures: [createSignatureEntry(nextState, bPrivateKey)]}]
     });

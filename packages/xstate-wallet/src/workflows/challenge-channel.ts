@@ -10,11 +10,9 @@ import {
   actions
 } from 'xstate';
 import {map} from 'rxjs/operators';
-import {Zero} from '@ethersproject/constants';
 
 import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
-import {BigNumber} from 'ethers';
 
 const {log} = actions;
 export interface Initial {
@@ -54,15 +52,15 @@ export type StateValue = keyof Schema['states'];
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
-  turnNumRecord: BigNumber;
-  finalizesAt: BigNumber;
+  turnNumRecord: number;
+  finalizesAt: number;
   finalized: boolean;
 }
 
 const noChallengeOnchain: Guard<Initial, ChainEvent> = {
   type: 'xstate.guard',
   name: 'noChallengeOnchain',
-  predicate: (context, {finalizesAt}) => finalizesAt.lte(Zero)
+  predicate: (context, {finalizesAt}) => finalizesAt === 0
 };
 
 // const someOtherChallengeOnchain: Guard<Initial, ChainEvent> = {
@@ -74,7 +72,7 @@ const noChallengeOnchain: Guard<Initial, ChainEvent> = {
 const challengeOnchainAsExpected: Guard<Initial, ChainEvent> = {
   type: 'xstate.guard',
   name: 'challengeOnchainAsExpected',
-  predicate: (context, {finalizesAt, finalized}) => finalizesAt.gt(0) && !finalized
+  predicate: (context, {finalizesAt, finalized}) => finalizesAt > 0 && !finalized
 };
 
 const challengeFinalized: Guard<Initial, ChainEvent> = {

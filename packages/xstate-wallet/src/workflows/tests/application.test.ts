@@ -1,5 +1,5 @@
 import {interpret} from 'xstate';
-import {ethers, BigNumber} from 'ethers';
+import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {StateVariables, isOpenChannel} from '@statechannels/wallet-core/lib/src/store/types';
@@ -23,7 +23,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       appDefinition: ethers.constants.AddressZero,
       participants,
       outcome: simpleEthAllocation([]),
-      challengeDuration: BigNumber.from(500),
+      challengeDuration: 500,
       requestId: 5,
       fundingStrategy: 'Direct',
       applicationDomain: 'localhost'

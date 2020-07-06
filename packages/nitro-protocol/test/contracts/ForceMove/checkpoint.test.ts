@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {defaultAbiCoder} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -96,7 +96,7 @@ describe('checkpoint', () => {
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
   `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
     const {appDatas, whoSignedWhat} = support;
-    const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+    const channel: Channel = {chainId, channelNonce, participants};
     const channelId = getChannelId(channel);
 
     const states = appDatas.map((data, idx) => ({
@@ -148,7 +148,7 @@ describe('checkpoint', () => {
       const event = receipt.events.pop();
       expect(event.args).toMatchObject({
         channelId,
-        newTurnNumRecord: bigNumberify(largestTurnNum),
+        newTurnNumRecord: largestTurnNum,
       });
 
       const expectedChannelStorageHash = channelDataToChannelStorageHash({

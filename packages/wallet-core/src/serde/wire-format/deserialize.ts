@@ -36,9 +36,6 @@ export function deserializeState(state: SignedStateWire): SignedState {
   delete stateWithoutChannelId.channelId;
   const deserializedState = {
     ...stateWithoutChannelId,
-    challengeDuration: BigNumber.from(state.challengeDuration),
-    channelNonce: BigNumber.from(state.channelNonce),
-    turnNum: BigNumber.from(state.turnNum),
     outcome: deserializeOutcome(state.outcome),
     participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
   };

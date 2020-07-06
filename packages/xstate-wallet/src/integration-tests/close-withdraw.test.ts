@@ -36,7 +36,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     CHALLENGE_DURATION,
     {
       outcome,
-      turnNum: BigNumber.from(20),
+      turnNum: 20,
       isFinal: false,
       appData: '0x0'
     }
@@ -94,7 +94,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
 
   // Verify that the blockchain is correct
   const chainView = await playerA.store.chain.getChainInfo(ledgerChannel.channelId);
-  expect(chainView.channelStorage.finalizesAt.gt(0)).toBe(true);
+  expect(chainView.channelStorage.finalizesAt > 0).toBe(true);
   expect(chainView.amount.eq(0)).toBe(true);
 
   // Check the channel is finalized

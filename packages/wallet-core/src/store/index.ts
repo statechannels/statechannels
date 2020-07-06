@@ -9,7 +9,7 @@ export * from './types';
 export function supportedStateFeed(store: Store, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
     filter(e => !!e.supported),
-    map(e => ({state: {...(e.supported as StateVariables), ...e.channelConstants}}))
+    map(e => ({state: {...e.channelConstants, ...(e.supported as StateVariables)}}))
   );
 }
 

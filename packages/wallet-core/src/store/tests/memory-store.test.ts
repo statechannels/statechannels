@@ -6,7 +6,6 @@ import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
 import {Wallet, BigNumber} from 'ethers';
 import {Store} from './../store';
-import {Zero} from '@ethersproject/constants';
 import {Errors} from '..';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -22,7 +21,7 @@ const outcome = simpleEthAllocation([
   {destination: aDestination, amount: BigNumber.from(5)},
   {destination: bDestination, amount: BigNumber.from(6)}
 ]);
-const turnNum = BigNumber.from(4);
+const turnNum = 4;
 const appData = '0xabc';
 const isFinal = false;
 const chainId = CHAIN_NETWORK_ID;
@@ -31,10 +30,10 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = Zero;
+const channelNonce = 0;
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
-const challengeDuration = BigNumber.from(CHALLENGE_DURATION);
+const challengeDuration = CHALLENGE_DURATION;
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
@@ -139,11 +138,11 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: Zero},
+      {...signedState, turnNum: 0},
       signedState.appDefinition
     );
 
-    const nextState = {...state, turnNum: state.turnNum.add(2)};
+    const nextState = {...state, turnNum: state.turnNum + 2};
     await store.pushMessage({
       signedStates: [{...nextState, signatures: [createSignatureEntry(nextState, bPrivateKey)]}]
     });

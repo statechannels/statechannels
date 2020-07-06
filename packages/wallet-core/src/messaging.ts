@@ -30,7 +30,6 @@ import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 
-import {BigNumber} from 'ethers';
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
 
 import {Store} from './store';
@@ -296,7 +295,7 @@ async function convertToInternalEvent(
         ...request.params,
         participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
-        challengeDuration: BigNumber.from(CHALLENGE_DURATION),
+        challengeDuration: CHALLENGE_DURATION,
         chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
         applicationDomain: domain

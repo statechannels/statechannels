@@ -22,8 +22,6 @@ import {
 
 import {FundGuarantor, AllocationItem} from '@statechannels/wallet-core/lib/src/store/types';
 
-import {BigNumber} from 'ethers';
-import {Zero} from '@ethersproject/constants';
 import {CHALLENGE_DURATION} from '../config';
 
 import {escalate} from '../actions';
@@ -60,7 +58,7 @@ const getFundGuarantorObjective = (store: Store) => async (ctx: Init): Promise<F
     jointParticipants[ParticipantIdx.Hub].participantId
   );
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
-    turnNum: Zero,
+    turnNum: 0,
     appData: '0x',
     isFinal: false,
     outcome: simpleEthGuarantee(
@@ -182,7 +180,7 @@ export const waitForFirstJointState = (store: Store) => ({
     .channelUpdatedFeed(jointChannelId)
     .pipe(
       flatMap(e => e.sortedStates),
-      filter(({turnNum}) => turnNum.eq(0)),
+      filter(({turnNum}) => turnNum === 0),
       tap(({outcome, participants}) => {
         const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
         const destinations = allocationItems.map(i => i.destination);
@@ -211,7 +209,7 @@ export const jointChannelUpdate = (store: Store) => ({
 }: Init): Promise<SupportState.Init> =>
   supportedStateFeed(store, jointChannelId)
     .pipe(
-      filter(({state}) => state.turnNum.eq(0)),
+      filter(({state}) => state.turnNum === 0),
       map(({state}) => {
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
         const amount = oldOutcome.allocationItems[OutcomeIdx.Hub].amount;
@@ -219,7 +217,7 @@ export const jointChannelUpdate = (store: Store) => ({
           {destination: makeDestination(targetChannelId), amount},
           {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
-        return {state: {...state, turnNum: BigNumber.from(1), outcome}};
+        return {state: {...state, turnNum: 1, outcome}};
       }),
       take(1)
     )

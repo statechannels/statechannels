@@ -81,7 +81,7 @@ beforeAll(async () => {
 //   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
 const description2 =
   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 2x Asset types transferred';
-const channelNonce = '1101';
+const channelNonce = 1101;
 const storedTurnNumRecord = 5;
 const declaredTurnNumRecord = storedTurnNumRecord;
 const finalized = true;

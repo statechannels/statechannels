@@ -175,16 +175,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           ...entry.latest,
           ...entry.channelConstants,
           outcome,
-          turnNum: entry.latest.turnNum.add(1)
+          turnNum: entry.latest.turnNum + 1
         }
       };
     } else {
       return {
         state: {
           ...entry.channelConstants,
-          challengeDuration: BigNumber.from(1),
+          challengeDuration: 1,
           isFinal: false,
-          turnNum: Zero,
+          turnNum: 0,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: HashZero,
           appDefinition: AddressZero
@@ -198,7 +198,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     return {
       state: {
         ...supported,
-        turnNum: supported.turnNum.add(1),
+        turnNum: supported.turnNum + 1,
         outcome: mergeDestinations(supported.outcome as SimpleAllocation)
       }
     };

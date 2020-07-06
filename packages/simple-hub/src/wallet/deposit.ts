@@ -6,13 +6,13 @@ import {
   SimpleAllocation,
   makeDestination
 } from './xstate-wallet-internals';
-import {ethers, BigNumber} from 'ethers';
+import {BigNumber} from 'ethers';
 import {cHubChainDestination} from '../constants';
 import _ from 'lodash/fp';
 
 interface SimpleAllocationStateVariables {
   outcome: SimpleAllocation;
-  turnNum: BigNumber;
+  turnNum: number;
   appData: string;
   isFinal: boolean;
 }
@@ -36,7 +36,7 @@ export function depositsToMake(
           state.outcome.allocationItems
         ) === 0
     )
-    .filter(state => state.turnNum.eq(ethers.constants.Zero))
+    .filter(state => state.turnNum === 0)
     .map(state => ({
       channelId: calculateChannelId(state),
       amountToDeposit: state.outcome.allocationItems[0].amount

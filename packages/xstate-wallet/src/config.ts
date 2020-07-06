@@ -1,5 +1,4 @@
 import {AddressZero} from '@ethersproject/constants';
-import {BigNumber} from 'ethers';
 import {Destination} from '@statechannels/wallet-core/lib/src/store';
 
 // TODO: Use getEnvBool from devtools once working
@@ -50,7 +49,7 @@ export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || Ad
 
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
-export const CHALLENGE_DURATION = BigNumber.from(process.env.CHALLENGE_DURATION || '0x12c');
+export const CHALLENGE_DURATION = Number(process.env.CHALLENGE_DURATION || '0x12c');
 
 export const JEST_WORKER_ID: string | undefined = process.env.JEST_WORKER_ID;
 

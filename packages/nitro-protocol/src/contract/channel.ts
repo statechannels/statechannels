@@ -1,8 +1,8 @@
 import {utils} from 'ethers';
-import {Address, Bytes32, Uint256} from './types';
+import {Address, Bytes32, Uint256, Uint48} from './types';
 
 export interface Channel {
-  channelNonce: Uint256;
+  channelNonce: Uint48;
   participants: Address[];
   chainId: Uint256;
 }

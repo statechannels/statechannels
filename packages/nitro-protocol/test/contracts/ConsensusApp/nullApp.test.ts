@@ -22,7 +22,7 @@ describe('null app', () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
       chainId: '0x1',
-      channelNonce: '0x1',
+      channelNonce: 0x1,
     };
     const fromState: State = {
       channel,

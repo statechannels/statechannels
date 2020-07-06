@@ -340,13 +340,13 @@
           "type": "string"
         },
         "challengeDuration": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint48"
         },
         "channelId": {
           "$ref": "#/definitions/Bytes32"
         },
         "channelNonce": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint48"
         },
         "isFinal": {
           "type": "boolean"
@@ -367,7 +367,7 @@
           "type": "array"
         },
         "turnNum": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint48"
         }
       },
       "required": [
@@ -389,6 +389,9 @@
       "description": "Uint256",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
+    },
+    "Uint48": {
+      "type": "number"
     },
     "VirtuallyFund": {
       "additionalProperties": false,

@@ -24,9 +24,7 @@ import {
   Message
 } from '@statechannels/client-api-schema';
 import {calculateChannelId} from '../../src/utils';
-import {Wallet, utils} from 'ethers';
-
-const bigNumberify = utils.bigNumberify;
+import {Wallet} from 'ethers';
 
 type ChannelId = string;
 
@@ -170,11 +168,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.opponentIndex[channelId];
   }
 
-  public verifyTurnNum(channelId: ChannelId, turnNum: string): Promise<void> {
-    const currentTurnNum = bigNumberify(turnNum);
-    if (currentTurnNum.mod(2).eq(this.getPlayerIndex(channelId))) {
+  public verifyTurnNum(channelId: ChannelId, turnNum: number): Promise<void> {
+    if (turnNum % 2 === this.getPlayerIndex(channelId)) {
       return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex[channelId]}`
+        `Not your turn: currentTurnNum = ${turnNum}, index = ${this.playerIndex[channelId]}`
       );
     }
     return Promise.resolve();
@@ -199,7 +196,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       appDefinition,
       appData,
       channelId: calculateChannelId(participants, appDefinition),
-      turnNum: bigNumberify(0).toString(),
+      turnNum: 0,
       status: 'proposed'
     };
     this.updatePlayerIndex(channel.channelId, 0);
@@ -222,7 +219,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     // [assuming we're working with 2-participant channels for the time being]
     this.setState({
       ...latestState,
-      turnNum: bigNumberify(3).toString(),
+      turnNum: 3,
       status: 'running'
     });
     this.opponentAddress[channelId] = latestState.participants[0].participantId;
@@ -246,9 +243,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
     const nextState = {...latestState, participants, allocations, appData};
     await this.verifyTurnNum(channelId, latestState.turnNum);
-    nextState.turnNum = bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
+    nextState.turnNum = latestState.turnNum + 1;
     log.debug(
       `Player ${this.getPlayerIndex(channelId)} updated channel to turnNum ${nextState.turnNum}`
     );
@@ -263,9 +258,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const latestState = this.findChannel(params.channelId);
 
     await this.verifyTurnNum(params.channelId, latestState.turnNum);
-    const turnNum = bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
+    const turnNum = latestState.turnNum + 1;
 
     const status = 'closing';
 
@@ -312,9 +305,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       this.setState(params.data);
       this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
       const channel: ChannelResult = params.data;
-      const turnNum = bigNumberify(channel.turnNum)
-        .add(1)
-        .toString();
+      const turnNum = channel.turnNum + 1;
       switch (params.data.status) {
         case 'proposed':
           this.events.emit('ChannelProposed', channel);

@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {defaultAbiCoder} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -88,7 +88,7 @@ describe('respond', () => {
       slotEmpty,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+      const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
@@ -142,7 +142,7 @@ describe('respond', () => {
 
         expect(event.args).toMatchObject({
           channelId,
-          newTurnNumRecord: bigNumberify(turnNumRecord + 1),
+          newTurnNumRecord: turnNumRecord + 1,
         });
 
         // Compute and check new expected ChannelDataHash

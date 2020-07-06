@@ -102,7 +102,7 @@ describe('conclude', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
-      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
+      const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;

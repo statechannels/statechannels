@@ -6,16 +6,16 @@ import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
-  * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
-  * The following transitions are allowed:
-  *
-  * Start -> RoundProposed  [ PROPOSE ]
-  * RoundProposed -> Start  [ REJECT ]
-  * RoundProposed -> RoundAccepted [ ACCEPT ]
-  * RoundAccepted -> Reveal [ REVEAL ]
-  * Reveal -> Start [ FINISH ]
-  *
-*/
+ * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
+ * The following transitions are allowed:
+ *
+ * Start -> RoundProposed  [ PROPOSE ]
+ * RoundProposed -> Start  [ REJECT ]
+ * RoundProposed -> RoundAccepted [ ACCEPT ]
+ * RoundAccepted -> Reveal [ REVEAL ]
+ * Reveal -> Start [ FINISH ]
+ *
+ */
 contract RockPaperScissors is ForceMoveApp {
     using SafeMath for uint256;
 
@@ -32,28 +32,28 @@ contract RockPaperScissors is ForceMoveApp {
     }
 
     /**
-    * @notice Decodes the appData.
-    * @dev Decodes the appData.
-    * @param appDataBytes The abi.encode of a RPSData struct describing the application-specific data.
-    * @return An RPSData struct containing the application-specific data.
-    */
+     * @notice Decodes the appData.
+     * @dev Decodes the appData.
+     * @param appDataBytes The abi.encode of a RPSData struct describing the application-specific data.
+     * @return An RPSData struct containing the application-specific data.
+     */
     function appData(bytes memory appDataBytes) internal pure returns (RPSData memory) {
         return abi.decode(appDataBytes, (RPSData));
     }
 
     /**
-    * @notice Encodes the RPS update rules.
-    * @dev Encodes the RPS update rules.
-    * @param fromPart State being transitioned from.
-    * @param toPart State being transitioned to.
-    * @return true if the transition conforms to the rules, false otherwise.
-    */
+     * @notice Encodes the RPS update rules.
+     * @dev Encodes the RPS update rules.
+     * @param fromPart State being transitioned from.
+     * @param toPart State being transitioned to.
+     * @return true if the transition conforms to the rules, false otherwise.
+     */
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256, /* turnNumB */
-        uint256  /* nParticipants */
-    ) public pure override returns (bool) {
+        uint48, /* turnNumB */
+        uint256 /* nParticipants */
+    ) public override pure returns (bool) {
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
         _requireDestinationsUnchanged(fromAllocation, toAllocation);
@@ -142,7 +142,7 @@ contract RockPaperScissors is ForceMoveApp {
 
         // Since Player A has the unique privilege of knowing the result of the game after receiving this 'to' state,
         // Player B should modify the allocations as if they had won the game and Player A had lost.
-        // This is to incentivize Player A to continue with the REVEAL (rather than disconnecting) 
+        // This is to incentivize Player A to continue with the REVEAL (rather than disconnecting)
         // in the case where Player A knows they have lost.
         require(
             toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake),
@@ -152,7 +152,6 @@ contract RockPaperScissors is ForceMoveApp {
             toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake),
             'Allocation for player B should be incremented by 1x stake.'
         );
-
     }
 
     function requireValidREVEAL(
@@ -175,11 +174,14 @@ contract RockPaperScissors is ForceMoveApp {
         // First, undo this
         uint256 correctAmountA = fromAllocation[0].amount.add(fromGameData.stake);
         uint256 correctAmountB = fromAllocation[1].amount.sub(fromGameData.stake);
-    
-        // Next, transfer one "stake" from Loser to Winner     
+
+        // Next, transfer one "stake" from Loser to Winner
         if (toGameData.aWeapon == toGameData.bWeapon) {
             // a draw
-        } else if ((toGameData.aWeapon == Weapon.Rock && toGameData.bWeapon == Weapon.Scissors) || (toGameData.aWeapon > toGameData.bWeapon)) {
+        } else if (
+            (toGameData.aWeapon == Weapon.Rock && toGameData.bWeapon == Weapon.Scissors) ||
+            (toGameData.aWeapon > toGameData.bWeapon)
+        ) {
             // player A won
             correctAmountA = correctAmountA.add(fromGameData.stake);
             correctAmountB = correctAmountB.sub(fromGameData.stake);
@@ -216,7 +218,10 @@ contract RockPaperScissors is ForceMoveApp {
         pure
         returns (Outcome.AllocationItem[] memory)
     {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(variablePart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcome = abi.decode(
+            variablePart.outcome,
+            (Outcome.OutcomeItem[])
+        );
         require(outcome.length == 1, 'RockPaperScissors: Only one asset allowed');
 
         Outcome.AssetOutcome memory assetOutcome = abi.decode(

@@ -15,7 +15,7 @@ export interface State {
 export interface FixedPart {
   chainId: Uint256;
   participants: Address[];
-  channelNonce: Uint256;
+  channelNonce: Uint48;
   appDefinition: Address;
   challengeDuration: Uint48;
 }

@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 import './interfaces/IForceMove.sol';
 import './interfaces/ForceMoveApp.sol';
 
-
 /**
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
  */
@@ -24,7 +23,11 @@ contract ForceMove is IForceMove {
     function getChannelStorage(bytes32 channelId)
         public
         view
-        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
+        returns (
+            uint48 turnNumRecord,
+            uint48 finalizesAt,
+            uint160 fingerprint
+        )
     {
         (turnNumRecord, finalizesAt, fingerprint) = _getChannelStorage(channelId);
     }
@@ -76,10 +79,11 @@ contract ForceMove is IForceMove {
         );
 
         // effects
+
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
-            now + fixedPart.challengeDuration,
+            uint48(now) + fixedPart.challengeDuration,
             challenger,
             isFinalCount > 0,
             fixedPart,
@@ -91,7 +95,7 @@ contract ForceMove is IForceMove {
         channelStorageHashes[channelId] = _hashChannelData(
             ChannelData(
                 largestTurnNum,
-                now + fixedPart.challengeDuration,
+                uint48(now) + fixedPart.challengeDuration,
                 supportedStateHash,
                 challenger,
                 keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
@@ -116,7 +120,7 @@ contract ForceMove is IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public override{
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
 
@@ -188,7 +192,7 @@ contract ForceMove is IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public override{
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -233,7 +237,7 @@ contract ForceMove is IForceMove {
 
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
-        for (uint256 i = 0; i < numStates; i++) {
+        for (uint48 i = 0; i < numStates; i++) {
             stateHashes[i] = keccak256(
                 abi.encode(
                     State(
@@ -261,7 +265,7 @@ contract ForceMove is IForceMove {
 
         // effects
         channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, now, bytes32(0), address(0), outcomeHash)
+            ChannelData(0, uint48(now), bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
     }
@@ -318,7 +322,7 @@ contract ForceMove is IForceMove {
      * @return true if the signatures are valid, false otherwise
      */
     function _validSignatures(
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         address[] memory participants,
         bytes32[] memory stateHashes,
         Signature[] memory sigs,
@@ -351,7 +355,7 @@ contract ForceMove is IForceMove {
      */
     function _acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         uint256 nParticipants,
         uint256 nStates
     ) internal pure returns (bool) {
@@ -398,7 +402,7 @@ contract ForceMove is IForceMove {
      * @return The hash of the latest state in the proof, if supported, else reverts.
      */
     function _requireStateSupportedBy(
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
@@ -441,18 +445,18 @@ contract ForceMove is IForceMove {
     function _requireValidTransitionChain(
         // returns stateHashes array if valid
         // else, reverts
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
         FixedPart memory fixedPart
     ) internal pure returns (bytes32[] memory) {
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
-        uint256 firstFinalTurnNum = largestTurnNum - isFinalCount + 1;
-        uint256 turnNum;
+        uint48 firstFinalTurnNum = largestTurnNum - isFinalCount + 1;
+        uint48 turnNum;
 
-        for (uint256 i = 0; i < variableParts.length; i++) {
-            turnNum = largestTurnNum - variableParts.length + 1 + i;
+        for (uint48 i = 0; i < variableParts.length; i++) {
+            turnNum = largestTurnNum - uint48(variableParts.length) + 1 + i;
             stateHashes[i] = _hashState(
                 turnNum,
                 turnNum >= firstFinalTurnNum,
@@ -489,7 +493,7 @@ contract ForceMove is IForceMove {
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         ForceMoveApp.VariablePart[2] memory ab, // [a,b]
-        uint256 turnNumB,
+        uint48 turnNumB,
         address appDefinition
     ) internal pure returns (bool) {
         // a prior check on the signatures for the submitted states implies that the following fields are equal for a and b:
@@ -546,7 +550,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      * @param newTurnNumRecord New turnNumRecord to overwrite existing value
      */
-    function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
+    function _clearChallenge(bytes32 channelId, uint48 newTurnNumRecord) internal {
         channelStorageHashes[channelId] = _hashChannelData(
             ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
@@ -675,7 +679,7 @@ contract ForceMove is IForceMove {
         result = uint256(channelData.turnNumRecord) << (cursor -= 48);
 
         // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
-        result |= (channelData.finalizesAt << (cursor -= 48));
+        result |= (uint256(channelData.finalizesAt) << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
         result |= uint256(uint160(uint256(keccak256(abi.encode(channelData)))));
@@ -694,7 +698,11 @@ contract ForceMove is IForceMove {
     function _getChannelStorage(bytes32 channelId)
         internal
         view
-        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
+        returns (
+            uint48 turnNumRecord,
+            uint48 finalizesAt,
+            uint160 fingerprint
+        )
     {
         bytes32 storageHash = channelStorageHashes[channelId];
         uint16 cursor = 256;
@@ -725,7 +733,7 @@ contract ForceMove is IForceMove {
      * @return The stateHash
      */
     function _hashState(
-        uint256 turnNum,
+        uint48 turnNum,
         bool isFinal,
         bytes32 channelId,
         FixedPart memory fixedPart,
@@ -778,8 +786,8 @@ contract ForceMove is IForceMove {
     event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or checkpoint
-        uint256 turnNumRecord,
-        uint256 finalizesAt,
+        uint48 turnNumRecord,
+        uint48 finalizesAt,
         address challenger,
         bool isFinal,
         FixedPart fixedPart,
@@ -788,6 +796,6 @@ contract ForceMove is IForceMove {
         uint8[] whoSignedWhat
     );
 
-    event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+    event ChallengeCleared(bytes32 indexed channelId, uint48 newTurnNumRecord);
     event Concluded(bytes32 indexed channelId);
 }

@@ -50,12 +50,29 @@ export class Backend implements DBBackend {
 
   private async create(databaseName: string) {
     this._db = new Dexie(databaseName, {indexedDB});
-    this._db.version(2).stores(
-      _.reduce(
-        STORES.map(s => ({[s]: ''})),
-        _.merge
+    this._db
+      .version(3)
+      .stores(
+        _.reduce(
+          STORES.map(s => ({[s]: ''})),
+          _.merge
+        )
       )
-    );
+      .upgrade(tx => {
+        const numberify = n => BigNumber.from(n).toNumber();
+        tx.table(ObjectStores.channels).each(
+          ({key: channelId, value}: {key: string; value: ChannelStoredData}) => {
+            const {challengeDuration, channelNonce} = value.channelConstants;
+
+            value.channelConstants.challengeDuration = numberify(challengeDuration);
+            value.channelConstants.channelNonce = numberify(channelNonce);
+            value.stateVariables.map(s => (s.turnNum = numberify(s.turnNum)));
+
+            this.setChannel(channelId, value);
+          }
+        );
+        tx.table(ObjectStores.nonces).each(({key, value}) => this.setNonce(key, numberify(value)));
+      });
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
@@ -83,11 +100,7 @@ export class Backend implements DBBackend {
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
     for (const key in nonces) {
-      if (nonces[key]) {
-        nonces[key] = BigNumber.from(-1);
-      } else {
-        nonces[key] = BigNumber.from(nonces[key]);
-      }
+      nonces[key] = nonces[key] ?? -1;
     }
     return nonces;
   }
@@ -136,11 +149,7 @@ export class Backend implements DBBackend {
     return this.get(ObjectStores.objectives, key);
   }
   public async getNonce(key: string) {
-    const nonce = await this.get(ObjectStores.nonces, key);
-    if (!nonce) {
-      return BigNumber.from(-1);
-    }
-    return BigNumber.from(nonce);
+    return (await this.get(ObjectStores.nonces, key)) ?? -1;
   }
   public async getPrivateKey(key: string) {
     return this.get(ObjectStores.privateKeys, key);
@@ -170,8 +179,8 @@ export class Backend implements DBBackend {
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
-  public async setNonce(key: string, value: BigNumber) {
-    await this.put(ObjectStores.nonces, value.toString(), key);
+  public async setNonce(key: string, value: number) {
+    await this.put(ObjectStores.nonces, value, key);
 
     return await this._db[ObjectStores.nonces].get(key);
   }

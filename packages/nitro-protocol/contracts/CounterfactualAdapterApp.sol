@@ -6,23 +6,26 @@ import '@counterfactual/cf-adjudicator-contracts/contracts/interfaces/Counterfac
 import './interfaces/ForceMoveApp.sol';
 
 contract CounterfactualAdapterApp is ForceMoveApp {
-
     struct CounterfactualAdapterAppData {
         address cfAppDefinition;
         bytes cfAppData;
         bytes cfActionTaken;
     }
 
-    function appData(bytes memory appDataBytes) internal pure returns (CounterfactualAdapterAppData memory) {
+    function appData(bytes memory appDataBytes)
+        internal
+        pure
+        returns (CounterfactualAdapterAppData memory)
+    {
         return abi.decode(appDataBytes, (CounterfactualAdapterAppData));
     }
 
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
-        uint256, // turnNumB
+        uint48, // turnNumB
         uint256 // nParticipants
-    ) public pure override returns (bool) {
+    ) public override pure returns (bool) {
         CounterfactualAdapterAppData memory prevState = appData(a.appData);
         CounterfactualAdapterAppData memory nextState = appData(b.appData);
         require(
@@ -31,9 +34,7 @@ contract CounterfactualAdapterApp is ForceMoveApp {
         );
         require(
             keccak256(
-                CounterfactualApp(
-                    prevState.cfAppDefinition
-                ).applyAction(
+                CounterfactualApp(prevState.cfAppDefinition).applyAction(
                     prevState.cfAppData,
                     nextState.cfActionTaken
                 )

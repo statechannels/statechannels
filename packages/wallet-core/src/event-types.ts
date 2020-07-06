@@ -1,5 +1,4 @@
 import {SimpleAllocation, Participant, DomainBudget} from './store/types';
-import {BigNumber} from 'ethers';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 
 export interface JoinChannelEvent {
@@ -17,7 +16,7 @@ export interface CreateChannelEvent {
   outcome: SimpleAllocation;
   appDefinition: string;
   appData: string;
-  challengeDuration: BigNumber;
+  challengeDuration: number;
   chainId: string;
   requestId: number;
   applicationDomain: string;

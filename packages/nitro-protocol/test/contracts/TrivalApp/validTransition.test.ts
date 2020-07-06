@@ -47,7 +47,7 @@ describe('validTransition', () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
       chainId: '0x1',
-      channelNonce: '0x1',
+      channelNonce: 0x01,
     };
     const fromState: State = {
       channel,

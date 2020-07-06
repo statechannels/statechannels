@@ -33,17 +33,17 @@ export const third: Participant = HUB;
 export const participants: [Participant, Participant] = [first, second];
 export const threeParticipants: [Participant, Participant, Participant] = [first, second, third];
 
-export const appState = (n: BigNumberish, isFinal = false): State => ({
+export const appState = (turnNum: number, isFinal = false): State => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
   appDefinition: '0x0000000000000000000000000000000000000000',
   isFinal,
-  turnNum: BigNumber.from(n),
+  turnNum,
   outcome: simpleEthAllocation([
     {destination: first.destination, amount: BigNumber.from(1)},
     {destination: second.destination, amount: BigNumber.from(3)}
   ]),
   participants,
-  channelNonce: BigNumber.from('0x01'),
+  channelNonce: 1,
   chainId: '0x01',
   challengeDuration: CHALLENGE_DURATION
 });
@@ -53,7 +53,7 @@ export const ledgerState = (
   amounts: BigNumberish[],
   turnNum = 0
 ): State => ({
-  turnNum: BigNumber.from(turnNum),
+  turnNum,
   outcome: simpleEthAllocation(
     amounts.map((a, i) => ({
       destination: participants[i].destination,
@@ -61,7 +61,7 @@ export const ledgerState = (
     }))
   ),
   participants,
-  channelNonce: BigNumber.from('0x02'),
+  channelNonce: 0x02,
   chainId: '0x01',
   isFinal: false,
   challengeDuration: CHALLENGE_DURATION,
