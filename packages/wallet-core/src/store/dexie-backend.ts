@@ -50,12 +50,29 @@ export class Backend implements DBBackend {
 
   private async create(databaseName: string) {
     this._db = new Dexie(databaseName, {indexedDB});
-    this._db.version(2).stores(
-      _.reduce(
-        STORES.map(s => ({[s]: ''})),
-        _.merge
+    this._db
+      .version(3)
+      .stores(
+        _.reduce(
+          STORES.map(s => ({[s]: ''})),
+          _.merge
+        )
       )
-    );
+      .upgrade(tx => {
+        const numberify = n => BigNumber.from(n).toNumber();
+        tx.table(ObjectStores.channels).each(
+          ({key: channelId, value}: {key: string; value: ChannelStoredData}) => {
+            const {challengeDuration, channelNonce} = value.channelConstants;
+
+            value.channelConstants.challengeDuration = numberify(challengeDuration);
+            value.channelConstants.channelNonce = numberify(channelNonce);
+            value.stateVariables.map(s => (s.turnNum = numberify(s.turnNum)));
+
+            this.setChannel(channelId, value);
+          }
+        );
+        tx.table(ObjectStores.nonces).each(({key, value}) => this.setNonce(key, numberify(value)));
+      });
   }
 
   public async clear(storeName: ObjectStores): Promise<string> {
