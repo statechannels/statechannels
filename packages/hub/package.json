@@ -4,11 +4,7 @@
   "version": "0.0.1",
   "author": "",
   "dependencies": {
-    "@sentry/node": "5.13.2",
-    "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/channel-provider": "0.0.3",
     "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wire-format": "0.0.1",
     "async-lock": "1.2.2",
     "ethers": "4.0.45",
     "knex": "0.20.9",
@@ -17,7 +13,6 @@
     "pino": "5.16.0"
   },
   "devDependencies": {
-    "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/devtools": "0.1.4",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
