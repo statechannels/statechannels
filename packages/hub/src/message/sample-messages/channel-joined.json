@@ -1,0 +1,47 @@
+{
+  "type": "Channel.Joined",
+  "signedState": {
+    "state": {
+      "channel": {
+        "channelNonce": "0x92020e56b40c70c0573c1feda75e47886f87bc5106d83fe477139a44b6a134b0",
+        "participants": [
+          "0x56b990ed93FbA609dcdF6dD6909683d3D029F224",
+          "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C"
+        ],
+        "chainId": "0x2329"
+      },
+      "challengeDuration": 300,
+      "appData": "0x0",
+      "appDefinition": "0x0000000000000000000000000000000000000000",
+      "outcome": [
+        {
+          "assetHolderAddress": "0x0116090EfeC8A6c176A094d3094c58811a7eA39c",
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000056b990ed93fba609dcdf6dd6909683d3d029f224",
+              "amount": "0x1"
+            },
+            {
+              "destination": "0x0000000000000000000000002b702b161b0b3fa52127ad1de357761c17ef07fc",
+              "amount": "0x1"
+            }
+          ]
+        }
+      ],
+      "turnNum": 1,
+      "isFinal": false
+    }
+  },
+  "participants": [
+    {
+      "participantId": "user-a",
+      "signingAddress": "0x56b990ed93FbA609dcdF6dD6909683d3D029F224",
+      "destination": "0x56b990ed93FbA609dcdF6dD6909683d3D029F224"
+    },
+    {
+      "participantId": "hub",
+      "signingAddress": "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+      "destination": "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C"
+    }
+  ]
+}
