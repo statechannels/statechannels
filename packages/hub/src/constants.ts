@@ -2,8 +2,6 @@ require('../env');
 
 export const NAME = 'Neo Bot';
 
-export const FIREBASE_PREFIX = process.env.FIREBASE_PREFIX || 'default-prefix';
-
 // This account is provided eth in @statechannels/devtools/utils/startGanache.js
 export const HUB_SIGNER_PRIVATE_KEY =
   process.env.HUB_SIGNER_PRIVATE_KEY ||

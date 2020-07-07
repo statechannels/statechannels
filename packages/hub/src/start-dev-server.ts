@@ -1,6 +1,5 @@
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
-import {startServer} from './hub/server';
 
 async function setupGanacheAndContracts() {
   const {deployer} = await setupGanache();
@@ -11,7 +10,6 @@ async function setupGanacheAndContracts() {
 
 async function start() {
   await setupGanacheAndContracts();
-  await startServer();
 }
 
 if (require.main === module) {

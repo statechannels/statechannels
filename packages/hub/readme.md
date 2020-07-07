@@ -39,8 +39,6 @@ $ yarn hub:watch (will rebuild app on file change)
 
 ### Establishing a virtual channel between clients through the hub
 
-**NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_ADDRESS` to one that is likely not being used by any other developer for local development purposes.
-
 To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wallet` need to:
 
 - Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_ADDRESS` and `HUB_PRIVATE_KEY` defined.
@@ -65,16 +63,19 @@ yarn test:ci
 Heroku runs a production version of the build `Dockerfile.hub.staging` in the root of the repo. To create a deployment you must:
 
 **Build the Dockerfile locally, by running**
+
 ```bash
 docker build -t registry.heroku.com/statechannels-hub-staging/statechannels-hub -f Dockerfile.hub.staging .
 ```
 
 **Push the container to the Heroku Container Registry**
+
 ```bash
 docker push registry.heroku.com/statechannels-hub-staging/statechannels-hub
 ```
 
 **Release the container on Heroku (a.k.a., trigger the dyno to update)**
+
 ```bash
 heroku container:release -a statechannels-hub-staging statechannels-hub
 ```
