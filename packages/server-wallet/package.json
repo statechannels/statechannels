@@ -1,6 +1,6 @@
 {
-  "name": "@statechannels/hub",
-  "description": "nitro hub prototype",
+  "name": "@statechannels/server-wallet",
+  "description": "http server statechannel wallet",
   "version": "0.0.1",
   "author": "",
   "dependencies": {
