@@ -22,22 +22,22 @@ export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6
 
 export const DUMMY_ASSET_HOLDER_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
 
-export const UNFUNDED_NONCE = '2';
+export const UNFUNDED_NONCE = 2;
 
-export const FUNDED_NONCE = '3';
-export const FUNDED_NONCE_3 = '33';
+export const FUNDED_NONCE = 3;
+export const FUNDED_NONCE_3 = 33;
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
 
-export const FUNDED_GUARANTOR_NONCE = '31';
+export const FUNDED_GUARANTOR_NONCE = 31;
 
-export const BEGINNING_APP_NONCE = '44';
+export const BEGINNING_APP_NONCE = 44;
 export const BEGINNING_APP_CHANNEL_HOLDINGS = '0x05';
 
-export const ONGOING_APP_NONCE = '5';
+export const ONGOING_APP_NONCE = 5;
 export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 
 // Just choose big numbers that won't be hit in seeding
-export const NONCE = '1000';
+export const NONCE = 1000;
 
 export const DUMMY_CHAIN_ID = '8888';
 

@@ -39,7 +39,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   interface Upsert {
     channelId: string;
     states: any[];
-    channelNonce: Uint256;
+    channelNonce: number;
     holdings?: any[];
     id?: number;
     participants?: any[];

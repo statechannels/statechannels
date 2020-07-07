@@ -50,7 +50,7 @@ export default class Channel extends Model {
   readonly id!: number;
   channelId: string;
   chainId: Uint256;
-  channelNonce: Uint256;
+  channelNonce: number;
   participants: ChannelParticipant[];
   states: ChannelState[];
   holdings: ChannelHolding[];

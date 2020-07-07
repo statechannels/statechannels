@@ -83,7 +83,7 @@ describe('updateChannel', () => {
     it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
       expect.assertions(1);
       const theirState = testDataConstructors.postfundSetup(2);
-      theirState.channel = {...fundedChannel, channelNonce: '1234'};
+      theirState.channel = {...fundedChannel, channelNonce: 1234};
       const hubState = testDataConstructors.postfundSetup(1);
       expect.assertions(1);
       await queries.updateChannel([theirState], hubState).catch(err => {

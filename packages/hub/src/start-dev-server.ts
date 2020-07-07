@@ -1,11 +1,5 @@
-import {setupGanache} from '@statechannels/devtools';
-import {deploy} from '../deployment/deploy';
-
 async function setupGanacheAndContracts() {
-  const {deployer} = await setupGanache();
-  const deployedArtifacts = await deploy(deployer);
-
-  process.env = {...process.env, ...deployedArtifacts};
+  process.env = {...process.env};
 }
 
 async function start() {

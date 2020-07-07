@@ -204,7 +204,7 @@ describe('updateLedgerChannel', () => {
 
       postfundSetup0.channel = {
         ...postfundSetup0.channel,
-        channelNonce: '999'
+        channelNonce: 999
       };
       theirSignature = signState(postfundSetup0, PARTICIPANT_1_PRIVATE_KEY).signature;
 
