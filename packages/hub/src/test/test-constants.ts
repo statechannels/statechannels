@@ -3,8 +3,8 @@ import {
   GuaranteeAssetOutcome,
   Outcome
 } from '@statechannels/nitro-protocol';
-import {ethers} from 'ethers';
-import {bigNumberify} from 'ethers/utils';
+import {ethers, BigNumber} from 'ethers';
+
 import {Address, Uint256} from '../types';
 import {HUB_ADDRESS} from '../constants';
 import {AllocationItem} from '@statechannels/client-api-schema';
@@ -50,6 +50,7 @@ export const PARTICIPANTS_3: Address[] = [
   HUB_ADDRESS
 ];
 
+const bigNumberify = (n: number) => BigNumber.from(n);
 const hex5 = bigNumberify(5).toHexString();
 
 export const allocation: AllocationItem[] = [

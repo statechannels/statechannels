@@ -1,8 +1,9 @@
 import {signState, State} from '@statechannels/nitro-protocol';
-import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../constants';
 import {fundedChannel, stateConstructors as testDataConstructors} from '../../test/test-data';
 import * as ChannelManager from '../channelManager';
+
+type Signature = any; // FIXME
 
 let prefundSetup0: State;
 let prefundSetup1: State;

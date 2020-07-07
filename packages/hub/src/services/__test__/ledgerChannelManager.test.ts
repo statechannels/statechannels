@@ -1,5 +1,4 @@
 import {signState, State} from '@statechannels/nitro-protocol';
-import {Signature} from 'ethers/utils';
 import {
   DUMMY_CHAIN_ID,
   FUNDED_NONCE,
@@ -24,6 +23,7 @@ import errors from '../../errors';
 import * as ChannelManager from '../channelManager';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
+type Signature = any; // FIXME
 // 2 participant channel
 let prefundSetup0: State;
 let postfundSetup0: State;

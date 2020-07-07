@@ -1,8 +1,8 @@
 import {SignedState, State, signState} from '@statechannels/nitro-protocol';
-import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../constants';
 import {logger} from '../logger';
 
+type Signature = any; // FIXME
 const log = logger();
 
 export function isApplicationState(state: State): boolean {
