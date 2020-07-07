@@ -5,7 +5,7 @@ import * as path from 'path';
 import {Config} from 'knex';
 import {dbCofig} from '../db-config';
 
-const BASE_PATH = path.join(__dirname, '..', 'wallet', 'db');
+const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
 
 let knexConfig: Config = {
