@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/devtools": "0.1.21",
+    "@statechannels/devtools": "0.1.4",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
