@@ -5,7 +5,6 @@
   "author": "",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
-    "async-lock": "1.2.2",
     "ethers": "5.0.0-beta.191",
     "knex": "0.20.9",
     "objection": "2.1.2",
@@ -14,7 +13,6 @@
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.4",
-    "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
