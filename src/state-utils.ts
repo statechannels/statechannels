@@ -22,16 +22,20 @@ import {
   convertAddressToBytes32,
   convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature} from '@ethersproject/bytes';
+import { joinSignature, splitSignature, hexlify } from '@ethersproject/bytes';
 import _ from 'lodash';
-import {Wallet, ethers} from 'ethers';
-import {logger} from './logger';
-import {BigNumber} from './bn';
-import {Bytes32} from './types';
+import { Wallet, ethers } from 'ethers';
+import { logger } from './logger';
+import { BigNumber } from './bn';
+import { Bytes32 } from './types';
 
 function toNitroState(state: State): NitroState {
-  const {channelNonce, participants, chainId} = state;
-  const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
+  const { channelNonce, participants, chainId } = state;
+  const channel = {
+    channelNonce: hexlify(channelNonce),
+    chainId,
+    participants: participants.map(x => x.signingAddress)
+  };
 
   return {
     ..._.pick(state, 'appData', 'isFinal', 'challengeDuration', 'appDefinition', 'turnNum'),
@@ -41,7 +45,7 @@ function toNitroState(state: State): NitroState {
 }
 
 export function fromNitroState(state: NitroState): State {
-  const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
+  const { appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum } = state;
 
   return {
     appDefinition,
@@ -65,26 +69,26 @@ export function fromNitroState(state: NitroState): State {
 // NitroSignedStates for a signed state with multiple signatures
 export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
   const state = toNitroState(signedState);
-  const {signatures} = signedState;
-  return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
+  const { signatures } = signedState;
+  return signatures.map(sig => ({ state, signature: splitSignature(sig.signature) }));
 }
 
 export function calculateChannelId(channelConstants: ChannelConstants): string {
-  const {chainId, channelNonce, participants} = channelConstants;
+  const { chainId, channelNonce, participants } = channelConstants;
   const addresses = participants.map(p => p.signingAddress);
-  return getChannelId({chainId, channelNonce, participants: addresses});
+  return getChannelId({ chainId, channelNonce: hexlify(channelNonce), participants: addresses });
 }
 
 export function createSignatureEntry(state: State, privateKey: string): SignatureEntry {
-  const {address} = new Wallet(privateKey);
+  const { address } = new Wallet(privateKey);
   const nitroState = toNitroState(state);
-  const {signature} = signNitroState(nitroState, privateKey);
-  return {signature: joinSignature(signature), signer: address} as SignatureEntry;
+  const { signature } = signNitroState(nitroState, privateKey);
+  return { signature: joinSignature(signature), signer: address } as SignatureEntry;
 }
 export function signState(state: State, privateKey: string): SignatureEntry {
   const nitroState = toNitroState(state);
-  const {signature} = signNitroState(nitroState, privateKey);
-  return {signature: joinSignature(signature), signer: new ethers.Wallet(privateKey).address};
+  const { signature } = signNitroState(nitroState, privateKey);
+  return { signature: joinSignature(signature), signer: new ethers.Wallet(privateKey).address };
 }
 
 export function hashState(state: State): Bytes32 {
@@ -94,7 +98,7 @@ export function hashState(state: State): Bytes32 {
 
 export function getSignerAddress(state: State, signature: string): string {
   const nitroState = toNitroState(state);
-  return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
+  return getNitroSignerAddress({ state: nitroState, signature: splitSignature(signature) });
 }
 
 export function statesEqual(left: State, right: State) {
@@ -134,7 +138,7 @@ export function outcomesEqual(left: Outcome, right?: Outcome) {
 
 export const firstState = (
   outcome: Outcome,
-  {channelNonce, chainId, challengeDuration, appDefinition, participants}: ChannelConstants,
+  { channelNonce, chainId, challengeDuration, appDefinition, participants }: ChannelConstants,
   appData?: string
 ): State =>
   ({
