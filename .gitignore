@@ -16,3 +16,4 @@ lib
 manual-test/message-sequence.json
 
 tsconfig.tsbuildinfo
+.eslintcache
