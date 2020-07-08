@@ -1,7 +1,7 @@
-import {queries} from '../db/queries/channels';
+import { queries } from '../db/queries/channels';
 import errors from '../errors';
 import * as ChannelManager from './channelManager';
-import {SignedState, State} from '../store-types';
+import { SignedState, State } from '../store-types';
 
 export async function updateLedgerChannel(
   stateRound: SignedState[],

@@ -1,5 +1,4 @@
-import {BigNumber as EthersBigNumber, BigNumberish} from 'ethers';
-import {Uint256} from './store-types';
+import { BigNumber as EthersBigNumber, BigNumberish } from 'ethers';
 
 type T = BigNumberish;
 const compare = (method: 'eq' | 'lt' | 'gt' | 'lte' | 'gte') => (a: T, b: T): boolean =>

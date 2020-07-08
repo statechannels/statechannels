@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import {Model} from 'objection';
+import { Model } from 'objection';
 import * as knexConfig from './knexfile';
 
 const knex = Knex(knexConfig);

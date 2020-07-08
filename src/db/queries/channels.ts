@@ -1,8 +1,8 @@
-import {Uint256} from '../../types';
+import { Uint256 } from '../../types';
 import errors from '../../errors';
 import Channel from '../../models/channel';
-import {State} from '../../store-types';
-import {calculateChannelId} from '../../state-utils';
+import { State } from '../../store-types';
+import { calculateChannelId } from '../../state-utils';
 
 export const queries = {
   updateChannel
@@ -10,11 +10,11 @@ export const queries = {
 
 async function updateChannel(stateRound: State[], hubState: State) {
   const firstState = stateRound[0];
-  const {channelNonce, participants, chainId} = firstState;
+  const { channelNonce, participants, chainId } = firstState;
   const channelId = calculateChannelId(firstState);
 
   const storedChannel = await Channel.query()
-    .findOne({channel_id: channelId})
+    .findOne({ channel_id: channelId })
     .select('id');
 
   if (storedChannel && firstState.turnNum < firstState.participants.length) {
@@ -42,7 +42,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   };
 
   if (storedChannel) {
-    upserts = {...upserts, id: storedChannel.id};
+    upserts = { ...upserts, id: storedChannel.id };
   } else {
     upserts = {
       ...upserts,

@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import {addBytes32Check, addAddressCheck, addUint48Check} from '../utils';
+import { addBytes32Check, addAddressCheck, addUint48Check } from '../utils';
 
 export async function up(knex: Knex): Promise<any> {
   const name = 'channels';

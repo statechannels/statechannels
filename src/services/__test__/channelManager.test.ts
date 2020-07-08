@@ -1,8 +1,8 @@
-import {SERVER_PRIVATE_KEY} from '../../constants';
-import {fundedChannel, stateConstructors as testDataConstructors} from '../../test/test-data';
+import { SERVER_PRIVATE_KEY } from '../../constants';
+import { fundedChannel, stateConstructors as testDataConstructors } from '../../test/test-data';
 import * as ChannelManager from '../channelManager';
-import {State} from '../../store-types';
-import {signState} from '../../state-utils';
+import { State } from '../../store-types';
+import { signState } from '../../state-utils';
 
 type Signature = any; // FIXME
 
@@ -26,14 +26,14 @@ beforeEach(() => {
 
 describe('validSignature', () => {
   it('returns true when the state was signed by the mover', async () => {
-    const signedState = {...prefundSetup1, signatures: [hubSignature]};
+    const signedState = { ...prefundSetup1, signatures: [hubSignature] };
     expect(ChannelManager.validSignature(signedState)).toBe(true);
   });
 });
 
 describe('formResponse', () => {
   it('returns a signed core state', async () => {
-    prefundSetup1 = {...prefundSetup1, ...fundedChannel};
+    prefundSetup1 = { ...prefundSetup1, ...fundedChannel };
 
     hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY).signature;
 

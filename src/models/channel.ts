@@ -1,5 +1,5 @@
-import {Model, snakeCaseMappers} from 'objection';
-import {outcomesEqual, hashState, createSignatureEntry, extractVariables} from '../state-utils';
+import { Model, snakeCaseMappers } from 'objection';
+import { outcomesEqual, hashState, createSignatureEntry, extractVariables } from '../state-utils';
 import _ from 'lodash';
 import {
   SignedStateVarsWithHash,
@@ -16,7 +16,7 @@ import {
   SignatureEntry,
   SignedStateWithHash
 } from '../store-types';
-import {logger} from '../logger';
+import { logger } from '../logger';
 
 export type ChannelColumns = {
   readonly channelId: Bytes32;
@@ -76,11 +76,11 @@ export default class Channel extends Model implements ChannelColumns {
   // Modifiers
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     if (this.isSupportedByMe && this.latestSignedByMe.turnNum >= stateVars.turnNum) {
-      logger.error({entry: this.channelId, stateVars}, Errors.staleState);
+      logger.error({ entry: this.channelId, stateVars }, Errors.staleState);
       throw Error(Errors.staleState);
     }
 
-    const state = {...this.channelConstants, ...stateVars};
+    const state = { ...this.channelConstants, ...stateVars };
 
     const signatureEntry = createSignatureEntry(state, privateKey);
 
@@ -88,11 +88,11 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
-    const signedStateVars: SignedStateVariables = {...stateVars, signatures: [signatureEntry]};
+    const signedStateVars: SignedStateVariables = { ...stateVars, signatures: [signatureEntry] };
     const stateHash = hashState(this.state(signedStateVars));
-    const withHash: StateVariablesWithHash = {...stateVars, stateHash};
+    const withHash: StateVariablesWithHash = { ...stateVars, stateHash };
 
-    const {participants} = this.channelConstants;
+    const { participants } = this.channelConstants;
 
     // check the signature
 
@@ -100,7 +100,7 @@ export default class Channel extends Model implements ChannelColumns {
     let entry = this.vars.find(s => s.stateHash === withHash.stateHash);
 
     if (!entry) {
-      entry = {...withHash, signatures: []};
+      entry = { ...withHash, signatures: [] };
       this.vars.push(entry);
     }
 
@@ -117,12 +117,12 @@ export default class Channel extends Model implements ChannelColumns {
 
   // Computed
   public get channelConstants(): ChannelConstants {
-    const {channelNonce, challengeDuration, chainId, participants, appDefinition} = this;
-    return {channelNonce, challengeDuration, chainId, participants, appDefinition};
+    const { channelNonce, challengeDuration, chainId, participants, appDefinition } = this;
+    return { channelNonce, challengeDuration, chainId, participants, appDefinition };
   }
 
   public get sortedStates() {
-    return this.vars.map(s => ({...this.channelConstants, ...s}));
+    return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   public get myAddress(): Address {
@@ -138,7 +138,7 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   public get support(): Array<SignedState> {
-    return this._support.map(s => ({...this.channelConstants, ...s}));
+    return this._support.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   get hasConclusionProof() {
@@ -148,7 +148,7 @@ export default class Channel extends Model implements ChannelColumns {
   get supported() {
     const vars = this._supported;
     if (!vars) throw new Error('No supported state found');
-    return {...this.channelConstants, ...vars};
+    return { ...this.channelConstants, ...vars };
   }
 
   get isSupportedByMe() {
@@ -157,15 +157,15 @@ export default class Channel extends Model implements ChannelColumns {
   get latestSignedByMe() {
     const vars = this._latestSupportedByMe;
     if (!vars) throw new Error('No state supported by me');
-    return {...this.channelConstants, ...vars};
+    return { ...this.channelConstants, ...vars };
   }
 
   get latest() {
-    return {...this.channelConstants, ...this.signedStates[0]};
+    return { ...this.channelConstants, ...this.signedStates[0] };
   }
 
   get latestState() {
-    return {...this.channelConstants, ...this.latest};
+    return { ...this.channelConstants, ...this.latest };
   }
 
   private get _supported() {
@@ -173,7 +173,7 @@ export default class Channel extends Model implements ChannelColumns {
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
   private state(stateVars: SignedStateVariables): SignedState {
-    return {...this.channelConstants, ...stateVars};
+    return { ...this.channelConstants, ...stateVars };
   }
 
   private get _signedByMe() {
@@ -189,7 +189,7 @@ export default class Channel extends Model implements ChannelColumns {
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
-      const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
+      const { stateHash: firstSupportStateHash } = this._support[this._support.length - 1];
 
       // Find where the first support state is in our current state array
       const supportIndex = this.vars.findIndex(sv => sv.stateHash === firstSupportStateHash);
@@ -203,27 +203,27 @@ export default class Channel extends Model implements ChannelColumns {
     const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
 
     if (multipleSignedByMe) {
-      logger.error({entry: this.channelId}, Errors.multipleSignedStates);
+      logger.error({ entry: this.channelId }, Errors.multipleSignedStates);
 
       throw Error(Errors.multipleSignedStates);
     }
 
-    const {signedStates} = this;
+    const { signedStates } = this;
     const turnNums = _.map(signedStates, s => s.turnNum);
 
     const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
     if (duplicateTurnNums) {
-      logger.error({signedStates}, Errors.duplicateTurnNums);
+      logger.error({ signedStates }, Errors.duplicateTurnNums);
       throw Error(Errors.duplicateTurnNums);
     }
     if (!isReverseSorted(turnNums)) {
-      logger.error({signedStates: _.map(signedStates, s => s.turnNum)});
+      logger.error({ signedStates: _.map(signedStates, s => s.turnNum) });
       throw Error(Errors.notSorted);
     }
   }
 
   private get signedStates(): Array<SignedStateWithHash> {
-    return this.vars.map(s => ({...this.channelConstants, ...s}));
+    return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   private mySignature(stateVars: StateVariables, signatures: SignatureEntry[]): boolean {

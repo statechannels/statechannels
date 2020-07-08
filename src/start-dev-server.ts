@@ -1,5 +1,5 @@
 async function setupGanacheAndContracts() {
-  process.env = {...process.env};
+  process.env = { ...process.env };
 }
 
 async function start() {

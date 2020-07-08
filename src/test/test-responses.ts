@@ -1,4 +1,4 @@
-import {SERVER_ADDRESS} from '../constants';
+import { SERVER_ADDRESS } from '../constants';
 import {
   allocationOutcome2,
   allocationOutcome3,
@@ -8,8 +8,8 @@ import {
   PARTICIPANTS_3,
   PARTICIPANT_1_ADDRESS
 } from './test-constants';
-import {fundedChannel, fundedChannel3, beginningAppPhaseChannel} from './test-data';
-import {State} from '../store-types';
+import { fundedChannel, fundedChannel3, beginningAppPhaseChannel } from './test-data';
+import { State } from '../store-types';
 
 const baseResponse = {
   channelNonce: expect.any(String),
@@ -64,6 +64,6 @@ export const app1Response: State = {
 
 export const createdChannel = {
   id: expect.any(Number),
-  participants: [{address: PARTICIPANT_1_ADDRESS}, {address: SERVER_ADDRESS}],
+  participants: [{ address: PARTICIPANT_1_ADDRESS }, { address: SERVER_ADDRESS }],
   chainId: DUMMY_CHAIN_ID
 };

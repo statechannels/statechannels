@@ -1,4 +1,4 @@
-import {Config} from 'knex';
+import { Config } from 'knex';
 
 import '../env';
 

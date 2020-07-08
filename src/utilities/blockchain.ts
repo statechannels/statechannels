@@ -1,7 +1,7 @@
-import {ContractArtifacts} from '@statechannels/nitro-protocol';
+import { ContractArtifacts } from '@statechannels/nitro-protocol';
 
-import {ContractFactory, ethers, providers} from 'ethers';
-import {SERVER_SIGNER_PRIVATE_KEY} from '../constants';
+import { ContractFactory, ethers, providers } from 'ethers';
+import { SERVER_SIGNER_PRIVATE_KEY } from '../constants';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);

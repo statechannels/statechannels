@@ -1,7 +1,7 @@
-import {SERVER_PRIVATE_KEY} from '../constants';
-import {logger as log} from '../logger';
-import {State, SignedState} from '../store-types';
-import {signState} from '../state-utils';
+import { SERVER_PRIVATE_KEY } from '../constants';
+import { logger as log } from '../logger';
+import { State, SignedState } from '../store-types';
+import { signState } from '../state-utils';
 
 export function isApplicationState(state: State): boolean {
   const isSetup: boolean = state.turnNum < state.participants.length * 2;
@@ -26,6 +26,6 @@ export function nextState(theirState: State): State {
     throw new Error('State has to be a prefund setup, postfund setup or final state');
   }
 
-  const ourState = {...theirState, turnNum: theirState.turnNum + 1};
+  const ourState = { ...theirState, turnNum: theirState.turnNum + 1 };
   return ourState;
 }

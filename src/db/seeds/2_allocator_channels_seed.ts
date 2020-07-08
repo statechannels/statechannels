@@ -1,4 +1,4 @@
-import {Model} from 'objection';
+import { Model } from 'objection';
 import {
   allocationOutcome2,
   allocationOutcome3,
@@ -37,23 +37,23 @@ const baseStateProperties = {
 // ***************
 
 function prefundSetupState(turnNum: number) {
-  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
+  return { ...baseStateProperties, turnNum, outcome: allocationOutcome2 };
 }
 
 function prefundSetupGuarantorState(turnNum: number) {
-  return {...baseStateProperties, turnNum, outcome: guaranteeOutcome2};
+  return { ...baseStateProperties, turnNum, outcome: guaranteeOutcome2 };
 }
 
 function prefundSetupState3(turnNum: number) {
-  return {...baseStateProperties, turnNum, outcome: allocationOutcome3};
+  return { ...baseStateProperties, turnNum, outcome: allocationOutcome3 };
 }
 
 function postfundSetupState(turnNum: number) {
-  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
+  return { ...baseStateProperties, turnNum, outcome: allocationOutcome2 };
 }
 
 function appState(turnNum: number) {
-  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
+  return { ...baseStateProperties, turnNum, outcome: allocationOutcome2 };
 }
 
 const unfundedChannelWithStates = {
@@ -66,35 +66,35 @@ const fundedChannelWithStates = {
   ...fundedChannel,
   channelId: FUNDED_CHANNEL_ID,
   states: [prefundSetupState(0), prefundSetupState(1)],
-  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
+  holdings: [{ assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2 }]
 };
 
 const fundedGuarantorChannelWithStates = {
   ...fundedGuarantorChannel,
   channelId: FUNDED_GUARANTOR_CHANNEL_ID,
   states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)],
-  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
+  holdings: [{ assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2 }]
 };
 
 const fundedChannel3WithStates = {
   ...fundedChannel3,
   channelId: FUNDED_CHANNEL_ID_3,
   states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)],
-  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings3}]
+  holdings: [{ assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings3 }]
 };
 
 const beginningAppPhaseChannelWithStates = {
   ...beginningAppPhaseChannel,
   channel_id: BEGINNING_APP_CHANNEL_ID,
   states: [postfundSetupState(2), postfundSetupState(3)],
-  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
+  holdings: [{ assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2 }]
 };
 
 const ongoingAppPhaseChannelWithStates = {
   ...ongoingAppPhaseChannel,
   channel_id: ONGOING_APP_CHANNEL_ID,
   states: [appState(4), appState(5)],
-  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
+  holdings: [{ assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2 }]
 };
 
 const twoParticipantChannelSeeds = {
@@ -105,7 +105,7 @@ const twoParticipantChannelSeeds = {
   ongoingAppPhaseChannelWithStates
 };
 
-const threeParticipantChannelSeeds = {fundedChannel3WithStates};
+const threeParticipantChannelSeeds = { fundedChannel3WithStates };
 
 const SEEDED_CHANNELS_2 = Object.keys(twoParticipantChannelSeeds).length;
 const SEEDED_CHANNELS_3 = Object.keys(threeParticipantChannelSeeds).length;

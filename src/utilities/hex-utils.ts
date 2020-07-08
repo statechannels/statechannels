@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers';
+import { BigNumber } from 'ethers';
 
 const bigNumberify = (n: number | string) => BigNumber.from(n);
 export function addHex(a: string, b: string): string {

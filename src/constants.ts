@@ -1,4 +1,4 @@
-import {Address} from './store-types';
+import { Address } from './store-types';
 
 require('../env');
 

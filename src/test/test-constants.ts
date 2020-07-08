@@ -1,8 +1,8 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
-import {Address, Uint256, Outcome, AllocationItem} from '../store-types';
-import {SERVER_ADDRESS} from '../constants';
-import {hexlify} from 'ethers/lib/utils';
+import { Address, Uint256, Outcome, AllocationItem } from '../store-types';
+import { SERVER_ADDRESS } from '../constants';
+import { hexlify } from 'ethers/lib/utils';
 
 export const PARTICIPANT_1_PRIVATE_KEY =
   '0xa205281c09d630f6639c3505b63d57013996ba037bdbe4d2979eb8bd5bed5b1b';
@@ -37,7 +37,7 @@ export const NONCE = 1000;
 export const DUMMY_CHAIN_ID = '8888';
 
 export const STAKE: Uint256 = hexlify(ethers.utils.parseEther('0.01'));
-const toParticipant = a => ({signingAddress: a, participantId: a, destination: a});
+const toParticipant = a => ({ signingAddress: a, participantId: a, destination: a });
 export const PARTICIPANTS = [PARTICIPANT_1_ADDRESS, SERVER_ADDRESS].map(toParticipant);
 
 export const PARTICIPANTS_3 = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, SERVER_ADDRESS].map(
@@ -47,9 +47,9 @@ export const PARTICIPANTS_3 = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, SER
 const hex5 = hexlify(5);
 
 export const allocation: AllocationItem[] = [
-  {destination: PARTICIPANT_1_ADDRESS, amount: hex5},
-  {destination: PARTICIPANT_2_ADDRESS, amount: hex5},
-  {destination: SERVER_ADDRESS, amount: hex5}
+  { destination: PARTICIPANT_1_ADDRESS, amount: hex5 },
+  { destination: PARTICIPANT_2_ADDRESS, amount: hex5 },
+  { destination: SERVER_ADDRESS, amount: hex5 }
 ];
 export const allocationOutcome2: Outcome = {
   type: 'SimpleAllocation',

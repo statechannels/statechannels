@@ -1,4 +1,4 @@
-import {calculateChannelId} from '../state-utils';
+import { calculateChannelId } from '../state-utils';
 import {
   allocationOutcome2,
   allocationOutcome3,
@@ -14,7 +14,7 @@ import {
   PARTICIPANTS_3,
   UNFUNDED_NONCE
 } from './test-constants';
-import {ChannelConstants, Participant, State} from '../store-types';
+import { ChannelConstants, Participant, State } from '../store-types';
 
 export const defaultChannel: ChannelConstants = {
   participants: PARTICIPANTS,
@@ -61,26 +61,32 @@ const baseState3 = (turnNum: number) => ({
 });
 
 function prefundSetup(turnNum: number): State {
-  return {...baseState(turnNum), ...defaultChannel};
+  return { ...baseState(turnNum), ...defaultChannel };
 }
 
 export function prefundSetup3(turnNum: number): State {
-  return {...baseState3(turnNum), ...defaultChannel3};
+  return { ...baseState3(turnNum), ...defaultChannel3 };
 }
 
 function postfundSetup(turnNum: number): State {
-  return {...baseState(turnNum), ...fundedChannel};
+  return { ...baseState(turnNum), ...fundedChannel };
 }
 
 export function postfundSetup3(turnNum: number): State {
-  return {...baseState3(turnNum), ...fundedChannel3};
+  return { ...baseState3(turnNum), ...fundedChannel3 };
 }
 
 function app(turnNum: number, channel: ChannelConstants): State {
-  return {...baseState(turnNum), ...channel};
+  return { ...baseState(turnNum), ...channel };
 }
 
-export const stateConstructors = {prefundSetup, postfundSetup, app, prefundSetup3, postfundSetup3};
+export const stateConstructors = {
+  prefundSetup,
+  postfundSetup,
+  app,
+  prefundSetup3,
+  postfundSetup3
+};
 
 // Ledger Channel Manager input states
 export const createdPrefundSetup1: State = {
