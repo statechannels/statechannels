@@ -1,23 +1,24 @@
-import {SignedState, State, signState} from '@statechannels/nitro-protocol';
 import {SERVER_PRIVATE_KEY} from '../constants';
-import {logger} from '../logger';
-
-type Signature = any; // FIXME
-const log = logger();
+import {logger as log} from '../logger';
+import {State, SignedState} from '../store-types';
+import {signState} from '../state-utils';
 
 export function isApplicationState(state: State): boolean {
-  const isSetup: boolean = state.turnNum < state.channel.participants.length * 2;
+  const isSetup: boolean = state.turnNum < state.participants.length * 2;
   return !isSetup && !state.isFinal;
 }
 
-export function validSignature(commitment: State, signature: Signature): boolean {
+export function validSignature(state: SignedState): boolean {
   log.warn('Signature not validated');
-  return commitment && signature && true;
+  return state && state.signatures[0] && true;
   // Return recover(toHex(commitment), signature) === mover(commitment);
 }
 
 export function formResponse(state: State): SignedState {
-  return signState(state, SERVER_PRIVATE_KEY);
+  return {
+    ...state,
+    signatures: [signState(state, SERVER_PRIVATE_KEY)]
+  };
 }
 
 export function nextState(theirState: State): State {

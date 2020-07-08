@@ -1,14 +1,12 @@
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
 
-type Brand<T, K extends string> = T & {[key in K]: void};
-// TODO: These should each have validators
-export type Address = Brand<string, '_isAddress'>;
-export type Bytes = Brand<string, '_isBytes'>;
-export type Signature = Brand<string, '_isSignature'>;
-export type Bytes32 = Brand<string, '_isBytes32'>;
-export type Uint48 = Brand<number, '_isUint48'>;
-export type Uint256 = Brand<string, '_isUint256'>;
-export type Destination = Brand<string, '_isDestination'>;
+export type Address = string;
+export type Bytes = string;
+export type Signature = string;
+export type Bytes32 = string;
+export type Uint48 = number;
+export type Uint256 = string;
+export type Destination = string;
 
 export type SignatureEntry = {signature: Signature; signer: Address};
 

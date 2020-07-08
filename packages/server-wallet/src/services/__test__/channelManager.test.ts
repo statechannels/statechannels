@@ -1,7 +1,8 @@
-import {signState, State} from '@statechannels/nitro-protocol';
 import {SERVER_PRIVATE_KEY} from '../../constants';
 import {fundedChannel, stateConstructors as testDataConstructors} from '../../test/test-data';
 import * as ChannelManager from '../channelManager';
+import {State} from '../../store-types';
+import {signState} from '../../state-utils';
 
 type Signature = any; // FIXME
 
@@ -20,23 +21,19 @@ beforeEach(() => {
   postfundSetup1 = testDataConstructors.postfundSetup(3);
   app0 = testDataConstructors.app(4, fundedChannel);
 
-  hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY).signature;
+  hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY);
 });
 
 describe('validSignature', () => {
   it('returns true when the state was signed by the mover', async () => {
-    expect(ChannelManager.validSignature(prefundSetup1, hubSignature)).toBe(true);
-  });
-
-  it.skip('returns false when the state was not signed by the mover', async () => {
-    // TODO: Unskip when validation is enabled
-    expect(ChannelManager.validSignature(prefundSetup0, hubSignature)).toBe(false);
+    const signedState = {...prefundSetup1, signatures: [hubSignature]};
+    expect(ChannelManager.validSignature(signedState)).toBe(true);
   });
 });
 
 describe('formResponse', () => {
   it('returns a signed core state', async () => {
-    prefundSetup1.channel = fundedChannel;
+    prefundSetup1 = {...prefundSetup1, ...fundedChannel};
 
     hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY).signature;
 

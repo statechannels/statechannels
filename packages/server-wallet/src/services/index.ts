@@ -1,5 +1,5 @@
-import {SignedState, State} from '@statechannels/nitro-protocol';
 import * as LedgerChannelManager from './ledgerChannelManager';
+import {SignedState, State} from '../store-types';
 
 export const updateLedgerChannel: (
   ledgerStateRound: SignedState[],

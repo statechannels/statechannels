@@ -1,4 +1,3 @@
-import {signState, State} from '@statechannels/nitro-protocol';
 import {
   DUMMY_CHAIN_ID,
   FUNDED_NONCE,
@@ -22,6 +21,8 @@ import {
 import errors from '../../errors';
 import * as ChannelManager from '../channelManager';
 import * as LedgerChannelManager from '../ledgerChannelManager';
+import {State} from '../../store-types';
+import {signState} from '../../state-utils';
 
 type Signature = any; // FIXME
 // 2 participant channel
@@ -50,30 +51,24 @@ beforeEach(() => {
 describe('updateLedgerChannel', () => {
   describe('opening a channel', () => {
     beforeEach(() => {
-      theirSignature = signState(prefundSetup0, PARTICIPANT_1_PRIVATE_KEY).signature;
+      theirSignature = signState(prefundSetup0, PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed state', async () => {
-      const {state, signature} = await LedgerChannelManager.updateLedgerChannel([
-        {state: prefundSetup0, signature: theirSignature}
+      const state = await LedgerChannelManager.updateLedgerChannel([
+        {...prefundSetup0, signatures: [theirSignature]}
       ]);
       expect(state).toMatchObject(prefundSetup1Response);
-      expect(ChannelManager.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state)).toBe(true);
     });
 
     it('on valid round received -- should return an allocator channel and a signed state', async () => {
-      const {state, signature} = await LedgerChannelManager.updateLedgerChannel([
-        {
-          state: prefundSetup30,
-          signature: signState(prefundSetup30, PARTICIPANT_1_PRIVATE_KEY).signature
-        },
-        {
-          state: prefundSetup31,
-          signature: signState(prefundSetup31, PARTICIPANT_2_PRIVATE_KEY).signature
-        }
+      const state = await LedgerChannelManager.updateLedgerChannel([
+        {...prefundSetup30, signatures: [signState(prefundSetup30, PARTICIPANT_1_PRIVATE_KEY)]},
+        {...prefundSetup31, signatures: [signState(prefundSetup31, PARTICIPANT_2_PRIVATE_KEY)]}
       ]);
       expect(state).toMatchObject(prefundSetup2Response3);
-      expect(ChannelManager.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state)).toBe(true);
     });
 
     it.skip('throws when the state is incorrectly signed', async () => {
@@ -83,8 +78,8 @@ describe('updateLedgerChannel', () => {
 
       await LedgerChannelManager.updateLedgerChannel([
         {
-          state: prefundSetup0,
-          signature: theirSignature
+          ...prefundSetup0,
+          signatures: [theirSignature]
         }
       ]).catch((err: Error) => {
         expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
@@ -94,7 +89,8 @@ describe('updateLedgerChannel', () => {
     it('throws when the channel exists', async () => {
       expect.assertions(1);
 
-      prefundSetup0.channel = {
+      prefundSetup0 = {
+        ...prefundSetup0,
         channelNonce: FUNDED_NONCE,
         participants: PARTICIPANTS,
         chainId: DUMMY_CHAIN_ID
@@ -103,8 +99,8 @@ describe('updateLedgerChannel', () => {
 
       await LedgerChannelManager.updateLedgerChannel([
         {
-          state: prefundSetup0,
-          signature: theirSignature
+          ...prefundSetup0,
+          signatures: [theirSignature]
         }
       ]).catch((err: Error) => {
         expect(err).toMatchObject(errors.CHANNEL_EXISTS);
@@ -118,44 +114,39 @@ describe('updateLedgerChannel', () => {
     });
 
     it('should return an allocator channel and a signed state', async () => {
-      const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
-        [
-          {
-            state: postfundSetup0,
-            signature: theirSignature
-          }
-        ],
+      const state = await LedgerChannelManager.updateLedgerChannel(
+        [{...postfundSetup0, signatures: [theirSignature]}],
         createdPrefundSetup1
       );
       expect(state).toMatchObject(postfundSetup1Response);
-      expect(ChannelManager.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state)).toBe(true);
     });
 
     describe('round of states', () => {
       it('on valid round received -- should return an allocator channel and a signed state', async () => {
-        const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
+        const state = await LedgerChannelManager.updateLedgerChannel(
           [
             {
-              state: postfundSetup30,
-              signature: signState(postfundSetup30, PARTICIPANT_1_PRIVATE_KEY).signature
+              ...postfundSetup30,
+              signatures: [signState(postfundSetup30, PARTICIPANT_1_PRIVATE_KEY)]
             },
             {
-              state: postfundSetup31,
-              signature: signState(postfundSetup31, PARTICIPANT_2_PRIVATE_KEY).signature
+              ...postfundSetup31,
+              signatures: [signState(postfundSetup31, PARTICIPANT_2_PRIVATE_KEY)]
             }
           ],
           createdPrefundSetup2Participants3
         );
         expect(state).toMatchObject(postfundSetup2Response3);
-        expect(ChannelManager.validSignature(state, signature)).toBe(true);
+        expect(ChannelManager.validSignature(state)).toBe(true);
       });
 
       it('on valid round received -- not our turn', async () => {
         await LedgerChannelManager.updateLedgerChannel(
           [
             {
-              state: postfundSetup30,
-              signature: signState(postfundSetup30, PARTICIPANT_1_PRIVATE_KEY).signature
+              ...postfundSetup30,
+              signatures: [signState(postfundSetup30, PARTICIPANT_1_PRIVATE_KEY)]
             }
           ],
           createdPrefundSetup2Participants3
@@ -171,8 +162,8 @@ describe('updateLedgerChannel', () => {
       theirSignature = signState(postfundSetup0, '0xf00').signature;
       await LedgerChannelManager.updateLedgerChannel([
         {
-          state: postfundSetup0,
-          signature: theirSignature
+          ...postfundSetup0,
+          signatures: [theirSignature]
         }
       ]).catch((err: Error) => {
         expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
@@ -184,16 +175,8 @@ describe('updateLedgerChannel', () => {
       theirSignature = signState(createdPrefundSetup1, PARTICIPANT_1_PRIVATE_KEY).signature;
 
       await LedgerChannelManager.updateLedgerChannel(
-        [
-          {
-            state: postfundSetup0,
-            signature: theirSignature
-          }
-        ],
-        {
-          ...createdPrefundSetup1,
-          turnNum: 0
-        }
+        [{...postfundSetup0, signatures: [theirSignature]}],
+        {...createdPrefundSetup1, turnNum: 0}
       ).catch(err => {
         expect(err).toMatchObject(errors.INVALID_TRANSITION);
       });
@@ -202,17 +185,14 @@ describe('updateLedgerChannel', () => {
     it("throws when the channel doesn't exist", async () => {
       expect.assertions(1);
 
-      postfundSetup0.channel = {
-        ...postfundSetup0.channel,
-        channelNonce: 999
-      };
+      postfundSetup0.channelNonce = 999;
       theirSignature = signState(postfundSetup0, PARTICIPANT_1_PRIVATE_KEY).signature;
 
       await LedgerChannelManager.updateLedgerChannel(
         [
           {
-            state: postfundSetup0,
-            signature: theirSignature
+            ...postfundSetup0,
+            signatures: [theirSignature]
           }
         ],
         createdPrefundSetup1
@@ -226,8 +206,8 @@ describe('updateLedgerChannel', () => {
 
       await LedgerChannelManager.updateLedgerChannel([
         {
-          state: postfundSetup0,
-          signature: theirSignature
+          ...postfundSetup0,
+          signatures: [theirSignature]
         }
       ]).catch(err => {
         expect(err).toMatchObject(errors.VALUE_LOST);
@@ -237,22 +217,17 @@ describe('updateLedgerChannel', () => {
 
   describe('transitioning to an app state', () => {
     beforeEach(() => {
-      theirSignature = signState(app0, PARTICIPANT_1_PRIVATE_KEY).signature;
+      theirSignature = signState(app0, PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed state', async () => {
-      const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
-        [
-          {
-            state: app0,
-            signature: theirSignature
-          }
-        ],
+      const state = await LedgerChannelManager.updateLedgerChannel(
+        [{...app0, signatures: [theirSignature]}],
         postfundSetup1Response
       );
       expect(state).toMatchObject(app1Response);
 
-      expect(ChannelManager.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state)).toBe(true);
     });
   });
 

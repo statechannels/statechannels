@@ -1,10 +1,10 @@
 import {Bytes} from './types';
-import {State} from '@statechannels/nitro-protocol';
 import {queries} from './db/queries/channels';
 import {formResponse, nextState, validSignature} from './services/channelManager';
 
 import errors from './errors';
 import {updateLedgerChannel} from './services/ledgerChannelManager';
+import {State} from './store-types';
 export {errors};
 
 export default class Wallet {

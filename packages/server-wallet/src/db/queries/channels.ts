@@ -1,8 +1,8 @@
-import {getChannelId, State} from '@statechannels/nitro-protocol';
 import {Uint256} from '../../types';
 import errors from '../../errors';
 import Channel from '../../models/channel';
-import {outcomeObjectToModel} from '../../utilities/outcome';
+import {State} from '../../store-types';
+import {calculateChannelId} from '../../state-utils';
 
 export const queries = {
   updateChannel
@@ -10,31 +10,20 @@ export const queries = {
 
 async function updateChannel(stateRound: State[], hubState: State) {
   const firstState = stateRound[0];
-  const {channel} = firstState;
-  const {channelNonce, participants, chainId} = channel;
-  const channelId = getChannelId(channel);
+  const {channelNonce, participants, chainId} = firstState;
+  const channelId = calculateChannelId(firstState);
 
   const storedChannel = await Channel.query()
     .findOne({channel_id: channelId})
     .select('id');
 
-  if (storedChannel && firstState.turnNum < firstState.channel.participants.length) {
+  if (storedChannel && firstState.turnNum < firstState.participants.length) {
     throw errors.CHANNEL_EXISTS;
-  } else if (!storedChannel && firstState.turnNum >= firstState.channel.participants.length) {
+  } else if (!storedChannel && firstState.turnNum >= firstState.participants.length) {
     throw errors.CHANNEL_MISSING;
   }
 
-  const outcome = (s: State) => outcomeObjectToModel(s.outcome);
-  const stateModel = (s: State) => ({
-    turnNum: s.turnNum,
-    isFinal: s.isFinal,
-    challengeDuration: s.challengeDuration,
-    outcome: outcome(s),
-    appDefinition: s.appDefinition,
-    appData: s.appData
-  });
-
-  const states = [...stateRound.map(s => stateModel(s)), stateModel(hubState)];
+  const states = [...stateRound, hubState];
 
   interface Upsert {
     channelId: string;

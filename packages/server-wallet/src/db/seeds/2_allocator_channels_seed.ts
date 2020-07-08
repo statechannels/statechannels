@@ -1,4 +1,3 @@
-import {encodeConsensusData} from '@statechannels/nitro-protocol';
 import {Model} from 'objection';
 import {
   allocationOutcome2,
@@ -12,9 +11,6 @@ import {
 import {
   BEGINNING_APP_CHANNEL_ID,
   beginningAppPhaseChannel,
-  channelObjectToModel,
-  consensusAppData2,
-  consensusAppData3,
   FUNDED_CHANNEL_ID,
   FUNDED_CHANNEL_ID_3,
   FUNDED_GUARANTOR_CHANNEL_ID,
@@ -27,7 +23,6 @@ import {
   unfundedChannel
 } from '../../test/test-data';
 import Channel from '../../models/channel';
-import {outcomeObjectToModel} from '../../utilities/outcome';
 import knex from '../../db-admin/db-admin-connection';
 
 Model.knex(knex);
@@ -43,87 +38,61 @@ const baseStateProperties = {
 // ***************
 
 function prefundSetupState(turnNum: number) {
-  return {
-    ...baseStateProperties,
-    turnNum,
-    outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensusAppData2(2))
-  };
+  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
 }
 
 function prefundSetupGuarantorState(turnNum: number) {
-  return {
-    ...baseStateProperties,
-    turnNum,
-    outcome: outcomeObjectToModel(guaranteeOutcome2),
-    // Todo: appData does not reflect the outcome above
-    appData: encodeConsensusData(consensusAppData2(2))
-  };
+  return {...baseStateProperties, turnNum, outcome: guaranteeOutcome2};
 }
 
 function prefundSetupState3(turnNum: number) {
-  return {
-    ...baseStateProperties,
-    turnNum,
-    outcome: outcomeObjectToModel(allocationOutcome3),
-    appData: encodeConsensusData(consensusAppData3(3))
-  };
+  return {...baseStateProperties, turnNum, outcome: allocationOutcome3};
 }
 
 function postfundSetupState(turnNum: number) {
-  return {
-    ...baseStateProperties,
-    turnNum,
-    outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensusAppData2(0))
-  };
+  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
 }
 
 function appState(turnNum: number) {
-  return {
-    ...baseStateProperties,
-    turnNum,
-    outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensusAppData2(turnNum % 2))
-  };
+  return {...baseStateProperties, turnNum, outcome: allocationOutcome2};
 }
 
 const unfundedChannelWithStates = {
-  ...channelObjectToModel(unfundedChannel),
+  ...unfundedChannel,
   channelId: UNFUNDED_CHANNEL_ID,
   states: [prefundSetupState(0), prefundSetupState(1)]
 };
 
 const fundedChannelWithStates = {
-  ...channelObjectToModel(fundedChannel),
+  ...fundedChannel,
   channelId: FUNDED_CHANNEL_ID,
   states: [prefundSetupState(0), prefundSetupState(1)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const fundedGuarantorChannelWithStates = {
-  ...channelObjectToModel(fundedGuarantorChannel),
+  ...fundedGuarantorChannel,
   channelId: FUNDED_GUARANTOR_CHANNEL_ID,
   states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const fundedChannel3WithStates = {
-  ...channelObjectToModel(fundedChannel3),
+  ...fundedChannel3,
   channelId: FUNDED_CHANNEL_ID_3,
   states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings3}]
 };
 
 const beginningAppPhaseChannelWithStates = {
-  ...channelObjectToModel(beginningAppPhaseChannel),
+  ...beginningAppPhaseChannel,
   channel_id: BEGINNING_APP_CHANNEL_ID,
   states: [postfundSetupState(2), postfundSetupState(3)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const ongoingAppPhaseChannelWithStates = {
-  ...channelObjectToModel(ongoingAppPhaseChannel),
+  ...ongoingAppPhaseChannel,
   channel_id: ONGOING_APP_CHANNEL_ID,
   states: [appState(4), appState(5)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]

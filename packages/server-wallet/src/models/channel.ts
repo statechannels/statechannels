@@ -18,14 +18,18 @@ import {
 } from '../store-types';
 import {logger} from '../logger';
 
-export default class Channel extends Model {
-  static tableName = 'channels';
+export type ChannelColumns = {
+  readonly channelId: Bytes32;
+  readonly chainId: Bytes32;
+  readonly appDefinition: Address;
+  readonly channelNonce: Uint48;
+  readonly challengeDuration: Uint48;
+  readonly participants: Participant[];
+  readonly myIndex: number;
+  readonly stateVariables: SignedStateVarsWithHash[];
+};
 
-  static get columnNameMappers() {
-    return snakeCaseMappers();
-  }
-
-  // Columns
+export default class Channel extends Model implements ChannelColumns {
   readonly id!: number;
   readonly channelId: Bytes32;
   readonly chainId: Bytes32;
@@ -35,6 +39,12 @@ export default class Channel extends Model {
   readonly participants: Participant[];
   readonly myIndex: number;
   readonly stateVariables: SignedStateVarsWithHash[];
+
+  static tableName = 'channels';
+
+  static get columnNameMappers() {
+    return snakeCaseMappers();
+  }
 
   // Modifiers
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {

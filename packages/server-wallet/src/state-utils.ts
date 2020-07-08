@@ -22,7 +22,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import _ from 'lodash';
-import {Wallet} from 'ethers';
+import {Wallet, ethers} from 'ethers';
 import {logger} from './logger';
 import {BigNumber} from './bn';
 import {Bytes32} from './types';
@@ -79,10 +79,10 @@ export function createSignatureEntry(state: State, privateKey: string): Signatur
   const {signature} = signNitroState(nitroState, privateKey);
   return {signature: joinSignature(signature), signer: address} as SignatureEntry;
 }
-export function signState(state: State, privateKey: string): string {
+export function signState(state: State, privateKey: string): SignatureEntry {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return joinSignature(signature);
+  return {signature: joinSignature(signature), signer: new ethers.Wallet(privateKey).address};
 }
 
 export function hashState(state: State): Bytes32 {

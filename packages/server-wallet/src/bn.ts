@@ -1,4 +1,5 @@
 import {BigNumber as BN, BigNumberish} from 'ethers';
+import {Uint256} from './store-types';
 
 type T = BigNumberish;
 const compare = (method: 'eq' | 'lt' | 'gt' | 'lte' | 'gte') => (a: T, b: T): boolean =>
@@ -17,6 +18,7 @@ const op = (method: 'add' | 'sub' | 'mul') => (a: T, b: T) => {
 };
 
 export const BigNumber = {
+  from: (s: T) => BigNumber.from(s).toHexString() as Uint256,
   eq: compare('eq'),
   lt: compare('lt'),
   gt: compare('gt'),
