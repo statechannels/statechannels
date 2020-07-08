@@ -1,1 +1,0 @@
-hub: node ./lib/hub/server.js
