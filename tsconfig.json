@@ -10,7 +10,6 @@
     "esModuleInterop": true,
     "strict": false
   },
-  "references": [{"path": "../devtools"}, {"path": "../nitro-protocol"}],
   "include": ["src/**/*"],
   "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
 }
