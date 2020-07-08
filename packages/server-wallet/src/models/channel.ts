@@ -1,5 +1,5 @@
 import {Model, snakeCaseMappers} from 'objection';
-import {outcomesEqual, hashState, createSignatureEntry} from '../state-utils';
+import {outcomesEqual, hashState, createSignatureEntry, extractVariables} from '../state-utils';
 import _ from 'lodash';
 import {
   SignedStateVarsWithHash,
@@ -26,11 +26,12 @@ export type ChannelColumns = {
   readonly challengeDuration: Uint48;
   readonly participants: Participant[];
   readonly myIndex: number;
-  readonly stateVariables: SignedStateVarsWithHash[];
+  readonly vars: SignedStateVarsWithHash[];
 };
 
 export default class Channel extends Model implements ChannelColumns {
   readonly id!: number;
+
   readonly channelId: Bytes32;
   readonly chainId: Bytes32;
   readonly appDefinition: Address;
@@ -38,13 +39,39 @@ export default class Channel extends Model implements ChannelColumns {
   readonly challengeDuration: Uint48;
   readonly participants: Participant[];
   readonly myIndex: number;
-  readonly stateVariables: SignedStateVarsWithHash[];
+  public vars: SignedStateVarsWithHash[];
 
   static tableName = 'channels';
 
   static get columnNameMappers() {
     return snakeCaseMappers();
   }
+
+  static prepareJsonBColumns = (json: ChannelColumns) => {
+    (json as any).participants = JSON.stringify(json.participants);
+    (json as any).vars = JSON.stringify(json.vars?.map(extractVariables));
+
+    return json;
+  };
+
+  static beforeInsert(args) {
+    Channel.prepareJsonBColumns(args);
+  }
+  static beforeUpdate(args) {
+    Channel.prepareJsonBColumns(args);
+  }
+
+  // static get jsonSchema() {
+  //   return {
+  //     type: 'object',
+  //     required: ['name'],
+  //     properties: {
+  //       id: {type: 'integer'},
+  //       name: {type: 'string', minLength: 1, maxLength: 255},
+  //       age: {type: 'number'} // optional
+  //     }
+  //   };
+  // }
 
   // Modifiers
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
@@ -61,26 +88,20 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
-    const signedStateVars: SignedStateVariables = {
-      ...stateVars,
-      signatures: [signatureEntry]
-    };
-    const withHash: StateVariablesWithHash = {
-      ...stateVars,
-      stateHash: hashState(this.state(signedStateVars))
-    };
+    const signedStateVars: SignedStateVariables = {...stateVars, signatures: [signatureEntry]};
+    const stateHash = hashState(this.state(signedStateVars));
+    const withHash: StateVariablesWithHash = {...stateVars, stateHash};
 
-    // TODO: This check could be more efficient
     const {participants} = this.channelConstants;
 
     // check the signature
 
     const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
-    let entry = this.stateVariables.find(s => s.stateHash === withHash.stateHash);
+    let entry = this.vars.find(s => s.stateHash === withHash.stateHash);
 
     if (!entry) {
       entry = {...withHash, signatures: []};
-      this.stateVariables.push(entry);
+      this.vars.push(entry);
     }
 
     if (signerIndex === -1) {
@@ -101,7 +122,7 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   public get sortedStates() {
-    return this.stateVariables.map(s => ({...this.channelConstants, ...s}));
+    return this.vars.map(s => ({...this.channelConstants, ...s}));
   }
 
   public get myAddress(): Address {
@@ -164,18 +185,16 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   private clearOldStates() {
-    this.stateVariables = _.reverse(_.sortBy(this.stateVariables, s => s.turnNum));
+    this.vars = _.reverse(_.sortBy(this.vars, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
       const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
 
       // Find where the first support state is in our current state array
-      const supportIndex = this.stateVariables.findIndex(
-        sv => sv.stateHash === firstSupportStateHash
-      );
+      const supportIndex = this.vars.findIndex(sv => sv.stateHash === firstSupportStateHash);
       // Take everything before that
-      this.stateVariables = this.stateVariables.slice(0, supportIndex + 1);
+      this.vars = this.vars.slice(0, supportIndex + 1);
     }
   }
 
@@ -204,7 +223,7 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   private get signedStates(): Array<SignedStateWithHash> {
-    return this.stateVariables.map(s => ({...this.channelConstants, ...s}));
+    return this.vars.map(s => ({...this.channelConstants, ...s}));
   }
 
   private mySignature(stateVars: StateVariables, signatures: SignatureEntry[]): boolean {

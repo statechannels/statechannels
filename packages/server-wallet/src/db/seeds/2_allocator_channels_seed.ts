@@ -22,7 +22,6 @@ import {
   UNFUNDED_CHANNEL_ID,
   unfundedChannel
 } from '../../test/test-data';
-import Channel from '../../models/channel';
 import knex from '../../db-admin/db-admin-connection';
 
 Model.knex(knex);
@@ -134,9 +133,9 @@ export const seeds = {
 };
 
 export function seed() {
-  return knex('channels')
-    .del()
-    .then(() => Channel.query().insertGraph(Object.values(seeds)));
+  // return knex('channels')
+  //   .del()
+  //   .then(() => Channel.query().insertGraph(Object.values(seeds)));
 }
 
 export const stateConstructors = {

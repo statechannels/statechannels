@@ -45,7 +45,7 @@ export const PARTICIPANTS_3 = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, SER
 );
 
 const bigNumberify = (n: number) => BigNumber.from(n);
-const hex5 = bigNumberify(5).toHexString();
+const hex5 = bigNumberify(5);
 
 export const allocation: AllocationItem[] = [
   {destination: PARTICIPANT_1_ADDRESS, amount: hex5},
@@ -71,5 +71,5 @@ export const guaranteeOutcome2 = {
   destinations: PARTICIPANTS
 };
 
-export const holdings2 = bigNumberify(10).toHexString();
-export const holdings3 = bigNumberify(15).toHexString();
+export const holdings2 = bigNumberify(10);
+export const holdings3 = bigNumberify(15);

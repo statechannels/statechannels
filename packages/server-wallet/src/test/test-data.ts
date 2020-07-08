@@ -24,10 +24,10 @@ export const defaultChannel: ChannelConstants = {
   appDefinition: DUMMY_RULES_ADDRESS
 };
 
-const constants = (participants: Participant[], nonce: number) => ({
+const constants = (participants: Participant[], channelNonce: number) => ({
   ...defaultChannel,
   participants,
-  nonce,
+  channelNonce,
   myIndex: 1
 });
 
@@ -37,7 +37,7 @@ export const fundedChannel = constants(PARTICIPANTS, FUNDED_NONCE);
 export const fundedChannel3 = constants(PARTICIPANTS_3, FUNDED_NONCE_3);
 export const fundedGuarantorChannel = constants(PARTICIPANTS, FUNDED_GUARANTOR_NONCE);
 export const beginningAppPhaseChannel = constants(PARTICIPANTS, BEGINNING_APP_NONCE);
-export const ongoingAppPhaseChannel = constants(PARTICIPANTS, ONGOING_APP_NONCE);
+export const ongoingAppPhaseChannel = constants([], ONGOING_APP_NONCE);
 
 export const UNFUNDED_CHANNEL_ID = calculateChannelId(unfundedChannel);
 export const FUNDED_CHANNEL_ID = calculateChannelId(fundedChannel);

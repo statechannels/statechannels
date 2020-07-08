@@ -6,7 +6,9 @@ import {
   SignedState,
   Destination,
   SimpleAllocation,
-  SignatureEntry
+  SignatureEntry,
+  SignedStateVarsWithHash,
+  SignedStateWithHash
 } from './store-types';
 import {
   State as NitroState,
@@ -221,3 +223,6 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
     // simpleAllocations: outcome.map(fromNitroOutcome)
   };
 }
+
+export const extractVariables = (s: SignedStateWithHash): SignedStateVarsWithHash =>
+  _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');

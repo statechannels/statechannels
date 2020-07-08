@@ -5,11 +5,11 @@ export async function up(knex: Knex): Promise<any> {
   const name = 'channels';
   await knex.schema.createTable(name, function(table) {
     table.increments('id');
-    table.string('channel_id', 64).notNullable();
+    table.string('channel_id').notNullable();
     table.integer('my_index').notNullable();
-    table.string('chain_id', 64).notNullable();
+    table.string('chain_id').notNullable();
     table.integer('channel_nonce').notNullable();
-    table.string('app_definition', 40).notNullable();
+    table.string('app_definition').notNullable();
     table.integer('challenge_duration').notNullable();
 
     // TODO: Use this to add a schema check
