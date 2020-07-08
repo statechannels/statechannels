@@ -1,5 +1,3 @@
-import {FundingStrategy} from '@statechannels/client-api-schema/src';
-
 export type Address = string;
 export type Bytes = string;
 export type Signature = string;
@@ -8,7 +6,9 @@ export type Uint48 = number;
 export type Uint256 = string;
 export type Destination = string;
 
-export type SignatureEntry = {signature: Signature; signer: Address};
+export type SignatureEntry = { signature: Signature; signer: Address };
+// import { FundingStrategy } from '@statechannels/client-api-schema/src'; TODO
+type FundingStrategy = any;
 
 export interface Participant {
   participantId: string;
@@ -68,18 +68,18 @@ type _Objective<Name, Data> = {
 
 export type OpenChannel = _Objective<
   'OpenChannel',
-  {targetChannelId: Bytes32; fundingStrategy: FundingStrategy}
+  { targetChannelId: Bytes32; fundingStrategy: FundingStrategy }
 >;
 export type VirtuallyFund = _Objective<
   'VirtuallyFund',
-  {targetChannelId: Bytes32; jointChannelId: Bytes32}
+  { targetChannelId: Bytes32; jointChannelId: Bytes32 }
 >;
 export type FundGuarantor = _Objective<
   'FundGuarantor',
-  {jointChannelId: Bytes32; ledgerId: Bytes32; guarantorId: Bytes32}
+  { jointChannelId: Bytes32; ledgerId: Bytes32; guarantorId: Bytes32 }
 >;
-export type FundLedger = _Objective<'FundLedger', {ledgerId: Bytes32}>;
-export type CloseLedger = _Objective<'CloseLedger', {ledgerId: Bytes32}>;
+export type FundLedger = _Objective<'FundLedger', { ledgerId: Bytes32 }>;
+export type CloseLedger = _Objective<'CloseLedger', { ledgerId: Bytes32 }>;
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
@@ -92,8 +92,8 @@ export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 
 export type State<T extends StateVariables = StateVariables> = T & ChannelConstants;
 
-type Signed = {signatures: SignatureEntry[]};
-type Hashed = {stateHash: Bytes32};
+type Signed = { signatures: SignatureEntry[] };
+type Hashed = { stateHash: Bytes32 };
 
 export type SignedStateVariables = StateVariables & Signed;
 export type SignedState = State<SignedStateVariables>;
