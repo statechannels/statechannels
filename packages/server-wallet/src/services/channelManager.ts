@@ -1,5 +1,5 @@
 import {SignedState, State, signState} from '@statechannels/nitro-protocol';
-import {HUB_PRIVATE_KEY} from '../constants';
+import {SERVER_PRIVATE_KEY} from '../constants';
 import {logger} from '../logger';
 
 type Signature = any; // FIXME
@@ -17,7 +17,7 @@ export function validSignature(commitment: State, signature: Signature): boolean
 }
 
 export function formResponse(state: State): SignedState {
-  return signState(state, HUB_PRIVATE_KEY);
+  return signState(state, SERVER_PRIVATE_KEY);
 }
 
 export function nextState(theirState: State): State {

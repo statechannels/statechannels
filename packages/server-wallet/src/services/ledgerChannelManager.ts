@@ -5,7 +5,7 @@ import {
   decodeConsensusData,
   encodeConsensusData
 } from '@statechannels/nitro-protocol';
-import {HUB_ADDRESS} from '../constants';
+import {SERVER_ADDRESS} from '../constants';
 import {queries} from '../db/queries/channels';
 import errors from '../errors';
 import * as ChannelManager from './channelManager';
@@ -59,7 +59,7 @@ export function nextState(stateRound: SignedState[]): State {
   // Check that it is our turn
   const lastState = stateRound.slice(-1)[0].state;
   const participants = lastState.channel.participants;
-  const ourIndex = participants.indexOf(HUB_ADDRESS);
+  const ourIndex = participants.indexOf(SERVER_ADDRESS);
   const lastTurn = lastState.turnNum;
   const numParticipants = participants.length;
   if ((lastTurn + 1) % numParticipants !== ourIndex) {

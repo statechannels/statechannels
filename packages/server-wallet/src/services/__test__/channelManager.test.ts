@@ -1,5 +1,5 @@
 import {signState, State} from '@statechannels/nitro-protocol';
-import {HUB_PRIVATE_KEY} from '../../constants';
+import {SERVER_PRIVATE_KEY} from '../../constants';
 import {fundedChannel, stateConstructors as testDataConstructors} from '../../test/test-data';
 import * as ChannelManager from '../channelManager';
 
@@ -20,7 +20,7 @@ beforeEach(() => {
   postfundSetup1 = testDataConstructors.postfundSetup(3);
   app0 = testDataConstructors.app(4, fundedChannel);
 
-  hubSignature = signState(prefundSetup1, HUB_PRIVATE_KEY).signature;
+  hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY).signature;
 });
 
 describe('validSignature', () => {
@@ -38,7 +38,7 @@ describe('formResponse', () => {
   it('returns a signed core state', async () => {
     prefundSetup1.channel = fundedChannel;
 
-    hubSignature = signState(prefundSetup1, HUB_PRIVATE_KEY).signature;
+    hubSignature = signState(prefundSetup1, SERVER_PRIVATE_KEY).signature;
 
     expect(await ChannelManager.formResponse(prefundSetup1)).toMatchObject({
       state: prefundSetup1,

@@ -6,7 +6,7 @@ import {
 import {ethers, BigNumber} from 'ethers';
 
 import {Address, Uint256} from '../types';
-import {HUB_ADDRESS} from '../constants';
+import {SERVER_ADDRESS} from '../constants';
 import {AllocationItem} from '@statechannels/client-api-schema';
 
 export const PARTICIPANT_1_PRIVATE_KEY =
@@ -42,12 +42,12 @@ export const NONCE = 1000;
 export const DUMMY_CHAIN_ID = '8888';
 
 export const STAKE: Uint256 = ethers.utils.parseEther('0.01').toHexString();
-export const PARTICIPANTS: Address[] = [PARTICIPANT_1_ADDRESS, HUB_ADDRESS];
+export const PARTICIPANTS: Address[] = [PARTICIPANT_1_ADDRESS, SERVER_ADDRESS];
 
 export const PARTICIPANTS_3: Address[] = [
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
-  HUB_ADDRESS
+  SERVER_ADDRESS
 ];
 
 const bigNumberify = (n: number) => BigNumber.from(n);
@@ -56,7 +56,7 @@ const hex5 = bigNumberify(5).toHexString();
 export const allocation: AllocationItem[] = [
   {destination: convertAddressToBytes32(PARTICIPANT_1_ADDRESS), amount: hex5},
   {destination: convertAddressToBytes32(PARTICIPANT_2_ADDRESS), amount: hex5},
-  {destination: convertAddressToBytes32(HUB_ADDRESS), amount: hex5}
+  {destination: convertAddressToBytes32(SERVER_ADDRESS), amount: hex5}
 ];
 export const allocationOutcome2: Outcome = [
   {

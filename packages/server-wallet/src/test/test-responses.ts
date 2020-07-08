@@ -1,5 +1,5 @@
 import {encodeConsensusData, State} from '@statechannels/nitro-protocol';
-import {HUB_ADDRESS} from '../constants';
+import {SERVER_ADDRESS} from '../constants';
 import {
   allocationOutcome2,
   allocationOutcome3,
@@ -77,6 +77,6 @@ export const app1Response: State = {
 
 export const createdChannel = {
   id: expect.any(Number),
-  participants: [{address: PARTICIPANT_1_ADDRESS}, {address: HUB_ADDRESS}],
+  participants: [{address: PARTICIPANT_1_ADDRESS}, {address: SERVER_ADDRESS}],
   chainId: DUMMY_CHAIN_ID
 };
