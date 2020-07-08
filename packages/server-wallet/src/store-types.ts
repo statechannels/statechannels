@@ -2,13 +2,13 @@ import {FundingStrategy} from '@statechannels/client-api-schema/src';
 
 type Brand<T, K extends string> = T & {[key in K]: void};
 // TODO: These should each have validators
-type Address = Brand<string, '_isAddress'>;
-type Bytes = Brand<string, '_isBytes'>;
-type Signature = Brand<string, '_isSignature'>;
-type Bytes32 = Brand<string, '_isBytes32'>;
-type Uint48 = Brand<number, '_isUint48'>;
-type Uint256 = Brand<string, '_isUint256'>;
-type Destination = Brand<string, '_isDestination'>;
+export type Address = Brand<string, '_isAddress'>;
+export type Bytes = Brand<string, '_isBytes'>;
+export type Signature = Brand<string, '_isSignature'>;
+export type Bytes32 = Brand<string, '_isBytes32'>;
+export type Uint48 = Brand<number, '_isUint48'>;
+export type Uint256 = Brand<string, '_isUint256'>;
+export type Destination = Brand<string, '_isDestination'>;
 
 export type SignatureEntry = {signature: Signature; signer: Address};
 
@@ -62,20 +62,6 @@ export interface ChannelConstants {
   challengeDuration: Uint48;
 }
 
-export type State = {
-  consts: ChannelConstants;
-  vars: StateVariables;
-};
-
-type Signed = {signatures: SignatureEntry[]};
-type Hashed = {stateHash: Bytes32};
-
-export type SignedState = State & Signed;
-export type SignedStateWithHash = SignedState & Hashed;
-
-export type SignedStateVariables = StateVariables & Signed;
-export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
-
 type _Objective<Name, Data> = {
   participants: Participant[];
   type: Name;
@@ -106,13 +92,52 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
 export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 
+export type State<T extends StateVariables = StateVariables> = T & ChannelConstants;
+
+type Signed = {signatures: SignatureEntry[]};
+type Hashed = {stateHash: Bytes32};
+
+export type SignedStateVariables = StateVariables & Signed;
+export type SignedState = State<SignedStateVariables>;
+
+export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
+export type SignedStateWithHash = State<SignedStateVarsWithHash>;
+
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
 }
 
-export type ChannelStoredData = {
-  stateVariables: Array<SignedStateWithHash>;
+export type StoredState = {
+  stateVariables: Array<SignedStateVarsWithHash>;
   channelConstants: ChannelConstants;
   myIndex: number;
 };
+
+export enum Errors {
+  duplicateTurnNums = 'multiple states with same turn number',
+  notSorted = 'states not sorted',
+  multipleSignedStates = 'Store signed multiple states for a single turn',
+  staleState = 'Attempting to sign a stale state',
+  channelMissing = 'No channel found with id.',
+  channelFunded = 'Channel already funded.',
+  channelLocked = 'Channel is locked',
+  noBudget = 'No budget exists for domain. ',
+  noAssetBudget = "This domain's budget does contain this asset",
+  channelNotInBudget = "This domain's budget does not reference this channel",
+  noDomainForChannel = 'No domain defined for channel',
+  domainExistsOnChannel = 'Channel already has a domain.',
+  budgetAlreadyExists = 'There already exists a budget for this domain',
+  budgetInsufficient = 'Budget insufficient to reserve funds',
+  amountUnauthorized = 'Amount unauthorized in current budget',
+  cannotFindDestination = 'Cannot find destination for participant',
+  cannotFindPrivateKey = 'Private key missing for your address',
+  notInChannel = 'Attempting to initialize  channel as a non-participant',
+  noLedger = 'No ledger exists with peer',
+  amountNotFound = 'Cannot find allocation entry with destination',
+  invalidNonce = 'Invalid nonce',
+  invalidTransition = 'Invalid transition',
+  invalidAppData = 'Invalid app data',
+  emittingDuringTransaction = 'Attempting to emit event during transaction',
+  notMyTurn = "Cannot update channel unless it's your turn"
+}
