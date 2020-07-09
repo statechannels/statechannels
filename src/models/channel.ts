@@ -75,7 +75,10 @@ export default class Channel extends Model implements ChannelColumns {
 
   // Modifiers
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    if (this.isSupportedByMe && this.latestSignedByMe.turnNum >= stateVars.turnNum) {
+    if (
+      this.isSupportedByMe &&
+      this.latestSignedByMe.turnNum >= stateVars.turnNum
+    ) {
       logger.error({ entry: this.channelId, stateVars }, Errors.staleState);
       throw Error(Errors.staleState);
     }
@@ -87,8 +90,14 @@ export default class Channel extends Model implements ChannelColumns {
     return this.addState(stateVars, signatureEntry);
   }
 
-  addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
-    const signedStateVars: SignedStateVariables = { ...stateVars, signatures: [signatureEntry] };
+  addState(
+    stateVars: StateVariables,
+    signatureEntry: SignatureEntry
+  ): SignedState {
+    const signedStateVars: SignedStateVariables = {
+      ...stateVars,
+      signatures: [signatureEntry],
+    };
     const stateHash = hashState(this.state(signedStateVars));
     const withHash: StateVariablesWithHash = { ...stateVars, stateHash };
 
@@ -96,8 +105,10 @@ export default class Channel extends Model implements ChannelColumns {
 
     // check the signature
 
-    const signerIndex = participants.findIndex((p) => p.signingAddress === signatureEntry.signer);
-    let entry = this.vars.find((s) => s.stateHash === withHash.stateHash);
+    const signerIndex = participants.findIndex(
+      p => p.signingAddress === signatureEntry.signer
+    );
+    let entry = this.vars.find(s => s.stateHash === withHash.stateHash);
 
     if (!entry) {
       entry = { ...withHash, signatures: [] };
@@ -108,7 +119,10 @@ export default class Channel extends Model implements ChannelColumns {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    entry.signatures = _.uniqWith(_.concat(entry.signatures, signatureEntry), _.isEqual);
+    entry.signatures = _.uniqWith(
+      _.concat(entry.signatures, signatureEntry),
+      _.isEqual
+    );
     this.clearOldStates();
     this.checkInvariants();
 
@@ -117,12 +131,24 @@ export default class Channel extends Model implements ChannelColumns {
 
   // Computed
   public get channelConstants(): ChannelConstants {
-    const { channelNonce, challengeDuration, chainId, participants, appDefinition } = this;
-    return { channelNonce, challengeDuration, chainId, participants, appDefinition };
+    const {
+      channelNonce,
+      challengeDuration,
+      chainId,
+      participants,
+      appDefinition,
+    } = this;
+    return {
+      channelNonce,
+      challengeDuration,
+      chainId,
+      participants,
+      appDefinition,
+    };
   }
 
   public get sortedStates() {
-    return this.vars.map((s) => ({ ...this.channelConstants, ...s }));
+    return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   public get myAddress(): Address {
@@ -130,7 +156,9 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   public get myTurn(): boolean {
-    return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    return (
+      (this.supported.turnNum + 1) % this.participants.length === this.myIndex
+    );
   }
 
   get isSupported() {
@@ -138,11 +166,11 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   public get support(): Array<SignedState> {
-    return this._support.map((s) => ({ ...this.channelConstants, ...s }));
+    return this._support.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   get hasConclusionProof() {
-    return this.isSupported && this.support.every((s) => s.isFinal);
+    return this.isSupported && this.support.every(s => s.isFinal);
   }
 
   get supported() {
@@ -177,7 +205,7 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   private get _signedByMe() {
-    return this.signedStates.filter((s) => this.mySignature(s, s.signatures));
+    return this.signedStates.filter(s => this.mySignature(s, s.signatures));
   }
 
   private get _latestSupportedByMe() {
@@ -185,22 +213,30 @@ export default class Channel extends Model implements ChannelColumns {
   }
 
   private clearOldStates() {
-    this.vars = _.reverse(_.sortBy(this.vars, (s) => s.turnNum));
+    this.vars = _.reverse(_.sortBy(this.vars, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
-      const { stateHash: firstSupportStateHash } = this._support[this._support.length - 1];
+      const { stateHash: firstSupportStateHash } = this._support[
+        this._support.length - 1
+      ];
 
       // Find where the first support state is in our current state array
-      const supportIndex = this.vars.findIndex((sv) => sv.stateHash === firstSupportStateHash);
+      const supportIndex = this.vars.findIndex(
+        sv => sv.stateHash === firstSupportStateHash
+      );
       // Take everything before that
       this.vars = this.vars.slice(0, supportIndex + 1);
     }
   }
 
   private checkInvariants() {
-    const groupedByTurnNum = _.groupBy(this._signedByMe, (s) => s.turnNum.toString());
-    const multipleSignedByMe = _.map(groupedByTurnNum, (s) => s.length)?.find((num) => num > 1);
+    const groupedByTurnNum = _.groupBy(this._signedByMe, s =>
+      s.turnNum.toString()
+    );
+    const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(
+      num => num > 1
+    );
 
     if (multipleSignedByMe) {
       logger.error({ entry: this.channelId }, Errors.multipleSignedStates);
@@ -209,7 +245,7 @@ export default class Channel extends Model implements ChannelColumns {
     }
 
     const { signedStates } = this;
-    const turnNums = _.map(signedStates, (s) => s.turnNum);
+    const turnNums = _.map(signedStates, s => s.turnNum);
 
     const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
     if (duplicateTurnNums) {
@@ -217,17 +253,20 @@ export default class Channel extends Model implements ChannelColumns {
       throw Error(Errors.duplicateTurnNums);
     }
     if (!isReverseSorted(turnNums)) {
-      logger.error({ signedStates: _.map(signedStates, (s) => s.turnNum) });
+      logger.error({ signedStates: _.map(signedStates, s => s.turnNum) });
       throw Error(Errors.notSorted);
     }
   }
 
   private get signedStates(): Array<SignedStateWithHash> {
-    return this.vars.map((s) => ({ ...this.channelConstants, ...s }));
+    return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
-  private mySignature(stateVars: StateVariables, signatures: SignatureEntry[]): boolean {
-    return signatures.some((sig) => sig.signer === this.myAddress);
+  private mySignature(
+    stateVars: StateVariables,
+    signatures: SignatureEntry[]
+  ): boolean {
+    return signatures.some(sig => sig.signer === this.myAddress);
   }
 
   private nParticipants(): number {
@@ -237,7 +276,9 @@ export default class Channel extends Model implements ChannelColumns {
   private get _support(): Array<SignedStateWithHash> {
     let support: Array<SignedStateWithHash> = [];
 
-    let participantsWhoHaveNotSigned = new Set(this.participants.map((p) => p.signingAddress));
+    let participantsWhoHaveNotSigned = new Set(
+      this.participants.map(p => p.signingAddress)
+    );
     let previousState;
 
     for (const signedState of this.signedStates) {
@@ -245,13 +286,15 @@ export default class Channel extends Model implements ChannelColumns {
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
         support = [];
-        participantsWhoHaveNotSigned = new Set(this.participants.map((p) => p.signingAddress));
+        participantsWhoHaveNotSigned = new Set(
+          this.participants.map(p => p.signingAddress)
+        );
       }
       const moverIndex = signedState.turnNum % this.nParticipants();
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
       // If the mover hasn't signed the state then we know it cannot be part of the support
-      if (signedState.signatures.some((s) => s.signer === moverForThisTurn)) {
+      if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
         support.push(signedState);
 
         for (const signature of signedState.signatures) {
@@ -268,7 +311,10 @@ export default class Channel extends Model implements ChannelColumns {
   // This is a simple check based on _requireValidTransition from NitroProtocol
   // We will eventually want to perform a proper validTransition check
   // but we will have to be careful where we do that to prevent eating up a ton of cpu
-  private validChain(firstState: SignedState, secondState: SignedState): boolean {
+  private validChain(
+    firstState: SignedState,
+    secondState: SignedState
+  ): boolean {
     if (firstState.turnNum + 1 !== secondState.turnNum) {
       return false;
     }

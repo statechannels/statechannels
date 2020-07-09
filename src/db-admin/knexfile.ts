@@ -13,16 +13,23 @@ let knexConfig: Config = {
   debug: process.env.DEBUG_KNEX === 'TRUE',
   migrations: {
     directory: path.join(BASE_PATH, 'migrations'),
-    loadExtensions: extensions
+    loadExtensions: extensions,
   },
   seeds: {
     directory: path.join(BASE_PATH, 'seeds'),
-    loadExtensions: extensions
-  }
+    loadExtensions: extensions,
+  },
 };
 
 if (process.env.NODE_ENV === 'development') {
   knexConfig = { ...knexConfig, pool: { min: 0, max: 1 } };
 }
 
-export const { client, connection, debug, migrations, seeds, pool } = knexConfig;
+export const {
+  client,
+  connection,
+  debug,
+  migrations,
+  seeds,
+  pool,
+} = knexConfig;

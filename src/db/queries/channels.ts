@@ -11,11 +11,16 @@ async function updateChannel(stateRound: State[], hubState: State) {
   const { channelNonce, participants, chainId } = firstState;
   const channelId = calculateChannelId(firstState);
 
-  const storedChannel = await Channel.query().findOne({ channel_id: channelId }).select('id');
+  const storedChannel = await Channel.query()
+    .findOne({ channel_id: channelId })
+    .select('id');
 
   if (storedChannel && firstState.turnNum < firstState.participants.length) {
     throw errors.CHANNEL_EXISTS;
-  } else if (!storedChannel && firstState.turnNum >= firstState.participants.length) {
+  } else if (
+    !storedChannel &&
+    firstState.turnNum >= firstState.participants.length
+  ) {
     throw errors.CHANNEL_MISSING;
   }
 

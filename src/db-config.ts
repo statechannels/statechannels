@@ -8,6 +8,6 @@ export const dbCofig: Config = {
     host: process.env.SERVER_DB_HOST,
     port: Number(process.env.SERVER_DB_PORT),
     database: process.env.SERVER_DB_NAME,
-    user: process.env.SERVER_DB_USER
-  }
+    user: process.env.SERVER_DB_USER,
+  },
 };

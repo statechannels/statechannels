@@ -1,5 +1,8 @@
 import { Model } from 'objection';
-import { allocationOutcome2, DUMMY_RULES_ADDRESS } from '../../test/test-constants';
+import {
+  allocationOutcome2,
+  DUMMY_RULES_ADDRESS,
+} from '../../test/test-constants';
 import {
   BEGINNING_APP_CHANNEL_ID,
   beginningAppPhaseChannel,
@@ -49,7 +52,10 @@ const ongoingAppPhaseChannelWithStates: ChannelColumns = {
   vars: [appState(4), appState(5)],
 };
 
-const seeds = [beginningAppPhaseChannelWithStates, ongoingAppPhaseChannelWithStates];
+const seeds = [
+  beginningAppPhaseChannelWithStates,
+  ongoingAppPhaseChannelWithStates,
+];
 
 // *******
 // Exports

@@ -39,16 +39,28 @@ export const defaultChannel3 = constants(PARTICIPANTS_3, NONCE);
 export const unfundedChannel = constants(PARTICIPANTS, UNFUNDED_NONCE);
 export const fundedChannel = constants(PARTICIPANTS, FUNDED_NONCE);
 export const fundedChannel3 = constants(PARTICIPANTS_3, FUNDED_NONCE_3);
-export const fundedGuarantorChannel = constants(PARTICIPANTS, FUNDED_GUARANTOR_NONCE);
-export const beginningAppPhaseChannel = constants(PARTICIPANTS, BEGINNING_APP_NONCE);
+export const fundedGuarantorChannel = constants(
+  PARTICIPANTS,
+  FUNDED_GUARANTOR_NONCE
+);
+export const beginningAppPhaseChannel = constants(
+  PARTICIPANTS,
+  BEGINNING_APP_NONCE
+);
 export const ongoingAppPhaseChannel = constants([], ONGOING_APP_NONCE);
 
 export const UNFUNDED_CHANNEL_ID = calculateChannelId(unfundedChannel);
 export const FUNDED_CHANNEL_ID = calculateChannelId(fundedChannel);
 export const FUNDED_CHANNEL_ID_3 = calculateChannelId(fundedChannel3);
-export const FUNDED_GUARANTOR_CHANNEL_ID = calculateChannelId(fundedGuarantorChannel);
-export const BEGINNING_APP_CHANNEL_ID = calculateChannelId(beginningAppPhaseChannel);
-export const ONGOING_APP_CHANNEL_ID = calculateChannelId(ongoingAppPhaseChannel);
+export const FUNDED_GUARANTOR_CHANNEL_ID = calculateChannelId(
+  fundedGuarantorChannel
+);
+export const BEGINNING_APP_CHANNEL_ID = calculateChannelId(
+  beginningAppPhaseChannel
+);
+export const ONGOING_APP_CHANNEL_ID = calculateChannelId(
+  ongoingAppPhaseChannel
+);
 
 const baseState = (turnNum: number) => ({
   turnNum,
