@@ -1,5 +1,4 @@
 import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
-import {getDataAndInvoke} from '@statechannels/wallet-core'; // FIXME
 import {map, first, filter} from 'rxjs/operators';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
@@ -7,6 +6,7 @@ import {VirtualDefundingAsLeaf, SupportState} from '.';
 import {commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
 import {MessagingServiceInterface} from '../messaging';
+import {getDataAndInvoke} from '../utils';
 
 const WORKFLOW = 'conclude-channel';
 

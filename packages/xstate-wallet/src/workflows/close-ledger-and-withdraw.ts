@@ -10,7 +10,6 @@ import {
   Interpreter
 } from 'xstate';
 import {
-  getDataAndInvoke,
   outcomesEqual,
   Participant,
   Objective,
@@ -23,6 +22,7 @@ import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {SupportState} from '.';
+import {getDataAndInvoke} from '../utils';
 import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 
 interface Initial {

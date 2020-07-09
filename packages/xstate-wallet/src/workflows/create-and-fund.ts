@@ -16,8 +16,7 @@ import {
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  checkThat,
-  getDataAndInvoke
+  checkThat
 } from '@statechannels/wallet-core';
 
 import {Zero} from '@ethersproject/constants';
@@ -26,6 +25,7 @@ import {Store} from '../store';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
+import {getDataAndInvoke} from '../utils';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {

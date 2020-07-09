@@ -15,7 +15,6 @@ import {
   Objective,
   Participant,
   StateVariables,
-  getDataAndInvoke,
   checkThat,
   isSimpleEthAllocation,
   add
@@ -26,6 +25,7 @@ import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
 import * as Depositing from './depositing';
+import {getDataAndInvoke} from '../utils';
 
 type WorkflowActions = {
   assignChannelId: AssignAction<WorkflowContext, DoneInvokeEvent<string>>;

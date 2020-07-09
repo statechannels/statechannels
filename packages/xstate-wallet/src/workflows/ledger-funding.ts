@@ -2,7 +2,6 @@ import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xs
 import {
   allocateToTarget,
   isSimpleEthAllocation,
-  getDataAndInvoke,
   checkThat,
   add,
   AllocationItem,
@@ -12,6 +11,7 @@ import {
 import {ChannelLock} from '../store/store';
 
 import {Store} from '../store';
+import {getDataAndInvoke} from '../utils';
 import {assignError} from '../utils/workflow-utils';
 import {SupportState} from '.';
 
