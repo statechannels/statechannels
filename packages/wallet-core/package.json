@@ -5,35 +5,18 @@
   "author": "Alex Gap",
   "main": "lib/src/index.js",
   "dependencies": {
-    "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/channel-provider": "0.0.3",
     "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wire-format": "0.0.1",
-    "async-lock": "1.2.2",
-    "dexie": "3.0.0",
-    "ethers": "5.0.0-beta.191",
-    "eventemitter3": "4.0.0",
-    "filter-async-rxjs-pipe": "0.1.5",
-    "guid-typescript": "1.0.9",
-    "jsonrpc-lite": "2.1.0",
-    "pino": "6.2.0",
-    "rxjs": "6.5.5",
-    "url-parse": "1.4.7"
+    "ethers": "5.0.0-beta.191"
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
     "@statechannels/devtools": "0.1.1",
-    "@types/async-lock": "1.1.1",
     "@types/babel__core": "7.1.7",
-    "@types/pino": "6.0.0",
-    "@types/url-parse": "1.4.3",
     "awesome-typescript-loader": "5.2.1",
-    "fake-indexeddb": "3.0.0",
     "jest": "25.1.0",
-    "pino-pretty": "4.0.0",
     "ts-jest": "25.0.0",
-    "typescript": "3.7.5",
-    "wait-for-expect": "3.0.2"
+    "typescript": "3.7.5"
   },
   "engines": {
     "node": "^12.16.3"
