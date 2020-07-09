@@ -5,7 +5,7 @@
   "author": "",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wallet-core": "^0.0.1",
+    "@statechannels/wallet-core": "0.0.5",
     "ethers": "5.0.0-beta.191",
     "knex": "0.20.9",
     "objection": "2.1.2",
