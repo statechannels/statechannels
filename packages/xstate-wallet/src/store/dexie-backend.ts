@@ -1,20 +1,17 @@
-import {ChannelStoreEntry} from './channel-store-entry';
+import * as _ from 'lodash';
+import Dexie, {Transaction, TransactionMode} from 'dexie';
+import {BigNumber} from 'ethers';
 import {
   Objective,
-  DBBackend,
   DomainBudget,
   ChannelStoredData,
-  AssetBudget,
-  ObjectStores,
-  TXMode
-} from './types';
-import * as _ from 'lodash';
-
-import Dexie, {Transaction, TransactionMode} from 'dexie';
+  AssetBudget
+} from '@statechannels/wallet-core/lib/src/types';
+import {ChannelStoreEntry} from './channel-store-entry';
+import {DBBackend, ObjectStores, TXMode} from '.';
 
 import {unreachable} from '../utils';
 import {logger} from '../logger';
-import {BigNumber} from 'ethers';
 
 const STORES: ObjectStores[] = [
   ObjectStores.budgets,

@@ -3,14 +3,14 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
-import {renderComponentInFrontOfApp} from './helpers';
 
 import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import React from 'react';
-import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-import {logger} from '../../logger';
 import {BigNumber} from 'ethers';
+import {logger} from '../../logger';
+import {Store} from '../../store';
+import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
+import {renderComponentInFrontOfApp} from './helpers';
 
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);

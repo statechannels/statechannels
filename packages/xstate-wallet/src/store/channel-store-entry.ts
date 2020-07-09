@@ -1,3 +1,5 @@
+import _ from 'lodash';
+import {BigNumber} from 'ethers';
 import {
   ChannelConstants,
   StateVariables,
@@ -7,20 +9,19 @@ import {
   SignedStateWithHash,
   SignedStateVarsWithHash,
   StateVariablesWithHash,
-  Outcome
-} from './types';
-import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
-import _ from 'lodash';
-import {BigNumber} from 'ethers';
+  Outcome,
+  Funding,
+  SignatureEntry
+} from '@statechannels/wallet-core/lib/src/types';
+import {
+  hashState,
+  calculateChannelId,
+  createSignatureEntry,
+  outcomesEqual
+} from '@statechannels/wallet-core/lib/src/state-utils';
 
-import {Funding} from './store';
 import {Errors} from '.';
 import {logger} from '../logger';
-export interface SignatureEntry {
-  signature: string;
-  signer: string;
-}
-
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {

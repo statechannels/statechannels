@@ -1,13 +1,13 @@
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {FakeChain} from '../chain';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-import {State, SignedState} from '@statechannels/wallet-core/lib/src/store/types';
-import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {State, SignedState} from '@statechannels/wallet-core/lib/src/types';
+import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/state-utils';
 import {AddressZero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 require('fake-indexeddb/auto');
-import {Backend} from '@statechannels/wallet-core/lib/src/store/dexie-backend';
 import {BigNumber} from 'ethers';
+import {Backend} from '../store/dexie-backend';
 
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';

@@ -11,7 +11,7 @@ import {
   SimpleAllocation,
   DomainBudget,
   AssetBudget
-} from '../../store/types';
+} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {BigNumber} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';

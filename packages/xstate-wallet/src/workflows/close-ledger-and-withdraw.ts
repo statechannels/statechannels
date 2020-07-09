@@ -10,12 +10,17 @@ import {
   Interpreter
 } from 'xstate';
 import {getDataAndInvoke} from '@statechannels/wallet-core/lib/src/utils';
-import {Store, DomainBudget} from '@statechannels/wallet-core/lib/src/store';
-import {outcomesEqual} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {Participant, Objective, CloseLedger} from '@statechannels/wallet-core/lib/src/store/types';
+import {outcomesEqual} from '@statechannels/wallet-core/lib/src/state-utils';
+import {
+  Participant,
+  Objective,
+  CloseLedger,
+  DomainBudget
+} from '@statechannels/wallet-core/lib/src/types';
 
-import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
 import {map, filter} from 'rxjs/operators';
+import {ChannelChainInfo} from '../chain';
+import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {SupportState} from '.';
 import {CommonWorkflowActions, commonWorkflowActions, CommonActions} from '../utils/workflow-utils';

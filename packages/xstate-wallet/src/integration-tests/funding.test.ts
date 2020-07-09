@@ -1,6 +1,6 @@
 import {CreateChannelResponse} from '@statechannels/client-api-schema';
 import {filter, first} from 'rxjs/operators';
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
+import {FakeChain} from '../chain';
 import {
   Player,
   generateCreateChannelRequest,

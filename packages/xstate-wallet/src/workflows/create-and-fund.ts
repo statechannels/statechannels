@@ -9,11 +9,7 @@ import {
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {
-  isVirtuallyFund,
-  StateVariables,
-  Outcome
-} from '@statechannels/wallet-core/lib/src/store/types';
+import {isVirtuallyFund, StateVariables, Outcome} from '@statechannels/wallet-core/lib/src/types';
 
 import {
   add,
@@ -22,9 +18,9 @@ import {
   checkThat,
   getDataAndInvoke
 } from '@statechannels/wallet-core/lib/src/utils';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-
 import {Zero} from '@ethersproject/constants';
+import {Store} from '../store';
+
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';

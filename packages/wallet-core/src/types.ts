@@ -1,7 +1,5 @@
 import {BigNumber} from 'ethers';
-import {Funding} from './store';
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
-import {SignatureEntry, ChannelStoreEntry} from './channel-store-entry';
 
 export interface DomainBudget {
   domain: string;
@@ -147,87 +145,48 @@ export type ChannelStoredData = {
   applicationDomain: string | undefined;
   myIndex: number;
 };
-export interface DBBackend {
-  initialize(cleanSlate: boolean, name: string): Promise<any>;
 
-  // TODO: Perhaps the backend API should look more like this?
-  // privateKeys(): Promise<Array<{signingAddress: string; privateKey: string}>>;
-  privateKeys(): Promise<Record<string, string | undefined>>;
-  ledgers(): Promise<Record<string, string | undefined>>;
-  nonces(): Promise<Record<string, number | undefined>>;
-  objectives(): Promise<Objective[]>;
-  channels(): Promise<Record<string, ChannelStoreEntry | undefined>>;
-
-  setDestinationAddress(destinationAddress: string): Promise<string>;
-  getDestinationAddress(): Promise<string | undefined>;
-
-  setPrivateKey(key: string, value: string): Promise<string>;
-  getPrivateKey(key: string): Promise<string | undefined>;
-
-  setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
-  getChannel(key: string): Promise<ChannelStoreEntry | undefined>;
-
-  getBudget(key: string): Promise<DomainBudget | undefined>;
-  setBudget(key: string, budget: DomainBudget): Promise<DomainBudget>;
-  deleteBudget(key: string): Promise<void>;
-
-  setLedger(key: string, value: string): Promise<string>;
-  getLedger(key: string): Promise<string | undefined>;
-
-  setNonce(key: string, value: number): Promise<number>;
-  getNonce(key: string): Promise<number | undefined>;
-
-  setObjective(key: number, value: Objective): Promise<Objective>;
-  getObjective(key: number): Promise<Objective | undefined>;
-
-  /**
-   * Starts an async database transaction.
-   *
-   * When mode is 'readwrite', acquires a lock on each store listed in stores param.
-   *
-   * dexie backend rejects with 'NotFoundError: TableX not part of transaction', if cb
-   * attempts to use table not listed by stores param.
-   *
-   * Rejects if tx.abort() is called.
-   *
-   * @param mode
-   * @param stores array of ObjectStore names usd in cb
-   * @param cb callback to execute within transaction scope
-   * @returns promise resolving to return value of cb
-   */
-  transaction<T, S extends ObjectStores>(
-    mode: TXMode,
-    stores: S[],
-    cb: (tx: Transaction) => Promise<T>
-  ): Promise<T>;
-  transactionOngoing: boolean;
+export interface SignatureEntry {
+  signature: string;
+  signer: string;
 }
 
-export type Transaction = {
-  abort(): void;
-  // TODO: We could expose a store function on the transaction and
-  // potentially do away with the individual getters on the backend interface
-  // EG:
-  // store<S extends Stores>(s: S): ObjectStore<S>;
-  // Or, we could just expose direct properties, like
-  // channels(): Table<ChannelRecord>
-};
-
-export type TXMode = 'readonly' | 'readwrite';
-
-export const enum ObjectStores {
-  channels = 'channels',
-  objectives = 'objectives',
-  nonces = 'nonces',
-  privateKeys = 'privateKeys',
-  destinationAddress = 'destinationAddress',
-  ledgers = 'ledgers',
-  budgets = 'budgets'
+interface DirectFunding {
+  type: 'Direct';
 }
 
-declare global {
-  interface Window {
-    channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
-    ethereum: any;
-  }
+interface IndirectFunding {
+  type: 'Indirect';
+  ledgerId: string;
+}
+
+export interface VirtualFunding {
+  type: 'Virtual';
+  jointChannelId: string;
+}
+
+interface Guarantee {
+  type: 'Guarantee';
+  guarantorChannelId: string;
+}
+
+interface Guarantees {
+  type: 'Guarantees';
+  guarantorChannelIds: [string, string];
+}
+
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarantees | Guarantee;
+export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
+  return funding.type === 'Indirect';
+}
+
+export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
+  return funding.type === 'Virtual';
+}
+
+export function isGuarantee(funding: Funding): funding is Guarantee {
+  return funding.type === 'Guarantee';
+}
+export function isGuarantees(funding: Funding): funding is Guarantees {
+  return funding.type === 'Guarantees';
 }

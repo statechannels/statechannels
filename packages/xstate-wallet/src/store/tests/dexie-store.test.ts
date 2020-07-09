@@ -1,15 +1,23 @@
 /* eslint-disable no-console */
 /* eslint-disable jest/no-disabled-tests */
-import {Store} from '../store';
-import {State, Objective, DomainBudget, AssetBudget, ObjectStores} from '../types';
-
 import {Wallet, BigNumber} from 'ethers';
-import {calculateChannelId, createSignatureEntry} from '../state-utils';
+import {simpleEthAllocation, makeDestination} from '@statechannels/wallet-core/lib/src/utils';
+import {
+  State,
+  Objective,
+  DomainBudget,
+  AssetBudget
+} from '@statechannels/wallet-core/lib/src/types';
+import {
+  calculateChannelId,
+  createSignatureEntry
+} from '@statechannels/wallet-core/lib/src/state-utils';
+
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
-import {simpleEthAllocation, makeDestination} from '../../utils';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
-import {Errors} from '..';
+import {Store, Errors, ObjectStores} from '..';
+
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(

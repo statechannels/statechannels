@@ -9,13 +9,13 @@ import {
   simpleEthAllocation,
   checkThat
 } from '@statechannels/wallet-core/lib/src/utils';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
 import {
   Outcome,
   SimpleAllocation,
   AllocationItem,
   Destination
-} from '@statechannels/wallet-core/lib/src/store/types';
+} from '@statechannels/wallet-core/lib/src/types';
+import {Store} from '../store';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';

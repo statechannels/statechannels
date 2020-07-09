@@ -12,16 +12,17 @@ import {
   DomainBudget,
   Participant,
   SimpleAllocation,
-  AssetBudget
-} from '@statechannels/wallet-core/lib/src/store/types';
+  AssetBudget,
+  State as ChannelState
+} from '@statechannels/wallet-core/lib/src/types';
 
-import {Store, State as ChannelState} from '@statechannels/wallet-core/lib/src/store';
 import {checkThat, exists, simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
 import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
-import {statesEqual} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
+import {statesEqual} from '@statechannels/wallet-core/lib/src/state-utils';
 import {BigNumber} from 'ethers';
+import {ChannelChainInfo} from '../chain';
+import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {sendUserDeclinedResponse, hideUI, displayUI} from '../utils/workflow-utils';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';

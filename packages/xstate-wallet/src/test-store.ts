@@ -1,9 +1,9 @@
-import {ChannelStoreEntry} from './store/channel-store-entry';
-import {SignedState} from './store/types';
-import {hashState} from './store/state-utils';
 import {Guid} from 'guid-typescript';
-import {Store, Funding} from './store';
 import {Wallet} from 'ethers';
+import {hashState} from '@statechannels/wallet-core/lib/src/state-utils';
+import {SignedState, Funding} from '@statechannels/wallet-core/lib/src/types';
+import {ChannelStoreEntry} from './store/channel-store-entry';
+import {Store} from './store';
 
 export class TestStore extends Store {
   public _channelLocks: Record<string, Guid>;

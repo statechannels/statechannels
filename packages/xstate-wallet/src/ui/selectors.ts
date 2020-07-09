@@ -1,4 +1,4 @@
-import {DomainBudget} from '@statechannels/wallet-core/lib/src/store/types';
+import {DomainBudget} from '@statechannels/wallet-core/lib/src/types';
 import {unreachable} from '@statechannels/wallet-core/lib/src/utils';
 import {Interpreter} from 'xstate';
 import {BigNumber} from 'ethers';

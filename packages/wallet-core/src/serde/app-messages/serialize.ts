@@ -13,13 +13,14 @@ import {
   SimpleAllocation,
   DomainBudget,
   AssetBudget,
-  isAllocation
-} from '../../store/types';
+  isAllocation,
+  SignedState,
+  ChannelConstants
+} from '../../types';
 
 import {AddressZero} from '@ethersproject/constants';
 import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
 import {BigNumber} from 'ethers';
-import {ChannelStoreEntry} from '../../store/channel-store-entry';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
@@ -70,6 +71,15 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
     amount: formatAmount(allocationItem.amount)
   };
 }
+
+type ChannelStoreEntry = {
+  supported: SignedState;
+  latest: SignedState;
+  channelConstants: ChannelConstants;
+  channelId: string;
+  hasConclusionProof: boolean;
+  isSupported: boolean;
+};
 
 export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
   const {

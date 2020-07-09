@@ -6,17 +6,11 @@ import {Wallet, BigNumber} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 
-import {Chain, FakeChain} from '../chain';
-import {CHAIN_NETWORK_ID, HUB} from '../config';
-import {checkThat, isSimpleEthAllocation, recordToArray} from '../utils';
-
-import {calculateChannelId, hashState} from './state-utils';
-import {ChannelStoreEntry} from './channel-store-entry';
-import {MemoryBackend} from './memory-backend';
-import {Errors, Outcome} from '.';
+import {isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {calculateChannelId, hashState} from '@statechannels/wallet-core/lib/src/state-utils';
 import {
+  Outcome,
   ChannelStoredData,
-  DBBackend,
   Message,
   Objective,
   Participant,
@@ -24,51 +18,19 @@ import {
   DomainBudget,
   State,
   StateVariables,
-  ObjectStores,
-  SimpleAllocation
-} from './types';
+  SimpleAllocation,
+  Funding
+} from '@statechannels/wallet-core/lib/src/types';
+import {Chain, FakeChain} from '../chain';
+import {CHAIN_NETWORK_ID, HUB} from '../config';
+import {checkThat, recordToArray} from '../utils';
+
+import {ChannelStoreEntry} from './channel-store-entry';
+import {MemoryBackend} from './memory-backend';
+import {Errors, DBBackend, ObjectStores} from '.';
+
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
-
-interface DirectFunding {
-  type: 'Direct';
-}
-
-interface IndirectFunding {
-  type: 'Indirect';
-  ledgerId: string;
-}
-
-export interface VirtualFunding {
-  type: 'Virtual';
-  jointChannelId: string;
-}
-
-interface Guarantee {
-  type: 'Guarantee';
-  guarantorChannelId: string;
-}
-
-interface Guarantees {
-  type: 'Guarantees';
-  guarantorChannelIds: [string, string];
-}
-
-export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarantees | Guarantee;
-export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
-  return funding.type === 'Indirect';
-}
-
-export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
-  return funding.type === 'Virtual';
-}
-
-export function isGuarantee(funding: Funding): funding is Guarantee {
-  return funding.type === 'Guarantee';
-}
-export function isGuarantees(funding: Funding): funding is Guarantees {
-  return funding.type === 'Guarantees';
-}
 
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];

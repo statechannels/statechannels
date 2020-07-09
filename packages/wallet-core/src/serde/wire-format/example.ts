@@ -1,8 +1,8 @@
 import {BigNumber} from 'ethers';
-import {Message, SignedState} from '../../store/types';
+import {Message, SignedState} from '../../types';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';
-import {calculateChannelId} from '../../store/state-utils';
+import {calculateChannelId} from '../../state-utils';
 
 export const wireStateFormat: WireState = {
   participants: [

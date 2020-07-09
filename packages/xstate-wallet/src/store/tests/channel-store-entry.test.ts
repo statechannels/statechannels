@@ -1,7 +1,7 @@
+import {hashState, createSignatureEntry} from '@statechannels/wallet-core/lib/src/state-utils';
+import {ChannelStoredData} from '@statechannels/wallet-core/lib/src/types';
 import {ChannelStoreEntry} from '../channel-store-entry';
-import {ChannelStoredData} from '../types';
 import {appState, wallet1, wallet2} from '../../tests/data';
-import {hashState, createSignatureEntry} from '../state-utils';
 import {Errors} from '..';
 
 const signState = (state, privateKeys: string[]) => ({

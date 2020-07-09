@@ -13,8 +13,8 @@ import {
   SimpleAllocation,
   Message,
   SimpleGuarantee
-} from '../../store/types';
-import {calculateChannelId} from '../../store/state-utils';
+} from '../../types';
+import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {

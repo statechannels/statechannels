@@ -5,8 +5,8 @@ import {
   firstState,
   createSignatureEntry,
   calculateChannelId
-} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
+} from '@statechannels/wallet-core/lib/src/state-utils';
+import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/types';
 import {AddressZero} from '@ethersproject/constants';
 import {
   add,
@@ -15,9 +15,9 @@ import {
   simpleEthGuarantee
 } from '@statechannels/wallet-core/lib/src/utils';
 
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
-import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {BigNumber} from 'ethers';
+import {FakeChain} from '../../chain';
+import {TestStore} from '../../test-store';
 import {
   wallet1,
   wallet2,

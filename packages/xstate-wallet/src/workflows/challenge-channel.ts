@@ -11,8 +11,8 @@ import {
 } from 'xstate';
 import {map} from 'rxjs/operators';
 
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
+import {ChannelChainInfo} from '../chain';
+import {Store} from '../store';
 
 const {log} = actions;
 export interface Initial {

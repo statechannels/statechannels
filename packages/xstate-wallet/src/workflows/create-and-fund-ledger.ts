@@ -15,8 +15,7 @@ import {
   Objective,
   Participant,
   StateVariables
-} from '@statechannels/wallet-core/lib/src/store/types';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
+} from '@statechannels/wallet-core/lib/src/types';
 import {Zero} from '@ethersproject/constants';
 import {
   getDataAndInvoke,
@@ -24,6 +23,7 @@ import {
   isSimpleEthAllocation,
   add
 } from '@statechannels/wallet-core/lib/src/utils';
+import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
 import * as Depositing from './depositing';
