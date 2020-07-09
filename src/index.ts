@@ -1,4 +1,3 @@
-import { Bytes } from './types';
 import { queries } from './db/queries/channels';
 
 import errors from './errors';

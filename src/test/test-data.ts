@@ -1,4 +1,9 @@
-import { calculateChannelId } from '../state-utils';
+import {
+  calculateChannelId,
+  ChannelConstants,
+  Participant,
+  State,
+} from '@statechannels/wallet-core';
 import {
   allocationOutcome2,
   allocationOutcome3,
@@ -12,23 +17,22 @@ import {
   ONGOING_APP_NONCE,
   PARTICIPANTS,
   PARTICIPANTS_3,
-  UNFUNDED_NONCE
+  UNFUNDED_NONCE,
 } from './test-constants';
-import { ChannelConstants, Participant, State } from '../store-types';
 
 export const defaultChannel: ChannelConstants = {
   participants: PARTICIPANTS,
   channelNonce: NONCE,
   chainId: DUMMY_CHAIN_ID,
   challengeDuration: 9001,
-  appDefinition: DUMMY_RULES_ADDRESS
+  appDefinition: DUMMY_RULES_ADDRESS,
 };
 
 const constants = (participants: Participant[], channelNonce: number) => ({
   ...defaultChannel,
   participants,
   channelNonce,
-  myIndex: 1
+  myIndex: 1,
 });
 
 export const defaultChannel3 = constants(PARTICIPANTS_3, NONCE);
@@ -52,12 +56,12 @@ const baseState = (turnNum: number) => ({
   challengeDuration: 1000,
   outcome: allocationOutcome2,
   appDefinition: DUMMY_RULES_ADDRESS,
-  appData: ''
+  appData: '',
 });
 
 const baseState3 = (turnNum: number) => ({
   ...baseState(turnNum),
-  outcome: allocationOutcome3
+  outcome: allocationOutcome3,
 });
 
 function prefundSetup(turnNum: number): State {
@@ -85,7 +89,7 @@ export const stateConstructors = {
   postfundSetup,
   app,
   prefundSetup3,
-  postfundSetup3
+  postfundSetup3,
 };
 
 // Ledger Channel Manager input states
@@ -96,7 +100,7 @@ export const createdPrefundSetup1: State = {
   outcome: allocationOutcome2,
   isFinal: false,
   challengeDuration: 1000,
-  appDefinition: DUMMY_RULES_ADDRESS
+  appDefinition: DUMMY_RULES_ADDRESS,
 };
 
 export const createdPrefundSetup2Participants3: State = {
@@ -106,5 +110,5 @@ export const createdPrefundSetup2Participants3: State = {
   outcome: allocationOutcome3,
   isFinal: false,
   challengeDuration: 1000,
-  appDefinition: DUMMY_RULES_ADDRESS
+  appDefinition: DUMMY_RULES_ADDRESS,
 };

@@ -6,10 +6,10 @@ import {
   DUMMY_RULES_ADDRESS,
   PARTICIPANTS,
   PARTICIPANTS_3,
-  PARTICIPANT_1_ADDRESS
+  PARTICIPANT_1_ADDRESS,
 } from './test-constants';
 import { fundedChannel, fundedChannel3, beginningAppPhaseChannel } from './test-data';
-import { State } from '../store-types';
+import { State } from '@statechannels/wallet-core';
 
 const baseResponse = {
   channelNonce: expect.any(String),
@@ -19,7 +19,7 @@ const baseResponse = {
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS,
   isFinal: false,
-  appData: ''
+  appData: '',
 };
 
 const baseResponse3 = {
@@ -30,40 +30,40 @@ const baseResponse3 = {
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS,
   isFinal: false,
-  appData: ''
+  appData: '',
 };
 
 // Ledger Channel Manager Responses
 export const prefundSetup1Response: State = {
   ...baseResponse,
-  turnNum: 1
+  turnNum: 1,
 };
 
 export const prefundSetup2Response3: State = {
   ...baseResponse3,
-  turnNum: 2
+  turnNum: 2,
 };
 
 export const postfundSetup1Response: State = {
   ...baseResponse,
   turnNum: 3,
-  ...fundedChannel
+  ...fundedChannel,
 };
 
 export const postfundSetup2Response3: State = {
   ...baseResponse3,
   turnNum: 5,
-  ...fundedChannel3
+  ...fundedChannel3,
 };
 
 export const app1Response: State = {
   ...baseResponse,
   turnNum: 5,
-  ...beginningAppPhaseChannel
+  ...beginningAppPhaseChannel,
 };
 
 export const createdChannel = {
   id: expect.any(Number),
   participants: [{ address: PARTICIPANT_1_ADDRESS }, { address: SERVER_ADDRESS }],
-  chainId: DUMMY_CHAIN_ID
+  chainId: DUMMY_CHAIN_ID,
 };

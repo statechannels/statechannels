@@ -1,21 +1,21 @@
 import { ethers } from 'ethers';
 
-import { Address, Uint256, Outcome, AllocationItem } from '../store-types';
+import { Outcome, AllocationItem, makeDestination } from '@statechannels/wallet-core';
 import { SERVER_ADDRESS } from '../constants';
 import { hexlify } from 'ethers/lib/utils';
 
 export const PARTICIPANT_1_PRIVATE_KEY =
   '0xa205281c09d630f6639c3505b63d57013996ba037bdbe4d2979eb8bd5bed5b1b';
-export const PARTICIPANT_1_ADDRESS = '0xffff6147243897776F085aBF5F45F24FC2943669' as Address;
+export const PARTICIPANT_1_ADDRESS = '0xffff6147243897776F085aBF5F45F24FC2943669';
 
 export const PARTICIPANT_2_PRIVATE_KEY =
   '0xc19d583e30a7ab6ab346505c216491ac74dd988cf833a7c29cbf2e57ab41e20c';
-export const PARTICIPANT_2_ADDRESS = '0xd274673B5128F7E745Dc4ee16799721D2D835f1A' as Address;
+export const PARTICIPANT_2_ADDRESS = '0xd274673B5128F7E745Dc4ee16799721D2D835f1A';
 
-export const DUMMY_RULES_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568' as Address;
-export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6' as Address;
+export const DUMMY_RULES_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
+export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6';
 
-export const DUMMY_ASSET_HOLDER_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568' as Address;
+export const DUMMY_ASSET_HOLDER_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
 
 export const UNFUNDED_NONCE = 2;
 
@@ -36,38 +36,38 @@ export const NONCE = 1000;
 
 export const DUMMY_CHAIN_ID = '8888';
 
-export const STAKE: Uint256 = hexlify(ethers.utils.parseEther('0.01'));
-const toParticipant = a => ({ signingAddress: a, participantId: a, destination: a });
+export const STAKE = hexlify(ethers.utils.parseEther('0.01'));
+const toParticipant = (a) => ({ signingAddress: a, participantId: a, destination: a });
 export const PARTICIPANTS = [PARTICIPANT_1_ADDRESS, SERVER_ADDRESS].map(toParticipant);
 
 export const PARTICIPANTS_3 = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, SERVER_ADDRESS].map(
   toParticipant
 );
 
-const hex5 = hexlify(5);
+const five = ethers.BigNumber.from(5);
 
 export const allocation: AllocationItem[] = [
-  { destination: PARTICIPANT_1_ADDRESS, amount: hex5 },
-  { destination: PARTICIPANT_2_ADDRESS, amount: hex5 },
-  { destination: SERVER_ADDRESS, amount: hex5 }
+  { destination: makeDestination(PARTICIPANT_1_ADDRESS), amount: five },
+  { destination: makeDestination(PARTICIPANT_2_ADDRESS), amount: five },
+  { destination: makeDestination(SERVER_ADDRESS), amount: five },
 ];
 export const allocationOutcome2: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-  allocationItems: allocation.slice(0, 2)
+  allocationItems: allocation.slice(0, 2),
 };
 
 export const allocationOutcome3: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-  allocationItems: allocation.slice(0, 3)
+  allocationItems: allocation.slice(0, 3),
 };
 
 export const guaranteeOutcome2 = {
   type: 'SimpleGuarantee',
   assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
   targetChannelId: '1234',
-  destinations: PARTICIPANTS
+  destinations: PARTICIPANTS,
 };
 
 export const holdings2 = hexlify(10);

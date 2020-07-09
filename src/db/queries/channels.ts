@@ -1,11 +1,9 @@
-import { Uint256 } from '../../types';
 import errors from '../../errors';
 import Channel from '../../models/channel';
-import { State } from '../../store-types';
-import { calculateChannelId } from '../../state-utils';
+import { State, calculateChannelId } from '@statechannels/wallet-core';
 
 export const queries = {
-  updateChannel
+  updateChannel,
 };
 
 async function updateChannel(stateRound: State[], hubState: State) {
@@ -13,9 +11,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   const { channelNonce, participants, chainId } = firstState;
   const channelId = calculateChannelId(firstState);
 
-  const storedChannel = await Channel.query()
-    .findOne({ channel_id: channelId })
-    .select('id');
+  const storedChannel = await Channel.query().findOne({ channel_id: channelId }).select('id');
 
   if (storedChannel && firstState.turnNum < firstState.participants.length) {
     throw errors.CHANNEL_EXISTS;
@@ -38,7 +34,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
     channelId,
     states,
     channelNonce,
-    chainId
+    chainId,
   };
 
   if (storedChannel) {
@@ -48,8 +44,8 @@ async function updateChannel(stateRound: State[], hubState: State) {
       ...upserts,
       participants: participants.map((address, i) => ({
         address,
-        priority: i
-      }))
+        priority: i,
+      })),
     };
   }
 
