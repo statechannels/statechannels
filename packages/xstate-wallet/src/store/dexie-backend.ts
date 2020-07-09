@@ -1,12 +1,7 @@
 import * as _ from 'lodash';
 import Dexie, {Transaction, TransactionMode} from 'dexie';
 import {BigNumber} from 'ethers';
-import {
-  Objective,
-  DomainBudget,
-  ChannelStoredData,
-  AssetBudget
-} from '@statechannels/wallet-core/lib/src/types';
+import {Objective, DomainBudget, ChannelStoredData, AssetBudget} from '@statechannels/wallet-core';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {DBBackend, ObjectStores, TXMode} from '.';
 

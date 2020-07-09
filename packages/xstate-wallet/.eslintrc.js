@@ -38,10 +38,7 @@ module.exports = {
     ...generalRules,
     ...leftoverTsLintRules,
 
-    'no-restricted-imports': [
-      'error',
-      {patterns: ['**/lib/**', '**/src/**', '!@statechannels/wallet-core/**']}
-    ],
+    'no-restricted-imports': ['error', {patterns: ['**/lib/**', '**/src/**']}],
     'arrow-body-style': 'error',
     'import/order': [
       'error',

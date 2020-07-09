@@ -3,9 +3,7 @@ import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 
-import {signState} from '@statechannels/wallet-core/lib/src/state-utils';
-import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils/outcome';
-import {State} from '@statechannels/wallet-core/lib/src/types';
+import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {BigNumber} from 'ethers';
 import {FakeChain} from '../../chain';

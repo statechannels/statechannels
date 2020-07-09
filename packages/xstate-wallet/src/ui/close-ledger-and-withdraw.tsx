@@ -4,7 +4,7 @@ import {useService} from '@xstate/react';
 
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
-import {DomainBudget} from '@statechannels/wallet-core/lib/src/types';
+import {DomainBudget} from '@statechannels/wallet-core';
 import {track} from '../segment-analytics';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';

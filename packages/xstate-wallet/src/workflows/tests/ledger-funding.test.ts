@@ -1,19 +1,20 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add, checkThat, isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-
-import _ from 'lodash';
 import {
+  add,
+  checkThat,
+  isSimpleEthAllocation,
   firstState,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/state-utils';
-import {
+  createSignatureEntry,
   ChannelConstants,
   Outcome,
   State,
   SignedState
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
+
+import _ from 'lodash';
+
 import {AddressZero} from '@ethersproject/constants';
 
 import {BigNumber} from 'ethers';

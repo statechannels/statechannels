@@ -1,12 +1,17 @@
-import {FakeChain} from '../chain';
+require('fake-indexeddb/auto');
 import waitForExpect from 'wait-for-expect';
-import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-import {State, SignedState} from '@statechannels/wallet-core/lib/src/types';
-import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/state-utils';
+import {
+  simpleEthAllocation,
+  State,
+  SignedState,
+  createSignatureEntry
+} from '@statechannels/wallet-core';
+
 import {AddressZero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
-require('fake-indexeddb/auto');
 import {BigNumber} from 'ethers';
+
+import {FakeChain} from '../chain';
 import {Backend} from '../store/dexie-backend';
 
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';

@@ -3,6 +3,7 @@
   "description": "State channel wallet components.",
   "version": "0.0.1",
   "author": "Alex Gap",
+  "main": "lib/src/index.js",
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/channel-provider": "0.0.3",
@@ -38,7 +39,6 @@
     "node": "^12.16.3"
   },
   "license": "MIT",
-  "main": "index.js",
   "private": true,
   "scripts": {
     "prepare": "yarn build",

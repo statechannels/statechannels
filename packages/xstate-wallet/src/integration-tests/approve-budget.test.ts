@@ -1,6 +1,6 @@
 import {filter, map, first} from 'rxjs/operators';
-import {FundLedger} from '@statechannels/wallet-core/lib/src/types';
-import {assertSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {FundLedger, assertSimpleEthAllocation} from '@statechannels/wallet-core';
+
 import {hexZeroPad} from '@ethersproject/bytes';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
 import {BigNumber} from 'ethers';

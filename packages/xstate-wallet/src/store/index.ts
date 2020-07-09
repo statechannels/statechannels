@@ -3,7 +3,7 @@ import {
   ChannelStoredData,
   DomainBudget,
   StateVariables
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
 import {filter, map} from 'rxjs/operators';
 import {Store} from './store';
 

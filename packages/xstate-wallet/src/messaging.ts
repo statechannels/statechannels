@@ -22,22 +22,29 @@ import {
 
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
-import {Message, DomainBudget, Participant} from '@statechannels/wallet-core/lib/src/types';
+import {
+  Message,
+  DomainBudget,
+  Participant,
+  unreachable,
+  isSimpleEthAllocation,
+  makeDestination
+} from '@statechannels/wallet-core';
+// eslint-disable-next-line no-restricted-imports
 import {
   serializeDomainBudget,
   serializeChannelEntry
 } from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+// eslint-disable-next-line no-restricted-imports
 import {deserializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/deserialize';
+// eslint-disable-next-line no-restricted-imports
 import {serializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/serialize';
+// eslint-disable-next-line no-restricted-imports
 import {
   deserializeAllocations,
   deserializeBudgetRequest
 } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
-import {
-  unreachable,
-  isSimpleEthAllocation,
-  makeDestination
-} from '@statechannels/wallet-core/lib/src/utils';
+
 import {AppRequestEvent} from './event-types';
 
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';

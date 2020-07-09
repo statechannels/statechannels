@@ -1,10 +1,10 @@
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {renderComponentInFrontOfApp} from './helpers';
-
-import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import React from 'react';
+
+import {renderComponentInFrontOfApp} from './helpers';
+import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ApplicationWorkflow} from '../application-workflow';
 import {Store} from '../../store';
 import {Application} from '../../workflows';

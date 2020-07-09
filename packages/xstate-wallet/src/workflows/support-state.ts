@@ -1,7 +1,7 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
 import {filter, map} from 'rxjs/operators';
-import {statesEqual, calculateChannelId} from '@statechannels/wallet-core/lib/src/state-utils';
-import {State} from '@statechannels/wallet-core/lib/src/types';
+import {statesEqual, calculateChannelId, State} from '@statechannels/wallet-core';
+
 import {Store} from '../store';
 const WORKFLOW = 'support-state';
 

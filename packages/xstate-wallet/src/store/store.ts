@@ -6,9 +6,10 @@ import {Wallet, BigNumber} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 
-import {isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-import {calculateChannelId, hashState} from '@statechannels/wallet-core/lib/src/state-utils';
 import {
+  isSimpleEthAllocation,
+  calculateChannelId,
+  hashState,
   Outcome,
   ChannelStoredData,
   Message,
@@ -20,7 +21,8 @@ import {
   StateVariables,
   SimpleAllocation,
   Funding
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
+
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
 import {checkThat, recordToArray} from '../utils';

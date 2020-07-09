@@ -15,9 +15,11 @@ import {
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination
-} from '@statechannels/wallet-core/lib/src/utils';
-import {FundGuarantor, AllocationItem} from '@statechannels/wallet-core/lib/src/types';
+  makeDestination,
+  FundGuarantor,
+  AllocationItem
+} from '@statechannels/wallet-core';
+
 import {Store, supportedStateFeed} from '../store';
 import {getDataAndInvoke} from '../utils/helpers';
 

@@ -1,10 +1,13 @@
-import {simpleEthAllocation, makeDestination} from '@statechannels/wallet-core/lib/src//utils';
-import {Wallet, BigNumber} from 'ethers';
 import {
+  simpleEthAllocation,
+  makeDestination,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/state-utils';
-import {State, Objective} from '@statechannels/wallet-core/lib/src/types';
+  createSignatureEntry,
+  State,
+  Objective
+} from '@statechannels/wallet-core';
+import {Wallet, BigNumber} from 'ethers';
+
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';

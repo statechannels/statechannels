@@ -9,15 +9,17 @@ import {
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {isVirtuallyFund, StateVariables, Outcome} from '@statechannels/wallet-core/lib/src/types';
-
 import {
+  isVirtuallyFund,
+  StateVariables,
+  Outcome,
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat,
   getDataAndInvoke
-} from '@statechannels/wallet-core/lib/src/utils';
+} from '@statechannels/wallet-core';
+
 import {Zero} from '@ethersproject/constants';
 import {Store} from '../store';
 

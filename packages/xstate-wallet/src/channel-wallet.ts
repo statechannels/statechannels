@@ -4,8 +4,9 @@ import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, isOpenChannel, OpenChannel} from '@statechannels/wallet-core/lib/src/types';
+import {Message, isOpenChannel, OpenChannel} from '@statechannels/wallet-core';
 
+// eslint-disable-next-line no-restricted-imports
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';

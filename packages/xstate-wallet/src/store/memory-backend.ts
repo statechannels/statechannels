@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {Objective, DomainBudget, ChannelStoredData} from '@statechannels/wallet-core/lib/src/types';
+import {Objective, DomainBudget, ChannelStoredData} from '@statechannels/wallet-core';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {DBBackend, ObjectStores, TXMode} from '.';
 

@@ -3,14 +3,13 @@ import {interpret} from 'xstate';
 import {
   firstState,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/state-utils';
-import {
+  createSignatureEntry,
   ChannelConstants,
   Outcome,
   State,
   SignedState
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
+
 import {AddressZero} from '@ethersproject/constants';
 
 import {BigNumber} from 'ethers';

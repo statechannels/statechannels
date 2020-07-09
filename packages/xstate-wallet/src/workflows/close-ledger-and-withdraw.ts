@@ -9,14 +9,14 @@ import {
   AssignAction,
   Interpreter
 } from 'xstate';
-import {getDataAndInvoke} from '@statechannels/wallet-core/lib/src/utils';
-import {outcomesEqual} from '@statechannels/wallet-core/lib/src/state-utils';
 import {
+  getDataAndInvoke,
+  outcomesEqual,
   Participant,
   Objective,
   CloseLedger,
   DomainBudget
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
 
 import {map, filter} from 'rxjs/operators';
 import {ChannelChainInfo} from '../chain';

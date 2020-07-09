@@ -1,17 +1,16 @@
 /* eslint-disable no-console */
 /* eslint-disable jest/no-disabled-tests */
 import {Wallet, BigNumber} from 'ethers';
-import {simpleEthAllocation, makeDestination} from '@statechannels/wallet-core/lib/src/utils';
 import {
+  simpleEthAllocation,
+  makeDestination,
   State,
   Objective,
   DomainBudget,
-  AssetBudget
-} from '@statechannels/wallet-core/lib/src/types';
-import {
+  AssetBudget,
   calculateChannelId,
   createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/state-utils';
+} from '@statechannels/wallet-core';
 
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {Backend} from '../dexie-backend';

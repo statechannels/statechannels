@@ -1,9 +1,13 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {StateVariables, isOpenChannel} from '@statechannels/wallet-core/lib/src/types';
+import {
+  StateVariables,
+  isOpenChannel,
+  simpleEthAllocation,
+  exists
+} from '@statechannels/wallet-core';
 
-import {simpleEthAllocation, exists} from '@statechannels/wallet-core/lib/src/utils';
 import {filter, first, map} from 'rxjs/operators';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';

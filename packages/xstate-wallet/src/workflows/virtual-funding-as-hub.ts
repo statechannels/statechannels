@@ -12,15 +12,15 @@ import {
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {checkThat, isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-
 import {
+  checkThat,
+  isSimpleEthAllocation,
   FundGuarantor,
   AllocationItem,
   isFundGuarantor,
   Participant,
   State
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
 
 import {Observable} from 'rxjs';
 import {Store} from '../store';

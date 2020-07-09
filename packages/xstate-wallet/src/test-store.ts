@@ -1,7 +1,7 @@
 import {Guid} from 'guid-typescript';
 import {Wallet} from 'ethers';
-import {hashState} from '@statechannels/wallet-core/lib/src/state-utils';
-import {SignedState, Funding} from '@statechannels/wallet-core/lib/src/types';
+import {hashState, SignedState, Funding} from '@statechannels/wallet-core';
+
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Store} from './store';
 

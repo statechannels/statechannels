@@ -1,5 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-import {Destination} from '@statechannels/wallet-core/lib/src/types';
+import {Destination} from '@statechannels/wallet-core';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {

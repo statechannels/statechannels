@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers';
 
-import {ethBudget} from '@statechannels/wallet-core/lib/src/utils/budget-utils';
+import {ethBudget} from '@statechannels/wallet-core';
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../../chain';

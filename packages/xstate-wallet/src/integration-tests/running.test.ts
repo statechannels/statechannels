@@ -1,4 +1,4 @@
-import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {simpleEthAllocation} from '@statechannels/wallet-core';
 import {BigNumber, constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';
 import {FakeChain} from '../chain';

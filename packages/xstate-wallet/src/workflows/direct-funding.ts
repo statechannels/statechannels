@@ -7,14 +7,13 @@ import {
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  checkThat
-} from '@statechannels/wallet-core/lib/src/utils';
-import {
+  checkThat,
   Outcome,
   SimpleAllocation,
   AllocationItem,
   Destination
-} from '@statechannels/wallet-core/lib/src/types';
+} from '@statechannels/wallet-core';
+
 import {Store} from '../store';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';

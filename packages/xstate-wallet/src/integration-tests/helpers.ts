@@ -1,5 +1,11 @@
 import {Wallet} from 'ethers';
-import {Participant, SignatureEntry, SignedState} from '@statechannels/wallet-core/lib/src/types';
+import {
+  Participant,
+  SignatureEntry,
+  SignedState,
+  signState,
+  makeDestination
+} from '@statechannels/wallet-core';
 import {
   isNotification,
   PushMessageRequest,
@@ -12,9 +18,9 @@ import {
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {makeDestination} from '@statechannels/wallet-core/lib/src/utils';
+
 import {hexZeroPad} from '@ethersproject/bytes';
-import {signState} from '@statechannels/wallet-core/lib/src/state-utils';
+
 import _ from 'lodash';
 import {DBBackend} from '../store';
 import {TestStore} from '../test-store';

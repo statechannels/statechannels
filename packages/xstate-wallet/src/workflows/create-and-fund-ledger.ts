@@ -14,15 +14,14 @@ import {
   SimpleAllocation,
   Objective,
   Participant,
-  StateVariables
-} from '@statechannels/wallet-core/lib/src/types';
-import {Zero} from '@ethersproject/constants';
-import {
+  StateVariables,
   getDataAndInvoke,
   checkThat,
   isSimpleEthAllocation,
   add
-} from '@statechannels/wallet-core/lib/src/utils';
+} from '@statechannels/wallet-core';
+import {Zero} from '@ethersproject/constants';
+
 import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';

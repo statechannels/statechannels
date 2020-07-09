@@ -4,9 +4,11 @@ import {
   isSimpleEthAllocation,
   getDataAndInvoke,
   checkThat,
-  add
-} from '@statechannels/wallet-core/lib/src/utils';
-import {AllocationItem, Funding} from '@statechannels/wallet-core/lib/src/types';
+  add,
+  AllocationItem,
+  Funding
+} from '@statechannels/wallet-core';
+
 import {ChannelLock} from '../store/store';
 
 import {Store} from '../store';

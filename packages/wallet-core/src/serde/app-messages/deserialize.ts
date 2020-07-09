@@ -5,13 +5,7 @@ import {
   DomainBudget as AppDomainBudget,
   ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
-import {
-  Allocation,
-  AllocationItem,
-  SimpleAllocation,
-  DomainBudget,
-  AssetBudget
-} from '../../types';
+import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {BigNumber} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';

@@ -1,6 +1,6 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {map, filter} from 'rxjs/operators';
-import {exists} from '@statechannels/wallet-core/lib/src/utils';
+import {exists} from '@statechannels/wallet-core';
 import {BigNumber} from 'ethers';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';

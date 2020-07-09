@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {useMachine} from '@xstate/react';
 
 import {ethers} from 'ethers';
-import {ethBudget} from '@statechannels/wallet-core/lib/src/utils/budget-utils';
+import {ethBudget} from '@statechannels/wallet-core';
 import {ChainWatcher} from './chain';
 import {MemoryBackend} from './store/memory-backend';
 import {TestStore} from './test-store';

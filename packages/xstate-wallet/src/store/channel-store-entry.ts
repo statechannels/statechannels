@@ -11,14 +11,12 @@ import {
   StateVariablesWithHash,
   Outcome,
   Funding,
-  SignatureEntry
-} from '@statechannels/wallet-core/lib/src/types';
-import {
+  SignatureEntry,
   hashState,
   calculateChannelId,
   createSignatureEntry,
   outcomesEqual
-} from '@statechannels/wallet-core/lib/src/state-utils';
+} from '@statechannels/wallet-core';
 
 import {Errors} from '.';
 import {logger} from '../logger';

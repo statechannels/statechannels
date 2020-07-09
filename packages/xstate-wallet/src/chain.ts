@@ -15,12 +15,13 @@ import {hexZeroPad} from '@ethersproject/bytes';
 import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
-import {State, SignedState} from '@statechannels/wallet-core/lib/src/types';
 import {
+  State,
+  SignedState,
   fromNitroState,
   toNitroSignedState,
   calculateChannelId
-} from '@statechannels/wallet-core/lib/src/state-utils';
+} from '@statechannels/wallet-core';
 
 import {getProvider} from './utils/contract-utils';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';

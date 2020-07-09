@@ -1,14 +1,17 @@
 const PROTOCOL = 'virtual-defunding-as-hub';
-import {checkThat, isSimpleEthAllocation, add} from '@statechannels/wallet-core/lib/src/utils';
+import {
+  checkThat,
+  isSimpleEthAllocation,
+  add,
+  isGuarantees,
+  isIndirectFunding,
+  AllocationItem
+} from '@statechannels/wallet-core';
 
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 import {map, filter, tap, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {
-  isGuarantees,
-  isIndirectFunding,
-  AllocationItem
-} from '@statechannels/wallet-core/lib/src/types';
+
 import {getDataAndInvoke} from '../utils/helpers';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {Store} from '../store';

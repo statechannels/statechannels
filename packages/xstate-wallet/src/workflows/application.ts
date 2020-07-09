@@ -14,9 +14,10 @@ import {
 
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 
-import {StateVariables} from '@statechannels/wallet-core/lib/src/types';
+import {StateVariables} from '@statechannels/wallet-core';
 
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
+// eslint-disable-next-line no-restricted-imports
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {

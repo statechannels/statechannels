@@ -1,5 +1,5 @@
-import {hashState, createSignatureEntry} from '@statechannels/wallet-core/lib/src/state-utils';
-import {ChannelStoredData} from '@statechannels/wallet-core/lib/src/types';
+import {hashState, createSignatureEntry, ChannelStoredData} from '@statechannels/wallet-core';
+
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {appState, wallet1, wallet2} from '../../tests/data';
 import {Errors} from '..';

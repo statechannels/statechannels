@@ -5,11 +5,15 @@ import {BigNumber} from 'ethers';
 import {
   firstState,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/state-utils';
-import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/types';
+  createSignatureEntry,
+  ChannelConstants,
+  Outcome,
+  State,
+  add
+} from '@statechannels/wallet-core';
+
 import {AddressZero} from '@ethersproject/constants';
-import {add} from '@statechannels/wallet-core/lib/src/utils';
+
 import {Store} from '../../store';
 
 import {FakeChain} from '../../chain';

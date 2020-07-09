@@ -1,5 +1,5 @@
 import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
-import {getDataAndInvoke} from '@statechannels/wallet-core/lib/src/utils'; // FIXME
+import {getDataAndInvoke} from '@statechannels/wallet-core'; // FIXME
 import {map, first, filter} from 'rxjs/operators';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';

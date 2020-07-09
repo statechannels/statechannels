@@ -13,13 +13,17 @@ import {
   Participant,
   SimpleAllocation,
   AssetBudget,
-  State as ChannelState
-} from '@statechannels/wallet-core/lib/src/types';
+  State as ChannelState,
+  statesEqual,
+  checkThat,
+  exists,
+  simpleEthAllocation
+} from '@statechannels/wallet-core';
 
-import {checkThat, exists, simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+// eslint-disable-next-line no-restricted-imports
 import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
-import {statesEqual} from '@statechannels/wallet-core/lib/src/state-utils';
+
 import {BigNumber} from 'ethers';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
