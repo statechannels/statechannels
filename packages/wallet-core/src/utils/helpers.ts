@@ -1,4 +1,3 @@
-import {StateNodeConfig, DoneInvokeEvent, TransitionConfig} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import {BigNumber} from 'ethers';
 export function unreachable(x: never) {
@@ -18,38 +17,6 @@ export function checkThat<T, S = undefined>(t: T | S, isTypeT: TypeGuard<T, S>):
     throw 'Unreachable';
   }
   return t;
-}
-
-type Opts<T> = {
-  onDone?: string | TransitionConfig<T, any>;
-  id?: string;
-  onError?: string | TransitionConfig<T, any>;
-  entry?: string;
-  exit?: string;
-};
-export function getDataAndInvoke<T, Services extends string = string>(
-  data: {src: Services; opts?: Opts<T>},
-  service: {src: Services; opts?: Opts<T>},
-  onDone?: string | TransitionConfig<T, any> | TransitionConfig<T, any>[]
-): StateNodeConfig<T, any, DoneInvokeEvent<T>> {
-  return {
-    initial: data.src,
-    states: {
-      [data.src]: {invoke: {src: data.src, onDone: service.src, onError: data.opts?.onError}},
-      [service.src]: {
-        invoke: {
-          id: service?.opts?.id,
-          src: service.src,
-          data: (_, {data}: DoneInvokeEvent<T>) => data,
-          onDone: 'done',
-          onError: service.opts?.onError
-        },
-        entry: service.opts?.entry
-      },
-      done: {type: 'final'}
-    },
-    onDone
-  };
 }
 
 export function createDestination(address: string): string {
