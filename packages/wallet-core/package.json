@@ -6,7 +6,7 @@
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "files": [
-    "lib"
+    "lib/src"
   ],
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
