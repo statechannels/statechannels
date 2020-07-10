@@ -10,5 +10,6 @@
     "target": "es2015",
     "types": ["node", "jest"]
   },
-  "include": ["./src", "./src/generated-schema.json"]
+  "include": ["./src", "./src/generated-schema.json"],
+  "exclude": ["**/*.test.ts", "./src/__tests__"]
 }
