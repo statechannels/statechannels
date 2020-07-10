@@ -2,7 +2,7 @@ import {filter, map, first} from 'rxjs/operators';
 import {FundLedger, assertSimpleEthAllocation} from '@statechannels/wallet-core';
 
 import {hexZeroPad} from '@ethersproject/bytes';
-import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
+import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 import {BigNumber} from 'ethers';
 import {FakeChain} from '../chain';
 import {TEST_APP_DOMAIN} from '../workflows/tests/data';
