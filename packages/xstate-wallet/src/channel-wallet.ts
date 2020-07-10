@@ -1,15 +1,15 @@
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, isOpenChannel, OpenChannel} from '@statechannels/wallet-core/lib/src/store/types';
+import {Message, isOpenChannel, OpenChannel} from '@statechannels/wallet-core';
 
-import {AppRequestEvent} from '@statechannels/wallet-core/lib/src/event-types';
+// eslint-disable-next-line no-restricted-imports
 import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+import {AppRequestEvent} from './event-types';
+import {Store} from './store';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {Wallet as WalletUi} from './ui/wallet';

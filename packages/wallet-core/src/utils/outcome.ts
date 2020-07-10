@@ -5,7 +5,7 @@ import {
   Outcome,
   Allocation,
   Destination
-} from '../store/types';
+} from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
 import {ethers} from 'ethers';

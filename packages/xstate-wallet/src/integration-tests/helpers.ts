@@ -1,6 +1,11 @@
 import {Wallet} from 'ethers';
-import {Participant, DBBackend} from '@statechannels/wallet-core/lib/src/store/types';
-import {Chain} from '@statechannels/wallet-core/lib/src/chain';
+import {
+  Participant,
+  SignatureEntry,
+  SignedState,
+  signState,
+  makeDestination
+} from '@statechannels/wallet-core';
 import {
   isNotification,
   PushMessageRequest,
@@ -13,13 +18,13 @@ import {
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
-import {makeDestination} from '@statechannels/wallet-core/lib/src/utils';
+
 import {hexZeroPad} from '@ethersproject/bytes';
-import {SignedState} from '@statechannels/wallet-core/lib/src/store';
-import {signState} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {SignatureEntry} from '@statechannels/wallet-core/lib/src/store/channel-store-entry';
+
 import _ from 'lodash';
+import {DBBackend} from '../store';
+import {TestStore} from '../test-store';
+import {Chain} from '../chain';
 import {ETH_TOKEN} from '../constants';
 import {logger} from '../logger';
 import {ADD_LOGS} from '../config';

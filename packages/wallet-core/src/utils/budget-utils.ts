@@ -1,4 +1,4 @@
-import {DomainBudget, AssetBudget} from '../store/types';
+import {DomainBudget, AssetBudget} from '../types';
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {Zero} from '@ethersproject/constants';
 import _ from 'lodash';

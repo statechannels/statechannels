@@ -1,21 +1,20 @@
 import {
   checkThat,
-  getDataAndInvoke,
   isSimpleEthAllocation,
-  simpleEthAllocation
-} from '@statechannels/wallet-core/lib/src/utils';
-
-import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
-
-import {
-  Store,
+  simpleEthAllocation,
+  nextState,
   isVirtualFunding,
   isIndirectFunding,
   isGuarantee
-} from '@statechannels/wallet-core/lib/src/store';
-import {nextState} from '@statechannels/wallet-core/lib/src/store/state-utils';
+} from '@statechannels/wallet-core';
+
+import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
+
 import _ from 'lodash';
-import {ChannelLock} from '@statechannels/wallet-core/lib/src/store/store';
+
+import {ChannelLock} from '../store/store';
+import {Store} from '../store';
+import {getDataAndInvoke} from '../utils/helpers';
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {SupportState} from '.';

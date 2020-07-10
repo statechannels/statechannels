@@ -47,7 +47,7 @@ restore_dep: &restore_dep
 save_built_artifacts: &save_built_artifacts
   save_cache:
     # Force a new cache on each build
-    key: v3-built-artifacts-cache-{{ epoch }}
+    key: v4-built-artifacts-cache-{{ epoch }}
     paths:
       # Various TypeScript emissions
       - packages/channel-client/lib
@@ -70,7 +70,7 @@ save_built_artifacts: &save_built_artifacts
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
-    key: v3-built-artifacts-cache-
+    key: v4-built-artifacts-cache-
 
 commands:
   log_stats:

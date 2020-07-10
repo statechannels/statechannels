@@ -1,18 +1,21 @@
 import {interpret} from 'xstate';
 
-import {Store, SignedState} from '@statechannels/wallet-core/lib/src/store';
-
 import {
   firstState,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
+  createSignatureEntry,
+  ChannelConstants,
+  Outcome,
+  State,
+  SignedState
+} from '@statechannels/wallet-core';
+
 import {AddressZero} from '@ethersproject/constants';
 
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
-import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {BigNumber} from 'ethers';
+import {Store} from '../../store';
+import {FakeChain} from '../../chain';
+import {TestStore} from '../../test-store';
 import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
 
 import {subscribeToMessages} from './message-service';

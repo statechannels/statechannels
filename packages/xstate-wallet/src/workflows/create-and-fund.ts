@@ -12,22 +12,20 @@ import _ from 'lodash';
 import {
   isVirtuallyFund,
   StateVariables,
-  Outcome
-} from '@statechannels/wallet-core/lib/src/store/types';
-
-import {
+  Outcome,
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  checkThat,
-  getDataAndInvoke
-} from '@statechannels/wallet-core/lib/src/utils';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
+  checkThat
+} from '@statechannels/wallet-core';
 
 import {Zero} from '@ethersproject/constants';
+import {Store} from '../store';
+
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
+import {getDataAndInvoke} from '../utils';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {

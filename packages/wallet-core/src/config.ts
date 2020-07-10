@@ -1,5 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-import {Destination} from './store';
+import {Destination} from './types';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {

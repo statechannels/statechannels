@@ -14,12 +14,20 @@ import {
   AllocationItem,
   SimpleAllocation,
   Message,
-  Objective
-} from '../../store/types';
+  Objective,
+  Participant
+} from '../../types';
 import {BigNumber} from 'ethers';
 import {makeDestination} from '../../utils';
-import {convertToInternalParticipant} from '../../messaging';
-import {getSignerAddress} from '../../store/state-utils';
+import {getSignerAddress} from '../../state-utils';
+
+export function convertToInternalParticipant(participant: {
+  destination: string;
+  signingAddress: string;
+  participantId: string;
+}): Participant {
+  return {...participant, destination: makeDestination(participant.destination)};
+}
 
 export function deserializeMessage(message: WireMessage): Message {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));

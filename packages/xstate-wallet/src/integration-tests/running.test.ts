@@ -1,7 +1,7 @@
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
-import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
+import {simpleEthAllocation} from '@statechannels/wallet-core';
 import {BigNumber, constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema/src';
+import {FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID} from '../config';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 jest.setTimeout(30000);

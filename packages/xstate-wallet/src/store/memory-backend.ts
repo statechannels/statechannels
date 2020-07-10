@@ -1,6 +1,7 @@
-import {Objective, DBBackend, DomainBudget, ChannelStoredData, ObjectStores, TXMode} from './types';
 import * as _ from 'lodash';
+import {Objective, DomainBudget, ChannelStoredData} from '@statechannels/wallet-core';
 import {ChannelStoreEntry} from './channel-store-entry';
+import {DBBackend, ObjectStores, TXMode} from '.';
 
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};

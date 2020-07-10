@@ -1,20 +1,20 @@
+export default {title: 'X-state wallet'};
+import {storiesOf} from '@storybook/react';
+import {interpret} from 'xstate';
+import React from 'react';
+import {Participant, DomainBudget} from '@statechannels/wallet-core';
+import {parseEther} from '@ethersproject/units';
+import {ethBudget} from '@statechannels/wallet-core';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
+import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
+import {Store} from '../../store';
+import {renderComponentInFrontOfApp} from './helpers';
+import {logger} from '../../logger';
 import {
   workflow as closeLedgerWithdrawWorkflow,
   config,
   WorkflowContext
 } from '../../workflows/close-ledger-and-withdraw';
-export default {title: 'X-state wallet'};
-import {storiesOf} from '@storybook/react';
-import {interpret} from 'xstate';
-import {renderComponentInFrontOfApp} from './helpers';
-import {Store, DomainBudget} from '@statechannels/wallet-core/lib/src/store';
-import React from 'react';
-import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
-import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {Participant} from '@statechannels/wallet-core/lib/src/store/types';
-import {parseEther} from '@ethersproject/units';
-import {ethBudget} from '@statechannels/wallet-core/lib/src/utils';
-import {logger} from '../../logger';
 
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);

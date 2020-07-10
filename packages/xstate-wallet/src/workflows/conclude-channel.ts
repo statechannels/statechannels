@@ -1,12 +1,12 @@
 import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-import {getDataAndInvoke} from '@statechannels/wallet-core/lib/src/utils'; // FIXME
 import {map, first, filter} from 'rxjs/operators';
-import {ChannelChainInfo} from '@statechannels/wallet-core/lib/src/chain';
+import {ChannelChainInfo} from '../chain';
+import {Store} from '../store';
 import {VirtualDefundingAsLeaf, SupportState} from '.';
 import {commonWorkflowActions, CommonActions} from '../utils/workflow-utils';
 import {ParticipantIdx} from './virtual-funding-as-leaf';
 import {MessagingServiceInterface} from '../messaging';
+import {getDataAndInvoke} from '../utils';
 
 const WORKFLOW = 'conclude-channel';
 

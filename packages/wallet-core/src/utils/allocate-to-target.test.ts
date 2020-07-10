@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers';
 
-import {AllocationItem} from '../store/types';
+import {AllocationItem} from '../types';
 
 import {
   Errors,
