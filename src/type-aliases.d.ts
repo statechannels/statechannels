@@ -1,3 +1,4 @@
+declare type ParticipantId = string;
 declare type Address = string;
 declare type Uint256 = string;
 declare type Uint48 = number;
