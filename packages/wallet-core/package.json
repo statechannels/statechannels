@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/wallet-core",
   "description": "State channel wallet components.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Alex Gap",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
