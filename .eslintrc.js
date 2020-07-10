@@ -31,6 +31,8 @@ module.exports = {
   rules: {
     ...leftoverTsLintRules,
     ...jestViolations,
-    ...otherViolations
+    ...otherViolations,
+
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }]
   }
 };
