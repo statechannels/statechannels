@@ -1,19 +1,18 @@
-import {machine as approveBudgetAndFundWorkflow} from '../../workflows/approve-budget-and-fund';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {renderComponentInFrontOfApp} from './helpers';
 
 import React from 'react';
-import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
-import {DomainBudget, Participant} from '@statechannels/wallet-core/lib/src/store/types';
-import {MessagingServiceInterface, MessagingService} from '../../messaging';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-import {ethBudget} from '@statechannels/wallet-core/lib/src/utils';
+import {DomainBudget, Participant, ethBudget} from '@statechannels/wallet-core';
 import {parseEther} from '@ethersproject/units';
-import {logger} from '../../logger';
 import {BigNumber} from 'ethers';
 import {Zero} from '@ethersproject/constants';
+import {logger} from '../../logger';
+import {Store} from '../../store';
+import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
+import {renderComponentInFrontOfApp} from './helpers';
+import {machine as approveBudgetAndFundWorkflow} from '../../workflows/approve-budget-and-fund';
 
 const store = new Store();
 

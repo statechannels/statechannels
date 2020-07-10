@@ -1,13 +1,19 @@
-import {ChainWatcher, FakeChain} from '@statechannels/wallet-core/lib/src/chain';
 import {Contract, BigNumber} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {first} from 'rxjs/operators';
-import {Store, SignedState, State} from '@statechannels/wallet-core/lib/src/store';
 import {parseUnits} from '@ethersproject/units';
 import {JsonRpcProvider} from '@ethersproject/providers';
-import {simpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-import {createSignatureEntry} from '@statechannels/wallet-core/lib/src/store/state-utils';
+import {
+  simpleEthAllocation,
+  createSignatureEntry,
+  SignedState,
+  State
+} from '@statechannels/wallet-core';
+
 import {hexZeroPad} from '@ethersproject/bytes';
+
+import {Store} from '../store';
+import {ChainWatcher, FakeChain} from '../chain';
 import {Player} from '../integration-tests/helpers';
 import {
   ETH_ASSET_HOLDER_ADDRESS,

@@ -12,17 +12,18 @@ import {
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {Store, State} from '@statechannels/wallet-core/lib/src/store';
-import {checkThat, isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-
 import {
+  checkThat,
+  isSimpleEthAllocation,
   FundGuarantor,
   AllocationItem,
   isFundGuarantor,
-  Participant
-} from '@statechannels/wallet-core/lib/src/store/types';
+  Participant,
+  State
+} from '@statechannels/wallet-core';
 
 import {Observable} from 'rxjs';
+import {Store} from '../store';
 import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';
 import {LedgerFunding, VirtualFundingAsLeaf, SupportState} from '.';
 

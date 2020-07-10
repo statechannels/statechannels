@@ -10,17 +10,18 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '@statechannels/wallet-core/lib/src/store';
 import {
   checkThat,
-  getDataAndInvoke,
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination
-} from '@statechannels/wallet-core/lib/src/utils';
+  makeDestination,
+  FundGuarantor,
+  AllocationItem
+} from '@statechannels/wallet-core';
 
-import {FundGuarantor, AllocationItem} from '@statechannels/wallet-core/lib/src/store/types';
+import {Store, supportedStateFeed} from '../store';
+import {getDataAndInvoke} from '../utils/helpers';
 
 import {CHALLENGE_DURATION} from '../config';
 

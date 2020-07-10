@@ -1,21 +1,25 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add, checkThat, isSimpleEthAllocation} from '@statechannels/wallet-core/lib/src/utils';
-
-import {SignedState} from '@statechannels/wallet-core/lib/src/store';
-
-import _ from 'lodash';
 import {
+  add,
+  checkThat,
+  isSimpleEthAllocation,
   firstState,
   calculateChannelId,
-  createSignatureEntry
-} from '@statechannels/wallet-core/lib/src/store/state-utils';
-import {ChannelConstants, Outcome, State} from '@statechannels/wallet-core/lib/src/store/types';
+  createSignatureEntry,
+  ChannelConstants,
+  Outcome,
+  State,
+  SignedState
+} from '@statechannels/wallet-core';
+
+import _ from 'lodash';
+
 import {AddressZero} from '@ethersproject/constants';
 
-import {FakeChain, Chain} from '@statechannels/wallet-core/lib/src/chain';
-import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
 import {BigNumber} from 'ethers';
+import {FakeChain, Chain} from '../../chain';
+import {TestStore} from '../../test-store';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';

@@ -14,19 +14,18 @@ import {
   SimpleAllocation,
   Objective,
   Participant,
-  StateVariables
-} from '@statechannels/wallet-core/lib/src/store/types';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
-import {Zero} from '@ethersproject/constants';
-import {
-  getDataAndInvoke,
+  StateVariables,
   checkThat,
   isSimpleEthAllocation,
   add
-} from '@statechannels/wallet-core/lib/src/utils';
+} from '@statechannels/wallet-core';
+import {Zero} from '@ethersproject/constants';
+
+import {Store} from '../store';
 import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
 import * as Depositing from './depositing';
+import {getDataAndInvoke} from '../utils';
 
 type WorkflowActions = {
   assignChannelId: AssignAction<WorkflowContext, DoneInvokeEvent<string>>;

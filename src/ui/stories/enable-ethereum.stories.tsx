@@ -1,13 +1,13 @@
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
+import React from 'react';
 import {renderComponentInFrontOfApp} from './helpers';
 
-import React from 'react';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ethereumEnableWorkflow} from '../../workflows/ethereum-enable';
 import {EnableEthereum} from '../enable-ethereum-workflow';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
+import {Store} from '../../store';
 import {WindowContext} from '../window-context';
 import {logger} from '../../logger';
 

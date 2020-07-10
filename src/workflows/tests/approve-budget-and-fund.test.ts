@@ -1,10 +1,10 @@
 import {BigNumber} from 'ethers';
 
-import {ethBudget} from '@statechannels/wallet-core/lib/src/utils/budget-utils';
-import {FakeChain} from '@statechannels/wallet-core/lib/src/chain';
-import {TestStore} from '@statechannels/wallet-core/lib/src/test-store';
+import {ethBudget} from '@statechannels/wallet-core';
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
+import {FakeChain} from '../../chain';
+import {TestStore} from '../../test-store';
 import {SimpleHub} from './simple-hub';
 import {subscribeToMessages} from './message-service';
 

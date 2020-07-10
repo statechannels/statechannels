@@ -1,13 +1,13 @@
 import React from 'react';
 import './wallet.scss';
 import {useService} from '@xstate/react';
-import {track} from '../segment-analytics';
 
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
+import {DomainBudget} from '@statechannels/wallet-core';
+import {track} from '../segment-analytics';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
-import {DomainBudget} from '@statechannels/wallet-core/lib/src/store';
 import {TARGET_NETWORK} from '../config';
 
 interface Props {

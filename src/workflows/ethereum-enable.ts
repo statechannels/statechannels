@@ -10,7 +10,7 @@ import {
   ServiceConfig,
   assign
 } from 'xstate';
-import {Store} from '@statechannels/wallet-core/lib/src/store';
+import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {GIT_VERSION} from '../config';
 
