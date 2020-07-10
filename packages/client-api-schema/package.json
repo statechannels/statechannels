@@ -21,8 +21,7 @@
     "ts-json-schema-generator": "0.60.0"
   },
   "files": [
-    "schema",
-    "types"
+    "lib/src"
   ],
   "keywords": [
     "client api",
