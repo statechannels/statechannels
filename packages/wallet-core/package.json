@@ -4,6 +4,7 @@
   "version": "0.0.5",
   "author": "Alex Gap",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wire-format": "0.0.4",
