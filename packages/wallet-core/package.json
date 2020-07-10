@@ -27,7 +27,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "prepare": "yarn build",
+    "prepare": "rm -rf lib; yarn build",
     "build": "yarn tsc -b",
     "build:ci": "yarn build",
     "lint:check": "eslint . --ext .ts --cache",
