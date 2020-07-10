@@ -6,7 +6,7 @@
   "main": "lib/src/index.js",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wire-format": "0.0.1",
+    "@statechannels/wire-format": "0.0.4",
     "ethers": "5.0.0-beta.191"
   },
   "devDependencies": {
