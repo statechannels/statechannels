@@ -20,6 +20,7 @@
     "types": ["jest", "node"]
   },
   "include": ["./src"],
+  "exclude": ["**/*.test.ts"],
   "references": [
     {"path": "../nitro-protocol"},
     {"path": "../devtools"},
