@@ -3,8 +3,8 @@ import {
   simpleEthAllocation,
   StateVariables,
   SignedStateVariables,
+  BigNumber,
 } from '@statechannels/wallet-core';
-import { BigNumber } from 'ethers';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
 

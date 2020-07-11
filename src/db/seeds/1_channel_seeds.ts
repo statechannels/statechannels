@@ -6,7 +6,7 @@ import { stateWithSignaturesAndHash } from '../../wallet/__test__/fixtures/state
 const seeds = [
   channel(),
   channel({ channelNonce: 1234, vars: [stateWithSignaturesAndHash()] }),
-].map(c => c.toColumns());
+];
 
 // *******
 // Exports
@@ -15,5 +15,5 @@ const seeds = [
 export function seed() {
   return knex('channels')
     .del()
-    .then(() => Channel.query().insert(seeds.map(Channel.prepareJsonBColumns)));
+    .then(() => Channel.query().insert(seeds));
 }

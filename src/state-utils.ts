@@ -4,10 +4,10 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-export const extractVariables = (
+export const dropNonVariables = (
   s: SignedStateWithHash
 ): SignedStateVarsWithHash =>
-  _.pick(
+  (s = _.pick(
     s,
     'appData',
     'outcome',
@@ -15,4 +15,4 @@ export const extractVariables = (
     'turnNum',
     'stateHash',
     'signatures'
-  );
+  ) as any);

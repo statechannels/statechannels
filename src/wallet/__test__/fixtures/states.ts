@@ -7,8 +7,8 @@ import {
   SignedStateVarsWithHash,
   SignedStateVariables,
   hashState,
+  BigNumber,
 } from '@statechannels/wallet-core';
-import { BigNumber } from 'ethers';
 import { fixture, Fixture } from './utils';
 import { alice, bob } from './participants';
 

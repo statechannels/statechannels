@@ -16,6 +16,7 @@ import {
 import _ from 'lodash';
 
 import { logger } from '../logger';
+import { dropNonVariables } from '../state-utils';
 import { Bytes32, Address, Uint48 } from '../type-aliases';
 
 export type ChannelColumns = {
@@ -29,7 +30,7 @@ export type ChannelColumns = {
   readonly vars: SignedStateVarsWithHash[];
 };
 
-export default class Channel extends Model implements ChannelColumns {
+export class Channel extends Model implements ChannelColumns {
   readonly id!: number;
 
   readonly channelId: Bytes32;
@@ -49,29 +50,18 @@ export default class Channel extends Model implements ChannelColumns {
 
   static prepareJsonBColumns = (json: ChannelColumns) => {
     (json as any).participants = JSON.stringify(json.participants);
-    (json as any).vars = JSON.stringify(json.vars?.map(extractVariables));
+    (json as any).vars = JSON.stringify(json.vars?.map(dropNonVariables));
 
     return json;
   };
 
-  static beforeInsert(args) {
-    Channel.prepareJsonBColumns(args);
+  $toDatabaseJson() {
+    return Channel.prepareJsonBColumns(super.$toDatabaseJson() as any);
   }
+
   static beforeUpdate(args) {
     Channel.prepareJsonBColumns(args);
   }
-
-  // static get jsonSchema() {
-  //   return {
-  //     type: 'object',
-  //     required: ['name'],
-  //     properties: {
-  //       id: {type: 'integer'},
-  //       name: {type: 'string', minLength: 1, maxLength: 255},
-  //       age: {type: 'number'} // optional
-  //     }
-  //   };
-  // }
 
   // Modifiers
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {

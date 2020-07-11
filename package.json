@@ -6,7 +6,7 @@
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wallet-core": "0.0.7",
+    "@statechannels/wallet-core": "0.1.0",
     "ethers": "5.0.0-beta.191",
     "knex": "0.20.9",
     "objection": "2.1.2",
@@ -56,7 +56,7 @@
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
     "db:setup:dev": "yarn db:drop && yarn db:create && yarn db:migrate",
-    "test": "yarn jest -c ./jest/jest.config.js",
+    "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "start:dev": "ts-node ./src/start-dev-server.ts",
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
