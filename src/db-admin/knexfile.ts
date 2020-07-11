@@ -1,5 +1,5 @@
 // Populate env vars as knexfile is used directly in yarn scripts
-import '../../env';
+import '../env';
 
 import * as path from 'path';
 import { Config } from 'knex';

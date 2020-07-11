@@ -1,6 +1,6 @@
 import { Config } from 'knex';
 
-import '../env';
+import './env';
 
 export const dbCofig: Config = {
   client: 'pg',
