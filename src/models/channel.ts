@@ -16,7 +16,7 @@ import {
 import _ from 'lodash';
 
 import { logger } from '../logger';
-import { extractVariables } from '../state-utils';
+import { Bytes32, Address, Uint48 } from '../type-aliases';
 
 export type ChannelColumns = {
   readonly channelId: Bytes32;

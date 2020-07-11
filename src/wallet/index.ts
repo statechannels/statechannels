@@ -7,6 +7,7 @@ import {
   ChannelResult as ClientChannelResult,
   Notification,
 } from '@statechannels/client-api-schema';
+import { Bytes32 } from '../type-aliases';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<

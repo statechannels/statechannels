@@ -1,6 +1,7 @@
 import errors from '../../errors';
 import Channel from '../../models/channel';
 import { State, calculateChannelId } from '@statechannels/wallet-core';
+import { Uint256 } from '../../type-aliases';
 
 export const queries = {
   updateChannel,
