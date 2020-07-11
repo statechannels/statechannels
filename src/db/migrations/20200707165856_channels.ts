@@ -5,7 +5,10 @@ export async function up(knex: Knex): Promise<any> {
   const name = 'channels';
   await knex.schema.createTable(name, function(table) {
     table.increments('id');
-    table.string('channel_id').notNullable();
+    table
+      .string('channel_id')
+      .notNullable()
+      .unique();
     table.integer('my_index').notNullable();
     table.string('chain_id').notNullable();
     table.integer('channel_nonce').notNullable();
