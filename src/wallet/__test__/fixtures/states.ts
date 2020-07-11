@@ -5,15 +5,14 @@ import {
   simpleEthAllocation,
   SignedStateWithHash,
   SignedStateVariables,
-  hashState,
   BigNumber,
   signState,
 } from '@statechannels/wallet-core';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
 import { alice as aliceWallet } from './signingWallets';
-import { Wallet } from 'ethers';
 import { addHash } from '../../../state-utils';
+import { SigningWallet } from '../../../models/signing-wallet';
 
 const defaultState: State = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -33,7 +32,7 @@ const defaultState: State = {
 export const createState = fixture(defaultState);
 export const stateSignedBy = (
   defaultWallet = aliceWallet(),
-  ...otherWallets: Wallet[]
+  ...otherWallets: SigningWallet[]
 ) =>
   fixture<SignedState>(
     _.merge({ signatures: [] }, defaultState),
@@ -48,6 +47,6 @@ export const stateSignedBy = (
 
 export const stateWithHashSignedBy = (
   pk = aliceWallet(),
-  ...otherWallets: Wallet[]
+  ...otherWallets: SigningWallet[]
 ) => (opts?: Partial<SignedStateVariables>): SignedStateWithHash =>
   addHash(stateSignedBy(pk, ...otherWallets)(opts));
