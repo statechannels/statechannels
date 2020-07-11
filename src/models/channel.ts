@@ -1,4 +1,4 @@
-import { Model, snakeCaseMappers } from 'objection';
+import { Model } from 'objection';
 import {
   outcomesEqual,
   hashState,

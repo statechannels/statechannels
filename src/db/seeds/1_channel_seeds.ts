@@ -1,6 +1,6 @@
 import { Channel } from '../../models/channel';
 import { channel } from '../../wallet/__test__/fixtures/channel';
-import knex from '../../db-admin/db-admin-connection';
+import knex from '../../db/connection';
 import { stateWithSignaturesAndHash } from '../../wallet/__test__/fixtures/states';
 
 const seeds = [
@@ -8,12 +8,8 @@ const seeds = [
   channel({ channelNonce: 1234, vars: [stateWithSignaturesAndHash()] }),
 ];
 
-// *******
-// Exports
-// *******
+export async function seed() {
+  await knex('channels').truncate();
 
-export function seed() {
-  return knex('channels')
-    .del()
-    .then(() => Channel.query().insert(seeds));
+  await Channel.query().insert(seeds);
 }

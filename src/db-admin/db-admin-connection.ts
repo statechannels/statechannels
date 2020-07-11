@@ -1,8 +1,8 @@
 import Knex from 'knex';
-import { Model } from 'objection';
 import * as knexConfig from './knexfile';
 
-const knex = Knex(knexConfig);
-Model.knex(knex);
-
-export default knex;
+/**
+ * To safely run migrations, we cannot use knexSnakeCaseMappers in the knex config
+ * https://github.com/Vincit/objection.js/issues/1144
+ */
+export default Knex(knexConfig);
