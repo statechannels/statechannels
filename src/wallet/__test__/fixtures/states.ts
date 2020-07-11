@@ -3,9 +3,13 @@ import {
   State,
   SignedState,
   simpleEthAllocation,
+  SignedStateWithHash,
+  SignedStateVarsWithHash,
+  SignedStateVariables,
+  hashState,
 } from '@statechannels/wallet-core';
 import { BigNumber } from 'ethers';
-import { fixture } from './utils';
+import { fixture, Fixture } from './utils';
 import { alice, bob } from './participants';
 
 const defaultState: State = {
@@ -23,7 +27,16 @@ const defaultState: State = {
   challengeDuration: 9001,
 };
 
-export const state = fixture(defaultState);
+export const createState = fixture(defaultState);
 export const stateWithSignatures = fixture<SignedState>(
   _.merge({ signatures: [] }, defaultState)
 );
+
+export const stateWithSignaturesAndHash: Fixture<SignedStateVarsWithHash> = function(
+  opts?: Partial<SignedStateVariables>
+): SignedStateWithHash {
+  const state: SignedStateWithHash = createState(opts) as any;
+
+  state.stateHash = hashState(state);
+  return state;
+};
