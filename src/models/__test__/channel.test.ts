@@ -1,4 +1,4 @@
-import { Channel } from '../channel';
+import { Channel, Errors } from '../channel';
 import { channel } from '../../wallet/__test__/fixtures/channel';
 import { stateWithHashSignedBy } from '../../wallet/__test__/fixtures/states';
 
@@ -26,7 +26,6 @@ it('can insert multiple channel instances within a transaction', async () => {
     expect(await Channel.query(tx).select()).toHaveLength(1);
 
     await Channel.query(tx).insert(c2);
-
     expect(await Channel.query(tx).select()).toHaveLength(2);
 
     // You can query the DB outside of this transaction,
@@ -36,4 +35,22 @@ it('can insert multiple channel instances within a transaction', async () => {
 
   // The transaction has been committed. Two channels were stored.
   expect(await Channel.query().select()).toHaveLength(2);
+});
+
+describe('validation', () => {
+  it('throws when constructin a model where the channelId is inconsistent', () =>
+    expect(() =>
+      channel({
+        channelId: '0x123',
+        vars: [stateWithHashSignedBy()()],
+      })
+    ).toThrow());
+
+  it('throws when inserting a model where the channelId is inconsistent', () =>
+    expect(
+      Channel.query().insert({
+        ...channel({ vars: [stateWithHashSignedBy()()] }),
+        channelId: 'wrongId',
+      })
+    ).rejects.toThrow(Errors.invalidChannelId));
 });

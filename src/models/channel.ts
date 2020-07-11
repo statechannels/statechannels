@@ -12,6 +12,7 @@ import {
   StateVariables,
   SignatureEntry,
   SignedStateWithHash,
+  calculateChannelId,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
@@ -19,6 +20,16 @@ import { logger } from '../logger';
 import { dropNonVariables } from '../state-utils';
 import { Bytes32, Address, Uint48 } from '../type-aliases';
 
+const CHANNEL_COLUMNS = [
+  'channelId',
+  'chainId',
+  'appDefinition',
+  'channelNonce',
+  'challengeDuration',
+  'participants',
+  'myIndex',
+  'vars',
+];
 export type ChannelColumns = {
   readonly channelId: Bytes32;
   readonly chainId: Bytes32;
@@ -44,23 +55,49 @@ export class Channel extends Model implements ChannelColumns {
 
   static tableName = 'channels';
 
-  static get columnNameMappers() {
-    return snakeCaseMappers();
-  }
+  static prepareJsonBColumns = json => {
+    json = _.cloneDeep(json);
+    // FIXME: This seems unnecessary
+    json = _.pick(json, CHANNEL_COLUMNS);
 
-  static prepareJsonBColumns = (json: ChannelColumns) => {
-    (json as any).participants = JSON.stringify(json.participants);
-    (json as any).vars = JSON.stringify(json.vars?.map(dropNonVariables));
+    json.participants = JSON.stringify(json.participants);
+
+    json.vars = json.vars || [];
+    json.vars = JSON.stringify(json.vars);
 
     return json;
   };
 
-  $toDatabaseJson() {
-    return Channel.prepareJsonBColumns(super.$toDatabaseJson() as any);
+  $beforeValidate(jsonSchema, json, _opt) {
+    super.$beforeValidate(jsonSchema, json, _opt);
+
+    json = _.pick(json, CHANNEL_COLUMNS);
+    json.vars = json.vars.map(dropNonVariables);
+
+    return jsonSchema;
   }
 
-  static beforeUpdate(args) {
-    Channel.prepareJsonBColumns(args);
+  $validate(json) {
+    super.$validate(json);
+
+    if (json.channelId !== calculateChannelId(json)) {
+      throw new ChannelError(Errors.invalidChannelId, {
+        given: json.channelId,
+        correct: calculateChannelId(json),
+      });
+    }
+
+    json.vars.map(sv => {
+      if (sv.stateHash) {
+        // FIXME: Check the state hash
+      }
+    });
+
+    return json;
+  }
+
+  $toDatabaseJson() {
+    return Channel.prepareJsonBColumns(super.$toDatabaseJson() as any);
   }
 
   // Modifiers
@@ -331,7 +368,8 @@ function isReverseSorted(arr) {
   return true;
 }
 
-enum Errors {
+export enum Errors {
+  invalidChannelId = 'Invalid channel id',
   duplicateTurnNums = 'multiple states with same turn number',
   notSorted = 'states not sorted',
   multipleSignedStates = 'Store signed multiple states for a single turn',
@@ -357,4 +395,11 @@ enum Errors {
   invalidAppData = 'Invalid app data',
   emittingDuringTransaction = 'Attempting to emit event during transaction',
   notMyTurn = "Cannot update channel unless it's your turn",
+}
+
+class ChannelError extends Error {
+  readonly type = 'ChannelError';
+  constructor(reason: Errors, public readonly data = undefined) {
+    super(reason);
+  }
 }
