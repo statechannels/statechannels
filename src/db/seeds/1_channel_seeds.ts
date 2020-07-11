@@ -1,11 +1,11 @@
 import { Channel } from '../../models/channel';
 import { channel } from '../../wallet/__test__/fixtures/channel';
 import knex from '../../db/connection';
-import { stateWithSignaturesAndHash } from '../../wallet/__test__/fixtures/states';
+import { stateWithHashSignedBy } from '../../wallet/__test__/fixtures/states';
 
 const seeds = [
   channel(),
-  channel({ channelNonce: 1234, vars: [stateWithSignaturesAndHash()] }),
+  channel({ channelNonce: 1234, vars: [stateWithHashSignedBy()()] }),
 ];
 
 export async function seed() {

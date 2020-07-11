@@ -4,13 +4,16 @@ import {
   SignedState,
   simpleEthAllocation,
   SignedStateWithHash,
-  SignedStateVarsWithHash,
   SignedStateVariables,
   hashState,
   BigNumber,
+  signState,
 } from '@statechannels/wallet-core';
-import { fixture, Fixture } from './utils';
+import { fixture } from './utils';
 import { alice, bob } from './participants';
+import { alice as aliceWallet } from './signingWallets';
+import { Wallet } from 'ethers';
+import { addHash } from '../../../state-utils';
 
 const defaultState: State = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -28,15 +31,23 @@ const defaultState: State = {
 };
 
 export const createState = fixture(defaultState);
-export const stateWithSignatures = fixture<SignedState>(
-  _.merge({ signatures: [] }, defaultState)
-);
+export const stateSignedBy = (
+  defaultWallet = aliceWallet(),
+  ...otherWallets: Wallet[]
+) =>
+  fixture<SignedState>(
+    _.merge({ signatures: [] }, defaultState),
+    (s: State): SignedState => ({
+      ...s,
+      signatures: [defaultWallet, ...otherWallets].map(sw => ({
+        signature: signState(s, sw.privateKey),
+        signer: sw.address,
+      })),
+    })
+  );
 
-export const stateWithSignaturesAndHash: Fixture<SignedStateVarsWithHash> = function(
-  opts?: Partial<SignedStateVariables>
-): SignedStateWithHash {
-  const state: SignedStateWithHash = createState(opts) as any;
-
-  state.stateHash = hashState(state);
-  return state;
-};
+export const stateWithHashSignedBy = (
+  pk = aliceWallet(),
+  ...otherWallets: Wallet[]
+) => (opts?: Partial<SignedStateVariables>): SignedStateWithHash =>
+  addHash(stateSignedBy(pk, ...otherWallets)(opts));
