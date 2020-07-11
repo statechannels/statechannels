@@ -4,7 +4,7 @@ import {hexZeroPad} from '@ethersproject/bytes';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {makeDestination} from '../../utils';
 import {ETH_TOKEN} from '../../constants';
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../../bignumber';
 
 export const externalEthAllocation: Allocations = [
   {

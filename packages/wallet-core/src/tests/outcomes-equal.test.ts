@@ -1,7 +1,7 @@
 import {outcomesEqual} from '../state-utils';
 import {SimpleAllocation, Destination} from '../types';
 import {AddressZero, HashZero} from '@ethersproject/constants';
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../bignumber';
 
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',

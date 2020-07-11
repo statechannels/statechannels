@@ -1,11 +1,9 @@
-
-import {ETH_ASSET_HOLDER_ADDRESS, } from '../config';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
-import {BigNumber, } from 'ethers';
-
+import {BigNumber} from '../bignumber';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
-  if (BigNumber.from(tokenAddress).isZero()) return ETH_ASSET_HOLDER_ADDRESS;
+  if (BigNumber.isZero(tokenAddress)) return ETH_ASSET_HOLDER_ADDRESS;
   else if (tokenAddress === MOCK_TOKEN) return MOCK_ASSET_HOLDER_ADDRESS;
 
   throw 'AssetHolderAddress not found';
@@ -17,4 +15,3 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 
   throw 'TokenAddress not found';
 }
-

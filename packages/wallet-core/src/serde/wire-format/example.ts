@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../../bignumber';
 import {Message, SignedState} from '../../types';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';

@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../bignumber';
 
 import {AllocationItem} from '../types';
 

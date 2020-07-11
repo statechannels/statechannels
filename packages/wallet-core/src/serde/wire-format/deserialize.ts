@@ -17,7 +17,7 @@ import {
   Objective,
   Participant
 } from '../../types';
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../../bignumber';
 import {makeDestination} from '../../utils';
 import {getSignerAddress} from '../../state-utils';
 

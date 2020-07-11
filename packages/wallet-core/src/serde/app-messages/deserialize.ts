@@ -7,7 +7,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../../bignumber';
 import {AddressZero} from '@ethersproject/constants';
 import {makeDestination, assetHolderAddress} from '../../utils';
 

@@ -1,5 +1,10 @@
-import {BigNumber} from 'ethers';
 import {FundingStrategy} from '@statechannels/client-api-schema';
+
+export type Uint256 = string & {_isUint256: void};
+// These "integers" have "type-safe" addition:
+// const a: Uint256 = '0xa' as Uint256;
+// const b: Uint256 = '0xb' as Uint256;
+// const s: Uint256 = a + b; // Type error: Type 'string' is not assignable to type 'Uint256'
 
 export interface DomainBudget {
   domain: string;
@@ -8,12 +13,12 @@ export interface DomainBudget {
 }
 
 interface ChannelBudgetEntry {
-  amount: BigNumber;
+  amount: Uint256;
 }
 export interface AssetBudget {
   assetHolderAddress: string;
-  availableReceiveCapacity: BigNumber;
-  availableSendCapacity: BigNumber;
+  availableReceiveCapacity: Uint256;
+  availableSendCapacity: Uint256;
   channels: Record<string, ChannelBudgetEntry>;
 }
 export interface Participant {
@@ -33,7 +38,7 @@ export type StateVariablesWithHash = StateVariables & Hashed;
 export type Destination = string & {_isDestination: void};
 export interface AllocationItem {
   destination: Destination;
-  amount: BigNumber;
+  amount: Uint256;
 }
 export interface SimpleAllocation {
   type: 'SimpleAllocation';
@@ -69,10 +74,10 @@ export interface ChannelConstants {
 
 export interface State extends ChannelConstants, StateVariables {}
 
-interface Signed {
+export interface Signed {
   signatures: SignatureEntry[];
 }
-interface Hashed {
+export interface Hashed {
   stateHash: string;
 }
 export type SignedState = State & Signed;

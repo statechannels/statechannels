@@ -20,7 +20,7 @@ import {
 
 import {AddressZero} from '@ethersproject/constants';
 import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
-import {BigNumber} from 'ethers';
+import {BigNumber} from '../../bignumber';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
