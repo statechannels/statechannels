@@ -46,8 +46,10 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
-  async createChannel(_args: CreateChannelParams): Promise<ChannelResult> {
-    throw 'Unimplemented';
+  async createChannel(args: CreateChannelParams): Promise<ChannelResult> {
+    const { channelId, latest } = await Channel.query().insert(args as any);
+
+    return { ...args, turnNum: latest.turnNum, status: 'funding', channelId };
   }
   async joinChannel(_channelId: Bytes32): Promise<ChannelResult> {
     throw 'Unimplemented';
