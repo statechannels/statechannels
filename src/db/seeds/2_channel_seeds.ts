@@ -1,7 +1,7 @@
 import { Channel } from '../../models/channel';
-import { channel } from '../../wallet/__test__/fixtures/channel';
 import knex from '../../db/connection';
 import { stateWithHashSignedBy } from '../../wallet/__test__/fixtures/states';
+import { channel } from '../../models/__test__/fixtures/channel';
 
 const seeds = [
   channel(),

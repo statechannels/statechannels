@@ -1,15 +1,31 @@
 import * as Knex from 'knex';
 import { addBytes32Check, addAddressCheck, addUint48Check } from '../utils';
 
+const channels = 'channels';
+const signingWallets = 'signing_wallets';
 export async function up(knex: Knex): Promise<any> {
-  const name = 'channels';
-  await knex.schema.createTable(name, function(table) {
+  await knex.schema.createTable(signingWallets, function(table) {
+    table.increments('id');
+    table
+      .string('private_key')
+      .notNullable()
+      .unique();
+    table
+      .string('address')
+      .notNullable()
+      .unique();
+  });
+  await addBytes32Check(knex, signingWallets, 'private_key');
+  await addAddressCheck(knex, signingWallets, 'address');
+
+  await knex.schema.createTable(channels, function(table) {
     table.increments('id');
     table
       .string('channel_id')
       .notNullable()
       .unique();
-    table.integer('my_index').notNullable();
+    table.string('signing_address').notNullable();
+    table.foreign('signing_address').references('signing_wallets.address');
     table.string('chain_id').notNullable();
     table.integer('channel_nonce').notNullable();
     table.string('app_definition').notNullable();
@@ -22,12 +38,14 @@ export async function up(knex: Knex): Promise<any> {
     table.jsonb('participants').notNullable();
   });
 
-  await addBytes32Check(knex, name, 'channel_id');
-  await addAddressCheck(knex, name, 'app_definition');
-  await addUint48Check(knex, name, 'channel_nonce');
-  await addUint48Check(knex, name, 'challenge_duration');
+  await addBytes32Check(knex, channels, 'channel_id');
+  await addAddressCheck(knex, channels, 'app_definition');
+  await addAddressCheck(knex, channels, 'signing_address');
+  await addUint48Check(knex, channels, 'channel_nonce');
+  await addUint48Check(knex, channels, 'challenge_duration');
 }
 
 export async function down(knex: Knex): Promise<any> {
-  return knex.schema.dropTable('channels');
+  await knex.schema.dropTable(channels);
+  await knex.schema.dropTable(signingWallets);
 }

@@ -74,7 +74,7 @@ export class Wallet implements WalletInterface {
           .first();
 
         if (!channel) {
-          const cols: ChannelColumns = {
+            const cols: RequiredColumns = {
             ...ss,
             channelId: calculateChannelId(ss),
             myIndex: 0, // TODO: We need to store private keys to calculate this

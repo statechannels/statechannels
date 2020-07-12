@@ -1,4 +1,4 @@
-import { Model } from 'objection';
+import { Model, QueryContext } from 'objection';
 import {
   outcomesEqual,
   hashState,
@@ -17,31 +17,43 @@ import {
 import _ from 'lodash';
 
 import { logger } from '../logger';
-import { dropNonVariables } from '../state-utils';
 import { Bytes32, Address, Uint48 } from '../type-aliases';
+import { SigningWallet } from './signing-wallet';
 
-const CHANNEL_COLUMNS = [
-  'channelId',
-  'chainId',
-  'appDefinition',
-  'channelNonce',
-  'challengeDuration',
-  'participants',
-  'myIndex',
-  'vars',
-];
-export type ChannelColumns = {
-  readonly channelId: Bytes32;
+export const REQUIRED_COLUMNS = {
+  chainId: 'chainId',
+  appDefinition: 'appDefinition',
+  channelNonce: 'channelNonce',
+  challengeDuration: 'challengeDuration',
+  participants: 'participants',
+  vars: 'vars',
+};
+
+export const COMPUTED_COLUMNS = {
+  channelId: 'channelId',
+  signingAddress: 'signingAddress',
+};
+export interface RequiredColumns
+  extends Record<keyof typeof REQUIRED_COLUMNS, any> {
   readonly chainId: Bytes32;
   readonly appDefinition: Address;
   readonly channelNonce: Uint48;
   readonly challengeDuration: Uint48;
   readonly participants: Participant[];
-  readonly myIndex: number;
   readonly vars: SignedStateVarsWithHash[];
+  readonly signingAddress: Address;
+}
+
+export type ComputedColumns = {
+  readonly channelId: Bytes32;
 };
 
-export class Channel extends Model implements ChannelColumns {
+export const CHANNEL_COLUMNS = {
+  ...REQUIRED_COLUMNS,
+  ...COMPUTED_COLUMNS,
+};
+
+export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
 
   readonly channelId: Bytes32;
@@ -50,18 +62,42 @@ export class Channel extends Model implements ChannelColumns {
   readonly channelNonce: Uint48;
   readonly challengeDuration: Uint48;
   readonly participants: Participant[];
-  readonly myIndex: number;
-  public vars: SignedStateVarsWithHash[];
+  readonly signingAddress: Address;
+  readonly vars: SignedStateVarsWithHash[];
+
+  readonly signingWallet!: SigningWallet;
+
+  static get jsonSchema() {
+    return {
+      type: 'object',
+      required: Object.keys(REQUIRED_COLUMNS),
+      properties: {
+        chainId: {
+          type: 'string',
+        },
+      },
+    };
+  }
 
   static tableName = 'channels';
+
+  static relationMappings = {
+    signingWallet: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: SigningWallet,
+      join: {
+        from: 'channels.signingAddress',
+        to: 'signing_wallets.address',
+      },
+    },
+  };
 
   static prepareJsonBColumns = json => {
     json = _.cloneDeep(json);
     // FIXME: This seems unnecessary
-    json = _.pick(json, CHANNEL_COLUMNS);
+    json = _.pick(json, Object.keys(CHANNEL_COLUMNS));
 
     json.participants = JSON.stringify(json.participants);
-
     json.vars = json.vars || [];
     json.vars = JSON.stringify(json.vars);
 
@@ -71,29 +107,33 @@ export class Channel extends Model implements ChannelColumns {
   $beforeValidate(jsonSchema, json, _opt) {
     super.$beforeValidate(jsonSchema, json, _opt);
 
-    json = _.pick(json, CHANNEL_COLUMNS);
-    json.vars = json.vars.map(dropNonVariables);
+    json = _.pick(json, Object.keys(CHANNEL_COLUMNS));
 
     return jsonSchema;
   }
 
-  $validate(json) {
-    super.$validate(json);
+  $beforeInsert(ctx: QueryContext) {
+    super.$beforeInsert(ctx);
+    const correctChannelId = calculateChannelId(this.channelConstants);
+    (this.channelId as any) = this.channelId ?? correctChannelId;
 
-    if (json.channelId !== calculateChannelId(json)) {
+    if (this.channelId !== correctChannelId) {
       throw new ChannelError(Errors.invalidChannelId, {
-        given: json.channelId,
-        correct: calculateChannelId(json),
+        given: this.channelId,
+        correctChannelId,
       });
     }
 
-    json.vars.map(sv => {
-      if (sv.stateHash) {
-        // FIXME: Check the state hash
+    this.vars.map(sv => {
+      const correctHash = hashState({ ...this.channelConstants, ...sv });
+      sv.stateHash = sv.stateHash ?? correctHash;
+      if (sv.stateHash !== correctHash) {
+        throw new ChannelError(Errors.incorrectHash, {
+          given: sv.stateHash,
+          correctHash,
+        });
       }
     });
-
-    return json;
   }
 
   $toDatabaseJson() {
@@ -157,6 +197,12 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   // Computed
+  get myIndex(): number {
+    return this.participants.findIndex(
+      p => p.signingAddress === this.signingAddress
+    );
+  }
+
   public get channelConstants(): ChannelConstants {
     const {
       channelNonce,
@@ -240,7 +286,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   private clearOldStates() {
-    this.vars = _.reverse(_.sortBy(this.vars, s => s.turnNum));
+    (this.vars as any) = _.reverse(_.sortBy(this.vars, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
@@ -253,7 +299,7 @@ export class Channel extends Model implements ChannelColumns {
         sv => sv.stateHash === firstSupportStateHash
       );
       // Take everything before that
-      this.vars = this.vars.slice(0, supportIndex + 1);
+      (this.vars as any) = this.vars.slice(0, supportIndex + 1);
     }
   }
 
@@ -370,6 +416,7 @@ function isReverseSorted(arr) {
 
 export enum Errors {
   invalidChannelId = 'Invalid channel id',
+  incorrectHash = 'Incorrect hash',
   duplicateTurnNums = 'multiple states with same turn number',
   notSorted = 'states not sorted',
   multipleSignedStates = 'Store signed multiple states for a single turn',
