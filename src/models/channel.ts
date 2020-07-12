@@ -278,7 +278,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   private get _signedByMe() {
-    return this.signedStates.filter(s => this.mySignature(s, s.signatures));
+    return this.signedStates.filter(s => this.mySignature(s.signatures));
   }
 
   private get _latestSupportedByMe() {
@@ -335,10 +335,7 @@ export class Channel extends Model implements RequiredColumns {
     return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
-  private mySignature(
-    stateVars: StateVariables,
-    signatures: SignatureEntry[]
-  ): boolean {
+  private mySignature(signatures: SignatureEntry[]): boolean {
     return signatures.some(sig => sig.signer === this.myAddress);
   }
 
