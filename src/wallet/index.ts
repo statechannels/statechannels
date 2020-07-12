@@ -63,6 +63,7 @@ export class Wallet implements WalletInterface {
   async pushMessage(
     message: AddressedMessage
   ): Promise<{ response?: Message; channelResults?: ChannelResult[] }> {
+    try {
     await Channel.transaction(async tx => {
       for (const ss of message.signedStates || []) {
         // We ignore unsigned states
@@ -89,6 +90,10 @@ export class Wallet implements WalletInterface {
         }
       }
     });
+    } catch (err) {
+      logger.error({ err }, 'Could not push message');
+      throw err;
+    }
 
     return {};
   }
