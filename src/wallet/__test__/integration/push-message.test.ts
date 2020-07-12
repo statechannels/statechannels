@@ -5,6 +5,9 @@ import { Channel } from '../../../models/channel';
 import { addHash } from '../../../state-utils';
 import { calculateChannelId } from '@statechannels/wallet-core';
 import { alice, bob } from '../fixtures/signingWallets';
+import { seed } from '../../../db/seeds/1_signing_wallet_seeds';
+import knex from '../../../db/connection';
+beforeEach(async () => seed(knex));
 
 it("doesn't throw on an empty message", () => {
   const wallet = new Wallet();
@@ -22,6 +25,7 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy()({ turnNum: 3 }),
     stateSignedBy()({ turnNum: 2 }),
   ];
+
   await wallet.pushMessage(message({ signedStates: signedStates }));
 
   const channelsAfter = await Channel.query().select();
@@ -91,4 +95,15 @@ it("Doesn't store stale states", async () => {
 
   const afterThird = await Channel.query().select();
   expect(afterThird[0].vars).toHaveLength(2);
+});
+
+it("doesn't store states for unknown signing addresses", async () => {
+  const wallet = new Wallet();
+  await knex('signing_wallets').delete();
+
+  return expect(
+    wallet.pushMessage(
+      message({ signedStates: [stateSignedBy(alice(), bob())({ turnNum: 5 })] })
+    )
+  ).rejects.toThrow(Error('Not in channel'));
 });

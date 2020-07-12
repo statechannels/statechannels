@@ -8,8 +8,10 @@ import {
   Notification,
 } from '@statechannels/client-api-schema';
 import { Bytes32 } from '../type-aliases';
-import { Channel, ChannelColumns } from '../models/channel';
+import { Channel, RequiredColumns } from '../models/channel';
 import { addHash } from '../state-utils';
+import { SigningWallet } from '../models/signing-wallet';
+import { logger } from '../logger';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<
@@ -64,32 +66,48 @@ export class Wallet implements WalletInterface {
     message: AddressedMessage
   ): Promise<{ response?: Message; channelResults?: ChannelResult[] }> {
     try {
-    await Channel.transaction(async tx => {
-      for (const ss of message.signedStates || []) {
-        // We ignore unsigned states
-        if (!ss.signatures?.length) return;
+      await Channel.transaction(async tx => {
+        for (const ss of message.signedStates || []) {
+          // We ignore unsigned states
+          if (!ss.signatures?.length) return;
 
-        const channelId = calculateChannelId(ss);
-        let channel = await Channel.query(tx)
-          .where('channelId', channelId)
-          .first();
+          const channelId = calculateChannelId(ss);
+          let channel = await Channel.query(tx)
+            .where('channelId', channelId)
+            .first();
 
-        if (!channel) {
+          if (!channel) {
+            const addresses = ss.participants.map(p => p.signingAddress);
+            const signingWallet = await SigningWallet.query(tx)
+              .whereIn('address', addresses)
+              .first();
+
+            if (!signingWallet) {
+              logger.error(
+                {
+                  knownWallets: await SigningWallet.query(tx).select(),
+                  addresses,
+                },
+                'Not in channel'
+              );
+              throw Error('Not in channel');
+            }
+
+            const { address: signingAddress } = signingWallet;
             const cols: RequiredColumns = {
-            ...ss,
-            channelId: calculateChannelId(ss),
-            myIndex: 0, // TODO: We need to store private keys to calculate this
-            vars: [addHash(ss)],
-          };
+              ...ss,
+              vars: [addHash(ss)],
+              signingAddress,
+            };
 
-          channel = Channel.fromJson(cols);
-          await Channel.query(tx).insert(channel);
-        } else {
-          ss.signatures?.map(sig => channel.addState(ss, sig));
-          await Channel.query(tx).update(channel);
+            channel = Channel.fromJson(cols);
+            await Channel.query(tx).insert(channel);
+          } else {
+            ss.signatures?.map(sig => channel.addState(ss, sig));
+            await Channel.query(tx).update(channel);
+          }
         }
-      }
-    });
+      });
     } catch (err) {
       logger.error({ err }, 'Could not push message');
       throw err;
