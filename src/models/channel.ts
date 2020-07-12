@@ -92,22 +92,15 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static prepareJsonBColumns = json => {
-    json = _.cloneDeep(json);
-    // FIXME: This seems unnecessary
-    json = _.pick(json, Object.keys(CHANNEL_COLUMNS));
+  static jsonAttributes = ['vars', 'participants'];
 
-    json.participants = JSON.stringify(json.participants);
-    json.vars = json.vars || [];
-    json.vars = JSON.stringify(json.vars);
-
-    return json;
-  };
+  $toDatabaseJson() {
+    // TODO: This seems unnecessary
+    return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
+  }
 
   $beforeValidate(jsonSchema, json, _opt) {
     super.$beforeValidate(jsonSchema, json, _opt);
-
-    json = _.pick(json, Object.keys(CHANNEL_COLUMNS));
 
     return jsonSchema;
   }
@@ -134,10 +127,6 @@ export class Channel extends Model implements RequiredColumns {
         });
       }
     });
-  }
-
-  $toDatabaseJson() {
-    return Channel.prepareJsonBColumns(super.$toDatabaseJson() as any);
   }
 
   // Modifiers
