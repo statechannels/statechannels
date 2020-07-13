@@ -251,11 +251,9 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get latest() {
-    return { ...this.channelConstants, ...this.signedStates[0] };
-  }
-
-  get latestState() {
-    return { ...this.channelConstants, ...this.latest };
+    return this.signedStates[0]
+      ? { ...this.channelConstants, ...this.signedStates[0] }
+      : undefined;
   }
 
   private get _supported() {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { BigNumber } from '@statechannels/wallet-core';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
