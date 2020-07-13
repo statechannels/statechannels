@@ -7,6 +7,7 @@ import {
   SignedStateVariables,
   BigNumber,
   signState,
+  hashState,
 } from '@statechannels/wallet-core';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
@@ -29,6 +30,14 @@ const defaultState: State = {
   challengeDuration: 9001,
 };
 
+// Caching signatures saves about 200ms per signature
+// TODO: Persist these signatures between tests
+const signatureCache: any = {};
+const _signState = (s, pk) => {
+  const key = `${pk}-${hashState(s)}`;
+  return (signatureCache[key] = signatureCache[key] || signState(s, pk));
+};
+
 export const createState = fixture(defaultState);
 export const stateSignedBy = (
   defaultWallet = aliceWallet(),
@@ -39,7 +48,7 @@ export const stateSignedBy = (
     (s: State): SignedState => ({
       ...s,
       signatures: [defaultWallet, ...otherWallets].map(sw => ({
-        signature: signState(s, sw.privateKey),
+        signature: _signState(s, sw.privateKey),
         signer: sw.address,
       })),
     })

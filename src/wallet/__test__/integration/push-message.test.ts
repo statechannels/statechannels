@@ -16,6 +16,10 @@ it("doesn't throw on an empty message", () => {
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
 });
 
+const two = 2;
+const three = 3;
+const five = 5;
+
 it('stores states contained in the message, in a single channel model', async () => {
   const wallet = new Wallet();
 
@@ -23,8 +27,8 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [
-    stateSignedBy()({ turnNum: 3 }),
-    stateSignedBy()({ turnNum: 2 }),
+    stateSignedBy()({ turnNum: three }),
+    stateSignedBy()({ turnNum: two }),
   ];
 
   await wallet.pushMessage(message({ signedStates: signedStates }));
@@ -45,8 +49,8 @@ it('stores states for multiple channels', async () => {
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [
-    stateSignedBy()({ turnNum: 2 }),
-    stateSignedBy()({ turnNum: 2, channelNonce: 567 }),
+    stateSignedBy()({ turnNum: three }),
+    stateSignedBy()({ turnNum: three, channelNonce: 567 }),
   ];
   await wallet.pushMessage(message({ signedStates: signedStates }));
 
@@ -72,7 +76,9 @@ it("Doesn't store stale states", async () => {
   expect(channelsBefore).toHaveLength(0);
 
   await wallet.pushMessage(
-    message({ signedStates: [stateSignedBy(alice(), bob())({ turnNum: 5 })] })
+    message({
+      signedStates: [stateSignedBy(alice(), bob())({ turnNum: three })],
+    })
   );
 
   const afterFirst = await Channel.query().select();
@@ -80,10 +86,10 @@ it("Doesn't store stale states", async () => {
   expect(afterFirst).toHaveLength(1);
   expect(afterFirst[0].vars).toHaveLength(1);
   expect(afterFirst[0].supported).toBeTruthy();
-  expect(afterFirst[0].supported.turnNum).toEqual(5);
+  expect(afterFirst[0].supported.turnNum).toEqual(three);
 
   await wallet.pushMessage(
-    message({ signedStates: [stateSignedBy(bob())({ turnNum: 3 })] })
+    message({ signedStates: [stateSignedBy()({ turnNum: two })] })
   );
 
   const afterSecond = await Channel.query().select();
@@ -91,7 +97,7 @@ it("Doesn't store stale states", async () => {
   expect(afterSecond).toMatchObject(afterFirst);
 
   await wallet.pushMessage(
-    message({ signedStates: [stateSignedBy(bob())({ turnNum: 6 })] })
+    message({ signedStates: [stateSignedBy()({ turnNum: five })] })
   );
 
   const afterThird = await Channel.query().select();
@@ -104,7 +110,9 @@ it("doesn't store states for unknown signing addresses", async () => {
 
   return expect(
     wallet.pushMessage(
-      message({ signedStates: [stateSignedBy(alice(), bob())({ turnNum: 5 })] })
+      message({
+        signedStates: [stateSignedBy(alice(), bob())({ turnNum: three })],
+      })
     )
   ).rejects.toThrow(Error('Not in channel'));
 });
