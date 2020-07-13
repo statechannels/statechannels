@@ -1,4 +1,8 @@
-import { Message, calculateChannelId } from '@statechannels/wallet-core';
+import {
+  Message,
+  calculateChannelId,
+  convertToParticipant,
+} from '@statechannels/wallet-core';
 
 import {
   CreateChannelParams,
@@ -12,6 +16,7 @@ import { Channel, RequiredColumns } from '../models/channel';
 import { addHash } from '../state-utils';
 import { SigningWallet } from '../models/signing-wallet';
 import { logger } from '../logger';
+import { Nonce } from '../models/nonce';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<
@@ -47,7 +52,12 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Promise<ChannelResult> {
-    const { channelId, latest } = await Channel.query().insert(args as any);
+    const { participants } = args;
+    const { channelId, latest } = await Channel.query().insert({
+      ...args,
+      channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
+      participants: participants.map(convertToParticipant),
+    });
 
     return { ...args, turnNum: latest.turnNum, status: 'funding', channelId };
   }
