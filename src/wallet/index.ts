@@ -2,7 +2,6 @@ import {
   Message,
   calculateChannelId,
   convertToParticipant,
-  SignedStateVariables,
   Outcome,
   SignedStateVarsWithHash,
   hashState,
@@ -23,6 +22,7 @@ import { addHash } from '../state-utils';
 import { SigningWallet } from '../models/signing-wallet';
 import { logger } from '../logger';
 import { Nonce } from '../models/nonce';
+import { protocolEngine } from '../protocols/direct-funding';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<
@@ -61,7 +61,7 @@ export class Wallet implements WalletInterface {
     const { participants, appDefinition, appData, allocations } = args;
     const outcome: Outcome = deserializeAllocations(allocations);
     // TODO: How do we pick a signing address?
-    const signingAddress = (await SigningWallet.query().first()).address;
+    const signingAddress = (await SigningWallet.query().first())?.address;
 
     const channelConstants: ChannelConstants = {
       channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
@@ -82,7 +82,23 @@ export class Wallet implements WalletInterface {
     const cols = { ...channelConstants, vars, signingAddress };
     const { channelId, latest } = await Channel.query().insert(cols);
 
-    return { ...args, turnNum: latest.turnNum, status: 'funding', channelId };
+    const { outbox } = (() => {
+      switch (args.fundingStrategy) {
+        case 'Direct':
+          return protocolEngine.run([channelId]);
+        case 'Ledger':
+        case 'Virtual':
+          throw 'Unimplemented';
+      }
+    })();
+
+    return {
+      ...args,
+      turnNum: latest.turnNum,
+      status: 'funding',
+      channelId,
+      outbox,
+    };
   }
 
   async joinChannel(_channelId: Bytes32): Promise<ChannelResult> {
@@ -100,7 +116,9 @@ export class Wallet implements WalletInterface {
 
   async pushMessage(
     message: AddressedMessage
-  ): Promise<{ response?: Message; channelResults?: ChannelResult[] }> {
+  ): Promise<{ channelResults?: ChannelResult[] }> {
+    const channelIds: Bytes32[] = [];
+
     try {
       await Channel.transaction(async tx => {
         for (const ss of message.signedStates || []) {
@@ -137,10 +155,12 @@ export class Wallet implements WalletInterface {
             };
 
             channel = Channel.fromJson(cols);
-            await Channel.query(tx).insert(channel);
+            const { channelId } = await Channel.query(tx).insert(channel);
+            channelIds.push(channelId);
           } else {
             ss.signatures?.map(sig => channel.addState(ss, sig));
             await Channel.query(tx).update(channel);
+            channelIds.push(channel.channelId);
           }
         }
       });
@@ -149,7 +169,23 @@ export class Wallet implements WalletInterface {
       throw err;
     }
 
-    return {};
+    const { outbox } = protocolEngine.run(channelIds);
+
+    return {
+      channelResults: [
+        {
+          outbox,
+          appData: '',
+          appDefinition: '',
+          channelId: '',
+          challengeExpirationTime: 0,
+          status: 'funding',
+          participants: [],
+          allocations: [],
+          turnNum: 0,
+        },
+      ],
+    };
   }
   onNotification(_cb: (notice: Notification) => void): { unsubscribe: any } {
     throw 'Unimplemented';
