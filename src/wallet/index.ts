@@ -2,7 +2,13 @@ import {
   Message,
   calculateChannelId,
   convertToParticipant,
+  SignedStateVariables,
+  Outcome,
+  SignedStateVarsWithHash,
+  hashState,
+  ChannelConstants,
 } from '@statechannels/wallet-core';
+import { deserializeAllocations } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 
 import {
   CreateChannelParams,
@@ -52,15 +58,33 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Promise<ChannelResult> {
-    const { participants } = args;
-    const { channelId, latest } = await Channel.query().insert({
-      ...args,
+    const { participants, appDefinition, appData, allocations } = args;
+    const outcome: Outcome = deserializeAllocations(allocations);
+    // TODO: How do we pick a signing address?
+    const signingAddress = (await SigningWallet.query().first()).address;
+
+    const channelConstants: ChannelConstants = {
       channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
       participants: participants.map(convertToParticipant),
-    });
+      chainId: '0x01',
+      challengeDuration: 9001,
+      appDefinition,
+    };
+
+    const turnNum = 0;
+    const isFinal = false;
+    const signatures = [];
+    const s = { appData, outcome, turnNum, isFinal, signatures };
+    const vars: SignedStateVarsWithHash[] = [
+      { ...s, stateHash: hashState({ ...channelConstants, ...s }) },
+    ];
+
+    const cols = { ...channelConstants, vars, signingAddress };
+    const { channelId, latest } = await Channel.query().insert(cols);
 
     return { ...args, turnNum: latest.turnNum, status: 'funding', channelId };
   }
+
   async joinChannel(_channelId: Bytes32): Promise<ChannelResult> {
     throw 'Unimplemented';
   }
