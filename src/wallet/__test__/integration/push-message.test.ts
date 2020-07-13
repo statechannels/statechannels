@@ -7,6 +7,7 @@ import { calculateChannelId } from '@statechannels/wallet-core';
 import { alice, bob } from '../fixtures/signingWallets';
 import { seed } from '../../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../../db/connection';
+import { truncate } from '../../../db-admin/db-admin-connection';
 beforeEach(async () => seed(knex));
 
 it("doesn't throw on an empty message", () => {
@@ -99,7 +100,7 @@ it("Doesn't store stale states", async () => {
 
 it("doesn't store states for unknown signing addresses", async () => {
   const wallet = new Wallet();
-  await knex('signing_wallets').delete();
+  await truncate(knex, ['signing_wallets']);
 
   return expect(
     wallet.pushMessage(
