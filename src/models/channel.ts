@@ -235,19 +235,19 @@ export class Channel extends Model implements RequiredColumns {
     return this.isSupported && this.support.every(s => s.isFinal);
   }
 
-  get supported() {
+  get supported(): SignedStateWithHash | undefined {
     const vars = this._supported;
-    if (!vars) throw new Error('No supported state found');
-    return { ...this.channelConstants, ...vars };
+    if (vars) return { ...this.channelConstants, ...vars };
+    else return undefined;
   }
 
   get isSupportedByMe() {
     return !!this._latestSupportedByMe;
   }
   get latestSignedByMe() {
-    const vars = this._latestSupportedByMe;
-    if (!vars) throw new Error('No state supported by me');
-    return { ...this.channelConstants, ...vars };
+    return this._latestSupportedByMe
+      ? { ...this.channelConstants, ...this._latestSupportedByMe }
+      : undefined;
   }
 
   get latest() {
