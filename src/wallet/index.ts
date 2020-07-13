@@ -22,7 +22,8 @@ import { addHash } from '../state-utils';
 import { SigningWallet } from '../models/signing-wallet';
 import { logger } from '../logger';
 import { Nonce } from '../models/nonce';
-import { protocolEngine } from '../protocols/direct-funding';
+import { executionLoop } from '../protocols/direct-funding';
+import { isOutgoing, Outgoing, isInternal } from '../protocols/actions';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<
@@ -36,7 +37,7 @@ export type AddressedMessage = Message & { to: string; from: string };
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // This is an interim type, until it does.
-type WithOutbox = { outbox?: AddressedMessage[] };
+type WithOutbox = { outbox: Outgoing[] };
 type ChannelResult = ClientChannelResult & WithOutbox;
 
 export type WalletInterface = {
@@ -82,10 +83,10 @@ export class Wallet implements WalletInterface {
     const cols = { ...channelConstants, vars, signingAddress };
     const { channelId, latest } = await Channel.query().insert(cols);
 
-    const { outbox } = (() => {
+    const { outbox } = await (() => {
       switch (args.fundingStrategy) {
         case 'Direct':
-          return protocolEngine.run([channelId]);
+          return protocolEngine([channelId]);
         case 'Ledger':
         case 'Virtual':
           throw 'Unimplemented';
@@ -169,7 +170,7 @@ export class Wallet implements WalletInterface {
       throw err;
     }
 
-    const { outbox } = protocolEngine.run(channelIds);
+    const { outbox } = await protocolEngine(channelIds);
 
     return {
       channelResults: [
@@ -191,3 +192,36 @@ export class Wallet implements WalletInterface {
     throw 'Unimplemented';
   }
 }
+
+type ExecutionResult = { ids: Bytes32[]; outbox: Outgoing[] };
+const protocolEngine = async (
+  ids: Bytes32[],
+  outbox: Outgoing[] = []
+): Promise<ExecutionResult> => {
+  const [channelId, ...rest] = ids;
+
+  const channel = await Channel.query()
+    .where({ channelId })
+    .first();
+  const actions = await executionLoop(channel);
+  const todos = actions.filter(isInternal);
+
+  for (const todo of todos) {
+    switch (todo.type) {
+      case 'SignState':
+        // await channel.signState(todo.hash);
+        break;
+      case 'UpdateChannel':
+        // await channel.update(todo);
+        break;
+    }
+  }
+
+  outbox = outbox.concat(actions.filter(isOutgoing));
+
+  if (rest.length) {
+    return { ids: rest, outbox };
+  } else {
+    return { ids: [], outbox };
+  }
+};
