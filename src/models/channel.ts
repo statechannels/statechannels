@@ -285,7 +285,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   private get _latestSupportedByMe() {
-    return this._signedByMe.find(() => true);
+    return this._signedByMe[0];
   }
 
   private clearOldStates() {

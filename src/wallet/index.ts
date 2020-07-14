@@ -6,7 +6,6 @@ import {
   SignedStateVarsWithHash,
   hashState,
   ChannelConstants,
-  SignedStateWithHash,
   SignedState,
 } from '@statechannels/wallet-core';
 import { deserializeAllocations } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
@@ -200,6 +199,8 @@ const protocolEngine = async (
   ids: Bytes32[],
   outbox: Outgoing[] = []
 ): Promise<ExecutionResult> => {
+  if (ids.length === 0) return { ids, outbox };
+
   const [channelId, ...nextIds] = ids;
 
   const channel = await Channel.forId(channelId, undefined);
