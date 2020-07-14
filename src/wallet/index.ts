@@ -6,6 +6,8 @@ import {
   SignedStateVarsWithHash,
   hashState,
   ChannelConstants,
+  SignedStateWithHash,
+  SignedState,
 } from '@statechannels/wallet-core';
 import { deserializeAllocations } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 
@@ -198,29 +200,44 @@ const protocolEngine = async (
   ids: Bytes32[],
   outbox: Outgoing[] = []
 ): Promise<ExecutionResult> => {
-  const [channelId, ...rest] = ids;
+  const [channelId, ...nextIds] = ids;
 
-  const channel = await Channel.query()
-    .where({ channelId })
-    .first();
+  const channel = await Channel.forId(channelId, undefined);
   const actions = await executionLoop(channel);
   const todos = actions.filter(isInternal);
 
   for (const todo of todos) {
+    let state: SignedState;
     switch (todo.type) {
       case 'SignState':
-        // await channel.signState(todo.hash);
+        state = await channel.signState(todo.hash);
         break;
       case 'UpdateChannel':
-        // await channel.update(todo);
+        // channel.update(todo);
         break;
     }
+
+    await Channel.query().update(channel);
+    outbox.push({
+      type: 'NotifyApp',
+      notice: {
+        method: 'MessageQueued',
+        params: {
+          recipient: 'bob',
+          sender: 'alice',
+          data: { signedStates: [state] },
+        },
+      },
+    });
+
+    // TODO: Push the channelId back, once we actually trigger these actions
+    // nextIds.push(channelId);
   }
 
   outbox = outbox.concat(actions.filter(isOutgoing));
 
-  if (rest.length) {
-    return { ids: rest, outbox };
+  if (nextIds.length) {
+    return await protocolEngine(nextIds, outbox);
   } else {
     return { ids: [], outbox };
   }

@@ -17,13 +17,25 @@ describe('happy path', () => {
 
   it('creates a channel', async () => {
     expect(await Channel.query().resultSize()).toEqual(0);
-    await expect(w.createChannel(createChannelArgs())).resolves.not.toThrow();
+
+    const appData = '0xa00f00';
+    const createPromise = w.createChannel(createChannelArgs({ appData }));
+    await expect(createPromise).resolves.toMatchObject({
+      channelId: expect.any(String),
+    });
+    const { channelId } = await createPromise;
     expect(await Channel.query().resultSize()).toEqual(1);
+
+    const updated = await Channel.forId(channelId, undefined);
+    expect(updated.latestSignedByMe).toMatchObject({
+      turnNum: 0,
+      appData,
+    });
   });
 
   it('sends a message', async () => {
     await expect(w.createChannel(createChannelArgs())).resolves.toMatchObject({
-      outbox: [{ to: 'bob', from: 'alice' }],
+      outbox: [{ notice: { params: { recipient: 'bob', sender: 'alice' } } }],
     });
   });
 });

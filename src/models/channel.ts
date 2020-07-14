@@ -94,6 +94,13 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
+  static forId(channelId: Bytes32, tx): Promise<Channel> {
+    return Channel.query(tx)
+      .where({ channelId })
+      .withGraphFetched('signingWallet')
+      .first();
+  }
+
   $toDatabaseJson() {
     // TODO: This seems unnecessary
     return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
@@ -130,6 +137,15 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   // Modifiers
+  signState(hash: Bytes32) {
+    const state = this.signedStates.find(s => s.stateHash === hash);
+    if (!state) {
+      throw 'State not found';
+    } else {
+      return this.addState(state, this.signingWallet.signState(state));
+    }
+  }
+
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     if (
       this.isSupportedByMe &&
