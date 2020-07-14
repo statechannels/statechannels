@@ -42,5 +42,5 @@ contract CountingApp is ForceMoveApp {
 Other examples exist: such as games of [Rock Paper Scissors](https://github.com/statechannels/monorepo/blob/master/packages/rps/contracts/RockPaperScissors.sol) and [Tic Tac Toe](https://github.com/magmo/apps/blob/master/packages/tictactoe/contracts/TicTacToeGame.sol).
 
 :::note
-The linked examples conform to a legacy ForceMoveApp interface.
+The Tic Tac Toe example conforms to a legacy ForceMoveApp interface.
 :::
