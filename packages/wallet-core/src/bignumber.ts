@@ -3,7 +3,10 @@ import {Uint256} from './types';
 
 type T = BigNumberish;
 
-const binaryOperator = (name: keyof EthersBigNumber) => (a: T, b: T): Uint256 => {
+const binaryOperator = <S extends any = Uint256>(name: keyof EthersBigNumber) => (
+  a: T,
+  b: T
+): S => {
   if (typeof EthersBigNumber.from(a)[name] !== 'function') throw Error(`Invalid method ${name}`);
 
   const result = (EthersBigNumber.from(a)[name] as any)(b);
@@ -28,11 +31,11 @@ const unaryOperator = <S extends any = Uint256>(name: keyof EthersBigNumber) => 
  */
 
 export class BN {
-  static eq = binaryOperator('eq');
-  static lt = binaryOperator('lt');
-  static gt = binaryOperator('gt');
-  static lte = binaryOperator('lte');
-  static gte = binaryOperator('gte');
+  static eq = binaryOperator<boolean>('eq');
+  static lt = binaryOperator<boolean>('lt');
+  static gt = binaryOperator<boolean>('gt');
+  static lte = binaryOperator<boolean>('lte');
+  static gte = binaryOperator<boolean>('gte');
   static add = binaryOperator('add');
   static sub = binaryOperator('sub');
   static mul = binaryOperator('mul');
