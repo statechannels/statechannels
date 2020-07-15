@@ -1,20 +1,6 @@
+import {getEnvBool} from '@statechannels/devtools';
 import {AddressZero} from '@ethersproject/constants';
 import {Destination} from './types';
-
-// TODO: Use getEnvBool from devtools once working
-function getBool(val: string | undefined): boolean {
-  switch (val) {
-    case undefined:
-    case null:
-    case 'null':
-    case 'false':
-    case 'FALSE':
-    case '0':
-      return false;
-    default:
-      return true;
-  }
-}
 
 export const GIT_VERSION = process.env.GIT_VERSION;
 
@@ -24,7 +10,7 @@ export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';
 
 export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 
-export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
+export const CLEAR_STORAGE_ON_START = getEnvBool('CLEAR_STORAGE_ON_START');
 
 export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADDRESS || AddressZero;
 
@@ -47,7 +33,7 @@ export const NITRO_ADJUDICATOR_ADDRESS: string =
 
 export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || AddressZero;
 
-export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
+export const USE_INDEXED_DB = getEnvBool('USE_INDEXED_DB');
 
 export const CHALLENGE_DURATION = Number(process.env.CHALLENGE_DURATION || 300);
 
