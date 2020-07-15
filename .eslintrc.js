@@ -38,7 +38,7 @@ module.exports = {
     ...generalRules,
     ...leftoverTsLintRules,
 
-    'no-restricted-imports': ['error', {patterns: ['**/lib/**', '**/src/**']}],
+    'no-restricted-imports': ['error', {patterns: ['**/lib', '**/src']}],
     'arrow-body-style': 'error',
     'import/order': [
       'error',
