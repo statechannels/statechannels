@@ -1,9 +1,13 @@
 {
   "name": "@statechannels/wallet-core",
   "description": "State channel wallet components.",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "author": "Alex Gap",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
+  "files": [
+    "lib/src"
+  ],
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wire-format": "0.0.4",
@@ -23,7 +27,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "prepare": "yarn build",
+    "prepare": "rm -rf lib; yarn build",
     "build": "yarn tsc -b",
     "build:ci": "yarn build",
     "lint:check": "eslint . --ext .ts --cache",

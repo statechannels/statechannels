@@ -1,5 +1,5 @@
 import {BigNumber} from 'ethers';
-import {FundingStrategy} from '@statechannels/client-api-schema/src';
+import {FundingStrategy} from '@statechannels/client-api-schema';
 
 export interface DomainBudget {
   domain: string;
