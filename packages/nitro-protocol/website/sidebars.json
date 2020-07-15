@@ -1,7 +1,12 @@
 {
   "docs": {
     "Overview": ["overview"],
-    "Dapp Developers": ["dapp-devs/dapp-devs-intro", "dapp-devs/quick-start"],
+    "Dapp Developers": [
+      "dapp-devs/dapp-devs-intro",
+      "dapp-devs/quick-start-contracts",
+      "dapp-devs/quick-start-dapp",
+      "dapp-devs/hook-up-messaging"
+    ],
     "Wallet Developers": [
       "wallet-devs/wallet-devs-intro",
       "wallet-devs/quick-start",
