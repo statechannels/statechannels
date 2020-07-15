@@ -20,14 +20,14 @@ import {
 
 import {AddressZero} from '@ethersproject/constants';
 import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
-import {BigNumber} from '../../bignumber';
+import {BN} from '../../bignumber';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
       channelId,
-      amount: formatAmount(BigNumber.from(assetBudget.channels[channelId].amount))
+      amount: formatAmount(BN.from(assetBudget.channels[channelId].amount))
     }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,

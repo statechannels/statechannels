@@ -1,4 +1,4 @@
-import {BigNumber} from '../bignumber';
+import {BN} from '../bignumber';
 
 import {AllocationItem} from '../types';
 
@@ -10,9 +10,9 @@ import {
   makeDestination
 } from '.';
 
-const one = BigNumber.from(1);
-const two = BigNumber.from(2);
-const three = BigNumber.from(3);
+const one = BN.from(1);
+const two = BN.from(2);
+const three = BN.from(3);
 
 const left = makeDestination('0x0000000000000000000000000000000000000001');
 const right = makeDestination('0x0000000000000000000000000000000000000002');

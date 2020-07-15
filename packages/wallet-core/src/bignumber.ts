@@ -27,7 +27,7 @@ const unaryOperator = <S extends any = Uint256>(name: keyof EthersBigNumber) => 
  * BN.add('0xabc', 10) // '0xac6'
  */
 
-export class BigNumber {
+export class BN {
   static eq = binaryOperator('eq');
   static lt = binaryOperator('lt');
   static gt = binaryOperator('gt');
@@ -49,4 +49,4 @@ export class BigNumber {
   static isBigNumber = val => typeof val === 'string' && !!val.match(/^0x[0-9A-Fa-f]{0,64}$/);
 }
 
-export const Zero = BigNumber.from(0);
+export const Zero = BN.from(0);

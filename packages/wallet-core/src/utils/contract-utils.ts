@@ -1,9 +1,9 @@
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
-import {BigNumber} from '../bignumber';
+import {BN} from '../bignumber';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
-  if (BigNumber.isZero(tokenAddress)) return ETH_ASSET_HOLDER_ADDRESS;
+  if (BN.isZero(tokenAddress)) return ETH_ASSET_HOLDER_ADDRESS;
   else if (tokenAddress === MOCK_TOKEN) return MOCK_ASSET_HOLDER_ADDRESS;
 
   throw 'AssetHolderAddress not found';

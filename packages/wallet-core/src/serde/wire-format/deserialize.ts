@@ -17,7 +17,7 @@ import {
   Objective,
   Participant
 } from '../../types';
-import {BigNumber} from '../../bignumber';
+import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
 import {getSignerAddress} from '../../state-utils';
 
@@ -109,5 +109,5 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination: makeDestination(destination), amount: BigNumber.from(amount)};
+  return {destination: makeDestination(destination), amount: BN.from(amount)};
 }

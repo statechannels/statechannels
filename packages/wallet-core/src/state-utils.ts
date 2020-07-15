@@ -23,7 +23,7 @@ import {
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import _ from 'lodash';
 import {Wallet} from 'ethers';
-import {BigNumber} from './bignumber';
+import {BN} from './bignumber';
 
 function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
@@ -105,7 +105,7 @@ function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation)
       left.allocationItems,
       (value, index) =>
         value.destination === right.allocationItems[index].destination &&
-        BigNumber.eq(value.amount, right.allocationItems[index].amount)
+        BN.eq(value.amount, right.allocationItems[index].amount)
     )
   );
 }
@@ -154,7 +154,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
 
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
-    amount: BigNumber.from(a.amount),
+    amount: BN.from(a.amount),
     destination:
       a.destination.substr(2, 22) === '00000000000000000000'
         ? (convertBytes32ToAddress(a.destination) as Destination)
