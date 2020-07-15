@@ -1,5 +1,6 @@
 import {hexZeroPad} from '@ethersproject/bytes';
-import {BigNumber} from 'ethers';
+import {BN} from '../bignumber';
+import {Uint256} from '../types';
 export function unreachable(x: never) {
   return x;
 }
@@ -23,8 +24,8 @@ export function createDestination(address: string): string {
   return hexZeroPad(address, 32);
 }
 
-export function formatAmount(amount: BigNumber): string {
-  return hexZeroPad(BigNumber.from(amount).toHexString(), 32);
+export function formatAmount(amount: Uint256): Uint256 {
+  return hexZeroPad(BN.from(amount), 32) as Uint256;
 }
 
 export function arrayToRecord<T, K extends keyof T>(

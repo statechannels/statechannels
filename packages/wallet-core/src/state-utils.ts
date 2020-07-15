@@ -22,7 +22,8 @@ import {
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import _ from 'lodash';
-import {Wallet, BigNumber} from 'ethers';
+import {Wallet} from 'ethers';
+import {BN} from './bignumber';
 
 function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
@@ -104,7 +105,7 @@ function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation)
       left.allocationItems,
       (value, index) =>
         value.destination === right.allocationItems[index].destination &&
-        value.amount.eq(right.allocationItems[index].amount)
+        BN.eq(value.amount, right.allocationItems[index].amount)
     )
   );
 }
@@ -145,7 +146,7 @@ export const firstState = (
 
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
   return allocationItems.map(a => ({
-    amount: a.amount.toHexString(),
+    amount: a.amount,
     destination:
       a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
   }));
@@ -153,7 +154,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
 
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
-    amount: BigNumber.from(a.amount),
+    amount: BN.from(a.amount),
     destination:
       a.destination.substr(2, 22) === '00000000000000000000'
         ? (convertBytes32ToAddress(a.destination) as Destination)

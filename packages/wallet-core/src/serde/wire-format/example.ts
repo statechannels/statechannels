@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers';
+import {BN} from '../../bignumber';
 import {Message, SignedState} from '../../types';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 import {makeDestination} from '../../utils';
@@ -85,17 +85,13 @@ export const internalStateFormat: SignedState = {
     assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
     allocationItems: [
       {
-        amount: BigNumber.from(
-          '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
-        ),
+        amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
         destination: makeDestination(
           '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
         )
       },
       {
-        amount: BigNumber.from(
-          '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
-        ),
+        amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
         destination: makeDestination(
           '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
         )

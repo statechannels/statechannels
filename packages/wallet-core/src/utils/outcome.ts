@@ -9,8 +9,8 @@ import {
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import _ from 'lodash';
 import {ethers} from 'ethers';
-import {Zero} from '@ethersproject/constants';
 import {checkThat} from './helpers';
+import {BN, Zero} from '../bignumber';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return (
@@ -73,14 +73,14 @@ export function allocateToTarget(
       throw new Error(Errors.DestinationMissing);
     }
 
-    total = total.add(targetItem.amount);
-    ledgerItem.amount = ledgerItem.amount.sub(targetItem.amount);
+    total = BN.add(total, targetItem.amount);
+    ledgerItem.amount = BN.sub(ledgerItem.amount, targetItem.amount);
 
-    if (ledgerItem.amount.lt(0)) throw new Error(Errors.InsufficientFunds);
+    if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
   });
 
   currentItems.push({destination: makeDestination(targetChannelId), amount: total});
-  currentItems = currentItems.filter(i => i.amount.gt(0));
+  currentItems = currentItems.filter(i => BN.gt(i.amount, 0));
 
   currentOutcome.allocationItems = currentItems;
   return currentOutcome;

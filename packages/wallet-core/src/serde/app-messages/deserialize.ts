@@ -7,7 +7,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {BigNumber} from 'ethers';
+import {BN} from '../../bignumber';
 import {AddressZero} from '@ethersproject/constants';
 import {makeDestination, assetHolderAddress} from '../../utils';
 
@@ -17,8 +17,8 @@ export function deserializeBudgetRequest(
 ): DomainBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-    availableSendCapacity: BigNumber.from(budgetRequest.requestedSendCapacity),
-    availableReceiveCapacity: BigNumber.from(budgetRequest.requestedReceiveCapacity),
+    availableSendCapacity: BN.from(budgetRequest.requestedSendCapacity),
+    availableReceiveCapacity: BN.from(budgetRequest.requestedReceiveCapacity),
     channels: {}
   };
   return {
@@ -31,10 +31,10 @@ export function deserializeBudgetRequest(
 export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBudget {
   const assetBudgets: AssetBudget[] = DomainBudget.budgets.map(b => ({
     assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
-    availableReceiveCapacity: BigNumber.from(b.availableReceiveCapacity),
-    availableSendCapacity: BigNumber.from(b.availableSendCapacity),
+    availableReceiveCapacity: BN.from(b.availableReceiveCapacity),
+    availableSendCapacity: BN.from(b.availableSendCapacity),
     channels: b.channels.reduce((record, item) => {
-      record[item.channelId] = {amount: BigNumber.from(item.amount)};
+      record[item.channelId] = {amount: BN.from(item.amount)};
       return record;
     }, {})
   }));
@@ -80,6 +80,6 @@ function deserializeAllocation(allocation: AppAllocation): SimpleAllocation {
 function deserializeAllocationItem(allocationItem: AppAllocationItem): AllocationItem {
   return {
     destination: makeDestination(allocationItem.destination),
-    amount: BigNumber.from(allocationItem.amount)
+    amount: BN.from(allocationItem.amount)
   };
 }
