@@ -1,4 +1,4 @@
-import { BigNumber } from '@statechannels/wallet-core';
+import { BN } from '@statechannels/wallet-core';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
 import { CreateChannelParams } from '../..';
@@ -13,8 +13,8 @@ const defaultVars: CreateChannelParams = {
     {
       token: '0x00',
       allocationItems: [
-        { destination: alice().destination, amount: BigNumber.from(1) },
-        { destination: bob().destination, amount: BigNumber.from(3) },
+        { destination: alice().destination, amount: BN.from(1) },
+        { destination: bob().destination, amount: BN.from(3) },
       ],
     },
   ],

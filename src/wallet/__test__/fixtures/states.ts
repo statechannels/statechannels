@@ -5,7 +5,7 @@ import {
   simpleEthAllocation,
   SignedStateWithHash,
   SignedStateVariables,
-  BigNumber,
+  BN,
   signState,
   hashState,
 } from '@statechannels/wallet-core';
@@ -21,8 +21,8 @@ const defaultState: State = {
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([
-    { destination: alice().destination, amount: BigNumber.from(1) },
-    { destination: bob().destination, amount: BigNumber.from(3) },
+    { destination: alice().destination, amount: BN.from(1) },
+    { destination: bob().destination, amount: BN.from(3) },
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,

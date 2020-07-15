@@ -3,7 +3,7 @@ import {
   simpleEthAllocation,
   StateVariables,
   SignedStateVariables,
-  BigNumber,
+  BN,
 } from '@statechannels/wallet-core';
 import { fixture } from './utils';
 import { alice, bob } from './participants';
@@ -13,8 +13,8 @@ const defaultVars: StateVariables = {
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([
-    { destination: alice().destination, amount: BigNumber.from(1) },
-    { destination: bob().destination, amount: BigNumber.from(3) },
+    { destination: alice().destination, amount: BN.from(1) },
+    { destination: bob().destination, amount: BN.from(3) },
   ]),
 };
 
