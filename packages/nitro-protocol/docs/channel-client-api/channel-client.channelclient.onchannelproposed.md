@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.onChannelProposed() method
 
+Registers a callback that will fire when a state channel is proposed.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ onChannelProposed(callback: (result: ChannelProposedNotification['params']) => v
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: ChannelProposedNotification\['params'\]) =&gt; void |  |
+|  callback | (result: ChannelProposedNotification\['params'\]) =&gt; void | A function that accepts a ChannelProposedNotification. |
 
 <b>Returns:</b>
 
 [UnsubscribeFunction](./channel-client.unsubscribefunction.md)
+
+A function that will unregister the callback when invoked.

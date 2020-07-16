@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.getState() method
 
+Requests the latest state for a channel
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ getState(channelId: string): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  channelId | string |  |
+|  channelId | string | id for the state channel |
 
 <b>Returns:</b>
 
 Promise&lt;ChannelResult&gt;
+
+A promise that resolves to a ChannelResult.

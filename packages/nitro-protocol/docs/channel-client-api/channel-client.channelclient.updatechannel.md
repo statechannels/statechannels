@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.updateChannel() method
 
+Updates the state of a channel
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,11 +21,13 @@ updateChannel(channelId: string, participants: Participant[], allocations: Token
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  channelId | string |  |
-|  participants | Participant\[\] |  |
-|  allocations | TokenAllocations |  |
-|  appData | string |  |
+|  channelId | string | id for the state channel |
+|  participants | Participant\[\] | Array of Participants for this channel TODO not clear why this is here, as it must be constant once the channel has its id. |
+|  allocations | TokenAllocations | Updated allocation of funds for this channel |
+|  appData | string | Updated application data for this channel |
 
 <b>Returns:</b>
 
 Promise&lt;ChannelResult&gt;
+
+A promise that resolves to a ChannelResult.

@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.closeAndWithdraw() method
 
+Requests the funds to be withdrawn from this site's ledger channel
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,9 +21,11 @@ closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainB
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  hubAddress | string |  |
-|  hubOutcomeAddress | string |  |
+|  hubAddress | string | The address of a state channel hub |
+|  hubOutcomeAddress | string | An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense |
 
 <b>Returns:</b>
 
 Promise&lt;DomainBudget&gt;
+
+A promise that resolves to a DomainBudget.

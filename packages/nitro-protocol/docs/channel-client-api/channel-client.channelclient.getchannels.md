@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.getChannels() method
 
+Requests the latest state for all channels.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  includeClosed | boolean |  |
+|  includeClosed | boolean | If true, closed channels will be included in the response. |
 
 <b>Returns:</b>
 
 Promise&lt;ChannelResult\[\]&gt;
+
+A promise that resolves to an array of ChannelResults.

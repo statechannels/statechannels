@@ -24,48 +24,35 @@ import { Participant } from '@statechannels/client-api-schema';
 import { PushMessageResult } from '@statechannels/client-api-schema';
 import { ReplaySubject } from 'rxjs';
 
-// @public (undocumented)
+// @public
 export class ChannelClient implements ChannelClientInterface {
     constructor(provider: ChannelProviderInterface_2);
     // (undocumented)
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
-    // (undocumented)
+    // @beta
     challengeChannel(channelId: string): Promise<ChannelResult>;
     // (undocumented)
     channelState: ReplaySubject<ChannelResult>;
-    // (undocumented)
     closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
-    // (undocumented)
+    // @beta
     closeChannel(channelId: string): Promise<ChannelResult>;
     // Warning: (ae-forgotten-export) The symbol "TokenAllocations" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     createChannel(participants: Participant[], allocations: TokenAllocations, appDefinition: string, appData: string, fundingStrategy: FundingStrategy): Promise<ChannelResult>;
     // (undocumented)
     get destinationAddress(): string | undefined;
-    // (undocumented)
     getBudget(hubAddress: string): Promise<DomainBudget>;
-    // (undocumented)
     getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
-    // (undocumented)
     getState(channelId: string): Promise<ChannelResult>;
-    // (undocumented)
     joinChannel(channelId: string): Promise<ChannelResult>;
-    // (undocumented)
     onBudgetUpdated(callback: (result: BudgetUpdatedNotification['params']) => void): UnsubscribeFunction;
-    // (undocumented)
     onChannelProposed(callback: (result: ChannelProposedNotification['params']) => void): UnsubscribeFunction;
-    // (undocumented)
     onChannelUpdated(callback: (result: ChannelUpdatedNotification['params']) => void): UnsubscribeFunction;
-    // (undocumented)
     onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void): UnsubscribeFunction;
     // (undocumented)
     readonly provider: ChannelProviderInterface_2;
-    // @beta
     pushMessage(message: Message): Promise<PushMessageResult>;
     // (undocumented)
     get signingAddress(): string | undefined;
-    // (undocumented)
     updateChannel(channelId: string, participants: Participant[], allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
     // (undocumented)
     get walletVersion(): string | undefined;

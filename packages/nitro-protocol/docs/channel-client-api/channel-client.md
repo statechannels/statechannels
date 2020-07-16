@@ -13,7 +13,7 @@ hide_title: true
 
 |  Class | Description |
 |  --- | --- |
-|  [ChannelClient](./channel-client.channelclient.md) |  |
+|  [ChannelClient](./channel-client.channelclient.md) | Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API |
 |  [FakeChannelProvider](./channel-client.fakechannelprovider.md) |  |
 
 ## Interfaces

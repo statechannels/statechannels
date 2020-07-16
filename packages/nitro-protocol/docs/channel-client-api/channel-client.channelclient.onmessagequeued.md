@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.onMessageQueued() method
 
+Registers a callback that will fire when an outbound message is ready to be dispatched.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,14 @@ onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void)
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: MessageQueuedNotification\['params'\]) =&gt; void |  |
+|  callback | (result: MessageQueuedNotification\['params'\]) =&gt; void | An function that accepts a MessageQueuedNotification. |
 
 <b>Returns:</b>
 
 [UnsubscribeFunction](./channel-client.unsubscribefunction.md)
+
+A function that will unregister the callback when invoked
+
+## Remarks
+
+This method should be hooked up to your applications's messaging layer.

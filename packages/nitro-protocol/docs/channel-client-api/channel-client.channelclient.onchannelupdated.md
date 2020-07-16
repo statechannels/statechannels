@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.onChannelUpdated() method
 
+Registers a callback that will fire when a state channel is updated.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ onChannelUpdated(callback: (result: ChannelUpdatedNotification['params']) => voi
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: ChannelUpdatedNotification\['params'\]) =&gt; void |  |
+|  callback | (result: ChannelUpdatedNotification\['params'\]) =&gt; void | A function that accepts a ChannelUpdatedNotification. |
 
 <b>Returns:</b>
 
 [UnsubscribeFunction](./channel-client.unsubscribefunction.md)
+
+A function that will unregister the callback when invoked.

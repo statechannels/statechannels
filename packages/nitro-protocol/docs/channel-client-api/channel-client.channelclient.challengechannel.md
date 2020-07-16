@@ -9,6 +9,11 @@ hide_title: true
 
 ## ChannelClient.challengeChannel() method
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Requests a challenge for a channel
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +24,10 @@ challengeChannel(channelId: string): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  channelId | string |  |
+|  channelId | string | id for the state channel |
 
 <b>Returns:</b>
 
 Promise&lt;ChannelResult&gt;
+
+A promise that resolves to a ChannelResult.

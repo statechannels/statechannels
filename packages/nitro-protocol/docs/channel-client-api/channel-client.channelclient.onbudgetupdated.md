@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.onBudgetUpdated() method
 
+Registers callback that will fire when a site budget is updated.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ onBudgetUpdated(callback: (result: BudgetUpdatedNotification['params']) => void)
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: BudgetUpdatedNotification\['params'\]) =&gt; void |  |
+|  callback | (result: BudgetUpdatedNotification\['params'\]) =&gt; void | A function that accepts a BudgetUpdatedNotification. |
 
 <b>Returns:</b>
 
 [UnsubscribeFunction](./channel-client.unsubscribefunction.md)
+
+A function that will unregister the callback when invoked.

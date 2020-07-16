@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.getBudget() method
 
+Requests the latest budget for this site
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ getBudget(hubAddress: string): Promise<DomainBudget>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  hubAddress | string |  |
+|  hubAddress | string | The address of a state channel hub |
 
 <b>Returns:</b>
 
 Promise&lt;DomainBudget&gt;
+
+A promise that resolves to a ChannelResult.

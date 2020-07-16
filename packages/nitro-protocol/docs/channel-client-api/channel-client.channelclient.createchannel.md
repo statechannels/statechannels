@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.createChannel() method
 
+Requests a new channel to be created
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,12 +21,14 @@ createChannel(participants: Participant[], allocations: TokenAllocations, appDef
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  participants | Participant\[\] |  |
-|  allocations | TokenAllocations |  |
-|  appDefinition | string |  |
-|  appData | string |  |
-|  fundingStrategy | FundingStrategy |  |
+|  participants | Participant\[\] | Array of Participants for this channel |
+|  allocations | TokenAllocations | Initial allocation of funds for this channel |
+|  appDefinition | string | Address of ForceMoveApp deployed on chain |
+|  appData | string | Initial application data for this channel |
+|  fundingStrategy | FundingStrategy | Direct, Ledger or Virtual funding |
 
 <b>Returns:</b>
 
 Promise&lt;ChannelResult&gt;
+
+A promise that resolves to a ChannelResult.
