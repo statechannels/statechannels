@@ -3,11 +3,6 @@
   "description": "State channel wallet components.",
   "version": "0.1.0",
   "author": "Alex Gap",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
-  "files": [
-    "lib/src"
-  ],
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wire-format": "0.0.4",
@@ -15,7 +10,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
-    "@statechannels/devtools": "0.1.1",
+    "@statechannels/devtools": "0.1.4",
     "@types/babel__core": "7.1.7",
     "awesome-typescript-loader": "5.2.1",
     "jest": "25.1.0",
@@ -23,17 +18,22 @@
     "typescript": "3.7.5"
   },
   "engines": {
-    "node": "^12.16.3"
+    "node": "12.16.3"
   },
+  "files": [
+    "lib/src"
+  ],
   "license": "MIT",
+  "main": "lib/src/index.js",
   "scripts": {
-    "prepare": "rm -rf lib; yarn build",
     "build": "yarn tsc -b",
     "build:ci": "yarn build",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
+    "prepare": "rm -rf lib; yarn build",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand"
-  }
+  },
+  "types": "lib/src/index.d.ts"
 }

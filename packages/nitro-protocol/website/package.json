@@ -11,7 +11,7 @@
   "devDependencies": {},
   "dependencies": {
     "docusaurus": "1.11.1",
-    "highlight.js": "^10.0.2",
+    "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "remarkable-admonitions": "0.2.1"
   }
