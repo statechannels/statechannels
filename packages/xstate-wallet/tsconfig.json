@@ -32,6 +32,9 @@
     },
     {
       "path": "../client-api-schema"
+    },
+    {
+      "path": "../wallet-core"
     }
   ]
 }
