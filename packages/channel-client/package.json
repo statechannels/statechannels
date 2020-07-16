@@ -42,6 +42,7 @@
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
     "build": "yarn build:typescript",
+    "docgen": "node scripts/docgen.js",
     "build:typescript": "tsc -b .",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
