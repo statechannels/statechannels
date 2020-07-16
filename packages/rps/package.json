@@ -17,7 +17,7 @@
     "@rimble/connection-banner": "1.2.3",
     "@rimble/network-indicator": "1.2.3",
     "@sentry/browser": "5.15.5",
-    "@statechannels/channel-client": "0.0.1",
+    "@statechannels/channel-client": "*",
     "@statechannels/nitro-protocol": "0.1.4",
     "ajv": "6.11.0",
     "aphrodite": "2.2.2",
@@ -46,7 +46,7 @@
     "raf": "3.4.1",
     "react": "16.12.0",
     "react-burger-menu": "2.6.13",
-    "react-dev-utils": "^9.0.4",
+    "react-dev-utils": "9.0.4",
     "react-dom": "16.12.0",
     "react-loader-spinner": "3.1.5",
     "react-modal": "3.11.1",
@@ -98,7 +98,7 @@
     "@types/prettier": "1.19.0",
     "@types/prop-types": "15.7.3",
     "@types/raf": "3.4.0",
-    "@types/react": "^16.9.19",
+    "@types/react": "16.9.19",
     "@types/react-burger-menu": "2.6.0",
     "@types/react-dev-utils": "9.0.4",
     "@types/react-dom": "16.9.5",
@@ -140,7 +140,7 @@
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "5.0.2",
     "fork-ts-checker-webpack-plugin": "4.0.3",
-    "ganache-cli": "6.8.2",
+    "ganache-cli": "6.9.1",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
@@ -184,7 +184,7 @@
   "module": "src/index.js",
   "private": true,
   "resolutions": {
-    "firebase/**/grpc": "^1.16.1"
+    "firebase/**/grpc": "1.16.1"
   },
   "scripts": {
     "build": "run-s build:typescript build:webpack",

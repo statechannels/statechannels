@@ -3,6 +3,7 @@
   "description": "A protocol for state channel networks",
   "version": "0.1.4",
   "author": "statechannels",
+  "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
@@ -16,7 +17,7 @@
     "@types/jest": "25.1.0",
     "@types/node": "13.5.1",
     "@types/prettier": "1.19.0",
-    "@types/webpack": "4.41.5",
+    "@types/webpack": "4.41.12",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
@@ -25,7 +26,7 @@
     "eslint-plugin-prettier": "3.1.2",
     "etherlime": "2.3.3",
     "etherlime-lib": "1.1.5",
-    "ganache-cli": "6.8.2",
+    "ganache-cli": "6.9.1",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "npm-run-all": "4.1.5",
@@ -40,7 +41,7 @@
   },
   "engines": {
     "yarn": "^1.17.0",
-    "node": "^12.16.3"
+    "node": "12.16.3"
   },
   "files": [
     "contracts/*",
@@ -59,7 +60,6 @@
   "lint-staged": {
     "{src,test}/**/*.{ts,tsx}": "eslint"
   },
-  "browser": "dist/nitro-protocol.min.js",
   "main": "lib/src/index.js",
   "private": false,
   "repository": "statechannels/monorepo.git",

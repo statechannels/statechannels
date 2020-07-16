@@ -16,13 +16,13 @@
     "ethers": "5.0.0-beta.191",
     "firebase": "7.11.0",
     "fp-ts": "2.5.3",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "pino": "6.2.0",
     "rxfire": "3.11.2",
     "rxjs": "6.5.5"
   },
   "devDependencies": {
-    "@statechannels/devtools": "0.1.2",
+    "@statechannels/devtools": "0.1.4",
     "@types/async-lock": "1.1.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -38,7 +38,7 @@
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
     "firebase-server": "1.1.0",
-    "ganache-cli": "6.8.2",
+    "ganache-cli": "6.9.1",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "nodemon": "1.19.4",
@@ -58,8 +58,6 @@
   "scripts": {
     "build": "tsc -b .",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
-    "start:dev": "ts-node ./start-dev-server.ts",
-    "watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "precommit": "lint-staged --quiet",
@@ -67,9 +65,11 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "prettier --write 'src/**/*.{ts,tsx}'",
+    "start:dev": "ts-node ./start-dev-server.ts",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "jest --runInBand -c ./jest/jest.config.js",
     "test:ci": "run-s test test:with-chain",
-    "test:with-chain": "jest --runInBand -c ./jest/jest.with-chain.config.js"
+    "test:with-chain": "jest --runInBand -c ./jest/jest.with-chain.config.js",
+    "watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./start-dev-server.ts"
   }
 }
