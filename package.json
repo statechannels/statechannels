@@ -7,38 +7,38 @@
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.1.4",
     "@statechannels/wallet-core": "0.0.7",
-    "ethers": "5.0.0-beta.191",
+    "ethers": "5.0.3",
     "knex": "0.20.9",
     "objection": "2.1.2",
     "pg": "7.17.1",
-    "pino": "6.2.0"
+    "pino": "6.3.2"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.4",
-    "@types/eslint": "6.1.7",
-    "@types/eslint-plugin-prettier": "2.2.0",
-    "@types/jest": "25.1.0",
+    "@types/eslint": "7.2.0",
+    "@types/eslint-plugin-prettier": "3.1.0",
+    "@types/jest": "26.0.4",
     "@types/lodash": "4.14.149",
     "@types/nodemon": "1.19.0",
     "@types/pg": "7.14.0",
-    "@types/pino": "6.0.0",
-    "@types/prettier": "1.19.0",
-    "@typescript-eslint/eslint-plugin": "2.18.0",
-    "@typescript-eslint/parser": "2.18.0",
-    "eslint": "6.8.0",
-    "eslint-config-prettier": "6.10.0",
-    "eslint-plugin-import": "2.20.0",
-    "eslint-plugin-jest": "23.6.0",
-    "eslint-plugin-prettier": "3.1.2",
-    "jest": "25.1.0",
-    "lint-staged": "10.0.4",
-    "nodemon": "1.19.4",
+    "@types/pino": "6.3.0",
+    "@types/prettier": "2.0.2",
+    "@typescript-eslint/eslint-plugin": "3.6.0",
+    "@typescript-eslint/parser": "3.6.0",
+    "eslint": "7.4.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-import": "2.22.0",
+    "eslint-plugin-jest": "23.18.0",
+    "eslint-plugin-prettier": "3.1.4",
+    "jest": "26.1.0",
+    "lint-staged": "10.2.11",
+    "nodemon": "2.0.4",
     "npm-run-all": "4.1.5",
-    "pino-pretty": "^4.0.0",
-    "prettier": "1.19.1",
-    "ts-jest": "25.0.0",
-    "ts-node": "8.9.1",
-    "typescript": "3.7.5"
+    "pino-pretty": "4.0.0",
+    "prettier": "2.0.5",
+    "ts-jest": "26.1.1",
+    "ts-node": "8.10.2",
+    "typescript": "3.9.6"
   },
   "license": "MIT",
   "lint-staged": {
@@ -46,6 +46,11 @@
   },
   "main": "lib/index.js",
   "private": true,
+  "resolutions": {
+    "broccoli": "3.3.3",
+    "ethereum-transaction-debugger": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz",
+    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
+  },
   "scripts": {
     "build": "tsc -b .",
     "build:typescript": "tsc -b .",
@@ -67,10 +72,5 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache"
-  },
-  "resolutions": {
-    "broccoli": "3.3.3",
-    "ethereum-transaction-debugger": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz",
-    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
   }
 }
