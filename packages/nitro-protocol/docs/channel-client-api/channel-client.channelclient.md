@@ -38,7 +38,7 @@ export declare class ChannelClient implements ChannelClientInterface
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [approveBudgetAndFund(receiveCapacity, sendCapacity, hubAddress, hubOutcomeAddress)](./channel-client.channelclient.approvebudgetandfund.md) |  |  |
+|  [approveBudgetAndFund(receiveCapacity, sendCapacity, hubAddress, hubOutcomeAddress)](./channel-client.channelclient.approvebudgetandfund.md) |  | Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub |
 |  [challengeChannel(channelId)](./channel-client.channelclient.challengechannel.md) |  | <b><i>(BETA)</i></b> Requests a challenge for a channel |
 |  [closeAndWithdraw(hubAddress, hubOutcomeAddress)](./channel-client.channelclient.closeandwithdraw.md) |  | Requests the funds to be withdrawn from this site's ledger channel |
 |  [closeChannel(channelId)](./channel-client.channelclient.closechannel.md) |  | <b><i>(BETA)</i></b> Requests a close for a channel |

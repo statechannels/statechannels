@@ -27,7 +27,6 @@ import { ReplaySubject } from 'rxjs';
 // @public
 export class ChannelClient implements ChannelClientInterface {
     constructor(provider: ChannelProviderInterface_2);
-    // (undocumented)
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
     // @beta
     challengeChannel(channelId: string): Promise<ChannelResult>;

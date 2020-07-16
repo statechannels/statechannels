@@ -9,6 +9,8 @@ hide_title: true
 
 ## ChannelClient.approveBudgetAndFund() method
 
+Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,11 +21,13 @@ approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: 
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  receiveCapacity | string |  |
-|  sendCapacity | string |  |
-|  hubAddress | string |  |
-|  hubOutcomeAddress | string |  |
+|  receiveCapacity | string | : Amount for me in the ledger channel |
+|  sendCapacity | string | : Amount for the hub in the ledger channel |
+|  hubAddress | string | : Address for the hub, |
+|  hubOutcomeAddress | string | : Ethereum account for the hub |
 
 <b>Returns:</b>
 
 Promise&lt;DomainBudget&gt;
+
+A promise that resolves to a DomainBudget

@@ -230,6 +230,15 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.send('PushMessage', message);
   }
 
+  /**
+   * Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub
+   * @param receiveCapacity: Amount for me in the ledger channel
+   * @param sendCapacity: Amount for the hub in the ledger channel
+   * @param hubAddress: Address for the hub,
+   * @param hubOutcomeAddress: Ethereum account for the hub
+   * @returns A promise that resolves to a DomainBudget
+   *
+   */
   async approveBudgetAndFund(
     receiveCapacity: string,
     sendCapacity: string,
