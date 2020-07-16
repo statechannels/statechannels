@@ -9,6 +9,11 @@ hide_title: true
 
 ## ChannelClient.pushMessage() method
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Accepts inbound messages from other state channel participants.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +24,14 @@ pushMessage(message: Message): Promise<PushMessageResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | Message |  |
+|  message | Message | An inbound message. |
 
 <b>Returns:</b>
 
 Promise&lt;PushMessageResult&gt;
+
+A promise that resolves to a PushMessageResult
+
+## Remarks
+
+This method should be hooked up to your applications's messaging layer.

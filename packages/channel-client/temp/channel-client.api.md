@@ -61,7 +61,7 @@ export class ChannelClient implements ChannelClientInterface {
     onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void): UnsubscribeFunction;
     // (undocumented)
     readonly provider: ChannelProviderInterface_2;
-    // (undocumented)
+    // @beta
     pushMessage(message: Message): Promise<PushMessageResult>;
     // (undocumented)
     get signingAddress(): string | undefined;

@@ -49,5 +49,5 @@ export declare class ChannelClient implements ChannelClientInterface
 |  [onChannelProposed(callback)](./channel-client.channelclient.onchannelproposed.md) |  |  |
 |  [onChannelUpdated(callback)](./channel-client.channelclient.onchannelupdated.md) |  |  |
 |  [onMessageQueued(callback)](./channel-client.channelclient.onmessagequeued.md) |  |  |
-|  [pushMessage(message)](./channel-client.channelclient.pushmessage.md) |  |  |
+|  [pushMessage(message)](./channel-client.channelclient.pushmessage.md) |  | <b><i>(BETA)</i></b> Accepts inbound messages from other state channel participants. |
 |  [updateChannel(channelId, participants, allocations, appData)](./channel-client.channelclient.updatechannel.md) |  |  |

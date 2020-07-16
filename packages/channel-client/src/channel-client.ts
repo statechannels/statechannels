@@ -122,6 +122,18 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.send('CloseChannel', {channelId});
   }
 
+  /**
+   * Accepts inbound messages from other state channel participants.
+   *
+   * @remarks
+   * This method should be hooked up to your applications's messaging layer.
+   *
+   * @param message - An inbound message.
+   * @param y - The second input number
+   * @returns A promise that resolves to a PushMessageResult
+   *
+   * @beta
+   */
   async pushMessage(message: Message): Promise<PushMessageResult> {
     return this.provider.send('PushMessage', message);
   }
