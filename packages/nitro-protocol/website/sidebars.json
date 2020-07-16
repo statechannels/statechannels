@@ -5,7 +5,8 @@
       "dapp-devs/dapp-devs-intro",
       "dapp-devs/quick-start-contracts",
       "dapp-devs/quick-start-dapp",
-      "dapp-devs/hook-up-messaging"
+      "dapp-devs/hook-up-messaging",
+      "channel-client-api/channel-client.channelclient"
     ],
     "Wallet Developers": [
       "wallet-devs/wallet-devs-intro",
