@@ -28,7 +28,7 @@
   },
   "files": [
     "lib/src",
-    "lib/tests"
+    "lib/tests/fakes/fake-channel-provider.js"
   ],
   "keywords": [
     "ethereum",
