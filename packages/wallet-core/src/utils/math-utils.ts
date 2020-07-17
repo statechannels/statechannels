@@ -1,20 +1,20 @@
-import {BigNumber} from 'ethers';
+import {BigNumberish} from 'ethers';
+
+import {BN} from '../bignumber';
 
 // This stuff should be replaced with some big number logic
-type numberish = string | number | BigNumber;
-type MathOp = (a: numberish, b: numberish) => BigNumber;
-export const add: MathOp = (a: numberish, b: numberish) => BigNumber.from(a || 0).add(b || 0);
 
-export const subtract: MathOp = (a: numberish, b: numberish) => {
-  const numA = BigNumber.from(a || 0);
-  const numB = BigNumber.from(b || 0);
-  if (numB.gt(numA)) {
+export const add = (a: BigNumberish, b: BigNumberish) => BN.add(a || 0, b || 0);
+
+export const subtract = (a: BigNumberish, b: BigNumberish) => {
+  const numA = BN.from(a || 0);
+  const numB = BN.from(b || 0);
+  if (BN.gt(numB, numA)) {
     throw new Error('Unsafe subtraction');
   }
-  return numA.sub(numB);
+  return BN.sub(numA, numB);
 };
-export const max: MathOp = (a: numberish, b: numberish) =>
-  BigNumber.from(a).gt(b) ? BigNumber.from(a) : BigNumber.from(b);
+export const max = (a: BigNumberish, b: BigNumberish) => (BN.gt(a, b) ? BN.from(a) : BN.from(b));
 
-export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
-export const eq = (a: numberish, b: numberish) => Number(a) === Number(b);
+export const gt = (a: BigNumberish, b: BigNumberish) => Number(a) > Number(b);
+export const eq = (a: BigNumberish, b: BigNumberish) => Number(a) === Number(b);

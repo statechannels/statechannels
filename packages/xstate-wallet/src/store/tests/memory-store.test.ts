@@ -4,9 +4,10 @@ import {
   calculateChannelId,
   createSignatureEntry,
   State,
-  Objective
+  Objective,
+  BN
 } from '@statechannels/wallet-core';
-import {Wallet, BigNumber} from 'ethers';
+import {Wallet} from 'ethers';
 
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
@@ -24,8 +25,8 @@ const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
 const [aDestination, bDestination] = [aAddress, bAddress].map(makeDestination); // for convenience
 
 const outcome = simpleEthAllocation([
-  {destination: aDestination, amount: BigNumber.from(5)},
-  {destination: bDestination, amount: BigNumber.from(6)}
+  {destination: aDestination, amount: BN.from(5)},
+  {destination: bDestination, amount: BN.from(6)}
 ]);
 const turnNum = 4;
 const appData = '0xabc';

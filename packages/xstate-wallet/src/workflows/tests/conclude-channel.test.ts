@@ -1,7 +1,5 @@
 import {interpret} from 'xstate';
 
-import {BigNumber} from 'ethers';
-
 import {
   firstState,
   calculateChannelId,
@@ -9,7 +7,8 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  add
+  add,
+  BN
 } from '@statechannels/wallet-core';
 
 import {AddressZero} from '@ethersproject/constants';
@@ -59,9 +58,9 @@ const destinations = participants.map(p => p.destination);
 
 const ledgerChannel: ChannelConstants = {...targetChannel, channelNonce: 1};
 
-const amounts = [BigNumber.from(7), BigNumber.from(5)];
-const ledgerAmounts = amounts.map(a => a.add(2));
-const depositAmount = ledgerAmounts.reduce(add).toHexString();
+const amounts = [BN.from(7), BN.from(5)];
+const ledgerAmounts = amounts.map(a => add(a, 2));
+const depositAmount = ledgerAmounts.reduce(add);
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
@@ -89,8 +88,8 @@ const createLedgerChannels = async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) =>
     createSignatureEntry(state, privateKey)
   );
-  await aStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
-  await bStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
+  await aStore.createBudget(budget(BN.from(7), BN.from(7)));
+  await bStore.createBudget(budget(BN.from(7), BN.from(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 

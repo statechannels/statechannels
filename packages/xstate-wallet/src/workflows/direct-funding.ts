@@ -1,7 +1,6 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
-import {BigNumber} from 'ethers';
-import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
+import {AddressZero, HashZero} from '@ethersproject/constants';
 
 import {
   add,
@@ -11,7 +10,10 @@ import {
   Outcome,
   SimpleAllocation,
   AllocationItem,
-  Destination
+  Destination,
+  BN,
+  subtract,
+  Zero
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
@@ -86,10 +88,10 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
-    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => a.add(b), Zero);
+    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => add(a, b), Zero);
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
-    if (allocated.gt(chainInfo.amount))
+    if (BN.gt(allocated, chainInfo.amount))
       throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
   }
 
@@ -104,9 +106,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           .map(i => i.amount)
           .reduce(add);
 
-        const amountLeft = BigNumber.from(amount).gt(currentlyAllocated)
-          ? amount.sub(currentlyAllocated)
-          : Zero;
+        const amountLeft = BN.gt(amount, currentlyAllocated)
+          ? subtract(amount, currentlyAllocated)
+          : BN.from(0);
         return {destination, amount: amountLeft};
       })
     );
@@ -134,7 +136,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = Zero;
+    let totalBeforeDeposit = BN.from(0);
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (myIndex === i) {
@@ -143,12 +145,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         return {
           channelId,
           depositAt: totalBeforeDeposit,
-          totalAfterDeposit: BigNumber.from(totalBeforeDeposit).add(allocation.amount),
-
+          totalAfterDeposit: BN.add(totalBeforeDeposit, allocation.amount),
           fundedAt
         };
       } else {
-        totalBeforeDeposit = BigNumber.from(allocation.amount).add(totalBeforeDeposit);
+        totalBeforeDeposit = BN.add(allocation.amount, totalBeforeDeposit);
       }
     }
 

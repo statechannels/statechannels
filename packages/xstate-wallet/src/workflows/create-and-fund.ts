@@ -16,10 +16,10 @@ import {
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  checkThat
+  checkThat,
+  Zero
 } from '@statechannels/wallet-core';
 
-import {Zero} from '@ethersproject/constants';
 import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
@@ -235,9 +235,9 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   let depositAt = Zero;
   for (let i = 0; i < allocationItems.length; i++) {
     const {amount} = allocationItems[i];
-    if (i !== myIndex) depositAt = depositAt.add(amount);
+    if (i !== myIndex) depositAt = add(depositAt, amount);
     else {
-      const totalAfterDeposit = depositAt.add(amount);
+      const totalAfterDeposit = add(depositAt, amount);
       return {channelId, depositAt, totalAfterDeposit, fundedAt};
     }
   }

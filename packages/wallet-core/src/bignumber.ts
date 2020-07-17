@@ -1,7 +1,7 @@
 import {BigNumber as EthersBigNumber, BigNumberish} from 'ethers';
 import {Uint256} from './types';
 
-type T = BigNumberish;
+type T = BigNumberish | BN;
 
 const binaryOperator = <S extends any = Uint256>(name: keyof EthersBigNumber) => (
   a: T,
@@ -48,7 +48,7 @@ export class BN {
   static toNumber = unaryOperator<number>('toNumber');
   static toHexString = unaryOperator('toHexString');
 
-  static from = (n: BigNumberish): Uint256 => EthersBigNumber.from(n).toHexString() as Uint256;
+  static from = (n: BigNumberish | BN): Uint256 => EthersBigNumber.from(n).toHexString() as Uint256;
   static isBigNumber = val => typeof val === 'string' && !!val.match(/^0x[0-9A-Fa-f]{0,64}$/);
 }
 

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import {BigNumber} from 'ethers';
 import {
   ChannelConstants,
   StateVariables,
@@ -15,7 +14,8 @@ import {
   hashState,
   calculateChannelId,
   createSignatureEntry,
-  outcomesEqual
+  outcomesEqual,
+  BN
 } from '@statechannels/wallet-core';
 
 import {Errors} from '.';
@@ -325,7 +325,7 @@ export class ChannelStoreEntry {
 
   private static prepareStateVariables(
     stateVariables, // TODO: Make this typesafe!
-    parserFunction: (data: string | BigNumber) => BigNumber | string = v => BigNumber.from(v)
+    parserFunction: (data: string | BN) => BN | string = v => BN.from(v)
   ): Array<SignedStateWithHash> {
     for (const state of stateVariables) {
       state.outcome = ChannelStoreEntry.toggleBigNumberOutcome(state.outcome, parserFunction);
@@ -335,7 +335,7 @@ export class ChannelStoreEntry {
 
   private static toggleBigNumberOutcome(
     outcome,
-    parserFunction: (data: string | BigNumber) => BigNumber | string
+    parserFunction: (data: string | BN) => BN | string
   ): Outcome {
     if (outcome.allocationItems) {
       return {

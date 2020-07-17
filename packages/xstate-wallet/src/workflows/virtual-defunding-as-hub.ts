@@ -69,7 +69,7 @@ const finalJointChannelUpdate = (store: Store) => async ({
         const amount = (i: AllocationItem) => i.amount;
         const supportedAmount = supportedItems.map(amount).reduce(add);
         const newAmount = newItems.map(amount).reduce(add);
-        const invariantTotal = supportedAmount.eq(newAmount);
+        const invariantTotal = supportedAmount === newAmount;
 
         if (!invariantTotal) throw new Error('Total allocation changed');
       }),

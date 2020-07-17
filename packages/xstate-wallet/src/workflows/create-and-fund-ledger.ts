@@ -17,9 +17,9 @@ import {
   StateVariables,
   checkThat,
   isSimpleEthAllocation,
-  add
+  add,
+  Zero
 } from '@statechannels/wallet-core';
-import {Zero} from '@ethersproject/constants';
 
 import {Store} from '../store';
 import {SupportState} from '.';

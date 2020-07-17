@@ -2,9 +2,8 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
-import {simpleEthAllocation} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
 import React from 'react';
-import {BigNumber} from 'ethers';
 
 import {workflow, config, WorkflowContext} from '../../workflows/confirm';
 import {logger} from '../../logger';
@@ -33,7 +32,7 @@ const testContext: WorkflowContext = {
   appDefinition: '0x0',
   appData: '0x0',
   chainId: '0',
-  challengeDuration: BigNumber.from(1)
+  challengeDuration: BN.from(1)
 };
 
 if (config.states) {

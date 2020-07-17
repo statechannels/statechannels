@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable jest/no-disabled-tests */
-import {Wallet, BigNumber} from 'ethers';
+import {Wallet} from 'ethers';
 import {
   simpleEthAllocation,
   makeDestination,
@@ -9,7 +9,9 @@ import {
   DomainBudget,
   AssetBudget,
   calculateChannelId,
-  createSignatureEntry
+  createSignatureEntry,
+  BN,
+  add
 } from '@statechannels/wallet-core';
 
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
@@ -29,8 +31,8 @@ const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
 const [aDestination, bDestination] = [aAddress, bAddress].map(makeDestination);
 
 const outcome = simpleEthAllocation([
-  {destination: aDestination, amount: BigNumber.from(5)},
-  {destination: bDestination, amount: BigNumber.from(6)}
+  {destination: aDestination, amount: BN.from(5)},
+  {destination: bDestination, amount: BN.from(6)}
 ]);
 const turnNum = 4;
 const appData = '0xabc';
@@ -216,8 +218,8 @@ describe('getBudget', () => {
       forAsset: {
         ETH: {
           assetHolderAddress: 'home',
-          availableSendCapacity: BigNumber.from(10),
-          availableReceiveCapacity: BigNumber.from(5),
+          availableSendCapacity: BN.from(10),
+          availableReceiveCapacity: BN.from(5),
           channels: {}
         }
       }
@@ -228,7 +230,7 @@ describe('getBudget', () => {
 
     const {availableReceiveCapacity, availableSendCapacity} = storedBudget?.forAsset
       .ETH as AssetBudget;
-    expect(availableReceiveCapacity.add(availableSendCapacity).eq(15)).toBeTruthy();
+    expect(add(availableReceiveCapacity, availableSendCapacity)).toBe(BN.from(15));
   });
 });
 

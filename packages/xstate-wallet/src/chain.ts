@@ -6,29 +6,29 @@ import {
   ChallengeRegisteredEvent,
   SignedState as NitroSignedState
 } from '@statechannels/nitro-protocol';
-import {Contract, Wallet, BigNumber, utils} from 'ethers';
-
-import {Observable, fromEvent, from, merge, interval} from 'rxjs';
-import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
-import {Zero} from '@ethersproject/constants';
-import {hexZeroPad} from '@ethersproject/bytes';
-import {TransactionRequest} from '@ethersproject/providers';
-import EventEmitter from 'eventemitter3';
-
 import {
+  BN,
   State,
   SignedState,
   fromNitroState,
   toNitroSignedState,
-  calculateChannelId
+  calculateChannelId,
+  Zero
 } from '@statechannels/wallet-core';
+import {Contract, Wallet, utils} from 'ethers';
+
+import {Observable, fromEvent, from, merge, interval} from 'rxjs';
+import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
+import {hexZeroPad} from '@ethersproject/bytes';
+import {TransactionRequest} from '@ethersproject/providers';
+import EventEmitter from 'eventemitter3';
 
 import {getProvider} from './utils/contract-utils';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
 
 export interface ChannelChainInfo {
-  readonly amount: BigNumber;
+  readonly amount: BN;
   readonly channelStorage: {
     turnNumRecord: number;
     finalizesAt: number;
@@ -57,7 +57,7 @@ export interface Chain {
   challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
-  balanceUpdatedFeed(address: string): Observable<BigNumber>;
+  balanceUpdatedFeed(address: string): Observable<BN>;
 }
 
 type Updated = ChannelChainInfo & {channelId: string};
@@ -161,12 +161,12 @@ export class FakeChain implements Chain {
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
-    const current = (this.channelStatus[channelId] || {}).amount || Zero;
+    const current = (this.channelStatus[channelId] || {}).amount || BN.from(0);
 
-    if (current.gte(expectedHeld)) {
+    if (BN.gte(current, expectedHeld)) {
       this.channelStatus[channelId] = {
         ...this.channelStatus[channelId],
-        amount: current.add(amount)
+        amount: BN.add(current, amount)
       };
       this.eventEmitter.emit('updated', {
         ...this.channelStatus[channelId],
@@ -206,9 +206,9 @@ export class FakeChain implements Chain {
 
     return merge(first, updates);
   }
-  public balanceUpdatedFeed(): Observable<BigNumber> {
+  public balanceUpdatedFeed(): Observable<BN> {
     // You're rich!
-    return from([BigNumber.from('0x999999999999')]);
+    return from([BN.from('0x999999999999')]);
   }
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
     const updates = fromEvent(this.eventEmitter, 'challengeRegistered').pipe(
@@ -400,11 +400,11 @@ export class ChainWatcher implements Chain {
     }
     const ethAssetHolder = this._assetHolders[0];
 
-    const amount: BigNumber = await ethAssetHolder.holdings(channelId);
+    const amount: BN = await ethAssetHolder.holdings(channelId);
 
     const result = await this._adjudicator.getChannelStorage(channelId);
 
-    const [turnNumRecord, finalizesAt] = result.map(BigNumber.from);
+    const [turnNumRecord, finalizesAt] = result.map(BN.from);
 
     const blockNum = await this.provider.getBlockNumber();
     chainLogger.trace(
@@ -414,7 +414,7 @@ export class ChainWatcher implements Chain {
           turnNumRecord,
           finalizesAt
         },
-        finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
+        finalized: BN.gt(finalizesAt, 0) && BN.lte(finalizesAt, blockNum),
         blockNum
       },
       'Chain query result'
@@ -426,18 +426,18 @@ export class ChainWatcher implements Chain {
         turnNumRecord,
         finalizesAt
       },
-      finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
+      finalized: BN.gt(finalizesAt, 0) && BN.lte(finalizesAt, blockNum),
       blockNum
     };
   }
 
-  public balanceUpdatedFeed(address: string): Observable<BigNumber> {
+  public balanceUpdatedFeed(address: string): Observable<BN> {
     const first = from(this.provider.getBalance(address));
-    const updates = fromEvent<BigNumber>(this.provider, 'block').pipe(
+    const updates = fromEvent<BN>(this.provider, 'block').pipe(
       flatMap(() => this.provider.getBalance(address))
     );
 
-    return merge(first, updates).pipe(distinctUntilChanged((a, b) => a.eq(b)));
+    return merge(first, updates).pipe(distinctUntilChanged((a, b) => a === b));
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
@@ -449,7 +449,7 @@ export class ChainWatcher implements Chain {
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
-      filter((event: Array<string | BigNumber | any>) => event[0] === channelId),
+      filter((event: Array<string | BN | any>) => event[0] === channelId),
       // TODO: Currently it seems that getChainInfo can return stale information
       // so as a workaround we use the amount from the event
       // see https://github.com/statechannels/monorepo/issues/1995
@@ -461,7 +461,7 @@ export class ChainWatcher implements Chain {
 
     const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
       // TODO: Type event correctly, use ethers-utils.js
-      filter((event: Array<string | BigNumber>) => event[0] === channelId),
+      filter((event: Array<string | BN>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
       flatMap(async () => this.getChainInfo(channelId))
     );
@@ -497,14 +497,12 @@ function convertNitroTransactionRequest(nitroTransactionRequest): TransactionReq
   return {
     ...nitroTransactionRequest,
     gasLimit: nitroTransactionRequest.gasLimit
-      ? BigNumber.from(nitroTransactionRequest.gasLimit)
+      ? BN.from(nitroTransactionRequest.gasLimit)
       : undefined,
     gasPrice: nitroTransactionRequest.gasPrice
-      ? BigNumber.from(nitroTransactionRequest.gasPrice)
+      ? BN.from(nitroTransactionRequest.gasPrice)
       : undefined,
-    nonce: nitroTransactionRequest.nonce
-      ? BigNumber.from(nitroTransactionRequest.nonce)
-      : undefined,
-    value: nitroTransactionRequest.value ? BigNumber.from(nitroTransactionRequest.value) : undefined
+    nonce: nitroTransactionRequest.nonce ? BN.from(nitroTransactionRequest.nonce) : undefined,
+    value: nitroTransactionRequest.value ? BN.from(nitroTransactionRequest.value) : undefined
   };
 }

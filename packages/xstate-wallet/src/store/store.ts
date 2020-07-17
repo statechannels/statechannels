@@ -2,7 +2,7 @@ import {AddressZero} from '@ethersproject/constants';
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
-import {Wallet, BigNumber} from 'ethers';
+import {Wallet} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 
@@ -20,7 +20,8 @@ import {
   State,
   StateVariables,
   SimpleAllocation,
-  Funding
+  Funding,
+  BN
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
@@ -224,7 +225,7 @@ export class Store {
           !!channel &&
           channel.applicationDomain === applicationDomain &&
           (!channel.hasConclusionProof || includeClosed) &&
-          !BigNumber.from(channel.channelConstants.appDefinition).isZero()
+          !BN.isZero(channel.channelConstants.appDefinition)
       )
     );
 
@@ -479,7 +480,7 @@ export class Store {
   public reserveFunds = (
     assetHolderAddress: string,
     channelId: string,
-    amount: {send: BigNumber; receive: BigNumber}
+    amount: {send: BN; receive: BN}
   ) =>
     this.backend.transaction(
       'readwrite',
@@ -497,19 +498,19 @@ export class Store {
         if (!assetBudget) throw Error(Errors.noAssetBudget);
 
         if (
-          assetBudget.availableSendCapacity.lt(amount.send) ||
-          assetBudget.availableReceiveCapacity.lt(amount.receive)
+          BN.lt(assetBudget.availableSendCapacity, amount.send) ||
+          BN.lt(assetBudget.availableReceiveCapacity, amount.receive)
         ) {
           throw Error(Errors.budgetInsufficient);
         }
 
         currentBudget.forAsset[assetHolderAddress] = {
           ...assetBudget,
-          availableSendCapacity: assetBudget.availableSendCapacity.sub(amount.send),
-          availableReceiveCapacity: assetBudget.availableReceiveCapacity.sub(amount.receive),
+          availableSendCapacity: BN.sub(assetBudget.availableSendCapacity, amount.send),
+          availableReceiveCapacity: BN.sub(assetBudget.availableReceiveCapacity, amount.receive),
           channels: {
             ...assetBudget.channels,
-            [channelId]: {amount: amount.send.add(amount.receive)}
+            [channelId]: {amount: BN.add(amount.send, amount.receive)}
           }
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);
