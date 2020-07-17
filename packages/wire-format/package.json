@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/wire-format",
   "description": "JSON-RPC Schema and TypeScript typings for the Wallet-to-Wallet Message Format",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "author": "Tom Close",
   "contributors": [],
   "dependencies": {
@@ -20,8 +20,7 @@
     "ts-json-schema-generator": "0.60.0"
   },
   "files": [
-    "schema",
-    "types"
+    "lib/src"
   ],
   "keywords": [
     "client api",
