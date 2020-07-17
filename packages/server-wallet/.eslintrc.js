@@ -21,7 +21,7 @@ module.exports = {
   },
   plugins: ['jest'],
   extends: [
-    './.eslintrc.root.js',
+    '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:import/errors',
@@ -33,6 +33,6 @@ module.exports = {
     ...jestViolations,
     ...otherViolations,
 
-    '@typescript-eslint/no-unused-vars': [1, { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_'}],
   },
 };

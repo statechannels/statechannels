@@ -1,5 +1,5 @@
 module.exports = {
-  ...require('./.prettierrc.root.js'),
+  ...require('../../.prettierrc.js'),
   trailingComma: 'es5',
   singleQuote: true,
   arrowParens: 'avoid',
