@@ -171,7 +171,11 @@ export function generateCloseRequest(channelId: string): CloseChannelRequest {
   };
 }
 
-export function generatePlayerUpdate(channelId: string): UpdateChannelRequest {
+export function generatePlayerUpdate(
+  channelId: string,
+  playerA: Participant,
+  playerB: Participant
+): UpdateChannelRequest {
   return {
     id: 555555555,
     method: 'UpdateChannel',
