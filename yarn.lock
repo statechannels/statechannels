@@ -4034,13 +4034,13 @@
   dependencies:
     type-detect "4.0.8"
 
-"@statechannels/wallet-core@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.npmjs.org/@statechannels/wallet-core/-/wallet-core-0.0.7.tgz#e4123881af7081c8ae2460c0b1ceac32551bbe2d"
-  integrity sha512-lKPQHygx5LIc/Zg8zgwGwmPDadWTD/rlem1AkW7U5cq13cy7nb5mBGTHBKN33n4z2U0f65Y5IwjMluVLKR6xSQ==
+"@statechannels/wallet-core@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.npmjs.org/@statechannels/wallet-core/-/wallet-core-0.0.8.tgz#c224418875ee68df0b7855f2c7bd3c4ed54a5718"
+  integrity sha512-6vTT92v0hcm/s7+IGXJyots/ameeTn7MisFdxWEmT94ZN8wS8VlfGLI+taeBz0dt7YTWDxR/CKJibVcBF6bUhQ==
   dependencies:
     "@statechannels/nitro-protocol" "0.1.4"
-    "@statechannels/wire-format" "0.0.4"
+    "@statechannels/wire-format" "0.0.7"
     ethers "5.0.0-beta.191"
 
 "@storybook/addon-actions@5.3.9":

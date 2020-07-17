@@ -27,7 +27,7 @@
     "@sentry/browser": "5.15.5",
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wallet-core": "0.0.7",
+    "@statechannels/wallet-core": "0.0.8",
     "@statechannels/wire-format": "0.0.7",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
