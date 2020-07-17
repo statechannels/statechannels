@@ -336,7 +336,6 @@ export class PaymentChannelClient {
   async updateChannel(channelId: string, peers: Peers): Promise<ChannelState> {
     const channelResult = await this.channelClient.updateChannel(
       channelId,
-      formatParticipants(peers),
       formatAllocations(peers),
       APP_DATA
     );
