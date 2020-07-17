@@ -236,7 +236,6 @@ describe('FakeChannelClient', () => {
 
       const ChannelResultAB = await clientA.updateChannel(
         channelIdAB,
-        participantsAB,
         allocationsAB,
         UPDATED_APP_DATA
       );
@@ -249,7 +248,7 @@ describe('FakeChannelClient', () => {
     it('the player whose turn it is not cannot update the channel', async () => {
       setProviderStates([providerA, providerB], statesAB['running']);
       await expect(
-        clientB.updateChannel(channelIdAB, participantsAB, allocationsAB, UPDATED_APP_DATA)
+        clientB.updateChannel(channelIdAB, allocationsAB, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
     });
   });
