@@ -1,14 +1,14 @@
-import { Channel, Errors } from '../channel';
-import { stateWithHashSignedBy } from '../../wallet/__test__/fixtures/states';
-import { seed } from '../../db/seeds/1_signing_wallet_seeds';
+import {Channel, Errors} from '../channel';
+import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {seed} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
-import { channel } from './fixtures/channel';
+import {channel} from './fixtures/channel';
 
 beforeEach(async () => seed(knex));
 
 it('can insert Channel instances to, and fetch them from, the database', async () => {
   const vars = [stateWithHashSignedBy()()];
-  const c1 = channel({ channelNonce: 1234, vars });
+  const c1 = channel({channelNonce: 1234, vars});
 
   await Channel.query()
     .withGraphFetched('signingWallet')
@@ -17,7 +17,7 @@ it('can insert Channel instances to, and fetch them from, the database', async (
   expect(c1.signingWallet).toBeDefined();
 
   const c2 = await Channel.query()
-    .where({ channel_nonce: 1234 })
+    .where({channel_nonce: 1234})
     .first();
 
   expect(c1.vars).toMatchObject(c2.vars);
@@ -25,8 +25,8 @@ it('can insert Channel instances to, and fetch them from, the database', async (
 
 it('can insert multiple channel instances within a transaction', async () => {
   const vars = [stateWithHashSignedBy()()];
-  const c1 = channel({ vars });
-  const c2 = channel({ channelNonce: 1234, vars });
+  const c1 = channel({vars});
+  const c2 = channel({channelNonce: 1234, vars});
 
   await Channel.transaction(async tx => {
     await Channel.query(tx).insert(c1);
@@ -49,7 +49,7 @@ describe('validation', () => {
   it('throws when inserting a model where the channelId is inconsistent', () =>
     expect(
       Channel.query().insert({
-        ...channel({ vars: [stateWithHashSignedBy()()] }),
+        ...channel({vars: [stateWithHashSignedBy()()]}),
         channelId: 'wrongId',
       })
     ).rejects.toThrow(Errors.invalidChannelId));

@@ -1,7 +1,7 @@
-import { Nonce } from '../nonce';
-import { nonce } from './fixtures/nonces';
+import {Nonce} from '../nonce';
+import {nonce} from './fixtures/nonces';
 
-import { bob, alice } from '../../wallet/__test__/fixtures/participants';
+import {bob, alice} from '../../wallet/__test__/fixtures/participants';
 import knex from '../../db/connection';
 import _ from 'lodash';
 
@@ -32,17 +32,16 @@ describe('asking for a new nonce', () => {
 });
 
 describe('using a given nonce', () => {
-  it('works when there is no existing nonce', () =>
-    expect(nonce().use()).resolves.toEqual(0));
+  it('works when there is no existing nonce', () => expect(nonce().use()).resolves.toEqual(0));
 
   it('works the value exceeds the existing nonce', async () => {
-    await expect(nonce({ value: 1 }).use()).resolves.toEqual(1);
-    await expect(nonce({ value: 3 }).use()).resolves.toEqual(3);
+    await expect(nonce({value: 1}).use()).resolves.toEqual(1);
+    await expect(nonce({value: 3}).use()).resolves.toEqual(3);
   });
 
   it('rejects when the value does not exceed the existing nonce', async () => {
-    await expect(nonce({ value: 3 }).use()).resolves.toEqual(3);
-    await expect(nonce({ value: 1 }).use()).rejects.toThrow('Nonce too low');
-    await expect(nonce({ value: 4 }).use()).resolves.toEqual(4);
+    await expect(nonce({value: 3}).use()).resolves.toEqual(3);
+    await expect(nonce({value: 1}).use()).rejects.toThrow('Nonce too low');
+    await expect(nonce({value: 4}).use()).resolves.toEqual(4);
   });
 });

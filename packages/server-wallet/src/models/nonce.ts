@@ -1,8 +1,7 @@
-import { Model } from 'objection';
-import { Address, Uint48 } from '../type-aliases';
+import {Model} from 'objection';
+import {Address, Uint48} from '../type-aliases';
 import knex from '../db/connection';
-import { ethers } from 'ethers';
-import { logger } from '../logger';
+import {ethers} from 'ethers';
 
 export class Nonce extends Model {
   readonly id!: number;
@@ -20,20 +19,20 @@ export class Nonce extends Model {
   $beforeValidate(jsonSchema, json, _opt) {
     super.$beforeValidate(jsonSchema, json, _opt);
 
-    const { addresses } = json;
+    const {addresses} = json;
 
     if (!Array.isArray(addresses)) {
-      throw new NonceError('Addresses are not an array', { addresses });
+      throw new NonceError('Addresses are not an array', {addresses});
     }
 
     const notAddr = addresses.find(addr => !isAddress(addr));
-    if (notAddr) throw new NonceError('Not an address', { notAddr });
+    if (notAddr) throw new NonceError('Not an address', {notAddr});
 
     return json;
   }
 
   static async next(addresses: Address[]): Promise<number> {
-    const insertQuery = knex('nonces').insert({ addresses });
+    const insertQuery = knex('nonces').insert({addresses});
 
     return Nonce.knex()
       .raw(
@@ -46,7 +45,7 @@ export class Nonce extends Model {
   }
 
   async use(): Promise<void> {
-    const { rows } = await Nonce.knex().raw(
+    const {rows} = await Nonce.knex().raw(
       `
         ${Nonce.knexQuery().insert(this)}
         ON CONFLICT (addresses) DO UPDATE

@@ -1,10 +1,7 @@
-import { Channel } from '../models/channel';
-import { ParticipantId } from '../type-aliases';
-import {
-  SignedStateWithHash,
-  SignedStateVarsWithHash,
-} from '@statechannels/wallet-core';
-import { ProtocolAction } from './actions';
+import {Channel} from '../models/channel';
+import {ParticipantId} from '../type-aliases';
+import {SignedStateWithHash, SignedStateVarsWithHash} from '@statechannels/wallet-core';
+import {ProtocolAction} from './actions';
 
 type ProtocolState = {
   channelId: string;
@@ -18,15 +15,9 @@ type ProtocolState = {
   latestSignedByMe: SignedStateWithHash;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function protocolState(appChannel: Channel): ProtocolState {
-  const {
-    channelId,
-    myIndex,
-    participants,
-    supported,
-    latest,
-    latestSignedByMe,
-  } = appChannel;
+  const {channelId, myIndex, participants, supported, latest, latestSignedByMe} = appChannel;
   const peer = participants[1 - myIndex].participantId;
 
   return {
@@ -39,9 +30,8 @@ function protocolState(appChannel: Channel): ProtocolState {
   };
 }
 type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | 'Final';
-const stage = (
-  state: SignedStateVarsWithHash | undefined
-): { type: Stage } => ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const stage = (state: SignedStateVarsWithHash | undefined): {type: Stage} => ({
   type: !state
     ? 'Missing'
     : state.isFinal

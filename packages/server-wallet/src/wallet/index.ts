@@ -8,7 +8,7 @@ import {
   ChannelConstants,
   SignedState,
 } from '@statechannels/wallet-core';
-import { deserializeAllocations } from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
+import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 
 import {
   CreateChannelParams,
@@ -17,28 +17,25 @@ import {
   ChannelResult as ClientChannelResult,
   Notification,
 } from '@statechannels/client-api-schema';
-import { Bytes32 } from '../type-aliases';
-import { Channel, RequiredColumns } from '../models/channel';
-import { addHash } from '../state-utils';
-import { SigningWallet } from '../models/signing-wallet';
-import { logger } from '../logger';
-import { Nonce } from '../models/nonce';
-import { executionLoop } from '../protocols/direct-funding';
-import { isOutgoing, Outgoing, isInternal } from '../protocols/actions';
+import {Bytes32} from '../type-aliases';
+import {Channel, RequiredColumns} from '../models/channel';
+import {addHash} from '../state-utils';
+import {SigningWallet} from '../models/signing-wallet';
+import {logger} from '../logger';
+import {Nonce} from '../models/nonce';
+import {executionLoop} from '../protocols/direct-funding';
+import {isOutgoing, Outgoing, isInternal} from '../protocols/actions';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
-export type UpdateChannelParams = Omit<
-  ClientUpdateChannelParams,
-  'participants'
->;
-export { ChannelStatus, CreateChannelParams };
+export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
+export {ChannelStatus, CreateChannelParams};
 
-export type AddressedMessage = Message & { to: string; from: string };
+export type AddressedMessage = Message & {to: string; from: string};
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // This is an interim type, until it does.
-type WithOutbox = { outbox: Outgoing[] };
+type WithOutbox = {outbox: Outgoing[]};
 type ChannelResult = ClientChannelResult & WithOutbox;
 
 export type WalletInterface = {
@@ -50,17 +47,15 @@ export type WalletInterface = {
   getChannels(): Promise<ClientChannelResult[]>;
 
   // Wallet <-> Wallet communication
-  pushMessage(
-    m: AddressedMessage
-  ): Promise<{ response?: Message; channelResults?: ChannelResult[] }>;
+  pushMessage(m: AddressedMessage): Promise<{response?: Message; channelResults?: ChannelResult[]}>;
 
   // Wallet -> App communication
-  onNotification(cb: (notice: Notification) => void): { unsubscribe: any };
+  onNotification(cb: (notice: Notification) => void): {unsubscribe: any};
 };
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Promise<ChannelResult> {
-    const { participants, appDefinition, appData, allocations } = args;
+    const {participants, appDefinition, appData, allocations} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
     // TODO: How do we pick a signing address?
     const signingAddress = (await SigningWallet.query().first())?.address;
@@ -76,15 +71,15 @@ export class Wallet implements WalletInterface {
     const turnNum = 0;
     const isFinal = false;
     const signatures = [];
-    const s = { appData, outcome, turnNum, isFinal, signatures };
+    const s = {appData, outcome, turnNum, isFinal, signatures};
     const vars: SignedStateVarsWithHash[] = [
-      { ...s, stateHash: hashState({ ...channelConstants, ...s }) },
+      {...s, stateHash: hashState({...channelConstants, ...s})},
     ];
 
-    const cols = { ...channelConstants, vars, signingAddress };
-    const { channelId, latest } = await Channel.query().insert(cols);
+    const cols = {...channelConstants, vars, signingAddress};
+    const {channelId, latest} = await Channel.query().insert(cols);
 
-    const { outbox } = await (() => {
+    const {outbox} = await (() => {
       switch (args.fundingStrategy) {
         case 'Direct':
           return protocolEngine([channelId]);
@@ -116,9 +111,7 @@ export class Wallet implements WalletInterface {
     throw 'Unimplemented';
   }
 
-  async pushMessage(
-    message: AddressedMessage
-  ): Promise<{ channelResults?: ChannelResult[] }> {
+  async pushMessage(message: AddressedMessage): Promise<{channelResults?: ChannelResult[]}> {
     const channelIds: Bytes32[] = [];
 
     try {
@@ -149,7 +142,7 @@ export class Wallet implements WalletInterface {
               throw Error('Not in channel');
             }
 
-            const { address: signingAddress } = signingWallet;
+            const {address: signingAddress} = signingWallet;
             const cols: RequiredColumns = {
               ...ss,
               vars: [addHash(ss)],
@@ -157,7 +150,7 @@ export class Wallet implements WalletInterface {
             };
 
             channel = Channel.fromJson(cols);
-            const { channelId } = await Channel.query(tx).insert(channel);
+            const {channelId} = await Channel.query(tx).insert(channel);
             channelIds.push(channelId);
           } else {
             ss.signatures?.map(sig => channel.addState(ss, sig));
@@ -167,11 +160,11 @@ export class Wallet implements WalletInterface {
         }
       });
     } catch (err) {
-      logger.error({ err }, 'Could not push message');
+      logger.error({err}, 'Could not push message');
       throw err;
     }
 
-    const { outbox } = await protocolEngine(channelIds);
+    const {outbox} = await protocolEngine(channelIds);
 
     return {
       channelResults: [
@@ -189,17 +182,17 @@ export class Wallet implements WalletInterface {
       ],
     };
   }
-  onNotification(_cb: (notice: Notification) => void): { unsubscribe: any } {
+  onNotification(_cb: (notice: Notification) => void): {unsubscribe: any} {
     throw 'Unimplemented';
   }
 }
 
-type ExecutionResult = { ids: Bytes32[]; outbox: Outgoing[] };
+type ExecutionResult = {ids: Bytes32[]; outbox: Outgoing[]};
 const protocolEngine = async (
   ids: Bytes32[],
   outbox: Outgoing[] = []
 ): Promise<ExecutionResult> => {
-  if (ids.length === 0) return { ids, outbox };
+  if (ids.length === 0) return {ids, outbox};
 
   const [channelId, ...nextIds] = ids;
 
@@ -226,7 +219,7 @@ const protocolEngine = async (
         params: {
           recipient: 'bob',
           sender: 'alice',
-          data: { signedStates: [state] },
+          data: {signedStates: [state]},
         },
       },
     });
@@ -240,6 +233,6 @@ const protocolEngine = async (
   if (nextIds.length) {
     return await protocolEngine(nextIds, outbox);
   } else {
-    return { ids: [], outbox };
+    return {ids: [], outbox};
   }
 };

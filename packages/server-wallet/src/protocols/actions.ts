@@ -1,15 +1,15 @@
-import { StateVariables } from '@statechannels/wallet-core';
-import { Bytes32 } from '../type-aliases';
-import { Notification } from '@statechannels/client-api-schema';
+import {StateVariables} from '@statechannels/wallet-core';
+import {Bytes32} from '../type-aliases';
+import {Notification} from '@statechannels/client-api-schema';
 
 /*
 Actions that protocols can declare.
 */
 
 type UpdateOpts = Partial<StateVariables>;
-type UpdateChannel = { type: 'UpdateChannel'; channelId: Bytes32 } & UpdateOpts;
-type SignState = { type: 'SignState'; channelId: Bytes32; hash: Bytes32 };
-type NotifyApp = { type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'> };
+type UpdateChannel = {type: 'UpdateChannel'; channelId: Bytes32} & UpdateOpts;
+type SignState = {type: 'SignState'; channelId: Bytes32; hash: Bytes32};
+type NotifyApp = {type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'>};
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
   a: ProtocolAction

@@ -1,7 +1,7 @@
-import { Config } from 'knex';
+import {Config} from 'knex';
 
 import './env';
-import { knexSnakeCaseMappers } from 'objection';
+import {knexSnakeCaseMappers} from 'objection';
 
 export const dbCofig: Config = {
   client: 'postgres',

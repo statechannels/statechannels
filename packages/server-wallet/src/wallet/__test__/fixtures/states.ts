@@ -9,11 +9,11 @@ import {
   signState,
   hashState,
 } from '@statechannels/wallet-core';
-import { fixture } from './utils';
-import { alice, bob } from './participants';
-import { alice as aliceWallet } from './signingWallets';
-import { addHash } from '../../../state-utils';
-import { SigningWallet } from '../../../models/signing-wallet';
+import {fixture} from './utils';
+import {alice, bob} from './participants';
+import {alice as aliceWallet} from './signingWallets';
+import {addHash} from '../../../state-utils';
+import {SigningWallet} from '../../../models/signing-wallet';
 
 const defaultState: State = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -21,8 +21,8 @@ const defaultState: State = {
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([
-    { destination: alice().destination, amount: BN.from(1) },
-    { destination: bob().destination, amount: BN.from(3) },
+    {destination: alice().destination, amount: BN.from(1)},
+    {destination: bob().destination, amount: BN.from(3)},
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,
@@ -39,12 +39,9 @@ const _signState = (s, pk) => {
 };
 
 export const createState = fixture(defaultState);
-export const stateSignedBy = (
-  defaultWallet = aliceWallet(),
-  ...otherWallets: SigningWallet[]
-) =>
+export const stateSignedBy = (defaultWallet = aliceWallet(), ...otherWallets: SigningWallet[]) =>
   fixture<SignedState>(
-    _.merge({ signatures: [] }, defaultState),
+    _.merge({signatures: []}, defaultState),
     (s: State): SignedState => ({
       ...s,
       signatures: [defaultWallet, ...otherWallets].map(sw => ({
@@ -54,8 +51,6 @@ export const stateSignedBy = (
     })
   );
 
-export const stateWithHashSignedBy = (
-  pk = aliceWallet(),
-  ...otherWallets: SigningWallet[]
-) => (opts?: Partial<SignedStateVariables>): SignedStateWithHash =>
-  addHash(stateSignedBy(pk, ...otherWallets)(opts));
+export const stateWithHashSignedBy = (pk = aliceWallet(), ...otherWallets: SigningWallet[]) => (
+  opts?: Partial<SignedStateVariables>
+): SignedStateWithHash => addHash(stateSignedBy(pk, ...otherWallets)(opts));

@@ -1,5 +1,5 @@
-import { Participant, makeDestination } from '@statechannels/wallet-core';
-import { fixture } from './utils';
+import {Participant, makeDestination} from '@statechannels/wallet-core';
+import {fixture} from './utils';
 import * as wallets from './signingWallets';
 
 const _alice: Participant = {

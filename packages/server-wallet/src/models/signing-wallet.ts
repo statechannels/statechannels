@@ -1,7 +1,7 @@
-import { Model } from 'objection';
-import { Address, Bytes32 } from '../type-aliases';
-import { ethers } from 'ethers';
-import { State, SignatureEntry, signState } from '@statechannels/wallet-core';
+import {Model} from 'objection';
+import {Address, Bytes32} from '../type-aliases';
+import {ethers} from 'ethers';
+import {State, SignatureEntry, signState} from '@statechannels/wallet-core';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -14,7 +14,7 @@ export class SigningWallet extends Model {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     if (!json.address) {
-      const { address } = new ethers.Wallet(json.privateKey);
+      const {address} = new ethers.Wallet(json.privateKey);
       json.address = address;
     }
 
