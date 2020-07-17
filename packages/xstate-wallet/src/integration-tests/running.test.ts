@@ -86,7 +86,7 @@ test('accepts states when running', async () => {
   playerA.workflowMachine?.send('SPAWN_OBSERVERS');
   playerB.workflowMachine?.send('SPAWN_OBSERVERS');
 
-  const update = generatePlayerUpdate(channelId, playerA.participant, playerB.participant);
+  const update = generatePlayerUpdate(channelId);
   playerB.messagingService.receiveRequest(update, applicationDomain);
 
   const expectedCode: ErrorCodes['UpdateChannel']['NotYourTurn'] = 403;
