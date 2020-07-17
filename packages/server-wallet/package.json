@@ -62,6 +62,7 @@
     "db:seed": "npx knex seed:run --cwd src/db-admin",
     "db:setup:dev": "yarn db:drop && yarn db:create && yarn db:migrate",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
+    "test:ci": "yarn test --bail",
     "start:dev": "ts-node ./src/start-dev-server.ts",
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
