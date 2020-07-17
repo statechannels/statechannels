@@ -234,14 +234,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   private async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
     const channelId = params.channelId;
-    const participants = params.participants;
     const allocations = params.allocations;
     const appData = params.appData;
 
     log.debug(`Player ${this.getPlayerIndex(channelId)} updating channel ${channelId}`);
     const latestState = this.findChannel(channelId);
 
-    const nextState = {...latestState, participants, allocations, appData};
+    const nextState = {...latestState, allocations, appData};
     await this.verifyTurnNum(channelId, latestState.turnNum);
     nextState.turnNum = latestState.turnNum + 1;
     log.debug(

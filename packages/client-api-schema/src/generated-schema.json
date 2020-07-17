@@ -593,7 +593,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -652,7 +652,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -1887,10 +1887,10 @@
           "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-757-827-1165839259-684-829-1165839259-659-830-1165839259-0-1233%3E"
+          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189%3E"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-920-940-1165839259-852-942-1165839259-830-943-1165839259-0-1233%3E"
+          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189%3E"
         },
         {
           "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
@@ -1914,17 +1914,10 @@
         },
         "channelId": {
           "$ref": "#/definitions/ChannelId"
-        },
-        "participants": {
-          "items": {
-            "$ref": "#/definitions/Participant"
-          },
-          "type": "array"
         }
       },
       "required": [
         "channelId",
-        "participants",
         "allocations",
         "appData"
       ],

@@ -1,10 +1,9 @@
-import {ChannelId, Participant, Allocation, ChannelResult, ChannelStatus} from '../data-types';
+import {ChannelId, Allocation, ChannelResult, ChannelStatus} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
 import {ErrorCodes as AllCodes} from '../error-codes';
 
 export interface UpdateChannelParams {
   channelId: ChannelId;
-  participants: Participant[];
   allocations: Allocation[];
   appData: string;
 }

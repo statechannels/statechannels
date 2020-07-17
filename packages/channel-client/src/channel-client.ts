@@ -100,7 +100,6 @@ export class ChannelClient implements ChannelClientInterface {
 
   async updateChannel(
     channelId: string,
-    participants: Participant[],
     allocations: TokenAllocations,
     appData: string
   ): Promise<ChannelResult> {
@@ -108,7 +107,6 @@ export class ChannelClient implements ChannelClientInterface {
       method: 'UpdateChannel',
       params: {
         channelId,
-        participants,
         allocations,
         appData
       }

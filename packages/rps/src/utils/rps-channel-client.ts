@@ -99,17 +99,11 @@ export class RPSChannelClient {
     bOutcomeAddress: string = bAddress
   ) {
     const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
-    const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
 
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
-    const channelResult = await this.channelClient.updateChannel(
-      channelId,
-      participants,
-      allocations,
-      appData
-    );
+    const channelResult = await this.channelClient.updateChannel(channelId, allocations, appData);
 
     return convertToChannelState(channelResult);
   }

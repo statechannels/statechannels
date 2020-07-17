@@ -85,7 +85,7 @@ class MockChannelClient implements ChannelClientInterface {
   getState = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
-  updateChannel = jest.fn(async function(channelId, participants, allocations, appData) {
+  updateChannel = jest.fn(async function(channelId, allocations, appData) {
     return await mockChannelResult;
   });
   closeChannel = jest.fn(async function(channelId: string) {
@@ -186,7 +186,6 @@ describe('when updateChannel() is called', () => {
   it('calls channelClient.updateChannel() with appropriately encoded data', async () => {
     expect(mockChannelClient.updateChannel).toHaveBeenCalledWith(
       MOCK_CHANNEL_ID,
-      participants,
       allocations,
       encodeAppData(appData.start)
     );

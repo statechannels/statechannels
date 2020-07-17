@@ -44,7 +44,6 @@ export interface ChannelClientInterface {
   joinChannel: (channelId: string) => Promise<ChannelResult>;
   updateChannel: (
     channelId: string,
-    participants: Participant[],
     allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;

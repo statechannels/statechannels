@@ -182,7 +182,6 @@ export function generatePlayerUpdate(
     jsonrpc: '2.0',
     params: {
       channelId,
-      participants: [playerA, playerB],
       appData: '0x0',
       allocations: [
         {
