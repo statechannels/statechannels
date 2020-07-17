@@ -451,7 +451,7 @@ export class ChainWatcher implements Chain {
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
-      filter((event: Array<string | BN | any>) => event[0] === channelId),
+      filter((event: Array<any>) => BN.eq(event[0], channelId)),
       // TODO: Currently it seems that getChainInfo can return stale information
       // so as a workaround we use the amount from the event
       // see https://github.com/statechannels/monorepo/issues/1995
@@ -463,7 +463,7 @@ export class ChainWatcher implements Chain {
 
     const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
       // TODO: Type event correctly, use ethers-utils.js
-      filter((event: Array<string | BN>) => event[0] === channelId),
+      filter((event: Array<string | Uint256>) => BN.eq(event[0], channelId)),
       // Actually ignores the event data and just polls the chain
       flatMap(async () => this.getChainInfo(channelId))
     );

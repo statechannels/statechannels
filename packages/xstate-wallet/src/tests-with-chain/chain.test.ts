@@ -48,7 +48,7 @@ it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and se
   const channelId = randomChannelId();
   const updateEvent = store.chain
     .chainUpdatedFeed(channelId)
-    .pipe(first(info => info.amount === BN.from(1)))
+    .pipe(first(info => BN.eq(info.amount, 1)))
     .toPromise();
 
   ETHAssetHolder.deposit(
@@ -61,10 +61,7 @@ it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and se
   expect(await updateEvent).toMatchObject({
     amount: '0x01',
     finalized: false,
-    channelStorage: {
-      finalizesAt: '0x00',
-      turnNumRecord: '0x00'
-    }
+    channelStorage: {finalizesAt: 0, turnNumRecord: 0}
   });
 });
 
