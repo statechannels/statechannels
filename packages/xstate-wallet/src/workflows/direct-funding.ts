@@ -87,7 +87,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
-    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => add(a, b), Zero);
+    const allocated = outcome.allocationItems.map(a => a.amount).reduce(BN.add, Zero);
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
     if (BN.gt(allocated, chainInfo.amount))
