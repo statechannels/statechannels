@@ -8,8 +8,6 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  add,
-  subtract,
   simpleEthAllocation,
   makeDestination,
   simpleEthGuarantee,
@@ -35,6 +33,7 @@ import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {SimpleHub} from './simple-hub';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
+const {add, sub: subtract} = BN;
 
 jest.setTimeout(20000);
 

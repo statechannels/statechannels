@@ -2,7 +2,7 @@ const PROTOCOL = 'virtual-defunding-as-hub';
 import {
   checkThat,
   isSimpleEthAllocation,
-  add,
+  BN,
   isGuarantees,
   isIndirectFunding,
   AllocationItem
@@ -20,6 +20,7 @@ import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
 import {SupportState} from '.';
 
 export type Init = {jointChannelId: string};
+const {add} = BN;
 
 type IDs = [string, string];
 type ChannelIds = {guarantorChannelIds: IDs; ledgerChannelIds: IDs};

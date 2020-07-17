@@ -10,7 +10,6 @@ import {
   State,
   checkThat,
   isSimpleEthAllocation,
-  add,
   BN
 } from '@statechannels/wallet-core';
 
@@ -42,6 +41,7 @@ import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);
 
+const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';

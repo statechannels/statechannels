@@ -13,11 +13,11 @@ import {
   isVirtuallyFund,
   StateVariables,
   Outcome,
-  add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat,
-  Zero
+  Zero,
+  BN
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
@@ -27,6 +27,7 @@ import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
 import {getDataAndInvoke} from '../utils';
 const PROTOCOL = 'create-and-fund';
+const {add} = BN;
 
 export type Init = {
   channelId: string;

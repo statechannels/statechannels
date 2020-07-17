@@ -10,14 +10,14 @@ import {
   AssetBudget,
   calculateChannelId,
   createSignatureEntry,
-  BN,
-  add
+  BN
 } from '@statechannels/wallet-core';
 
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {Store, Errors, ObjectStores} from '..';
+const {add} = BN;
 
 require('fake-indexeddb/auto');
 

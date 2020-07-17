@@ -1,7 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {
-  add,
   checkThat,
   isSimpleEthAllocation,
   firstState,
@@ -26,6 +25,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {Init, machine, Errors} from '../ledger-funding';
 
 jest.setTimeout(10000);
+const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';

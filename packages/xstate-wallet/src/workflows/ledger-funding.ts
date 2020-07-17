@@ -3,7 +3,6 @@ import {
   allocateToTarget,
   isSimpleEthAllocation,
   checkThat,
-  add,
   AllocationItem,
   Funding,
   BN
@@ -19,6 +18,7 @@ import {SupportState} from '.';
 import {escalate} from '../actions';
 
 const WORKFLOW = 'ledger-funding';
+const {add} = BN;
 
 export interface Init {
   targetChannelId: string;

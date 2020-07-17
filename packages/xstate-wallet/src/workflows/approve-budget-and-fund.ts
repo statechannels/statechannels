@@ -18,7 +18,6 @@ import {
   checkThat,
   exists,
   simpleEthAllocation,
-  add,
   BN,
   Uint256
 } from '@statechannels/wallet-core';
@@ -32,6 +31,7 @@ import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {sendUserDeclinedResponse, hideUI, displayUI} from '../utils/workflow-utils';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
+const {add} = BN;
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: number;

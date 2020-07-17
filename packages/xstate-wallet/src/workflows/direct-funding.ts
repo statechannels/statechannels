@@ -3,7 +3,6 @@ import _ from 'lodash';
 import {AddressZero, HashZero} from '@ethersproject/constants';
 
 import {
-  add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat,
@@ -12,7 +11,6 @@ import {
   AllocationItem,
   Destination,
   BN,
-  subtract,
   Zero
 } from '@statechannels/wallet-core';
 
@@ -20,6 +18,7 @@ import {Store} from '../store';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
+const {add, sub: subtract} = BN;
 
 const WORKFLOW = 'direct-funding';
 

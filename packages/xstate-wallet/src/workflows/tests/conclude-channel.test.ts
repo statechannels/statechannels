@@ -7,7 +7,6 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  add,
   BN
 } from '@statechannels/wallet-core';
 
@@ -41,6 +40,7 @@ import {MessagingService} from '../../messaging';
 
 jest.setTimeout(20000);
 
+const {add} = BN;
 const chainId = '0x01';
 const challengeDuration = 10;
 const appDefinition = AddressZero;
