@@ -51,7 +51,7 @@
     "@fullhuman/postcss-purgecss": "2.1.0",
     "@glimmer/component": "1.0.0",
     "@glimmer/tracking": "1.0.0",
-    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/client-api-schema": "0.0.3",
     "@statechannels/devtools": "0.1.4",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@types/autoprefixer": "9.6.1",

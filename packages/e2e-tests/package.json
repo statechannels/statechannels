@@ -5,7 +5,7 @@
   "author": "snario <liam@l4v.io>",
   "devDependencies": {
     "@statechannels/channel-provider": "*",
-    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/client-api-schema": "0.0.3",
     "@statechannels/devtools": "0.1.4",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
