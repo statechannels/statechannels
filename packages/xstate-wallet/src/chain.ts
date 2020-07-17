@@ -455,7 +455,7 @@ export class ChainWatcher implements Chain {
       // see https://github.com/statechannels/monorepo/issues/1995
       flatMap(async event => ({
         ...(await this.getChainInfo(channelId)),
-        amount: event.slice(-1)[0].args.destinationHoldings
+        amount: BN.from(event.slice(-1)[0].args.destinationHoldings)
       }))
     );
 

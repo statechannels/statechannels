@@ -59,11 +59,11 @@ it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and se
   );
 
   expect(await updateEvent).toMatchObject({
-    amount: {_hex: '0x01'},
+    amount: '0x01',
     finalized: false,
     channelStorage: {
-      finalizesAt: {_hex: '0x00'},
-      turnNumRecord: {_hex: '0x00'}
+      finalizesAt: '0x00',
+      turnNumRecord: '0x00'
     }
   });
 });
