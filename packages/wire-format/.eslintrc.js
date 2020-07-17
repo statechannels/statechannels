@@ -1,11 +1,6 @@
-const baseConfig = require('../../.eslintrc.js');
-
 module.exports = {
-  ...baseConfig,
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style'
   ],
