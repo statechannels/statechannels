@@ -1,15 +1,15 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {map, filter} from 'rxjs/operators';
-import {exists, BN} from '@statechannels/wallet-core';
+import {exists, BN, Uint256} from '@statechannels/wallet-core';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {MachineFactory} from '../utils/workflow-utils';
 
 export type Init = {
   channelId: string;
-  depositAt: BN;
-  totalAfterDeposit: BN;
-  fundedAt: BN;
+  depositAt: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
 };
 
 export const config: MachineConfig<Init, any, any> = {
@@ -24,7 +24,7 @@ export const config: MachineConfig<Init, any, any> = {
     failure: {entry: assign<any>({error: () => 'Deposit failed'})}
   }
 };
-type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BN};
+type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256};
 
 export const machine: MachineFactory<Init, any> = (store: Store) => {
   const subscribeDepositEvent = (ctx: Init) =>

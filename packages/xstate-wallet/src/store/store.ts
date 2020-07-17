@@ -21,7 +21,8 @@ import {
   StateVariables,
   SimpleAllocation,
   Funding,
-  BN
+  BN,
+  Uint256
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
@@ -480,7 +481,7 @@ export class Store {
   public reserveFunds = (
     assetHolderAddress: string,
     channelId: string,
-    amount: {send: BN; receive: BN}
+    amount: {send: Uint256; receive: Uint256}
   ) =>
     this.backend.transaction(
       'readwrite',

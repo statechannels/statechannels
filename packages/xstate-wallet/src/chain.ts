@@ -13,7 +13,8 @@ import {
   fromNitroState,
   toNitroSignedState,
   calculateChannelId,
-  Zero
+  Zero,
+  Uint256
 } from '@statechannels/wallet-core';
 import {Contract, Wallet, utils} from 'ethers';
 
@@ -28,7 +29,7 @@ import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
 
 export interface ChannelChainInfo {
-  readonly amount: BN;
+  readonly amount: Uint256;
   readonly channelStorage: {
     turnNumRecord: number;
     finalizesAt: number;
@@ -57,7 +58,7 @@ export interface Chain {
   challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
-  balanceUpdatedFeed(address: string): Observable<BN>;
+  balanceUpdatedFeed(address: string): Observable<Uint256>;
 }
 
 type Updated = ChannelChainInfo & {channelId: string};
@@ -206,7 +207,7 @@ export class FakeChain implements Chain {
 
     return merge(first, updates);
   }
-  public balanceUpdatedFeed(): Observable<BN> {
+  public balanceUpdatedFeed(): Observable<Uint256> {
     // You're rich!
     return from([BN.from('0x999999999999')]);
   }
@@ -400,11 +401,12 @@ export class ChainWatcher implements Chain {
     }
     const ethAssetHolder = this._assetHolders[0];
 
-    const amount: BN = BN.from(await ethAssetHolder.holdings(channelId));
+    const amount: Uint256 = BN.from(await ethAssetHolder.holdings(channelId));
 
-    const result = await this._adjudicator.getChannelStorage(channelId);
-
-    const [turnNumRecord, finalizesAt] = result.map(BN.from);
+    const [turnNumRecord, finalizesAt]: [
+      number,
+      number
+    ] = await this._adjudicator.getChannelStorage(channelId);
 
     const blockNum = await this.provider.getBlockNumber();
     chainLogger.trace(
@@ -431,13 +433,13 @@ export class ChainWatcher implements Chain {
     };
   }
 
-  public balanceUpdatedFeed(address: string): Observable<BN> {
-    const first = from(this.provider.getBalance(address));
-    const updates = fromEvent<BN>(this.provider, 'block').pipe(
+  public balanceUpdatedFeed(address: string): Observable<Uint256> {
+    const first = from(this.provider.getBalance(address).then(BN.from));
+    const updates = fromEvent<Uint256>(this.provider, 'block').pipe(
       flatMap(() => this.provider.getBalance(address))
     );
 
-    return merge(first, updates).pipe(distinctUntilChanged((a, b) => a === b));
+    return merge(first, updates).pipe(distinctUntilChanged<Uint256>(BN.eq));
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {

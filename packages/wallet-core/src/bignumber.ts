@@ -1,7 +1,7 @@
 import {BigNumber as EthersBigNumber, BigNumberish} from 'ethers';
 import {Uint256} from './types';
 
-type T = BigNumberish | BN;
+type T = BigNumberish;
 
 const binaryOperator = <S extends any = Uint256>(name: keyof EthersBigNumber) => (
   a: T,

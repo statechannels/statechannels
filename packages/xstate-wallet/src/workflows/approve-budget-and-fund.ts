@@ -19,7 +19,8 @@ import {
   exists,
   simpleEthAllocation,
   add,
-  BN
+  BN,
+  Uint256
 } from '@statechannels/wallet-core';
 
 // eslint-disable-next-line no-restricted-imports
@@ -34,7 +35,7 @@ import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: number;
-  balance: BN;
+  balance: Uint256;
 }
 
 type Event =
@@ -57,13 +58,13 @@ interface LedgerExists extends Initial {
   ledgerState: ChannelState;
 }
 interface Deposit {
-  depositAt: BN;
-  totalAfterDeposit: BN;
-  fundedAt: BN;
+  depositAt: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
 }
 
 interface Chain {
-  ledgerTotal: BN;
+  ledgerTotal: Uint256;
   lastChangeBlockNum: number;
   currentBlockNum: number;
 }
