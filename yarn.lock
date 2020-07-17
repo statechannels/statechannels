@@ -4034,6 +4034,13 @@
   dependencies:
     type-detect "4.0.8"
 
+"@statechannels/client-api-schema@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/@statechannels/client-api-schema/-/client-api-schema-0.0.1.tgz#fa6bc51b9fa411981100eeddd771334aa4a0c682"
+  integrity sha512-IXx/gLfs7jEOkMo8azWRkuyN1u1Wt6+xmJcE9spqKZ1Owh2rTicJn9MkxMqUGm3Nyi+plaumq3tVuwFgXLM4fQ==
+  dependencies:
+    ajv "6.11.0"
+
 "@statechannels/wallet-core@0.0.8":
   version "0.0.8"
   resolved "https://registry.npmjs.org/@statechannels/wallet-core/-/wallet-core-0.0.8.tgz#c224418875ee68df0b7855f2c7bd3c4ed54a5718"
