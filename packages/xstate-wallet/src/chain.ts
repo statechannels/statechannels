@@ -400,7 +400,7 @@ export class ChainWatcher implements Chain {
     }
     const ethAssetHolder = this._assetHolders[0];
 
-    const amount: BN = await ethAssetHolder.holdings(channelId);
+    const amount: BN = BN.from(await ethAssetHolder.holdings(channelId));
 
     const result = await this._adjudicator.getChannelStorage(channelId);
 
