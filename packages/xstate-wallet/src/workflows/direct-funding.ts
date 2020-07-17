@@ -107,7 +107,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
         const amountLeft = BN.gt(amount, currentlyAllocated)
           ? subtract(amount, currentlyAllocated)
-          : BN.from(0);
+          : Zero;
         return {destination, amount: amountLeft};
       })
     );
@@ -135,7 +135,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = BN.from(0);
+    let totalBeforeDeposit = Zero;
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (myIndex === i) {

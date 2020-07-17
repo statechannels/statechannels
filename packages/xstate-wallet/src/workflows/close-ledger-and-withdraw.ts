@@ -15,7 +15,7 @@ import {
   Objective,
   CloseLedger,
   DomainBudget,
-  BN
+  Zero
 } from '@statechannels/wallet-core';
 
 import {map, filter} from 'rxjs/operators';
@@ -212,7 +212,7 @@ const createObjective = (store: Store) => async context => {
 };
 const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
-    filter(c => c.amount === BN.from(0)),
+    filter(c => c.amount === Zero),
     map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
   );
 

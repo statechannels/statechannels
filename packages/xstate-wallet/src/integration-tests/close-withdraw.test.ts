@@ -1,7 +1,13 @@
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
-import {simpleEthAllocation, isCloseLedger, CloseLedger, BN} from '@statechannels/wallet-core';
+import {
+  simpleEthAllocation,
+  isCloseLedger,
+  CloseLedger,
+  BN,
+  Zero
+} from '@statechannels/wallet-core';
 
 import waitForExpect from 'wait-for-expect';
 import {CHALLENGE_DURATION} from '../config';
@@ -94,7 +100,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   // Verify that the blockchain is correct
   const chainView = await playerA.store.chain.getChainInfo(ledgerChannel.channelId);
   expect(chainView.channelStorage.finalizesAt > 0).toBe(true);
-  expect(chainView.amount).toBe(BN.from(0));
+  expect(chainView.amount).toBe(Zero);
 
   // Check the channel is finalized
   const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);
