@@ -21,7 +21,7 @@ module.exports = {
   },
   plugins: ['jest'],
   extends: [
-    '../../.eslintrc.js',
+    './.eslintrc.root.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:import/errors',
