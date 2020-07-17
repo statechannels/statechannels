@@ -186,7 +186,6 @@ describe('when updateChannel() is called', () => {
   it('calls channelClient.updateChannel() with appropriately encoded data', async () => {
     expect(mockChannelClient.updateChannel).toHaveBeenCalledWith(
       MOCK_CHANNEL_ID,
-      participants,
       allocations,
       encodeAppData(appData.start)
     );
