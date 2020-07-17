@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/channel-client",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
     "@statechannels/channel-provider": "*",
@@ -26,6 +26,10 @@
     "ts-jest": "25.0.0",
     "typescript": "3.7.5"
   },
+  "files": [
+    "lib/src",
+    "lib/tests"
+  ],
   "keywords": [
     "ethereum",
     "state channels"
