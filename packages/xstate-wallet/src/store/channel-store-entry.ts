@@ -8,14 +8,12 @@ import {
   SignedStateWithHash,
   SignedStateVarsWithHash,
   StateVariablesWithHash,
-  Outcome,
   Funding,
   SignatureEntry,
   hashState,
   calculateChannelId,
   createSignatureEntry,
-  outcomesEqual,
-  BN
+  outcomesEqual
 } from '@statechannels/wallet-core';
 
 import {Errors} from '.';
@@ -290,9 +288,7 @@ export class ChannelStoreEntry {
       channelNonce: this.channelConstants.channelNonce
     };
 
-    const stateVariables = ChannelStoreEntry.prepareStateVariables(
-      _.cloneDeep(this.stateVariables)
-    );
+    const stateVariables = _.cloneDeep(this.stateVariables);
 
     return {
       stateVariables,
@@ -312,7 +308,7 @@ export class ChannelStoreEntry {
     // TODO: Add some sort of data validator here
 
     const {channelConstants, funding, myIndex, applicationDomain} = data;
-    const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
+    const stateVariables = data.stateVariables;
 
     return new ChannelStoreEntry({
       channelConstants,
@@ -321,40 +317,6 @@ export class ChannelStoreEntry {
       funding,
       applicationDomain
     });
-  }
-
-  private static prepareStateVariables(
-    stateVariables, // TODO: Make this typesafe!
-    parserFunction: (data: string | BN) => BN | string = v => BN.from(v)
-  ): Array<SignedStateWithHash> {
-    for (const state of stateVariables) {
-      state.outcome = ChannelStoreEntry.toggleBigNumberOutcome(state.outcome, parserFunction);
-    }
-    return stateVariables;
-  }
-
-  private static toggleBigNumberOutcome(
-    outcome,
-    parserFunction: (data: string | BN) => BN | string
-  ): Outcome {
-    if (outcome.allocationItems) {
-      return {
-        ...outcome,
-        allocationItems: outcome.allocationItems.map(item => ({
-          ...item,
-          amount: parserFunction(item.amount)
-        }))
-      };
-    } else if (outcome.simpleAllocations) {
-      return {
-        ...outcome,
-        simpleAllocations: outcome.simpleAllocations.map(sA =>
-          ChannelStoreEntry.toggleBigNumberOutcome(sA, parserFunction)
-        )
-      };
-    } else {
-      return outcome;
-    }
   }
 }
 
