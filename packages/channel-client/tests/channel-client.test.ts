@@ -171,12 +171,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
   describe('updates a channel', () => {
     it('the player whose turn it is can update the channel', async () => {
       setProviderStates([providerA, providerB], states['running']);
-      const channelResult = await clientA.updateChannel(
-        channelId,
-        participants,
-        allocations,
-        UPDATED_APP_DATA
-      );
+      const channelResult = await clientA.updateChannel(channelId, allocations, UPDATED_APP_DATA);
       expect(channelResult).toEqual(states['updated_app_data']);
       expect(providerB.latestState[channelId]).toEqual(states['updated_app_data']);
     });
@@ -184,7 +179,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
     it('the player whose turn it is not cannot update the channel', async () => {
       setProviderStates([providerA, providerB], states['running']);
       await expect(
-        clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
+        clientB.updateChannel(channelId, allocations, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
     });
   });
