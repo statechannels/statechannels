@@ -171,18 +171,13 @@ export function generateCloseRequest(channelId: string): CloseChannelRequest {
   };
 }
 
-export function generatePlayerUpdate(
-  channelId: string,
-  playerA: Participant,
-  playerB: Participant
-): UpdateChannelRequest {
+export function generatePlayerUpdate(channelId: string): UpdateChannelRequest {
   return {
     id: 555555555,
     method: 'UpdateChannel',
     jsonrpc: '2.0',
     params: {
       channelId,
-      participants: [playerA, playerB],
       appData: '0x0',
       allocations: [
         {
