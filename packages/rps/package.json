@@ -67,7 +67,7 @@
   "devDependencies": {
     "@babel/runtime": "7.8.3",
     "@statechannels/channel-provider": "*",
-    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/client-api-schema": "0.0.3",
     "@statechannels/devtools": "0.1.4",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@storybook/react": "5.3.9",
