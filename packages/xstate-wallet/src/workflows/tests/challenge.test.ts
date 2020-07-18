@@ -3,9 +3,8 @@ import {interpret} from 'xstate';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 
-import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
+import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';
 
-import {BigNumber} from 'ethers';
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
 import {Player} from '../../integration-tests/helpers';
@@ -44,11 +43,11 @@ beforeEach(async () => {
     outcome: simpleEthAllocation([
       {
         destination: playerA.destination,
-        amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
+        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
       },
       {
         destination: playerA.destination,
-        amount: BigNumber.from(hexZeroPad('0x06f05b59d3b20000', 32))
+        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
       }
     ]),
     turnNum: 5,

@@ -1,5 +1,5 @@
-import {simpleEthAllocation} from '@statechannels/wallet-core';
-import {BigNumber, constants} from 'ethers';
+import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
+import {constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema';
 import {FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID} from '../config';
@@ -59,7 +59,7 @@ test('accepts states when running', async () => {
       })
     );
 
-  const amount = BigNumber.from('0x06f05b59d3b20000');
+  const amount = BN.from('0x06f05b59d3b20000');
   const outcome = simpleEthAllocation(players.map(({destination}) => ({destination, amount})));
 
   hookUpMessaging(playerA, playerB);

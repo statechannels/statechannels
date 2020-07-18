@@ -4,7 +4,7 @@ import {useService} from '@xstate/react';
 
 import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
-import {DomainBudget} from '@statechannels/wallet-core';
+import {DomainBudget, BN} from '@statechannels/wallet-core';
 import {track} from '../segment-analytics';
 import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
@@ -37,8 +37,8 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
         </Text>
 
         <Text pb={3} fontSize={1}>
-          You will receive {formatEther(playerAmount)} ETH and the budget will be closed with the
-          channel hub.
+          You will receive {formatEther(BN.from(playerAmount))} ETH and the budget will be closed
+          with the channel hub.
         </Text>
         <Button disabled={waiting} onClick={send('USER_APPROVES_CLOSE')} id="approve-withdraw">
           Close and Withdraw

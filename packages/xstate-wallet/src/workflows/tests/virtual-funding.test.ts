@@ -8,15 +8,14 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  add,
   simpleEthAllocation,
   makeDestination,
-  simpleEthGuarantee
+  simpleEthGuarantee,
+  BN
 } from '@statechannels/wallet-core';
 
 import {AddressZero} from '@ethersproject/constants';
 
-import {BigNumber} from 'ethers';
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
 import {
@@ -34,6 +33,7 @@ import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {SimpleHub} from './simple-hub';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
+const {add, sub: subtract} = BN;
 
 jest.setTimeout(20000);
 
@@ -59,7 +59,7 @@ const jointChannel: ChannelConstants = {
 };
 const jointChannelId = calculateChannelId(jointChannel);
 
-const amounts = [BigNumber.from(2), BigNumber.from(3)];
+const amounts = [BN.from(2), BN.from(3)];
 const outcome: Outcome = simpleEthAllocation([
   {destination: jointParticipants[ParticipantIdx.A].destination, amount: amounts[0]},
   {destination: jointParticipants[ParticipantIdx.Hub].destination, amount: amounts.reduce(add)},
@@ -73,8 +73,8 @@ const hubContext: VirtualFundingAsHub.Init = {
   [ParticipantIdx.B]: {}
 };
 
-const ledgerAmounts = [4, 4].map(BigNumber.from);
-const depositAmount = ledgerAmounts.reduce(add).toHexString();
+const ledgerAmounts = [4, 4].map(BN.from);
+const depositAmount = ledgerAmounts.reduce(add);
 let hubStore: TestStore;
 let aStore: TestStore;
 let bStore: TestStore;
@@ -142,7 +142,7 @@ test('virtual funding with smart hub', async () => {
     expect(aService.state.value).toEqual('success');
     const {supported: supportedState} = await aStore.getEntry(jointChannelId);
     const outcome = supportedState.outcome;
-    const amount = BigNumber.from(5);
+    const amount = BN.from(5);
     expect(outcome).toMatchObject(
       simpleEthAllocation([
         {destination: makeDestination(targetChannelId), amount},
@@ -206,11 +206,11 @@ test('virtual funding with a simple hub', async () => {
       simpleEthAllocation([
         {
           destination: jointParticipants[ParticipantIdx.A].destination,
-          amount: ledgerAmounts[0].sub(amounts[0])
+          amount: subtract(ledgerAmounts[0], amounts[0])
         },
         {
           destination: jointParticipants[ParticipantIdx.Hub].destination,
-          amount: ledgerAmounts[1].sub(amounts[1])
+          amount: subtract(ledgerAmounts[1], amounts[1])
         },
         // We don't know the guarantor channel id
         {destination: expect.any(String), amount: amounts.reduce(add)}
@@ -225,7 +225,7 @@ test('virtual funding with a simple hub', async () => {
     expect(funding).toEqual({type: 'Guarantee', guarantorChannelId: expect.any(String)});
     guarantorChannelId = (funding as any).guarantorChannelId;
 
-    const amount = BigNumber.from(5);
+    const amount = BN.from(5);
     expect(supported.outcome).toMatchObject(
       simpleEthAllocation([
         {destination: makeDestination(targetChannelId), amount},

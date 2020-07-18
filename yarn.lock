@@ -4034,15 +4034,6 @@
   dependencies:
     type-detect "4.0.8"
 
-"@statechannels/wallet-core@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.npmjs.org/@statechannels/wallet-core/-/wallet-core-0.0.8.tgz#c224418875ee68df0b7855f2c7bd3c4ed54a5718"
-  integrity sha512-6vTT92v0hcm/s7+IGXJyots/ameeTn7MisFdxWEmT94ZN8wS8VlfGLI+taeBz0dt7YTWDxR/CKJibVcBF6bUhQ==
-  dependencies:
-    "@statechannels/nitro-protocol" "0.1.4"
-    "@statechannels/wire-format" "0.0.7"
-    ethers "5.0.0-beta.191"
-
 "@storybook/addon-actions@5.3.9":
   version "5.3.9"
   resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"

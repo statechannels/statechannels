@@ -17,7 +17,8 @@ import {
   simpleEthAllocation,
   makeDestination,
   FundGuarantor,
-  AllocationItem
+  AllocationItem,
+  BN
 } from '@statechannels/wallet-core';
 
 import {Store, supportedStateFeed} from '../store';
@@ -195,7 +196,9 @@ export const waitForFirstJointState = (store: Store) => ({
           )
         ) {
           throw new Error('Incorrect participants');
-        } else if (!amounts[OutcomeIdx.A].add(amounts[OutcomeIdx.B]).eq(amounts[OutcomeIdx.Hub])) {
+        } else if (
+          !(BN.add(amounts[OutcomeIdx.A], amounts[OutcomeIdx.B]) === amounts[OutcomeIdx.Hub])
+        ) {
           throw new Error('Incorrect allocation');
         } else return;
       }),

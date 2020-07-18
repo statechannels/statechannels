@@ -1,7 +1,6 @@
-import {DomainBudget, unreachable} from '@statechannels/wallet-core';
+import {DomainBudget, unreachable, Uint256} from '@statechannels/wallet-core';
 
 import {Interpreter} from 'xstate';
-import {BigNumber} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {
@@ -83,7 +82,7 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
 
 export function getAmountsFromBudget(
   budget: DomainBudget
-): {playerAmount: BigNumber; hubAmount: BigNumber} {
+): {playerAmount: Uint256; hubAmount: Uint256} {
   const pending = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   if (!pending) throw new Error('No eth budget found');
   const {availableReceiveCapacity, availableSendCapacity} = pending;

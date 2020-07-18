@@ -2,9 +2,9 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import React from 'react';
-import {Participant, DomainBudget} from '@statechannels/wallet-core';
+import {Participant, DomainBudget, ethBudget, BN} from '@statechannels/wallet-core';
 import {parseEther} from '@ethersproject/units';
-import {ethBudget} from '@statechannels/wallet-core';
+
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {Store} from '../../store';
@@ -33,8 +33,8 @@ const bob: Participant = {
 };
 
 const budget: DomainBudget = ethBudget('rps.statechannels.org', {
-  availableReceiveCapacity: parseEther('0.05'),
-  availableSendCapacity: parseEther('0.05')
+  availableReceiveCapacity: BN.from(parseEther('0.05')),
+  availableSendCapacity: BN.from(parseEther('0.05'))
 });
 const testContext: WorkflowContext = {
   player: alice,
