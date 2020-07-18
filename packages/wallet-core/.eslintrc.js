@@ -16,20 +16,14 @@ module.exports = {
     browser: true,
     es6: true
   },
-  plugins: ['jest', 'react'],
-  settings: {
-    react: {
-      version: 'detect'
-    }
-  },
+  plugins: ['jest'],
   extends: [
     '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:import/typescript',
-    'plugin:react/recommended'
+    'plugin:import/typescript'
   ],
   rules: {
     // @typescript-eslint/no-unused-vars overrides this
