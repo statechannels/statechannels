@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/wallet-core",
   "description": "State channel wallet components.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Alex Gap",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.1.4",
