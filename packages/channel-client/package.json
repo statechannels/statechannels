@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/channel-client",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
     "@statechannels/channel-provider": "*",
@@ -28,7 +28,7 @@
   },
   "files": [
     "lib/src",
-    "lib/tests/fakes/fake-channel-provider.js"
+    "lib/tests"
   ],
   "keywords": [
     "ethereum",
