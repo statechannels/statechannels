@@ -7,12 +7,12 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  SignedState
+  SignedState,
+  BN
 } from '@statechannels/wallet-core';
 
 import {AddressZero} from '@ethersproject/constants';
 
-import {BigNumber} from 'ethers';
 import {Store} from '../../store';
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
@@ -42,7 +42,7 @@ const targetChannelId = calculateChannelId(targetChannel);
 
 const destinations = participants.map(p => p.destination);
 
-const amounts = [BigNumber.from(7), BigNumber.from(5)];
+const amounts = [BN.from(7), BN.from(5)];
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',

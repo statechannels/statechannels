@@ -1,8 +1,13 @@
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
-import {simpleEthAllocation, isCloseLedger, CloseLedger} from '@statechannels/wallet-core';
-import {BigNumber} from 'ethers';
+import {
+  simpleEthAllocation,
+  isCloseLedger,
+  CloseLedger,
+  BN,
+  Zero
+} from '@statechannels/wallet-core';
 
 import waitForExpect from 'wait-for-expect';
 import {CHALLENGE_DURATION} from '../config';
@@ -26,8 +31,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     fakeChain
   );
   const outcome = simpleEthAllocation([
-    {amount: BigNumber.from(6), destination: playerA.destination},
-    {amount: BigNumber.from(4), destination: hub.destination}
+    {amount: BN.from(6), destination: playerA.destination},
+    {amount: BN.from(4), destination: hub.destination}
   ]);
   hookUpMessaging(playerA, hub);
 
@@ -43,8 +48,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   );
 
   await playerA.store.setDestinationAddress(playerA.signingAddress);
-  await playerA.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
-  await hub.store.createBudget(budget(BigNumber.from(6), BigNumber.from(4)));
+  await playerA.store.createBudget(budget(BN.from(6), BN.from(4)));
+  await hub.store.createBudget(budget(BN.from(6), BN.from(4)));
 
   await playerA.store.setLedger(ledgerChannel.channelId);
   await hub.store
@@ -95,7 +100,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   // Verify that the blockchain is correct
   const chainView = await playerA.store.chain.getChainInfo(ledgerChannel.channelId);
   expect(chainView.channelStorage.finalizesAt > 0).toBe(true);
-  expect(chainView.amount.eq(0)).toBe(true);
+  expect(chainView.amount).toBe(Zero);
 
   // Check the channel is finalized
   const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);

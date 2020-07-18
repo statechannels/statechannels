@@ -1,7 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {
-  add,
   checkThat,
   isSimpleEthAllocation,
   firstState,
@@ -10,14 +9,14 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  SignedState
+  SignedState,
+  BN
 } from '@statechannels/wallet-core';
 
 import _ from 'lodash';
 
 import {AddressZero} from '@ethersproject/constants';
 
-import {BigNumber} from 'ethers';
 import {FakeChain, Chain} from '../../chain';
 import {TestStore} from '../../test-store';
 import {wallet1, wallet2, participants} from './data';
@@ -26,6 +25,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {Init, machine, Errors} from '../ledger-funding';
 
 jest.setTimeout(10000);
+const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -51,8 +51,8 @@ const ledgerChannel: ChannelConstants = {
 const ledgerChannelId = calculateChannelId(ledgerChannel);
 
 const destinations = participants.map(p => p.destination);
-const amounts = [BigNumber.from(7), BigNumber.from(5)];
-const deductionAmounts = [BigNumber.from(3), BigNumber.from(2)];
+const amounts = [BN.from(7), BN.from(5)];
+const deductionAmounts = [BN.from(3), BN.from(2)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
@@ -101,7 +101,7 @@ describe('success', () => {
 
   test('happy path', async () => {
     const _chain = new FakeChain();
-    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add));
     [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
 
     const aService = interpret(machine(aStore).withContext(context));
@@ -120,7 +120,7 @@ describe('success', () => {
         [0, 1]
           .map(i => ({
             destination: destinations[i],
-            amount: amounts[i].sub(deductionAmounts[i])
+            amount: BN.sub(amounts[i], deductionAmounts[i])
           }))
           .concat([{destination: targetChannelId as any, amount: deductionAmounts.reduce(add)}])
       );
@@ -134,7 +134,7 @@ describe('success', () => {
 
   test('locks', async () => {
     const _chain = new FakeChain();
-    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+    _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add));
     [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
 
     const aService = interpret(machine(aStore).withContext(context));
@@ -180,7 +180,7 @@ describe('failure modes', () => {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [0, 1].map(i => ({
         destination: destinations[i],
-        amount: deductionAmounts[i].sub(1)
+        amount: BN.sub(deductionAmounts[i], 1)
       }))
     }
   };
