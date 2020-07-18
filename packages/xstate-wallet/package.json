@@ -103,7 +103,9 @@
     "babel-preset-react-app": "9.1.0",
     "resolve-url-loader": "3.1.0",
     "react-dev-utils": "9.0.4",
-    "file-loader": "5.0.2"
+    "file-loader": "5.0.2",
+    "postcss-flexbugs-fixes": "4.1.0",
+    "postcss-preset-env": "6.7.0"
   },
   "engines": {
     "node": "12.16.3"
