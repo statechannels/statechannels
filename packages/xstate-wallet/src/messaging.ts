@@ -28,22 +28,14 @@ import {
   Participant,
   unreachable,
   isSimpleEthAllocation,
-  makeDestination
-} from '@statechannels/wallet-core';
-// eslint-disable-next-line no-restricted-imports
-import {
+  makeDestination,
   serializeDomainBudget,
-  serializeChannelEntry
-} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
-// eslint-disable-next-line no-restricted-imports
-import {deserializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/deserialize';
-// eslint-disable-next-line no-restricted-imports
-import {serializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/serialize';
-// eslint-disable-next-line no-restricted-imports
-import {
+  serializeChannelEntry,
+  deserializeMessage,
+  serializeMessage,
   deserializeAllocations,
   deserializeBudgetRequest
-} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
+} from '@statechannels/wallet-core';
 
 import {AppRequestEvent} from './event-types';
 
