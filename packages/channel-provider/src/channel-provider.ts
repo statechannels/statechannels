@@ -6,11 +6,11 @@ import {MessagingService} from './messaging-service';
 import {
   ChannelProviderInterface,
   isJsonRpcNotification,
-  MethodRequestType,
-  MethodResponseType,
+  Method,
+  EventType,
+  MethodType,
   OnType,
-  OffType,
-  EventType
+  OffType
 } from './types';
 import {UIService} from './ui-service';
 import {logger} from './logger';
@@ -49,7 +49,7 @@ class ChannelProvider implements ChannelProviderInterface {
   async mountWalletComponent(url?: string) {
     if (this.mounted) {
       logger.warn(
-        'The channel provider has already been mounted ignoring call to mountWalletComponent'
+        'The channel provider has already been mounted: ignoring call to mountWalletComponent'
       );
       return;
     }
@@ -67,31 +67,34 @@ class ChannelProvider implements ChannelProviderInterface {
     logger.info('Waiting for wallet ping...');
     await this.walletReady;
     logger.info('Wallet ready to receive requests');
-    const {signingAddress, destinationAddress, walletVersion} = await this.send({
-      method: 'GetWalletInformation',
-      params: {}
-    });
+    const {signingAddress, destinationAddress, walletVersion} = await this.send(
+      'GetWalletInformation',
+      {}
+    );
     this.signingAddress = signingAddress;
     this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 
   async enable() {
-    const {signingAddress, destinationAddress, walletVersion} = await this.send({
-      method: 'EnableEthereum',
-      params: {}
-    });
+    const {signingAddress, destinationAddress, walletVersion} = await this.send(
+      'EnableEthereum',
+      {}
+    );
     this.signingAddress = signingAddress;
     this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 
-  async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
+  async send<M extends Method = Method>(
+    method: M,
+    params: MethodType[M]['request']['params']
+  ): Promise<MethodType[M]['response']['result']> {
     const target = await this.ui.getTarget();
     const response = await this.messaging.request(target, {
       jsonrpc: '2.0',
-      method: request.method,
-      params: request.params
+      method: method,
+      params: params
     });
 
     return response;
