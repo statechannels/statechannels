@@ -5,6 +5,9 @@
 # dependencies
 node_modules
 
+# ts output
+lib
+
 # testing
 coverage
 

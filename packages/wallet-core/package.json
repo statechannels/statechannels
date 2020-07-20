@@ -26,7 +26,8 @@
     "src"
   ],
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "scripts": {
     "build": "yarn tsc -b",
     "build:ci": "yarn build",
