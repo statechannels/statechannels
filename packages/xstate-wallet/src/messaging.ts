@@ -257,6 +257,9 @@ async function convertToInternalEvent(
       if (!closeAndWithdrawDestination) {
         throw new Error('No selected destination');
       }
+      if (!request.params.hubId !== HUB_ADDRESS) {
+        throw new Error(`You may only closeAndWithdraw for hub with address ${HUB_ADDRESS}`);
+      }
       return {
         type: 'CLOSE_AND_WITHDRAW',
         requestId: request.id,
@@ -265,7 +268,11 @@ async function convertToInternalEvent(
           signingAddress: await store.getAddress(),
           destination: closeAndWithdrawDestination
         }),
-        hub: convertToInternalParticipant(request.params.hub),
+        hub: convertToInternalParticipant({
+          participantId: request.params.hubAddress,
+          signingAddress: HUB_ADDRESS,
+          destination: HUB_DESTINATION
+        }),
         domain: domain
       };
     case 'ApproveBudgetAndFund':
