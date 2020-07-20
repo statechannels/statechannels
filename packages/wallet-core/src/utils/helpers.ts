@@ -7,7 +7,7 @@ export function unreachable(x: never) {
 
 export const exists = <T>(t: T | undefined): t is T => !!t;
 
-const throwError = (fn: (t1: any) => boolean, t) => {
+const throwError = (fn: (t1: any) => boolean, t: any) => {
   throw new Error(`not valid, ${fn.name} failed on ${t}`);
 };
 type TypeGuard<T, S> = (t1: T | S) => t1 is T;
