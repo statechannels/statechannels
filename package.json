@@ -5,15 +5,13 @@
   "devDependencies": {
     "@statechannels/devtools": "0.1.4",
     "@types/prettier": "1.19.0",
-    "@types/wait-on": "4.0.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
     "netlify-cli": "2.30.0",
     "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.5",
-    "wait-on": "4.0.0"
+    "typescript": "3.7.5"
   },
   "engines": {
     "yarn": "^1.17.0",
