@@ -98,7 +98,7 @@
   },
   "license": "MIT",
   "main": "index.js",
-  "private": true,
+  "private": false,
   "scripts": {
     "build": "node scripts/build.js",
     "build:ci": "yarn build",
