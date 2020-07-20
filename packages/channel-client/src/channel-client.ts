@@ -160,7 +160,6 @@ export class ChannelClient implements ChannelClientInterface {
    * Updates the state of a channel
    *
    * @param channelId id for the state channel
-   * @param participants Array of Participants for this channel TODO not clear why this is here, as it must be constant once the channel has its id.
    * @param allocations Updated allocation of funds for this channel
    * @param appData Updated application data for this channel
    * @returns A promise that resolves to a ChannelResult.
