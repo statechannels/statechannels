@@ -7,7 +7,7 @@
   "devDependencies": {
     "@statechannels/channel-client": "*",
     "@statechannels/channel-provider": "*",
-    "@statechannels/nitro-protocol": "0.1.4",
+    "@statechannels/nitro-protocol": "0.1.5",
     "@types/http-server": "0.10.0",
     "@types/webpack": "4.41.12",
     "ethers": "4.0.45",

@@ -4,7 +4,7 @@
   "version": "0.1.2",
   "author": "Alex Gap",
   "dependencies": {
-    "@statechannels/nitro-protocol": "0.1.4",
+    "@statechannels/nitro-protocol": "0.1.5",
     "@statechannels/wire-format": "0.0.7",
     "ethers": "5.0.0-beta.191",
     "lodash": "4.17.19"
