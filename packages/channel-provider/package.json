@@ -1,6 +1,6 @@
 {
   "name": "@statechannels/channel-provider",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "browser": "dist/channel-provider.min.js",
   "browserslist": {
     "production": [
