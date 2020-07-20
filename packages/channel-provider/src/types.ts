@@ -1,6 +1,5 @@
 import {EventEmitter} from 'eventemitter3';
 import {
-  Request as RequestParams,
   CreateChannelResponse,
   CreateChannelRequest,
   CloseChannelResponse,

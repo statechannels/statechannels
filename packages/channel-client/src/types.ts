@@ -56,8 +56,8 @@ export interface ChannelClientInterface {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<DomainBudget>;
-  getBudget(hubAddress: string): Promise<DomainBudget>;
-  closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget>;
+  getBudget(hubAddress: string): Promise<DomainBudget | {}>;
+  closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
   getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
 }
 export interface EventsWithArgs {
