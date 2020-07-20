@@ -1,4 +1,4 @@
-import {EventEmitter} from 'eventemitter3';
+import { EventEmitter } from 'eventemitter3';
 import {
   parseRequest,
   CreateChannelRequest,
@@ -17,10 +17,10 @@ import {
   ErrorResponse,
   ChallengeChannelRequest,
   FundingStrategy,
-  parseResponse
+  parseResponse,
 } from '@statechannels/client-api-schema';
-import {fromEvent, Observable} from 'rxjs';
-import {validateMessage} from '@statechannels/wire-format';
+import { fromEvent, Observable } from 'rxjs';
+import { validateMessage } from '@statechannels/wire-format';
 import {
   Message,
   DomainBudget,
@@ -33,12 +33,21 @@ import {
   deserializeMessage,
   serializeMessage,
   deserializeAllocations,
-  deserializeBudgetRequest
+  deserializeBudgetRequest,
 } from '@statechannels/wallet-core';
 
-import {AppRequestEvent} from './event-types';
-import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
-import {Store} from './store';
+import { AppRequestEvent } from './event-types';
+
+import {
+  CHALLENGE_DURATION,
+  GIT_VERSION,
+  CHAIN_NETWORK_ID,
+  HUB_PARTICIPANT_ID,
+  HUB_ADDRESS,
+  HUB_DESTINATION,
+} from './config';
+
+import { Store } from './store';
 
 type ChannelRequest =
   | ChallengeChannelRequest
@@ -72,7 +81,7 @@ export interface MessagingServiceInterface {
   );
   sendChannelNotification(
     method: ChannelProposedNotification['method'],
-    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+    notificationData: ChannelResult & { fundingStrategy: FundingStrategy }
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
@@ -96,12 +105,12 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendResponse(id: number, result: Response['result']) {
-    const response = parseResponse({id, jsonrpc: '2.0', result});
+    const response = parseResponse({ id, jsonrpc: '2.0', result });
     this.eventEmitter.emit('SendMessage', response);
   }
 
   public async sendError(id: number, error: ErrorResponse['error']) {
-    const response = {id, jsonrpc: '2.0', error} as ErrorResponse; // typescript can't handle this otherwise
+    const response = { id, jsonrpc: '2.0', error } as ErrorResponse; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', response);
   }
 
@@ -109,7 +118,7 @@ export class MessagingService implements MessagingServiceInterface {
     const notification: Notification = {
       jsonrpc: '2.0',
       method: 'BudgetUpdated',
-      params: serializeDomainBudget(notificationData)
+      params: serializeDomainBudget(notificationData),
     };
     this.eventEmitter.emit('SendMessage', notification);
   }
@@ -121,11 +130,11 @@ export class MessagingService implements MessagingServiceInterface {
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(
     method: ChannelProposedNotification['method'],
-    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+    notificationData: ChannelResult & { fundingStrategy: FundingStrategy }
   );
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(method, notificationData) {
-    const notification = {jsonrpc: '2.0', method, params: notificationData} as Notification; // typescript can't handle this otherwise
+    const notification = { jsonrpc: '2.0', method, params: notificationData } as Notification; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', notification);
   }
 
@@ -134,19 +143,19 @@ export class MessagingService implements MessagingServiceInterface {
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
     const objectiveRecipients =
-      message.objectives?.map(o => o.participants).reduce((a, b) => a.concat(b)) || [];
+      message.objectives?.map((o) => o.participants).reduce((a, b) => a.concat(b)) || [];
     const stateRecipients =
-      message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b)) || [];
+      message.signedStates?.map((ss) => ss.participants).reduce((a, b) => a.concat(b)) || [];
 
     const filteredRecipients = [...new Set((objectiveRecipients || []).concat(stateRecipients))]
-      .filter(p => p.signingAddress !== sender)
-      .map(p => p.participantId);
+      .filter((p) => p.signingAddress !== sender)
+      .map((p) => p.participantId);
 
-    filteredRecipients.forEach(recipient => {
+    filteredRecipients.forEach((recipient) => {
       const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
-        params: validateMessage(serializeMessage(message, recipient, sender))
+        params: validateMessage(serializeMessage(message, recipient, sender)),
       };
       this.eventEmitter.emit('SendMessage', notification);
     });
@@ -157,21 +166,21 @@ export class MessagingService implements MessagingServiceInterface {
     const notification: Notification = {
       jsonrpc: '2.0',
       method: 'UIUpdate',
-      params: {showWallet}
+      params: { showWallet },
     };
     this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
     const request = parseRequest(jsonRpcRequest);
-    const {id: requestId} = request;
+    const { id: requestId } = request;
 
     switch (request.method) {
       case 'GetWalletInformation':
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
           destinationAddress: (await this.store.getDestinationAddress()) ?? null,
-          walletVersion: GIT_VERSION
+          walletVersion: GIT_VERSION,
         });
         break;
       case 'EnableEthereum':
@@ -180,10 +189,10 @@ export class MessagingService implements MessagingServiceInterface {
           await this.sendResponse(requestId, {
             signingAddress: await this.store.getAddress(),
             destinationAddress,
-            walletVersion: GIT_VERSION
+            walletVersion: GIT_VERSION,
           });
         } else {
-          this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
+          this.eventEmitter.emit('AppRequest', { type: 'ENABLE_ETHEREUM', requestId });
         }
         break;
       case 'GetChannels':
@@ -213,7 +222,7 @@ export class MessagingService implements MessagingServiceInterface {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         await this.store.pushMessage(deserializeMessage(message));
-        await this.sendResponse(requestId, {success: true});
+        await this.sendResponse(requestId, { success: true });
         break;
       case 'GetBudget':
         const DomainBudget = await this.store.getBudget(fromDomain);
@@ -236,7 +245,7 @@ export function convertToInternalParticipant(participant: {
 }): Participant {
   return {
     ...participant,
-    destination: makeDestination(participant.destination)
+    destination: makeDestination(participant.destination),
   };
 }
 
@@ -250,33 +259,33 @@ async function convertToInternalEvent(
       return {
         type: 'PLAYER_REQUEST_CHALLENGE',
         requestId: request.id,
-        channelId: request.params.channelId
+        channelId: request.params.channelId,
       };
     case 'CloseAndWithdraw':
       const closeAndWithdrawDestination = await store.getDestinationAddress();
       if (!closeAndWithdrawDestination) {
         throw new Error('No selected destination');
       }
-      if (!request.params.hubParticipantId !== HUB_PARTICIPANT_ID) {
+      if (!(request.params.hubParticipantId !== HUB_PARTICIPANT_ID)) {
         throw new Error(`You may only closeAndWithdraw for hub with id ${HUB_PARTICIPANT_ID}`);
       }
       return {
         type: 'CLOSE_AND_WITHDRAW',
         requestId: request.id,
         player: convertToInternalParticipant({
-          participantId: request.params.playerParticipantId,
+          participantId: await store.getAddress(),
           signingAddress: await store.getAddress(),
-          destination: closeAndWithdrawDestination
+          destination: closeAndWithdrawDestination,
         }),
         hub: convertToInternalParticipant({
           participantId: request.params.hubParticipantId,
           signingAddress: HUB_ADDRESS,
-          destination: HUB_DESTINATION
+          destination: HUB_DESTINATION,
         }),
-        domain: domain
+        domain: domain,
       };
     case 'ApproveBudgetAndFund':
-      const {hub, playerParticipantId} = request.params;
+      const { hub, playerParticipantId } = request.params;
       const signingAddress = await store.getAddress();
       const destination = await store.getDestinationAddress();
       if (!destination) {
@@ -289,15 +298,15 @@ async function convertToInternalEvent(
         player: convertToInternalParticipant({
           participantId: playerParticipantId,
           signingAddress,
-          destination
+          destination,
         }),
-        hub: convertToInternalParticipant(hub)
+        hub: convertToInternalParticipant(hub),
       };
     case 'CloseChannel':
       return {
         type: 'PLAYER_REQUEST_CONCLUDE',
         requestId: request.id,
-        channelId: request.params.channelId
+        channelId: request.params.channelId,
       };
     case 'CreateChannel': {
       const outcome = deserializeAllocations(request.params.allocations);
@@ -312,7 +321,7 @@ async function convertToInternalEvent(
         challengeDuration: CHALLENGE_DURATION,
         chainId: CHAIN_NETWORK_ID,
         requestId: request.id,
-        applicationDomain: domain
+        applicationDomain: domain,
       };
     }
     case 'JoinChannel':
@@ -320,7 +329,7 @@ async function convertToInternalEvent(
         type: 'JOIN_CHANNEL',
         ...request.params,
         requestId: request.id,
-        applicationDomain: domain
+        applicationDomain: domain,
       };
     case 'UpdateChannel':
       const outcome = deserializeAllocations(request.params.allocations);
@@ -334,7 +343,7 @@ async function convertToInternalEvent(
         requestId: request.id,
         outcome,
         channelId: request.params.channelId,
-        appData: request.params.appData
+        appData: request.params.appData,
       };
   }
 }
