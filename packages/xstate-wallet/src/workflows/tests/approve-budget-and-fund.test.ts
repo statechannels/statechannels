@@ -1,6 +1,4 @@
-import {BigNumber} from 'ethers';
-
-import {ethBudget} from '@statechannels/wallet-core';
+import {ethBudget, BN} from '@statechannels/wallet-core';
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../../chain';
@@ -21,8 +19,8 @@ jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 5000;
 
 const budget = ethBudget('example.com', {
-  availableReceiveCapacity: BigNumber.from(5),
-  availableSendCapacity: BigNumber.from(5)
+  availableReceiveCapacity: BN.from(5),
+  availableSendCapacity: BN.from(5)
 });
 
 hub.participantId = 'hub';

@@ -1,16 +1,15 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {map, filter} from 'rxjs/operators';
-import {exists} from '@statechannels/wallet-core';
-import {BigNumber} from 'ethers';
+import {exists, BN, Uint256} from '@statechannels/wallet-core';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {MachineFactory} from '../utils/workflow-utils';
 
 export type Init = {
   channelId: string;
-  depositAt: BigNumber;
-  totalAfterDeposit: BigNumber;
-  fundedAt: BigNumber;
+  depositAt: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
 };
 
 export const config: MachineConfig<Init, any, any> = {
@@ -25,14 +24,14 @@ export const config: MachineConfig<Init, any, any> = {
     failure: {entry: assign<any>({error: () => 'Deposit failed'})}
   }
 };
-type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BigNumber};
+type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256};
 
 export const machine: MachineFactory<Init, any> = (store: Store) => {
   const subscribeDepositEvent = (ctx: Init) =>
     store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo: ChannelChainInfo): 'FUNDED' | SafeToDeposit | undefined => {
-        if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
-        else if (chainInfo.amount.gte(ctx.depositAt))
+        if (BN.gte(chainInfo.amount, ctx.fundedAt)) return 'FUNDED';
+        else if (BN.gte(chainInfo.amount, ctx.depositAt))
           return {type: 'SAFE_TO_DEPOSIT', currentHoldings: chainInfo.amount};
         else return;
       }),
@@ -40,10 +39,10 @@ export const machine: MachineFactory<Init, any> = (store: Store) => {
     );
 
   const submitDepositTransaction = async (ctx: Init, {currentHoldings}: SafeToDeposit) => {
-    const amount = BigNumber.from(ctx.totalAfterDeposit).sub(currentHoldings);
-    if (amount.lte(0)) return;
+    const amount = BN.sub(ctx.totalAfterDeposit, currentHoldings);
+    if (BN.lte(amount, 0)) return;
 
-    await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
+    await store.chain.deposit(ctx.channelId, BN.from(currentHoldings), amount);
   };
 
   const services = {submitDepositTransaction};

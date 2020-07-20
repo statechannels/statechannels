@@ -13,13 +13,13 @@ import {
   isVirtuallyFund,
   StateVariables,
   Outcome,
-  add,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  checkThat
+  checkThat,
+  Zero,
+  BN
 } from '@statechannels/wallet-core';
 
-import {Zero} from '@ethersproject/constants';
 import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
@@ -27,6 +27,7 @@ import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
 import {getDataAndInvoke} from '../utils';
 const PROTOCOL = 'create-and-fund';
+const {add} = BN;
 
 export type Init = {
   channelId: string;
@@ -235,9 +236,9 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   let depositAt = Zero;
   for (let i = 0; i < allocationItems.length; i++) {
     const {amount} = allocationItems[i];
-    if (i !== myIndex) depositAt = depositAt.add(amount);
+    if (i !== myIndex) depositAt = add(depositAt, amount);
     else {
-      const totalAfterDeposit = depositAt.add(amount);
+      const totalAfterDeposit = add(depositAt, amount);
       return {channelId, depositAt, totalAfterDeposit, fundedAt};
     }
   }

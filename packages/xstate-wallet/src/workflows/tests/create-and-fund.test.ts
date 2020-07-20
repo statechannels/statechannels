@@ -1,8 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {BigNumber} from 'ethers';
-
 import {
   firstState,
   calculateChannelId,
@@ -12,7 +10,7 @@ import {
   State,
   checkThat,
   isSimpleEthAllocation,
-  add
+  BN
 } from '@statechannels/wallet-core';
 
 import {AddressZero} from '@ethersproject/constants';
@@ -43,6 +41,7 @@ import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);
 
+const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -67,8 +66,8 @@ const ledgerChannel: ChannelConstants = {
 };
 
 const destinations = participants.map(p => p.destination);
-const amounts = [BigNumber.from(7), BigNumber.from(5)];
-const totalAmount = amounts.reduce((a, b) => a.add(b));
+const amounts = [BN.from(7), BN.from(5)];
+const totalAmount = amounts.reduce((a, b) => add(a, b));
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
@@ -79,8 +78,8 @@ const allocation: Outcome = {
   }))
 };
 
-const ledgerAmounts = amounts.map(a => a.add(2));
-const depositAmount = ledgerAmounts.reduce(add).toHexString();
+const ledgerAmounts = amounts.map(a => add(a, 2));
+const depositAmount = ledgerAmounts.reduce(add);
 
 const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
@@ -140,7 +139,7 @@ test('it uses direct funding when told', async () => {
 
   expect(outcome).toMatchObject(allocation);
   expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Direct'});
-  expect((await aStore.chain.getChainInfo(targetChannelId)).amount).toMatchObject(totalAmount);
+  expect((await aStore.chain.getChainInfo(targetChannelId)).amount).toBe(totalAmount);
 });
 
 // eslint-disable-next-line jest/no-disabled-tests
@@ -150,8 +149,8 @@ test.skip('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) =>
     createSignatureEntry(state, privateKey)
   );
-  await aStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
-  await bStore.createBudget(budget(BigNumber.from(7), BigNumber.from(7)));
+  await aStore.createBudget(budget(BN.from(7), BN.from(7)));
+  await bStore.createBudget(budget(BN.from(7), BN.from(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
@@ -189,10 +188,10 @@ test.skip('it uses virtual funding when enabled', async () => {
   const aBudget = await aStore.getBudget(TEST_APP_DOMAIN);
   const aChannelAmount =
     aBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
-  expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
+  expect(aChannelAmount).toEqual(totalAmount);
 
   const bBudget = await bStore.getBudget(TEST_APP_DOMAIN);
   const bChannelAmount =
     bBudget?.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
-  expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
+  expect(bChannelAmount).toEqual(totalAmount);
 });

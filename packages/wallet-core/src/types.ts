@@ -141,11 +141,8 @@ export interface Message {
 }
 
 export type ChannelStoredData = {
-  stateVariables: Array<SignedStateWithHash>;
-  channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
-    challengeDuration: number;
-    channelNonce: number;
-  };
+  stateVariables: Array<SignedStateVarsWithHash>;
+  channelConstants: ChannelConstants;
   funding: Funding | undefined;
   applicationDomain: string | undefined;
   myIndex: number;

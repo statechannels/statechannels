@@ -17,23 +17,25 @@ import {
   statesEqual,
   checkThat,
   exists,
-  simpleEthAllocation
+  simpleEthAllocation,
+  BN,
+  Uint256
 } from '@statechannels/wallet-core';
 
 // eslint-disable-next-line no-restricted-imports
 import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 
-import {BigNumber} from 'ethers';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 import {sendUserDeclinedResponse, hideUI, displayUI} from '../utils/workflow-utils';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../config';
+const {add} = BN;
 interface ChainEvent {
   type: 'CHAIN_EVENT';
   blockNum: number;
-  balance: BigNumber;
+  balance: Uint256;
 }
 
 type Event =
@@ -56,13 +58,13 @@ interface LedgerExists extends Initial {
   ledgerState: ChannelState;
 }
 interface Deposit {
-  depositAt: BigNumber;
-  totalAfterDeposit: BigNumber;
-  fundedAt: BigNumber;
+  depositAt: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
 }
 
 interface Chain {
-  ledgerTotal: BigNumber;
+  ledgerTotal: Uint256;
   lastChangeBlockNum: number;
   currentBlockNum: number;
 }
@@ -303,7 +305,7 @@ const calculateDepositInfo = (context: Context) => {
   );
   const ourAmount = ethBudget.availableSendCapacity;
   const hubAmount = ethBudget.availableSendCapacity;
-  const totalAmount = ourAmount.add(hubAmount);
+  const totalAmount = add(ourAmount, hubAmount);
 
   const depositAt = hubAmount; // hub goes first
   const totalAfterDeposit = totalAmount;
@@ -330,7 +332,7 @@ const notifyWhenSufficientFunds = (store: Store) => ({budget}: Initial) => {
   const depositAmount = ethBudget.availableSendCapacity;
   return store.chain.balanceUpdatedFeed(store.chain.selectedAddress).pipe(
     map(b => ({
-      type: b.gte(depositAmount) ? 'SUFFICIENT_FUNDS_DETECTED' : 'INSUFFICIENT_FUNDS_DETECTED'
+      type: BN.gte(b, depositAmount) ? 'SUFFICIENT_FUNDS_DETECTED' : 'INSUFFICIENT_FUNDS_DETECTED'
     }))
   );
 };
@@ -348,31 +350,31 @@ const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists)
 const fullAmountConfirmed: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
   name: 'fullAmountConfirmed',
-  predicate: (context, event) => event.balance.gte(context.fundedAt)
+  predicate: (context, event) => BN.gte(event.balance, context.fundedAt)
 };
 const myTurnNow: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
   name: 'myTurnNow',
   predicate: (context, event) =>
-    event.balance.gte(context.depositAt) && event.balance.lt(context.totalAfterDeposit)
+    BN.gte(event.balance, context.depositAt) && BN.lt(event.balance, context.totalAfterDeposit)
 };
 const notMyTurnYet: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
   name: 'notMyTurnYet',
-  predicate: (context, event) => event.balance.lt(context.depositAt)
+  predicate: (context, event) => BN.lt(event.balance, context.depositAt)
 };
 const myAmountConfirmed: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
   name: 'myAmountConfirmed',
   predicate: (context, event) =>
-    event.balance.gte(context.totalAfterDeposit) && event.balance.lt(context.fundedAt)
+    BN.gte(event.balance, context.totalAfterDeposit) && BN.lt(event.balance, context.fundedAt)
 };
 
 const assignChainData = assign<Context, ChainEvent>({
   ledgerTotal: (context, event: ChainEvent) => event.balance,
   currentBlockNum: (context, event: ChainEvent) => event.blockNum,
   lastChangeBlockNum: (context, event: ChainEvent) =>
-    context.ledgerTotal && context.ledgerTotal.eq(event.balance)
+    context.ledgerTotal && context.ledgerTotal === event.balance
       ? context.lastChangeBlockNum
       : event.blockNum
 });
@@ -384,15 +386,15 @@ const setTransactionId = assign<Context, DoneInvokeEvent<string>>({
 const submitDepositTransaction = (store: Store) => async (
   ctx: LedgerExists & Deposit & Chain
 ): Promise<string | undefined> => {
-  const amount = ctx.totalAfterDeposit.sub(ctx.ledgerTotal);
-  if (amount.lte(0)) {
+  const amount = BN.sub(ctx.totalAfterDeposit, ctx.ledgerTotal);
+  if (BN.lte(amount, 0)) {
     // sanity check: we shouldn't be in this state, if this is the case
     throw new Error(
       `Something is wrong! Shouldn't be trying to deposit when the remaining amount is ${amount.toString()}.`
     );
   }
 
-  return store.chain.deposit(ctx.ledgerId, ctx.ledgerTotal.toHexString(), amount.toHexString());
+  return store.chain.deposit(ctx.ledgerId, BN.from(ctx.ledgerTotal), amount);
 };
 
 export type ApproveBudgetAndFundService = Interpreter<Context, any, Event, Typestate>;

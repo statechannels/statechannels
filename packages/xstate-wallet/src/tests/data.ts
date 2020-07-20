@@ -1,10 +1,11 @@
-import {ethers, BigNumberish, BigNumber} from 'ethers';
+import {ethers, BigNumberish} from 'ethers';
 import {
   simpleEthAllocation,
   makeDestination,
   Participant,
   State,
-  DomainBudget
+  DomainBudget,
+  BN
 } from '@statechannels/wallet-core';
 
 import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
@@ -45,8 +46,8 @@ export const appState = (turnNum: number, isFinal = false): State => ({
   isFinal,
   turnNum,
   outcome: simpleEthAllocation([
-    {destination: first.destination, amount: BigNumber.from(1)},
-    {destination: second.destination, amount: BigNumber.from(3)}
+    {destination: first.destination, amount: BN.from(1)},
+    {destination: second.destination, amount: BN.from(3)}
   ]),
   participants,
   channelNonce: 1,
@@ -63,7 +64,7 @@ export const ledgerState = (
   outcome: simpleEthAllocation(
     amounts.map((a, i) => ({
       destination: participants[i].destination,
-      amount: BigNumber.from(a)
+      amount: BN.from(a)
     }))
   ),
   participants,
@@ -76,14 +77,14 @@ export const ledgerState = (
 });
 
 export const TEST_APP_DOMAIN = 'localhost';
-export const budget = (send: BigNumber, receive: BigNumber): DomainBudget => ({
+export const budget = (send: string, receive: string): DomainBudget => ({
   hubAddress: HUB_ADDRESS,
   domain: TEST_APP_DOMAIN,
   forAsset: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      availableReceiveCapacity: receive,
-      availableSendCapacity: send,
+      availableReceiveCapacity: BN.from(receive),
+      availableSendCapacity: BN.from(send),
       channels: {}
     }
   }
