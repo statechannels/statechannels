@@ -1,11 +1,11 @@
 import {EventEmitter} from 'eventemitter3';
 import {
   ChannelProviderInterface,
-  MethodResponseType,
-  MethodRequestType,
   OnType,
   OffType,
-  EventType
+  EventType,
+  MethodType,
+  Method
 } from '@statechannels/channel-provider';
 import {
   ApproveBudgetAndFundParams,
@@ -19,7 +19,8 @@ import {
   PushMessageResult,
   DomainBudget,
   UpdateChannelParams,
-  Message
+  Message,
+  PushMessageParams
 } from '@statechannels/client-api-schema';
 import {Wallet} from 'ethers';
 import log = require('loglevel');
@@ -70,22 +71,25 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   async enable(): Promise<void> {
-    const {signingAddress, destinationAddress, walletVersion} = await this.send({
-      method: 'EnableEthereum',
-      params: {}
-    });
+    const {signingAddress, destinationAddress, walletVersion} = await this.send(
+      'EnableEthereum',
+      {}
+    );
     this.signingAddress = signingAddress;
     this.destinationAddress = destinationAddress;
     this.walletVersion = walletVersion;
   }
 
-  async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
-    switch (request.method) {
+  async send<M extends Method = Method>(
+    method: M,
+    params: MethodType[M]['request']['params']
+  ): Promise<MethodType[M]['response']['result']> {
+    switch (method) {
       case 'CreateChannel':
-        return this.createChannel(request.params);
+        return this.createChannel(params as CreateChannelParams);
 
       case 'PushMessage':
-        return this.pushMessage(request.params);
+        return this.pushMessage(params as PushMessageParams);
 
       case 'GetWalletInformation':
       case 'EnableEthereum':
@@ -96,28 +100,28 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         };
 
       case 'JoinChannel':
-        return this.joinChannel(request.params);
+        return this.joinChannel(params as JoinChannelParams);
 
       case 'GetState':
-        return this.getState(request.params);
+        return this.getState(params as GetStateParams);
 
       case 'UpdateChannel':
-        return this.updateChannel(request.params);
+        return this.updateChannel(params as UpdateChannelParams);
 
       case 'CloseChannel':
-        return this.closeChannel(request.params);
+        return this.closeChannel(params as CloseChannelParams);
 
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(request.params);
+        return this.approveBudgetAndFund(params as ApproveBudgetAndFundParams);
 
       case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(request.params);
+        return this.closeAndWithdraw(params as CloseAndWithdrawParams);
 
       case 'GetBudget':
-        return this.getBudget(request.params);
+        return this.getBudget(params as GetBudgetParams);
 
       default:
-        return Promise.reject(`No callback available for ${request.method}`);
+        return Promise.reject(`No callback available for ${method}`);
     }
   }
 
