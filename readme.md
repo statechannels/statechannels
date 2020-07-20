@@ -38,7 +38,6 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
-- [simple-hub](./packages/simple-hub) : Simple server wallet for mediating virtual channels
 - [wallet-core](./packages/wallet-core) : Core wallet code that works in node-js and browser contexts
 - [wire-format](./packages/wire-format) : Format of messages that are sent over the wire between wallets
 - [xstate-wallet](./packages/xstate-wallet) : A browser wallet implementation
