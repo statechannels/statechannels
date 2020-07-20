@@ -18,7 +18,7 @@ import {StateVariables} from '@statechannels/wallet-core';
 
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
 // eslint-disable-next-line no-restricted-imports
-import {serializeChannelEntry} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+import {serializeChannelEntry} from '@statechannels/wallet-core/src/serde/app-messages/serialize';
 import _ from 'lodash';
 import {
   PlayerStateUpdate,

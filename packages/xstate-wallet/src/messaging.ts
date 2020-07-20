@@ -34,16 +34,16 @@ import {
 import {
   serializeDomainBudget,
   serializeChannelEntry
-} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+} from '@statechannels/wallet-core/src/serde/app-messages/serialize';
 // eslint-disable-next-line no-restricted-imports
-import {deserializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/deserialize';
+import {deserializeMessage} from '@statechannels/wallet-core/src/serde/wire-format/deserialize';
 // eslint-disable-next-line no-restricted-imports
-import {serializeMessage} from '@statechannels/wallet-core/lib/src/serde/wire-format/serialize';
+import {serializeMessage} from '@statechannels/wallet-core/src/serde/wire-format/serialize';
 // eslint-disable-next-line no-restricted-imports
 import {
   deserializeAllocations,
   deserializeBudgetRequest
-} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
+} from '@statechannels/wallet-core/src/serde/app-messages/deserialize';
 
 import {AppRequestEvent} from './event-types';
 

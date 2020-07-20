@@ -23,7 +23,7 @@ import {
 } from '@statechannels/wallet-core';
 
 // eslint-disable-next-line no-restricted-imports
-import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
+import {serializeDomainBudget} from '@statechannels/wallet-core/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 
 import {ChannelChainInfo} from '../chain';
