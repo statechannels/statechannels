@@ -264,7 +264,7 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
-      hub,
+      hubParticipantId: hub.participantId,
       playerParticipantId: player.participantId
     }
   };
