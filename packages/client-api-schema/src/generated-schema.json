@@ -183,16 +183,12 @@
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
       "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerParticipantId": {
+        "hubParticipantId": {
           "type": "string"
         }
       },
       "required": [
-        "hub",
-        "playerParticipantId"
+        "hubParticipantId"
       ],
       "type": "object"
     },
@@ -200,7 +196,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476%3E"
     },
     "CloseChannelError": {
       "anyOf": [
@@ -1596,7 +1592,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540>": {
+    "JsonRpcResponse<structure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476>": {
       "additionalProperties": false,
       "properties": {
         "id": {

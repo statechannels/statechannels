@@ -26,7 +26,9 @@ import {
   NotificationType,
   GetChannelsRequest,
   GetChannelsResponse,
-  ErrorResponse
+  ErrorResponse,
+  CloseAndWithdrawRequest,
+  CloseAndWithdrawResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -83,7 +85,7 @@ export type MethodResponseType = {
   ChallengeChannel: ChallengeChannelResponse['result'];
   ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
-  CloseAndWithdraw: any; // TODO: Add types
+  CloseAndWithdraw: CloseAndWithdrawResponse['result'];
   GetChannels: GetChannelsResponse['result'];
 };
 
@@ -120,7 +122,7 @@ export type MethodRequestType =
   | Call<'ChallengeChannel', ChallengeChannelRequest>
   | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
   | Call<'GetBudget', GetBudgetRequest>
-  | Call<'CloseAndWithdraw', any>
+  | Call<'CloseAndWithdraw', CloseAndWithdrawRequest>
   | Call<'GetChannels', GetChannelsRequest>;
 
 export interface EventType extends NotificationType {
