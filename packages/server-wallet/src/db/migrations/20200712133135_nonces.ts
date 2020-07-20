@@ -3,7 +3,7 @@ import * as Knex from 'knex';
 const nonces = 'nonces';
 const addresses = 'addresses';
 const constraint = 'nonces_addresses_are_valid';
-const countInvalidAddresses = 'count_invalid_addresses';
+const validateAddresses = 'validate_addresses';
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable(nonces, table => {
@@ -19,7 +19,7 @@ export async function up(knex: Knex): Promise<any> {
   });
 
   await knex.raw(`\
-    CREATE OR REPLACE FUNCTION ${countInvalidAddresses}(text[])
+    CREATE OR REPLACE FUNCTION ${validateAddresses}(text[])
     RETURNS boolean AS
     $$
     BEGIN RETURN
@@ -36,7 +36,7 @@ export async function up(knex: Knex): Promise<any> {
   `);
 
   await knex.raw(
-    `ALTER TABLE ${nonces} ADD CONSTRAINT ${constraint} CHECK (${countInvalidAddresses}(addresses));`
+    `ALTER TABLE ${nonces} ADD CONSTRAINT ${constraint} CHECK (${validateAddresses}(addresses));`
   );
 }
 
