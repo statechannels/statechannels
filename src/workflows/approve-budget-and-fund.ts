@@ -19,11 +19,10 @@ import {
   exists,
   simpleEthAllocation,
   BN,
-  Uint256
+  Uint256,
+  serializeDomainBudget
 } from '@statechannels/wallet-core';
 
-// eslint-disable-next-line no-restricted-imports
-import {serializeDomainBudget} from '@statechannels/wallet-core/lib/src/serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 
 import {ChannelChainInfo} from '../chain';
