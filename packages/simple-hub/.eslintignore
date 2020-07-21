@@ -1,9 +1,0 @@
-node_modules/
-/.vscode/
-/typings
-**/*.json
-/.etherlime-store/
-/lib/
-/dist/
-/jest/
-/deployment/

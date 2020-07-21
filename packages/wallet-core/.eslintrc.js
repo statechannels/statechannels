@@ -3,7 +3,7 @@ module.exports = {
     node: true,
     es6: true
   },
-  plugins: ['jest', 'react'],
+  plugins: ['jest'],
   extends: [
     '../../.eslintrc.js',
     'plugin:jest/recommended',

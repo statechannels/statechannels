@@ -30,13 +30,9 @@ save_dep: &save_dep
       - packages/channel-provider/node_modules
       - packages/client-api-schema/node_modules
       - packages/devtools/node_modules
-      - packages/e2e-tests/node_modules
       - packages/jest-gas-reporter/node_modules
       - packages/nitro-protocol/node_modules
-      - packages/rps/node_modules
       - packages/simple-hub/node_modules
-      - packages/tic-tac-toe/node_modules
-      - packages/web3torrent/node_modules
       - packages/wire-format/node_modules
       - packages/xstate-wallet/node_modules
 
@@ -62,9 +58,6 @@ save_built_artifacts: &save_built_artifacts
       # Smart contract compiles
       - packages/nitro-protocol/build
       # Webpack builds & contract compiles
-      - packages/rps/build
-      - packages/tic-tac-toe/build
-      - packages/web3torrent/build
       - packages/xstate-wallet/build
 
 restore_built_artifacts: &restore_built_artifacts
@@ -107,12 +100,6 @@ commands:
       - store_artifacts:
           path: /home/circleci/project/packages/<< parameters.package >>/gas.md
           destination: << parameters.package >>-gas.md
-
-  upload_e2e_screenshots:
-    description: 'Upload e2e error screengrab '
-    steps:
-      - store_artifacts:
-          path: /home/circleci/project/packages/e2e-tests/screenshots
 
   upload_e2e_logs:
     description: 'Upload e2e logs'
@@ -164,32 +151,6 @@ commands:
           registry: registry.heroku.com
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
-
-  integration-test:
-    description: 'Running integration tests'
-    parameters:
-      app:
-        type: enum
-        enum: ['rps', 'web3torrent']
-      test_files:
-        description: Space-delimited list of test files patterns to run
-        type: string
-    steps:
-      - checkout
-      - log_stats:
-          file: integration-test-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - run:
-          command: mkdir logs
-      - run:
-          command: yarn start-servers << parameters.app >>
-          background: true
-      - run: (cd packages/e2e-tests && yarn test << parameters.test_files >>)
-      - upload_logs:
-          file: integration-test-stats
-      - upload_e2e_logs
-      - upload_e2e_screenshots
 
 jobs:
   prepare:
@@ -261,57 +222,8 @@ jobs:
       - upload_logs:
           file: test-stats
       - upload_gas_report:
-          package: rps
-      - upload_gas_report:
           package: nitro-protocol
       - notify_slack
-
-  integration-test-rps:
-    <<: *integration_test_settings
-    environment:
-      SC_ENV: circle-integration-rps
-    steps:
-      - integration-test:
-          app: rps
-          test_files: rps
-
-  integration-test-web3torrent:
-    <<: *integration_test_settings
-    environment:
-      SC_ENV: circle-integration-w3t
-    steps:
-      - integration-test:
-          app: web3torrent
-          test_files: web3torrent
-
-  integration-test-web3torrent-with-hub:
-    <<: *integration_test_settings
-    environment:
-      SC_ENV: circle-integration-w3t-with-hub
-    steps:
-      - integration-test:
-          app: web3torrent
-          test_files: web3torrent
-
-  integration-test-web3torrent-with-hub-optional:
-    <<: *integration_test_settings
-    environment:
-      SC_ENV: circle-integration-w3t-with-hub
-    steps:
-      - integration-test:
-          app: web3torrent
-          test_files: optional
-
-  e2e-test-w3t-production:
-    <<: *integration_test_settings
-    environment:
-      SCREENSHOT_DIR: 'screenshots'
-      LOG_DESTINATION: '../../logs'
-      SC_ENV: production-goerli
-    steps:
-      - integration-test:
-          app: web3torrent
-          test_files: seed-download-complete
 
   release-pull-request:
     <<: *defaults
@@ -366,7 +278,7 @@ jobs:
       - <<: *restore_built_artifacts
       - run:
           rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
-          channel-client client-api-schema e2e-tests persistent-seeder rps tic-tac-toe web3torrent xstate-wallet
+          channel-client client-api-schema xstate-wallet
       - run: yarn --frozen-lockfile
       - build_push_release:
           dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
@@ -377,27 +289,6 @@ jobs:
           channel: C0125NB072B
           failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
           success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
-
-  release-persistent-seeder:
-    working_directory: /home/circleci/project
-    resource_class: large
-    docker:
-      - image: circleci/node:12.16.3-browsers
-    steps:
-      - setup_remote_docker
-      - checkout
-      - <<: *restore_dep
-      - <<: *restore_built_artifacts
-      - run: rm -rf ./patches && cd ./packages/ && find . -maxdepth 1 ! -path "./channel-provider" ! -path "./client-api-schema" ! -path "./persistent-seeder" ! -path "./e2e-tests" ! -path "./devtools" -exec rm -rf {} ';'
-      - build_push_release:
-          dockerfile_path: packages/persistent-seeder/persistent-seeder.dockerfile
-          pipeline: persistent-seeder
-          app: persistent-seeder-production
-      - slack/status:
-          # notify-deployments
-          channel: C0125NB072B
-          failure_message: ':red_circle: Failed to release persistent-seeder at $CIRCLE_SHA1!'
-          success_message: ':tada: Released persistent-seeder at $CIRCLE_SHA1 '
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
@@ -426,18 +317,6 @@ workflows:
       - test:
           requires:
             - prepare
-      - integration-test-rps:
-          requires:
-            - prepare
-      - integration-test-web3torrent:
-          requires:
-            - prepare
-      - integration-test-web3torrent-with-hub:
-          requires:
-            - prepare
-      - integration-test-web3torrent-with-hub-optional:
-          requires:
-            - prepare
       - release-pull-request:
           requires:
             - prepare
@@ -458,20 +337,6 @@ workflows:
               only: deploy
 
       - release-hub-production:
-          filters:
-            branches:
-              only: deploy
-
-      - release-persistent-seeder:
-          filters:
-            branches:
-              only: deploy
-
-      - e2e-test-w3t-production:
-          requires:
-            - prepare
-            - release-hub-production
-            - release-netlify-production
           filters:
             branches:
               only: deploy

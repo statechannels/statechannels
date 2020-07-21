@@ -35,15 +35,10 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
 - [channel-provider](./packages/channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
-- [e2e-tests](./packages/e2e-tests) : End-to-end browser tests of all packages with puppeteer
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
-- [rps](./packages/rps) : Rock paper scissors DApp
-- [simple-hub](./packages/simple-hub) : Simple server wallet for mediating virtual channels
-- [tic-tac-toe](./packages/tic-tac-toe) : Tic-tac-toe DApp
 - [wallet-core](./packages/wallet-core) : Core wallet code that works in node-js and browser contexts
-- [web3torrent](./packages/web3torrent) : DApp extension of webtorrent including micropayments
 - [wire-format](./packages/wire-format) : Format of messages that are sent over the wire between wallets
 - [xstate-wallet](./packages/xstate-wallet) : A browser wallet implementation
 
@@ -101,28 +96,6 @@ To run all tests:
 ```shell
 yarn test
 ```
-
-### Development Flow
-
-The `rps`, `nitro-protocol`, `wallet`, and `hub` packages will need to interact with a local
-blockchain when running and testing locally.
-
-#### Running locally
-
-Run
-
-```
-SC_ENV=virtual-funding yarn start-servers $APP
-```
-
-where `APP` is either `web3torrent` or `rps`.
-This will start a ganache instance on port 8545, and subsequently start servers for
-
-- the wallet
-- the app
-- the simple-hub (used for virtual-funding)
-
-These servers use a common set of contracts deployed against the shared ganache instance.
 
 ## Community
 
