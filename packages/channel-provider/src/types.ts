@@ -1,6 +1,5 @@
 import {EventEmitter} from 'eventemitter3';
 import {
-  Request as RequestParams,
   CreateChannelResponse,
   CreateChannelRequest,
   CloseChannelResponse,
@@ -26,7 +25,9 @@ import {
   NotificationType,
   GetChannelsRequest,
   GetChannelsResponse,
-  ErrorResponse
+  ErrorResponse,
+  CloseAndWithdrawRequest,
+  CloseAndWithdrawResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -70,24 +71,62 @@ export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorRes
   return 'error' in message;
 }
 
-// TODO: This probably should live in client-api-schema?
-export type MethodResponseType = {
-  CreateChannel: CreateChannelResponse['result'];
-  UpdateChannel: UpdateChannelResponse['result'];
-  PushMessage: PushMessageResponse['result'];
-  CloseChannel: CloseChannelResponse['result'];
-  JoinChannel: JoinChannelResponse['result'];
-  GetState: GetStateResponse['result'];
-  GetWalletInformation: GetWalletInformationResponse['result'];
-  EnableEthereum: EnableEthereumResponse['result'];
-  ChallengeChannel: ChallengeChannelResponse['result'];
-  ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
-  GetBudget: GetBudgetResponse['result'];
-  CloseAndWithdraw: any; // TODO: Add types
-  GetChannels: GetChannelsResponse['result'];
+export type MethodType = {
+  CreateChannel: {
+    request: CreateChannelRequest;
+    response: CreateChannelResponse;
+  };
+  UpdateChannel: {
+    request: UpdateChannelRequest;
+    response: UpdateChannelResponse;
+  };
+  PushMessage: {
+    request: PushMessageRequest;
+    response: PushMessageResponse;
+  };
+  CloseChannel: {
+    request: CloseChannelRequest;
+    response: CloseChannelResponse;
+  };
+  JoinChannel: {
+    request: JoinChannelRequest;
+    response: JoinChannelResponse;
+  };
+  GetState: {
+    request: GetStateRequest;
+    response: GetStateResponse;
+  };
+  GetWalletInformation: {
+    request: GetWalletInformationRequest;
+    response: GetWalletInformationResponse;
+  };
+  EnableEthereum: {
+    request: EnableEthereumRequest;
+    response: EnableEthereumResponse;
+  };
+  ChallengeChannel: {
+    request: ChallengeChannelRequest;
+    response: ChallengeChannelResponse;
+  };
+  ApproveBudgetAndFund: {
+    request: ApproveBudgetAndFundRequest;
+    response: ApproveBudgetAndFundResponse;
+  };
+  GetBudget: {
+    request: GetBudgetRequest;
+    response: GetBudgetResponse;
+  };
+  CloseAndWithdraw: {
+    request: CloseAndWithdrawRequest;
+    response: CloseAndWithdrawResponse;
+  };
+  GetChannels: {
+    request: GetChannelsRequest;
+    response: GetChannelsResponse;
+  };
 };
 
-type Method =
+export type Method =
   | 'CreateChannel'
   | 'UpdateChannel'
   | 'PushMessage'
@@ -101,27 +140,6 @@ type Method =
   | 'GetBudget'
   | 'CloseAndWithdraw'
   | 'GetChannels';
-
-type Request = {params: RequestParams['params']}; // Replace with union type
-type Call<K extends Method, T extends Request> = {
-  method: K;
-  params: T['params'];
-};
-
-export type MethodRequestType =
-  | Call<'CreateChannel', CreateChannelRequest>
-  | Call<'UpdateChannel', UpdateChannelRequest>
-  | Call<'PushMessage', PushMessageRequest>
-  | Call<'CloseChannel', CloseChannelRequest>
-  | Call<'JoinChannel', JoinChannelRequest>
-  | Call<'GetWalletInformation', GetWalletInformationRequest>
-  | Call<'EnableEthereum', EnableEthereumRequest>
-  | Call<'GetState', GetStateRequest>
-  | Call<'ChallengeChannel', ChallengeChannelRequest>
-  | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
-  | Call<'GetBudget', GetBudgetRequest>
-  | Call<'CloseAndWithdraw', any>
-  | Call<'GetChannels', GetChannelsRequest>;
 
 export interface EventType extends NotificationType {
   [id: string]: [unknown]; // guid
@@ -138,7 +156,10 @@ export interface ChannelProviderInterface {
   off: OffType;
   mountWalletComponent(url?: string): Promise<void>;
   enable(): Promise<void>;
-  send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
+  send<M extends Method = Method>(
+    method: M,
+    params: MethodType[M]['request']['params']
+  ): Promise<MethodType[M]['response']['result']>;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
 }

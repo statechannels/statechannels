@@ -28,6 +28,8 @@ export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START
 
 export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADDRESS || AddressZero;
 
+export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
+
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 

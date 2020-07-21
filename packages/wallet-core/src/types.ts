@@ -178,17 +178,17 @@ interface Guarantees {
 }
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarantees | Guarantee;
-export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
-  return funding.type === 'Indirect';
+export function isIndirectFunding(funding?: Funding): funding is IndirectFunding {
+  return funding?.type === 'Indirect';
 }
 
-export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
-  return funding.type === 'Virtual';
+export function isVirtualFunding(funding?: Funding): funding is VirtualFunding {
+  return funding?.type === 'Virtual';
 }
 
-export function isGuarantee(funding: Funding): funding is Guarantee {
-  return funding.type === 'Guarantee';
+export function isGuarantee(funding?: Funding): funding is Guarantee {
+  return funding?.type === 'Guarantee';
 }
-export function isGuarantees(funding: Funding): funding is Guarantees {
-  return funding.type === 'Guarantees';
+export function isGuarantees(funding?: Funding): funding is Guarantees {
+  return funding?.type === 'Guarantees';
 }

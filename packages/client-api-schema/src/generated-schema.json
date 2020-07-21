@@ -183,16 +183,12 @@
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
       "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerParticipantId": {
+        "hubParticipantId": {
           "type": "string"
         }
       },
       "required": [
-        "hub",
-        "playerParticipantId"
+        "hubParticipantId"
       ],
       "type": "object"
     },
@@ -200,7 +196,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476%3E"
     },
     "CloseChannelError": {
       "anyOf": [
@@ -329,11 +325,23 @@
       ],
       "type": "string"
     },
+    "GetBudgetParams": {
+      "additionalProperties": false,
+      "properties": {
+        "hubParticipantId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hubParticipantId"
+      ],
+      "type": "object"
+    },
     "GetBudgetRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2Cstructure-45911622-222-244-45911622-194-245-45911622-163-246-45911622-0-315%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2CGetBudgetParams%3E"
     },
     "GetBudgetResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-309-312-45911622-295-312-45911622-278-313-45911622-246-314-45911622-0-315)%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)%3E"
     },
     "GetChannelsRequest": {
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
@@ -360,10 +368,10 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "GetWalletInformationRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-339%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-344%3E"
     },
     "GetWalletInformationResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-336-825486248-226-337-825486248-183-338-825486248-0-339%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-341-825486248-226-342-825486248-183-343-825486248-0-344%3E"
     },
     "JoinChannelParams": {
       "additionalProperties": false,
@@ -1204,7 +1212,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetBudget\",structure-45911622-222-244-45911622-194-245-45911622-163-246-45911622-0-315>": {
+    "JsonRpcRequest<\"GetBudget\",GetBudgetParams>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1223,16 +1231,7 @@
           "type": "string"
         },
         "params": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAddress": {
-              "$ref": "#/definitions/Address"
-            }
-          },
-          "required": [
-            "hubAddress"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/GetBudgetParams"
         }
       },
       "required": [
@@ -1309,7 +1308,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-339>": {
+    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-178-181-825486248-139-182-825486248-96-183-825486248-0-344>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1430,7 +1429,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<(DomainBudget|structure-45911622-309-312-45911622-295-312-45911622-278-313-45911622-246-314-45911622-0-315)>": {
+    "JsonRpcResponse<(DomainBudget|structure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1596,7 +1595,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-398-416-736846332-381-417-736846332-342-418-736846332-0-540>": {
+    "JsonRpcResponse<structure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1628,7 +1627,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-825486248-243-336-825486248-226-337-825486248-183-338-825486248-0-339>": {
+    "JsonRpcResponse<structure-825486248-243-341-825486248-226-342-825486248-183-343-825486248-0-344>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1644,14 +1643,7 @@
           "additionalProperties": false,
           "properties": {
             "destinationAddress": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Address"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/definitions/Address"
             },
             "signingAddress": {
               "$ref": "#/definitions/Address"
@@ -1662,7 +1654,6 @@
           },
           "required": [
             "signingAddress",
-            "destinationAddress",
             "walletVersion"
           ],
           "type": "object"

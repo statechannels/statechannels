@@ -37,7 +37,14 @@ import {
 } from '@statechannels/wallet-core';
 
 import {AppRequestEvent} from './event-types';
-import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
+import {
+  CHALLENGE_DURATION,
+  GIT_VERSION,
+  CHAIN_NETWORK_ID,
+  HUB_PARTICIPANT_ID,
+  HUB_ADDRESS,
+  HUB_DESTINATION
+} from './config';
 import {Store} from './store';
 
 type ChannelRequest =
@@ -170,7 +177,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetWalletInformation':
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
-          destinationAddress: (await this.store.getDestinationAddress()) ?? null,
+          destinationAddress: (await this.store.getDestinationAddress()) ?? undefined,
           walletVersion: GIT_VERSION
         });
         break;
@@ -257,15 +264,22 @@ async function convertToInternalEvent(
       if (!closeAndWithdrawDestination) {
         throw new Error('No selected destination');
       }
+      if (!(request.params.hubParticipantId !== HUB_PARTICIPANT_ID)) {
+        throw new Error(`You may only closeAndWithdraw for hub with id ${HUB_PARTICIPANT_ID}`);
+      }
       return {
         type: 'CLOSE_AND_WITHDRAW',
         requestId: request.id,
         player: convertToInternalParticipant({
-          participantId: request.params.playerParticipantId,
+          participantId: await store.getAddress(),
           signingAddress: await store.getAddress(),
           destination: closeAndWithdrawDestination
         }),
-        hub: convertToInternalParticipant(request.params.hub),
+        hub: convertToInternalParticipant({
+          participantId: request.params.hubParticipantId,
+          signingAddress: HUB_ADDRESS,
+          destination: HUB_DESTINATION
+        }),
         domain: domain
       };
     case 'ApproveBudgetAndFund':

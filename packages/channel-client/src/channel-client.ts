@@ -73,7 +73,7 @@ export class ChannelClient implements ChannelClientInterface {
     };
   }
   async getChannels(includeClosed: boolean): Promise<ChannelResult[]> {
-    return this.provider.send({method: 'GetChannels', params: {includeClosed}});
+    return this.provider.send('GetChannels', {includeClosed});
   }
 
   async createChannel(
@@ -83,20 +83,17 @@ export class ChannelClient implements ChannelClientInterface {
     appData: string,
     fundingStrategy: FundingStrategy
   ): Promise<ChannelResult> {
-    return this.provider.send({
-      method: 'CreateChannel',
-      params: {
-        participants,
-        allocations,
-        appDefinition,
-        appData,
-        fundingStrategy
-      }
+    return this.provider.send('CreateChannel', {
+      participants,
+      allocations,
+      appDefinition,
+      appData,
+      fundingStrategy
     });
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send({method: 'JoinChannel', params: {channelId}});
+    return this.provider.send('JoinChannel', {channelId});
   }
 
   async updateChannel(
@@ -104,35 +101,29 @@ export class ChannelClient implements ChannelClientInterface {
     allocations: TokenAllocations,
     appData: string
   ): Promise<ChannelResult> {
-    return this.provider.send({
-      method: 'UpdateChannel',
-      params: {
-        channelId,
-        allocations,
-        appData
-      }
+    return this.provider.send('UpdateChannel', {
+      channelId,
+      allocations,
+      appData
     });
   }
 
   async getState(channelId: string): Promise<ChannelResult> {
-    return this.provider.send({method: 'GetState', params: {channelId}});
+    return this.provider.send('GetState', {channelId});
   }
 
   async challengeChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send({
-      method: 'ChallengeChannel',
-      params: {
-        channelId
-      }
+    return this.provider.send('ChallengeChannel', {
+      channelId
     });
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send({method: 'CloseChannel', params: {channelId}});
+    return this.provider.send('CloseChannel', {channelId});
   }
 
   async pushMessage(message: Message): Promise<PushMessageResult> {
-    return this.provider.send({method: 'PushMessage', params: message});
+    return this.provider.send('PushMessage', message);
   }
 
   async approveBudgetAndFund(
@@ -141,38 +132,26 @@ export class ChannelClient implements ChannelClientInterface {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<DomainBudget> {
-    return this.provider.send({
-      method: 'ApproveBudgetAndFund',
-      params: {
-        requestedReceiveCapacity: receiveCapacity,
-        requestedSendCapacity: sendCapacity,
-        token: ETH_TOKEN_ADDRESS,
-        playerParticipantId: this.signingAddress as string,
-
-        hub: {
-          participantId: HUB.participantId,
-          signingAddress: hubAddress,
-          destination: hubOutcomeAddress
-        }
+    return this.provider.send('ApproveBudgetAndFund', {
+      requestedReceiveCapacity: receiveCapacity,
+      requestedSendCapacity: sendCapacity,
+      token: ETH_TOKEN_ADDRESS,
+      playerParticipantId: this.signingAddress as string,
+      hub: {
+        participantId: HUB.participantId,
+        signingAddress: hubAddress,
+        destination: hubOutcomeAddress
       }
     });
   }
 
-  async getBudget(hubAddress: string): Promise<DomainBudget> {
-    return this.provider.send({method: 'GetBudget', params: {hubAddress}});
+  async getBudget(hubParticipantId: string): Promise<DomainBudget | {}> {
+    return this.provider.send('GetBudget', {hubParticipantId});
   }
 
-  async closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget> {
-    return this.provider.send({
-      method: 'CloseAndWithdraw',
-      params: {
-        playerParticipantId: this.signingAddress as string,
-        hub: {
-          participantId: HUB.participantId,
-          signingAddress: hubAddress,
-          destination: hubOutcomeAddress
-        }
-      }
+  async closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}> {
+    return this.provider.send('CloseAndWithdraw', {
+      hubParticipantId
     });
   }
 }
