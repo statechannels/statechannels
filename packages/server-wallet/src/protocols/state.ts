@@ -35,7 +35,7 @@ export const stage = (state: SignedStateWithHash | undefined): Stage =>
     : 'Running';
 
 // FIXME: This should be a union of the errors that the client-api-schema specifies.
-type ProtocolError = Error;
+export type ProtocolError = Error;
 
 /*
 A protocol should accept a "protocol state", and resolve to
@@ -43,4 +43,5 @@ A protocol should accept a "protocol state", and resolve to
 - or, a protocol error
 A protocol should never reject.
 */
-export type Protocol<PS> = (ps: PS) => Promise<Either<ProtocolError, Option<ProtocolAction>>>;
+export type ProtocolResult = Promise<Either<ProtocolError, Option<ProtocolAction>>>;
+export type Protocol<PS> = (ps: PS) => ProtocolResult;
