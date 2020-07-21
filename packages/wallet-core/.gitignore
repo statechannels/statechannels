@@ -1,24 +1,18 @@
-# See https://help.github.com/ignore-files/ for more about ignoring files.
+# secrets / local env configuration
+.env.local
+.env.*.local
 
 # dependencies
-/node_modules
+node_modules
+
+# ts output
+lib
 
 # testing
-/coverage
-
-# production
-/build
-
-# "library"
-/lib
+coverage
 
 # misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -27,6 +21,3 @@ yarn-error.log*
 debug.log
 error.log
 info.log
-
-# Config files for visualizer
-/src/workflows/*.config.js

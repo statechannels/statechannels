@@ -1,5 +1,6 @@
 import {Machine, StateNodeConfig, assign, DoneInvokeEvent} from 'xstate';
 import {map, first, filter} from 'rxjs/operators';
+import {BN} from '@statechannels/wallet-core';
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {VirtualDefundingAsLeaf, SupportState} from '.';
@@ -89,7 +90,7 @@ interface FundsWithdrawn {
 
 const observeFundsWithdrawal = (store: Store) => context =>
   store.chain.chainUpdatedFeed(context.channelId).pipe(
-    filter(c => c.amount.eq(0)),
+    filter(c => BN.eq(c.amount, 0)),
     map<ChannelChainInfo, FundsWithdrawn>(() => ({type: 'FUNDS_WITHDRAWN'}))
   );
 

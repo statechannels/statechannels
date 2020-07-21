@@ -21,7 +21,7 @@ import {
   convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {Wallet} from 'ethers';
 import {BN} from './bignumber';
 

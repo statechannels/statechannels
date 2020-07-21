@@ -1,13 +1,14 @@
 {
   "name": "@statechannels/channel-client",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
     "@statechannels/channel-provider": "*",
-    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/client-api-schema": "0.0.3",
     "ethers": "4.0.45",
-    "eventemitter3": "4.0.0"
+    "eventemitter3": "4.0.0",
+    "loglevel": "1.6.8"
   },
   "devDependencies": {
     "@types/eslint": "6.1.7",
@@ -26,6 +27,10 @@
     "ts-jest": "25.0.0",
     "typescript": "3.7.5"
   },
+  "files": [
+    "lib/src",
+    "lib/tests"
+  ],
   "keywords": [
     "ethereum",
     "state channels"

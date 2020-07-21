@@ -5,7 +5,8 @@ import {
   nextState,
   isVirtualFunding,
   isIndirectFunding,
-  isGuarantee
+  isGuarantee,
+  BN
 } from '@statechannels/wallet-core';
 
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
@@ -133,8 +134,8 @@ const defundGuarantorInLedger = (store: Store) => async ({
   if (leaf.destination !== jAlloc[role].destination) throw BadOutcome;
 
   const outcome = simpleEthAllocation([
-    {destination: hub.destination, amount: hub.amount.add(jAlloc[2 - role].amount)},
-    {destination: leaf.destination, amount: leaf.amount.add(jAlloc[role].amount)},
+    {destination: hub.destination, amount: BN.add(hub.amount, jAlloc[2 - role].amount)},
+    {destination: leaf.destination, amount: BN.add(leaf.amount, jAlloc[role].amount)},
     ...ledgerWithoutGuarantor.slice(2)
   ]);
   return {state: nextState(ledgerState, outcome)};

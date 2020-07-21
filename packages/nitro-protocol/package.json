@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "statechannels",
   "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
@@ -81,7 +81,7 @@
     "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-protocol",
     "test": "run-s test:contracts 'test:app --all'",
     "test:app": "jest -c ./config/jest/jest.config.js",
-    "test:ci": "yarn test:ci:contracts --runInBand && yarn test:ci:app --runInBand",
+    "test:ci": "yarn run-p 'test:ci:contracts --runInBand' 'test:ci:app --runInBand'",
     "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",

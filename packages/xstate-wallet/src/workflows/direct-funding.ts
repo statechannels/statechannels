@@ -1,23 +1,24 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
-import {BigNumber} from 'ethers';
-import {AddressZero, HashZero, Zero} from '@ethersproject/constants';
+import {AddressZero, HashZero} from '@ethersproject/constants';
 
 import {
-  add,
   isSimpleEthAllocation,
   simpleEthAllocation,
   checkThat,
   Outcome,
   SimpleAllocation,
   AllocationItem,
-  Destination
+  Destination,
+  BN,
+  Zero
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
+const {add, sub: subtract} = BN;
 
 const WORKFLOW = 'direct-funding';
 
@@ -86,10 +87,10 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
-    const allocated = outcome.allocationItems.map(a => a.amount).reduce((a, b) => a.add(b), Zero);
+    const allocated = outcome.allocationItems.map(a => a.amount).reduce(BN.add, Zero);
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
-    if (allocated.gt(chainInfo.amount))
+    if (BN.gt(allocated, chainInfo.amount))
       throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
   }
 
@@ -104,8 +105,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           .map(i => i.amount)
           .reduce(add);
 
-        const amountLeft = BigNumber.from(amount).gt(currentlyAllocated)
-          ? amount.sub(currentlyAllocated)
+        const amountLeft = BN.gt(amount, currentlyAllocated)
+          ? subtract(amount, currentlyAllocated)
           : Zero;
         return {destination, amount: amountLeft};
       })
@@ -143,12 +144,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         return {
           channelId,
           depositAt: totalBeforeDeposit,
-          totalAfterDeposit: BigNumber.from(totalBeforeDeposit).add(allocation.amount),
-
+          totalAfterDeposit: BN.add(totalBeforeDeposit, allocation.amount),
           fundedAt
         };
       } else {
-        totalBeforeDeposit = BigNumber.from(allocation.amount).add(totalBeforeDeposit);
+        totalBeforeDeposit = BN.add(allocation.amount, totalBeforeDeposit);
       }
     }
 

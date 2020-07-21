@@ -9,15 +9,14 @@ import {
   SignedState,
   ChannelConstants,
   DomainBudget,
-  add,
   simpleEthAllocation,
   simpleEthGuarantee,
-  makeDestination
+  makeDestination,
+  BN
 } from '@statechannels/wallet-core';
 
 import {AddressZero, HashZero} from '@ethersproject/constants';
 
-import {BigNumber} from 'ethers';
 import {TestStore} from '../../test-store';
 import {
   wallet1,
@@ -34,6 +33,7 @@ import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 
 jest.setTimeout(20000);
+const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = 10;
@@ -88,7 +88,7 @@ const state = (constants: ChannelConstants, outcome: Outcome, turnNum = 0): Sign
   B: T, J, L2, G2
 */
 
-const targetAmounts = [2, 3].map(BigNumber.from);
+const targetAmounts = [2, 3].map(BN.from);
 const totalTargetAmount = targetAmounts.reduce(add);
 const targetChannel = channelConstants(aliceAndBob);
 const targetChannelId = calculateChannelId(targetChannel);
@@ -117,7 +117,7 @@ const guarantor1Outcome = simpleEthGuarantee(
 const guarantor1State = state(guarantor1, guarantor1Outcome);
 const guarantor1Id = calculateChannelId(guarantor1State);
 
-const ledger1Amounts = [5, 7].map(BigNumber.from);
+const ledger1Amounts = [5, 7].map(BN.from);
 const ledger1 = channelConstants(aliceAndHub);
 const ledger1Outcome = simpleEthAllocation([
   {destination: hub.destination, amount: ledger1Amounts[0]},
@@ -138,7 +138,7 @@ const guarantor2Outcome = simpleEthGuarantee(
 const guarantor2State = state(guarantor2, guarantor2Outcome);
 const guarantor2Id = calculateChannelId(guarantor2State);
 
-const ledger2Amounts = [5, 7].map(BigNumber.from);
+const ledger2Amounts = [5, 7].map(BN.from);
 const ledger2 = channelConstants(bobAndHub);
 const ledger2Outcome = simpleEthAllocation([
   {destination: makeDestination(hub.destination), amount: ledger2Amounts[0]},
@@ -224,15 +224,15 @@ test('virtual defunding with a simple hub', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
     const expectedAmounts1 = [
-      targetAmounts[1].add(ledger1Amounts[0]),
-      targetAmounts[0].add(ledger1Amounts[1])
+      BN.add(targetAmounts[1], ledger1Amounts[0]),
+      BN.add(targetAmounts[0], ledger1Amounts[1])
     ];
     expectBudgetIsUpdated(expectedAmounts1, aStore);
 
     const {supported} = await aStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
-      {destination: hub.destination, amount: targetAmounts[1].add(ledger1Amounts[0])},
-      {destination: alice.destination, amount: targetAmounts[0].add(ledger1Amounts[1])}
+      {destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0])},
+      {destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1])}
     ]);
   }, EXPECT_TIMEOUT);
 });
@@ -274,17 +274,17 @@ test('virtual defunding with a proper hub', async () => {
 
     const {supported} = await hubStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
-      {destination: hub.destination, amount: targetAmounts[1].add(ledger1Amounts[0])},
-      {destination: alice.destination, amount: targetAmounts[0].add(ledger1Amounts[1])}
+      {destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0])},
+      {destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1])}
     ]);
   }, EXPECT_TIMEOUT);
 });
 
-async function expectBudgetIsUpdated(expectedLedgerAmounts: BigNumber[], store: TestStore) {
+async function expectBudgetIsUpdated(expectedLedgerAmounts: BN[], store: TestStore) {
   const budget = assumeNotUndefined(await store.getBudget(TEST_APP_DOMAIN));
   const ethBudget = assumeNotUndefined(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]);
-  expect(ethBudget.availableSendCapacity.eq(expectedLedgerAmounts[1])).toBe(true);
-  expect(ethBudget.availableReceiveCapacity.eq(expectedLedgerAmounts[0])).toBe(true);
+  expect(ethBudget.availableSendCapacity).toBe(expectedLedgerAmounts[1]);
+  expect(ethBudget.availableReceiveCapacity).toBe(expectedLedgerAmounts[0]);
   expect(Object.keys(ethBudget.channels)).toHaveLength(0);
 }
 

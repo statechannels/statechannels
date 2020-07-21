@@ -7,7 +7,7 @@ import {
   Destination
 } from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {ethers} from 'ethers';
 import {checkThat} from './helpers';
 import {BN, Zero} from '../bignumber';
@@ -39,7 +39,7 @@ export const simpleEthGuarantee = (
 });
 
 export const simpleTokenAllocation = (
-  assetHolderAddress,
+  assetHolderAddress: string,
   allocationItems: AllocationItem[]
 ): SimpleAllocation => ({
   type: 'SimpleAllocation',

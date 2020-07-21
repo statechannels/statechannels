@@ -3,10 +3,9 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 
 import React from 'react';
-import {DomainBudget, Participant, ethBudget} from '@statechannels/wallet-core';
+import {DomainBudget, Participant, ethBudget, BN, Zero} from '@statechannels/wallet-core';
 import {parseEther} from '@ethersproject/units';
-import {BigNumber} from 'ethers';
-import {Zero} from '@ethersproject/constants';
+
 import {logger} from '../../logger';
 import {Store} from '../../store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
@@ -20,8 +19,8 @@ store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc9
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const budget: DomainBudget = ethBudget('web3torrent.statechannels.org', {
-  availableReceiveCapacity: parseEther('0.05'),
-  availableSendCapacity: parseEther('0.05')
+  availableReceiveCapacity: BN.from(parseEther('0.05')),
+  availableSendCapacity: BN.from(parseEther('0.05'))
 });
 
 const alice: Participant = {
@@ -56,9 +55,9 @@ const testContext = {
 const contextWithLedger = {...testContext, ledgerId: 'ledger123', ledgerState: {}};
 const contextWithDeposit = {
   ...contextWithLedger,
-  depositAt: BigNumber.from(5),
-  totalAfterDeposit: BigNumber.from(10),
-  fundedAt: BigNumber.from(12)
+  depositAt: BN.from(5),
+  totalAfterDeposit: BN.from(10),
+  fundedAt: BN.from(12)
 };
 
 const contextWaitTurn = {
@@ -67,9 +66,9 @@ const contextWaitTurn = {
   lastChangeBlockNum: 9792500,
   currentBlockNum: 9792500
 };
-const contextSubmitTransaction = {...contextWaitTurn, ledgerTotal: BigNumber.from(5)};
+const contextSubmitTransaction = {...contextWaitTurn, ledgerTotal: BN.from(5)};
 const contextWaitMining = {...contextSubmitTransaction, transactionId: 'transaction-123'};
-const contextWaitFullyFunded = {...contextWaitTurn, ledgerTotal: BigNumber.from(10)};
+const contextWaitFullyFunded = {...contextWaitTurn, ledgerTotal: BN.from(10)};
 
 addStory('waitForUserApproval', 'waitForUserApproval', testContext);
 addStory('createLedger', 'createLedger', testContext);
