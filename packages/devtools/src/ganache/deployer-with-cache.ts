@@ -1,11 +1,13 @@
 import * as fs from 'fs';
+import * as path from 'path';
+
 import {CompiledContract} from 'etherlime-lib';
 import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
+import lockfile from 'lockfile';
+
 import {GanacheDeployer} from './deployer';
 import {logger} from './logger';
-import lockfile from 'lockfile';
-import * as path from 'path';
 
 interface CacheKey {
   name: string;
