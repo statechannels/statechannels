@@ -13,7 +13,7 @@ import {
   hashState,
   outcomesEqual,
 } from '@statechannels/wallet-core';
-import {JSONSchema, Model, Pojo, QueryContext} from 'objection';
+import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
@@ -56,15 +56,15 @@ export const CHANNEL_COLUMNS = {
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
 
-  channelId: Bytes32;
-  vars: SignedStateVarsWithHash[];
+  channelId!: Bytes32;
+  vars!: SignedStateVarsWithHash[];
 
-  readonly chainId: Bytes32;
-  readonly appDefinition: Address;
-  readonly channelNonce: Uint48;
-  readonly challengeDuration: Uint48;
-  readonly participants: Participant[];
-  readonly signingAddress: Address;
+  readonly chainId!: Bytes32;
+  readonly appDefinition!: Address;
+  readonly channelNonce!: Uint48;
+  readonly challengeDuration!: Uint48;
+  readonly participants!: Participant[];
+  readonly signingAddress!: Address;
 
   readonly signingWallet!: SigningWallet;
 
@@ -95,7 +95,7 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static forId(channelId: Bytes32, tx): Promise<Channel> {
+  static forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
     return Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
@@ -107,7 +107,7 @@ export class Channel extends Model implements RequiredColumns {
     return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
   }
 
-  $beforeValidate(jsonSchema, json, _opt): JSONSchema {
+  $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     return jsonSchema;
@@ -149,7 +149,11 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    if (this.isSupportedByMe && this.latestSignedByMe.turnNum >= stateVars.turnNum) {
+    if (
+      this.isSupportedByMe &&
+      this.latestSignedByMe &&
+      this.latestSignedByMe.turnNum >= stateVars.turnNum
+    ) {
       logger.error({entry: this.channelId, stateVars}, Errors.staleState);
       throw Error(Errors.staleState);
     }
@@ -217,7 +221,11 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get myTurn(): boolean {
-    return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    if (this.supported) {
+      return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    } else {
+      return this.myIndex === 0;
+    }
   }
 
   get isSupported(): boolean {
@@ -242,17 +250,17 @@ export class Channel extends Model implements RequiredColumns {
     return !!this._latestSupportedByMe;
   }
 
-  get latestSignedByMe(): SignedStateWithHash {
+  get latestSignedByMe(): SignedStateWithHash | undefined {
     return this._latestSupportedByMe
       ? {...this.channelConstants, ...this._latestSupportedByMe}
       : undefined;
   }
 
   get latest(): SignedStateWithHash {
-    return this.signedStates[0] ? {...this.channelConstants, ...this.signedStates[0]} : undefined;
+    return {...this.channelConstants, ...this.signedStates[0]};
   }
 
-  private get _supported(): SignedStateWithHash {
+  private get _supported(): SignedStateWithHash | undefined {
     const latestSupport = this._support;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
@@ -369,7 +377,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
-function isReverseSorted(arr): boolean {
+function isReverseSorted(arr: number[]): boolean {
   const len = arr.length - 1;
   for (let i = 0; i < len; ++i) {
     if (arr[i] < arr[i + 1]) {
@@ -411,7 +419,7 @@ export enum Errors {
 
 class ChannelError extends Error {
   readonly type = 'ChannelError';
-  constructor(reason: Errors, public readonly data = undefined) {
+  constructor(reason: Errors, public readonly data: any = undefined) {
     super(reason);
   }
 }

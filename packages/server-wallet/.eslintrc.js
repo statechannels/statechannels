@@ -15,15 +15,19 @@ module.exports = {
     'plugin:import/typescript',
   ],
   rules: {
-    'import/order': [1, {
-      'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      'newlines-between': 'always'
-    }],
+    'import/order': [
+      1,
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+      },
+    ],
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
     'jest/expect-expect': 'off',
     // We use snake case for some PostgreSQL / Objection client library key names
     '@typescript-eslint/camelcase': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_'}],
   },

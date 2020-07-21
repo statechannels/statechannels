@@ -12,9 +12,9 @@ type ProtocolState = {
   // turn number == 0 <==> prefund setup
   // turn number == 3 <==> postfund setup
   // turn number > 3 <=> channel is set up
-  supported: SignedStateWithHash;
-  latest: SignedStateWithHash;
-  latestSignedByMe: SignedStateWithHash;
+  supported?: SignedStateWithHash;
+  latest?: SignedStateWithHash;
+  latestSignedByMe?: SignedStateWithHash;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

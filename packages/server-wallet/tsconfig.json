@@ -4,11 +4,11 @@
     "baseUrl": ".",
     "module": "commonjs",
     "target": "es2017",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "rootDir": "src",
     "outDir": "lib",
     "esModuleInterop": true,
-    "strict": false
+    "strict": true
   },
   "include": ["src/**/*"],
   "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
