@@ -1,19 +1,21 @@
-import _ from 'lodash';
 import {
-  State,
-  SignedState,
-  simpleEthAllocation,
-  SignedStateWithHash,
-  SignedStateVariables,
   BN,
-  signState,
+  SignedState,
+  SignedStateVariables,
+  SignedStateWithHash,
+  State,
   hashState,
+  signState,
+  simpleEthAllocation,
 } from '@statechannels/wallet-core';
-import {fixture, Fixture} from './utils';
+import _ from 'lodash';
+
+import {SigningWallet} from '../../../models/signing-wallet';
+import {addHash} from '../../../state-utils';
+
+import {Fixture, fixture} from './utils';
 import {alice, bob} from './participants';
 import {alice as aliceWallet} from './signingWallets';
-import {addHash} from '../../../state-utils';
-import {SigningWallet} from '../../../models/signing-wallet';
 
 const defaultState: State = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',

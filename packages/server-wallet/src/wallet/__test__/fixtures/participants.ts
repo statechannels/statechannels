@@ -1,6 +1,7 @@
 import {Participant, makeDestination} from '@statechannels/wallet-core';
-import {fixture} from './utils';
+
 import * as wallets from './signingWallets';
+import {fixture} from './utils';
 
 const _alice: Participant = {
   signingAddress: wallets.alice().address,

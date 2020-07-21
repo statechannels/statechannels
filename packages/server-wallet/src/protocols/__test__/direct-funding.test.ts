@@ -1,4 +1,4 @@
-import {channelWithVars, channel} from '../../models/__test__/fixtures/channel';
+import {channel, channelWithVars} from '../../models/__test__/fixtures/channel';
 import {executionLoop} from '../direct-funding';
 
 const c = channelWithVars();

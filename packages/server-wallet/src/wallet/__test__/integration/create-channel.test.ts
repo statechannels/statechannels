@@ -1,9 +1,9 @@
-import {Wallet} from '../..';
-import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
-import {createChannelArgs} from '../fixtures/create-channel';
 import {Channel} from '../../../models/channel';
-import knex from '../../../db/connection';
+import {Wallet} from '../..';
+import {createChannelArgs} from '../fixtures/create-channel';
+import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
+import knex from '../../../db/connection';
 
 let w: Wallet;
 beforeEach(async () => {

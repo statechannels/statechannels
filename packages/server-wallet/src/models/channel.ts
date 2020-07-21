@@ -1,23 +1,24 @@
-import {Model, QueryContext, JSONSchema, Pojo} from 'objection';
 import {
-  outcomesEqual,
-  hashState,
-  createSignatureEntry,
-  SignedStateVarsWithHash,
-  SignedStateVariables,
-  Participant,
-  StateVariablesWithHash,
   ChannelConstants,
-  SignedState,
-  StateVariables,
+  Participant,
   SignatureEntry,
+  SignedState,
+  SignedStateVariables,
+  SignedStateVarsWithHash,
   SignedStateWithHash,
+  StateVariables,
+  StateVariablesWithHash,
   calculateChannelId,
+  createSignatureEntry,
+  hashState,
+  outcomesEqual,
 } from '@statechannels/wallet-core';
+import {JSONSchema, Model, Pojo, QueryContext} from 'objection';
 import _ from 'lodash';
 
+import {Address, Bytes32, Uint48} from '../type-aliases';
 import {logger} from '../logger';
-import {Bytes32, Address, Uint48} from '../type-aliases';
+
 import {SigningWallet} from './signing-wallet';
 
 export const REQUIRED_COLUMNS = {

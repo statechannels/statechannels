@@ -2,7 +2,9 @@
 import '../env';
 
 import * as path from 'path';
+
 import {Config} from 'knex';
+
 import {dbCofig} from '../db-config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');

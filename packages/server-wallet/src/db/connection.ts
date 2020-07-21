@@ -1,5 +1,5 @@
-import Knex from 'knex';
 import {Model} from 'objection';
+import Knex from 'knex';
 
 import {dbCofig} from '../db-config';
 

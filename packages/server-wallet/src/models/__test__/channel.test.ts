@@ -1,7 +1,8 @@
 import {Channel, Errors} from '../channel';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {seed} from '../../db/seeds/1_signing_wallet_seeds';
+import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import knex from '../../db/connection';
+
 import {channel} from './fixtures/channel';
 
 beforeEach(async () => seed(knex));

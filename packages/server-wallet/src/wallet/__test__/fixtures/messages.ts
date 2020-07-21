@@ -1,6 +1,8 @@
-import _ from 'lodash';
-import {AddressedMessage} from '../..';
 import {SignedState} from '@statechannels/wallet-core';
+import _ from 'lodash';
+
+import {AddressedMessage} from '../..';
+
 import {createState} from './states';
 
 const emptyMessage = {to: 'alice', from: 'bob'};

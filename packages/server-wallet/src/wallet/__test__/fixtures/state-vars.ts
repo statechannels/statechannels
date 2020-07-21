@@ -1,12 +1,13 @@
-import _ from 'lodash';
 import {
-  simpleEthAllocation,
-  StateVariables,
-  SignedStateVariables,
   BN,
+  SignedStateVariables,
+  StateVariables,
+  simpleEthAllocation,
 } from '@statechannels/wallet-core';
-import {fixture} from './utils';
+import _ from 'lodash';
+
 import {alice, bob} from './participants';
+import {fixture} from './utils';
 
 const defaultVars: StateVariables = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',

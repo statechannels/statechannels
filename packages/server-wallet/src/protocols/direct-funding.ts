@@ -1,6 +1,8 @@
+import {SignedStateVarsWithHash, SignedStateWithHash} from '@statechannels/wallet-core';
+
 import {Channel} from '../models/channel';
 import {ParticipantId} from '../type-aliases';
-import {SignedStateWithHash, SignedStateVarsWithHash} from '@statechannels/wallet-core';
+
 import {ProtocolAction} from './actions';
 
 type ProtocolState = {

@@ -1,8 +1,10 @@
 import {BN} from '@statechannels/wallet-core';
-import {fixture} from './utils';
-import {alice, bob} from './participants';
-import {CreateChannelParams} from '../..';
 import {constants} from 'ethers';
+
+import {CreateChannelParams} from '../..';
+
+import {alice, bob} from './participants';
+import {fixture} from './utils';
 
 const defaultVars: CreateChannelParams = {
   appData: '0xabc',

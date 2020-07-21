@@ -1,10 +1,10 @@
 import {
-  SignedStateWithHash,
-  SignedStateVarsWithHash,
   ChannelConstants,
+  Hashed,
+  SignedStateVarsWithHash,
+  SignedStateWithHash,
   State,
   hashState,
-  Hashed,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 

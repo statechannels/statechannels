@@ -1,7 +1,8 @@
-import {Model, JSONSchema, Pojo} from 'objection';
+import {JSONSchema, Model, Pojo} from 'objection';
+import {ethers} from 'ethers';
+
 import {Address, Uint48} from '../type-aliases';
 import knex from '../db/connection';
-import {ethers} from 'ethers';
 
 export class Nonce extends Model {
   readonly id!: number;

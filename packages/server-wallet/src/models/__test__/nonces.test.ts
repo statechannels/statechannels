@@ -1,9 +1,10 @@
-import {Nonce} from '../nonce';
-import {nonce} from './fixtures/nonces';
-
-import {bob, alice} from '../../wallet/__test__/fixtures/participants';
-import knex from '../../db/connection';
 import _ from 'lodash';
+
+import {Nonce} from '../nonce';
+import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import knex from '../../db/connection';
+
+import {nonce} from './fixtures/nonces';
 
 afterEach(async () => knex('nonces').truncate());
 

@@ -1,13 +1,14 @@
-import {Wallet} from '../..';
-import {message} from '../fixtures/messages';
-import {stateSignedBy} from '../fixtures/states';
-import {Channel} from '../../../models/channel';
-import {addHash} from '../../../state-utils';
 import {calculateChannelId} from '@statechannels/wallet-core';
+
+import {Channel} from '../../../models/channel';
+import {Wallet} from '../..';
+import {addHash} from '../../../state-utils';
 import {alice, bob} from '../fixtures/signingWallets';
+import {message} from '../fixtures/messages';
 import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
-import knex from '../../../db/connection';
+import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
+import knex from '../../../db/connection';
 
 beforeEach(async () => seed(knex));
 

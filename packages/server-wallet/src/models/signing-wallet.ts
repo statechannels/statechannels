@@ -1,7 +1,8 @@
-import {Model, JSONSchema, Pojo} from 'objection';
-import {Address, Bytes32} from '../type-aliases';
+import {JSONSchema, Model, Pojo} from 'objection';
+import {SignatureEntry, State, signState} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
-import {State, SignatureEntry, signState} from '@statechannels/wallet-core';
+
+import {Address, Bytes32} from '../type-aliases';
 
 export class SigningWallet extends Model {
   readonly id!: number;

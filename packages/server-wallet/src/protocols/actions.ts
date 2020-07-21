@@ -1,6 +1,7 @@
-import {StateVariables} from '@statechannels/wallet-core';
-import {Bytes32} from '../type-aliases';
 import {Notification} from '@statechannels/client-api-schema';
+import {StateVariables} from '@statechannels/wallet-core';
+
+import {Bytes32} from '../type-aliases';
 
 /*
 Actions that protocols can declare.

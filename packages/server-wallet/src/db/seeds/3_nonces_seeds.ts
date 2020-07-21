@@ -1,7 +1,7 @@
-import knex from '../../db/connection';
-import {nonce} from '../../models/__test__/fixtures/nonces';
 import {Nonce} from '../../models/nonce';
-import {bob, alice} from '../../wallet/__test__/fixtures/participants';
+import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import {nonce} from '../../models/__test__/fixtures/nonces';
+import knex from '../../db/connection';
 
 const addresses = [bob, alice].map(p => p().signingAddress);
 const seeds = [nonce(), nonce({addresses, value: 3})];

@@ -1,30 +1,30 @@
-import {
-  Message,
-  calculateChannelId,
-  convertToParticipant,
-  Outcome,
-  SignedStateVarsWithHash,
-  hashState,
-  ChannelConstants,
-  SignedState,
-} from '@statechannels/wallet-core';
 import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
-
 import {
-  CreateChannelParams,
-  UpdateChannelParams as ClientUpdateChannelParams,
   ChannelStatus,
   ChannelResult as ClientChannelResult,
+  UpdateChannelParams as ClientUpdateChannelParams,
+  CreateChannelParams,
   Notification,
 } from '@statechannels/client-api-schema';
+import {
+  ChannelConstants,
+  Message,
+  Outcome,
+  SignedState,
+  SignedStateVarsWithHash,
+  calculateChannelId,
+  convertToParticipant,
+  hashState,
+} from '@statechannels/wallet-core';
+
 import {Bytes32} from '../type-aliases';
 import {Channel, RequiredColumns} from '../models/channel';
-import {addHash} from '../state-utils';
-import {SigningWallet} from '../models/signing-wallet';
-import {logger} from '../logger';
 import {Nonce} from '../models/nonce';
+import {Outgoing, isInternal, isOutgoing} from '../protocols/actions';
+import {SigningWallet} from '../models/signing-wallet';
+import {addHash} from '../state-utils';
 import {executionLoop} from '../protocols/direct-funding';
-import {isOutgoing, Outgoing, isInternal} from '../protocols/actions';
+import {logger} from '../logger';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;

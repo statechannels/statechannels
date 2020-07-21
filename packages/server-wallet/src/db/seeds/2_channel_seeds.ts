@@ -1,7 +1,7 @@
 import {Channel} from '../../models/channel';
-import knex from '../../db/connection';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {channel} from '../../models/__test__/fixtures/channel';
+import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import knex from '../../db/connection';
 
 const seeds = [channel(), channel({channelNonce: 1234, vars: [stateWithHashSignedBy()()]})];
 
