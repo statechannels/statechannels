@@ -11,7 +11,6 @@ import {
   AssignAction
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
-
 import {
   checkThat,
   isSimpleEthAllocation,
@@ -21,10 +20,12 @@ import {
   Participant,
   State
 } from '@statechannels/wallet-core';
-
 import {Observable} from 'rxjs';
+
 import {Store} from '../store';
+
 import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';
+
 import {LedgerFunding, VirtualFundingAsLeaf, SupportState} from '.';
 
 type RoleData = {

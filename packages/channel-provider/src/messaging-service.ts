@@ -1,6 +1,7 @@
+import {ErrorResponse} from '@statechannels/client-api-schema';
+
 import {JsonRpcRequest, isJsonRpcResponse, isJsonRpcErrorResponse} from './types';
 import {logger} from './logger';
-import {ErrorResponse} from '@statechannels/client-api-schema';
 
 export interface MessagingServiceOptions {
   timeoutMs?: number;

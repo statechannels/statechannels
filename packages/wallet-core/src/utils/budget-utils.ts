@@ -1,7 +1,9 @@
-import {DomainBudget, AssetBudget} from '../types';
-import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {Zero} from '@ethersproject/constants';
 import * as _ from 'lodash';
+
+import {DomainBudget, AssetBudget} from '../types';
+import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
+
 import {checkThat, exists} from './helpers';
 
 export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBudget {

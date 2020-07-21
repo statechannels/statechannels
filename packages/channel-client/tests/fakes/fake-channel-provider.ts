@@ -1,3 +1,4 @@
+import {EventEmitter} from 'eventemitter3';
 import {
   ChannelProviderInterface,
   MethodResponseType,
@@ -6,9 +7,6 @@ import {
   OffType,
   EventType
 } from '@statechannels/channel-provider';
-import log = require('loglevel');
-
-import {EventEmitter} from 'eventemitter3';
 import {
   ApproveBudgetAndFundParams,
   CloseAndWithdrawParams,
@@ -23,8 +21,10 @@ import {
   UpdateChannelParams,
   Message
 } from '@statechannels/client-api-schema';
-import {calculateChannelId} from '../../src/utils';
 import {Wallet} from 'ethers';
+import log = require('loglevel');
+
+import {calculateChannelId} from '../../src/utils';
 
 type ChannelId = string;
 

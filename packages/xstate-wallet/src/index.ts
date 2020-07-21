@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/browser';
-
 import Url from 'url-parse';
 import ReactDOM from 'react-dom';
+
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
 import {MemoryBackend} from './store/memory-backend';

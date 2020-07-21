@@ -2,6 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {hexlify} from 'ethers/utils';
+
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';

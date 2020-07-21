@@ -1,6 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
+
 import {getTestProvider, setupContracts} from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 import {getVariablePart, State, Channel} from '../../../src';

@@ -7,7 +7,6 @@ import {
   isIndirectFunding,
   AllocationItem
 } from '@statechannels/wallet-core';
-
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 import {map, filter, tap, first} from 'rxjs/operators';
 import _ from 'lodash';
@@ -15,8 +14,10 @@ import _ from 'lodash';
 import {getDataAndInvoke} from '../utils/helpers';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {Store} from '../store';
+
 import {OutcomeIdx} from './virtual-funding-as-leaf';
 import {defundGuarantorInLedger} from './virtual-defunding-as-leaf';
+
 import {SupportState} from '.';
 
 export type Init = {jointChannelId: string};

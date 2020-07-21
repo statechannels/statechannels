@@ -1,7 +1,6 @@
 import {Message, createSignatureEntry} from '@statechannels/wallet-core';
 import {Observable, fromEvent} from 'rxjs';
 import {EventEmitter} from 'eventemitter3';
-
 import {ethers} from 'ethers';
 
 export class SimpleHub {

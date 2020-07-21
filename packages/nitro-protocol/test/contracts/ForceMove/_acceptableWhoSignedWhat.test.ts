@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
+
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';

@@ -4,6 +4,7 @@ import {
   ChannelStatus,
   ChannelResult
 } from '@statechannels/client-api-schema';
+
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
 

@@ -5,10 +5,11 @@ import {
   StateVariables
 } from '@statechannels/wallet-core';
 import {filter, map} from 'rxjs/operators';
+
 import {Store} from './store';
+import {ChannelStoreEntry} from './channel-store-entry';
 
 export {Store} from './store';
-import {ChannelStoreEntry} from './channel-store-entry';
 
 // TODO: Move to somewhere better?
 export function supportedStateFeed(store: Store, channelId: string) {

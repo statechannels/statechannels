@@ -4,6 +4,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionRequest} from 'ethers/providers';
+
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {validTransition} from '../../../src/contract/consensus-app';
 import {ConsensusData} from '../../../src/contract/consensus-data';

@@ -1,14 +1,4 @@
 import {
-  State,
-  ChannelConstants,
-  Outcome,
-  AllocationItem,
-  SignedState,
-  Destination,
-  SimpleAllocation,
-  SignatureEntry
-} from './types';
-import {
   State as NitroState,
   SignedState as NitroSignedState,
   Outcome as NitroOutcome,
@@ -23,6 +13,17 @@ import {
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
 import {Wallet} from 'ethers';
+
+import {
+  State,
+  ChannelConstants,
+  Outcome,
+  AllocationItem,
+  SignedState,
+  Destination,
+  SimpleAllocation,
+  SignatureEntry
+} from './types';
 import {BN} from './bignumber';
 
 function toNitroState(state: State): NitroState {

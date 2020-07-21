@@ -1,6 +1,7 @@
 import {Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {id} from 'ethers/utils';
+
 import {
   ConsensusData,
   decodeConsensusData,

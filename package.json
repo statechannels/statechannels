@@ -10,6 +10,7 @@
     "netlify-cli": "2.30.0",
     "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
+    "eslint-plugin-import": "2.20.0",
     "prettier": "1.19.1",
     "typescript": "3.7.5"
   },

@@ -1,7 +1,9 @@
 #! /usr/local/bin/node
 
 import * as path from 'path';
+
 import {configureEnvVariables} from '../config/env';
+
 import {startSharedGanache} from '.';
 
 configureEnvVariables();

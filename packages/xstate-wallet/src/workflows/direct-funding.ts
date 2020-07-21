@@ -1,7 +1,6 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
 import {AddressZero, HashZero} from '@ethersproject/constants';
-
 import {
   isSimpleEthAllocation,
   simpleEthAllocation,
@@ -15,9 +14,10 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
+import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
+
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
-import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
 const {add, sub: subtract} = BN;
 
 const WORKFLOW = 'direct-funding';

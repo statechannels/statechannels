@@ -1,11 +1,11 @@
 import {filter, map, first} from 'rxjs/operators';
 import {FundLedger, assertSimpleEthAllocation, BN} from '@statechannels/wallet-core';
-
 import {hexZeroPad} from '@ethersproject/bytes';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 
 import {FakeChain} from '../chain';
 import {TEST_APP_DOMAIN} from '../workflows/tests/data';
+
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 
 jest.setTimeout(30000);

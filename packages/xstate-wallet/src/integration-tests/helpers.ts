@@ -18,10 +18,9 @@ import {
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
-
 import {hexZeroPad} from '@ethersproject/bytes';
-
 import _ from 'lodash';
+
 import {DBBackend} from '../store';
 import {TestStore} from '../test-store';
 import {Chain} from '../chain';

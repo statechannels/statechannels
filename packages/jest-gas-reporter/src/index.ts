@@ -1,11 +1,11 @@
+import fs from 'fs';
+import path from 'path';
+
 import {Interface, FunctionFragment, EventFragment} from 'ethers/utils';
 import {JsonRpcProvider} from 'ethers/providers';
 import {Config} from '@jest/types';
 import {Reporter} from '@jest/reporters';
-
-import fs from 'fs';
 import linker from 'solc/linker';
-import path from 'path';
 import easyTable from 'easy-table';
 
 interface MethodCalls {

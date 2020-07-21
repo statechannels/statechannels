@@ -2,6 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {bigNumberify} from 'ethers/utils';
+
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore

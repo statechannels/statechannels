@@ -1,4 +1,5 @@
 import pino from 'pino';
+
 import {LOG_DESTINATION, ADD_LOGS, LOG_LEVEL} from './config';
 
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';

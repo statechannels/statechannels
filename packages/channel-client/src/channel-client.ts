@@ -1,6 +1,4 @@
 import {ChannelProviderInterface} from '@statechannels/channel-provider';
-
-import {ChannelClientInterface, UnsubscribeFunction} from './types';
 import {
   PushMessageResult,
   ChannelResult,
@@ -14,9 +12,12 @@ import {
   MessageQueuedNotification,
   FundingStrategy
 } from '@statechannels/client-api-schema';
-import {HUB} from './constants';
-import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 import {ReplaySubject} from 'rxjs';
+
+import {ETH_TOKEN_ADDRESS} from '../tests/constants';
+
+import {ChannelClientInterface, UnsubscribeFunction} from './types';
+import {HUB} from './constants';
 
 type TokenAllocations = Allocation[];
 

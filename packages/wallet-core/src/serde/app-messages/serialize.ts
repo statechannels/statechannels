@@ -7,6 +7,8 @@ import {
   ChannelResult,
   ChannelStatus
 } from '@statechannels/client-api-schema';
+import {AddressZero} from '@ethersproject/constants';
+
 import {
   Allocation,
   AllocationItem,
@@ -17,8 +19,6 @@ import {
   SignedState,
   ChannelConstants
 } from '../../types';
-
-import {AddressZero} from '@ethersproject/constants';
 import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
 import {BN} from '../../bignumber';
 

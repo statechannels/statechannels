@@ -1,5 +1,4 @@
 import {BN} from '../bignumber';
-
 import {AllocationItem} from '../types';
 
 import {

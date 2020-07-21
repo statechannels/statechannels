@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+
 import {decodeOutcome, encodeOutcome, Outcome} from './outcome';
 
 export interface ConsensusData {

@@ -17,7 +17,6 @@ import {
   Uint256
 } from '@statechannels/wallet-core';
 import {Contract, Wallet, utils} from 'ethers';
-
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
 import {hexZeroPad} from '@ethersproject/bytes';

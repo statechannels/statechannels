@@ -22,7 +22,6 @@ import {
   Uint256,
   serializeDomainBudget
 } from '@statechannels/wallet-core';
-
 import {filter, map, first} from 'rxjs/operators';
 
 import {ChannelChainInfo} from '../chain';

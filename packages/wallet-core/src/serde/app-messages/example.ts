@@ -1,6 +1,7 @@
 import {Allocations} from '@statechannels/client-api-schema';
-import {SimpleAllocation, MixedAllocation} from '../../types';
 import {hexZeroPad} from '@ethersproject/bytes';
+
+import {SimpleAllocation, MixedAllocation} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {makeDestination} from '../../utils';
 import {ETH_TOKEN} from '../../constants';

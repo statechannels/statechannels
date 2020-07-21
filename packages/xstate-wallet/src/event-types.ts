@@ -1,4 +1,5 @@
 import {SimpleAllocation, Participant, DomainBudget} from '@statechannels/wallet-core';
+
 import {ChannelStoreEntry} from './store/channel-store-entry';
 
 export interface JoinChannelEvent {

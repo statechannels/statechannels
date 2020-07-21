@@ -19,7 +19,6 @@ import {
   FundingStrategy,
   parseResponse
 } from '@statechannels/client-api-schema';
-
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
 import {
@@ -38,9 +37,7 @@ import {
 } from '@statechannels/wallet-core';
 
 import {AppRequestEvent} from './event-types';
-
 import {CHALLENGE_DURATION, GIT_VERSION, CHAIN_NETWORK_ID} from './config';
-
 import {Store} from './store';
 
 type ChannelRequest =

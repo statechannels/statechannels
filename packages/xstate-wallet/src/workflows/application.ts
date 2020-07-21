@@ -11,14 +11,11 @@ import {
   StateMachine,
   State
 } from 'xstate';
-
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-
 import {StateVariables, serializeChannelEntry} from '@statechannels/wallet-core';
-
 import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
-
 import _ from 'lodash';
+
 import {
   PlayerStateUpdate,
   ChannelUpdated,
@@ -32,9 +29,10 @@ import {Store, Errors} from '../store';
 import {unreachable} from '../utils';
 import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
-import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 import {createMockGuard} from '../utils/workflow-utils';
 import {MessagingServiceInterface} from '../messaging';
+
+import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 export interface WorkflowContext {
   applicationDomain: string;

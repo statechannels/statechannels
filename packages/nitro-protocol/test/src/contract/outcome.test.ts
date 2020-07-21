@@ -1,5 +1,6 @@
 import {Wallet} from 'ethers';
 import {id} from 'ethers/utils';
+
 import {
   decodeAllocation,
   decodeGuarantee,

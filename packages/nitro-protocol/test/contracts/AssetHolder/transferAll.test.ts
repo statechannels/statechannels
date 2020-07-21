@@ -2,6 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import {Contract} from 'ethers';
 import {bigNumberify, id} from 'ethers/utils';
+
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   allocationToParams,
@@ -11,7 +12,6 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../../test-helpers';
-
 import {encodeAllocation} from '../../../src/contract/outcome';
 
 const provider = getTestProvider();

@@ -26,9 +26,6 @@ module.exports = {
     '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript',
     'plugin:react/recommended'
   ],
   rules: {
@@ -39,16 +36,7 @@ module.exports = {
     ...leftoverTsLintRules,
 
     'no-restricted-imports': ['error', {patterns: ['**/lib', '**/src']}],
-    'arrow-body-style': 'error',
-    'import/order': [
-      'error',
-      {
-        groups: [
-          ['external', 'builtin'],
-          ['internal', 'index', 'sibling', 'parent']
-        ]
-      }
-    ]
+    'arrow-body-style': 'error'
   },
 
   overrides: [

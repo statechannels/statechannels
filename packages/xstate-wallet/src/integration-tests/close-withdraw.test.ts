@@ -1,6 +1,5 @@
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
-
 import {
   simpleEthAllocation,
   isCloseLedger,
@@ -8,12 +7,13 @@ import {
   BN,
   Zero
 } from '@statechannels/wallet-core';
-
 import waitForExpect from 'wait-for-expect';
+
 import {CHALLENGE_DURATION} from '../config';
 import {FakeChain} from '../chain';
-import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 import {TEST_APP_DOMAIN, budget} from '../workflows/tests/data';
+
+import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 jest.setTimeout(30000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {

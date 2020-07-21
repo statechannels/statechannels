@@ -1,6 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
+
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';

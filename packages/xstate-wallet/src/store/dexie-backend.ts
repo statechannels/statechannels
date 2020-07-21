@@ -7,11 +7,13 @@ import {
   AssetBudget,
   BN
 } from '@statechannels/wallet-core';
-import {ChannelStoreEntry} from './channel-store-entry';
-import {DBBackend, ObjectStores, TXMode} from '.';
 
 import {unreachable} from '../utils';
 import {logger} from '../logger';
+
+import {ChannelStoreEntry} from './channel-store-entry';
+
+import {DBBackend, ObjectStores, TXMode} from '.';
 
 const STORES: ObjectStores[] = [
   ObjectStores.budgets,
