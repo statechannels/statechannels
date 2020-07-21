@@ -149,7 +149,11 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    if (this.isSupportedByMe && this.latestSignedByMe.turnNum >= stateVars.turnNum) {
+    if (
+      this.isSupportedByMe &&
+      this.latestSignedByMe &&
+      this.latestSignedByMe.turnNum >= stateVars.turnNum
+    ) {
       logger.error({entry: this.channelId, stateVars}, Errors.staleState);
       throw Error(Errors.staleState);
     }
@@ -217,7 +221,11 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get myTurn(): boolean {
-    return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    if (this.supported) {
+      return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    } else {
+      return this.myIndex === 0;
+    }
   }
 
   get isSupported(): boolean {
@@ -242,17 +250,17 @@ export class Channel extends Model implements RequiredColumns {
     return !!this._latestSupportedByMe;
   }
 
-  get latestSignedByMe(): SignedStateWithHash {
+  get latestSignedByMe(): SignedStateWithHash | undefined {
     return this._latestSupportedByMe
       ? {...this.channelConstants, ...this._latestSupportedByMe}
       : undefined;
   }
 
   get latest(): SignedStateWithHash {
-    return this.signedStates[0] ? {...this.channelConstants, ...this.signedStates[0]} : undefined;
+    return {...this.channelConstants, ...this.signedStates[0]};
   }
 
-  private get _supported(): SignedStateWithHash {
+  private get _supported(): SignedStateWithHash | undefined {
     const latestSupport = this._support;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
@@ -411,7 +419,7 @@ export enum Errors {
 
 class ChannelError extends Error {
   readonly type = 'ChannelError';
-  constructor(reason: Errors, public readonly data = undefined) {
+  constructor(reason: Errors, public readonly data: any = undefined) {
     super(reason);
   }
 }
