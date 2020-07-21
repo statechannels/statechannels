@@ -1,7 +1,8 @@
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
+import {configureEnvVariables} from '@statechannels/devtools';
 
-import './env';
+configureEnvVariables();
 
 export const dbCofig: Config = {
   client: 'postgres',

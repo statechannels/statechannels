@@ -1,14 +1,15 @@
 // Populate env vars as knexfile is used directly in yarn scripts
-import '../env';
-
 import * as path from 'path';
 
+import {configureEnvVariables} from '@statechannels/devtools';
 import {Config} from 'knex';
 
 import {dbCofig} from '../db-config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
+
+configureEnvVariables();
 
 let knexConfig: Config = {
   ...dbCofig,
