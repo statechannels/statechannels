@@ -183,11 +183,19 @@ States with turn numbers `n` through `2n-1` (inclusive) are known as "post fund 
 
 Although you can check the validity of a state transition by providing the data above to an on-chain method, to cause any meaningful change in on-chain state (such as releasing funds), digitial signatures on those states are also required.
 
-Nitro protocol uses the idea of supporting a state: in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`). The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
+Nitro protocol uses the idea of **supporting** a state: in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`). The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
 
 There is also an optimization where a state can be supported by `n` signatures on a sequence of `m < n` states, provided again that each consecutive pair of those `m` states form a valid transition and further provided each participant has provided a signature on a state later or equal in the sequence than the state for which they were the mover.
 
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
+
+:::note
+In most cases where a support proof is required for some change of state of the chain, the entire proof is submitted in the call data, and no on chain `State` is involved. The [`respond`](./clear-a-challenge#call-respond) method is an exception to this rule, and allows for the submission of only a single state in certain circumstances, with the support proof being implied by a combination of on-chain and submitted data.
+:::
+
+:::tip
+Nitro wallets need only store the "last" `n` states, because they never need to submit more than `n` states to the chain.
+:::
 
 In the following diagram, A is participant 0, B is participant 1 and C is participant 2. The states are shown by circles and numbered 0, 1, and 2. We are considering whether state with `turnNum = 2` is supported by various sets of signatures on the states in the sequence.
 

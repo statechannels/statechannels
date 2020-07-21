@@ -188,6 +188,14 @@ There is also an optimization where a state can be supported by `n` signatures o
 
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
 
+:::note
+In most cases where a support proof is required for some change of state of the chain, the entire proof is submitted in the call data, and no on chain `State` is involved. The [`respond`](./clear-a-challenge#call-respond) method is an exception to this rule, and allows for the submission of only a single state in certain circumstances, with the support proof being implied by a combination of on-chain and submitted data.
+:::
+
+:::tip
+Nitro wallets need only store the "last" `n` states, because they never need to submit more than `n` states to the chain.
+:::
+
 In the following diagram, A is participant 0, B is participant 1 and C is participant 2. The states are shown by circles and numbered 0, 1, and 2. We are considering whether state with `turnNum = 2` is supported by various sets of signatures on the states in the sequence.
 
 The yellow boxes show who signed what: in the first example, everyone signed their own state. This _is_ acceptable:
