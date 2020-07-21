@@ -1,3 +1,6 @@
+import * as _ from 'lodash';
+import {ethers} from 'ethers';
+
 import {
   AllocationItem,
   SimpleAllocation,
@@ -7,10 +10,9 @@ import {
   Destination
 } from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import * as _ from 'lodash';
-import {ethers} from 'ethers';
-import {checkThat} from './helpers';
 import {BN, Zero} from '../bignumber';
+
+import {checkThat} from './helpers';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return (

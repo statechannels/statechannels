@@ -13,6 +13,13 @@ module.exports = {
     'plugin:import/typescript'
   ],
   rules: {
+    'import/order': [
+      1,
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always'
+      }
+    ],
     'no-process-env': 'error',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
