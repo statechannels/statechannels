@@ -9,7 +9,7 @@ import {
   signState,
   hashState,
 } from '@statechannels/wallet-core';
-import {fixture} from './utils';
+import {fixture, Fixture} from './utils';
 import {alice, bob} from './participants';
 import {alice as aliceWallet} from './signingWallets';
 import {addHash} from '../../../state-utils';
@@ -33,13 +33,16 @@ const defaultState: State = {
 // Caching signatures saves about 200ms per signature
 // TODO: Persist these signatures between tests
 const signatureCache: any = {};
-const _signState = (s, pk) => {
+const _signState = (s: State, pk: string): string => {
   const key = `${pk}-${hashState(s)}`;
   return (signatureCache[key] = signatureCache[key] || signState(s, pk));
 };
 
 export const createState = fixture(defaultState);
-export const stateSignedBy = (defaultWallet = aliceWallet(), ...otherWallets: SigningWallet[]) =>
+export const stateSignedBy = (
+  defaultWallet = aliceWallet(),
+  ...otherWallets: SigningWallet[]
+): Fixture<SignedState> =>
   fixture<SignedState>(
     _.merge({signatures: []}, defaultState),
     (s: State): SignedState => ({

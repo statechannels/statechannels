@@ -1,4 +1,4 @@
-import {Model} from 'objection';
+import {Model, JSONSchema, Pojo} from 'objection';
 import {Address, Uint48} from '../type-aliases';
 import knex from '../db/connection';
 import {ethers} from 'ethers';
@@ -9,14 +9,14 @@ export class Nonce extends Model {
   readonly value: Uint48;
 
   static tableName = 'nonces';
-  static get jsonSchema() {
+  static get jsonSchema(): JSONSchema {
     return {
       type: 'object',
       required: ['addresses'],
     };
   }
 
-  $beforeValidate(jsonSchema, json, _opt) {
+  $beforeValidate(jsonSchema, json, _opt): Pojo {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     const {addresses} = json;

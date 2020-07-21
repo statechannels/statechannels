@@ -13,4 +13,4 @@ export const SERVER_PRIVATE_KEY =
   process.env.SERVER_PRIVATE_KEY ||
   '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b';
 
-export const unreachable = (x: never) => x;
+export const unreachable = (x: never): never => x;

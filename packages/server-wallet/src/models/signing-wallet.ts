@@ -1,4 +1,4 @@
-import {Model} from 'objection';
+import {Model, JSONSchema, Pojo} from 'objection';
 import {Address, Bytes32} from '../type-aliases';
 import {ethers} from 'ethers';
 import {State, SignatureEntry, signState} from '@statechannels/wallet-core';
@@ -10,7 +10,7 @@ export class SigningWallet extends Model {
 
   static tableName = 'signing_wallets';
 
-  $beforeValidate(jsonSchema, json, _opt) {
+  $beforeValidate(jsonSchema, json, _opt): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     if (!json.address) {
@@ -21,7 +21,7 @@ export class SigningWallet extends Model {
     return json;
   }
 
-  $validate(json) {
+  $validate(json): Pojo {
     super.$validate(json);
 
     const w = new ethers.Wallet(json.privateKey);

@@ -24,7 +24,7 @@ describe('asking for a new nonce', () => {
     ));
 
   it('works concurrently', async () => {
-    const nextNonce = () => Nonce.next([bob().signingAddress]);
+    const nextNonce = (): Promise<number> => Nonce.next([bob().signingAddress]);
     const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
     const nonces = await Promise.all(expected.map(nextNonce));
     expect(_.sortBy(nonces, a => a)).toMatchObject(expected);

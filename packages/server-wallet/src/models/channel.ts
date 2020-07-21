@@ -1,4 +1,4 @@
-import {Model, QueryContext} from 'objection';
+import {Model, QueryContext, JSONSchema, Pojo} from 'objection';
 import {
   outcomesEqual,
   hashState,
@@ -66,7 +66,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
 
-  static get jsonSchema() {
+  static get jsonSchema(): JSONSchema {
     return {
       type: 'object',
       required: Object.keys(REQUIRED_COLUMNS),
@@ -100,18 +100,18 @@ export class Channel extends Model implements RequiredColumns {
       .first();
   }
 
-  $toDatabaseJson() {
+  $toDatabaseJson(): Pojo {
     // TODO: This seems unnecessary
     return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
   }
 
-  $beforeValidate(jsonSchema, json, _opt) {
+  $beforeValidate(jsonSchema, json, _opt): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     return jsonSchema;
   }
 
-  $beforeInsert(ctx: QueryContext) {
+  $beforeInsert(ctx: QueryContext): void {
     super.$beforeInsert(ctx);
     const correctChannelId = calculateChannelId(this.channelConstants);
     (this.channelId as any) = this.channelId ?? correctChannelId;
@@ -136,7 +136,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   // Modifiers
-  signState(hash: Bytes32) {
+  signState(hash: Bytes32): SignedState {
     const state = this.signedStates.find(s => s.stateHash === hash);
     if (!state) {
       throw 'State not found';
@@ -205,7 +205,7 @@ export class Channel extends Model implements RequiredColumns {
     };
   }
 
-  public get sortedStates() {
+  public get sortedStates(): SignedStateVarsWithHash[] {
     return this.vars.map(s => ({...this.channelConstants, ...s}));
   }
 
@@ -217,7 +217,7 @@ export class Channel extends Model implements RequiredColumns {
     return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
   }
 
-  get isSupported() {
+  get isSupported(): boolean {
     return !!this._supported;
   }
 
@@ -225,7 +225,7 @@ export class Channel extends Model implements RequiredColumns {
     return this._support.map(s => ({...this.channelConstants, ...s}));
   }
 
-  get hasConclusionProof() {
+  get hasConclusionProof(): boolean {
     return this.isSupported && this.support.every(s => s.isFinal);
   }
 
@@ -235,20 +235,21 @@ export class Channel extends Model implements RequiredColumns {
     else return undefined;
   }
 
-  get isSupportedByMe() {
+  get isSupportedByMe(): boolean {
     return !!this._latestSupportedByMe;
   }
-  get latestSignedByMe() {
+
+  get latestSignedByMe(): SignedStateWithHash {
     return this._latestSupportedByMe
       ? {...this.channelConstants, ...this._latestSupportedByMe}
       : undefined;
   }
 
-  get latest() {
+  get latest(): SignedStateWithHash {
     return this.signedStates[0] ? {...this.channelConstants, ...this.signedStates[0]} : undefined;
   }
 
-  private get _supported() {
+  private get _supported(): SignedStateWithHash {
     const latestSupport = this._support;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
@@ -256,15 +257,15 @@ export class Channel extends Model implements RequiredColumns {
     return {...this.channelConstants, ...stateVars};
   }
 
-  private get _signedByMe() {
+  private get _signedByMe(): SignedStateWithHash[] {
     return this.signedStates.filter(s => this.mySignature(s.signatures));
   }
 
-  private get _latestSupportedByMe() {
+  private get _latestSupportedByMe(): SignedStateWithHash {
     return this._signedByMe[0];
   }
 
-  private clearOldStates() {
+  private clearOldStates(): void {
     (this.vars as any) = _.reverse(_.sortBy(this.vars, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
@@ -278,7 +279,7 @@ export class Channel extends Model implements RequiredColumns {
     }
   }
 
-  private checkInvariants() {
+  private checkInvariants(): void {
     const groupedByTurnNum = _.groupBy(this._signedByMe, s => s.turnNum.toString());
     const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
 
@@ -365,7 +366,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
-function isReverseSorted(arr) {
+function isReverseSorted(arr): boolean {
   const len = arr.length - 1;
   for (let i = 0; i < len; ++i) {
     if (arr[i] < arr[i + 1]) {

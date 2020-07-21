@@ -79,7 +79,7 @@ export class Wallet implements WalletInterface {
     const cols = {...channelConstants, vars, signingAddress};
     const {channelId, latest} = await Channel.query().insert(cols);
 
-    const {outbox} = await (() => {
+    const {outbox} = await ((): Promise<ExecutionResult> => {
       switch (args.fundingStrategy) {
         case 'Direct':
           return protocolEngine([channelId]);

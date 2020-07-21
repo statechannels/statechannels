@@ -1,14 +1,14 @@
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
-import {ContractFactory, ethers, providers} from 'ethers';
+import {ContractFactory, ethers, providers, Contract} from 'ethers';
 import {SERVER_SIGNER_PRIVATE_KEY} from '../constants';
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(SERVER_SIGNER_PRIVATE_KEY, provider);
 
-export async function ethAssetHolder() {
-  let ethAssetHolderFactory;
+export async function ethAssetHolder(): Promise<Contract> {
+  let ethAssetHolderFactory: ContractFactory;
   try {
     ethAssetHolderFactory = await ContractFactory.fromSolidity(
       ContractArtifacts.EthAssetHolderArtifact,
