@@ -22,6 +22,9 @@ export async function ethAssetHolder(): Promise<Contract> {
     throw err;
   }
 
+  if (!process.env.ETH_ASSET_HOLDER_ADDRESS) {
+    throw new Error('ETH_ASSET_HOLDER_ADDRESS not defined');
+  }
   const contract = await ethAssetHolderFactory.attach(process.env.ETH_ASSET_HOLDER_ADDRESS);
 
   return contract;
