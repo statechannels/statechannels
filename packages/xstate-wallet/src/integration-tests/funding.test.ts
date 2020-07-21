@@ -1,13 +1,15 @@
 import {CreateChannelResponse} from '@statechannels/client-api-schema';
 import {filter, first} from 'rxjs/operators';
+
 import {FakeChain} from '../chain';
+import {isChannelUpdated, isChannelProposed} from '../messaging';
+
 import {
   Player,
   generateCreateChannelRequest,
   hookUpMessaging,
   generateJoinChannelRequest
 } from './helpers';
-import {isChannelUpdated, isChannelProposed} from '../messaging';
 
 jest.setTimeout(20000);
 

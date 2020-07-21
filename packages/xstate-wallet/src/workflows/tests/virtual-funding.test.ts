@@ -1,6 +1,5 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-
 import {
   firstState,
   createSignatureEntry,
@@ -13,11 +12,12 @@ import {
   simpleEthGuarantee,
   BN
 } from '@statechannels/wallet-core';
-
 import {AddressZero} from '@ethersproject/constants';
 
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
+import {ParticipantIdx} from '../virtual-funding-as-leaf';
+
 import {
   wallet1,
   wallet2,
@@ -30,8 +30,8 @@ import {
   third
 } from './data';
 import {subscribeToMessages} from './message-service';
-import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {SimpleHub} from './simple-hub';
+
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
 const {add, sub: subtract} = BN;
 

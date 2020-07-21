@@ -1,5 +1,4 @@
 import {interpret} from 'xstate';
-
 import {
   firstState,
   calculateChannelId,
@@ -9,13 +8,18 @@ import {
   State,
   BN
 } from '@statechannels/wallet-core';
-
 import {AddressZero} from '@ethersproject/constants';
 
 import {Store} from '../../store';
-
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
+import {machine as concludeChannel} from '../conclude-channel';
+import {Init, machine as createChannel} from '../create-and-fund';
+import {MessagingService} from '../../messaging';
+
+import {subscribeToMessages} from './message-service';
+import {SimpleHub} from './simple-hub';
 import {
   wallet1,
   wallet2,
@@ -28,15 +32,6 @@ import {
   TEST_APP_DOMAIN,
   budget
 } from './data';
-
-import {subscribeToMessages} from './message-service';
-
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
-
-import {SimpleHub} from './simple-hub';
-import {machine as concludeChannel} from '../conclude-channel';
-import {Init, machine as createChannel} from '../create-and-fund';
-import {MessagingService} from '../../messaging';
 
 jest.setTimeout(20000);
 

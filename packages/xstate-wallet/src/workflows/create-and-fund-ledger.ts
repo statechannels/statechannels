@@ -22,10 +22,12 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
-import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../config';
-import * as Depositing from './depositing';
 import {getDataAndInvoke} from '../utils';
+
+import * as Depositing from './depositing';
+
+import {SupportState} from '.';
 const {add} = BN;
 
 type WorkflowActions = {

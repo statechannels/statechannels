@@ -1,13 +1,14 @@
 import {ethBudget, BN} from '@statechannels/wallet-core';
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
+
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
-import {SimpleHub} from './simple-hub';
-import {subscribeToMessages} from './message-service';
-
 import {machine as approveBudgetAndFund} from '../approve-budget-and-fund';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
+
+import {SimpleHub} from './simple-hub';
+import {subscribeToMessages} from './message-service';
 import {
   wallet1 as playerWallet,
   wallet2 as hubWallet,

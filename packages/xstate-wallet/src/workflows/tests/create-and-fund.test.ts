@@ -1,6 +1,5 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-
 import {
   firstState,
   calculateChannelId,
@@ -12,13 +11,15 @@ import {
   isSimpleEthAllocation,
   BN
 } from '@statechannels/wallet-core';
-
 import {AddressZero} from '@ethersproject/constants';
 
 import {Store} from '../../store';
-
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
+import {Init, machine} from '../create-and-fund';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
+
 import {
   wallet1,
   wallet2,
@@ -32,12 +33,7 @@ import {
   budget
 } from './data';
 import {subscribeToMessages} from './message-service';
-
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
-
 import {SimpleHub} from './simple-hub';
-import {Init, machine} from '../create-and-fund';
-import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(20000);
 

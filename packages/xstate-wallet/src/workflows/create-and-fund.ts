@@ -6,7 +6,6 @@ import {
   DoneInvokeEvent,
   assign
 } from 'xstate';
-
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
 import {
@@ -21,11 +20,11 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
-
-import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MessagingServiceInterface} from '../messaging';
 import {getDataAndInvoke} from '../utils';
+
+import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 const PROTOCOL = 'create-and-fund';
 const {add} = BN;
 

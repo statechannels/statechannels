@@ -12,17 +12,16 @@ import {
   SignedState,
   BN
 } from '@statechannels/wallet-core';
-
 import _ from 'lodash';
-
 import {AddressZero} from '@ethersproject/constants';
 
 import {FakeChain, Chain} from '../../chain';
 import {TestStore} from '../../test-store';
-import {wallet1, wallet2, participants} from './data';
-import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {Init, machine, Errors} from '../ledger-funding';
+
+import {wallet1, wallet2, participants} from './data';
+import {subscribeToMessages} from './message-service';
 
 jest.setTimeout(10000);
 const {add} = BN;

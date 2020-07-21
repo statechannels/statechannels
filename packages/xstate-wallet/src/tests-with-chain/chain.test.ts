@@ -10,7 +10,6 @@ import {
   State,
   BN
 } from '@statechannels/wallet-core';
-
 import {hexZeroPad} from '@ethersproject/bytes';
 
 import {Store} from '../store';

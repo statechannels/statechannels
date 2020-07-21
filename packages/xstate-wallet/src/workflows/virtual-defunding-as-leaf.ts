@@ -8,18 +8,18 @@ import {
   isGuarantee,
   BN
 } from '@statechannels/wallet-core';
-
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine, ServiceConfig} from 'xstate';
-
 import _ from 'lodash';
 
 import {ChannelLock} from '../store/store';
 import {Store} from '../store';
 import {getDataAndInvoke} from '../utils/helpers';
-import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {SupportState} from '.';
 import {MessagingServiceInterface} from '../messaging';
+
+import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
+
+import {SupportState} from '.';
 
 export type Init = {targetChannelId: string};
 const PROTOCOL = 'virtual-defunding-as-leaf';

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {exists} from '@statechannels/wallet-core';
+
 import {Store} from '../../store';
 import {ADD_LOGS} from '../../config';
 import {logger} from '../../logger';
