@@ -243,8 +243,6 @@ zero-->one;
 one-->two;
 </div>
 
-(Note that there is no need to submit states to the chain if they are not signed by anybody).
-
 The following signatures would _not_ be acceptable:
 
 <div class="mermaid" align="center">
@@ -263,6 +261,10 @@ end
 </div>
 
 This is because C signed a state _earlier_ in the sequence than the one she is the mover for.
+
+:::tip
+Note that there is no need to submit a state if it is _both_ not signed by anybody _and_ is not preceeded by any signed states.
+:::
 
 We provide a helper function to sign a `State`:
 
