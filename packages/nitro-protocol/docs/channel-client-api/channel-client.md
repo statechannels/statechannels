@@ -13,19 +13,20 @@ hide_title: true
 
 |  Class | Description |
 |  --- | --- |
-|  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API |
+|  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/channel-provider |
 |  [FakeChannelProvider](./channel-client.fakechannelprovider.md) | <b><i>(BETA)</i></b> This fake provider becomes the stateful object which handles the calls coming from a non-fake <code>ChannelClient</code>. |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [ErrorCode](./channel-client.errorcode.md) | <b><i>(BETA)</i></b> /\* |
-|  [EthereumNotEnabledErrorCode](./channel-client.ethereumnotenablederrorcode.md) | <b><i>(BETA)</i></b> /\* |
-|  [UserDeclinedErrorCode](./channel-client.userdeclinederrorcode.md) | <b><i>(BETA)</i></b> /\* |
+|  [ErrorCode](./channel-client.errorcode.md) | <b><i>(BETA)</i></b> |
+|  [EthereumNotEnabledErrorCode](./channel-client.ethereumnotenablederrorcode.md) | <b><i>(BETA)</i></b> |
+|  [UserDeclinedErrorCode](./channel-client.userdeclinederrorcode.md) | <b><i>(BETA)</i></b> |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> /\* |
+|  [TokenAllocations](./channel-client.tokenallocations.md) | <b><i>(BETA)</i></b> |
+|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |

@@ -12,7 +12,7 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-Registers callback that will fire when a site budget is updated.
+Registers callback that will fire when a domain budget is updated.
 
 <b>Signature:</b>
 

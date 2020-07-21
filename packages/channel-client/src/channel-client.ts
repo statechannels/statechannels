@@ -2,7 +2,6 @@ import {ChannelProviderInterface} from '@statechannels/channel-provider';
 import {
   PushMessageResult,
   ChannelResult,
-  Allocation,
   Participant,
   DomainBudget,
   ChannelUpdatedNotification,
@@ -16,30 +15,61 @@ import {ReplaySubject} from 'rxjs';
 
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 
-import {UnsubscribeFunction} from './types';
+import {UnsubscribeFunction, TokenAllocations} from './types';
 import {HUB} from './constants';
-
-type TokenAllocations = Allocation[];
-
 /**
+ * Class that wraps the JSON-RPC interface of \@statechannels/channel-provider
+ *
+ * @remarks
+ * This class exposes a convenient API feturing event emitters and async methods returning Promises.
+ * Together with \@statechannels/channel-provider, it allows a Dapp to speak to the statechannels wallet.
+ *
  * @beta
- * Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API
  */
 export class ChannelClient {
+  /**
+   *  E.g. instance of the \@statechannels/channel-provider class, suitably configured
+   */
+  readonly provider: ChannelProviderInterface;
+
+  /**
+   * rxjs Observable which emits ChannelResults for all channels of interest
+   */
   channelState: ReplaySubject<ChannelResult>;
+
+  /**
+   * Get my state channel (ephemeral) signingAddress
+   */
   get signingAddress(): string | undefined {
     return this.provider.signingAddress;
   }
-
+  /**
+   * Get my destination address
+   *
+   * @remarks
+   * E.g. an address in MetaMask / other Ethereum wallet
+   */
   get destinationAddress(): string | undefined {
     return this.provider.destinationAddress;
   }
-
+  /**
+   * Get the wallet version
+   */
   get walletVersion(): string | undefined {
     return this.provider.walletVersion;
   }
 
-  constructor(readonly provider: ChannelProviderInterface) {
+  /**
+   * Create a new instance of the Channel Client
+   *
+   * @remarks
+   * It is possible to pass in a {@link @statechannels/channel-client#FakeChannelProvider | fake channel provider},
+   * which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.
+   *
+   * @param provider - An instance of the \@statechannels/channel-provider class, suitably configured
+   */
+  constructor(provider: ChannelProviderInterface) {
+    this.provider = provider;
     this.channelState = new ReplaySubject(1);
     this.provider.on('ChannelUpdated', result => this.channelState.next(result));
   }
@@ -92,7 +122,7 @@ export class ChannelClient {
   }
 
   /**
-   * Registers callback that will fire when a site budget is updated.
+   * Registers callback that will fire when a domain budget is updated.
    *
    * @param callback - A function that accepts a BudgetUpdatedNotification.
    * @returns A function that will unregister the callback when invoked.
@@ -259,7 +289,7 @@ export class ChannelClient {
   }
 
   /**
-   * Requests the latest budget for this site
+   * Requests the latest budget for this domain
    *
    * @param hubParticipantId - The id of a state channel hub
    * @returns A promise that resolves to a ChannelResult.
@@ -270,7 +300,7 @@ export class ChannelClient {
   }
 
   /**
-   * Requests the funds to be withdrawn from this site's ledger channel
+   * Requests the funds to be withdrawn from this domain's ledger channel
    *
    * @param hubAddress - The address of a state channel hub
    * @param hubOutcomeAddress - An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense

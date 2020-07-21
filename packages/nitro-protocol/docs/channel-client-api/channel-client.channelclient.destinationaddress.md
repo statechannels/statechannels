@@ -12,8 +12,14 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
+Get my destination address
+
 <b>Signature:</b>
 
 ```typescript
 get destinationAddress(): string | undefined;
 ```
+
+## Remarks
+
+E.g. an address in MetaMask / other Ethereum wallet

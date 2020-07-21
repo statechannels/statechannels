@@ -1,8 +1,19 @@
-import {ChannelResult, DomainBudget, Message, ErrorCodes} from '@statechannels/client-api-schema';
+import {
+  ChannelResult,
+  DomainBudget,
+  Message,
+  ErrorCodes,
+  Allocation
+} from '@statechannels/client-api-schema';
 
-/** 
-  /* @beta
-*/
+/**
+ * @beta
+ */
+export type TokenAllocations = Allocation[];
+
+/**
+ * @beta
+ */
 export type UnsubscribeFunction = () => void;
 export interface EventsWithArgs {
   MessageQueued: [Message];
@@ -12,9 +23,9 @@ export interface EventsWithArgs {
   ChannelProposed: [ChannelResult];
 }
 
-/** 
-  /* @beta
-*/
+/**
+ * @beta
+ */
 export const ErrorCode: ErrorCodes = {
   EnableEthereum: {EthereumNotEnabled: 100},
   CloseAndWithdraw: {UserDeclined: 200},

@@ -25,7 +25,7 @@ updateChannel(channelId: string, allocations: TokenAllocations, appData: string)
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  channelId | string | id for the state channel |
-|  allocations | TokenAllocations | Updated allocation of funds for this channel |
+|  allocations | [TokenAllocations](./channel-client.tokenallocations.md) | Updated allocation of funds for this channel |
 |  appData | string | Updated application data for this channel |
 
 <b>Returns:</b>

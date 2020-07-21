@@ -12,6 +12,8 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
+E.g. instance of the @<!-- -->statechannels/channel-provider class, suitably configured
+
 <b>Signature:</b>
 
 ```typescript

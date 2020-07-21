@@ -12,7 +12,7 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-Constructs a new instance of the `ChannelClient` class
+Create a new instance of the Channel Client
 
 <b>Signature:</b>
 
@@ -24,4 +24,8 @@ constructor(provider: ChannelProviderInterface);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  provider | ChannelProviderInterface |  |
+|  provider | ChannelProviderInterface | An instance of the @<!-- -->statechannels/channel-provider class, suitably configured |
+
+## Remarks
+
+It is possible to pass in a [fake channel provider](./channel-client.fakechannelprovider.md)<!-- -->, which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.

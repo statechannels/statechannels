@@ -28,13 +28,10 @@ export class ChannelClient {
     constructor(provider: ChannelProviderInterface);
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
     challengeChannel(channelId: string): Promise<ChannelResult>;
-    // (undocumented)
     channelState: ReplaySubject<ChannelResult>;
     closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
     closeChannel(channelId: string): Promise<ChannelResult>;
-    // Warning: (ae-forgotten-export) The symbol "TokenAllocations" needs to be exported by the entry point index.d.ts
     createChannel(participants: Participant[], allocations: TokenAllocations, appDefinition: string, appData: string, fundingStrategy: FundingStrategy): Promise<ChannelResult>;
-    // (undocumented)
     get destinationAddress(): string | undefined;
     getBudget(hubParticipantId: string): Promise<DomainBudget | {}>;
     getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
@@ -44,22 +41,19 @@ export class ChannelClient {
     onChannelProposed(callback: (result: ChannelProposedNotification['params']) => void): UnsubscribeFunction;
     onChannelUpdated(callback: (result: ChannelUpdatedNotification['params']) => void): UnsubscribeFunction;
     onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void): UnsubscribeFunction;
-    // (undocumented)
     readonly provider: ChannelProviderInterface;
     pushMessage(message: Message): Promise<PushMessageResult>;
-    // (undocumented)
     get signingAddress(): string | undefined;
     updateChannel(channelId: string, allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
-    // (undocumented)
     get walletVersion(): string | undefined;
 }
 
 export { ChannelResult }
 
-// @beta
+// @beta (undocumented)
 export const ErrorCode: ErrorCodes;
 
-// @beta
+// @beta (undocumented)
 export const EthereumNotEnabledErrorCode: 100;
 
 // @beta
@@ -120,10 +114,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     walletVersion?: string;
 }
 
-// @beta
+// @beta (undocumented)
+export type TokenAllocations = Allocation[];
+
+// @beta (undocumented)
 export type UnsubscribeFunction = () => void;
 
-// @beta
+// @beta (undocumented)
 export const UserDeclinedErrorCode: 200;
 
 

@@ -25,7 +25,7 @@ createChannel(participants: Participant[], allocations: TokenAllocations, appDef
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  participants | Participant\[\] | Array of Participants for this channel |
-|  allocations | TokenAllocations | Initial allocation of funds for this channel |
+|  allocations | [TokenAllocations](./channel-client.tokenallocations.md) | Initial allocation of funds for this channel |
 |  appDefinition | string | Address of ForceMoveApp deployed on chain |
 |  appData | string | Initial application data for this channel |
 |  fundingStrategy | FundingStrategy | Direct, Ledger or Virtual funding |

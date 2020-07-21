@@ -12,7 +12,7 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API
+Class that wraps the JSON-RPC interface of @<!-- -->statechannels/channel-provider
 
 <b>Signature:</b>
 
@@ -20,21 +20,25 @@ Class that wraps the channel-provider's JSON-RPC interface and exposes a more co
 export declare class ChannelClient 
 ```
 
+## Remarks
+
+This class exposes a convenient API feturing event emitters and async methods returning Promises. Together with @<!-- -->statechannels/channel-provider, it allows a Dapp to speak to the statechannels wallet.
+
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(provider)](./channel-client.channelclient._constructor_.md) |  | <b><i>(BETA)</i></b> Constructs a new instance of the <code>ChannelClient</code> class |
+|  [(constructor)(provider)](./channel-client.channelclient._constructor_.md) |  | <b><i>(BETA)</i></b> Create a new instance of the Channel Client |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [channelState](./channel-client.channelclient.channelstate.md) |  | ReplaySubject&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [destinationAddress](./channel-client.channelclient.destinationaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> |
-|  [provider](./channel-client.channelclient.provider.md) |  | ChannelProviderInterface | <b><i>(BETA)</i></b> |
-|  [signingAddress](./channel-client.channelclient.signingaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> |
-|  [walletVersion](./channel-client.channelclient.walletversion.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> |
+|  [channelState](./channel-client.channelclient.channelstate.md) |  | ReplaySubject&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> rxjs Observable which emits ChannelResults for all channels of interest |
+|  [destinationAddress](./channel-client.channelclient.destinationaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my destination address |
+|  [provider](./channel-client.channelclient.provider.md) |  | ChannelProviderInterface | <b><i>(BETA)</i></b> E.g. instance of the @<!-- -->statechannels/channel-provider class, suitably configured |
+|  [signingAddress](./channel-client.channelclient.signingaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my state channel (ephemeral) signingAddress |
+|  [walletVersion](./channel-client.channelclient.walletversion.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get the wallet version |
 
 ## Methods
 
@@ -42,14 +46,14 @@ export declare class ChannelClient
 |  --- | --- | --- |
 |  [approveBudgetAndFund(receiveCapacity, sendCapacity, hubAddress, hubOutcomeAddress)](./channel-client.channelclient.approvebudgetandfund.md) |  | <b><i>(BETA)</i></b> Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub |
 |  [challengeChannel(channelId)](./channel-client.channelclient.challengechannel.md) |  | <b><i>(BETA)</i></b> Requests a challenge for a channel |
-|  [closeAndWithdraw(hubParticipantId)](./channel-client.channelclient.closeandwithdraw.md) |  | <b><i>(BETA)</i></b> Requests the funds to be withdrawn from this site's ledger channel |
+|  [closeAndWithdraw(hubParticipantId)](./channel-client.channelclient.closeandwithdraw.md) |  | <b><i>(BETA)</i></b> Requests the funds to be withdrawn from this domain's ledger channel |
 |  [closeChannel(channelId)](./channel-client.channelclient.closechannel.md) |  | <b><i>(BETA)</i></b> Requests a close for a channel |
 |  [createChannel(participants, allocations, appDefinition, appData, fundingStrategy)](./channel-client.channelclient.createchannel.md) |  | <b><i>(BETA)</i></b> Requests a new channel to be created |
-|  [getBudget(hubParticipantId)](./channel-client.channelclient.getbudget.md) |  | <b><i>(BETA)</i></b> Requests the latest budget for this site |
+|  [getBudget(hubParticipantId)](./channel-client.channelclient.getbudget.md) |  | <b><i>(BETA)</i></b> Requests the latest budget for this domain |
 |  [getChannels(includeClosed)](./channel-client.channelclient.getchannels.md) |  | <b><i>(BETA)</i></b> Requests the latest state for all channels. |
 |  [getState(channelId)](./channel-client.channelclient.getstate.md) |  | <b><i>(BETA)</i></b> Requests the latest state for a channel |
 |  [joinChannel(channelId)](./channel-client.channelclient.joinchannel.md) |  | <b><i>(BETA)</i></b> Join a proposed state channel |
-|  [onBudgetUpdated(callback)](./channel-client.channelclient.onbudgetupdated.md) |  | <b><i>(BETA)</i></b> Registers callback that will fire when a site budget is updated. |
+|  [onBudgetUpdated(callback)](./channel-client.channelclient.onbudgetupdated.md) |  | <b><i>(BETA)</i></b> Registers callback that will fire when a domain budget is updated. |
 |  [onChannelProposed(callback)](./channel-client.channelclient.onchannelproposed.md) |  | <b><i>(BETA)</i></b> Registers a callback that will fire when a state channel is proposed. |
 |  [onChannelUpdated(callback)](./channel-client.channelclient.onchannelupdated.md) |  | <b><i>(BETA)</i></b> Registers a callback that will fire when a state channel is updated. |
 |  [onMessageQueued(callback)](./channel-client.channelclient.onmessagequeued.md) |  | <b><i>(BETA)</i></b> Registers a callback that will fire when an outbound message is ready to be dispatched. |

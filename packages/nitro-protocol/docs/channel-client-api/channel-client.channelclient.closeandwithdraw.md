@@ -12,7 +12,7 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-Requests the funds to be withdrawn from this site's ledger channel
+Requests the funds to be withdrawn from this domain's ledger channel
 
 <b>Signature:</b>
 
