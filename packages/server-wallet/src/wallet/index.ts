@@ -14,6 +14,7 @@ import {
   calculateChannelId,
   convertToParticipant,
   hashState,
+  SignatureEntry,
 } from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
@@ -68,7 +69,7 @@ export class Wallet implements WalletInterface {
 
     const turnNum = 0;
     const isFinal = false;
-    const signatures = [];
+    const signatures: SignatureEntry[] = [];
     const s = {appData, outcome, turnNum, isFinal, signatures};
     const vars: SignedStateVarsWithHash[] = [
       {...s, stateHash: hashState({...channelConstants, ...s})},

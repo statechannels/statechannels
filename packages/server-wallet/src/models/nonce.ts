@@ -1,4 +1,4 @@
-import {JSONSchema, Model, Pojo} from 'objection';
+import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
 import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
@@ -17,7 +17,7 @@ export class Nonce extends Model {
     };
   }
 
-  $beforeValidate(jsonSchema, json, _opt): Pojo {
+  $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): Pojo {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     const {addresses} = json;

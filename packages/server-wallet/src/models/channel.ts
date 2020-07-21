@@ -13,7 +13,7 @@ import {
   hashState,
   outcomesEqual,
 } from '@statechannels/wallet-core';
-import {JSONSchema, Model, Pojo, QueryContext} from 'objection';
+import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
@@ -95,7 +95,7 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static forId(channelId: Bytes32, tx): Promise<Channel> {
+  static forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
     return Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
@@ -107,7 +107,7 @@ export class Channel extends Model implements RequiredColumns {
     return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
   }
 
-  $beforeValidate(jsonSchema, json, _opt): JSONSchema {
+  $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     return jsonSchema;
@@ -377,7 +377,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
-function isReverseSorted(arr): boolean {
+function isReverseSorted(arr: number[]): boolean {
   const len = arr.length - 1;
   for (let i = 0; i < len; ++i) {
     if (arr[i] < arr[i + 1]) {
