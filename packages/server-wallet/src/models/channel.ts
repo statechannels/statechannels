@@ -33,7 +33,7 @@ export const COMPUTED_COLUMNS = {
   channelId: 'channelId',
   signingAddress: 'signingAddress',
 };
-export interface RequiredColumns extends Record<keyof typeof REQUIRED_COLUMNS, any> {
+export interface RequiredColumns {
   readonly chainId: Bytes32;
   readonly appDefinition: Address;
   readonly channelNonce: Uint48;
@@ -55,14 +55,15 @@ export const CHANNEL_COLUMNS = {
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
 
-  readonly channelId: Bytes32;
+  channelId: Bytes32;
+  vars: SignedStateVarsWithHash[];
+
   readonly chainId: Bytes32;
   readonly appDefinition: Address;
   readonly channelNonce: Uint48;
   readonly challengeDuration: Uint48;
   readonly participants: Participant[];
   readonly signingAddress: Address;
-  readonly vars: SignedStateVarsWithHash[];
 
   readonly signingWallet!: SigningWallet;
 
@@ -114,7 +115,8 @@ export class Channel extends Model implements RequiredColumns {
   $beforeInsert(ctx: QueryContext): void {
     super.$beforeInsert(ctx);
     const correctChannelId = calculateChannelId(this.channelConstants);
-    (this.channelId as any) = this.channelId ?? correctChannelId;
+
+    this.channelId = this.channelId ?? correctChannelId;
 
     if (this.channelId !== correctChannelId) {
       throw new ChannelError(Errors.invalidChannelId, {
@@ -266,7 +268,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   private clearOldStates(): void {
-    (this.vars as any) = _.reverse(_.sortBy(this.vars, s => s.turnNum));
+    this.vars = _.reverse(_.sortBy(this.vars, s => s.turnNum));
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
@@ -275,7 +277,7 @@ export class Channel extends Model implements RequiredColumns {
       // Find where the first support state is in our current state array
       const supportIndex = this.vars.findIndex(sv => sv.stateHash === firstSupportStateHash);
       // Take everything before that
-      (this.vars as any) = this.vars.slice(0, supportIndex + 1);
+      this.vars = this.vars.slice(0, supportIndex + 1);
     }
   }
 

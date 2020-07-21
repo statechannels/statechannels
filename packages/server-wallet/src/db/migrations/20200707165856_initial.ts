@@ -3,7 +3,7 @@ import {addBytes32Check, addAddressCheck, addUint48Check} from '../utils';
 
 const channels = 'channels';
 const signingWallets = 'signing_wallets';
-export async function up(knex: Knex): Promise<any> {
+export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(signingWallets, function(table) {
     table.increments('id');
     table
@@ -45,7 +45,7 @@ export async function up(knex: Knex): Promise<any> {
   await addUint48Check(knex, channels, 'challenge_duration');
 }
 
-export async function down(knex: Knex): Promise<any> {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTable(channels);
   await knex.schema.dropTable(signingWallets);
 }

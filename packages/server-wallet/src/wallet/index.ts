@@ -50,7 +50,7 @@ export type WalletInterface = {
   pushMessage(m: AddressedMessage): Promise<{response?: Message; channelResults?: ChannelResult[]}>;
 
   // Wallet -> App communication
-  onNotification(cb: (notice: Notification) => void): {unsubscribe: any};
+  onNotification(cb: (notice: Notification) => void): {unsubscribe: () => void};
 };
 
 export class Wallet implements WalletInterface {
@@ -182,7 +182,7 @@ export class Wallet implements WalletInterface {
       ],
     };
   }
-  onNotification(_cb: (notice: Notification) => void): {unsubscribe: any} {
+  onNotification(_cb: (notice: Notification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
   }
 }

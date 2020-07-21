@@ -32,7 +32,7 @@ const defaultState: State = {
 
 // Caching signatures saves about 200ms per signature
 // TODO: Persist these signatures between tests
-const signatureCache: any = {};
+const signatureCache: Record<string, string> = {};
 const _signState = (s: State, pk: string): string => {
   const key = `${pk}-${hashState(s)}`;
   return (signatureCache[key] = signatureCache[key] || signState(s, pk));

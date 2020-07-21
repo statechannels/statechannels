@@ -1,6 +1,5 @@
 // From the tslint.json we used previously
 const leftoverTsLintRules = {
-  '@typescript-eslint/no-explicit-any': 'off',
 
   '@typescript-eslint/no-use-before-define': 'off',
 };
