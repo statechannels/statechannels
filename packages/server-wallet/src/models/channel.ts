@@ -18,6 +18,7 @@ import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {logger} from '../logger';
+import {ChannelData} from '../protocols/state.ts';
 
 import {SigningWallet} from './signing-wallet';
 
@@ -136,6 +137,18 @@ export class Channel extends Model implements RequiredColumns {
         });
       }
     });
+  }
+
+  get protocolState(): ChannelData {
+    const {channelId, myIndex, supported, latest, latestSignedByMe} = this;
+
+    return {
+      myIndex: myIndex as 0 | 1,
+      channelId,
+      supported,
+      latest,
+      latestSignedByMe,
+    };
   }
 
   // Modifiers
