@@ -14,7 +14,7 @@ Updates the state of a channel
 <b>Signature:</b>
 
 ```typescript
-updateChannel(channelId: string, participants: Participant[], allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
+updateChannel(channelId: string, allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
 ```
 
 ## Parameters
@@ -22,7 +22,6 @@ updateChannel(channelId: string, participants: Participant[], allocations: Token
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  channelId | string | id for the state channel |
-|  participants | Participant\[\] | Array of Participants for this channel TODO not clear why this is here, as it must be constant once the channel has its id. |
 |  allocations | TokenAllocations | Updated allocation of funds for this channel |
 |  appData | string | Updated application data for this channel |
 

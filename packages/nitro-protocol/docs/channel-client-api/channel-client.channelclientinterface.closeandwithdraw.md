@@ -12,16 +12,15 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-closeAndWithdraw(hubAddress: string, hubDestination: string): Promise<DomainBudget>;
+closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  hubAddress | string |  |
-|  hubDestination | string |  |
+|  hubParticipantId | string |  |
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;DomainBudget \| {}&gt;

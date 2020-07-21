@@ -40,10 +40,10 @@ export declare class ChannelClient implements ChannelClientInterface
 |  --- | --- | --- |
 |  [approveBudgetAndFund(receiveCapacity, sendCapacity, hubAddress, hubOutcomeAddress)](./channel-client.channelclient.approvebudgetandfund.md) |  | Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub |
 |  [challengeChannel(channelId)](./channel-client.channelclient.challengechannel.md) |  | <b><i>(BETA)</i></b> Requests a challenge for a channel |
-|  [closeAndWithdraw(hubAddress, hubOutcomeAddress)](./channel-client.channelclient.closeandwithdraw.md) |  | Requests the funds to be withdrawn from this site's ledger channel |
+|  [closeAndWithdraw(hubParticipantId)](./channel-client.channelclient.closeandwithdraw.md) |  | Requests the funds to be withdrawn from this site's ledger channel |
 |  [closeChannel(channelId)](./channel-client.channelclient.closechannel.md) |  | <b><i>(BETA)</i></b> Requests a close for a channel |
 |  [createChannel(participants, allocations, appDefinition, appData, fundingStrategy)](./channel-client.channelclient.createchannel.md) |  | Requests a new channel to be created |
-|  [getBudget(hubAddress)](./channel-client.channelclient.getbudget.md) |  | Requests the latest budget for this site |
+|  [getBudget(hubParticipantId)](./channel-client.channelclient.getbudget.md) |  | Requests the latest budget for this site |
 |  [getChannels(includeClosed)](./channel-client.channelclient.getchannels.md) |  | Requests the latest state for all channels. |
 |  [getState(channelId)](./channel-client.channelclient.getstate.md) |  | Requests the latest state for a channel |
 |  [joinChannel(channelId)](./channel-client.channelclient.joinchannel.md) |  | Join a proposed state channel |
@@ -52,4 +52,4 @@ export declare class ChannelClient implements ChannelClientInterface
 |  [onChannelUpdated(callback)](./channel-client.channelclient.onchannelupdated.md) |  | Registers a callback that will fire when a state channel is updated. |
 |  [onMessageQueued(callback)](./channel-client.channelclient.onmessagequeued.md) |  | Registers a callback that will fire when an outbound message is ready to be dispatched. |
 |  [pushMessage(message)](./channel-client.channelclient.pushmessage.md) |  | Accepts inbound messages from other state channel participants. |
-|  [updateChannel(channelId, participants, allocations, appData)](./channel-client.channelclient.updatechannel.md) |  | Updates the state of a channel |
+|  [updateChannel(channelId, allocations, appData)](./channel-client.channelclient.updatechannel.md) |  | Updates the state of a channel |

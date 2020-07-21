@@ -12,15 +12,16 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
+send<M extends Method = Method>(method: M, params: MethodType[M]['request']['params']): Promise<MethodType[M]['response']['result']>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | MethodRequestType |  |
+|  method | M |  |
+|  params | MethodType\[M\]\['request'\]\['params'\] |  |
 
 <b>Returns:</b>
 
-Promise&lt;MethodResponseType\[MethodRequestType\['method'\]\]&gt;
+Promise&lt;MethodType\[M\]\['response'\]\['result'\]&gt;

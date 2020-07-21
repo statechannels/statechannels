@@ -14,18 +14,17 @@ Requests the funds to be withdrawn from this site's ledger channel
 <b>Signature:</b>
 
 ```typescript
-closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
+closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  hubAddress | string | The address of a state channel hub |
-|  hubOutcomeAddress | string | An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense |
+|  hubParticipantId | string |  |
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;DomainBudget \| {}&gt;
 
 A promise that resolves to a DomainBudget.

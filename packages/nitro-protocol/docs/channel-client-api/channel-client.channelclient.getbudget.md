@@ -14,17 +14,17 @@ Requests the latest budget for this site
 <b>Signature:</b>
 
 ```typescript
-getBudget(hubAddress: string): Promise<DomainBudget>;
+getBudget(hubParticipantId: string): Promise<DomainBudget | {}>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  hubAddress | string | The address of a state channel hub |
+|  hubParticipantId | string | The id of a state channel hub |
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;DomainBudget \| {}&gt;
 
 A promise that resolves to a ChannelResult.

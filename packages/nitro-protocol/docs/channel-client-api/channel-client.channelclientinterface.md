@@ -33,7 +33,7 @@ export interface ChannelClientInterface
 |  [provider](./channel-client.channelclientinterface.provider.md) | ChannelProviderInterface |  |
 |  [pushMessage](./channel-client.channelclientinterface.pushmessage.md) | (message: Message) =&gt; Promise&lt;PushMessageResult&gt; |  |
 |  [signingAddress](./channel-client.channelclientinterface.signingaddress.md) | string |  |
-|  [updateChannel](./channel-client.channelclientinterface.updatechannel.md) | (channelId: string, participants: Participant\[\], allocations: Allocation\[\], appData: string) =&gt; Promise&lt;ChannelResult&gt; |  |
+|  [updateChannel](./channel-client.channelclientinterface.updatechannel.md) | (channelId: string, allocations: Allocation\[\], appData: string) =&gt; Promise&lt;ChannelResult&gt; |  |
 |  [walletVersion](./channel-client.channelclientinterface.walletversion.md) | string |  |
 
 ## Methods
@@ -41,6 +41,6 @@ export interface ChannelClientInterface
 |  Method | Description |
 |  --- | --- |
 |  [approveBudgetAndFund(playerAmount, hubAmount, hubAddress, hubOutcomeAddress)](./channel-client.channelclientinterface.approvebudgetandfund.md) |  |
-|  [closeAndWithdraw(hubAddress, hubDestination)](./channel-client.channelclientinterface.closeandwithdraw.md) |  |
+|  [closeAndWithdraw(hubParticipantId)](./channel-client.channelclientinterface.closeandwithdraw.md) |  |
 |  [getBudget(hubAddress)](./channel-client.channelclientinterface.getbudget.md) |  |
 |  [getChannels(includeClosed)](./channel-client.channelclientinterface.getchannels.md) |  |

@@ -12,5 +12,5 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-updateChannel: (channelId: string, participants: Participant[], allocations: Allocation[], appData: string) => Promise<ChannelResult>;
+updateChannel: (channelId: string, allocations: Allocation[], appData: string) => Promise<ChannelResult>;
 ```

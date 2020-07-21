@@ -16,8 +16,8 @@ import { ErrorCodes } from '@statechannels/client-api-schema';
 import { FundingStrategy } from '@statechannels/client-api-schema';
 import { Message } from '@statechannels/client-api-schema';
 import { MessageQueuedNotification } from '@statechannels/client-api-schema';
-import { MethodRequestType } from '@statechannels/channel-provider';
-import { MethodResponseType } from '@statechannels/channel-provider';
+import { Method } from '@statechannels/channel-provider';
+import { MethodType } from '@statechannels/channel-provider';
 import { OffType } from '@statechannels/channel-provider';
 import { OnType } from '@statechannels/channel-provider';
 import { Participant } from '@statechannels/client-api-schema';
@@ -32,14 +32,14 @@ export class ChannelClient implements ChannelClientInterface {
     challengeChannel(channelId: string): Promise<ChannelResult>;
     // (undocumented)
     channelState: ReplaySubject<ChannelResult>;
-    closeAndWithdraw(hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
+    closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
     // @beta
     closeChannel(channelId: string): Promise<ChannelResult>;
     // Warning: (ae-forgotten-export) The symbol "TokenAllocations" needs to be exported by the entry point index.d.ts
     createChannel(participants: Participant[], allocations: TokenAllocations, appDefinition: string, appData: string, fundingStrategy: FundingStrategy): Promise<ChannelResult>;
     // (undocumented)
     get destinationAddress(): string | undefined;
-    getBudget(hubAddress: string): Promise<DomainBudget>;
+    getBudget(hubParticipantId: string): Promise<DomainBudget | {}>;
     getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
     getState(channelId: string): Promise<ChannelResult>;
     joinChannel(channelId: string): Promise<ChannelResult>;
@@ -52,7 +52,7 @@ export class ChannelClient implements ChannelClientInterface {
     pushMessage(message: Message): Promise<PushMessageResult>;
     // (undocumented)
     get signingAddress(): string | undefined;
-    updateChannel(channelId: string, participants: Participant[], allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
+    updateChannel(channelId: string, allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
     // (undocumented)
     get walletVersion(): string | undefined;
 }
@@ -66,7 +66,7 @@ export interface ChannelClientInterface {
     // (undocumented)
     channelState: ReplaySubject<ChannelResult>;
     // (undocumented)
-    closeAndWithdraw(hubAddress: string, hubDestination: string): Promise<DomainBudget>;
+    closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
     // (undocumented)
     closeChannel: (channelId: string) => Promise<ChannelResult>;
     // (undocumented)
@@ -74,7 +74,7 @@ export interface ChannelClientInterface {
     // (undocumented)
     destinationAddress?: string;
     // (undocumented)
-    getBudget(hubAddress: string): Promise<DomainBudget>;
+    getBudget(hubAddress: string): Promise<DomainBudget | {}>;
     // (undocumented)
     getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
     // (undocumented)
@@ -96,7 +96,7 @@ export interface ChannelClientInterface {
     // (undocumented)
     signingAddress?: string;
     // (undocumented)
-    updateChannel: (channelId: string, participants: Participant[], allocations: Allocation[], appData: string) => Promise<ChannelResult>;
+    updateChannel: (channelId: string, allocations: Allocation[], appData: string) => Promise<ChannelResult>;
     // (undocumented)
     walletVersion?: string;
 }
@@ -146,7 +146,7 @@ export class FakeChannelProvider implements ChannelProviderInterface_2 {
     // (undocumented)
     playerIndex: Record<ChannelId, 0 | 1>;
     // (undocumented)
-    send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
+    send<M extends Method = Method>(method: M, params: MethodType[M]['request']['params']): Promise<MethodType[M]['response']['result']>;
     // (undocumented)
     setAddress(address: string): void;
     // (undocumented)

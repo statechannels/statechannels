@@ -44,7 +44,7 @@ export declare class FakeChannelProvider implements ChannelProviderInterface
 |  [notifyAppBudgetUpdated(data)](./channel-client.fakechannelprovider.notifyappbudgetupdated.md) |  |  |
 |  [notifyAppChannelUpdated(data)](./channel-client.fakechannelprovider.notifyappchannelupdated.md) |  |  |
 |  [notifyOpponent(data, notificationType)](./channel-client.fakechannelprovider.notifyopponent.md) |  |  |
-|  [send(request)](./channel-client.fakechannelprovider.send.md) |  |  |
+|  [send(method, params)](./channel-client.fakechannelprovider.send.md) |  |  |
 |  [setAddress(address)](./channel-client.fakechannelprovider.setaddress.md) |  |  |
 |  [setState(state)](./channel-client.fakechannelprovider.setstate.md) |  |  |
 |  [subscribe()](./channel-client.fakechannelprovider.subscribe.md) |  |  |

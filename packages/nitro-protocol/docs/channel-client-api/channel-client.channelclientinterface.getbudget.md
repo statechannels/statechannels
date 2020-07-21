@@ -12,7 +12,7 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-getBudget(hubAddress: string): Promise<DomainBudget>;
+getBudget(hubAddress: string): Promise<DomainBudget | {}>;
 ```
 
 ## Parameters
@@ -23,4 +23,4 @@ getBudget(hubAddress: string): Promise<DomainBudget>;
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;DomainBudget \| {}&gt;
