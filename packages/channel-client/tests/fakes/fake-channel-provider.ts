@@ -43,9 +43,12 @@ const mockDomainBudget = {
 };
 
 /**
+ * Class which simulates a state channel wallet
+ *
+ * @remarks
+ * Conforms to the same interface as the real channel provider.
+ *
  * @beta
- * This fake provider becomes the stateful object which handles the calls
- * coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
   public signingAddress?: string;
