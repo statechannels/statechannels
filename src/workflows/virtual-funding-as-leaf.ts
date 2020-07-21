@@ -9,7 +9,6 @@ import {
   ActionTypes
 } from 'xstate';
 import {filter, map, take, flatMap, tap, first} from 'rxjs/operators';
-
 import {
   checkThat,
   simpleEthGuarantee,
@@ -23,12 +22,11 @@ import {
 
 import {Store, supportedStateFeed} from '../store';
 import {getDataAndInvoke} from '../utils/helpers';
-
 import {CHALLENGE_DURATION} from '../config';
-
 import {escalate} from '../actions';
-import {SupportState, LedgerFunding} from '.';
 import {assignError} from '../utils/workflow-utils';
+
+import {SupportState, LedgerFunding} from '.';
 
 export const enum OutcomeIdx {
   A = 0,

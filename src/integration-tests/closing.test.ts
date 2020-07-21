@@ -7,15 +7,14 @@ import {
   createSignatureEntry,
   BN
 } from '@statechannels/wallet-core';
-
 import {AddressZero} from '@ethersproject/constants';
 import {hexZeroPad} from '@ethersproject/bytes';
 
 import {FakeChain} from '../chain';
 import {Backend} from '../store/dexie-backend';
+import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
 
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
-import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
 
 jest.setTimeout(30000);
 

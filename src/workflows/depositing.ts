@@ -1,6 +1,7 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {map, filter} from 'rxjs/operators';
 import {exists, BN, Uint256} from '@statechannels/wallet-core';
+
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
 import {MachineFactory} from '../utils/workflow-utils';

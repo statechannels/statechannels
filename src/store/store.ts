@@ -5,7 +5,6 @@ import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {Wallet} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
-
 import {
   isSimpleEthAllocation,
   calculateChannelId,
@@ -28,13 +27,13 @@ import {
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
 import {checkThat, recordToArray} from '../utils';
+import {logger} from '../logger';
+import {DB_NAME} from '../constants';
 
 import {ChannelStoreEntry} from './channel-store-entry';
 import {MemoryBackend} from './memory-backend';
-import {Errors, DBBackend, ObjectStores} from '.';
 
-import {logger} from '../logger';
-import {DB_NAME} from '../constants';
+import {Errors, DBBackend, ObjectStores} from '.';
 
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];

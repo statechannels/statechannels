@@ -16,6 +16,7 @@ import {
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
 import {Backend} from '../dexie-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
+
 import {Store, Errors, ObjectStores} from '..';
 const {add} = BN;
 

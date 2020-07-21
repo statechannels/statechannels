@@ -10,6 +10,7 @@ import {
   ActionFunction,
   ActionFunctionMap
 } from 'xstate';
+
 import {Store} from '../store';
 import {MessagingServiceInterface} from '../messaging';
 

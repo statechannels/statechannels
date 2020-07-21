@@ -16,8 +16,9 @@ import {
   outcomesEqual
 } from '@statechannels/wallet-core';
 
-import {Errors} from '.';
 import {logger} from '../logger';
+
+import {Errors} from '.';
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {

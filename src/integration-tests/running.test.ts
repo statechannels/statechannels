@@ -1,8 +1,10 @@
 import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
 import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema';
+
 import {FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID} from '../config';
+
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 jest.setTimeout(30000);
 

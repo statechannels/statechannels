@@ -2,6 +2,7 @@ import {hashState, createSignatureEntry, ChannelStoredData} from '@statechannels
 
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {appState, wallet1, wallet2} from '../../tests/data';
+
 import {Errors} from '..';
 
 const signState = (state, privateKeys: string[]) => ({

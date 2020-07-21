@@ -7,13 +7,15 @@ import {
   simpleEthAllocation,
   exists
 } from '@statechannels/wallet-core';
-
 import {filter, first, map} from 'rxjs/operators';
+
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {Store} from '../../store';
-import {participants, wallet1} from './data';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
+
+import {participants, wallet1} from './data';
+
 import {Application} from '..';
 
 jest.setTimeout(10000);

@@ -1,6 +1,5 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-
 import {
   calculateChannelId,
   createSignatureEntry,
@@ -14,10 +13,13 @@ import {
   makeDestination,
   BN
 } from '@statechannels/wallet-core';
-
 import {AddressZero, HashZero} from '@ethersproject/constants';
 
 import {TestStore} from '../../test-store';
+import {ParticipantIdx} from '../virtual-funding-as-leaf';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
+import {MessagingServiceInterface, MessagingService} from '../../messaging';
+
 import {
   wallet1,
   wallet2,
@@ -26,10 +28,8 @@ import {
   TEST_APP_DOMAIN
 } from './data';
 import {subscribeToMessages} from './message-service';
-import {ParticipantIdx} from '../virtual-funding-as-leaf';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 import {SimpleHub} from './simple-hub';
-import {MessagingServiceInterface, MessagingService} from '../../messaging';
+
 import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 
 jest.setTimeout(20000);

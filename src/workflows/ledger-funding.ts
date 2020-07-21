@@ -9,13 +9,12 @@ import {
 } from '@statechannels/wallet-core';
 
 import {ChannelLock} from '../store/store';
-
 import {Store} from '../store';
 import {getDataAndInvoke} from '../utils';
 import {assignError} from '../utils/workflow-utils';
-import {SupportState} from '.';
-
 import {escalate} from '../actions';
+
+import {SupportState} from '.';
 
 const WORKFLOW = 'ledger-funding';
 const {add} = BN;
