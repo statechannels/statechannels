@@ -5,10 +5,11 @@ import {
   DomainBudget as AppDomainBudget,
   ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
+import {AddressZero} from '@ethersproject/constants';
+
 import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {BN} from '../../bignumber';
-import {AddressZero} from '@ethersproject/constants';
 import {makeDestination, assetHolderAddress} from '../../utils';
 
 export function deserializeBudgetRequest(

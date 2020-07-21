@@ -1,9 +1,11 @@
 import {spawn} from 'child_process';
+
 import {ethers} from 'ethers';
 import {JsonRpcProvider} from 'ethers/providers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
+
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 

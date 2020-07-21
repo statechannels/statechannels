@@ -2,7 +2,8 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
-// @ts-ignore
+import {TransactionRequest} from 'ethers/providers';
+
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
@@ -26,7 +27,6 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {createForceMoveTransaction} from '../../../src/transactions';
-import {TransactionRequest} from 'ethers/providers';
 
 const provider = getTestProvider();
 

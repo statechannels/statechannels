@@ -2,12 +2,13 @@ import {ethers, utils} from 'ethers';
 const {Interface, bigNumberify, keccak256, defaultAbiCoder} = utils;
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
-import {Channel} from '..';
+import {SignedState, Signature} from '../signatures';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
 import {Address, Bytes32, Uint8, Uint48} from './types';
-import {SignedState, Signature} from '../signatures';
+
+import {Channel} from '..';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(

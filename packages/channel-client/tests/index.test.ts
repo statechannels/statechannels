@@ -1,5 +1,6 @@
-import {ChannelClient} from '../src/channel-client';
 import {ChannelProviderInterface} from '@statechannels/channel-provider';
+
+import {ChannelClient} from '../src/channel-client';
 
 // TODO: Figure out how to test
 describe('ChannelClient', () => {

@@ -1,5 +1,4 @@
 import {utils} from 'ethers';
-
 import {Participant} from '@statechannels/client-api-schema';
 
 /*

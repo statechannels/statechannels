@@ -4,14 +4,7 @@ module.exports = {
     es6: true
   },
   plugins: ['jest'],
-  extends: [
-    '../../.eslintrc.js',
-    'plugin:jest/recommended',
-    'plugin:jest/style',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript'
-  ],
+  extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
   rules: {
     'no-process-env': 'error',
     '@typescript-eslint/no-explicit-any': 'off',

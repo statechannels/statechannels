@@ -1,4 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
+import {validateState} from '@statechannels/wire-format';
+
 import {
   wireStateFormat,
   internalStateFormat,
@@ -7,7 +9,6 @@ import {
 } from './example';
 import {serializeState, serializeMessage} from './serialize';
 import {deserializeState, deserializeMessage} from './deserialize';
-import {validateState} from '@statechannels/wire-format';
 
 it('works for states', () => {
   expect(serializeState(internalStateFormat)).toEqual(wireStateFormat);

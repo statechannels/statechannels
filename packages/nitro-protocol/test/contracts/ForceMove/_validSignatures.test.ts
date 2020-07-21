@@ -1,6 +1,7 @@
 // @ts-ignore
 import {Contract, Wallet} from 'ethers';
 import {id} from 'ethers/utils';
+
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 import {sign} from '../../../src/signatures';

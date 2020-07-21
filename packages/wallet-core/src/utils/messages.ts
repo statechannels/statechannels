@@ -1,4 +1,5 @@
 import {Participant} from '../types';
+
 import {makeDestination} from '.';
 
 export function convertToParticipant(participant: {

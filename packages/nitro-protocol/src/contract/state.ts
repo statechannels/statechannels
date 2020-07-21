@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+
 import {Channel, getChannelId} from './channel';
 import {encodeOutcome, hashOutcome, Outcome} from './outcome';
 import {Address, Bytes32, Uint256, Uint48} from './types';

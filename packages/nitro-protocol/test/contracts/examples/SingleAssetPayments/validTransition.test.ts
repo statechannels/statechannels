@@ -2,6 +2,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
+
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';

@@ -1,6 +1,8 @@
 import EventEmitter from 'eventemitter3';
-import {MessagingService} from './messaging-service';
 import {Guid} from 'guid-typescript';
+import {NotificationType, Notification} from '@statechannels/client-api-schema';
+
+import {MessagingService} from './messaging-service';
 import {
   ChannelProviderInterface,
   isJsonRpcNotification,
@@ -11,7 +13,6 @@ import {
   EventType
 } from './types';
 import {UIService} from './ui-service';
-import {NotificationType, Notification} from '@statechannels/client-api-schema';
 import {logger} from './logger';
 
 class ChannelProvider implements ChannelProviderInterface {

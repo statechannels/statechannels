@@ -1,4 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
+
 import {Destination} from './types';
 
 // TODO: Use getEnvBool from devtools once working

@@ -3,8 +3,10 @@
 import Ajv = require('ajv');
 
 // eslint-disable-next-line
-const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
 import {Message, SignedState} from './types.js';
+
+// eslint-disable-next-line
+const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
 
 const ajv = new Ajv();
 ajv.addSchema(apiSchema, 'api.json');

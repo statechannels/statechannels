@@ -1,4 +1,5 @@
 import {ethers} from 'ethers';
+
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import {signChallengeMessage, Signature} from '../../signatures';
 import {hashOutcome} from '../outcome';

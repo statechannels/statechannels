@@ -1,5 +1,5 @@
-import {constants} from 'ethers';
-import {utils} from 'ethers';
+import {constants, utils} from 'ethers';
+
 import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
 import {Address, Bytes, Bytes32, Uint48} from './types';

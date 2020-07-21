@@ -6,6 +6,7 @@ import {
   Guarantee as GuaranteeWire,
   Message as WireMessage
 } from '@statechannels/wire-format';
+
 import {
   SignedState,
   Outcome,

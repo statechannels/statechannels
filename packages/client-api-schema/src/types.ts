@@ -1,18 +1,20 @@
-import * as GetClientWalletInformation from './methods/GetWalletInformation';
-import * as EnableEthereum from './methods/EnableEthereum';
-import * as CreateChannel from './methods/CreateChannel';
-import * as JoinChannel from './methods/JoinChannel';
-import * as UpdateChannel from './methods/UpdateChannel';
-import * as GetState from './methods/GetState';
-import * as PushMessage from './methods/PushMessage';
-import * as CloseChannel from './methods/CloseChannel';
-import * as ChallengeChannel from './methods/ChallengeChannel';
-import * as GetChannels from './methods/GetChannels';
-import * as GetBudget from './methods/GetBudget';
-import * as ApproveBudgetAndFund from './methods/ApproveBudgetAndFund';
-import * as CloseAndWithdraw from './methods/CloseAndWithdraw';
-
 import {Notification} from './notifications';
+import * as ApproveBudgetAndFund from './methods/ApproveBudgetAndFund';
+import * as ChallengeChannel from './methods/ChallengeChannel';
+import * as CloseAndWithdraw from './methods/CloseAndWithdraw';
+import * as CloseChannel from './methods/CloseChannel';
+import * as CreateChannel from './methods/CreateChannel';
+import * as EnableEthereum from './methods/EnableEthereum';
+import * as GetBudget from './methods/GetBudget';
+import * as GetChannels from './methods/GetChannels';
+import * as GetClientWalletInformation from './methods/GetWalletInformation';
+import * as GetState from './methods/GetState';
+import * as JoinChannel from './methods/JoinChannel';
+import * as PushMessage from './methods/PushMessage';
+import * as UpdateChannel from './methods/UpdateChannel';
+import {JsonRpcError} from './utils';
+
+type GenericError = JsonRpcError<500, 'Wallet error'>;
 
 export type Request =
   | CreateChannel.CreateChannelRequest
@@ -43,9 +45,6 @@ export type Response =
   | ApproveBudgetAndFund.ApproveBudgetAndFundResponse
   | CloseAndWithdraw.CloseAndWithdrawResponse
   | GetChannels.GetChannelsResponse;
-
-import {JsonRpcError} from './utils';
-type GenericError = JsonRpcError<500, 'Wallet error'>;
 
 export type ErrorResponse =
   | EnableEthereum.EnableEthereumError

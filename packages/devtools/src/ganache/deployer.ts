@@ -1,5 +1,6 @@
 import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {colors} from 'etherlime-utils';
+
 import {logger} from './logger';
 
 export class GanacheDeployer {
