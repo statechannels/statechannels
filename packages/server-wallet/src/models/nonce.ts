@@ -6,8 +6,8 @@ import knex from '../db/connection';
 
 export class Nonce extends Model {
   readonly id!: number;
-  readonly addresses: Address[];
-  readonly value: Uint48;
+  readonly addresses!: Address[];
+  readonly value!: Uint48;
 
   static tableName = 'nonces';
   static get jsonSchema(): JSONSchema {
@@ -66,7 +66,7 @@ export class Nonce extends Model {
 class NonceError extends Error {
   readonly type = 'NonceError';
 
-  constructor(reason: string, public readonly data = undefined) {
+  constructor(reason: string, public readonly data: any = undefined) {
     super(reason);
   }
 }

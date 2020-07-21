@@ -6,8 +6,8 @@ import {Address, Bytes32} from '../type-aliases';
 
 export class SigningWallet extends Model {
   readonly id!: number;
-  readonly privateKey: Bytes32;
-  readonly address: Address;
+  readonly privateKey!: Bytes32;
+  readonly address!: Address;
 
   static tableName = 'signing_wallets';
 
@@ -47,7 +47,7 @@ export class SigningWallet extends Model {
 class SigningWalletError extends Error {
   readonly type = 'SigningWalletError';
 
-  constructor(reason: string, public readonly data = undefined) {
+  constructor(reason: string, public readonly data: any = undefined) {
     super(reason);
   }
 }
