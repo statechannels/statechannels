@@ -3,15 +3,19 @@ version: 2.1
 orbs:
   docker: circleci/docker@1.0.1
   slack: circleci/slack@3.4.1
-  puppeteer: threetreeslight/puppeteer@0.1.2
 
 defaults: &defaults
   environment:
     USE_NATIVE_SOLC: false
+    PSQL_ARGS: -p 5432 -h localhost
+    NODE_ENV: test
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
     - image: geoknee/statechannels:node12.16-solc0.6.2 # Fast contract compilation with solc installed
+    - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
+      environment:
+        POSTGRES_USER: root
 
 integration_test_settings: &integration_test_settings
   resource_class: large
@@ -209,6 +213,11 @@ jobs:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
+      - run:
+          name: wallet setup
+          command: |
+            sudo apt install -y postgresql-client || true
+            (cd packages/server-wallet && yarn db:create $PSQL_ARGS && yarn db:migrate $PSQL_ARGS)
       - run:
           name: test
           command: |
