@@ -49,7 +49,6 @@
       "contract-api/natspec/ETHAssetHolder"
     ],
     "ForceMove Apps": [
-      "contract-api/natspec/CounterfactualAdapterApp",
       "contract-api/natspec/CountingApp",
       "contract-api/natspec/SingleAssetPayments",
       "contract-api/natspec/TrivialApp"

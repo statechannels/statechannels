@@ -6,7 +6,7 @@ original_id: ForceMoveApp
 
 View Source: [contracts/interfaces/ForceMoveApp.sol](https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/interfaces/ForceMoveApp.sol)
 
-**↘ Derived Contracts: [ConsensusApp](ConsensusApp.md), [CounterfactualAdapterApp](CounterfactualAdapterApp.md), [CountingApp](CountingApp.md), [SingleAssetPayments](SingleAssetPayments.md), [TrivialApp](TrivialApp.md)**
+**↘ Derived Contracts: [ConsensusApp](ConsensusApp.md), [CountingApp](CountingApp.md), [SingleAssetPayments](SingleAssetPayments.md), [TrivialApp](TrivialApp.md)**
 
 The ForceMoveApp interface calls for its children to implement an application-specific validTransition function, defining the state machine of a ForceMove state channel DApp.
 
@@ -43,10 +43,10 @@ true if the transition conforms to this application's rules, false otherwise
 
 **Arguments**
 
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| a | struct ForceMoveApp.VariablePart | State being transitioned from. | 
-| b | struct ForceMoveApp.VariablePart | State being transitioned to. | 
-| turnNumB | uint256 | Turn number being transitioned to. | 
-| nParticipants | uint256 | Number of participants in this state channel. | 
+| Name          | Type                             | Description                                   |
+|---------------|----------------------------------|-----------------------------------------------|
+| a             | struct ForceMoveApp.VariablePart | State being transitioned from.                |
+| b             | struct ForceMoveApp.VariablePart | State being transitioned to.                  |
+| turnNumB      | uint256                          | Turn number being transitioned to.            |
+| nParticipants | uint256                          | Number of participants in this state channel. |
 
