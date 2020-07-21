@@ -179,7 +179,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetWalletInformation':
         await this.sendResponse(requestId, {
           signingAddress: await this.store.getAddress(),
-          destinationAddress: (await this.store.getDestinationAddress()) ?? null,
+          destinationAddress: (await this.store.getDestinationAddress()) ?? undefined,
           walletVersion: GIT_VERSION,
         });
         break;
