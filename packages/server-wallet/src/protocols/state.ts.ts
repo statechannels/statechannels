@@ -1,5 +1,7 @@
 import {SignedStateWithHash} from '@statechannels/wallet-core';
 
+import {Either, Option} from '../fp';
+
 import {ProtocolAction} from './actions';
 
 /*
@@ -32,7 +34,13 @@ export const stage = (state: SignedStateWithHash | undefined): Stage =>
     ? 'PostfundSetup'
     : 'Running';
 
-// A protocol should accept a protocol state, and resolve to a protocol action.
-// FIXME: Protocols could resolve to errors.
-// So, the protocol should actually resolve to an Either<ProtocolAction | undefined, ProtocolError>
-export type Protocol<PS> = (ps: PS) => Promise<ProtocolAction | undefined>;
+// FIXME: This should be a union of the errors that the client-api-schema specifies.
+type ProtocolError = Error;
+
+/*
+A protocol should accept a "protocol state", and resolve to
+- either zero or one protocol actions;
+- or a protocol error
+A protocol should never reject.
+*/
+export type Protocol<PS> = (ps: PS) => Promise<Either<Option<ProtocolAction>, ProtocolError>>;
