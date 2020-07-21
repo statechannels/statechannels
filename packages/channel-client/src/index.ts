@@ -5,7 +5,14 @@ export {UnsubscribeFunction} from './types';
 export {ChannelClient} from './channel-client';
 export {FakeChannelProvider} from '../tests/fakes/fake-channel-provider';
 
+/** 
+  /* @alpha
+*/
 const UserDeclinedErrorCode = ErrorCode.CloseAndWithdraw.UserDeclined;
+/** 
+  /* @alpha
+*/
 const EthereumNotEnabledErrorCode = ErrorCode.EnableEthereum.EthereumNotEnabled;
+
 export {EthereumNotEnabledErrorCode, UserDeclinedErrorCode};
 export {ErrorCode} from './types';

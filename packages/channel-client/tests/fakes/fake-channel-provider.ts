@@ -42,9 +42,10 @@ const mockDomainBudget = {
   ]
 };
 
-/*
- This fake provider becomes the stateful object which handles the calls
- coming from a non-fake `ChannelClient`.
+/**
+ * @alpha
+ * This fake provider becomes the stateful object which handles the calls
+ * coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
   public signingAddress?: string;

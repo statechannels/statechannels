@@ -22,6 +22,7 @@ import {HUB} from './constants';
 type TokenAllocations = Allocation[];
 
 /**
+ * @alpha
  * Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API
  */
 export class ChannelClient {
@@ -64,7 +65,7 @@ export class ChannelClient {
   /**
    * Registers a callback that will fire when a state channel is updated.
    *
-   * @param callback A function that accepts a ChannelUpdatedNotification.
+   * @param callback - A function that accepts a ChannelUpdatedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
    */
@@ -77,7 +78,7 @@ export class ChannelClient {
   /**
    * Registers a callback that will fire when a state channel is proposed.
    *
-   * @param callback A function that accepts a ChannelProposedNotification.
+   * @param callback - A function that accepts a ChannelProposedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
    */
@@ -93,7 +94,7 @@ export class ChannelClient {
   /**
    * Registers callback that will fire when a site budget is updated.
    *
-   * @param callback A function that accepts a BudgetUpdatedNotification.
+   * @param callback - A function that accepts a BudgetUpdatedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
    */
@@ -109,7 +110,7 @@ export class ChannelClient {
   /**
    * Requests the latest state for all channels.
    *
-   * @param includeClosed If true, closed channels will be included in the response.
+   * @param includeClosed - If true, closed channels will be included in the response.
    * @returns A promise that resolves to an array of ChannelResults.
    *
    */
@@ -120,11 +121,11 @@ export class ChannelClient {
   /**
    * Requests a new channel to be created
    *
-   * @param participants Array of Participants for this channel
-   * @param allocations Initial allocation of funds for this channel
-   * @param appDefinition Address of ForceMoveApp deployed on chain
-   * @param appData Initial application data for this channel
-   * @param fundingStrategy Direct, Ledger or Virtual funding
+   * @param participants - Array of Participants for this channel
+   * @param allocations - Initial allocation of funds for this channel
+   * @param appDefinition - Address of ForceMoveApp deployed on chain
+   * @param appData - Initial application data for this channel
+   * @param fundingStrategy - Direct, Ledger or Virtual funding
    * @returns A promise that resolves to a ChannelResult.
    *
    */
@@ -147,7 +148,7 @@ export class ChannelClient {
   /**
    * Join a proposed state channel
    *
-   * @param channelId id for the state channel
+   * @param channelId - id for the state channel
 
    * @returns A promise that resolves to a ChannelResult.
    *
@@ -159,9 +160,9 @@ export class ChannelClient {
   /**
    * Updates the state of a channel
    *
-   * @param channelId id for the state channel
-   * @param allocations Updated allocation of funds for this channel
-   * @param appData Updated application data for this channel
+   * @param channelId - id for the state channel
+   * @param allocations - Updated allocation of funds for this channel
+   * @param appData - Updated application data for this channel
    * @returns A promise that resolves to a ChannelResult.
    *
    */
@@ -180,7 +181,7 @@ export class ChannelClient {
   /**
    * Requests the latest state for a channel
    *
-   * @param channelId id for the state channel
+   * @param channelId - id for the state channel
    * @returns A promise that resolves to a ChannelResult.
    *
    */
@@ -191,7 +192,7 @@ export class ChannelClient {
   /**
    * Requests a challenge for a channel
    *
-   * @param channelId id for the state channel
+   * @param channelId - id for the state channel
    * @returns A promise that resolves to a ChannelResult.
    *
    * @beta
@@ -205,7 +206,7 @@ export class ChannelClient {
   /**
    * Requests a close for a channel
    *
-   * @param channelId id for the state channel
+   * @param channelId - id for the state channel
    * @returns A promise that resolves to a ChannelResult.
    *
    * @beta
@@ -231,10 +232,10 @@ export class ChannelClient {
 
   /**
    * Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub
-   * @param receiveCapacity: Amount for me in the ledger channel
-   * @param sendCapacity: Amount for the hub in the ledger channel
-   * @param hubAddress: Address for the hub,
-   * @param hubOutcomeAddress: Ethereum account for the hub
+   * @param receiveCapacity -  Amount for me in the ledger channel
+   * @param sendCapacity - Amount for the hub in the ledger channel
+   * @param hubAddress - Address for the hub,
+   * @param hubOutcomeAddress - Ethereum account for the hub
    * @returns A promise that resolves to a DomainBudget
    *
    */
@@ -260,7 +261,7 @@ export class ChannelClient {
   /**
    * Requests the latest budget for this site
    *
-   * @param hubParticipantId The id of a state channel hub
+   * @param hubParticipantId - The id of a state channel hub
    * @returns A promise that resolves to a ChannelResult.
    *
    */
@@ -271,8 +272,8 @@ export class ChannelClient {
   /**
    * Requests the funds to be withdrawn from this site's ledger channel
    *
-   * @param hubAddress The address of a state channel hub
-   * @param hubOutcomeAddress An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense
+   * @param hubAddress - The address of a state channel hub
+   * @param hubOutcomeAddress - An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense
    * @returns A promise that resolves to a DomainBudget.
    *
    */

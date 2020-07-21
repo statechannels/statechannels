@@ -23,7 +23,7 @@ import { Participant } from '@statechannels/client-api-schema';
 import { PushMessageResult } from '@statechannels/client-api-schema';
 import { ReplaySubject } from 'rxjs';
 
-// @public
+// @alpha
 export class ChannelClient {
     constructor(provider: ChannelProviderInterface);
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
@@ -58,13 +58,13 @@ export class ChannelClient {
 
 export { ChannelResult }
 
-// @public (undocumented)
+// @alpha
 export const ErrorCode: ErrorCodes;
 
-// @public (undocumented)
+// @alpha
 export const EthereumNotEnabledErrorCode: 100;
 
-// @public (undocumented)
+// @alpha
 export class FakeChannelProvider implements ChannelProviderInterface {
     // (undocumented)
     budget: DomainBudget;
@@ -122,10 +122,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     walletVersion?: string;
 }
 
-// @public (undocumented)
+// @alpha
 export type UnsubscribeFunction = () => void;
 
-// @public (undocumented)
+// @alpha
 export const UserDeclinedErrorCode: 200;
 
 

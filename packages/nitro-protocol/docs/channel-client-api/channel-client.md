@@ -8,24 +8,3 @@ hide_title: true
 [@statechannels/channel-client](./channel-client.md)
 
 ## channel-client package
-
-## Classes
-
-|  Class | Description |
-|  --- | --- |
-|  [ChannelClient](./channel-client.channelclient.md) | Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API |
-|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) |  |
-
-## Variables
-
-|  Variable | Description |
-|  --- | --- |
-|  [ErrorCode](./channel-client.errorcode.md) |  |
-|  [EthereumNotEnabledErrorCode](./channel-client.ethereumnotenablederrorcode.md) |  |
-|  [UserDeclinedErrorCode](./channel-client.userdeclinederrorcode.md) |  |
-
-## Type Aliases
-
-|  Type Alias | Description |
-|  --- | --- |
-|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) |  |
