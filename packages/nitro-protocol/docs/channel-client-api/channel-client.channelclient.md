@@ -14,9 +14,8 @@ Class that wraps the channel-provider's JSON-RPC interface and exposes a more co
 <b>Signature:</b>
 
 ```typescript
-export declare class ChannelClient implements ChannelClientInterface 
+export declare class ChannelClient 
 ```
-<b>Implements:</b> [ChannelClientInterface](./channel-client.channelclientinterface.md)
 
 ## Constructors
 

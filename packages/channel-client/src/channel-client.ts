@@ -16,7 +16,7 @@ import {ReplaySubject} from 'rxjs';
 
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 
-import {ChannelClientInterface, UnsubscribeFunction} from './types';
+import {UnsubscribeFunction} from './types';
 import {HUB} from './constants';
 
 type TokenAllocations = Allocation[];
@@ -24,7 +24,7 @@ type TokenAllocations = Allocation[];
 /**
  * Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API
  */
-export class ChannelClient implements ChannelClientInterface {
+export class ChannelClient {
   channelState: ReplaySubject<ChannelResult>;
   get signingAddress(): string | undefined {
     return this.provider.signingAddress;

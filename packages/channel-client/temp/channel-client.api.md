@@ -7,8 +7,7 @@
 import { Allocation } from '@statechannels/client-api-schema';
 import { BudgetUpdatedNotification } from '@statechannels/client-api-schema';
 import { ChannelProposedNotification } from '@statechannels/client-api-schema';
-import { ChannelProviderInterface } from '@statechannels/channel-provider/src';
-import { ChannelProviderInterface as ChannelProviderInterface_2 } from '@statechannels/channel-provider';
+import { ChannelProviderInterface } from '@statechannels/channel-provider';
 import { ChannelResult } from '@statechannels/client-api-schema';
 import { ChannelUpdatedNotification } from '@statechannels/client-api-schema';
 import { DomainBudget } from '@statechannels/client-api-schema';
@@ -25,8 +24,8 @@ import { PushMessageResult } from '@statechannels/client-api-schema';
 import { ReplaySubject } from 'rxjs';
 
 // @public
-export class ChannelClient implements ChannelClientInterface {
-    constructor(provider: ChannelProviderInterface_2);
+export class ChannelClient {
+    constructor(provider: ChannelProviderInterface);
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
     // @beta
     challengeChannel(channelId: string): Promise<ChannelResult>;
@@ -48,57 +47,13 @@ export class ChannelClient implements ChannelClientInterface {
     onChannelUpdated(callback: (result: ChannelUpdatedNotification['params']) => void): UnsubscribeFunction;
     onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void): UnsubscribeFunction;
     // (undocumented)
-    readonly provider: ChannelProviderInterface_2;
+    readonly provider: ChannelProviderInterface;
     pushMessage(message: Message): Promise<PushMessageResult>;
     // (undocumented)
     get signingAddress(): string | undefined;
     updateChannel(channelId: string, allocations: TokenAllocations, appData: string): Promise<ChannelResult>;
     // (undocumented)
     get walletVersion(): string | undefined;
-}
-
-// @public (undocumented)
-export interface ChannelClientInterface {
-    // (undocumented)
-    approveBudgetAndFund(playerAmount: string, hubAmount: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
-    // (undocumented)
-    challengeChannel: (channelId: string) => Promise<ChannelResult>;
-    // (undocumented)
-    channelState: ReplaySubject<ChannelResult>;
-    // (undocumented)
-    closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
-    // (undocumented)
-    closeChannel: (channelId: string) => Promise<ChannelResult>;
-    // (undocumented)
-    createChannel: (participants: Participant[], allocations: Allocation[], appDefinition: string, appData: string, fundingStrategy: FundingStrategy) => Promise<ChannelResult>;
-    // (undocumented)
-    destinationAddress?: string;
-    // (undocumented)
-    getBudget(hubAddress: string): Promise<DomainBudget | {}>;
-    // (undocumented)
-    getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
-    // (undocumented)
-    getState: (channelId: string) => Promise<ChannelResult>;
-    // (undocumented)
-    joinChannel: (channelId: string) => Promise<ChannelResult>;
-    // (undocumented)
-    onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
-    // (undocumented)
-    onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
-    // (undocumented)
-    onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
-    // (undocumented)
-    onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
-    // (undocumented)
-    provider: ChannelProviderInterface;
-    // (undocumented)
-    pushMessage: (message: Message) => Promise<PushMessageResult>;
-    // (undocumented)
-    signingAddress?: string;
-    // (undocumented)
-    updateChannel: (channelId: string, allocations: Allocation[], appData: string) => Promise<ChannelResult>;
-    // (undocumented)
-    walletVersion?: string;
 }
 
 export { ChannelResult }
@@ -110,7 +65,7 @@ export const ErrorCode: ErrorCodes;
 export const EthereumNotEnabledErrorCode: 100;
 
 // @public (undocumented)
-export class FakeChannelProvider implements ChannelProviderInterface_2 {
+export class FakeChannelProvider implements ChannelProviderInterface {
     // (undocumented)
     budget: DomainBudget;
     // (undocumented)
