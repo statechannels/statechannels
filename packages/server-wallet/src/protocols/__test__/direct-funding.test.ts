@@ -3,7 +3,7 @@ import {protocol} from '../direct-funding';
 
 const c = channelWithVars();
 
-it('resolves', () =>
+it.skip('resolves', () =>
   expect(protocol(c.protocolState)).toMatchObject([
     // {type: 'SignState', channelId: c.channelId, hash: c.latest.stateHash},
   ]));
