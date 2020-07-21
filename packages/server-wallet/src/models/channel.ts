@@ -56,15 +56,15 @@ export const CHANNEL_COLUMNS = {
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
 
-  channelId: Bytes32;
-  vars: SignedStateVarsWithHash[];
+  channelId!: Bytes32;
+  vars!: SignedStateVarsWithHash[];
 
-  readonly chainId: Bytes32;
-  readonly appDefinition: Address;
-  readonly channelNonce: Uint48;
-  readonly challengeDuration: Uint48;
-  readonly participants: Participant[];
-  readonly signingAddress: Address;
+  readonly chainId!: Bytes32;
+  readonly appDefinition!: Address;
+  readonly channelNonce!: Uint48;
+  readonly challengeDuration!: Uint48;
+  readonly participants!: Participant[];
+  readonly signingAddress!: Address;
 
   readonly signingWallet!: SigningWallet;
 
