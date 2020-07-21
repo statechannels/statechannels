@@ -18,7 +18,7 @@ import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {logger} from '../logger';
-import {ChannelData} from '../protocols/state.ts';
+import {ChannelData} from '../protocols/state';
 
 import {SigningWallet} from './signing-wallet';
 
