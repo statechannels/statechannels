@@ -43,7 +43,7 @@ const mockDomainBudget = {
 };
 
 /**
- * @alpha
+ * @beta
  * This fake provider becomes the stateful object which handles the calls
  * coming from a non-fake `ChannelClient`.
  */

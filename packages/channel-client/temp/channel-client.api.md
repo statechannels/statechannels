@@ -23,16 +23,14 @@ import { Participant } from '@statechannels/client-api-schema';
 import { PushMessageResult } from '@statechannels/client-api-schema';
 import { ReplaySubject } from 'rxjs';
 
-// @alpha
+// @beta
 export class ChannelClient {
     constructor(provider: ChannelProviderInterface);
     approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
-    // @beta
     challengeChannel(channelId: string): Promise<ChannelResult>;
     // (undocumented)
     channelState: ReplaySubject<ChannelResult>;
     closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
-    // @beta
     closeChannel(channelId: string): Promise<ChannelResult>;
     // Warning: (ae-forgotten-export) The symbol "TokenAllocations" needs to be exported by the entry point index.d.ts
     createChannel(participants: Participant[], allocations: TokenAllocations, appDefinition: string, appData: string, fundingStrategy: FundingStrategy): Promise<ChannelResult>;
@@ -58,13 +56,13 @@ export class ChannelClient {
 
 export { ChannelResult }
 
-// @alpha
+// @beta
 export const ErrorCode: ErrorCodes;
 
-// @alpha
+// @beta
 export const EthereumNotEnabledErrorCode: 100;
 
-// @alpha
+// @beta
 export class FakeChannelProvider implements ChannelProviderInterface {
     // (undocumented)
     budget: DomainBudget;
@@ -122,10 +120,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     walletVersion?: string;
 }
 
-// @alpha
+// @beta
 export type UnsubscribeFunction = () => void;
 
-// @alpha
+// @beta
 export const UserDeclinedErrorCode: 200;
 
 

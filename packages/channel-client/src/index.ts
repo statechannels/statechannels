@@ -6,11 +6,11 @@ export {ChannelClient} from './channel-client';
 export {FakeChannelProvider} from '../tests/fakes/fake-channel-provider';
 
 /** 
-  /* @alpha
+  /* @beta
 */
 const UserDeclinedErrorCode = ErrorCode.CloseAndWithdraw.UserDeclined;
 /** 
-  /* @alpha
+  /* @beta
 */
 const EthereumNotEnabledErrorCode = ErrorCode.EnableEthereum.EthereumNotEnabled;
 

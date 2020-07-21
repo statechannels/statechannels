@@ -22,7 +22,7 @@ import {HUB} from './constants';
 type TokenAllocations = Allocation[];
 
 /**
- * @alpha
+ * @beta
  * Class that wraps the channel-provider's JSON-RPC interface and exposes a more convenient API
  */
 export class ChannelClient {

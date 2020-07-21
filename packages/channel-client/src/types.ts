@@ -1,7 +1,7 @@
 import {ChannelResult, DomainBudget, Message, ErrorCodes} from '@statechannels/client-api-schema';
 
 /** 
-  /* @alpha
+  /* @beta
 */
 export type UnsubscribeFunction = () => void;
 export interface EventsWithArgs {
@@ -13,7 +13,7 @@ export interface EventsWithArgs {
 }
 
 /** 
-  /* @alpha
+  /* @beta
 */
 export const ErrorCode: ErrorCodes = {
   EnableEthereum: {EthereumNotEnabled: 100},
