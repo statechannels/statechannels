@@ -10,7 +10,6 @@ import {
   ChannelConstants,
   Message,
   Outcome,
-  SignedState,
   SignedStateVarsWithHash,
   calculateChannelId,
   convertToParticipant,
@@ -20,10 +19,9 @@ import {
 import {Bytes32} from '../type-aliases';
 import {Channel, RequiredColumns} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Outgoing, isInternal, isOutgoing} from '../protocols/actions';
+import {Outgoing} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
-import {executionLoop} from '../protocols/direct-funding';
 import {logger} from '../logger';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
@@ -192,47 +190,5 @@ const protocolEngine = async (
   ids: Bytes32[],
   outbox: Outgoing[] = []
 ): Promise<ExecutionResult> => {
-  if (ids.length === 0) return {ids, outbox};
-
-  const [channelId, ...nextIds] = ids;
-
-  const channel = await Channel.forId(channelId, undefined);
-  const actions = await executionLoop(channel);
-  const todos = actions.filter(isInternal);
-
-  for (const todo of todos) {
-    let state: SignedState;
-    switch (todo.type) {
-      case 'SignState':
-        state = await channel.signState(todo.hash);
-        break;
-      case 'UpdateChannel':
-        // channel.update(todo);
-        break;
-    }
-
-    await Channel.query().update(channel);
-    outbox.push({
-      type: 'NotifyApp',
-      notice: {
-        method: 'MessageQueued',
-        params: {
-          recipient: 'bob',
-          sender: 'alice',
-          data: {signedStates: [state]},
-        },
-      },
-    });
-
-    // TODO: Push the channelId back, once we actually trigger these actions
-    // nextIds.push(channelId);
-  }
-
-  outbox = outbox.concat(actions.filter(isOutgoing));
-
-  if (nextIds.length) {
-    return await protocolEngine(nextIds, outbox);
-  } else {
-    return {ids: [], outbox};
-  }
+  return Promise.resolve({ids, outbox});
 };
