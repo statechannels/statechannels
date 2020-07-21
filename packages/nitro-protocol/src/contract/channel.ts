@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+
 import {Address, Bytes32, Uint256, Uint48} from './types';
 
 export interface Channel {

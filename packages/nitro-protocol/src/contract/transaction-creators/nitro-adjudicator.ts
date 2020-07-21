@@ -1,5 +1,6 @@
 // @ts-ignore
 import {utils, providers} from 'ethers';
+
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
 import {encodeOutcome, Outcome} from '../outcome';

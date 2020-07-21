@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
+
 import * as assetHolderTransactionCreator from './asset-holder';
 
 // @ts-ignore

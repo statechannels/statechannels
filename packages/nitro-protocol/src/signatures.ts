@@ -1,4 +1,5 @@
 import {ethers, Wallet, utils} from 'ethers';
+
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';

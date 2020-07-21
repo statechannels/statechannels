@@ -3,6 +3,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {MaxUint256} from 'ethers/constants';
 import {solidityKeccak256} from 'ethers/utils';
+
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';

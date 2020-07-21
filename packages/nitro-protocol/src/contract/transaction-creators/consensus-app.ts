@@ -1,4 +1,5 @@
 import {ethers} from 'ethers';
+
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {getVariablePart} from '../consensus-app';
 import {ConsensusData} from '../consensus-data';

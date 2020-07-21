@@ -1,5 +1,6 @@
-import {Contract, ethers, Wallet} from 'ethers';
-import {constants, providers, utils} from 'ethers';
+import fs from 'fs';
+
+import {Contract, ethers, Wallet, constants, providers, utils} from 'ethers';
 
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
@@ -12,7 +13,6 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
-import fs from 'fs';
 
 // Interfaces
 

@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+
 import {Address, Bytes, Bytes32, Uint256} from './types';
 
 export enum AssetOutcomeType {

@@ -16,9 +16,23 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  plugins: ['jest'],
-  extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
+  plugins: ['jest', 'import'],
+  extends: [
+    '../../.eslintrc.js',
+    'plugin:jest/recommended',
+    'plugin:jest/style',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+  ],
   rules: {
+    'import/order': [
+      1,
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+      },
+    ],
     ...leftoverTsLintRules,
   },
 };

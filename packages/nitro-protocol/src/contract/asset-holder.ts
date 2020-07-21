@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+
 import {parseEventResult} from '../ethers-utils';
 
 export interface DepositedEvent {
