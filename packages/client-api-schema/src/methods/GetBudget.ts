@@ -1,6 +1,6 @@
 import {JsonRpcRequest, JsonRpcResponse} from '../utils';
-import {Address, DomainBudget} from '../data-types';
+import {DomainBudget} from '../data-types';
 
-export type GetBudgetParams = {hubAddress: string};
-export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
+export type GetBudgetParams = {hubParticipantId: string};
+export type GetBudgetRequest = JsonRpcRequest<'GetBudget', GetBudgetParams>;
 export type GetBudgetResponse = JsonRpcResponse<DomainBudget | {}>;

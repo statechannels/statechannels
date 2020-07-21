@@ -145,8 +145,8 @@ export class ChannelClient implements ChannelClientInterface {
     });
   }
 
-  async getBudget(hubAddress: string): Promise<DomainBudget | {}> {
-    return this.provider.send('GetBudget', {hubAddress});
+  async getBudget(hubParticipantId: string): Promise<DomainBudget | {}> {
+    return this.provider.send('GetBudget', {hubParticipantId});
   }
 
   async closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}> {
