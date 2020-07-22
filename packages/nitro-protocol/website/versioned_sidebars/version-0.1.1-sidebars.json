@@ -2,8 +2,8 @@
   "version-0.1.1-docs": {
     "Overview": ["version-0.1.1-overview"],
     "Dapp Developers": [
-      "version-0.1.1-app-devs/app-devs-intro",
-      "version-0.1.1-app-devs/quick-start"
+      "version-0.1.1-dapp-devs/dapp-devs-intro",
+      "version-0.1.1-dapp-devs/quick-start"
     ],
     "Wallet Developers": [
       "version-0.1.1-wallet-devs/wallet-devs-intro",
