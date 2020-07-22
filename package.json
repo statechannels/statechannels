@@ -12,7 +12,8 @@
     "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.5"
+    "typescript": "3.7.5",
+    "typesync": "0.7.0"
   },
   "engines": {
     "yarn": "^1.17.0",
@@ -47,7 +48,7 @@
     "lint:check": "lerna run lint:check --no-sort --no-bail -- --max-warnings=0",
     "lint:write": "lerna run lint:write --no-sort --no-bail",
     "postinstall": "patch-package",
-    "preinstall": "npx typesync",
+    "preinstall": "typesync",
     "prepare": "lerna run --concurrency 8 --stream prepare",
     "publish": "lerna publish --yes from-package patch",
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
