@@ -16,12 +16,12 @@ import {ReplaySubject} from 'rxjs';
 
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 
-import {ChannelClientInterface, UnsubscribeFunction} from './types';
+import {BrowserChannelClientInterface, UnsubscribeFunction} from './types';
 import {HUB} from './constants';
 
 type TokenAllocations = Allocation[];
 
-export class ChannelClient implements ChannelClientInterface {
+export class ChannelClient implements BrowserChannelClientInterface {
   channelState: ReplaySubject<ChannelResult>;
   get signingAddress(): string | undefined {
     return this.provider.signingAddress;
@@ -72,6 +72,7 @@ export class ChannelClient implements ChannelClientInterface {
       this.provider.off('BudgetUpdated', callback);
     };
   }
+
   async getChannels(includeClosed: boolean): Promise<ChannelResult[]> {
     return this.provider.send('GetChannels', {includeClosed});
   }

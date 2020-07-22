@@ -21,7 +21,6 @@ export interface ChannelClientInterface {
   onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
-  onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
 
   provider: ChannelProviderInterface;
   channelState: ReplaySubject<ChannelResult>;
@@ -50,22 +49,30 @@ export interface ChannelClientInterface {
   getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
+  getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
+}
+
+export interface BrowserChannelClientInterface extends ChannelClientInterface {
+  onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
   approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<DomainBudget>;
-  getBudget(hubAddress: string): Promise<DomainBudget | {}>;
   closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
-  getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
+  getBudget(hubAddress: string): Promise<DomainBudget | {}>;
 }
+
 export interface EventsWithArgs {
   MessageQueued: [Message];
   ChannelUpdated: [ChannelResult];
-  BudgetUpdated: [DomainBudget];
   // TODO: Is `ChannelResult` the right type to use here?
   ChannelProposed: [ChannelResult];
+}
+
+export interface BrowserEventsWithArgs extends EventsWithArgs {
+  BudgetUpdated: [DomainBudget];
 }
 
 export const ErrorCode: ErrorCodes = {
