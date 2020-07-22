@@ -12,7 +12,7 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-This fake provider becomes the stateful object which handles the calls coming from a non-fake `ChannelClient`<!-- -->.
+Class which simulates a state channel wallet
 
 <b>Signature:</b>
 
@@ -20,6 +20,10 @@ This fake provider becomes the stateful object which handles the calls coming fr
 export declare class FakeChannelProvider implements ChannelProviderInterface 
 ```
 <b>Implements:</b> ChannelProviderInterface
+
+## Remarks
+
+Conforms to the same interface as the real channel provider.
 
 ## Properties
 

@@ -14,7 +14,7 @@ hide_title: true
 |  Class | Description |
 |  --- | --- |
 |  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/channel-provider |
-|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) | <b><i>(BETA)</i></b> This fake provider becomes the stateful object which handles the calls coming from a non-fake <code>ChannelClient</code>. |
+|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) | <b><i>(BETA)</i></b> Class which simulates a state channel wallet |
 
 ## Variables
 
