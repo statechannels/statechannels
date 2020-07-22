@@ -4,10 +4,10 @@
   "version": "0.0.1",
   "author": "",
   "dependencies": {
-    "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/nitro-protocol": "0.1.4",
-    "@statechannels/wallet-core": "0.1.0",
-    "ethers": "5.0.0-beta.191",
+    "@statechannels/client-api-schema": "0.0.3",
+    "@statechannels/nitro-protocol": "0.1.5",
+    "@statechannels/wallet-core": "0.1.4",
+    "ethers": "5.0.7",
     "knex": "0.20.9",
     "objection": "2.1.2",
     "pg": "7.17.1",
@@ -61,10 +61,6 @@
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
     "db:setup:dev": "yarn db:drop && yarn db:create && yarn db:migrate",
-    "test": "yarn jest -c ./jest/jest.config.js --runInBand",
-    "test:ci": "yarn test --bail",
-    "start:dev": "ts-node ./scripts/start-dev-server.ts",
-    "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts}\" --fix",
     "precommit": "lint-staged --quiet",
@@ -72,6 +68,10 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache"
+    "start:dev": "ts-node ./scripts/start-dev-server.ts",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
+    "test": "yarn jest -c ./jest/jest.config.js --runInBand",
+    "test:ci": "yarn test --bail"
   }
 }
