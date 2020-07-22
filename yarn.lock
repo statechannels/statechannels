@@ -1210,11 +1210,6 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@counterfactual/cf-adjudicator-contracts@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.npmjs.org/@counterfactual/cf-adjudicator-contracts/-/cf-adjudicator-contracts-0.0.11.tgz#6e956250cb33e44e99e370f7ec7be932b3c8a0b7"
-  integrity sha512-MrFMOQ9Fm54yww7VD9elkebpjp0WgoV0RjBp7gd4GUj05ogxC29+QVIX7fgsDdZ3eiT7tgNW+amp2hQQC7oqlg==
-
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
@@ -11335,6 +11330,11 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.npmjs.org/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
+
+fp-ts@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.npmjs.org/fp-ts/-/fp-ts-2.7.0.tgz#41de65a846715ca4df6889b91c6b3aa953165198"
+  integrity sha512-J7EIg4MEVuOm1vZspQDVYRD/CTsQECQk01cP5VEBvQ5LnSSjp6sckun1m1eUPSuvtMIlGgm9NqqOxE0+QyntWQ==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
