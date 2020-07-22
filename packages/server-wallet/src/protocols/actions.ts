@@ -9,7 +9,7 @@ Actions that protocols can declare.
 
 type UpdateOpts = Partial<StateVariables>;
 type UpdateChannel = {type: 'UpdateChannel'; channelId: Bytes32} & UpdateOpts;
-export type SignState = {type: 'SignState'; channelId: Bytes32; hash: Bytes32};
+export type SignState = {type: 'SignState'; channelId: Bytes32} & UpdateOpts;
 type NotifyApp = {type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'>};
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
