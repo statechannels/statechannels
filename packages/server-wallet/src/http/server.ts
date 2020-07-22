@@ -1,22 +1,20 @@
 import express from 'express';
 import {configureEnvVariables} from '@statechannels/devtools';
 
-import {Channel} from '../models/channel';
 import '../db/connection'; // This is how the DB is "connected"
+import {Wallet} from '../wallet';
 
 configureEnvVariables();
 
 const app = express();
 
-const router = express.Router();
+const myWallet = new Wallet();
 
-router.get('/inbox', async (req, res) => {
+app.post('/inbox', async (req, res) => {
   return res.json({
-    message: await Channel.query(),
+    message: myWallet.pushMessage(req.body),
   });
 });
-
-app.use('/api', router);
 
 const port = process.env.PORT || 5000;
 
