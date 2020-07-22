@@ -4,7 +4,7 @@ import {protocol} from '../direct-funding';
 const c = channelWithVars();
 const protocolState = {
   ...c.protocolState,
-  targetOutcome: {
+  minimalOutcome: {
     type: 'SimpleAllocation' as 'SimpleAllocation',
     allocationItems: [],
     assetHolderAddress: '0x0',
