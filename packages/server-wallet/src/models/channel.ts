@@ -18,7 +18,7 @@ import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {logger} from '../logger';
-import {ChannelData} from '../protocols/state';
+import {ChannelState} from '../protocols/state';
 
 import {SigningWallet} from './signing-wallet';
 
@@ -139,7 +139,7 @@ export class Channel extends Model implements RequiredColumns {
     });
   }
 
-  get protocolState(): ChannelData {
+  get protocolState(): ChannelState {
     const {channelId, myIndex, supported, latest, latestSignedByMe} = this;
 
     return {

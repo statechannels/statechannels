@@ -1,5 +1,5 @@
 import {right, none} from '../fp';
 
-import {Protocol, ChannelData} from './state';
+import {Protocol, ChannelState} from './state';
 
-export const protocol: Protocol<ChannelData> = (_ps: ChannelData) => Promise.resolve(right(none));
+export const protocol: Protocol<ChannelState> = (_ps: ChannelState) => Promise.resolve(right(none));
