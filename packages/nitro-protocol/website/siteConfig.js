@@ -84,10 +84,13 @@ const siteConfig = {
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.4.0/dist/mermaid.min.js',
+    'https://unpkg.com/mermaid@8.6.0/dist/mermaid.min.js',
   ],
 
-  stylesheets: ['https://fonts.googleapis.com/css?family=Chivo&display=swap'],
+  stylesheets: [
+    'https://fonts.googleapis.com/css?family=Chivo&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css',
+  ],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',
