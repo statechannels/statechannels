@@ -8,6 +8,7 @@ The following diagram describes our tech stack. Clicking on a node will take you
 <div class="mermaid" align="center">
 flowchart TB;
 linkStyle default interpolate basis
+%% applicationz("3rd party Apps")
 subgraph A [application layer]
 channelclient("fab:fa-npm channel-client")
 channelprovider("fab:fa-npm channel-provider")
@@ -34,13 +35,13 @@ A --> S;
 %% applicationz--> channelclient;
 %% applicationz--> channelprovider;
 %% browserwallet--> apischema;
-%% browserwallet--> walletcore;
+browserwallet--> walletcore;
 %% browserwallet--> wireformat;
 %% browserwallet--> nitroprotocol;
-%% serverwallet--> walletcore;
+serverwallet--> walletcore;
 %% serverwallet--> wireformat;
-%% nitroprotocol--> nitroPDF;
-%% nitroprotocol--> forcemovePDF;
+nitroprotocol--> nitroPDF;
+nitroprotocol--> forcemovePDF;
 %% walletcore--> nitroprotocol;
 %% walletcore--> wireformat;
 click nitroprotocol "https://www.npmjs.com/package/@statechannels/nitro-protocol";
