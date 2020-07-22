@@ -10,7 +10,7 @@ import {
   simpleTokenAllocation,
 } from '@statechannels/wallet-core';
 
-import {match} from '../fp';
+import {match} from '../match';
 
 import {Protocol, ChannelState, stage, ProtocolResult} from './state';
 import {protocol as fundingProtocol} from './depositing';

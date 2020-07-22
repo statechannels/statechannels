@@ -1,5 +1,6 @@
 export {Either, left, right} from 'fp-ts/lib/Either';
 export {Option, none, some} from 'fp-ts/lib/Option';
+
 import {Protocol, ChannelState, ProtocolResult} from './protocols/state';
 
 type Partitioner<T, PS> = (ps: PS) => T;
