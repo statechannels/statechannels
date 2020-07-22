@@ -14,6 +14,10 @@ import {BN, Zero} from '../bignumber';
 
 import {checkThat} from './helpers';
 
+export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
+  return outcome.type === 'SimpleAllocation';
+}
+
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return (
     outcome.type === 'SimpleAllocation' && outcome.assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS

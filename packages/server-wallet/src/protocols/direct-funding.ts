@@ -6,7 +6,7 @@ import {
   Outcome,
   Zero,
   simpleEthAllocation,
-  isSimpleEthAllocation,
+  isSimpleAllocation,
   simpleTokenAllocation,
 } from '@statechannels/wallet-core';
 
@@ -19,10 +19,10 @@ export type ProtocolState = ChannelState & {minimalOutcome: SimpleAllocation};
 
 type FundingStatus = 'Funded' | 'Not Funded';
 
-function minimalOutcome(
+const minimalOutcome = (
   currentOutcome: SimpleAllocation,
   minimalAllocation: SimpleAllocation
-): Outcome {
+): Outcome => {
   const allocationItems = currentOutcome.allocationItems.concat(
     minimalAllocation.allocationItems.map(({destination, amount}) => {
       const currentlyAllocated = currentOutcome.allocationItems
@@ -38,12 +38,13 @@ function minimalOutcome(
   );
 
   return simpleTokenAllocation(minimalAllocation.assetHolderAddress, allocationItems);
-}
+};
+
 const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => async (
   state: ProtocolState
 ): ProtocolResult => {
   const currentOutcome =
-    state.supported && isSimpleEthAllocation(state.supported.outcome)
+    state.supported && isSimpleAllocation(state.supported.outcome)
       ? state.supported.outcome
       : simpleEthAllocation([]);
   return right(
