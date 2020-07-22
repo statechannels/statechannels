@@ -148,6 +148,7 @@ export class Channel extends Model implements RequiredColumns {
       supported,
       latest,
       latestSignedByMe,
+      funding: {}, // TODO: This needs to be populated from the chain
     };
   }
 

@@ -15,11 +15,9 @@ import {match} from '../fp';
 import {Protocol, ChannelState, stage, ProtocolResult} from './state';
 import {protocol as fundingProtocol} from './depositing';
 
-const {add, sub: subtract} = BN;
-
 export type DirectFundingState = ChannelState & {minimalOutcome: SimpleAllocation};
 
-type FundingStatus = 'Not Funded' | 'Funded';
+type FundingStatus = 'Funded' | 'Not Funded';
 
 function minimalOutcome(
   currentOutcome: SimpleAllocation,
@@ -30,10 +28,10 @@ function minimalOutcome(
       const currentlyAllocated = currentOutcome.allocationItems
         .filter(i => i.destination === destination)
         .map(i => i.amount)
-        .reduce(add);
+        .reduce(BN.add);
 
       const amountLeft = BN.gt(amount, currentlyAllocated)
-        ? subtract(amount, currentlyAllocated)
+        ? BN.sub(amount, currentlyAllocated)
         : Zero;
       return {destination, amount: amountLeft};
     })
@@ -58,7 +56,11 @@ const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => async (
   );
 };
 
-const getFundingStatus = (): FundingStatus => 'Not Funded';
+const getFundingStatus = (ps: DirectFundingState): FundingStatus => {
+  const currentFunding = ps.funding[ps.minimalOutcome.assetHolderAddress] || '0x0';
+  const targetFunding = ps.minimalOutcome.allocationItems.map(a => a.amount).reduce(BN.add);
+  return BN.gte(currentFunding, targetFunding) ? 'Funded' : 'Not Funded';
+};
 
 const alreadyFunded = match(ps => stage(ps.latestSignedByMe), {
   Missing: () => Promise.resolve(left(new Error(`Missing prefund setup`))),
