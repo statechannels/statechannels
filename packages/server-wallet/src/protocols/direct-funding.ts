@@ -15,7 +15,7 @@ import {match} from '../match';
 import {Protocol, ChannelState, stage, ProtocolResult} from './state';
 import {protocol as fundingProtocol} from './depositing';
 
-export type DirectFundingState = ChannelState & {minimalOutcome: SimpleAllocation};
+export type ProtocolState = ChannelState & {minimalOutcome: SimpleAllocation};
 
 type FundingStatus = 'Funded' | 'Not Funded';
 
@@ -40,7 +40,7 @@ function minimalOutcome(
   return simpleTokenAllocation(minimalAllocation.assetHolderAddress, allocationItems);
 }
 const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => async (
-  state: DirectFundingState
+  state: ProtocolState
 ): ProtocolResult => {
   const currentOutcome =
     state.supported && isSimpleEthAllocation(state.supported.outcome)
@@ -56,7 +56,7 @@ const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => async (
   );
 };
 
-const getFundingStatus = (ps: DirectFundingState): FundingStatus => {
+const getFundingStatus = (ps: ProtocolState): FundingStatus => {
   const currentFunding = ps.funding[ps.minimalOutcome.assetHolderAddress] || '0x0';
   const targetFunding = ps.minimalOutcome.allocationItems.map(a => a.amount).reduce(BN.add);
   return BN.gte(currentFunding, targetFunding) ? 'Funded' : 'Not Funded';
@@ -80,7 +80,7 @@ const noSupportedState = match(ps => stage(ps.latestSignedByMe), {
   Default: () => Promise.resolve(left(new Error(`State signed too early`))),
 });
 
-export const protocol: Protocol<DirectFundingState> = match(ps => stage(ps.supported), {
+export const protocol: Protocol<ProtocolState> = match(ps => stage(ps.supported), {
   Missing: noSupportedState,
   PrefundSetup: prefundSetupStateSupported,
 
