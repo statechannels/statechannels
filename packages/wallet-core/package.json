@@ -28,7 +28,6 @@
   ],
   "license": "MIT",
   "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
   "scripts": {
     "build": "yarn tsc -b",
     "build:ci": "yarn build",
@@ -38,5 +37,6 @@
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand"
-  }
+  },
+  "types": "lib/src/index.d.ts"
 }
