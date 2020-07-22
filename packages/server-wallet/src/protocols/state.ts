@@ -40,7 +40,7 @@ type ProtocolError = Error;
 /*
 A protocol should accept a "protocol state", and resolve to
 - either zero or one protocol actions;
-- or a protocol error
+- or, a protocol error
 A protocol should never reject.
 */
-export type Protocol<PS> = (ps: PS) => Promise<Either<Option<ProtocolAction>, ProtocolError>>;
+export type Protocol<PS> = (ps: PS) => Promise<Either<ProtocolError, Option<ProtocolAction>>>;
