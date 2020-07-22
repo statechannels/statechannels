@@ -1,15 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "module": "commonjs",
-    "target": "es2017",
-    "noImplicitAny": true,
-    "rootDir": "src",
-    "outDir": "lib",
+    "noEmit": true,
+    "target": "es2019",
     "esModuleInterop": true,
-    "strict": true
+    "noImplicitAny": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
+  "include": ["src"]
 }
