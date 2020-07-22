@@ -36,7 +36,7 @@ div#${UIElementNames.Container} {
 }
 `;
 
-export class UIService {
+export class IFrameService {
   protected get container(): HTMLDivElement | null {
     return document.querySelector(`#${UIElementNames.Container}`);
   }

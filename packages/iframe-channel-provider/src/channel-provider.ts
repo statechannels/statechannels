@@ -2,23 +2,18 @@ import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {NotificationType, Notification} from '@statechannels/client-api-schema';
 
-import {
-  isJsonRpcNotification,
-  Method,
-  EventType,
-  MethodType,
-  OnType,
-  OffType,
-  IFrameChannelProviderInterface
-} from './types';
+import {IFrameChannelProviderInterface} from './types';
+import {WalletJsonRpcAPI} from './types/wallet-api';
 import {logger} from './logger';
 import {PostMessageService} from './postmessage-service';
-import {UIService} from './ui-service';
+import {IFrameService} from './iframe-service';
+import {isJsonRpcNotification} from './types/jsonrpc';
+import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
 
 class IFrameChannelProvider implements IFrameChannelProviderInterface {
   protected mounted = false;
   protected readonly events: EventEmitter<EventType>;
-  protected readonly ui: UIService;
+  protected readonly iframe: IFrameService;
   protected readonly messaging: PostMessageService;
   protected readonly subscriptions: {
     [T in keyof NotificationType]: string[];
@@ -38,7 +33,7 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
 
   constructor() {
     this.events = new EventEmitter<EventType>();
-    this.ui = new UIService();
+    this.iframe = new IFrameService();
     this.messaging = new PostMessageService();
   }
 
@@ -60,9 +55,9 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     if (url) {
       this.url = url;
     }
-    this.ui.setUrl(this.url);
+    this.iframe.setUrl(this.url);
     this.messaging.setUrl(this.url);
-    await this.ui.mount();
+    await this.iframe.mount();
     logger.info('Application successfully mounted Wallet iFrame inside DOM.');
     logger.info('Waiting for wallet ping...');
     await this.walletReady;
@@ -86,11 +81,11 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     this.walletVersion = walletVersion;
   }
 
-  async send<M extends Method = Method>(
+  async send<M extends keyof WalletJsonRpcAPI>(
     method: M,
-    params: MethodType[M]['request']['params']
-  ): Promise<MethodType[M]['response']['result']> {
-    const target = await this.ui.getTarget();
+    params: WalletJsonRpcAPI[M]['request']['params']
+  ): Promise<WalletJsonRpcAPI[M]['response']['result']> {
+    const target = await this.iframe.getTarget();
     const response = await this.messaging.request(target, {
       jsonrpc: '2.0',
       method: method,
@@ -100,13 +95,13 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     return response;
   }
 
-  async subscribe(subscriptionType: Notification['method']): Promise<string> {
+  subscribe: SubscribeType = async subscriptionType => {
     const subscriptionId = Guid.create().toString();
     this.subscriptions[subscriptionType].push(subscriptionId);
     return subscriptionId;
-  }
+  };
 
-  async unsubscribe(subscriptionId: string): Promise<boolean> {
+  unsubscribe: UnsubscribeType = async subscriptionId => {
     Object.keys(this.subscriptions).forEach(method => {
       this.subscriptions[method as Notification['method']] = this.subscriptions[
         method as Notification['method']
@@ -114,7 +109,7 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     });
 
     return true;
-  }
+  };
 
   on: OnType = (method, params) => this.events.on(method, params);
 
@@ -132,7 +127,7 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
       const notificationParams = message.params;
       this.events.emit(notificationMethod, notificationParams);
       if (notificationMethod === 'UIUpdate') {
-        this.ui.setVisibility(message.params.showWallet);
+        this.iframe.setVisibility(message.params.showWallet);
       } else {
         this.subscriptions[notificationMethod].forEach(id => {
           this.events.emit(id, notificationParams);

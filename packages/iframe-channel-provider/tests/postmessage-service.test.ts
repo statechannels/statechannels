@@ -1,13 +1,13 @@
 import {PostMessageService} from '../src/postmessage-service';
-import {JsonRpcRequest, JsonRpcResponse} from '../src/types';
-import {UIService} from '../src/ui-service';
+import {JsonRpcRequest, JsonRpcResponse} from '../src/types/jsonrpc';
+import {IFrameService} from '../src/iframe-service';
 import {logger} from '../src/logger';
 
 type MessageResponse = {isFooBar: boolean};
 
 describe('PostMessageService', () => {
   let postMessageService: PostMessageService;
-  let uiService: UIService;
+  let uiService: IFrameService;
   let target: Window;
 
   const request = {
@@ -27,7 +27,7 @@ describe('PostMessageService', () => {
     postMessageService = new PostMessageService({timeoutMs: 1000, maxRetries: 5});
     postMessageService.setUrl('*');
 
-    uiService = new UIService();
+    uiService = new IFrameService();
 
     await uiService.mount();
     target = await uiService.getTarget();

@@ -1,10 +1,10 @@
-import {cssStyles, UIElementNames, UIService} from '../src/ui-service';
+import {cssStyles, UIElementNames, IFrameService} from '../src/iframe-service';
 
 describe('UIService', () => {
-  let uiService: UIService;
+  let uiService: IFrameService;
 
   beforeEach(async () => {
-    uiService = new UIService();
+    uiService = new IFrameService();
     await uiService.mount();
   });
 
