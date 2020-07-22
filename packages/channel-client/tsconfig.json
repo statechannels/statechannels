@@ -4,6 +4,7 @@
     "baseUrl": "src",
     "module": "commonjs",
     "outDir": "lib",
+    "removeComments": false,
     "target": "es2015",
     "esModuleInterop": true,
     "types": ["react", "jest", "node"]
