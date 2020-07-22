@@ -1,11 +1,9 @@
 {
   "version-0.1.1-docs": {
-    "Overview": [
-      "version-0.1.1-overview"
-    ],
+    "Overview": ["version-0.1.1-overview"],
     "Dapp Developers": [
-      "version-0.1.1-dapp-devs/dapp-devs-intro",
-      "version-0.1.1-dapp-devs/quick-start"
+      "version-0.1.1-app-devs/app-devs-intro",
+      "version-0.1.1-app-devs/quick-start"
     ],
     "Wallet Developers": [
       "version-0.1.1-wallet-devs/wallet-devs-intro",
@@ -33,9 +31,7 @@
     ]
   },
   "version-0.1.1-Contract API": {
-    "Overview": [
-      "version-0.1.1-contract-api/contract-inheritance"
-    ],
+    "Overview": ["version-0.1.1-contract-api/contract-inheritance"],
     "Base Contracts": [
       "version-0.1.1-contract-api/natspec/IForceMove",
       "version-0.1.1-contract-api/natspec/ForceMove",

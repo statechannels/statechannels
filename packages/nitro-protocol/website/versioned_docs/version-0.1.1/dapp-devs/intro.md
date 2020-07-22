@@ -1,7 +1,7 @@
 ---
-id: version-0.1.1-dapp-devs-intro
+id: version-0.1.1-app-devs-intro
 title: Introduction
-original_id: dapp-devs-intro
+original_id: app-devs-intro
 ---
 
 As a Dapp dev you only need to author and deploy a single smart contract. These docs will help you do that.

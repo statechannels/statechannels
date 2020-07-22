@@ -1,5 +1,5 @@
 ---
-id: dapp-devs-intro
+id: app-devs-intro
 title: Introduction
 ---
 
