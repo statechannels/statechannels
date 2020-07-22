@@ -22,7 +22,7 @@ This section is for any developers who want to get started writing a web applica
 - Need to write a single [Solidity](https://solidity.readthedocs.io/en/v0.6.0/) contract implementing the `ForceMoveApp` interface
 - Are happy to lean on our deployed state channels wallet.
 
-## ⚙️ [Engineers and Researchers](./wallet-devs/quick-start.md)
+## ⚙️ [Engineers and Researchers](./protocol-docs/quick-start.md)
 
 This section is for anyone looking for a deeper dive: Want to understand how our contracts implement the protocols set out in our whitepapers? Want to improve our implementation (e.g. to patch a vulnerability or reduce gas consumption)? This section is for you.
 
