@@ -5,9 +5,9 @@ import {Either, Option} from '../fp';
 import {ProtocolAction} from './actions';
 
 /*
-The ChannelData type is the data that protocols need about the channel to decide what to do next.
+The ChannelState type is the data that protocols need about a given channel to decide what to do next.
 */
-export type ChannelData = {
+export type ChannelState = {
   channelId: string;
   myIndex: 0 | 1;
   supported?: SignedStateWithHash;
