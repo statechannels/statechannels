@@ -1,4 +1,5 @@
-import {right, none} from '../fp';
+import {right} from 'fp-ts/lib/Either';
+import {none} from 'fp-ts/lib/Option';
 
 import {Protocol, ChannelState} from './state';
 

@@ -1,6 +1,6 @@
 import {SignedStateWithHash} from '@statechannels/wallet-core';
-
-import {Either, Option} from '../fp';
+import {Either} from 'fp-ts/lib/Either';
+import {Option} from 'fp-ts/lib/Option';
 
 import {ProtocolAction} from './actions';
 
