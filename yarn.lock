@@ -1210,11 +1210,6 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@counterfactual/cf-adjudicator-contracts@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.npmjs.org/@counterfactual/cf-adjudicator-contracts/-/cf-adjudicator-contracts-0.0.11.tgz#6e956250cb33e44e99e370f7ec7be932b3c8a0b7"
-  integrity sha512-MrFMOQ9Fm54yww7VD9elkebpjp0WgoV0RjBp7gd4GUj05ogxC29+QVIX7fgsDdZ3eiT7tgNW+amp2hQQC7oqlg==
-
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
