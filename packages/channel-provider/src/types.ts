@@ -154,12 +154,19 @@ export interface ChannelProviderInterface {
   walletVersion?: string;
   on: OnType;
   off: OffType;
-  mountWalletComponent(url?: string): Promise<void>;
-  enable(): Promise<void>;
   send<M extends Method = Method>(
     method: M,
     params: MethodType[M]['request']['params']
   ): Promise<MethodType[M]['response']['result']>;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
+}
+
+export interface BrowserChannelProviderInterface extends ChannelProviderInterface {
+  enable(): Promise<void>;
+}
+
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+export interface IFrameChannelProviderInterface extends BrowserChannelProviderInterface {
+  mountWalletComponent(url?: string): Promise<void>;
 }

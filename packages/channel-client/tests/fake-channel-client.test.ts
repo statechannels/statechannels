@@ -16,7 +16,7 @@ import {
   APP_DATA,
   UPDATED_APP_DATA
 } from './constants';
-import {FakeChannelProvider} from './fakes/fake-channel-provider';
+import {FakeBrowserChannelProvider} from './fakes/fake-browser-channel-provider';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -44,9 +44,9 @@ describe('FakeChannelClient', () => {
   const clientCEventEmitter = new EventEmitter<EventsWithArgs>();
 
   let clientA: ChannelClient, clientB: ChannelClient, clientC: ChannelClient;
-  let providerA: FakeChannelProvider,
-    providerB: FakeChannelProvider,
-    providerC: FakeChannelProvider;
+  let providerA: FakeBrowserChannelProvider,
+    providerB: FakeBrowserChannelProvider,
+    providerC: FakeBrowserChannelProvider;
 
   beforeAll(() => {
     statesAB['proposed'] = new ChannelResultBuilder(
@@ -101,11 +101,11 @@ describe('FakeChannelClient', () => {
   });
 
   beforeEach(() => {
-    providerA = new FakeChannelProvider();
+    providerA = new FakeBrowserChannelProvider();
     providerA.internalAddress = participantA.signingAddress;
-    providerB = new FakeChannelProvider();
+    providerB = new FakeBrowserChannelProvider();
     providerB.internalAddress = participantB.signingAddress;
-    providerC = new FakeChannelProvider();
+    providerC = new FakeBrowserChannelProvider();
     providerC.internalAddress = participantC.signingAddress;
 
     clientA = new ChannelClient(providerA);

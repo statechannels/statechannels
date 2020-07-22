@@ -1,4 +1,4 @@
-import {EventEmitter} from 'eventemitter3';
+import EventEmitter from 'eventemitter3';
 import {
   ChannelProviderInterface,
   OnType,
@@ -8,12 +8,9 @@ import {
   Method
 } from '@statechannels/channel-provider';
 import {
-  ApproveBudgetAndFundParams,
-  CloseAndWithdrawParams,
   ChannelResult,
   CloseChannelParams,
   CreateChannelParams,
-  GetBudgetParams,
   GetStateParams,
   JoinChannelParams,
   PushMessageResult,
@@ -29,19 +26,6 @@ import {calculateChannelId} from '../../src/utils';
 
 type ChannelId = string;
 
-const mockDomainBudget = {
-  hubAddress: 'mock.hub.com',
-  domain: 'mock.web3torrent.com',
-  budgets: [
-    {
-      token: '0x0',
-      availableReceiveCapacity: '0x5000000',
-      availableSendCapacity: '0x3000000',
-      channels: []
-    }
-  ]
-};
-
 /*
  This fake provider becomes the stateful object which handles the calls
  coming from a non-fake `ChannelClient`.
@@ -51,7 +35,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   public destinationAddress?: string;
   public walletVersion?: string;
 
-  private events = new EventEmitter<EventType>();
+  protected events = new EventEmitter<EventType>();
   protected url = '';
 
   playerIndex: Record<ChannelId, 0 | 1> = {};
@@ -59,26 +43,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   internalAddress: string = Wallet.createRandom().address;
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
-
-  // Replace mock with real initial budget
-  budget: DomainBudget = mockDomainBudget;
-
-  async mountWalletComponent(url?: string): Promise<void> {
-    this.url = url || '';
-    this.signingAddress = this.getAddress();
-    this.walletVersion = 'FakeChannelProvider@VersionTBD';
-    this.destinationAddress = '0xEthereumAddress';
-  }
-
-  async enable(): Promise<void> {
-    const {signingAddress, destinationAddress, walletVersion} = await this.send(
-      'EnableEthereum',
-      {}
-    );
-    this.signingAddress = signingAddress;
-    this.destinationAddress = destinationAddress;
-    this.walletVersion = walletVersion;
-  }
 
   async send<M extends Method = Method>(
     method: M,
@@ -92,7 +56,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         return this.pushMessage(params as PushMessageParams);
 
       case 'GetWalletInformation':
-      case 'EnableEthereum':
         return {
           signingAddress: this.getAddress(),
           destinationAddress: '0xEthereumAddress',
@@ -110,15 +73,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'CloseChannel':
         return this.closeChannel(params as CloseChannelParams);
-
-      case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params as ApproveBudgetAndFundParams);
-
-      case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(params as CloseAndWithdrawParams);
-
-      case 'GetBudget':
-        return this.getBudget(params as GetBudgetParams);
 
       default:
         return Promise.reject(`No callback available for ${method}`);
@@ -151,14 +105,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
   }
 
-  private getAddress(): string {
+  protected getAddress(): string {
     if (this.internalAddress === undefined) {
       throw Error('No address has been set yet');
     }
     return this.internalAddress;
   }
 
-  private getPlayerIndex(channelId: ChannelId): number {
+  protected getPlayerIndex(channelId: ChannelId): number {
     if (this.playerIndex === undefined) {
       throw Error(`This client does not have its player index set yet`);
     }
@@ -188,7 +142,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState[channelId];
   }
 
-  private async createChannel(params: CreateChannelParams): Promise<ChannelResult> {
+  protected async createChannel(params: CreateChannelParams): Promise<ChannelResult> {
     const participants = params.participants;
     const allocations = params.allocations;
     const appDefinition = params.appDefinition;
@@ -212,7 +166,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return channel;
   }
 
-  private async joinChannel(params: JoinChannelParams): Promise<ChannelResult> {
+  protected async joinChannel(params: JoinChannelParams): Promise<ChannelResult> {
     const {channelId} = params;
     const latestState = this.findChannel(channelId);
     this.updatePlayerIndex(channelId, 1);
@@ -232,11 +186,11 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState[channelId];
   }
 
-  private async getState({channelId}: GetStateParams): Promise<ChannelResult> {
+  protected async getState({channelId}: GetStateParams): Promise<ChannelResult> {
     return this.findChannel(channelId);
   }
 
-  private async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
+  protected async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
     const channelId = params.channelId;
     const allocations = params.allocations;
     const appData = params.appData;
@@ -257,7 +211,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState[channelId];
   }
 
-  private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
+  protected async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
 
     await this.verifyTurnNum(params.channelId, latestState.turnNum);
@@ -299,11 +253,11 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
-  private isChannelResult(data: unknown): data is ChannelResult {
+  protected isChannelResult(data: unknown): data is ChannelResult {
     return typeof data === 'object' && data != null && 'turnNum' in data;
   }
 
-  private async pushMessage(params: Message): Promise<PushMessageResult> {
+  protected async pushMessage(params: Message): Promise<PushMessageResult> {
     if (this.isChannelResult(params.data)) {
       this.setState(params.data);
       this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
@@ -324,36 +278,5 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       }
     }
     return {success: true};
-  }
-
-  private async approveBudgetAndFund(params: ApproveBudgetAndFundParams): Promise<DomainBudget> {
-    // TODO: Does this need to be delayed?
-    this.budget = {
-      hubAddress: params.hub.signingAddress,
-      domain: 'localhost',
-      budgets: [
-        {
-          token: '0x0',
-          availableReceiveCapacity: params.requestedReceiveCapacity,
-          availableSendCapacity: params.requestedSendCapacity,
-          channels: []
-        }
-      ]
-    };
-
-    this.notifyAppBudgetUpdated(this.budget);
-
-    return this.budget;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private async closeAndWithdraw(_params: CloseAndWithdrawParams): Promise<{success: boolean}> {
-    // TODO: Implement a fake implementation
-    return {success: true};
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private async getBudget(_params: GetBudgetParams): Promise<DomainBudget> {
-    return this.budget;
   }
 }
