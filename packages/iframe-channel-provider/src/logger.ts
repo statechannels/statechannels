@@ -1,3 +1,7 @@
+/**
+ * TODO: Explain how or why `process` is expected to exist.
+ */
+
 import pino from 'pino';
 import _ from 'lodash';
 

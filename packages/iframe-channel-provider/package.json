@@ -1,7 +1,7 @@
 {
-  "name": "@statechannels/channel-provider",
-  "version": "0.0.5",
-  "browser": "dist/channel-provider.min.js",
+  "name": "@statechannels/iframe-channel-provider",
+  "version": "0.0.1",
+  "browser": "dist/iframe-channel-provider.min.js",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -62,7 +62,7 @@
     ]
   },
   "license": "MIT",
-  "main": "dist/channel-provider.js",
+  "main": "dist/iframe-channel-provider.js",
   "scripts": {
     "build": "webpack",
     "build:typescript": "tsc -b .",

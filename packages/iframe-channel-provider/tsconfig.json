@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // We build for the browser and need to use import assignment for some modules (i.e., eventemitter3)
-    // which is forbidden when targeting ECMAScript modules.
+    // We build for the browser and need to use import assignment for some modules
+    // (i.e., eventemitter3) which is forbidden when targeting ECMAScript modules.
     "module": "commonjs",
     "esModuleInterop": true,
     "declarationDir": "dist",

@@ -2,24 +2,24 @@ import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {NotificationType, Notification} from '@statechannels/client-api-schema';
 
-import {MessagingService} from './messaging-service';
 import {
-  ChannelProviderInterface,
   isJsonRpcNotification,
   Method,
   EventType,
   MethodType,
   OnType,
-  OffType
+  OffType,
+  IFrameChannelProviderInterface
 } from './types';
-import {UIService} from './ui-service';
 import {logger} from './logger';
+import {PostMessageService} from './postmessage-service';
+import {UIService} from './ui-service';
 
-class ChannelProvider implements ChannelProviderInterface {
+class IFrameChannelProvider implements IFrameChannelProviderInterface {
   protected mounted = false;
   protected readonly events: EventEmitter<EventType>;
   protected readonly ui: UIService;
-  protected readonly messaging: MessagingService;
+  protected readonly messaging: PostMessageService;
   protected readonly subscriptions: {
     [T in keyof NotificationType]: string[];
   } = {
@@ -39,7 +39,7 @@ class ChannelProvider implements ChannelProviderInterface {
   constructor() {
     this.events = new EventEmitter<EventType>();
     this.ui = new UIService();
-    this.messaging = new MessagingService();
+    this.messaging = new PostMessageService();
   }
 
   walletReady = new Promise(resolve => {
@@ -142,6 +142,6 @@ class ChannelProvider implements ChannelProviderInterface {
   }
 }
 
-const channelProvider = new ChannelProvider();
+const channelProvider = new IFrameChannelProvider();
 
 export {channelProvider};

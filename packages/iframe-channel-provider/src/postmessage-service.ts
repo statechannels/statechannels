@@ -14,7 +14,7 @@ class RpcError extends Error {
   }
 }
 
-export class MessagingService {
+export class PostMessageService {
   protected timeoutListener?: NodeJS.Timeout;
   protected attempts = 0;
   protected url = '';
