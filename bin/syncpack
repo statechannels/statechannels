@@ -1,0 +1,4 @@
+# Skip ethers dependency due to https://github.com/statechannels/monorepo/issues/2333
+npx syncpack fix-mismatches --filter '^(?!ethers).*$'
+npx syncpack format
+npx syncpack set-semver-ranges
