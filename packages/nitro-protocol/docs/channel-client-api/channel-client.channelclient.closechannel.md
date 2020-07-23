@@ -31,3 +31,7 @@ closeChannel(channelId: string): Promise<ChannelResult>;
 Promise&lt;ChannelResult&gt;
 
 A promise that resolves to a ChannelResult.
+
+## Remarks
+
+The wallet will respond to this request with an error if it is not your turn. If it is your turn, the wallet will respond as soon as it has signed an `isFinal` state, and the channel is updated to `closing` status. The channel may later update to `closed` status only when other channel participants have responded in kind: this can be detected by listening to [Channel Updated](./channel-client.channelclient.onchannelupdated.md) events and filtering on the channel status.

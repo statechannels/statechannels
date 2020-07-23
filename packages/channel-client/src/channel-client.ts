@@ -134,6 +134,10 @@ export class ChannelClient implements BrowserChannelClientInterface {
   /**
    * Registers a callback that will fire when a state channel is proposed.
    *
+   * @remarks
+   *
+   * Triggered when the wallet receives a message containing a new channel.
+   * The App might respond by calling {@link @statechannels/channel-client#ChannelClient.joinChannel| joinChannel()}.
    * @param callback - A function that accepts a ChannelProposedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
@@ -261,6 +265,12 @@ export class ChannelClient implements BrowserChannelClientInterface {
 
   /**
    * Requests a close for a channel
+   *
+   * @remarks
+   *
+   * The wallet will respond to this request with an error if it is not your turn.
+   * If it is your turn, the wallet will respond as soon as it has signed an `isFinal` state, and the channel is updated to `closing` status.
+   * The channel may later update to `closed` status only when other channel participants have responded in kind: this can be detected by listening to {@link @statechannels/channel-client#ChannelClient.onChannelUpdated | Channel Updated} events and filtering on the channel status.
    *
    * @param channelId - id for the state channel
    * @returns A promise that resolves to a ChannelResult.

@@ -31,3 +31,7 @@ onChannelProposed(callback: (result: ChannelProposedNotification['params']) => v
 [UnsubscribeFunction](./channel-client.unsubscribefunction.md)
 
 A function that will unregister the callback when invoked.
+
+## Remarks
+
+Triggered when the wallet receives a message containing a new channel. The App might respond by calling [joinChannel()](./channel-client.channelclient.joinchannel.md)<!-- -->.
