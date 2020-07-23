@@ -2,7 +2,12 @@ import {spawn, ChildProcessWithoutNullStreams} from 'child_process';
 
 function startServerWallet(port: string): ChildProcessWithoutNullStreams {
   const server = spawn('yarn', ['ts-node', 'src/index'], {
-    env: {...process.env, NODE_ENV: 'test', PORT: port},
+    env: {
+      // eslint-disable-next-line
+      ...process.env,
+      NODE_ENV: 'test',
+      PORT: port,
+    },
   });
 
   server.stdout.on('data', data => console.log(data.toString()));
@@ -11,9 +16,10 @@ function startServerWallet(port: string): ChildProcessWithoutNullStreams {
   return server;
 }
 
-const aliceHttp = startServerWallet('5001');
-const bobHttp = startServerWallet('5002');
-
+(async () => {
+  // Start up an HTTP Server for Alice
+  const httpWallet = startServerWallet('5252');
+})();
 // TODO:
 //
 // [ ] Point servers to separate DBs.

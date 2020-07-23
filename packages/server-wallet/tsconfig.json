@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
     "module": "commonjs",
     "target": "es2019",
+    "outDir": "lib",
     "esModuleInterop": true,
     "noImplicitAny": true
   },
