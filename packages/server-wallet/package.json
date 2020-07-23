@@ -18,6 +18,7 @@
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.1.4",
+    "@types/body-parser": "^1.19.0",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
