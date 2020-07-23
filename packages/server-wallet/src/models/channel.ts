@@ -9,7 +9,6 @@ import {
   StateVariables,
   StateVariablesWithHash,
   calculateChannelId,
-  createSignatureEntry,
   hashState,
   outcomesEqual,
 } from '@statechannels/wallet-core';
@@ -166,7 +165,7 @@ export class Channel extends Model implements RequiredColumns {
     }
   }
 
-  signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
+  signAndAdd(stateVars: StateVariables): SignedState {
     if (
       this.isSupportedByMe &&
       this.latestSignedByMe &&
@@ -178,7 +177,7 @@ export class Channel extends Model implements RequiredColumns {
 
     const state = {...this.channelConstants, ...stateVars};
 
-    const signatureEntry = createSignatureEntry(state, privateKey);
+    const signatureEntry = this.signingWallet.signState(state);
 
     return this.addState(stateVars, signatureEntry);
   }
