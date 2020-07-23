@@ -1,6 +1,6 @@
 {
   "docs": {
-    "Overview": ["overview"],
+    "Overview": ["overview", "products"],
     "App Developers": [
       "app-devs/app-devs-intro",
       "app-devs/quick-start-contracts",
