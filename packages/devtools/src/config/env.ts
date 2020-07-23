@@ -22,11 +22,13 @@ export function getEnvBool(name: string, throwIfMissing = true): boolean {
 }
 
 export function configureEnvVariables(): void {
+  const scEnvFilesDirectory = process.env.MONOREPO_ROOT || '../..';
+
   // State Channel Environment
   // Intended usage is a single file in monorepo root defining configuration for multiple packages
   const SC_ENV = process.env.SC_ENV;
   if (SC_ENV) {
-    const scEnvFile = path.join('../..', '.env.' + SC_ENV);
+    const scEnvFile = path.join(scEnvFilesDirectory, '.env.' + SC_ENV);
     const scEnvFileFullPath = path.join(process.cwd(), scEnvFile);
     if (!fs.existsSync(scEnvFileFullPath)) {
       throw new Error(`${scEnvFileFullPath} must exist in the monorepo root`);

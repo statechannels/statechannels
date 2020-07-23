@@ -5,6 +5,7 @@ import {configureEnvVariables} from '@statechannels/devtools';
 import {Config} from 'knex';
 
 import {dbCofig} from '../db-config';
+import config from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
@@ -13,7 +14,7 @@ configureEnvVariables();
 
 let knexConfig: Config = {
   ...dbCofig,
-  debug: process.env.DEBUG_KNEX === 'TRUE',
+  debug: config.debugKnex === 'TRUE',
   migrations: {
     directory: path.join(BASE_PATH, 'migrations'),
     loadExtensions: extensions,
@@ -33,7 +34,7 @@ let knexConfig: Config = {
   wrapIdentifier: undefined,
 };
 
-if (process.env.NODE_ENV === 'development') {
+if (config.nodeEnv === 'development') {
   knexConfig = {...knexConfig, pool: {min: 0, max: 1}};
 }
 

@@ -9,15 +9,13 @@ import {
   BudgetUpdatedNotification,
   Message,
   MessageQueuedNotification,
-  FundingStrategy,
-  Allocation
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 import {ReplaySubject} from 'rxjs';
 
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
-type TokenAllocations = Allocation[];
 
-import {BrowserChannelClientInterface, UnsubscribeFunction} from './types';
+import {BrowserChannelClientInterface, UnsubscribeFunction, TokenAllocations} from './types';
 import {HUB} from './constants';
 /**
  * Class that wraps the JSON-RPC interface of \@statechannels/iframe-channel-provider

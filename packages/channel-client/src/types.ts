@@ -11,6 +11,10 @@ import {
 import {ChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 import {ReplaySubject} from 'rxjs';
 
+/**
+ * @beta
+ */
+export type TokenAllocations = Allocation[];
 export type UnsubscribeFunction = () => void;
 
 /**
