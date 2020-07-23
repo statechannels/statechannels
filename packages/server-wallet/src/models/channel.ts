@@ -96,11 +96,15 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
-    return Channel.query(tx)
+  static async forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
+    const result = Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
       .first();
+
+    if (!result) throw new ChannelError(Errors.channelMissing, {channelId});
+
+    return result;
   }
 
   $toDatabaseJson(): Pojo {
