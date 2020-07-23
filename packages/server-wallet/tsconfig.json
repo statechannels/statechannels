@@ -6,5 +6,11 @@
     "esModuleInterop": true,
     "noImplicitAny": true
   },
+   "references": [
+     {"path": "../devtools"},
+     {"path": "../client-api-schema"},
+     {"path": "../nitro-protocol"},
+     {"path": "../wallet-core"}
+   ],
   "include": ["src"]
 }
