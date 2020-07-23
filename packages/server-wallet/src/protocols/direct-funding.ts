@@ -13,7 +13,7 @@ import {
 import {match} from '../match';
 
 import {Protocol, ChannelState, stage, ProtocolResult} from './state';
-import {protocol as fundingProtocol} from './depositing';
+import {protocol as depositProtocol, ProtocolState as DepositState} from './depositing';
 
 export type ProtocolState = ChannelState & {minimalOutcome: SimpleAllocation};
 
@@ -70,9 +70,13 @@ const alreadyFunded = match(ps => stage(ps.latestSignedByMe), {
   Default: () => Promise.resolve(left(new Error(`State signed too early`))),
 });
 
+const calculateDepositInfo = (ps: ProtocolState): DepositState => {
+  return (ps as unknown) as DepositState; // TODO: Implement this
+};
+
 const prefundSetupStateSupported = match(getFundingStatus, {
   Funded: alreadyFunded,
-  'Not Funded': async ps => fundingProtocol(ps),
+  'Not Funded': async ps => depositProtocol(calculateDepositInfo(ps)),
 });
 
 const noSupportedState = match(ps => stage(ps.latestSignedByMe), {
