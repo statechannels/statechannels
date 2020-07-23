@@ -15,13 +15,6 @@ module.exports = {
     'plugin:import/typescript',
   ],
   rules: {
-    'import/order': [
-      1,
-      {
-        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-        'newlines-between': 'always',
-      },
-    ],
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
     'jest/expect-expect': 'off',
