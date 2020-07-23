@@ -4,8 +4,7 @@ import {
   OnType,
   OffType,
   EventType,
-  MethodType,
-  Method
+  WalletJsonRpcAPI
 } from '@statechannels/iframe-channel-provider';
 import {
   ChannelResult,
@@ -44,10 +43,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
-  async send<M extends Method = Method>(
+  async send<M extends keyof WalletJsonRpcAPI>(
     method: M,
-    params: MethodType[M]['request']['params']
-  ): Promise<MethodType[M]['response']['result']> {
+    params: WalletJsonRpcAPI[M]['request']['params']
+  ): Promise<WalletJsonRpcAPI[M]['response']['result']> {
     switch (method) {
       case 'CreateChannel':
         return this.createChannel(params as CreateChannelParams);

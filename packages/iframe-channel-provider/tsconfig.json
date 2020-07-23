@@ -9,7 +9,6 @@
     "outDir": "dist",
     "jsx": "preserve",
     "target": "es5",
-    "sourceMap": true
   },
   "include": ["src", "tests"]
 }

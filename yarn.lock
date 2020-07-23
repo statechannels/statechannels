@@ -3354,15 +3354,6 @@
   dependencies:
     type-detect "4.0.8"
 
-"@statechannels/channel-provider@*":
-  version "0.0.5"
-  resolved "https://registry.npmjs.org/@statechannels/channel-provider/-/channel-provider-0.0.5.tgz#bf61011ffe4a01e268909ad2ec460664ddd05e4d"
-  integrity sha512-lL6VXoWL99RziDz9guet9w3kAOVUHUVLXq3NXp8I34oOu+WNVfCqb1+jDPpevrEdTsO+4yh91+qPMaoAco5Dew==
-  dependencies:
-    eventemitter3 "4.0.0"
-    guid-typescript "1.0.9"
-    pino "6.2.0"
-
 "@storybook/addon-actions@5.3.9":
   version "5.3.9"
   resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"

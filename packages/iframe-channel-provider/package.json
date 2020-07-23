@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/iframe-channel-provider",
   "version": "0.0.1",
-  "browser": "dist/iframe-channel-provider.min.js",
+  "browser": "dist/iframe-channel-provider.js",
   "browserslist": {
     "production": [
       ">0.2%",

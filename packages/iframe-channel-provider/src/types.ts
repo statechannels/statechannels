@@ -1,12 +1,14 @@
-import {OnType, OffType, SubscribeType, UnsubscribeType} from './types/events';
+import {OnType, OffType, SubscribeType, UnsubscribeType, EventType} from './types/events';
 import {WalletJsonRpcAPI} from './types/wallet-api';
+
+export {WalletJsonRpcAPI, OnType, OffType, SubscribeType, UnsubscribeType, EventType};
 
 /**
  * The generic JsonRPC provider interface that mimics EIP-1193 and the window.ethereum
  * object in the browser. Expectation is bidirectional communication between application
  * and the wallet.
  */
-export interface JsonRpcChannelProviderInterface {
+export interface ChannelProviderInterface {
   signingAddress?: string;
   destinationAddress?: string;
   walletVersion?: string;
@@ -27,7 +29,7 @@ export interface JsonRpcChannelProviderInterface {
  * For environments where the destinationAddress is secret until the wallet is "enabled", such
  * as is the case with MetaMask and its connected accounts feature.
  */
-export interface Web3ChannelProviderInterface extends JsonRpcChannelProviderInterface {
+export interface Web3ChannelProviderInterface extends ChannelProviderInterface {
   enable(): Promise<void>;
 }
 

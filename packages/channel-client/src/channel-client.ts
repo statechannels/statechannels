@@ -72,7 +72,7 @@ export class ChannelClient implements BrowserChannelClientInterface {
   constructor(provider: ChannelProviderInterface) {
     this.provider = provider;
     this.channelState = new ReplaySubject(1);
-    this.provider.on('ChannelUpdated', result => this.channelState.next(result));
+    this.provider.on('ChannelUpdated', (result: ChannelResult) => this.channelState.next(result));
   }
   /**
    * Registers a callback that will fire when an outbound message is ready to be dispatched.

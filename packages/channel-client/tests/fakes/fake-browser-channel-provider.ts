@@ -1,7 +1,6 @@
 import {
-  MethodType,
-  Method,
-  BrowserChannelProviderInterface
+  WalletJsonRpcAPI,
+  IFrameChannelProviderInterface
 } from '@statechannels/iframe-channel-provider';
 import {
   ApproveBudgetAndFundParams,
@@ -31,7 +30,7 @@ const mockDomainBudget = {
  * specific provider method enable() (i.e., for MetaMask approval).
  */
 export class FakeBrowserChannelProvider extends FakeChannelProvider
-  implements BrowserChannelProviderInterface {
+  implements IFrameChannelProviderInterface {
   budget: DomainBudget = mockDomainBudget;
 
   async mountWalletComponent(url?: string): Promise<void> {
@@ -51,10 +50,10 @@ export class FakeBrowserChannelProvider extends FakeChannelProvider
     this.walletVersion = walletVersion;
   }
 
-  async send<M extends Method = Method>(
+  async send<M extends keyof WalletJsonRpcAPI>(
     method: M,
-    params: MethodType[M]['request']['params']
-  ): Promise<MethodType[M]['response']['result']> {
+    params: WalletJsonRpcAPI[M]['request']['params']
+  ): Promise<WalletJsonRpcAPI[M]['response']['result']> {
     switch (method) {
       case 'EnableEthereum':
         return {

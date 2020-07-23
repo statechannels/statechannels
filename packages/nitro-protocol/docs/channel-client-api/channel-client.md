@@ -11,22 +11,22 @@ hide_title: true
 
 ## Classes
 
-| Class                                                          | Description                                                                                                    |
-|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| [ChannelClient](./channel-client.channelclient.md)             | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel-provider |
-| [FakeChannelProvider](./channel-client.fakechannelprovider.md) | <b><i>(BETA)</i></b> Class which simulates a state channel wallet                                              |
+|  Class | Description |
+|  --- | --- |
+|  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel-provider |
+|  [FakeBrowserChannelProvider](./channel-client.fakebrowserchannelprovider.md) | Extension of FakeChannelProvider which adds support for browser-specific wallet API methods such as EnableEthereum and ApproveBudgetAndFund. Also, exposes the browser specific provider method enable() (i.e., for MetaMask approval). |
 
 ## Variables
 
-| Variable                                                                       | Description          |
-|--------------------------------------------------------------------------------|----------------------|
-| [ErrorCode](./channel-client.errorcode.md)                                     | <b><i>(BETA)</i></b> |
-| [EthereumNotEnabledErrorCode](./channel-client.ethereumnotenablederrorcode.md) | <b><i>(BETA)</i></b> |
-| [UserDeclinedErrorCode](./channel-client.userdeclinederrorcode.md)             | <b><i>(BETA)</i></b> |
+|  Variable | Description |
+|  --- | --- |
+|  [ErrorCode](./channel-client.errorcode.md) | <b><i>(BETA)</i></b> |
+|  [EthereumNotEnabledErrorCode](./channel-client.ethereumnotenablederrorcode.md) | <b><i>(BETA)</i></b> |
+|  [UserDeclinedErrorCode](./channel-client.userdeclinederrorcode.md) | <b><i>(BETA)</i></b> |
 
 ## Type Aliases
 
-| Type Alias                                                     | Description          |
-|----------------------------------------------------------------|----------------------|
-| [TokenAllocations](./channel-client.tokenallocations.md)       | <b><i>(BETA)</i></b> |
-| [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
+|  Type Alias | Description |
+|  --- | --- |
+|  [TokenAllocations](./channel-client.tokenallocations.md) | <b><i>(BETA)</i></b> |
+|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) |  |
