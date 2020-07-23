@@ -13,7 +13,7 @@ export type ChannelState = {
   channelId: string;
   myIndex: 0 | 1;
   supported?: SignedStateWithHash;
-  latest?: SignedStateWithHash;
+  latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
   funding: Record<Address, Uint256>;
 };
