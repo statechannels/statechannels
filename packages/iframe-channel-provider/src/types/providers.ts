@@ -1,7 +1,5 @@
-import {OnType, OffType, SubscribeType, UnsubscribeType, EventType} from './types/events';
-import {WalletJsonRpcAPI} from './types/wallet-api';
-
-export {WalletJsonRpcAPI, OnType, OffType, SubscribeType, UnsubscribeType, EventType};
+import {OnType, OffType, SubscribeType, UnsubscribeType} from './events';
+import {WalletJsonRpcAPI} from './wallet-api';
 
 /**
  * The generic JsonRPC provider interface that mimics EIP-1193 and the window.ethereum
