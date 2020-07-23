@@ -95,7 +95,7 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static async forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
+  static async forId(channelId: Bytes32, tx: Transaction | undefined): Promise<Channel> {
     const result = Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
