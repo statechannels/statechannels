@@ -49,6 +49,8 @@ export type WalletInterface = {
   closeChannel(args: CloseChannelParams): Result;
   getChannels(): Result;
 
+  getChannel(channelId: Bytes32): Promise<ClientChannelResult>;
+
   // Wallet <-> Wallet communication
   pushMessage(m: AddressedMessage): Promise<{response?: Message; outbox?: Outgoing[]}>;
 
