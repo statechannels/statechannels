@@ -34,13 +34,7 @@ A function that will unregister the callback when invoked.
 
 ## Remarks
 
-Triggered when any of the following occurs:
-
-- A state is received via `updateChannel`
-
-- A state is received from another participant via [pushMessage](./channel-client.channelclient.pushmessage.md)
-
-- Changes to the state of the blockchain are detected (e.g funding or challenges)
+The ChannelUpdated event is emitted when any of the following occurs: <ul> <li> A state is received via [updateChannel()](./channel-client.channelclient.updatechannel.md)</li> <li> A state is received from another participant via [pushMessage()](./channel-client.channelclient.pushmessage.md)</li> <li> Changes to the state of the blockchain are detected (e.g funding or challenges)</li> </ul>
 
 In the first two cases, this notification is only triggered when the wallet verifies that the state causes the 'top state' to change.
 
@@ -48,14 +42,6 @@ The 'top state' is the state drawn from the set of supported states that has the
 
 (We have glossed over / left undefined what happens in the case where there is more than one top state).
 
-In particular, this means that
+In particular, this means that <ul> <li> incorrectly formatted</li> <li> incorrectly signed</li> <li> otherwise unsupported</li> <li> out-of-date</li> </ul>
 
-- incorrectly formatted
-
-- incorrectly signed
-
-- otherwise unsupported
-
-- out-of-date
-
-states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification \_unless\_ it means that a conclusion proof is now available.
+states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification <b>unless</b> it means that a conclusion proof is now available.

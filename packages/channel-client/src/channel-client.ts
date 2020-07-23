@@ -96,29 +96,31 @@ export class ChannelClient implements BrowserChannelClientInterface {
   /**
    * Registers a callback that will fire when a state channel is updated.
    *
-   * @remarks 
-   * 
-   * Triggered when any of the following occurs:
-   * 
-   * * A state is received via `updateChannel`
-   * * A state is received from another participant via `pushMessage`
-   * * Changes to the state of the blockchain are detected (e.g funding or challenges)
-   * 
+   * @remarks
+   *
+   * The ChannelUpdated event is emitted when any of the following occurs:
+   * <ul>
+   * <li> A state is received via {@link @statechannels/channel-client#ChannelClient.updateChannel| updateChannel()}</li>
+   * <li> A state is received from another participant via {@link @statechannels/channel-client#ChannelClient.pushMessage | pushMessage()}</li>
+   * <li> Changes to the state of the blockchain are detected (e.g funding or challenges)</li>
+   * </ul>
+   *
    * In the first two cases, this notification is only triggered when the wallet verifies that the state causes the 'top state' to change.
-   * 
-   * The 'top state' is the state drawn from the set of **supported** states that has the highest turn number.
-   * 
+   *
+   * The 'top state' is the state drawn from the set of supported states that has the highest turn number.
+   *
    * (We have glossed over / left undefined what happens in the case where there is more than one top state).
-   * 
+   *
    * In particular, this means that
-   * 
-   * * incorrectly formatted
-   * * incorrectly signed
-   * * otherwise unsupported
-   * * out-of-date
-   * 
-   * states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification _unless_ it means that a conclusion proof is now available.
-   * 
+   * <ul>
+   * <li> incorrectly formatted</li>
+   * <li> incorrectly signed</li>
+   * <li> otherwise unsupported</li>
+   * <li> out-of-date</li>
+   * </ul>
+   *
+   * states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification <b>unless</b> it means that a conclusion proof is now available.
+   *
    * @param callback - A function that accepts a ChannelUpdatedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
