@@ -5,9 +5,9 @@ import {
   BN,
   Outcome,
   Zero,
-  simpleEthAllocation,
   isSimpleAllocation,
   simpleTokenAllocation,
+  checkThat,
 } from '@statechannels/wallet-core';
 
 import {match} from '../match';
@@ -41,18 +41,17 @@ const minimalOutcome = (
 };
 
 const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => (
-  state: ProtocolState
+  ps: ProtocolState
 ): ProtocolResult => {
-  const currentOutcome =
-    state.supported && isSimpleAllocation(state.supported.outcome)
-      ? state.supported.outcome
-      : simpleEthAllocation([]);
+  const {outcome, appData, isFinal} = ps.latest;
   return right(
     some({
       type: 'SignState',
-      channelId: state.channelId,
+      channelId: ps.channelId,
       turnNum: stage === 'PrefundSetup' ? 0 : 1,
-      outcome: minimalOutcome(currentOutcome, state.minimalOutcome),
+      outcome: minimalOutcome(checkThat(outcome, isSimpleAllocation), ps.minimalOutcome),
+      appData,
+      isFinal,
     })
   );
 };
