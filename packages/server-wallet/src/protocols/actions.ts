@@ -8,8 +8,7 @@ Actions that protocols can declare.
 */
 
 export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
-type NotifyApp = {type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'>};
-
+export type NotifyApp = {type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'>};
 export type SubmitTransaction = {
   type: 'SubmitTransaction';
   transactionRequest: providers.TransactionRequest;
@@ -23,8 +22,11 @@ export const isSignState = guard<SignState>('SignState');
 export const isNotifyApp = guard<NotifyApp>('NotifyApp');
 export const isSubmitTransaction = guard<SubmitTransaction>('SubmitTransaction');
 
+export type Outgoing = NotifyApp;
 export const isOutgoing = isNotifyApp;
 
-export type Outgoing = NotifyApp;
+export function signState(channelId: Bytes32, vars: StateVariables): SignState {
+  return {...vars, type: 'SignState', channelId};
+}
 
 export type ProtocolAction = SignState | NotifyApp | SubmitTransaction;
