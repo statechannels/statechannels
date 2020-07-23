@@ -40,7 +40,7 @@ const minimalOutcome = (
   return simpleTokenAllocation(minimalAllocation.assetHolderAddress, allocationItems);
 };
 
-const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => async (
+const signState = (stage: 'PrefundSetup' | 'PostfundSetup') => (
   state: ProtocolState
 ): ProtocolResult => {
   const currentOutcome =
@@ -64,10 +64,10 @@ const getFundingStatus = (ps: ProtocolState): FundingStatus => {
 };
 
 const alreadyFunded = match(ps => stage(ps.latestSignedByMe), {
-  Missing: () => Promise.resolve(left(new Error(`Missing prefund setup`))),
+  Missing: () => left(new Error(`Missing prefund setup`)),
   PrefundSetup: signState('PostfundSetup'),
-  PostfundSetup: () => Promise.resolve(right(none)), // Postfund setup is already signed
-  Default: () => Promise.resolve(left(new Error(`State signed too early`))),
+  PostfundSetup: () => right(none), // Postfund setup is already signed
+  Default: () => left(new Error(`State signed too early`)),
 });
 
 const calculateDepositInfo = (ps: ProtocolState): DepositState => {
@@ -76,18 +76,18 @@ const calculateDepositInfo = (ps: ProtocolState): DepositState => {
 
 const prefundSetupStateSupported = match(getFundingStatus, {
   Funded: alreadyFunded,
-  'Not Funded': async ps => depositProtocol(calculateDepositInfo(ps)),
+  'Not Funded': ps => depositProtocol(calculateDepositInfo(ps)),
 });
 
 const noSupportedState = match(ps => stage(ps.latestSignedByMe), {
   Missing: signState('PrefundSetup'),
-  PrefundSetup: () => Promise.resolve(right(none)), // Could probably log something out
-  Default: () => Promise.resolve(left(new Error(`State signed too early`))),
+  PrefundSetup: () => right(none), // Could probably log something out
+  Default: () => left(new Error(`State signed too early`)),
 });
 
 export const protocol: Protocol<ProtocolState> = match(ps => stage(ps.supported), {
   Missing: noSupportedState,
   PrefundSetup: prefundSetupStateSupported,
 
-  Default: () => Promise.resolve(right(none)),
+  Default: () => right(none),
 });

@@ -16,7 +16,7 @@ export type ProtocolState = ChannelState & {
 };
 type FundingStatus = 'Not Safe to Deposit' | 'Safe to Deposit' | 'Funded';
 
-const submitTransaction = async (): ProtocolResult =>
+const submitTransaction = (): ProtocolResult =>
   right(
     some({
       type: 'SubmitTransaction',

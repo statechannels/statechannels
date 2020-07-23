@@ -40,10 +40,10 @@ export const stage = (state: SignedStateWithHash | undefined): Stage =>
 export type ProtocolError = Error;
 
 /*
-A protocol should accept a "protocol state", and resolve to
+A protocol should accept a "protocol state", and return or resolve to
 - either zero or one protocol actions;
 - or, a protocol error
-A protocol should never reject.
+A protocol should never reject or throw.
 */
-export type ProtocolResult = Promise<Either<ProtocolError, Option<ProtocolAction>>>;
-export type Protocol<PS> = (ps: PS) => ProtocolResult;
+export type ProtocolResult = Either<ProtocolError, Option<ProtocolAction>>;
+export type Protocol<PS> = (ps: PS) => ProtocolResult | Promise<ProtocolResult>;

@@ -23,6 +23,7 @@ const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
 export const isUpdateChannel = guard<UpdateChannel>('UpdateChannel');
 export const isSignState = guard<SignState>('SignState');
 export const isNotifyApp = guard<NotifyApp>('NotifyApp');
+export const isSubmitTransaction = guard<SubmitTransaction>('SubmitTransaction');
 
 export const isOutgoing = isNotifyApp;
 
