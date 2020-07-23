@@ -25,12 +25,14 @@ import _ from 'lodash';
 import {Bytes32} from '../type-aliases';
 import {Channel, RequiredColumns} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Outgoing} from '../protocols/actions';
+import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
+
+import {handleSignState} from './actionHandlers';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
@@ -188,22 +190,30 @@ export class Wallet implements WalletInterface {
 }
 
 type ChangedChannel = {type: 'App' | 'Ledger'; id: Bytes32};
-type ExecutionResult = {channels: ChangedChannel[]; outbox: Outgoing[]; error?: any};
+type ExecutionResult = {outbox: Outgoing[]; error?: any};
 const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
+    const tx = await knex.transaction();
     // For the moment, we are only considering directly funded app channels.
     // Thus, we can directly fetch the channel record, and construct the protocol state from it.
     // In the future, we can have an App model which collects all the relevant channels for an app channel,
     // and a Ledger model which stores ledger-specific data (eg. queued requests)
-    const tx = await knex.transaction();
 
     const setError = async (e: Error): Promise<void> => {
       error = e;
       await tx.rollback();
     };
     const markChannelAsDone = async (): Promise<any> => channels.shift();
+    const handleAction = (action: ProtocolAction): Promise<any> => {
+      switch (action.type) {
+        case 'SignState':
+          return handleSignState(action, tx);
+        default:
+          throw 'Unimplemented';
+      }
+    };
 
     const app = await Channel.forId(channels[0].id, undefined);
     const nextAction = await Application.protocol({app: app.protocolState});
@@ -213,7 +223,5 @@ const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult>
     await tx.commit();
   }
 
-  return Promise.resolve({channels, outbox, error});
+  return {outbox, error};
 };
-
-const handleAction: any = _.noop;
