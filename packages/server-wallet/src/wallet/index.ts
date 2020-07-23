@@ -18,6 +18,9 @@ import {
   hashState,
   SignatureEntry,
 } from '@statechannels/wallet-core';
+import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
+import _ from 'lodash';
 
 import {Bytes32} from '../type-aliases';
 import {Channel, RequiredColumns} from '../models/channel';
@@ -26,6 +29,8 @@ import {Outgoing} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {logger} from '../logger';
+import * as Application from '../protocols/application';
+import knex from '../db/connection';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
@@ -81,13 +86,7 @@ export class Wallet implements WalletInterface {
     const {channelId, latest} = await Channel.query().insert(cols);
 
     const {outbox} = await ((): Promise<ExecutionResult> => {
-      switch (args.fundingStrategy) {
-        case 'Direct':
-          return protocolEngine([channelId]);
-        case 'Ledger':
-        case 'Virtual':
-          throw 'Unimplemented';
-      }
+      return takeActions([{type: 'App', id: channelId}]);
     })();
 
     return {
@@ -165,7 +164,7 @@ export class Wallet implements WalletInterface {
       throw err;
     }
 
-    const {outbox} = await protocolEngine(channelIds);
+    const {outbox} = await takeActions(channelIds.map(id => ({type: 'App', id})));
 
     return {
       channelResults: [
@@ -188,11 +187,33 @@ export class Wallet implements WalletInterface {
   }
 }
 
-type ExecutionResult = {ids: Bytes32[]; outbox: Outgoing[]};
+type ChangedChannel = {type: 'App' | 'Ledger'; id: Bytes32};
+type ExecutionResult = {channels: ChangedChannel[]; outbox: Outgoing[]; error?: any};
+const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult> => {
+  const outbox: Outgoing[] = [];
+  let error: Error | undefined = undefined;
+  while (channels.length && !error) {
+    // For the moment, we are only considering directly funded app channels.
+    // Thus, we can directly fetch the channel record, and construct the protocol state from it.
+    // In the future, we can have an App model which collects all the relevant channels for an app channel,
+    // and a Ledger model which stores ledger-specific data (eg. queued requests)
+    const tx = await knex.transaction();
 
-const protocolEngine = async (
-  ids: Bytes32[],
-  outbox: Outgoing[] = []
-): Promise<ExecutionResult> => {
-  return Promise.resolve({ids, outbox});
+    const setError = async (e: Error): Promise<void> => {
+      error = e;
+      await tx.rollback();
+    };
+    const markChannelAsDone = async (): Promise<any> => channels.shift();
+
+    const app = await Channel.forId(channels[0].id, undefined);
+    const nextAction = await Application.protocol({app: app.protocolState});
+
+    await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
+
+    await tx.commit();
+  }
+
+  return Promise.resolve({channels, outbox, error});
 };
+
+const handleAction: any = _.noop;
