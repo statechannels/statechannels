@@ -1,5 +1,7 @@
 import Knex from 'knex';
 
+import config from '../config';
+
 import * as knexConfig from './knexfile';
 
 /**
@@ -13,7 +15,7 @@ export const truncate = async (
   knex: Knex,
   tables = ['signing_wallets', 'channels', 'nonces']
 ): Promise<void> => {
-  if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+  if (config.nodeEnv !== 'development' && config.nodeEnv !== 'test') {
     throw 'No admin connection allowed';
   }
 
