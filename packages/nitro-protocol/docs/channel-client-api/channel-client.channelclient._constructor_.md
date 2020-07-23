@@ -28,4 +28,4 @@ constructor(provider: ChannelProviderInterface);
 
 ## Remarks
 
-It is possible to pass in a , which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.
+It is possible to pass in a [fake channel provider](./channel-client.fakechannelprovider.md)<!-- -->, which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.

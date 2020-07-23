@@ -9,14 +9,16 @@ hide_title: true
 
 ## FakeBrowserChannelProvider class
 
-Extension of FakeChannelProvider which adds support for browser-specific wallet API methods such as EnableEthereum and ApproveBudgetAndFund. Also, exposes the browser specific provider method enable() (i.e., for MetaMask approval).
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
 
 <b>Signature:</b>
 
 ```typescript
 export declare class FakeBrowserChannelProvider extends FakeChannelProvider implements IFrameChannelProviderInterface 
 ```
-<b>Extends:</b> FakeChannelProvider
+<b>Extends:</b> [FakeChannelProvider](./channel-client.fakechannelprovider.md)
 
 <b>Implements:</b> IFrameChannelProviderInterface
 
@@ -24,16 +26,16 @@ export declare class FakeBrowserChannelProvider extends FakeChannelProvider impl
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [budget](./channel-client.fakebrowserchannelprovider.budget.md) |  | DomainBudget |  |
+|  [budget](./channel-client.fakebrowserchannelprovider.budget.md) |  | DomainBudget | <b><i>(BETA)</i></b> |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [approveBudgetAndFund(params)](./channel-client.fakebrowserchannelprovider.approvebudgetandfund.md) |  |  |
-|  [closeAndWithdraw(\_params)](./channel-client.fakebrowserchannelprovider.closeandwithdraw.md) |  |  |
-|  [enable()](./channel-client.fakebrowserchannelprovider.enable.md) |  |  |
-|  [getBudget(\_params)](./channel-client.fakebrowserchannelprovider.getbudget.md) |  |  |
-|  [mountWalletComponent(url)](./channel-client.fakebrowserchannelprovider.mountwalletcomponent.md) |  |  |
-|  [notifyAppBudgetUpdated(data)](./channel-client.fakebrowserchannelprovider.notifyappbudgetupdated.md) |  |  |
-|  [send(method, params)](./channel-client.fakebrowserchannelprovider.send.md) |  |  |
+|  [approveBudgetAndFund(params)](./channel-client.fakebrowserchannelprovider.approvebudgetandfund.md) |  | <b><i>(BETA)</i></b> |
+|  [closeAndWithdraw(\_params)](./channel-client.fakebrowserchannelprovider.closeandwithdraw.md) |  | <b><i>(BETA)</i></b> |
+|  [enable()](./channel-client.fakebrowserchannelprovider.enable.md) |  | <b><i>(BETA)</i></b> |
+|  [getBudget(\_params)](./channel-client.fakebrowserchannelprovider.getbudget.md) |  | <b><i>(BETA)</i></b> |
+|  [mountWalletComponent(url)](./channel-client.fakebrowserchannelprovider.mountwalletcomponent.md) |  | <b><i>(BETA)</i></b> |
+|  [notifyAppBudgetUpdated(data)](./channel-client.fakebrowserchannelprovider.notifyappbudgetupdated.md) |  | <b><i>(BETA)</i></b> |
+|  [send(method, params)](./channel-client.fakebrowserchannelprovider.send.md) |  | <b><i>(BETA)</i></b> |

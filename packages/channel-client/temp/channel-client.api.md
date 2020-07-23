@@ -33,8 +33,18 @@ import { ReplaySubject } from 'rxjs';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
 import { WalletJsonRpcAPI } from '@statechannels/iframe-channel-provider';
 
-// Warning: (ae-forgotten-export) The symbol "BrowserChannelClientInterface" needs to be exported by the entry point index.d.ts
-//
+// @beta (undocumented)
+export interface BrowserChannelClientInterface extends ChannelClientInterface {
+    // (undocumented)
+    approveBudgetAndFund(playerAmount: string, hubAmount: string, hubAddress: string, hubOutcomeAddress: string): Promise<DomainBudget>;
+    // (undocumented)
+    closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
+    // (undocumented)
+    getBudget(hubAddress: string): Promise<DomainBudget | {}>;
+    // (undocumented)
+    onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
+}
+
 // @beta
 export class ChannelClient implements BrowserChannelClientInterface {
     constructor(provider: ChannelProviderInterface);
@@ -60,6 +70,42 @@ export class ChannelClient implements BrowserChannelClientInterface {
     get walletVersion(): string | undefined;
 }
 
+// @beta (undocumented)
+export interface ChannelClientInterface {
+    // (undocumented)
+    challengeChannel: (channelId: string) => Promise<ChannelResult>;
+    // (undocumented)
+    channelState: ReplaySubject<ChannelResult>;
+    // (undocumented)
+    closeChannel: (channelId: string) => Promise<ChannelResult>;
+    // (undocumented)
+    createChannel: (participants: Participant[], allocations: Allocation[], appDefinition: string, appData: string, fundingStrategy: FundingStrategy) => Promise<ChannelResult>;
+    // (undocumented)
+    destinationAddress?: string;
+    // (undocumented)
+    getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
+    // (undocumented)
+    getState: (channelId: string) => Promise<ChannelResult>;
+    // (undocumented)
+    joinChannel: (channelId: string) => Promise<ChannelResult>;
+    // (undocumented)
+    onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+    // (undocumented)
+    onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+    // (undocumented)
+    onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
+    // (undocumented)
+    provider: ChannelProviderInterface;
+    // (undocumented)
+    pushMessage: (message: Message) => Promise<PushMessageResult>;
+    // (undocumented)
+    signingAddress?: string;
+    // (undocumented)
+    updateChannel: (channelId: string, allocations: Allocation[], appData: string) => Promise<ChannelResult>;
+    // (undocumented)
+    walletVersion?: string;
+}
+
 export { ChannelResult }
 
 // @beta (undocumented)
@@ -68,9 +114,7 @@ export const ErrorCode: ErrorCodes;
 // @beta (undocumented)
 export const EthereumNotEnabledErrorCode: 100;
 
-// Warning: (ae-forgotten-export) The symbol "FakeChannelProvider" needs to be exported by the entry point index.d.ts
-//
-// @public
+// @beta (undocumented)
 export class FakeBrowserChannelProvider extends FakeChannelProvider implements IFrameChannelProviderInterface {
     // (undocumented)
     approveBudgetAndFund(params: ApproveBudgetAndFundParams): Promise<DomainBudget>;
@@ -92,10 +136,82 @@ export class FakeBrowserChannelProvider extends FakeChannelProvider implements I
     send<M extends keyof WalletJsonRpcAPI>(method: M, params: WalletJsonRpcAPI[M]['request']['params']): Promise<WalletJsonRpcAPI[M]['response']['result']>;
 }
 
+// @public (undocumented)
+export class FakeChannelProvider implements ChannelProviderInterface {
+    // (undocumented)
+    protected closeChannel(params: CloseChannelParams): Promise<ChannelResult>;
+    // (undocumented)
+    protected createChannel(params: CreateChannelParams): Promise<ChannelResult>;
+    // (undocumented)
+    destinationAddress?: string;
+    // (undocumented)
+    protected events: EventEmitter<EventType>;
+    // (undocumented)
+    findChannel(channelId: string): ChannelResult;
+    // (undocumented)
+    protected getAddress(): string;
+    // (undocumented)
+    getOpponentIndex(channelId: ChannelId): number;
+    // (undocumented)
+    protected getPlayerIndex(channelId: ChannelId): number;
+    // (undocumented)
+    protected getState({ channelId }: GetStateParams): Promise<ChannelResult>;
+    // (undocumented)
+    internalAddress: string;
+    // (undocumented)
+    protected isChannelResult(data: unknown): data is ChannelResult;
+    // (undocumented)
+    protected joinChannel(params: JoinChannelParams): Promise<ChannelResult>;
+    // (undocumented)
+    latestState: Record<ChannelId, ChannelResult>;
+    // (undocumented)
+    protected notifyAppBudgetUpdated(data: DomainBudget): void;
+    // (undocumented)
+    protected notifyAppChannelUpdated(data: ChannelResult): void;
+    // (undocumented)
+    protected notifyOpponent(data: ChannelResult, notificationType: string): void;
+    // (undocumented)
+    off: OffType;
+    // (undocumented)
+    on: OnType;
+    // (undocumented)
+    opponentAddress: Record<ChannelId, string>;
+    // (undocumented)
+    opponentIndex: Record<ChannelId, 0 | 1>;
+    // Warning: (ae-forgotten-export) The symbol "ChannelId" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    playerIndex: Record<ChannelId, 0 | 1>;
+    // (undocumented)
+    protected pushMessage(params: Message): Promise<PushMessageResult>;
+    // (undocumented)
+    send<M extends keyof WalletJsonRpcAPI>(method: M, params: WalletJsonRpcAPI[M]['request']['params']): Promise<WalletJsonRpcAPI[M]['response']['result']>;
+    // (undocumented)
+    setAddress(address: string): void;
+    // (undocumented)
+    setState(state: ChannelResult): void;
+    // (undocumented)
+    signingAddress?: string;
+    // (undocumented)
+    subscribe(): Promise<string>;
+    // (undocumented)
+    unsubscribe(): Promise<boolean>;
+    // (undocumented)
+    protected updateChannel(params: UpdateChannelParams): Promise<ChannelResult>;
+    // (undocumented)
+    updatePlayerIndex(channelId: ChannelId, playerIndex: 0 | 1): void;
+    // (undocumented)
+    protected url: string;
+    // (undocumented)
+    verifyTurnNum(channelId: ChannelId, turnNum: number): Promise<void>;
+    // (undocumented)
+    walletVersion?: string;
+}
+
 // @beta (undocumented)
 export type TokenAllocations = Allocation[];
 
-// @public (undocumented)
+// @beta (undocumented)
 export type UnsubscribeFunction = () => void;
 
 // @beta (undocumented)

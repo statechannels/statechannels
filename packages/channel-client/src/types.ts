@@ -15,6 +15,10 @@ import {ReplaySubject} from 'rxjs';
  * @beta
  */
 export type TokenAllocations = Allocation[];
+
+/**
+ * @beta
+ */
 export type UnsubscribeFunction = () => void;
 
 /**
@@ -59,6 +63,9 @@ export interface ChannelClientInterface {
   getChannels(includeClosed: boolean): Promise<ChannelResult[]>;
 }
 
+/**
+ * @beta
+ */
 export interface BrowserChannelClientInterface extends ChannelClientInterface {
   onBudgetUpdated: (callback: (result: DomainBudget) => void) => UnsubscribeFunction;
   approveBudgetAndFund(

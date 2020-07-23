@@ -29,6 +29,10 @@ const mockDomainBudget = {
  * methods such as EnableEthereum and ApproveBudgetAndFund. Also, exposes the browser
  * specific provider method enable() (i.e., for MetaMask approval).
  */
+
+/**
+ * @beta
+ */
 export class FakeBrowserChannelProvider extends FakeChannelProvider
   implements IFrameChannelProviderInterface {
   budget: DomainBudget = mockDomainBudget;

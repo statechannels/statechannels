@@ -14,7 +14,15 @@ hide_title: true
 |  Class | Description |
 |  --- | --- |
 |  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel-provider |
-|  [FakeBrowserChannelProvider](./channel-client.fakebrowserchannelprovider.md) | Extension of FakeChannelProvider which adds support for browser-specific wallet API methods such as EnableEthereum and ApproveBudgetAndFund. Also, exposes the browser specific provider method enable() (i.e., for MetaMask approval). |
+|  [FakeBrowserChannelProvider](./channel-client.fakebrowserchannelprovider.md) | <b><i>(BETA)</i></b> |
+|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) |  |
+
+## Interfaces
+
+|  Interface | Description |
+|  --- | --- |
+|  [BrowserChannelClientInterface](./channel-client.browserchannelclientinterface.md) | <b><i>(BETA)</i></b> |
+|  [ChannelClientInterface](./channel-client.channelclientinterface.md) | <b><i>(BETA)</i></b> |
 
 ## Variables
 
@@ -29,4 +37,4 @@ hide_title: true
 |  Type Alias | Description |
 |  --- | --- |
 |  [TokenAllocations](./channel-client.tokenallocations.md) | <b><i>(BETA)</i></b> |
-|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) |  |
+|  [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |

@@ -19,7 +19,7 @@ Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel
 ```typescript
 export declare class ChannelClient implements BrowserChannelClientInterface 
 ```
-<b>Implements:</b> BrowserChannelClientInterface
+<b>Implements:</b> [BrowserChannelClientInterface](./channel-client.browserchannelclientinterface.md)
 
 ## Remarks
 
