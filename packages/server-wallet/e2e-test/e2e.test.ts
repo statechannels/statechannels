@@ -13,10 +13,10 @@ beforeAll(async () => {
 });
 
 describe('e2e', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // TODO: Does not work right now, also both Wallets re-use the same DB
     console.log('Seeding database of both parties with stuff');
-    seed(knex);
+    await seed(knex);
   });
 
   it('can do an update channel via http', async () => {

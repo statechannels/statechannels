@@ -1,7 +1,7 @@
 import {Client} from 'jayson';
 import {Message} from '@statechannels/wire-format';
 
-import {Wallet} from '../src/wallet';
+import {Wallet} from '../../src/wallet';
 
 export default class PingClient {
   private readonly wallet: Wallet = new Wallet();

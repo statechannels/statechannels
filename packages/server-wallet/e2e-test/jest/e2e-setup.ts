@@ -1,6 +1,6 @@
 import {Server} from 'http';
 
-import app from './receiver/app';
+import app from '../pong/app';
 
 module.exports = async (): Promise<void> => {
   let server: Server;
