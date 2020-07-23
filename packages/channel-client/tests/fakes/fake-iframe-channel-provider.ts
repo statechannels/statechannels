@@ -1,4 +1,4 @@
-import {IFrameChannelProviderInterface} from '@statechannels/channel-provider';
+import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 
 import {FakeBrowserChannelProvider} from './fake-browser-channel-provider';
 

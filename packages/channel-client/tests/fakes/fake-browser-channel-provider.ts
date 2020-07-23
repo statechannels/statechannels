@@ -1,4 +1,8 @@
-import {MethodType, Method, BrowserChannelProviderInterface} from '@statechannels/channel-provider';
+import {
+  MethodType,
+  Method,
+  BrowserChannelProviderInterface
+} from '@statechannels/iframe-channel-provider';
 import {
   ApproveBudgetAndFundParams,
   CloseAndWithdrawParams,

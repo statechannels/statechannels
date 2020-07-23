@@ -1,18 +1,21 @@
 import {
-  PushMessageResult,
   ChannelResult,
-  Participant,
-  Allocation,
   DomainBudget,
   Message,
-  FundingStrategy,
-  ErrorCodes
+  ErrorCodes,
+  Allocation,
+  PushMessageResult,
+  Participant,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
-import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
+import {ChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 import {ReplaySubject} from 'rxjs';
 
 export type UnsubscribeFunction = () => void;
 
+/**
+ * @beta
+ */
 export interface ChannelClientInterface {
   /*
     Queuing a message is meant for when the app receives messages from
@@ -71,10 +74,9 @@ export interface EventsWithArgs {
   ChannelProposed: [ChannelResult];
 }
 
-export interface BrowserEventsWithArgs extends EventsWithArgs {
-  BudgetUpdated: [DomainBudget];
-}
-
+/**
+ * @beta
+ */
 export const ErrorCode: ErrorCodes = {
   EnableEthereum: {EthereumNotEnabled: 100},
   CloseAndWithdraw: {UserDeclined: 200},

@@ -7,10 +7,10 @@ By using our reference state channels wallet implementation, you will be able to
 
 ## Installing
 
-You will want to add both `@statechannels/channel-client` and `@statechannels/channel-provider` to your project:
+You will want to add both `@statechannels/channel-client` and `@statechannels/iframe-channel-provider` to your project:
 
 ```console
-> yarn add @statechannels/channel-client @statechannels/channel-provider
+> yarn add @statechannels/channel-client @statechannels/iframe-channel-provider
 ```
 
 Think about the client as exposing a friendly API for your Dapp, and the provider as a lower level bit of plumbing that it uses to connect to our wallet.
@@ -19,7 +19,7 @@ The wallet code will be downloaded by the browser and executed inside an iframe.
 
 ```typescript
 // Attaches the channel provider to the window object
-require('@statechannels/channel-provider');
+require('@statechannels/iframe-channel-provider');
 ```
 
 ## Enabling the channel provider

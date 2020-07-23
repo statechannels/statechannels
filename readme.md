@@ -33,7 +33,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [benchmarking](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
 - [client-api-docs](./packages/client-api-docs) : API docs for the interface betwen a state channel Dapp and the wallet
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
-- [channel-provider](./packages/channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
+- [iframe-channel-provider](./packages/iframe-channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts

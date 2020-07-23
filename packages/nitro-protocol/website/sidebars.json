@@ -1,35 +1,36 @@
 {
   "docs": {
     "Overview": ["overview"],
-    "Dapp Developers": [
-      "dapp-devs/dapp-devs-intro",
-      "dapp-devs/quick-start-contracts",
-      "dapp-devs/quick-start-dapp",
-      "dapp-devs/hook-up-messaging"
+    "App Developers": [
+      "app-devs/app-devs-intro",
+      "app-devs/quick-start-contracts",
+      "app-devs/quick-start-dapp",
+      "app-devs/hook-up-messaging",
+      "channel-client-api/channel-client.channelclient"
     ],
-    "Wallet Developers": [
-      "wallet-devs/wallet-devs-intro",
-      "wallet-devs/quick-start",
-      "wallet-devs/tutorial"
+    "Protocol Docs": [
+      "protocol-docs/wallet-devs-intro",
+      "protocol-docs/quick-start",
+      "protocol-docs/tutorial"
     ],
-    "Wallet Dev Tutorial": [
-      "wallet-dev-tutorial/execute-state-transitions",
-      "wallet-dev-tutorial/deposit-assets",
-      "wallet-dev-tutorial/finalize-a-channel-happy",
-      "wallet-dev-tutorial/finalize-a-channel-sad",
-      "wallet-dev-tutorial/understand-channel-storage",
-      "wallet-dev-tutorial/clear-a-challenge",
-      "wallet-dev-tutorial/outcomes",
-      "wallet-dev-tutorial/release-assets",
-      "wallet-dev-tutorial/off-chain-funding"
+    "Protocol Tutorial": [
+      "protocol-tutorial/execute-state-transitions",
+      "protocol-tutorial/deposit-assets",
+      "protocol-tutorial/finalize-a-channel-happy",
+      "protocol-tutorial/finalize-a-channel-sad",
+      "protocol-tutorial/understand-channel-storage",
+      "protocol-tutorial/clear-a-challenge",
+      "protocol-tutorial/outcomes",
+      "protocol-tutorial/release-assets",
+      "protocol-tutorial/off-chain-funding"
     ],
-    "Contract Developers": [
-      "contract-devs/contract-devs-intro",
-      "contract-devs/asset-holder",
-      "contract-devs/force-move",
-      "contract-devs/nitro-adjudicator",
-      "contract-devs/consensus-app",
-      "contract-devs/single-asset-payments"
+    "Implementation Notes": [
+      "implementation-notes/implementation-notes-intro",
+      "implementation-notes/asset-holder",
+      "implementation-notes/force-move",
+      "implementation-notes/nitro-adjudicator",
+      "implementation-notes/consensus-app",
+      "implementation-notes/single-asset-payments"
     ]
   },
   "Contract API": {
@@ -49,7 +50,6 @@
       "contract-api/natspec/ETHAssetHolder"
     ],
     "ForceMove Apps": [
-      "contract-api/natspec/CounterfactualAdapterApp",
       "contract-api/natspec/CountingApp",
       "contract-api/natspec/SingleAssetPayments",
       "contract-api/natspec/TrivialApp"

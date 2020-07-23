@@ -1,7 +1,9 @@
-require('@statechannels/channel-provider');
+require('@statechannels/iframe-channel-provider');
 import {ChannelClient} from '@statechannels/channel-client';
-const {ethers} = require('ethers');
 import {signState, getStateSignerAddress} from '@statechannels/nitro-protocol';
+
+const {ethers} = require('ethers');
+
 const {HashZero, AddressZero} = ethers.constants;
 const {runBenchmark} = require('../signatures');
 

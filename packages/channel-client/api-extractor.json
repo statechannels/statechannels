@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+
+  "mainEntryPointFilePath": "lib/src/index.d.ts",
+
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "."
+  },
+
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "dist/channel-client.api.json"
+  },
+  "dtsRollup": {
+    "enabled": true
+  }
+}

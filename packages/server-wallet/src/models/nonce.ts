@@ -1,4 +1,4 @@
-import {JSONSchema, Model, Pojo} from 'objection';
+import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
 import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
@@ -6,8 +6,8 @@ import knex from '../db/connection';
 
 export class Nonce extends Model {
   readonly id!: number;
-  readonly addresses: Address[];
-  readonly value: Uint48;
+  readonly addresses!: Address[];
+  readonly value!: Uint48;
 
   static tableName = 'nonces';
   static get jsonSchema(): JSONSchema {
@@ -17,7 +17,7 @@ export class Nonce extends Model {
     };
   }
 
-  $beforeValidate(jsonSchema, json, _opt): Pojo {
+  $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): Pojo {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     const {addresses} = json;
@@ -66,7 +66,7 @@ export class Nonce extends Model {
 class NonceError extends Error {
   readonly type = 'NonceError';
 
-  constructor(reason: string, public readonly data = undefined) {
+  constructor(reason: string, public readonly data: any = undefined) {
     super(reason);
   }
 }

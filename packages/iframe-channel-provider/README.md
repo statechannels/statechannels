@@ -9,7 +9,7 @@ In the near future, it'll feature-detect if a wallet such as MetaMask has state 
 Include the `iframe-channel-provider.min.js` file in your app via a `script` tag:
 
 ```html
-<script src="node_modules/@statechannels/channel-provider/dist/iframe-channel-provider.min.js"></script>
+<script src="node_modules/@statechannels/iframe-channel-provider/dist/iframe-channel-provider.min.js"></script>
 ```
 
 Then, enable the provider, passing on an URL to where the Wallet UI hosted.

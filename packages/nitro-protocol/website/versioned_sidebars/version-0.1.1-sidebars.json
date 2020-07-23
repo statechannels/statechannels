@@ -1,8 +1,6 @@
 {
   "version-0.1.1-docs": {
-    "Overview": [
-      "version-0.1.1-overview"
-    ],
+    "Overview": ["version-0.1.1-overview"],
     "Dapp Developers": [
       "version-0.1.1-dapp-devs/dapp-devs-intro",
       "version-0.1.1-dapp-devs/quick-start"
@@ -33,9 +31,7 @@
     ]
   },
   "version-0.1.1-Contract API": {
-    "Overview": [
-      "version-0.1.1-contract-api/contract-inheritance"
-    ],
+    "Overview": ["version-0.1.1-contract-api/contract-inheritance"],
     "Base Contracts": [
       "version-0.1.1-contract-api/natspec/IForceMove",
       "version-0.1.1-contract-api/natspec/ForceMove",
@@ -51,7 +47,6 @@
       "version-0.1.1-contract-api/natspec/ETHAssetHolder"
     ],
     "ForceMove Apps": [
-      "version-0.1.1-contract-api/natspec/CounterfactualAdapterApp",
       "version-0.1.1-contract-api/natspec/CountingApp",
       "version-0.1.1-contract-api/natspec/SingleAssetPayments",
       "version-0.1.1-contract-api/natspec/TrivialApp"

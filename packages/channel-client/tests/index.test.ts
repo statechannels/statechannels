@@ -1,4 +1,4 @@
-import {ChannelProviderInterface} from '@statechannels/channel-provider';
+import {ChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 
 import {ChannelClient} from '../src/channel-client';
 

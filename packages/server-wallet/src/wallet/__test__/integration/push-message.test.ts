@@ -88,7 +88,7 @@ it("Doesn't store stale states", async () => {
   expect(afterFirst).toHaveLength(1);
   expect(afterFirst[0].vars).toHaveLength(1);
   expect(afterFirst[0].supported).toBeTruthy();
-  expect(afterFirst[0].supported.turnNum).toEqual(five);
+  expect(afterFirst[0].supported?.turnNum).toEqual(five);
 
   await wallet.pushMessage(message({signedStates: [stateSignedBy()({turnNum: four})]}));
 

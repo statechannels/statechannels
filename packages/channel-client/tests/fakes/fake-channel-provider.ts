@@ -6,7 +6,7 @@ import {
   EventType,
   MethodType,
   Method
-} from '@statechannels/channel-provider';
+} from '@statechannels/iframe-channel-provider';
 import {
   ChannelResult,
   CloseChannelParams,
