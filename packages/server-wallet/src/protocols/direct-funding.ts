@@ -10,7 +10,7 @@ type FundingStatus = 'Funded' | 'Not Funded';
 export type ProtocolState = {app: ChannelState};
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult => {
   if (!ps.app.latestSignedByMe) {
-    throw new Error('Expected a signed state by me');
+    return left(new Error('Expected a signed state by me'));
   }
   return right(
     some({
