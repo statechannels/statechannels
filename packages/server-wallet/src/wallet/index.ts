@@ -7,6 +7,7 @@ import {
   JoinChannelParams,
   CloseChannelParams,
   ChannelResult,
+  GetStateParams,
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
@@ -48,6 +49,7 @@ export type WalletInterface = {
   updateChannel(args: UpdateChannelParams): Result;
   closeChannel(args: CloseChannelParams): Result;
   getChannels(): Result;
+  getState(args: GetStateParams): Result;
 
   // Wallet <-> Wallet communication
   pushMessage(m: AddressedMessage): Promise<{response?: Message; outbox?: Outgoing[]}>;
@@ -105,6 +107,22 @@ export class Wallet implements WalletInterface {
   }
   async getChannels(): Result {
     throw 'Unimplemented';
+  }
+
+  async getState({channelId}: GetStateParams): Result {
+    try {
+      const {channelResult} = await Channel.query()
+        .where({channelId})
+        .first();
+
+      return {
+        channelResults: [channelResult],
+        outbox: [],
+      };
+    } catch (err) {
+      logger.error({err}, 'Could not get channel');
+      throw err; // FIXME: Wallet shoudl return ChannelNotFound
+    }
   }
 
   async pushMessage(message: AddressedMessage): Result {
