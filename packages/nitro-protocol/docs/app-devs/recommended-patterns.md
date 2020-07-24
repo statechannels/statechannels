@@ -186,7 +186,7 @@ export function hashPreCommit(weapon: Weapon, salt: string) {
 
 We recommend that you wrap the channelClient in an `AppSecificChannelClient`, which can leverage your app-specific coding [as above](#application-coding). This additional layer of abstraction should result in cleaner code for the rest of your application.
 
-Here's a sketch of what we did with Rock Paper Scissors:
+Here's a sketch of what we did with Rock Paper Scissors (full code available [here](https://github.com/statechannels/apps/blob/master/packages/rps/src/utils/rps-channel-client.ts)):
 
 ```typescript
 export class RPSChannelClient {
