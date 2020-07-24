@@ -5,6 +5,8 @@ import {
   UpdateChannelParams as ClientUpdateChannelParams,
   CreateChannelParams,
   Notification,
+  JoinChannelParams,
+  CloseChannelParams,
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
@@ -40,10 +42,10 @@ type ChannelResult = ClientChannelResult & WithOutbox;
 export type WalletInterface = {
   // App channel management
   createChannel(args: CreateChannelParams): Promise<ChannelResult>;
-  joinChannel(channelId: Bytes32): Promise<ChannelResult>;
+  joinChannel(args: JoinChannelParams): Promise<ChannelResult>;
   updateChannel(args: UpdateChannelParams): Promise<ChannelResult>;
-  closeChannel(channelId: Bytes32): Promise<ChannelResult>;
-  getChannels(): Promise<ClientChannelResult[]>;
+  closeChannel(args: CloseChannelParams): Promise<ChannelResult>;
+  getChannels(): Promise<ChannelResult[]>;
 
   // Wallet <-> Wallet communication
   pushMessage(m: AddressedMessage): Promise<{response?: Message; channelResults?: ChannelResult[]}>;
@@ -97,16 +99,16 @@ export class Wallet implements WalletInterface {
     };
   }
 
-  async joinChannel(_channelId: Bytes32): Promise<ChannelResult> {
+  async joinChannel(_args: JoinChannelParams): Promise<ChannelResult> {
     throw 'Unimplemented';
   }
   async updateChannel(_args: UpdateChannelParams): Promise<ChannelResult> {
     throw 'Unimplemented';
   }
-  async closeChannel(_channelId: Bytes32): Promise<ChannelResult> {
+  async closeChannel(_args: CloseChannelParams): Promise<ChannelResult> {
     throw 'Unimplemented';
   }
-  async getChannels(): Promise<ClientChannelResult[]> {
+  async getChannels(): Promise<ChannelResult[]> {
     throw 'Unimplemented';
   }
 
@@ -187,6 +189,7 @@ export class Wallet implements WalletInterface {
 }
 
 type ExecutionResult = {ids: Bytes32[]; outbox: Outgoing[]};
+
 const protocolEngine = async (
   ids: Bytes32[],
   outbox: Outgoing[] = []
