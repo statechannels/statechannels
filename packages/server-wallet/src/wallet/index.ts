@@ -87,7 +87,7 @@ export class Wallet implements WalletInterface {
     const {channelId, latest} = await Channel.query().insert(cols);
 
     const {outbox} = await ((): Promise<ExecutionResult> => {
-      return takeActions([{type: 'App', id: channelId}]);
+      return takeActions([channelId]);
     })();
 
     return {
@@ -165,7 +165,7 @@ export class Wallet implements WalletInterface {
       throw err;
     }
 
-    const {outbox} = await takeActions(channelIds.map(id => ({type: 'App', id})));
+    const {outbox} = await takeActions(channelIds);
 
     return {
       channelResults: [
@@ -188,17 +188,12 @@ export class Wallet implements WalletInterface {
   }
 }
 
-type ChangedChannel = {type: 'App' | 'Ledger'; id: Bytes32};
 type ExecutionResult = {outbox: Outgoing[]; error?: any};
-const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult> => {
+const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
     const tx = await knex.transaction();
-    // For the moment, we are only considering directly funded app channels.
-    // Thus, we can directly fetch the channel record, and construct the protocol state from it.
-    // In the future, we can have an App model which collects all the relevant channels for an app channel,
-    // and a Ledger model which stores ledger-specific data (eg. queued requests)
 
     const setError = async (e: Error): Promise<void> => {
       error = e;
@@ -214,7 +209,11 @@ const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult>
       }
     };
 
-    const app = await Channel.forId(channels[0].id, undefined);
+    // For the moment, we are only considering directly funded app channels.
+    // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+    // In the future, we can have an App model which collects all the relevant channels for an app channel,
+    // and a Ledger model which stores ledger-specific data (eg. queued requests)
+    const app = await Channel.forId(channels[0], undefined);
     const nextAction = await Application.protocol({app: app.protocolState});
 
     // TODO: handleAction might also throw an error.
