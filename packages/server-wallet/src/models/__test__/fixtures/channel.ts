@@ -1,10 +1,10 @@
-import {calculateChannelId} from '@statechannels/wallet-core';
+import {calculateChannelId, StateVariables} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {Channel, RequiredColumns} from '../../../models/channel';
 import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/utils';
 import {addHash} from '../../../state-utils';
-import {alice} from '../../../wallet/__test__/fixtures/signingWallets';
+import {alice, bob} from '../../../wallet/__test__/fixtures/signingWallets';
 import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
 
 export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) => {
@@ -29,3 +29,6 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
 export const channelWithVars: Fixture<Channel> = fixture<Channel>(
   channel({vars: [addHash(stateSignedBy()())]})
 );
+
+export const withSupportedState = (stateVars: Partial<StateVariables>): Fixture<Channel> =>
+  fixture(channel({vars: [addHash(stateSignedBy(alice(), bob())({...stateVars}))]}));
