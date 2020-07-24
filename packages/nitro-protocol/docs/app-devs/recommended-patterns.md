@@ -27,7 +27,7 @@ For a simple game like Rock Paper Scissors, the advantages of virtual funding ma
 
 ## Application coding
 
-In order for your app to construct state updates of the right format, you'll need to write some javascript / typescript helper code. The purpose of this code is to translate between the general-purpose, [protocol-level concepts of `appData` and `outcome`](./quick-start-contracts) and the specific data structures that your application needs to work with. Those structures should mirror those in the olidity code you have already written. Here's an idea of what we did in Rock Paper Scissors (see the solidity code [here](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol)):
+In order for your app to construct state updates of the right format, you'll need to write some Javascript or Typescript helper code. The purpose of this code is to translate between the general-purpose, [protocol-level concepts of `appData` and `outcome`](./quick-start-contracts) and the specific data structures that your application needs to work with. Those structures should mirror those in the Solidity code you have already written. Here's an idea of what we did in Rock Paper Scissors (see the Solidity code [here](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol)):
 
 ```typescript
 import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
@@ -227,6 +227,8 @@ export class RPSChannelClient {
       appCallback(channelState);
     });
   }
+
+  // ... and wrappers for the other methods
 }
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {

@@ -34,13 +34,13 @@ rect rgba(0, 0, 255, .1)
     note left of WalletB: Opening a channel
     ClientA->>WalletA: createChannel();
     WalletA-->>ClientA: ChannelUpdated('proposed')
-    WalletA-->>ClientA: MessageQueued(msg)
+    WalletA-->>ClientA: MessageQueued(msg0)
     ClientA->>ClientB: msg0
     ClientB->>WalletB: pushMessage(msg0)
     WalletB-->>ClientB: ChannelProposed('id')
     ClientB->>+WalletB: joinChannel('id');
     WalletB-->>ClientB: ChannelUpdated('funding');
-    WalletB-->>ClientB: MessageQueued(msg)
+    WalletB-->>ClientB: MessageQueued(msg1)
     ClientB->>ClientA: msg1;
     ClientA->>+WalletA: pushMessage(msg1);
     WalletA-->>ClientA: ChannelUpdated('funding')
