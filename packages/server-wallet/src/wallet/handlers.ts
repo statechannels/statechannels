@@ -15,11 +15,15 @@ import {UpdateChannelParams} from '.';
 type HandlerResult = Either<Error, Option<ProtocolAction>>;
 type ValidateState = (ss: SignedStateWithHash) => Either<Error, SignedStateWithHash>;
 
+// Open questions:
+// - What is responsible for querying the store for an channel entry?
+// - What is responsible for deserializing data from the application?
+// - How do we figure out what other actions need to be taken?
 export function updateChannel(
   args: UpdateChannelParams,
   channelState: ChannelState
 ): HandlerResult {
-  // TODO: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
+  // todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
   const latestIfExists = (cs: ChannelState): Either<Error, SignedStateWithHash> =>
     cs.latest ? right(cs.latest) : left(new Error('updateChannel: must have latest state'));
   const hasRunningTurnNumber: ValidateState = ss =>
@@ -29,7 +33,6 @@ export function updateChannel(
       ? right(ss)
       : left(new Error('updateChanne: it is not my turn'));
   const newState = (ss: SignedStateWithHash): StateVariables => ({
-    // todo: should data already get deserialized?
     outcome: deserializeAllocations(args.allocations),
     turnNum: ss.turnNum + 1,
     appData: args.appData,
