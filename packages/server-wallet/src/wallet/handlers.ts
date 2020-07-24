@@ -1,6 +1,10 @@
-import {Either, left, right, chain, ap, map} from 'fp-ts/lib/Either';
-import {Option} from 'fp-ts/lib/Option';
-import {SignedStateWithHash} from '@statechannels/wallet-core';
+import {Either, left, right, chain, map} from 'fp-ts/lib/Either';
+import {Option, none} from 'fp-ts/lib/Option';
+import {
+  SignedStateWithHash,
+  deserializeAllocations,
+  StateVariables,
+} from '@statechannels/wallet-core';
 import {pipe} from 'fp-ts/lib/function';
 
 import {ProtocolAction} from '../protocols/actions';
@@ -9,16 +13,7 @@ import {ChannelState} from '../protocols/state';
 import {UpdateChannelParams} from '.';
 
 type HandlerResult = Either<Error, Option<ProtocolAction>>;
-
-// Check that the channel is:
-// - Is funded.
-// - No challenge exists.
-// - In the running state.
-// - It is my turn to update
-
-// Then:
-// - Create and sign new state.
-// - Check if any other actions need to be taken.
+type ValidateState = (ss: SignedStateWithHash) => Either<Error, SignedStateWithHash>;
 
 export function updateChannel(
   args: UpdateChannelParams,
@@ -27,7 +22,31 @@ export function updateChannel(
   // TODO: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
   const latestIfExists = (cs: ChannelState): Either<Error, SignedStateWithHash> =>
     cs.latest ? right(cs.latest) : left(new Error('updateChannel: must have latest state'));
-  const runningTurnNumber = (ss: SignedStateWithHash): Either<Error, SignedStateWithHash> =>
+  const hasRunningTurnNumber: ValidateState = ss =>
     ss.turnNum < 3 ? left(new Error('updateChannel: channel must be in running state')) : right(ss);
-  pipe(channelState, latestIfExists, chain(runningTurnNumber));
+  const isMyTurn: ValidateState = ss =>
+    ss.turnNum % channelState.myIndex
+      ? right(ss)
+      : left(new Error('updateChanne: it is not my turn'));
+  const newState = (ss: SignedStateWithHash): StateVariables => ({
+    // todo: should data already get deserialized?
+    outcome: deserializeAllocations(args.allocations),
+    turnNum: ss.turnNum + 1,
+    appData: args.appData,
+    isFinal: false,
+  });
+
+  const finalAction = (_sv: StateVariables): Option<ProtocolAction> => none;
+
+  // todo:
+  // - ask the store to sign and add the new state.
+  // - check if other actions need to be taken.
+  return pipe(
+    channelState,
+    latestIfExists,
+    chain(hasRunningTurnNumber),
+    chain(isMyTurn),
+    map(newState),
+    map(finalAction)
+  );
 }
