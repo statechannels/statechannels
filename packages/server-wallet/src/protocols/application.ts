@@ -51,7 +51,7 @@ const prefundSetupSigned = match(ps => stage(ps.app.supported), {
 });
 
 export const protocol: Protocol<ProtocolState> = match(ps => stage(ps.app.latestSignedByMe), {
-  Missing: () => left(new Error(`The direct funding protocol requires a signed prefund setup`)),
+  Missing: () => left(new Error(`The application protocol requires a signed prefund setup`)),
   PrefundSetup: prefundSetupSigned,
   Default: () => right(none),
 });
