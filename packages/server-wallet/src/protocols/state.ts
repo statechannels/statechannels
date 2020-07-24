@@ -1,6 +1,8 @@
-import {SignedStateWithHash} from '@statechannels/wallet-core';
 import {Either} from 'fp-ts/lib/Either';
 import {Option} from 'fp-ts/lib/Option';
+import {SignedStateWithHash, Uint256} from '@statechannels/wallet-core';
+
+import {Address} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
 
@@ -11,10 +13,10 @@ export type ChannelState = {
   channelId: string;
   myIndex: 0 | 1;
   supported?: SignedStateWithHash;
-  latest?: SignedStateWithHash;
+  latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
+  funding: Record<Address, Uint256>;
 };
-
 export type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | 'Final';
 /**
  *
@@ -35,12 +37,13 @@ export const stage = (state: SignedStateWithHash | undefined): Stage =>
     : 'Running';
 
 // FIXME: This should be a union of the errors that the client-api-schema specifies.
-type ProtocolError = Error;
+export type ProtocolError = Error;
 
 /*
-A protocol should accept a "protocol state", and resolve to
+A protocol should accept a "protocol state", and return or resolve to
 - either zero or one protocol actions;
 - or, a protocol error
-A protocol should never reject.
+A protocol should never reject or throw.
 */
-export type Protocol<PS> = (ps: PS) => Promise<Either<ProtocolError, Option<ProtocolAction>>>;
+export type ProtocolResult = Either<ProtocolError, Option<ProtocolAction>>;
+export type Protocol<PS> = (ps: PS) => ProtocolResult | Promise<ProtocolResult>;

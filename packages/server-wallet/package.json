@@ -15,6 +15,7 @@
     "pino": "6.2.0"
   },
   "devDependencies": {
+    "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.1.4",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
