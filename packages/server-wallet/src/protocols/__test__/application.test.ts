@@ -5,10 +5,7 @@ import {some, none} from 'fp-ts/lib/Option';
 import {protocol} from '../application';
 import {alice} from '../../wallet/__test__/fixtures/signingWallets';
 
-import {
-  directFundingProtocolState,
-  withSupportedState,
-} from './fixtures/application-protocol-state';
+import {applicationProtocolState, withSupportedState} from './fixtures/application-protocol-state';
 
 expect.extend(matchers);
 
@@ -20,7 +17,7 @@ const postFundState = {outcome, turnNum: 3};
 
 it('generates an action to sign the post fund setup', async () => {
   const funding = (): Uint256 => BN.from(5);
-  const protocolState = directFundingProtocolState(
+  const protocolState = applicationProtocolState(
     withSupportedState(prefundState)({app: {funding}})
   );
 
@@ -29,7 +26,7 @@ it('generates an action to sign the post fund setup', async () => {
 
 it('generates no actions if the post fund setup is signed', async () => {
   const funding = (): Uint256 => BN.from(5);
-  const protocolState = directFundingProtocolState(
+  const protocolState = applicationProtocolState(
     withSupportedState(postFundState)({app: {funding}})
   );
 
@@ -37,6 +34,6 @@ it('generates no actions if the post fund setup is signed', async () => {
 });
 
 it('returns an error if there is no pre fund setup', async () => {
-  const protocolState = directFundingProtocolState();
+  const protocolState = applicationProtocolState();
   expect(await protocol(protocolState)).toBeLeft();
 });
