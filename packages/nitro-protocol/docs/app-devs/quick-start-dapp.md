@@ -42,9 +42,9 @@ If everything is setup correctly, you should see the statechannels wallet UI:
 
 ![](assets/wallet-ui.png)
 
-## App <> Wallet security
+## App <-> Wallet security
 
-Having the wallet served in an iFrame from a different domain to the app is an important component from a security standpoint. It means app <> wallet communication is cross-origin and therefore disabled by default, but capable of being selectively enabled on a per-origin (per-app) basis.
+Having the wallet served in an iFrame from a different domain to the app is an important component from a security standpoint. It means app <-> wallet communication is cross-origin and therefore disabled by default, but capable of being selectively enabled on a per-origin (per-app) basis. Even after being enabled, the app can only send and receive messages to the wallet, and cannot otherwise control it.
 
 Ethereum wallets will typically prompt the user, when triggered by an application, to approve access to the accounts it controls for the domain that application is served from. Wallets should not implicitly trust applications or grant them access to sign away assets, because unknown applications could contain malicious code and put those asssets at risk.
 
@@ -52,6 +52,10 @@ The same is true for our wallet: when the `.enable()` call is made, the user is 
 
 There are a few differences between a state channel wallet and an Ethereum wallet, that are important to understand.
 
-Because state channel applications are capable of very rapid throughput of state updates (or "Layer 2 transactions"), it would not be feasible to ask for user approval for each one. It is for this reason that our wallet will create an "ephemeral key" to **silently** sign most of your state updates, instead of using your Ethereum key. (When it comes to releasing assets on chain, however the money still goes to your Ethereum account).
+Because state channel applications are capable of very rapid throughput of state updates (or "Layer 2 transactions"), it would not be feasible to ask for user approval for each one. It is for this reason that our wallet will create an "ephemeral key" to sign state updates (sliently), instead of using your Ethereum key.
 
-Our wallet uses the concept of a "Domain Budget" to further reduce the amount of user interaction that is required. The budget can be [approved](../channel-client-api/channel-client.channelclient.approvebudgetandfund) on the user's first visit to an application, and specifies a maximum send and maximum receive amount for each asset type (e.g. ETH). It then only needs to be administered or "topped-up" when the maximum amounts are reached. Otherwise, the wallet will not prompt the user at all when creating and closing channels, but will silently perform the necessary steps to do so.
+:::important
+This ephemeral key is only used for creating signatures that will be recovered in our adjudicator contract, and isn't designed to _directly_ control any on chain funds. When it comes to releasing assets on chain, however, the money still goes to your Ethereum account when your state channel closes).
+:::
+
+Our wallet uses the concept of a "Domain Budget" to further reduce the amount of user interaction that is required. The budget can be [approved](../channel-client-api/channel-client.channelclient.approvebudgetandfund) on the user's first visit to an application, and specifies a maximum send and maximum receive amount for each asset type (e.g. ETH). It then only needs to be administered or "topped-up" when the maximum amounts are reached. Otherwise, the wallet will not prompt the user at all when creating and closing channels, but will silently perform the necessary steps to do so. You can see budgets in action by trying out our [Web3Torrent](https://web3torrent.statechannels.org/) app.
