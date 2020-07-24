@@ -16,7 +16,7 @@ import {
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 
-import {Address, Bytes32, Uint48} from '../type-aliases';
+import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
 import {logger} from '../logger';
 import {ChannelState} from '../protocols/state';
 
@@ -148,6 +148,7 @@ export class Channel extends Model implements RequiredColumns {
       supported,
       latest,
       latestSignedByMe,
+      funding: (): Uint256 => '0x0', // TODO: This needs to be populated from the chain
     };
   }
 
