@@ -6,7 +6,7 @@ Ths package serves two purposes:
 
 ![Benchmarking results](./benchmark.svg)
 
-2. A minimal testbed for the wallet API (including the @statechannels/channel-provider and @statechannels/channel-client packages), including benchmarking for speed if desired.
+2. A minimal testbed for the wallet API (including the @statechannels/iframe-channel-provider and @statechannels/channel-client packages), including benchmarking for speed if desired.
 
 ### Generating benchmarking plot
 

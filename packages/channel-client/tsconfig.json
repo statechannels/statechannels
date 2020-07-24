@@ -9,5 +9,5 @@
     "esModuleInterop": true,
     "types": ["react", "jest", "node"]
   },
-  "references": [{"path": "../channel-provider"}, {"path": "../client-api-schema"}]
+  "references": [{"path": "../iframe-channel-provider"}, {"path": "../client-api-schema"}]
 }

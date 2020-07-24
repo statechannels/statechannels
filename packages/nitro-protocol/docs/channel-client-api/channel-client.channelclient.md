@@ -12,17 +12,18 @@ hide_title: true
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
 > 
 
-Class that wraps the JSON-RPC interface of @<!-- -->statechannels/channel-provider
+Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel-provider
 
 <b>Signature:</b>
 
 ```typescript
-export declare class ChannelClient 
+export declare class ChannelClient implements BrowserChannelClientInterface 
 ```
+<b>Implements:</b> [BrowserChannelClientInterface](./channel-client.browserchannelclientinterface.md)
 
 ## Remarks
 
-This class exposes a convenient API feturing event emitters and async methods returning Promises. Together with @<!-- -->statechannels/channel-provider, it allows a Dapp to speak to the statechannels wallet.
+This class exposes a convenient API feturing event emitters and async methods returning Promises. Together with @<!-- -->statechannels/iframe-channel-provider, it allows a Dapp to speak to the statechannels wallet.
 
 ## Constructors
 
@@ -36,7 +37,7 @@ This class exposes a convenient API feturing event emitters and async methods re
 |  --- | --- | --- | --- |
 |  [channelState](./channel-client.channelclient.channelstate.md) |  | ReplaySubject&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> rxjs Observable which emits ChannelResults for all channels of interest |
 |  [destinationAddress](./channel-client.channelclient.destinationaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my destination address |
-|  [provider](./channel-client.channelclient.provider.md) |  | ChannelProviderInterface | <b><i>(BETA)</i></b> E.g. instance of the @<!-- -->statechannels/channel-provider class, suitably configured |
+|  [provider](./channel-client.channelclient.provider.md) |  | ChannelProviderInterface | <b><i>(BETA)</i></b> E.g. instance of the @<!-- -->statechannels/iframe-channel-provider class, suitably configured |
 |  [signingAddress](./channel-client.channelclient.signingaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my state channel (ephemeral) signingAddress |
 |  [walletVersion](./channel-client.channelclient.walletversion.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get the wallet version |
 

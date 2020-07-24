@@ -4,7 +4,7 @@
   "version": "0.0.6",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
-    "@statechannels/channel-provider": "*",
+    "@statechannels/iframe-channel-provider": "*",
     "@statechannels/client-api-schema": "0.0.3",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",

@@ -1,4 +1,4 @@
-import {ChannelProviderInterface} from '@statechannels/channel-provider';
+import {Web3ChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 
 import {ChannelClient} from '../src/channel-client';
 
@@ -14,7 +14,7 @@ describe('ChannelClient', () => {
         on: (_method, _callback) => {
           /* do nothing */
         }
-      } as ChannelProviderInterface)
+      } as Web3ChannelProviderInterface)
     ).toBeDefined();
   });
 });

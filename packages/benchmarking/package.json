@@ -6,7 +6,7 @@
   "dependencies": {},
   "devDependencies": {
     "@statechannels/channel-client": "*",
-    "@statechannels/channel-provider": "*",
+    "@statechannels/iframe-channel-provider": "*",
     "@statechannels/nitro-protocol": "0.1.5",
     "@types/http-server": "0.10.0",
     "@types/webpack": "4.41.12",

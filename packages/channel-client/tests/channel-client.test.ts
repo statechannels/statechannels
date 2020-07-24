@@ -15,7 +15,7 @@ import {
   APP_DATA,
   UPDATED_APP_DATA
 } from './constants';
-import {FakeChannelProvider} from './fakes/fake-channel-provider';
+import {FakeBrowserChannelProvider} from './fakes/fake-browser-channel-provider';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -28,7 +28,7 @@ interface Addresses {
   opponent: string;
 }
 
-describe('ChannelClient with FakeChannelProvider', () => {
+describe('ChannelClient with FakeBrowserChannelProvider', () => {
   const participantA = buildParticipant(PARTICIPANT_A);
   const participantB = buildParticipant(PARTICIPANT_B);
 
@@ -41,7 +41,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
   // events the client is listening on
   const clientBEventEmitter = new EventEmitter<EventsWithArgs>();
 
-  let providerA: FakeChannelProvider, providerB: FakeChannelProvider;
+  let providerA: FakeBrowserChannelProvider, providerB: FakeBrowserChannelProvider;
   let clientA: ChannelClient, clientB: ChannelClient;
 
   beforeAll(() => {
@@ -72,7 +72,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
   });
 
   function setupProvider(
-    provider: FakeChannelProvider,
+    provider: FakeBrowserChannelProvider,
     playerIndex: 0 | 1,
     addresses: Addresses
   ): void {
@@ -82,8 +82,8 @@ describe('ChannelClient with FakeChannelProvider', () => {
   }
 
   beforeEach(() => {
-    providerA = new FakeChannelProvider();
-    providerB = new FakeChannelProvider();
+    providerA = new FakeBrowserChannelProvider();
+    providerB = new FakeBrowserChannelProvider();
 
     providerA.enable();
     providerB.enable();

@@ -13,8 +13,16 @@ hide_title: true
 
 |  Class | Description |
 |  --- | --- |
-|  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/channel-provider |
-|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) | <b><i>(BETA)</i></b> Class which simulates a state channel wallet |
+|  [ChannelClient](./channel-client.channelclient.md) | <b><i>(BETA)</i></b> Class that wraps the JSON-RPC interface of @<!-- -->statechannels/iframe-channel-provider |
+|  [FakeBrowserChannelProvider](./channel-client.fakebrowserchannelprovider.md) | <b><i>(BETA)</i></b> |
+|  [FakeChannelProvider](./channel-client.fakechannelprovider.md) |  |
+
+## Interfaces
+
+|  Interface | Description |
+|  --- | --- |
+|  [BrowserChannelClientInterface](./channel-client.browserchannelclientinterface.md) | <b><i>(BETA)</i></b> |
+|  [ChannelClientInterface](./channel-client.channelclientinterface.md) | <b><i>(BETA)</i></b> |
 
 ## Variables
 

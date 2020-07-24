@@ -1,6 +1,6 @@
 # @statechannels/channel-client
 
-Javascript class exposing the statechannels wallet API. Used in conjunction with @statechannels/channel-provider.
+Javascript class exposing the statechannels wallet API. Used in conjunction with @statechannels/iframe-channel-provider.
 
 ### API report
 

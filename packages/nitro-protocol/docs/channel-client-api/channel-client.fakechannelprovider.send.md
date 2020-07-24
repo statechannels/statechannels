@@ -9,13 +9,10 @@ hide_title: true
 
 ## FakeChannelProvider.send() method
 
-> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
-> 
-
 <b>Signature:</b>
 
 ```typescript
-send<M extends Method = Method>(method: M, params: MethodType[M]['request']['params']): Promise<MethodType[M]['response']['result']>;
+send<M extends keyof WalletJsonRpcAPI>(method: M, params: WalletJsonRpcAPI[M]['request']['params']): Promise<WalletJsonRpcAPI[M]['response']['result']>;
 ```
 
 ## Parameters
@@ -23,8 +20,8 @@ send<M extends Method = Method>(method: M, params: MethodType[M]['request']['par
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  method | M |  |
-|  params | MethodType\[M\]\['request'\]\['params'\] |  |
+|  params | WalletJsonRpcAPI\[M\]\['request'\]\['params'\] |  |
 
 <b>Returns:</b>
 
-Promise&lt;MethodType\[M\]\['response'\]\['result'\]&gt;
+Promise&lt;WalletJsonRpcAPI\[M\]\['response'\]\['result'\]&gt;

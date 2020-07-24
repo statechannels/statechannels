@@ -1,4 +1,4 @@
-import {ChannelProviderInterface} from '@statechannels/channel-provider';
+import {ChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 import {
   PushMessageResult,
   ChannelResult,
@@ -15,20 +15,21 @@ import {ReplaySubject} from 'rxjs';
 
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 
-import {UnsubscribeFunction, TokenAllocations} from './types';
+import {BrowserChannelClientInterface, UnsubscribeFunction, TokenAllocations} from './types';
 import {HUB} from './constants';
 /**
- * Class that wraps the JSON-RPC interface of \@statechannels/channel-provider
+ * Class that wraps the JSON-RPC interface of \@statechannels/iframe-channel-provider
  *
  * @remarks
  * This class exposes a convenient API feturing event emitters and async methods returning Promises.
- * Together with \@statechannels/channel-provider, it allows a Dapp to speak to the statechannels wallet.
+ * Together with \@statechannels/iframe-channel-provider, it allows a Dapp to speak to the statechannels wallet.
  *
  * @beta
  */
-export class ChannelClient {
+
+export class ChannelClient implements BrowserChannelClientInterface {
   /**
-   *  E.g. instance of the \@statechannels/channel-provider class, suitably configured
+   *  E.g. instance of the \@statechannels/iframe-channel-provider class, suitably configured
    */
   readonly provider: ChannelProviderInterface;
 
@@ -66,12 +67,12 @@ export class ChannelClient {
    * It is possible to pass in a {@link @statechannels/channel-client#FakeChannelProvider | fake channel provider},
    * which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.
    *
-   * @param provider - An instance of the \@statechannels/channel-provider class, suitably configured
+   * @param provider - An instance of the \@statechannels/iframe-channel-provider class, suitably configured
    */
   constructor(provider: ChannelProviderInterface) {
     this.provider = provider;
     this.channelState = new ReplaySubject(1);
-    this.provider.on('ChannelUpdated', result => this.channelState.next(result));
+    this.provider.on('ChannelUpdated', (result: ChannelResult) => this.channelState.next(result));
   }
   /**
    * Registers a callback that will fire when an outbound message is ready to be dispatched.

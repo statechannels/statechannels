@@ -9,11 +9,6 @@ hide_title: true
 
 ## FakeChannelProvider class
 
-> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
-> 
-
-Class which simulates a state channel wallet
-
 <b>Signature:</b>
 
 ```typescript
@@ -21,42 +16,45 @@ export declare class FakeChannelProvider implements ChannelProviderInterface
 ```
 <b>Implements:</b> ChannelProviderInterface
 
-## Remarks
-
-Conforms to the same interface as the real channel provider.
-
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [budget](./channel-client.fakechannelprovider.budget.md) |  | DomainBudget | <b><i>(BETA)</i></b> |
-|  [destinationAddress](./channel-client.fakechannelprovider.destinationaddress.md) |  | string | <b><i>(BETA)</i></b> |
-|  [internalAddress](./channel-client.fakechannelprovider.internaladdress.md) |  | string | <b><i>(BETA)</i></b> |
-|  [latestState](./channel-client.fakechannelprovider.lateststate.md) |  | Record&lt;ChannelId, ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [off](./channel-client.fakechannelprovider.off.md) |  | OffType | <b><i>(BETA)</i></b> |
-|  [on](./channel-client.fakechannelprovider.on.md) |  | OnType | <b><i>(BETA)</i></b> |
-|  [opponentAddress](./channel-client.fakechannelprovider.opponentaddress.md) |  | Record&lt;ChannelId, string&gt; | <b><i>(BETA)</i></b> |
-|  [opponentIndex](./channel-client.fakechannelprovider.opponentindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; | <b><i>(BETA)</i></b> |
-|  [playerIndex](./channel-client.fakechannelprovider.playerindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; | <b><i>(BETA)</i></b> |
-|  [signingAddress](./channel-client.fakechannelprovider.signingaddress.md) |  | string | <b><i>(BETA)</i></b> |
-|  [url](./channel-client.fakechannelprovider.url.md) |  | string | <b><i>(BETA)</i></b> |
-|  [walletVersion](./channel-client.fakechannelprovider.walletversion.md) |  | string | <b><i>(BETA)</i></b> |
+|  [destinationAddress](./channel-client.fakechannelprovider.destinationaddress.md) |  | string |  |
+|  [events](./channel-client.fakechannelprovider.events.md) |  | EventEmitter&lt;EventType&gt; |  |
+|  [internalAddress](./channel-client.fakechannelprovider.internaladdress.md) |  | string |  |
+|  [latestState](./channel-client.fakechannelprovider.lateststate.md) |  | Record&lt;ChannelId, ChannelResult&gt; |  |
+|  [off](./channel-client.fakechannelprovider.off.md) |  | OffType |  |
+|  [on](./channel-client.fakechannelprovider.on.md) |  | OnType |  |
+|  [opponentAddress](./channel-client.fakechannelprovider.opponentaddress.md) |  | Record&lt;ChannelId, string&gt; |  |
+|  [opponentIndex](./channel-client.fakechannelprovider.opponentindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; |  |
+|  [playerIndex](./channel-client.fakechannelprovider.playerindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; |  |
+|  [signingAddress](./channel-client.fakechannelprovider.signingaddress.md) |  | string |  |
+|  [url](./channel-client.fakechannelprovider.url.md) |  | string |  |
+|  [walletVersion](./channel-client.fakechannelprovider.walletversion.md) |  | string |  |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [enable()](./channel-client.fakechannelprovider.enable.md) |  | <b><i>(BETA)</i></b> |
-|  [findChannel(channelId)](./channel-client.fakechannelprovider.findchannel.md) |  | <b><i>(BETA)</i></b> |
-|  [getOpponentIndex(channelId)](./channel-client.fakechannelprovider.getopponentindex.md) |  | <b><i>(BETA)</i></b> |
-|  [mountWalletComponent(url)](./channel-client.fakechannelprovider.mountwalletcomponent.md) |  | <b><i>(BETA)</i></b> |
-|  [notifyAppBudgetUpdated(data)](./channel-client.fakechannelprovider.notifyappbudgetupdated.md) |  | <b><i>(BETA)</i></b> |
-|  [notifyAppChannelUpdated(data)](./channel-client.fakechannelprovider.notifyappchannelupdated.md) |  | <b><i>(BETA)</i></b> |
-|  [notifyOpponent(data, notificationType)](./channel-client.fakechannelprovider.notifyopponent.md) |  | <b><i>(BETA)</i></b> |
-|  [send(method, params)](./channel-client.fakechannelprovider.send.md) |  | <b><i>(BETA)</i></b> |
-|  [setAddress(address)](./channel-client.fakechannelprovider.setaddress.md) |  | <b><i>(BETA)</i></b> |
-|  [setState(state)](./channel-client.fakechannelprovider.setstate.md) |  | <b><i>(BETA)</i></b> |
-|  [subscribe()](./channel-client.fakechannelprovider.subscribe.md) |  | <b><i>(BETA)</i></b> |
-|  [unsubscribe()](./channel-client.fakechannelprovider.unsubscribe.md) |  | <b><i>(BETA)</i></b> |
-|  [updatePlayerIndex(channelId, playerIndex)](./channel-client.fakechannelprovider.updateplayerindex.md) |  | <b><i>(BETA)</i></b> |
-|  [verifyTurnNum(channelId, turnNum)](./channel-client.fakechannelprovider.verifyturnnum.md) |  | <b><i>(BETA)</i></b> |
+|  [closeChannel(params)](./channel-client.fakechannelprovider.closechannel.md) |  |  |
+|  [createChannel(params)](./channel-client.fakechannelprovider.createchannel.md) |  |  |
+|  [findChannel(channelId)](./channel-client.fakechannelprovider.findchannel.md) |  |  |
+|  [getAddress()](./channel-client.fakechannelprovider.getaddress.md) |  |  |
+|  [getOpponentIndex(channelId)](./channel-client.fakechannelprovider.getopponentindex.md) |  |  |
+|  [getPlayerIndex(channelId)](./channel-client.fakechannelprovider.getplayerindex.md) |  |  |
+|  [getState({ channelId })](./channel-client.fakechannelprovider.getstate.md) |  |  |
+|  [isChannelResult(data)](./channel-client.fakechannelprovider.ischannelresult.md) |  |  |
+|  [joinChannel(params)](./channel-client.fakechannelprovider.joinchannel.md) |  |  |
+|  [notifyAppBudgetUpdated(data)](./channel-client.fakechannelprovider.notifyappbudgetupdated.md) |  |  |
+|  [notifyAppChannelUpdated(data)](./channel-client.fakechannelprovider.notifyappchannelupdated.md) |  |  |
+|  [notifyOpponent(data, notificationType)](./channel-client.fakechannelprovider.notifyopponent.md) |  |  |
+|  [pushMessage(params)](./channel-client.fakechannelprovider.pushmessage.md) |  |  |
+|  [send(method, params)](./channel-client.fakechannelprovider.send.md) |  |  |
+|  [setAddress(address)](./channel-client.fakechannelprovider.setaddress.md) |  |  |
+|  [setState(state)](./channel-client.fakechannelprovider.setstate.md) |  |  |
+|  [subscribe()](./channel-client.fakechannelprovider.subscribe.md) |  |  |
+|  [unsubscribe()](./channel-client.fakechannelprovider.unsubscribe.md) |  |  |
+|  [updateChannel(params)](./channel-client.fakechannelprovider.updatechannel.md) |  |  |
+|  [updatePlayerIndex(channelId, playerIndex)](./channel-client.fakechannelprovider.updateplayerindex.md) |  |  |
+|  [verifyTurnNum(channelId, turnNum)](./channel-client.fakechannelprovider.verifyturnnum.md) |  |  |

@@ -1,0 +1,78 @@
+{
+  "name": "@statechannels/iframe-channel-provider",
+  "version": "0.0.1",
+  "browser": "dist/iframe-channel-provider.js",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "eventemitter3": "4.0.0",
+    "guid-typescript": "1.0.9",
+    "pino": "6.2.0"
+  },
+  "devDependencies": {
+    "@statechannels/client-api-schema": "0.0.3",
+    "@types/debug": "4.1.5",
+    "@types/eslint": "6.1.7",
+    "@types/eslint-plugin-prettier": "2.2.0",
+    "@types/jest": "25.1.0",
+    "@types/node": "13.5.1",
+    "@types/pino": "6.0.0",
+    "@types/prettier": "1.19.0",
+    "@types/webpack": "4.41.12",
+    "@typescript-eslint/eslint-plugin": "2.18.0",
+    "@typescript-eslint/parser": "2.18.0",
+    "debug": "4.1.1",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.0",
+    "eslint-plugin-import": "2.20.0",
+    "eslint-plugin-jest": "23.6.0",
+    "eslint-plugin-prettier": "3.1.2",
+    "jest": "25.1.0",
+    "lint-staged": "10.0.4",
+    "pino": "6.2.0",
+    "prettier": "1.19.1",
+    "ts-jest": "25.0.0",
+    "ts-loader": "7.0.5",
+    "typescript": "3.7.5",
+    "webpack": "4.41.5",
+    "webpack-cli": "3.3.9"
+  },
+  "jest": {
+    "roots": [
+      "./src",
+      "./tests"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "./src/**/*.ts",
+      "!./src/**/index.ts",
+      "!./src/**/*.d.ts"
+    ]
+  },
+  "license": "MIT",
+  "main": "dist/iframe-channel-provider.js",
+  "scripts": {
+    "build": "webpack",
+    "build:typescript": "tsc -b .",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
+    "prepare": "rm -rf dist && yarn build",
+    "prepublish": "webpack",
+    "test": "jest --watch",
+    "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
+    "test:coverage": "jest --coverage"
+  },
+  "types": "dist/src/index.d.ts"
+}

@@ -6,9 +6,12 @@ import {
 } from '@statechannels/client-api-schema';
 
 import {ETH_TOKEN_ADDRESS} from './constants';
-import {FakeChannelProvider} from './fakes/fake-channel-provider';
+import {FakeBrowserChannelProvider} from './fakes/fake-browser-channel-provider';
 
-export function setProviderStates(providers: FakeChannelProvider[], state: ChannelResult): void {
+export function setProviderStates(
+  providers: FakeBrowserChannelProvider[],
+  state: ChannelResult
+): void {
   providers.forEach(provider => {
     provider.setState(state);
   });

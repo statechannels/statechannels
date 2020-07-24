@@ -15,7 +15,7 @@
 !./packages/devtools
 !./packages/e2e-tests
 !./packages/persistent-seeder
-!./packages/channel-provider
+!./packages/iframe-channel-provider
 !./packages/client-api-schema
 !./packages/nitro-protocol
 !./packages/simple-hub/
