@@ -1,3 +1,0 @@
-// describe('updateChannel', () => {
-//   it('validUpdate', () => {});
-// });
