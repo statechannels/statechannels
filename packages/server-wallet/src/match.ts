@@ -21,7 +21,7 @@ export const match = <PS, T extends string>(
     if ('Default' in handlers) {
       return await handlers.Default(ps);
     } else {
-      throw new Error('No default handler for non-exhaustive match');
+      return left(new Error('No default handler for non-exhaustive match'))
     }
   }
 };
