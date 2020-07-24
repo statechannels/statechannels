@@ -4,7 +4,7 @@ import {some, none} from 'fp-ts/lib/Option';
 
 import {protocol} from '../direct-funding';
 import {alice} from '../../wallet/__test__/fixtures/signingWallets';
-import {Address, Uint256} from '../../type-aliases';
+import {Uint256} from '../../type-aliases';
 
 import {
   directFundingProtocolState,
@@ -20,7 +20,7 @@ const prefundState = {outcome, turnNum: 0};
 const postFundState = {outcome, turnNum: 3};
 
 it('generates an action to sign the post fund setup', async () => {
-  const funding: Record<Address, Uint256> = {[outcome.assetHolderAddress]: '0x5'};
+  const funding = (): Uint256 => '0x5';
   const protocolState = directFundingProtocolState(
     withSupportedState(prefundState)({app: {funding}})
   );
@@ -29,7 +29,7 @@ it('generates an action to sign the post fund setup', async () => {
 });
 
 it('generates no actions if the post fund setup is signed', async () => {
-  const funding: Record<Address, Uint256> = {[outcome.assetHolderAddress]: '0x5'};
+  const funding = (): Uint256 => '0x5';
   const protocolState = directFundingProtocolState(
     withSupportedState(postFundState)({app: {funding}})
   );

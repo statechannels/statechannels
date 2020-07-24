@@ -1,8 +1,8 @@
 import {Either} from 'fp-ts/lib/Either';
 import {Option} from 'fp-ts/lib/Option';
-import {SignedStateWithHash, Uint256} from '@statechannels/wallet-core';
+import {SignedStateWithHash} from '@statechannels/wallet-core';
 
-import {Address} from '../type-aliases';
+import {Address, Uint256} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
 
@@ -15,7 +15,7 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
-  funding: Record<Address, Uint256>;
+  funding: (address: Address) => Uint256;
 };
 export type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | 'Final';
 /**
