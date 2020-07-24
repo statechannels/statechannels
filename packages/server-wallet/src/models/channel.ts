@@ -11,9 +11,13 @@ import {
   calculateChannelId,
   hashState,
   outcomesEqual,
+  checkThat,
+  isAllocation,
+  serializeAllocation,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
 import {logger} from '../logger';
@@ -152,6 +156,24 @@ export class Channel extends Model implements RequiredColumns {
       latest,
       latestSignedByMe,
       funding: (): Uint256 => '0x0', // TODO: This needs to be populated from the chain
+    };
+  }
+
+  get channelResult(): ChannelResult {
+    const {channelId, participants, appDefinition, supported} = this;
+    if (!supported) throw 'not supported';
+    const {outcome, appData, turnNum} = supported;
+
+    const allocations = serializeAllocation(checkThat(outcome, isAllocation));
+
+    return {
+      channelId,
+      participants,
+      appData,
+      allocations,
+      appDefinition,
+      status: 'funding', // FIXME
+      turnNum,
     };
   }
 
