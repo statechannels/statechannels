@@ -5,7 +5,6 @@ import {some, none} from 'fp-ts/lib/Option';
 import {protocol} from '../direct-funding';
 import {alice} from '../../wallet/__test__/fixtures/signingWallets';
 import {Address, Uint256} from '../../type-aliases';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 
 import {
   directFundingProtocolState,
@@ -17,8 +16,8 @@ expect.extend(matchers);
 const outcome = simpleEthAllocation([
   {amount: BN.from('0x5'), destination: makeDestination(alice().address)},
 ]);
-const prefundState = stateVars({outcome, turnNum: 0});
-const postFundState = stateVars({outcome, turnNum: 3});
+const prefundState = {outcome, turnNum: 0};
+const postFundState = {outcome, turnNum: 3};
 
 it('generates an action to sign the post fund setup', async () => {
   const funding: Record<Address, Uint256> = {[outcome.assetHolderAddress]: '0x5'};
