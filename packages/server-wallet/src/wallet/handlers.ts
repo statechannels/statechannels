@@ -1,52 +1,67 @@
 import {Either, left, right, chain, map} from 'fp-ts/lib/Either';
-import {Option, none} from 'fp-ts/lib/Option';
-import {
-  SignedStateWithHash,
-  deserializeAllocations,
-  StateVariables,
-} from '@statechannels/wallet-core';
+import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/wallet-core';
 import {pipe} from 'fp-ts/lib/function';
+import {ChannelId} from '@statechannels/client-api-schema';
 
-import {ProtocolAction} from '../protocols/actions';
+import {ProtocolAction, SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
 
-import {UpdateChannelParams} from '.';
+type ChannelStateWithSupported = ChannelState & {
+  supported: SignedStateWithHash;
+};
 
-type HandlerResult = Either<Error, Option<ProtocolAction>>;
-type ValidateState = (ss: SignedStateWithHash) => Either<Error, SignedStateWithHash>;
+type HandlerResult = Either<Error, ProtocolAction>;
+type ValidateState = (ss: ChannelStateWithSupported) => Either<Error, ChannelStateWithSupported>;
+export interface UpdateChannelHandlerParams {
+  channelId: ChannelId;
+  outcome: Outcome;
+  appData: string;
+}
 
-// Open questions:
-// - What is responsible for querying the store for an channel entry?
-// - What is responsible for deserializing data from the application?
-// - How do we figure out what other actions need to be taken?
+enum Errors {
+  invalidLatestState = 'must have latest state',
+  notInRunningStage = 'channel must be in running state',
+  notMyTurn = 'it is not my turn',
+}
+
+class UpdateChannelError extends Error {
+  readonly type = 'UpdateChannelError';
+  constructor(reason: Errors, public readonly data: any = undefined) {
+    super(reason);
+  }
+}
+
 export function updateChannel(
-  args: UpdateChannelParams,
+  args: UpdateChannelHandlerParams,
   channelState: ChannelState
 ): HandlerResult {
   // todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
-  const latestIfExists = (cs: ChannelState): Either<Error, SignedStateWithHash> =>
-    cs.latest ? right(cs.latest) : left(new Error('updateChannel: must have latest state'));
-  const hasRunningTurnNumber: ValidateState = ss =>
-    ss.turnNum < 3 ? left(new Error('updateChannel: channel must be in running state')) : right(ss);
+  const ensureSupportedStateExists = (
+    cs: ChannelState
+  ): Either<UpdateChannelError, ChannelStateWithSupported> =>
+    cs.supported ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
+  const hasRunningTurnNumber: ValidateState = cs =>
+    cs.supported.turnNum < 3 ? left(new UpdateChannelError(Errors.notInRunningStage)) : right(cs);
   const isMyTurn: ValidateState = ss =>
-    ss.turnNum % channelState.myIndex
+    ss.supported.turnNum % channelState.myIndex
       ? right(ss)
-      : left(new Error('updateChanne: it is not my turn'));
-  const newState = (ss: SignedStateWithHash): StateVariables => ({
-    outcome: deserializeAllocations(args.allocations),
-    turnNum: ss.turnNum + 1,
-    appData: args.appData,
+      : left(new UpdateChannelError(Errors.notMyTurn));
+  const newState = (cs: ChannelStateWithSupported): StateVariables => ({
+    ...args,
+    turnNum: cs.supported.turnNum + 1,
     isFinal: false,
   });
 
-  const finalAction = (_sv: StateVariables): Option<ProtocolAction> => none;
+  // todo: use Action creator from another branch
+  const finalAction = (sv: StateVariables): SignState => ({
+    type: 'SignState',
+    channelId: args.channelId,
+    ...sv,
+  });
 
-  // todo:
-  // - ask the store to sign and add the new state.
-  // - check if other actions need to be taken.
   return pipe(
     channelState,
-    latestIfExists,
+    ensureSupportedStateExists,
     chain(hasRunningTurnNumber),
     chain(isMyTurn),
     map(newState),
