@@ -1,17 +1,15 @@
-import {simpleEthAllocation, makeDestination, BN, Uint256} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, Uint256} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
 import {some, none} from 'fp-ts/lib/Option';
 
 import {protocol} from '../application';
-import {alice} from '../../wallet/__test__/fixtures/signingWallets';
+import {alice} from '../../wallet/__test__/fixtures/participants';
 
 import {applicationProtocolState, withSupportedState} from './fixtures/application-protocol-state';
 
 expect.extend(matchers);
 
-const outcome = simpleEthAllocation([
-  {amount: BN.from(5), destination: makeDestination(alice().address)},
-]);
+const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
 const prefundState = {outcome, turnNum: 0};
 const postFundState = {outcome, turnNum: 3};
 
