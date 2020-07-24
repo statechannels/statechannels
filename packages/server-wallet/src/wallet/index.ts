@@ -217,6 +217,9 @@ const takeActions = async (channels: ChangedChannel[]): Promise<ExecutionResult>
     const app = await Channel.forId(channels[0].id, undefined);
     const nextAction = await Application.protocol({app: app.protocolState});
 
+    // TODO: handleAction might also throw an error.
+    // It would be nice for handleAction to return an Either type, pipe the right values,
+    // and handle the left values with setError
     await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
 
     await tx.commit();
