@@ -44,7 +44,7 @@ If everything is setup correctly, you should see the statechannels wallet UI:
 
 ## App <-> Wallet security
 
-Having the wallet served in an iFrame from a different domain to the app is an important component from a security standpoint. It means app <-> wallet communication is cross-origin and therefore disabled by default, but capable of being selectively enabled on a per-origin (per-app) basis. Even after being enabled, the app can only send and receive messages to the wallet, and cannot otherwise control it.
+Having the wallet served in an iFrame from a different domain to the app is an important component from a security standpoint. The app can only send and receive messages to the wallet, and cannot otherwise access its code or storage. Furthermore, it means the app <-> wallet communication is cross-origin, and the wallet can associate policies (such as whitelists) and other data (such as channels and keys) to each domain.
 
 Ethereum wallets will typically prompt the user, when triggered by an application, to approve access to the accounts it controls for the domain that application is served from. Wallets should not implicitly trust applications or grant them access to sign away assets, because unknown applications could contain malicious code and put those asssets at risk.
 
