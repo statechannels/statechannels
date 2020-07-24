@@ -15,7 +15,7 @@ You will want to add both `@statechannels/channel-client` and `@statechannels/ch
 
 Think about the client as exposing a friendly API for your Dapp, and the provider as a lower level bit of plumbing that it uses to connect to our wallet.
 
-The wallet code will be downloaded by the browser and executed inside an iframe. The channel-provider uses `postMessage` under the hood to communicate with the wallet. Set it up as follows:
+The wallet code will be downloaded by the browser and executed inside an iFrame. The channel-provider uses `postMessage` under the hood to communicate with the wallet. Set it up as follows:
 
 ```typescript
 // Attaches the channel provider to the window object
@@ -30,7 +30,7 @@ The channel provider needs to be pointed at our hosted wallet:
 window.channelProvider.mountWalletComponent('https://xstate-wallet.statechannels.org/');
 ```
 
-This step mounts the wallet iframe in your Dapp, configures communication and performs an initial handshake with the wallet.
+This step mounts the wallet iFrame in your Dapp, configures communication and performs an initial handshake with the wallet.
 
 At some point in your user flow, you will want to enable the wallet:
 
@@ -44,7 +44,7 @@ If everything is setup correctly, you should see the statechannels wallet UI:
 
 ## App <> Wallet security
 
-Having the wallet served in an iframe from a different domain to the app is an important component from a security standpoint. It means app <> wallet communication is cross-origin and therefore disabled by default, but capable of being selectively enabled on a per-origin (per-app) basis.
+Having the wallet served in an iFrame from a different domain to the app is an important component from a security standpoint. It means app <> wallet communication is cross-origin and therefore disabled by default, but capable of being selectively enabled on a per-origin (per-app) basis.
 
 Ethereum wallets will typically prompt the user, when triggered by an application, to approve access to the accounts it controls for the domain that application is served from. Wallets should not implicitly trust applications or grant them access to sign away assets, because unknown applications could contain malicious code and put those asssets at risk.
 
