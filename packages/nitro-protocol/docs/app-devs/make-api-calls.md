@@ -17,13 +17,13 @@ participant WalletA
 participant ClientA
 participant ClientB
 participant WalletB
-    par handshake & setup for Wallet A
+    par setup for Wallet A
         ClientA->>WalletA: p.mountWalletComponent();
         ClientA->>WalletA: p.enable();
         ClientA->>WalletA: onMessageQueued(callback)
         ClientA->>WalletA: onChannelProposed(callback)
         ClientA->>WalletA: onChannelUpdated(callback)
-    and handshake & setup for Wallet B
+    and setup for Wallet B
         ClientB->>WalletB: p.mountWalletComponent();
         ClientB->>WalletB: p.enable();
         ClientB->>WalletB: onMessageQueued(callback)
