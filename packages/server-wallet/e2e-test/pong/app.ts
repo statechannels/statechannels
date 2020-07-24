@@ -13,8 +13,8 @@ const controller = new PongController();
 const app = express();
 
 const jsonRpcServer = new Server({
-  status: (_args: any, done: any): Promise<void> => done(null, 'Up!'),
-  receiveMessage: async function(args: any, done: any): Promise<void> {
+  Status: (_args: any, done: any): Promise<void> => done(null, 'Up!'),
+  SendMessage: async function(args: any, done: any): Promise<void> {
     let err = null;
     let ret = undefined;
     try {

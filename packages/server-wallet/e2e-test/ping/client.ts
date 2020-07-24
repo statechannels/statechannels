@@ -2,29 +2,36 @@ import {Client} from 'jayson';
 import {Message} from '@statechannels/wire-format';
 
 import {Wallet} from '../../src/wallet';
+import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-channel';
 
 export default class PingClient {
   private readonly wallet: Wallet = new Wallet();
 
-  constructor(private readonly channelId: string, private readonly receiverAddress: string) {
-    console.log(`Created PingClient with ${channelId} and ${receiverAddress}`);
+  private channelId: string;
+
+  constructor(private readonly pongHttpServerURL: string) {
+    console.log(`Created PingClient that pings ${pongHttpServerURL}`);
   }
 
-  public async ping(): Promise<void> {
-    const channel = await this.wallet.getChannel(this.channelId);
+  public async createPingChannel(): Promise<void> {
+    if (this.channelId) throw Error(`PingClient channel already created: ${this.channelId}`);
 
-    const channelResult = await this.wallet.updateChannel(channel);
-
-    // Assuming MessageQueued inside the outbox
     const {
+      channelId,
       outbox: [
+        // FIXME: Fails here because createChannel does not create a message
         {
           notice: {params},
         },
       ],
-    } = channelResult;
+    } = await this.wallet.createChannel(
+      // Re-using test fixture
+      createChannelArgs()
+    );
 
-    const message = await this.sendMessageViaHttp(params as Message);
+    this.channelId = channelId;
+
+    const message = await this.sendMessageToPongOverHTTP(params as Message);
 
     await this.wallet.pushMessage({
       ...message,
@@ -33,15 +40,32 @@ export default class PingClient {
     });
   }
 
-  public async getBalance(): Promise<string> {
-    return (await this.wallet.getChannel(this.channelId)).appData;
+  public async ping(): Promise<void> {
+    const channel = await this.wallet.getChannel(this.channelId);
+
+    // Assuming MessageQueued inside the outbox
+    const {
+      outbox: [
+        {
+          notice: {params},
+        },
+      ],
+    } = await this.wallet.updateChannel(channel);
+
+    const message = await this.sendMessageToPongOverHTTP(params as Message);
+
+    await this.wallet.pushMessage({
+      ...message,
+      to: message.recipient,
+      from: message.sender,
+    });
   }
 
-  private sendMessageViaHttp = (message: Message): Promise<Message> =>
+  private sendMessageToPongOverHTTP = (message: Message): Promise<Message> =>
     new Promise((resolve, reject) =>
       Client.http(
-        this.receiverAddress as any // jayson Client.http types are outdated
-      ).request('sendMessage', message, (err: any, response: Message) =>
+        (this.pongHttpServerURL + '/inbox') as any // jayson Client.http types are outdated
+      ).request('inbox', message, (err: any, response: Message) =>
         err ? reject(err) : resolve(response)
       )
     );
