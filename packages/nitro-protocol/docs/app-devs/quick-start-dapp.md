@@ -55,7 +55,7 @@ There are a few differences between a state channel wallet and an Ethereum walle
 Because state channel applications are capable of very rapid throughput of state updates (or "Layer 2 transactions"), it would not be feasible to ask for user approval for each one. It is for this reason that our wallet will create an "ephemeral key" to sign state updates (sliently), instead of using your Ethereum key.
 
 :::important
-This ephemeral key is only used for creating signatures that will be recovered in our adjudicator contract, and isn't designed to _directly_ control any on chain funds. When it comes to releasing assets on chain, however, the money still goes to your Ethereum account when your state channel closes).
+This ephemeral key is only used for creating signatures that will be recovered in our adjudicator contract, and isn't designed to _directly_ control any on chain funds. When it comes to releasing assets on chain, however, the money still goes to your Ethereum account when your state channel closes.
 :::
 
 Our wallet uses the concept of a "Domain Budget" to further reduce the amount of user interaction that is required. The budget can be [approved](../channel-client-api/channel-client.channelclient.approvebudgetandfund) on the user's first visit to an application, and specifies a maximum send and maximum receive amount for each asset type (e.g. ETH). It then only needs to be administered or "topped-up" when the maximum amounts are reached. Otherwise, the wallet will not prompt the user at all when creating and closing channels, but will silently perform the necessary steps to do so. You can see budgets in action by trying out our [Web3Torrent](https://web3torrent.statechannels.org/) app.
