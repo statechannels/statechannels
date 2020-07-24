@@ -84,7 +84,7 @@ const siteConfig = {
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.6.0/dist/mermaid.min.js',
+    'https://unpkg.com/mermaid@8.6.2/dist/mermaid.min.js',
   ],
 
   stylesheets: [

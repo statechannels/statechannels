@@ -3,9 +3,9 @@ id: quick-start-contracts
 title: Quick start (contracts)
 ---
 
-The first step is to cast your application as a state machine. In particular, you must author a single smart contract, conforming to the [`ForceMoveApp`](../contract-api/natspec/ForceMoveApp) interface.
+You should begin your application design process by creating a single smart contract conforming to the [`ForceMoveApp`](../contract-api/natspec/ForceMoveApp) interface.
 
-You'll want to pull this interface, as well as the `Outcome`library contract into your project using your favourite node package manager:
+You'll want to pull this interface, as well as the `Outcome` library contract, into your project using your favourite node package manager:
 
 ```console
 > yarn add @statechannels/nitro-protocol
@@ -13,9 +13,9 @@ You'll want to pull this interface, as well as the `Outcome`library contract int
 
 The `ForceMoveApp` interface calls for an application-specific `validTransition(a,b)` function. This function needs to decode the `appData`, from state channel updates `a` and `b`, and decide if `b` is an acceptable transition from `a`. For example, in a game of chess, the position of the king in `b.appData` must be within one square of its position in `a.appData`.
 
-### Example
+## Examples
 
-For example, one can implement a simple counting application
+For example, one can implement a simple counting application, where the stae of the channel can only be updated by incrementing a counter variable:
 
 In `/contracts/CountingApp.sol`:
 
@@ -51,4 +51,32 @@ contract CountingApp is ForceMoveApp {
 }
 ```
 
-Other examples exist: such as games of [Rock Paper Scissors](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol) and [Tic Tac Toe](https://github.com/statechannels/apps/blob/master/packages/tic-tac-toe/contracts/TicTacToe.sol).
+This example is unrepresentative, however, in that it does not allow any changes to the `outcome` of the channel. This means nothing of any value can change hands as the application is executed. A full ForceMoveApp should specify how the outcome is allowed to change during a transition: for example, if a chess player achieves checkmate, they might be permitted to claim all of the money in the channel.
+
+More realistic ForceMoveApp examples exist: such as games of [Rock Paper Scissors](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol) and [Tic Tac Toe](https://github.com/statechannels/apps/blob/master/packages/tic-tac-toe/contracts/TicTacToe.sol), as well as a simple [Payment Channel](../implementation-notes/single-asset-payments) app.
+
+## Design guide
+
+In more complicated applications, it can help to adopt a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine) model, which means the application can be represented in a digram such as this:
+
+<div class="mermaid" align="center">
+  stateDiagram-v2
+    [*] --> Resting
+    Resting --> Propose
+    Propose --> Resting
+    Propose --> Accept
+    Accept --> Reveal
+    Reveal --> Resting
+</div>
+
+These finite states could be represented as a Solidity [`enum`](https://solidity.readthedocs.io/en/v0.6.0/types.html#enums). In ForceMove, the participants "leapfrog" each other on this diagram, i.e.:
+
+- A starts at Resting
+- B transitions to Propose
+- A transitions to Accept
+- B transitions to Reveal
+- repeat
+
+The `validTransition` function returns `true` only if the transition is one allowed by the arrows in the diagram (this is necessary but not sufficient, there are of course other checks made, too). On the other hand, Accept --> Propose is not allowed, so `validTransition` could return `false` in this case.
+
+In fact, to provide more information, it actually calls `revert('No valid transition found');`.
