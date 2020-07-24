@@ -39,7 +39,9 @@ export function updateChannel(
   const ensureSupportedStateExists = (
     cs: ChannelState
   ): Either<UpdateChannelError, ChannelStateWithSupported> =>
-    cs.supported ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
+    cs.supported
+      ? right({...cs, supported: cs.supported})
+      : left(new UpdateChannelError(Errors.invalidLatestState));
   const hasRunningTurnNumber: ValidateState = cs =>
     cs.supported.turnNum < 3 ? left(new UpdateChannelError(Errors.notInRunningStage)) : right(cs);
   const isMyTurn: ValidateState = ss =>
