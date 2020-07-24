@@ -20,7 +20,6 @@ import {
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import _ from 'lodash';
 
 import {Bytes32} from '../type-aliases';
 import {Channel, RequiredColumns} from '../models/channel';
