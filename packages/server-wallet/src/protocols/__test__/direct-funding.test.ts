@@ -24,7 +24,7 @@ it('generates an action to sign the post fund setup', async () => {
 
   const funding: Record<Address, Uint256> = {[outcome.assetHolderAddress]: '0x5'};
   const protocolState = directFundingProtocolState(
-    withSupportedState(prefundState, {app: {funding}})
+    withSupportedState(prefundState)({app: {funding}})
   );
 
   expect(await protocol(protocolState)).toMatchRight(
@@ -47,7 +47,7 @@ it('generates no actions if the post fund setup is signed', async () => {
 
   const funding: Record<Address, Uint256> = {[outcome.assetHolderAddress]: '0x5'};
   const protocolState = directFundingProtocolState(
-    withSupportedState(postfundSetup, {app: {funding}})
+    withSupportedState(postfundSetup)({app: {funding}})
   );
 
   expect(await protocol(protocolState)).toMatchRight(none);

@@ -1,24 +1,13 @@
-import _ from 'lodash';
 import {StateVariables} from '@statechannels/wallet-core';
 
-import {Fixture, FixtureProps} from '../../../wallet/__test__/fixtures/utils';
-import {ProtocolState} from '../../direct-funding';
+import {fixture, Fixture} from '../../../wallet/__test__/fixtures/utils';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {ProtocolState} from '../../direct-funding';
 
-export const directFundingProtocolState: Fixture<ProtocolState> = props => {
-  const defaults = channel().protocolState;
-  return {app: _.merge(defaults, props?.app)};
-};
-
-export const withSupportedState = (
-  stateVars: Partial<StateVariables>,
-  props?: FixtureProps<ProtocolState>
-): FixtureProps<ProtocolState> => {
-  return _.merge(props, {
-    app: {
-      latest: stateVars,
-      supported: stateVars,
-      latestSignedByMe: stateVars,
-    },
-  });
-};
+export const directFundingProtocolState = fixture({app: channel().protocolState});
+export const withSupportedState = (stateVars: Partial<StateVariables>): Fixture<ProtocolState> =>
+  fixture(
+    directFundingProtocolState({
+      app: {latest: stateVars, latestSignedByMe: stateVars, supported: stateVars},
+    })
+  );
