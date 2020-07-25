@@ -7,7 +7,7 @@ import {
 import _ from 'lodash';
 
 import {alice, bob} from './participants';
-import {fixture} from './utils';
+import {fixture, overwriteOutcome} from './utils';
 
 const defaultVars: StateVariables = {
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -19,8 +19,9 @@ const defaultVars: StateVariables = {
   ]),
 };
 
-export const stateVars = fixture(defaultVars);
+export const stateVars = fixture<StateVariables>(defaultVars, overwriteOutcome);
 
 export const stateVarsWithSignatures = fixture<SignedStateVariables>(
-  _.merge({signatures: []}, defaultVars)
+  _.merge({signatures: []}, defaultVars),
+  overwriteOutcome
 );
