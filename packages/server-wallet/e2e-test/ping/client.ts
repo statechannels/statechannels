@@ -7,7 +7,7 @@ import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-chann
 export default class PingClient {
   private readonly wallet: Wallet = new Wallet();
 
-  private channelId: string;
+  private channelId?: string;
 
   constructor(private readonly pongHttpServerURL: string) {
     console.log(`Created PingClient that pings ${pongHttpServerURL}`);
@@ -41,6 +41,8 @@ export default class PingClient {
   }
 
   public async ping(): Promise<void> {
+    if (!this.channelId) throw Error(`PingClient has no channel`);
+
     const channel = await this.wallet.getChannel(this.channelId);
 
     // Assuming MessageQueued inside the outbox

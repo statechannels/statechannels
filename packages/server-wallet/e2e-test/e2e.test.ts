@@ -30,7 +30,7 @@ describe('e2e', () => {
     // the latest turnNum it has in its DB for this channel and likewise for Pong over HTTP
   });
 
-  it('can update a channel via http', async () => {
+  it.skip('can update a channel via http', async () => {
     await pingClient.ping();
   });
 });
