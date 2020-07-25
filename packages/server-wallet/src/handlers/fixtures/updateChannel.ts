@@ -3,6 +3,9 @@ import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
 import {UpdateChannelHandlerParams} from '../updateChannel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {fixture} from '../../wallet/__test__/fixtures/utils';
+import {Uint256} from '../../type-aliases';
+import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {ChannelState} from '../../protocols/state';
 
 const defaultVars: UpdateChannelHandlerParams = {
   channelId: '0x1234',
@@ -13,4 +16,14 @@ const defaultVars: UpdateChannelHandlerParams = {
   ]),
 };
 
-export const updateChannelHandlerParams: UpdateChannelHandlerParams = fixture(defaultVars);
+export const updateChannelFixture = fixture(defaultVars);
+
+const defaultChannelState: ChannelState = {
+  channelId: '0x1234',
+  myIndex: 0,
+  supported: stateWithHashSignedBy()({turnNum: 3}),
+  latest: stateWithHashSignedBy()({turnNum: 3}),
+  funding: (): Uint256 => '0x0',
+};
+
+export const channelStateFixture = fixture(defaultChannelState);
