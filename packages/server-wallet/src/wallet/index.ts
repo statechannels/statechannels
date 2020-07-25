@@ -31,7 +31,7 @@ import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
 
-import {handleSignState} from './actionHandlers';
+import {Store} from './store';
 
 // TODO: participants should be removed from ClientUpdateChannelParams
 export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
@@ -160,10 +160,7 @@ export class Wallet implements WalletInterface {
 
     const {channelResults, outbox} = await takeActions(channelIds);
 
-    return {
-      outbox,
-      channelResults,
-    };
+    return {outbox, channelResults};
   }
   onNotification(_cb: (notice: Notification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
@@ -177,7 +174,7 @@ type ExecutionResult = {
 };
 
 const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
-  const outbox: Outgoing[] = [];
+  let outbox: Outgoing[] = [];
   const channelResults: ClientChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
@@ -194,10 +191,12 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       channelResults.push(channelResult);
     };
 
-    const handleAction = (action: ProtocolAction): Promise<any> => {
+    const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
         case 'SignState':
-          return handleSignState(action, tx);
+          outbox = outbox.concat(await Store.signState(action, tx));
+
+          return;
         default:
           throw 'Unimplemented';
       }

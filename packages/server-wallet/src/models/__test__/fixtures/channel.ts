@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import {Channel, RequiredColumns} from '../../../models/channel';
 import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/utils';
-import {addHash} from '../../../state-utils';
+import {addHash, dropNonVariables} from '../../../state-utils';
 import {alice, bob} from '../../../wallet/__test__/fixtures/signingWallets';
 import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
 
@@ -21,6 +21,8 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
   };
 
   const columns: RequiredColumns = _.merge(defaults, props);
+
+  (columns as any).vars = columns.vars.map(dropNonVariables);
 
   const channelId = calculateChannelId(columns);
   return Channel.fromJson(_.merge({channelId}, columns));

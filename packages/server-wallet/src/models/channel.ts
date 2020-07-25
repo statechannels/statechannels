@@ -18,12 +18,17 @@ import {
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {pipe} from 'fp-ts/lib/function';
 
 import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
 import {logger} from '../logger';
 import {ChannelState} from '../protocols/state';
+import {addHash, dropNonVariables} from '../state-utils';
+import {NotifyApp} from '../protocols/actions';
 
 import {SigningWallet} from './signing-wallet';
+
+export type SyncState = NotifyApp[];
 
 export const REQUIRED_COLUMNS = {
   chainId: 'chainId',
@@ -187,7 +192,7 @@ export class Channel extends Model implements RequiredColumns {
     }
   }
 
-  signAndAdd(stateVars: StateVariables): SignedState {
+  signAndAdd(stateVars: StateVariables): SyncState {
     if (
       this.isSupportedByMe &&
       this.latestSignedByMe &&
@@ -201,7 +206,16 @@ export class Channel extends Model implements RequiredColumns {
 
     const signatureEntry = this.signingWallet.signState(state);
 
-    return this.addState(stateVars, signatureEntry);
+    const signedState = this.addState(stateVars, signatureEntry);
+
+    const sender = this.participants[this.myIndex].participantId;
+    const data = {signedStates: [pipe(signedState, addHash, dropNonVariables)]};
+    const notMe = (_p: any, i: number): boolean => i !== this.myIndex;
+
+    return state.participants.filter(notMe).map(({participantId: recipient}) => ({
+      type: 'NotifyApp',
+      notice: {method: 'MessageQueued', params: {sender, recipient, data}},
+    }));
   }
 
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {

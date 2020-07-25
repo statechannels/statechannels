@@ -1,6 +1,6 @@
 import Objection from 'objection';
 
-import {handleSignState} from '../actionHandlers';
+import {Store} from '../store';
 import {signState} from '../../protocols/actions';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seed} from '../../db/seeds/1_signing_wallet_seeds';
@@ -21,27 +21,38 @@ beforeEach(async () => {
 
 afterEach(async () => tx.rollback());
 
-describe('SignState action handler', () => {
+describe('signState', () => {
   let c: Channel;
 
   beforeEach(async () => {
     c = await Channel.query().insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
   });
 
-  it('signs the state', async () => {
+  it('signs the state, ', async () => {
     await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
 
-    const updatedC = await handleSignState(signState(c.channelId, c.vars[0]), tx);
-    expect(updatedC.latestSignedByMe).toBeDefined();
+    const result = await Store.signState(signState(c.channelId, c.vars[0]), tx);
+    expect(result).toMatchObject([
+      {
+        type: 'NotifyApp',
+        notice: {
+          method: 'MessageQueued',
+          params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+        },
+      },
+    ]);
   });
 
   it('uses a transaction', async () => {
-    const updatedC = await handleSignState(signState(c.channelId, c.vars[0]), tx);
-    expect(updatedC.latestSignedByMe).toBeDefined();
+    const updatedC = await Store.signState(signState(c.channelId, c.vars[0]), tx);
+    expect(updatedC).toBeDefined();
 
     // Fetch the current channel outside the transaction context
-    const currentC = await Channel.forId(updatedC.channelId, undefined);
+    const currentC = await Channel.forId(c.channelId, undefined);
     expect(currentC.latestSignedByMe).toBeUndefined();
+
+    const pendingC = await Channel.forId(c.channelId, tx);
+    expect(pendingC.latestSignedByMe).toBeDefined();
   });
 });
