@@ -29,7 +29,7 @@ const getFundingStatus = (ps: ProtocolState): FundingStatus => {
   const allocation = checkThat(ps.app.supported?.outcome, isSimpleAllocation);
 
   const currentFunding = ps.app.funding(allocation.assetHolderAddress);
-  const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add);
+  const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
   return BN.gte(currentFunding, targetFunding) ? 'Funded' : 'Not Funded';
 };
 
