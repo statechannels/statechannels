@@ -7,8 +7,9 @@ import {Bytes32} from '../type-aliases';
 Actions that protocols can declare.
 */
 
+export type Notice = Omit<Notification, 'jsonrpc'>;
 export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
-export type NotifyApp = {type: 'NotifyApp'; notice: Omit<Notification, 'jsonrpc'>};
+export type NotifyApp = {type: 'NotifyApp'; notice: Notice};
 export type SubmitTransaction = {
   type: 'SubmitTransaction';
   transactionRequest: providers.TransactionRequest;
@@ -22,7 +23,7 @@ export const isSignState = guard<SignState>('SignState');
 export const isNotifyApp = guard<NotifyApp>('NotifyApp');
 export const isSubmitTransaction = guard<SubmitTransaction>('SubmitTransaction');
 
-export type Outgoing = NotifyApp;
+export type Outgoing = Notice;
 export const isOutgoing = isNotifyApp;
 
 export function signState(channelId: Bytes32, vars: StateVariables): SignState {

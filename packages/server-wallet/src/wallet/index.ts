@@ -174,7 +174,7 @@ type ExecutionResult = {
 };
 
 const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
-  let outbox: Outgoing[] = [];
+  const outbox: Outgoing[] = [];
   const channelResults: ClientChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
@@ -185,18 +185,19 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       await tx.rollback();
     };
     const markChannelAsDone = async (): Promise<any> => {
-      const channelId = channels.shift() as string;
-      const {channelResult} = await Channel.forId(channelId, tx);
-
-      channelResults.push(channelResult);
+      channels.shift() as string;
     };
 
     const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
-        case 'SignState':
-          outbox = outbox.concat(await Store.signState(action, tx));
+        case 'SignState': {
+          const notices = await Store.signState(action, tx);
+          notices.map(n => outbox.push(n.notice));
 
+          const {channelResult} = await Channel.forId(action.channelId, tx);
+          channelResults.push(channelResult);
           return;
+        }
         default:
           throw 'Unimplemented';
       }

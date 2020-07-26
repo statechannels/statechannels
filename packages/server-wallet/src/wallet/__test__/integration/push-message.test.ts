@@ -123,7 +123,7 @@ it('takes the next action, when the application protocol returns an action', asy
     wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}))
   ).resolves.toMatchObject({
     channelResults: [{channelId, status: 'funding'}],
-    outbox: [{notice: {method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}}],
+    outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
   });
 
   const updatedC = await Channel.forId(channelId, undefined);
