@@ -18,12 +18,11 @@ import {
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {pipe} from 'fp-ts/lib/function';
 
 import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
 import {logger} from '../logger';
 import {ChannelState} from '../protocols/state';
-import {addHash, dropNonVariables} from '../state-utils';
+import {addHash} from '../state-utils';
 import {NotifyApp} from '../protocols/actions';
 
 import {SigningWallet} from './signing-wallet';
@@ -209,7 +208,7 @@ export class Channel extends Model implements RequiredColumns {
     const signedState = this.addState(stateVars, signatureEntry);
 
     const sender = this.participants[this.myIndex].participantId;
-    const data = {signedStates: [pipe(signedState, addHash, dropNonVariables)]};
+    const data = {signedStates: [addHash(signedState)]};
     const notMe = (_p: any, i: number): boolean => i !== this.myIndex;
 
     return state.participants.filter(notMe).map(({participantId: recipient}) => ({
