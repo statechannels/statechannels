@@ -50,7 +50,7 @@ Ethereum wallets will typically prompt the user, when triggered by an applicatio
 
 The same is true for our wallet: when the `.enable()` call is made, the user is asked for approval (see above).
 
-There are a few differences between a state channel wallet and an Ethereum wallet, that are important to understand.
+There are a few differences between a state channel wallet and an Ethereum wallet, which are important to understand.
 
 Because state channel applications are capable of very rapid throughput of state updates (or "Layer 2 transactions"), it would not be feasible to ask for user approval for each one. It is for this reason that our wallet will create an "ephemeral key" to sign state updates (sliently), instead of using your Ethereum key.
 
