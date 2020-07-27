@@ -3,7 +3,7 @@ import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/walle
 import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
 
-import {ProtocolAction, SignState} from '../protocols/actions';
+import {SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
 
 type ChannelStateWithSupported = ChannelState & {
@@ -11,8 +11,8 @@ type ChannelStateWithSupported = ChannelState & {
   latestSignedByMe: SignedStateWithHash;
 };
 
-type HandlerResult = Either<Error, ProtocolAction>;
-type StepResult = Either<Error, ChannelStateWithSupported>;
+type HandlerResult = Either<UpdateChannelError, SignState>;
+type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
