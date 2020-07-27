@@ -109,6 +109,7 @@ export class Wallet implements WalletInterface {
 
       switch (decision._tag) {
         case 'Left':
+          // TODO: We have not decided how the wallet should handle errors. For now, I am throwing.
           throw decision.left;
 
         case 'Right': {
