@@ -31,6 +31,7 @@ import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
+import {updateChannel} from '../handlers/updateChannel';
 
 import {Store} from './store';
 
@@ -99,8 +100,26 @@ export class Wallet implements WalletInterface {
   async joinChannel(_args: JoinChannelParams): Result {
     throw 'Unimplemented';
   }
-  async updateChannel(_args: UpdateChannelParams): Result {
-    throw 'Unimplemented';
+  async updateChannel({channelId, appData, allocations}: UpdateChannelParams): Result {
+    return Channel.transaction(async tx => {
+      const channel = await Store.getChannel(channelId, undefined);
+
+      const outcome = deserializeAllocations(allocations);
+      const decision = updateChannel({channelId, appData, outcome}, channel);
+
+      switch (decision._tag) {
+        case 'Left':
+          throw decision.left;
+
+        case 'Right':
+          await Store.signState(decision.right, tx);
+
+          return {
+            outbox: [],
+            channelResults: [],
+          };
+      }
+    });
   }
   async closeChannel(_args: CloseChannelParams): Result {
     throw 'Unimplemented';
