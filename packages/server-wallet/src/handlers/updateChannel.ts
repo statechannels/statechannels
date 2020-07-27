@@ -2,7 +2,6 @@ import {Either, left, right, chain, map} from 'fp-ts/lib/Either';
 import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/wallet-core';
 import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
-import {curry} from 'lodash';
 
 import {ProtocolAction, SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
@@ -78,7 +77,7 @@ export function updateChannel(
     ensureSupportedStateExists,
     chain(hasRunningTurnNumber),
     chain(isMyTurn),
-    map(curry(incrementTurnNumber)(args)),
+    map(incrementTurnNumber(args)),
     map(signStateAction)
   );
 }
