@@ -45,7 +45,7 @@ export function updateChannel(
   const hasRunningTurnNumber: ValidateState = cs =>
     cs.supported.turnNum < 3 ? left(new UpdateChannelError(Errors.notInRunningStage)) : right(cs);
   const isMyTurn: ValidateState = ss =>
-    ss.supported.turnNum % channelState.myIndex
+    ss.supported.turnNum + (1 % ss.supported.participants.length) === ss.myIndex
       ? right(ss)
       : left(new UpdateChannelError(Errors.notMyTurn));
   const newState = (cs: ChannelStateWithSupported): StateVariables => ({
