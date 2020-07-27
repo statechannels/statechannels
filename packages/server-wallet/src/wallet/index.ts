@@ -1,7 +1,7 @@
 import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 import {
   ChannelResult as ClientChannelResult,
-  UpdateChannelParams as ClientUpdateChannelParams,
+  UpdateChannelParams,
   CreateChannelParams,
   Notification,
   JoinChannelParams,
@@ -33,8 +33,6 @@ import knex from '../db/connection';
 
 import {Store} from './store';
 
-// TODO: participants should be removed from ClientUpdateChannelParams
-export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
 export {CreateChannelParams};
 
 export type AddressedMessage = Message & {to: string; from: string};
