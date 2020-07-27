@@ -35,6 +35,11 @@ class UpdateChannelError extends Error {
 const hasSupportedState = (cs: ChannelState): cs is ChannelStateWithSupported => !!cs.supported;
 
 // The helper functions should be factored out, tested, and reusable
+const ensureSupportedStateExists = (
+  cs: ChannelState
+): Either<UpdateChannelError, ChannelStateWithSupported> =>
+  hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
+
 function isMyTurn(ss: ChannelStateWithSupported): StepResult {
   if (ss.supported.turnNum + (1 % ss.supported.participants.length) === ss.myIndex)
     return right(ss);
@@ -56,16 +61,12 @@ const incrementTurnNumber = (
 });
 // END helper functions
 
+// todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
+
 export function updateChannel(
   args: UpdateChannelHandlerParams,
   channelState: ChannelState
 ): HandlerResult {
-  // todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
-  const ensureSupportedStateExists = (
-    cs: ChannelState
-  ): Either<UpdateChannelError, ChannelStateWithSupported> =>
-    hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
-
   // todo: use Action creator from another branch
   const signStateAction = (sv: StateVariables): SignState => ({
     type: 'SignState',
