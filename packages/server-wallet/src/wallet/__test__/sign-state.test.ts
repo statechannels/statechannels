@@ -10,7 +10,7 @@ import {Bytes32} from '../../type-aliases';
 import {SignState} from '../../protocols/actions';
 
 import {stateWithHashSignedBy} from './fixtures/states';
-import {bob} from './fixtures/signingWallets';
+import {bob} from './fixtures/signing-wallets';
 
 function signState(channelId: Bytes32, vars: StateVariables): SignState {
   return {...vars, type: 'SignState', channelId};

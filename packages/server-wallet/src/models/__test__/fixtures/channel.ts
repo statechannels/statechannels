@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {Channel, RequiredColumns} from '../../../models/channel';
 import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/utils';
 import {addHash, dropNonVariables} from '../../../state-utils';
-import {alice, bob} from '../../../wallet/__test__/fixtures/signingWallets';
+import {alice, bob} from '../../../wallet/__test__/fixtures/signing-wallets';
 import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
 
 export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) => {

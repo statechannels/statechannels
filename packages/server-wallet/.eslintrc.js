@@ -5,7 +5,7 @@ module.exports = {
     // We expect to be able to use Promise and Set
     es6: true,
   },
-  plugins: ['jest', 'import'],
+  plugins: ['jest', 'import', 'unicorn'],
   extends: [
     '../../.eslintrc.js',
     'plugin:jest/recommended',
@@ -24,12 +24,17 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_'}],
     'no-process-env': 'error',
+    'unicorn/filename-case': [
+      'error',
+      // Enforce kebab casing for file names except for generated seed/migration files
+      {case: 'kebabCase', ignore: [/^\d_.*_seeds\.ts$/, /^\d{14}_.*\.ts$/]},
+    ],
   },
   overrides: [
     {
       // process.env allowed in src/config.js
       files: ['src/config.ts', 'scripts/*'],
-      rules: {'no-process-env': 'off'}
-    }
-  ]
+      rules: {'no-process-env': 'off'},
+    },
+  ],
 };
