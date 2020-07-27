@@ -234,6 +234,22 @@ jobs:
           package: nitro-protocol
       - notify_slack
 
+  server-wallet-e2e-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          command: |
+            sudo apt install -y postgresql-client || true
+            (cd packages/server-wallet && yarn db:create $PSQL_ARGS && yarn db:migrate $PSQL_ARGS)
+      - run:
+          name: server-wallet-e2e-test
+          command: cd packages/server-wallet && yarn test:e2e
+          no_output_timeout: 30m
+
   release-pull-request:
     <<: *defaults
     steps:

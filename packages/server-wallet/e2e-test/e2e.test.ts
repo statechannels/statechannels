@@ -22,7 +22,7 @@ describe('e2e', () => {
     await seedChannels();
   });
 
-  it('can create a channel via http', async () => {
+  it.skip('can create a channel via http', async () => {
     await pingClient.createPingChannel();
     // TODO: The above line should send an HTTP request to Pong, and then Pong should
     // respond with a message in the response to Ping who should store the value in their

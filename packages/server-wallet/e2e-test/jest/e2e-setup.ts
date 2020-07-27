@@ -7,8 +7,8 @@ module.exports = async (): Promise<void> => {
 
   server = await new Promise(function(resolve) {
     server = app.listen(0, '127.0.0.1', function() {
-      const address = server.address();
-      console.log(`\nRunning Pong server on '${JSON.stringify(address)}'...`);
+      const {address, port} = server.address() as {address: string; port: number};
+      console.log(`\nRunning HTTP Pong server on ${address}:${port}...`);
       resolve(server);
     });
   });
