@@ -52,8 +52,7 @@ function hasRunningTurnNumber(cs: ChannelStateWithSupported): StepResult {
   return right(cs);
 }
 
-const incrementTurnNumber = (
-  args: UpdateChannelHandlerParams,
+const incrementTurnNumber = (args: UpdateChannelHandlerParams) => (
   cs: ChannelStateWithSupported
 ): StateVariables => ({
   ...args,
