@@ -9,18 +9,25 @@ import {
   StateVariables,
   StateVariablesWithHash,
   calculateChannelId,
-  createSignatureEntry,
   hashState,
   outcomesEqual,
+  checkThat,
+  isAllocation,
+  serializeAllocation,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
 import {logger} from '../logger';
 import {ChannelState} from '../protocols/state';
+import {addHash} from '../state-utils';
+import {NotifyApp} from '../protocols/actions';
 
 import {SigningWallet} from './signing-wallet';
+
+export type SyncState = NotifyApp[];
 
 export const REQUIRED_COLUMNS = {
   chainId: 'chainId',
@@ -96,11 +103,15 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static forId(channelId: Bytes32, tx?: Transaction): Promise<Channel> {
-    return Channel.query(tx)
+  static async forId(channelId: Bytes32, tx: Transaction | undefined): Promise<Channel> {
+    const result = Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
       .first();
+
+    if (!result) throw new ChannelError(Errors.channelMissing, {channelId});
+
+    return result;
   }
 
   $toDatabaseJson(): Pojo {
@@ -152,6 +163,24 @@ export class Channel extends Model implements RequiredColumns {
     };
   }
 
+  get channelResult(): ChannelResult {
+    const {channelId, participants, appDefinition, supported} = this;
+    if (!supported) throw 'not supported';
+    const {outcome, appData, turnNum} = supported;
+
+    const allocations = serializeAllocation(checkThat(outcome, isAllocation));
+
+    return {
+      channelId,
+      participants,
+      appData,
+      allocations,
+      appDefinition,
+      status: 'funding', // FIXME
+      turnNum,
+    };
+  }
+
   // Modifiers
   signState(hash: Bytes32): SignedState {
     const state = this.signedStates.find(s => s.stateHash === hash);
@@ -162,7 +191,7 @@ export class Channel extends Model implements RequiredColumns {
     }
   }
 
-  signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
+  signAndAdd(stateVars: StateVariables): SyncState {
     if (
       this.isSupportedByMe &&
       this.latestSignedByMe &&
@@ -174,9 +203,18 @@ export class Channel extends Model implements RequiredColumns {
 
     const state = {...this.channelConstants, ...stateVars};
 
-    const signatureEntry = createSignatureEntry(state, privateKey);
+    const signatureEntry = this.signingWallet.signState(state);
 
-    return this.addState(stateVars, signatureEntry);
+    const signedState = this.addState(stateVars, signatureEntry);
+
+    const sender = this.participants[this.myIndex].participantId;
+    const data = {signedStates: [addHash(signedState)]};
+    const notMe = (_p: any, i: number): boolean => i !== this.myIndex;
+
+    return state.participants.filter(notMe).map(({participantId: recipient}) => ({
+      type: 'NotifyApp',
+      notice: {method: 'MessageQueued', params: {sender, recipient, data}},
+    }));
   }
 
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {

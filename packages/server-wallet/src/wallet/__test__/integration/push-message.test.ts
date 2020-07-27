@@ -1,4 +1,4 @@
-import {calculateChannelId} from '@statechannels/wallet-core';
+import {calculateChannelId, simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -9,12 +9,11 @@ import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
+import {channel} from '../../../models/__test__/fixtures/channel';
 
 beforeEach(async () => seed(knex));
 
 it("doesn't throw on an empty message", () => {
-  const wallet = new Wallet();
-
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
 });
 
@@ -22,9 +21,9 @@ const four = 4;
 const five = 5;
 const six = 6;
 
-it('stores states contained in the message, in a single channel model', async () => {
-  const wallet = new Wallet();
+const wallet = new Wallet();
 
+it('stores states contained in the message, in a single channel model', async () => {
   const channelsBefore = await Channel.query().select();
   expect(channelsBefore).toHaveLength(0);
 
@@ -45,8 +44,6 @@ it('stores states contained in the message, in a single channel model', async ()
 });
 
 it('stores states for multiple channels', async () => {
-  const wallet = new Wallet();
-
   const channelsBefore = await Channel.query().select();
   expect(channelsBefore).toHaveLength(0);
 
@@ -72,8 +69,6 @@ it('stores states for multiple channels', async () => {
 });
 
 it("Doesn't store stale states", async () => {
-  const wallet = new Wallet();
-
   const channelsBefore = await Channel.query().select();
   expect(channelsBefore).toHaveLength(0);
 
@@ -103,7 +98,6 @@ it("Doesn't store stale states", async () => {
 });
 
 it("doesn't store states for unknown signing addresses", async () => {
-  const wallet = new Wallet();
   await truncate(knex, ['signing_wallets']);
 
   return expect(
@@ -113,4 +107,28 @@ it("doesn't store states for unknown signing addresses", async () => {
       })
     )
   ).rejects.toThrow(Error('Not in channel'));
+});
+
+it('takes the next action, when the application protocol returns an action', async () => {
+  const state = stateSignedBy()({outcome: simpleEthAllocation([])});
+
+  const c = channel({vars: [addHash(state)]});
+  await Channel.query().insert(c);
+
+  expect(c.latestSignedByMe?.turnNum).toEqual(0);
+  expect(c.supported).toBeUndefined();
+  const {channelId} = c;
+
+  await expect(
+    wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}))
+  ).resolves.toMatchObject({
+    channelResults: [{channelId, status: 'funding'}],
+    outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
+  });
+
+  const updatedC = await Channel.forId(channelId, undefined);
+  expect(updatedC.protocolState).toMatchObject({
+    latestSignedByMe: {turnNum: 3},
+    supported: {turnNum: 0},
+  });
 });

@@ -24,7 +24,7 @@ it('can insert Channel instances to, and fetch them from, the database', async (
   expect(c1.vars).toMatchObject(c2.vars);
 });
 
-it('can insert multiple channel instances within a transaction', async () => {
+it('can insert multiple channels instances within a transaction', async () => {
   const vars = [stateWithHashSignedBy()()];
   const c1 = channel({vars});
   const c2 = channel({channelNonce: 1234, vars});

@@ -21,9 +21,9 @@ describe('happy path', () => {
     const appData = '0xa00f00';
     const createPromise = w.createChannel(createChannelArgs({appData}));
     await expect(createPromise).resolves.toMatchObject({
-      channelId: expect.any(String),
+      channelResults: [{channelId: expect.any(String)}],
     });
-    const {channelId} = await createPromise;
+    const {channelId} = (await createPromise).channelResults[0];
     expect(await Channel.query().resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, undefined);

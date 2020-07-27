@@ -2,13 +2,12 @@ import {
   ChannelConstants,
   Hashed,
   SignedStateVarsWithHash,
-  SignedStateWithHash,
   State,
   hashState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-export const dropNonVariables = (s: SignedStateWithHash): SignedStateVarsWithHash =>
+export const dropNonVariables = (s: SignedStateVarsWithHash): SignedStateVarsWithHash =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
 
 export const dropNonConstants = (s: State): ChannelConstants =>
