@@ -1,25 +1,21 @@
-import {right, left} from 'fp-ts/lib/Either';
-import {none, some} from 'fp-ts/lib/Option';
 import {BN, isSimpleAllocation, checkThat} from '@statechannels/wallet-core';
 
 import {match} from '../match';
 
 import {Protocol, stage, ProtocolResult, ChannelState} from './state';
+import {noAction, error, signState} from './actions';
 
 type FundingStatus = 'Funded' | 'Not Funded';
 export type ProtocolState = {app: ChannelState};
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult => {
   if (!ps.app.latestSignedByMe) {
-    return left(new Error('Expected a signed state by me'));
+    return error('Expected a signed state by me');
   }
-  return right(
-    some({
-      type: 'SignState',
-      channelId: ps.app.channelId,
-      ...ps.app.latestSignedByMe,
-      turnNum: 3,
-    })
-  );
+  return signState({
+    channelId: ps.app.channelId,
+    ...ps.app.latestSignedByMe,
+    turnNum: 3,
+  });
 };
 
 const getFundingStatus = (ps: ProtocolState): FundingStatus => {
@@ -34,24 +30,24 @@ const getFundingStatus = (ps: ProtocolState): FundingStatus => {
 };
 
 const alreadyFunded = match(ps => stage(ps.app.latestSignedByMe), {
-  Missing: () => left(new Error(`Missing prefund setup`)),
+  Missing: () => error(`Missing prefund setup`),
   PrefundSetup: signPostFundSetup,
-  PostfundSetup: () => right(none), // Postfund setup is already signed
-  Default: () => left(new Error(`State signed too early`)),
+  PostfundSetup: () => noAction, // Postfund setup is already signed
+  Default: () => error(`State signed too early`),
 });
 
 const prefundSetupStateSupported = match(getFundingStatus, {
   Funded: alreadyFunded,
-  'Not Funded': () => right(none), // TODO: Start depositing
+  'Not Funded': () => noAction, // TODO: Start depositing
 });
 
 const prefundSetupSigned = match(ps => stage(ps.app.supported), {
   PrefundSetup: prefundSetupStateSupported,
-  Default: () => right(none), // Still waiting for the opponent to sign
+  Default: () => noAction, // Still waiting for the opponent to sign
 });
 
 export const protocol: Protocol<ProtocolState> = match(ps => stage(ps.app.latestSignedByMe), {
-  Missing: () => left(new Error(`The application protocol requires a signed prefund setup`)),
+  Missing: () => error(`The application protocol requires a signed prefund setup`),
   PrefundSetup: prefundSetupSigned,
-  Default: () => right(none),
+  Default: () => noAction,
 });
