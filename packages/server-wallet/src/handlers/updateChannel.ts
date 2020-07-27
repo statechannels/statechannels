@@ -12,7 +12,7 @@ type ChannelStateWithSupported = ChannelState & {
 };
 
 type HandlerResult = Either<Error, ProtocolAction>;
-type ValidateState = (ss: ChannelStateWithSupported) => Either<Error, ChannelStateWithSupported>;
+type StepResult = Either<Error, ChannelStateWithSupported>;
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
@@ -35,15 +35,13 @@ class UpdateChannelError extends Error {
 const hasSupportedState = (cs: ChannelState): cs is ChannelStateWithSupported => !!cs.supported;
 
 // The helper functions should be factored out, tested, and reusable
-function isMyTurn(ss: ChannelStateWithSupported): Either<Error, ChannelStateWithSupported> {
+function isMyTurn(ss: ChannelStateWithSupported): StepResult {
   if (ss.supported.turnNum + (1 % ss.supported.participants.length) === ss.myIndex)
     return right(ss);
   return left(new UpdateChannelError(Errors.notMyTurn));
 }
 
-function hasRunningTurnNumber(
-  cs: ChannelStateWithSupported
-): Either<Error, ChannelStateWithSupported> {
+function hasRunningTurnNumber(cs: ChannelStateWithSupported): StepResult {
   if (cs.supported.turnNum < 3) return left(new UpdateChannelError(Errors.notInRunningStage));
   return right(cs);
 }
