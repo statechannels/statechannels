@@ -18,7 +18,7 @@ import {alice, bob} from './participants';
 import {alice as aliceWallet} from './signingWallets';
 
 const defaultState: State = {
-  appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  appData: '0x',
   appDefinition: '0x0000000000000000000000000000000000000000',
   isFinal: false,
   turnNum: 0,
