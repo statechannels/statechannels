@@ -31,7 +31,7 @@ import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
-import {updateChannel} from '../handlers/update-channel';
+import * as UpdateChannel from '../handlers/update-channel';
 
 import {Store} from './store';
 
@@ -100,22 +100,30 @@ export class Wallet implements WalletInterface {
   async joinChannel(_args: JoinChannelParams): Result {
     throw 'Unimplemented';
   }
-  async updateChannel({channelId, appData, allocations}: UpdateChannelParams): Result {
-    return Channel.transaction(async tx => {
-      const channel = await Store.getChannel(channelId, undefined);
+  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
+    return knex.transaction(async tx => {
+      const channel = await Store.getChannel(channelId, tx);
+
+      if (!channel)
+        throw new UpdateChannel.UpdateChannelError(UpdateChannel.Errors.channelNotFound, {
+          channelId,
+        });
 
       const outcome = deserializeAllocations(allocations);
 
-      const decision = updateChannel({channelId, appData, outcome}, channel);
-      if (Either.isLeft(decision)) {
-        throw decision.left;
-      } else {
-        const {outgoing, channelResult} = await Store.signState(decision.right, tx);
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+      const throwError = (error: Error) => {
+        throw error;
+      };
+      const nextState = Either.getOrElseW(throwError)(
+        UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
+      );
+      const {outgoing, channelResult} = await Store.signState(nextState, tx);
 
-        return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
-      }
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
     });
   }
+
   async closeChannel(_args: CloseChannelParams): Result {
     throw 'Unimplemented';
   }

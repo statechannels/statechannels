@@ -23,7 +23,7 @@ export const Store = {
   getChannel: async function(
     channelId: Bytes32,
     tx: Objection.Transaction | undefined
-  ): Promise<ChannelState> {
-    return (await Channel.forId(channelId, tx)).protocolState;
+  ): Promise<ChannelState | undefined> {
+    return (await Channel.forId(channelId, tx))?.protocolState;
   },
 };

@@ -19,13 +19,14 @@ export interface UpdateChannelHandlerParams {
   appData: string;
 }
 
-enum Errors {
+export enum Errors {
+  channelNotFound = 'channel not found',
   invalidLatestState = 'must have latest state',
   notInRunningStage = 'channel must be in running state',
   notMyTurn = 'it is not my turn',
 }
 
-class UpdateChannelError extends Error {
+export class UpdateChannelError extends Error {
   readonly type = 'UpdateChannelError';
   constructor(reason: Errors, public readonly data: any = undefined) {
     super(reason);

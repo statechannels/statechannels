@@ -54,4 +54,10 @@ describe('error cases', () => {
       Error('it is not my turn')
     );
   });
+
+  it("throws when the channel isn't found", async () => {
+    await expect(w.updateChannel(updateChannelArgs())).rejects.toMatchObject(
+      Error('channel not found')
+    );
+  });
 });
