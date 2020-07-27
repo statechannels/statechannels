@@ -3,7 +3,7 @@ import {calculateChannelId, simpleEthAllocation} from '@statechannels/wallet-cor
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {addHash} from '../../../state-utils';
-import {alice, bob} from '../fixtures/signingWallets';
+import {alice, bob} from '../fixtures/signing-wallets';
 import {message} from '../fixtures/messages';
 import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';

@@ -31,7 +31,7 @@ import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
-import {updateChannel} from '../handlers/updateChannel';
+import {updateChannel} from '../handlers/update-channel';
 
 import {Store} from './store';
 

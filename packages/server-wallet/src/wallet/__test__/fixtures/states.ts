@@ -15,7 +15,7 @@ import {addHash} from '../../../state-utils';
 
 import {Fixture, fixture, overwriteOutcome} from './utils';
 import {alice, bob} from './participants';
-import {alice as aliceWallet} from './signingWallets';
+import {alice as aliceWallet} from './signing-wallets';
 
 const defaultState: State = {
   appData: '0x',

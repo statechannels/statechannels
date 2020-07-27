@@ -5,7 +5,7 @@ import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
-import {alice, bob} from '../fixtures/signingWallets';
+import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 
 let w: Wallet;
