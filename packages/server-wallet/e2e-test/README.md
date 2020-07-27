@@ -1,5 +1,22 @@
 # e2e-test
 
+```
+      +-------------+                 +-------------+
+      | Ping Wallet |                 | Pong Wallet |
+      +-+-+----+-+--+                 +-+-+----+-+--+
+        ^ |    ^ |                      ^ |    ^ |
+        | |    | |                      | |    | |
+create  0 1    8 9 pushMessage    join  5 6    3 4 pushMessage
+Channel | |    | |              Channel | |    | |
+        | v    | v                      | v    | v
+      +-+-+----+-+--+                 +-+-+----+-+--+
+      |             +-------2-------->+             |
+      | Ping Client |  POST /inbox    | Pong Client |
+      |             +<------7---------+             |
+      +-------------+                 +-------------+
+
+```
+
 This is a reference test for how two clients, communicating to each other over HTTP, may write clients to update the state of a pre-existing channel.
 
 - `pong` is an Express server which accepts a single kind of request. It accepts `POST` requests of JSON-RPC encoded data at `/inbox` with the `SendMessage` method and parameters being of the type `Message`. It is expected to take this HTTP request and place the message inside it's wallet, and then respond to this same HTTP request with a response that includes any `MessageQueued` messages from the wallet.
