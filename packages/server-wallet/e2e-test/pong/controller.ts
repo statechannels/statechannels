@@ -5,11 +5,13 @@ import {Wallet} from '../../src/wallet';
 export default class PongController {
   private readonly wallet: Wallet = new Wallet();
 
-  public async handleMessage(message: Message): Promise<void> {
+  public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {
+    const {recipient, sender} = message;
+
     const {channelResults, outbox} = await this.wallet.pushMessage({
       ...message,
-      to: message.recipient,
-      from: message.sender,
+      to: recipient,
+      from: sender,
     });
 
     if (!channelResults) throw Error('sanity check');
@@ -19,5 +21,16 @@ export default class PongController {
         console.log('Observed a ChannelProposed event');
       }
     }
+
+    return {
+      sender: 'pong',
+      recipient: sender,
+      data: {
+        signedStates: [
+          /* TODO: */
+        ],
+        objectives: [],
+      },
+    };
   }
 }

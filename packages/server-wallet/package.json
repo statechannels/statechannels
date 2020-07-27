@@ -9,7 +9,6 @@
     "@statechannels/wallet-core": "0.1.5",
     "ethers": "5.0.7",
     "fp-ts": "2.7.0",
-    "jayson": "^3.3.3",
     "knex": "0.20.9",
     "objection": "2.1.2",
     "pg": "7.17.1",

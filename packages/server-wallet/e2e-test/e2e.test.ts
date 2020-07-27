@@ -22,6 +22,14 @@ describe('e2e', () => {
     await seedChannels();
   });
 
+  it('can do a simple end-to-end flow with no signed states', async () => {
+    const ret = await pingClient.emptyMessage();
+    expect(ret.sender).toBe('pong');
+    expect(ret.recipient).toBe('ping');
+    expect(ret.data.signedStates?.length).toBe(0);
+    expect(ret.data.objectives?.length).toBe(0);
+  });
+
   it.skip('can create a channel via http', async () => {
     await pingClient.createPingChannel();
     // TODO: The above line should send an HTTP request to Pong, and then Pong should

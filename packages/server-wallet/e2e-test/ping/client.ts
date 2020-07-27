@@ -1,4 +1,4 @@
-import {Client} from 'jayson';
+import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
 
 import {Wallet} from '../../src/wallet';
@@ -26,7 +26,7 @@ export default class PingClient {
 
     this.channelId = channelId;
 
-    const message = await this.sendMessageToPongOverHTTP(params as Message);
+    const message = await this.messagePongAndExpectReply(params as Message);
 
     await this.wallet.pushMessage({
       ...message,
@@ -47,7 +47,7 @@ export default class PingClient {
       outbox: [{params}],
     } = await this.wallet.updateChannel(channel);
 
-    const message = await this.sendMessageToPongOverHTTP(params as Message);
+    const message = await this.messagePongAndExpectReply(params as Message);
 
     await this.wallet.pushMessage({
       ...message,
@@ -56,12 +56,14 @@ export default class PingClient {
     });
   }
 
-  private sendMessageToPongOverHTTP = (message: Message): Promise<Message> =>
-    new Promise((resolve, reject) =>
-      Client.http(
-        (this.pongHttpServerURL + '/inbox') as any // jayson Client.http types are outdated
-      ).request('SendMessage', message, (err: any, response: Message) =>
-        err ? reject(err) : resolve(response)
-      )
-    );
+  public emptyMessage(): Promise<Message> {
+    return this.messagePongAndExpectReply({
+      sender: 'ping',
+      recipient: 'pong',
+      data: {signedStates: [], objectives: []},
+    });
+  }
+
+  private messagePongAndExpectReply = async (message: Message): Promise<Message> =>
+    (await axios.post(this.pongHttpServerURL + '/inbox', {message})).data;
 }
