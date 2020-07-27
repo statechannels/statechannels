@@ -17,6 +17,5 @@ module.exports = async (): Promise<void> => {
 
   (global as any).server = server;
 
-  // eslint-disable-next-line
   process.env.SERVER_ADDRESS = `http://${address.address}:${address.port}`;
 };

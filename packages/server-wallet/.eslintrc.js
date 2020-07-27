@@ -12,24 +12,29 @@ module.exports = {
     'plugin:jest/style',
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:import/typescript',
   ],
   rules: {
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
     'jest/expect-expect': 'off',
-    // We use snake case for some PostgreSQL / Objection client library key names
-    '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_'}],
     'no-process-env': 'error',
   },
   overrides: [
     {
-      // process.env allowed in src/config.js
-      files: ['src/config.ts', 'scripts/*'],
-      rules: {'no-process-env': 'off'}
-    }
-  ]
+      // process.env allowed in some files
+      files: ['src/config.ts', 'scripts/*', 'e2e-test/jest/*'],
+      rules: {'no-process-env': 'off'},
+    },
+    {
+      files: ['**/*.ts'],
+      extends: ['plugin:import/typescript'],
+      rules: {
+        // We use snake case for some PostgreSQL / Objection client library key names
+        '@typescript-eslint/camelcase': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-use-before-define': 'off',
+        '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_'}],
+      },
+    },
+  ],
 };
