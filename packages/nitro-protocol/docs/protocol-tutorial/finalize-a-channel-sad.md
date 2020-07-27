@@ -35,7 +35,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 const chainId = '0x1234';
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = 0;
 const channel: Channel = {chainId, channelNonce, participants};
 
 /* Choose a challenger */

@@ -30,7 +30,7 @@ for (let i = 0; i < 3; i++) {
 
 const chainId = '0x1234'; // E.g. '0x1' for mainnnet. Using a mock here
 
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = 0;
 const channel: Channel = {chainId, channelNonce, participants};
 const channelId = getChannelId(channel);
 ```
