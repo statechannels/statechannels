@@ -38,21 +38,22 @@ export default class PingClient {
   public async ping(): Promise<void> {
     if (!this.channelId) throw Error(`PingClient has no channel`);
 
-    // TODO: Blocked on https://github.com/statechannels/statechannels/pull/2355
-    // const channel = await this.wallet.getChannel(this.channelId);
+    const {
+      channelResults: [channel],
+    } = await this.wallet.getState({channelId: this.channelId});
 
-    // // Assuming MessageQueued inside the outbox
-    // const {
-    //   outbox: [{params}],
-    // } = await this.wallet.updateChannel(channel);
+    // Assuming MessageQueued inside the outbox
+    const {
+      outbox: [{params}],
+    } = await this.wallet.updateChannel(channel);
 
-    // const message = await this.sendMessageToPongOverHTTP(params as Message);
+    const message = await this.sendMessageToPongOverHTTP(params as Message);
 
-    // await this.wallet.pushMessage({
-    //   ...message,
-    //   to: message.recipient,
-    //   from: message.sender,
-    // });
+    await this.wallet.pushMessage({
+      ...message,
+      to: message.recipient,
+      from: message.sender,
+    });
   }
 
   private sendMessageToPongOverHTTP = (message: Message): Promise<Message> =>
