@@ -60,7 +60,7 @@ export default class PingClient {
     new Promise((resolve, reject) =>
       Client.http(
         (this.pongHttpServerURL + '/inbox') as any // jayson Client.http types are outdated
-      ).request('inbox', message, (err: any, response: Message) =>
+      ).request('SendMessage', message, (err: any, response: Message) =>
         err ? reject(err) : resolve(response)
       )
     );
