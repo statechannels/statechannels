@@ -105,18 +105,14 @@ export class Wallet implements WalletInterface {
       const channel = await Store.getChannel(channelId, undefined);
 
       const outcome = deserializeAllocations(allocations);
+
       const decision = updateChannel({channelId, appData, outcome}, channel);
+      if (Either.isLeft(decision)) {
+        throw decision.left;
+      } else {
+        const {outgoing, channelResult} = await Store.signState(decision.right, tx);
 
-      switch (decision._tag) {
-        case 'Left':
-          // TODO: We have not decided how the wallet should handle errors. For now, I am throwing.
-          throw decision.left;
-
-        case 'Right': {
-          const {outgoing, channelResult} = await Store.signState(decision.right, tx);
-
-          return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
-        }
+        return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
       }
     });
   }
