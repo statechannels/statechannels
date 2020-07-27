@@ -7,45 +7,51 @@ import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signingWallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {Bytes32} from '../../../type-aliases';
 
 let w: Wallet;
-let channelId: Bytes32;
 beforeEach(async () => {
   await truncate(knex);
   w = new Wallet();
 });
 
-describe('happy path', () => {
-  // Make sure alice's PK is in the DB
-  beforeEach(async () => {
-    await seed(knex);
+// Make sure alice's PK is in the DB
+beforeEach(async () => {
+  await seed(knex);
+});
 
-    const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 5})]});
-    await Channel.query().insert(c);
+it('updates a channel', async () => {
+  const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 5})]});
+  await Channel.query().insert(c);
 
-    channelId = c.channelId;
+  const channelId = c.channelId;
+  const current = await Channel.forId(channelId, undefined);
+  expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
+
+  const appData = '0xa00f00';
+  await expect(w.updateChannel(updateChannelArgs({appData}))).resolves.toMatchObject({
+    outbox: [
+      {
+        params: {
+          recipient: 'bob',
+          sender: 'alice',
+          data: {signedStates: [{turnNum: 6, appData}]},
+        },
+      },
+    ],
+    channelResults: [{channelId, turnNum: 6, appData}],
   });
 
-  it('updates a channel', async () => {
-    const current = await Channel.forId(channelId, undefined);
-    expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
+  const updated = await Channel.forId(channelId, undefined);
+  expect(updated.latest).toMatchObject({turnNum: 6, appData});
+});
 
-    const appData = '0xa00f00';
-    await expect(w.updateChannel(updateChannelArgs({appData}))).resolves.toMatchObject({
-      outbox: [
-        {
-          params: {
-            recipient: 'bob',
-            sender: 'alice',
-            data: {signedStates: [{turnNum: 6, appData}]},
-          },
-        },
-      ],
-      channelResults: [{channelId, turnNum: 6, appData}],
-    });
+describe('error cases', () => {
+  it('throws when it is not my turn', async () => {
+    const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 4})]});
+    await Channel.query().insert(c);
 
-    const updated = await Channel.forId(channelId, undefined);
-    expect(updated.latest).toMatchObject({turnNum: 6, appData});
+    await expect(w.updateChannel(updateChannelArgs())).rejects.toMatchObject(
+      Error('it is not my turn')
+    );
   });
 });
