@@ -41,7 +41,7 @@ const ensureSupportedStateExists = (
   hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
-  if (cs.supported.turnNum + (1 % cs.supported.participants.length) === cs.myIndex)
+  if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
     return right(cs);
   return left(new UpdateChannelError(Errors.notMyTurn));
 }
