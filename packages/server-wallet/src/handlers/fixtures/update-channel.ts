@@ -1,6 +1,6 @@
 import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
 
-import {UpdateChannelHandlerParams} from '../updateChannel';
+import {UpdateChannelHandlerParams} from '../update-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {fixture} from '../../wallet/__test__/fixtures/utils';
 import {Uint256} from '../../type-aliases';
