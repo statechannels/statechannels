@@ -2,7 +2,7 @@ import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/a
 import {
   ChannelStatus,
   ChannelResult as ClientChannelResult,
-  UpdateChannelParams as ClientUpdateChannelParams,
+  UpdateChannelParams,
   CreateChannelParams,
   Notification,
   JoinChannelParams,
@@ -27,8 +27,6 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {logger} from '../logger';
 
-// TODO: participants should be removed from ClientUpdateChannelParams
-export type UpdateChannelParams = Omit<ClientUpdateChannelParams, 'participants'>;
 export {ChannelStatus, CreateChannelParams};
 
 export type AddressedMessage = Message & {to: string; from: string};
