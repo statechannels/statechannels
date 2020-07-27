@@ -56,8 +56,4 @@ export const isSubmitTransaction = guard<SubmitTransaction>('SubmitTransaction')
 export type Outgoing = Notice;
 export const isOutgoing = isNotifyApp;
 
-export function signState(channelId: Bytes32, vars: StateVariables): SignState {
-  return {...vars, type: 'SignState', channelId};
-}
-
 export type ProtocolAction = SignState | NotifyApp | SubmitTransaction;

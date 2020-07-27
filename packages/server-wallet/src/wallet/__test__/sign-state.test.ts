@@ -1,14 +1,20 @@
 import Objection from 'objection';
+import {StateVariables} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
-import {signState} from '../../protocols/actions';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seed} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
 import {Channel} from '../../models/channel';
+import {Bytes32} from '../../type-aliases';
+import {SignState} from '../../protocols/actions';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob} from './fixtures/signingWallets';
+
+function signState(channelId: Bytes32, vars: StateVariables): SignState {
+  return {...vars, type: 'SignState', channelId};
+}
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
