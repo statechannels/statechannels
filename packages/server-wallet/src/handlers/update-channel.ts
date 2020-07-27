@@ -3,16 +3,15 @@ import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/walle
 import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
 
-import {SignState} from '../protocols/actions';
-import {ChannelState} from '../protocols/state';
+import {SignState, signState} from '../protocols/actions';
+import {ChannelState, ProtocolResult} from '../protocols/state';
 
 type ChannelStateWithSupported = ChannelState & {
   supported: SignedStateWithHash;
   latestSignedByMe: SignedStateWithHash;
 };
 
-type HandlerResult = Either<UpdateChannelError, SignState>;
-type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
+type StepResult = Either<Error, ChannelStateWithSupported>;
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
@@ -65,13 +64,9 @@ const incrementTurnNumber = (args: UpdateChannelHandlerParams) => (
 export function updateChannel(
   args: UpdateChannelHandlerParams,
   channelState: ChannelState
-): HandlerResult {
-  // todo: use Action creator from another branch
-  const signStateAction = (sv: StateVariables): SignState => ({
-    type: 'SignState',
-    channelId: args.channelId,
-    ...sv,
-  });
+): ProtocolResult {
+  const signStateVars = (sv: StateVariables): ProtocolResult =>
+    signState({...sv, channelId: args.channelId});
 
   return pipe(
     channelState,
@@ -79,6 +74,6 @@ export function updateChannel(
     chain(hasRunningTurnNumber),
     chain(isMyTurn),
     map(incrementTurnNumber(args)),
-    map(signStateAction)
+    chain(signStateVars)
   );
 }
