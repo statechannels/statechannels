@@ -17,13 +17,8 @@ export default class PingClient {
     if (this.channelId) throw Error(`PingClient channel already created: ${this.channelId}`);
 
     const {
-      channelId,
-      outbox: [
-        // FIXME: Fails here because createChannel does not create a message
-        {
-          notice: {params},
-        },
-      ],
+      channelResults: [{channelId}],
+      outbox: [{params}],
     } = await this.wallet.createChannel(
       // Re-using test fixture
       createChannelArgs()
@@ -43,24 +38,21 @@ export default class PingClient {
   public async ping(): Promise<void> {
     if (!this.channelId) throw Error(`PingClient has no channel`);
 
-    const channel = await this.wallet.getChannel(this.channelId);
+    // TODO: Blocked on https://github.com/statechannels/statechannels/pull/2355
+    // const channel = await this.wallet.getChannel(this.channelId);
 
-    // Assuming MessageQueued inside the outbox
-    const {
-      outbox: [
-        {
-          notice: {params},
-        },
-      ],
-    } = await this.wallet.updateChannel(channel);
+    // // Assuming MessageQueued inside the outbox
+    // const {
+    //   outbox: [{params}],
+    // } = await this.wallet.updateChannel(channel);
 
-    const message = await this.sendMessageToPongOverHTTP(params as Message);
+    // const message = await this.sendMessageToPongOverHTTP(params as Message);
 
-    await this.wallet.pushMessage({
-      ...message,
-      to: message.recipient,
-      from: message.sender,
-    });
+    // await this.wallet.pushMessage({
+    //   ...message,
+    //   to: message.recipient,
+    //   from: message.sender,
+    // });
   }
 
   private sendMessageToPongOverHTTP = (message: Message): Promise<Message> =>
