@@ -34,20 +34,23 @@ describe('signState', () => {
     c = await Channel.query().insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
   });
 
-  it('signs the state, ', async () => {
+  it('signs the state, returning outgoing messages and a channelResult', async () => {
     await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
 
     const result = await Store.signState(signState(c.channelId, c.vars[0]), tx);
-    expect(result).toMatchObject([
-      {
-        type: 'NotifyApp',
-        notice: {
-          method: 'MessageQueued',
-          params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+    expect(result).toMatchObject({
+      outgoing: [
+        {
+          type: 'NotifyApp',
+          notice: {
+            method: 'MessageQueued',
+            params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+          },
         },
-      },
-    ]);
+      ],
+      channelResult: {turnNum: c.vars[0].turnNum},
+    });
   });
 
   it('uses a transaction', async () => {
