@@ -28,26 +28,24 @@ describe('happy path', () => {
   });
 
   it('updates a channel', async () => {
-    expect(
-      await Channel.query()
-        .where({channelId})
-        .resultSize()
-    ).toEqual(1);
     const current = await Channel.forId(channelId, undefined);
     expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
 
     const appData = '0xa00f00';
-    await w.updateChannel(updateChannelArgs({appData}));
-    expect(await Channel.query().resultSize()).toEqual(1);
+    await expect(w.updateChannel(updateChannelArgs({appData}))).resolves.toMatchObject({
+      outbox: [
+        {
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [{turnNum: 6, appData}]},
+          },
+        },
+      ],
+      channelResults: [{channelId, turnNum: 6, appData}],
+    });
 
     const updated = await Channel.forId(channelId, undefined);
     expect(updated.latest).toMatchObject({turnNum: 6, appData});
-  });
-
-  it('sends a message', async () => {
-    await expect(w.updateChannel(updateChannelArgs())).resolves.toMatchObject({
-      // outbox: [{params: {recipient: 'bob', sender: 'alice'}}],
-      outbox: [], // FIXME
-    });
   });
 });

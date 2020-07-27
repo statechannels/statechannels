@@ -111,13 +111,11 @@ export class Wallet implements WalletInterface {
         case 'Left':
           throw decision.left;
 
-        case 'Right':
-          await Store.signState(decision.right, tx);
+        case 'Right': {
+          const {outgoing, channelResult} = await Store.signState(decision.right, tx);
 
-          return {
-            outbox: [],
-            channelResults: [],
-          };
+          return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+        }
       }
     });
   }
@@ -226,10 +224,8 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
         case 'SignState': {
-          const notices = await Store.signState(action, tx);
-          notices.map(n => outbox.push(n.notice));
-
-          const {channelResult} = await Channel.forId(action.channelId, tx);
+          const {outgoing, channelResult} = await Store.signState(action, tx);
+          outgoing.map(n => outbox.push(n.notice));
           channelResults.push(channelResult);
           return;
         }

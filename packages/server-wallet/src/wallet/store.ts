@@ -1,4 +1,5 @@
 import Objection from 'objection';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {SignState} from '../protocols/actions';
 import {Channel, SyncState} from '../models/channel';
@@ -6,12 +7,17 @@ import {Bytes32} from '../type-aliases';
 import {ChannelState} from '../protocols/state';
 
 export const Store = {
-  signState: async function(action: SignState, tx: Objection.Transaction): Promise<SyncState> {
+  signState: async function(
+    action: SignState,
+    tx: Objection.Transaction
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const channel = await Channel.forId(action.channelId, tx);
-    const notifications = channel.signAndAdd(action);
+    const outgoing = channel.signAndAdd(action);
     await Channel.query(tx).update(channel);
 
-    return notifications;
+    const {channelResult} = channel;
+
+    return {outgoing, channelResult};
   },
 
   getChannel: async function(
