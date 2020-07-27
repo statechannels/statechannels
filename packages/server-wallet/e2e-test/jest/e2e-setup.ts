@@ -8,7 +8,7 @@ module.exports = async (): Promise<void> => {
   server = await new Promise(function(resolve) {
     server = app.listen(0, '127.0.0.1', function() {
       const {address, port} = server.address() as {address: string; port: number};
-      console.log(`\nRunning HTTP Pong server on ${address}:${port}...`);
+      console.log(`\n[e2e-setup.ts] Running HTTP Pong server on ${address}:${port}...`);
       resolve(server);
     });
   });
