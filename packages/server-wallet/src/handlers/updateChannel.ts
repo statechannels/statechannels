@@ -9,6 +9,7 @@ import {ChannelState} from '../protocols/state';
 
 type ChannelStateWithSupported = ChannelState & {
   supported: SignedStateWithHash;
+  latestSignedByMe: SignedStateWithHash;
 };
 
 type HandlerResult = Either<Error, ProtocolAction>;
