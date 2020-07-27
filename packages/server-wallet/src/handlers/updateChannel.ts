@@ -40,9 +40,9 @@ const ensureSupportedStateExists = (
 ): Either<UpdateChannelError, ChannelStateWithSupported> =>
   hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
 
-function isMyTurn(ss: ChannelStateWithSupported): StepResult {
-  if (ss.supported.turnNum + (1 % ss.supported.participants.length) === ss.myIndex)
-    return right(ss);
+function isMyTurn(cs: ChannelStateWithSupported): StepResult {
+  if (cs.supported.turnNum + (1 % cs.supported.participants.length) === cs.myIndex)
+    return right(cs);
   return left(new UpdateChannelError(Errors.notMyTurn));
 }
 
@@ -62,7 +62,6 @@ const incrementTurnNumber = (
 // END helper functions
 
 // todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
-
 export function updateChannel(
   args: UpdateChannelHandlerParams,
   channelState: ChannelState
