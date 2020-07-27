@@ -64,6 +64,8 @@ export default class PingClient {
     });
   }
 
-  private messagePongAndExpectReply = async (message: Message): Promise<Message> =>
-    (await axios.post(this.pongHttpServerURL + '/inbox', {message})).data;
+  private async messagePongAndExpectReply(message: Message): Promise<Message> {
+    const {data: reply} = await axios.post(this.pongHttpServerURL + '/inbox', {message});
+    return reply;
+  }
 }
