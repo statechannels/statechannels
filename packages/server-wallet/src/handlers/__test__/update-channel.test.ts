@@ -1,7 +1,7 @@
 import {updateChannel} from '../update-channel';
-import {updateChannelFixture} from '../fixtures/update-channel';
-import {channelStateFixture} from '../../protocols/__test__/fixtures/channel-state';
+import {updateChannelFixture, channelStateFixture} from '../fixtures/update-channel';
 
 test('validUpdate', () => {
-  updateChannel(updateChannelFixture(), channelStateFixture());
+  const result = updateChannel(updateChannelFixture(), channelStateFixture());
+  expect(result).toEqualRight();
 });
