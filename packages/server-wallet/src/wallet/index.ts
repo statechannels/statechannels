@@ -31,6 +31,7 @@ import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
+import * as UpdateChannel from '../handlers/update-channel';
 
 import {Store} from './store';
 
@@ -99,9 +100,26 @@ export class Wallet implements WalletInterface {
   async joinChannel(_args: JoinChannelParams): Result {
     throw 'Unimplemented';
   }
-  async updateChannel(_args: UpdateChannelParams): Result {
-    throw 'Unimplemented';
+  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
+    return knex.transaction(async tx => {
+      const channel = await Store.getChannel(channelId, tx);
+
+      if (!channel)
+        throw new UpdateChannel.UpdateChannelError(UpdateChannel.Errors.channelNotFound, {
+          channelId,
+        });
+
+      const outcome = deserializeAllocations(allocations);
+
+      const nextState = getOrThrow(
+        UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
+      );
+      const {outgoing, channelResult} = await Store.signState(nextState, tx);
+
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+    });
   }
+
   async closeChannel(_args: CloseChannelParams): Result {
     throw 'Unimplemented';
   }
@@ -207,10 +225,8 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
         case 'SignState': {
-          const notices = await Store.signState(action, tx);
-          notices.map(n => outbox.push(n.notice));
-
-          const {channelResult} = await Channel.forId(action.channelId, tx);
+          const {outgoing, channelResult} = await Store.signState(action, tx);
+          outgoing.map(n => outbox.push(n.notice));
           channelResults.push(channelResult);
           return;
         }
@@ -241,3 +257,13 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
   return {outbox, error, channelResults};
 };
+
+// TODO: This should be removed, and not used externally.
+// It is a fill-in until the wallet API is specced out.
+function getOrThrow<E, T>(result: Either.Either<E, T>): T {
+  return Either.getOrElseW<E, T>(
+    (err: E): T => {
+      throw err;
+    }
+  )(result);
+}

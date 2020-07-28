@@ -1,4 +1,4 @@
-import {StateVariables} from '@statechannels/wallet-core';
+import {StateVariables, calculateChannelId} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {Channel, RequiredColumns} from '../../../models/channel';
@@ -23,6 +23,7 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
   const columns: RequiredColumns = _.merge(defaults, props);
 
   columns.vars.map(s => (s = dropNonVariables(addHash({...columns, ...s}))));
+  (columns as any).channelId = calculateChannelId(columns);
   return Channel.fromJson(columns);
 };
 

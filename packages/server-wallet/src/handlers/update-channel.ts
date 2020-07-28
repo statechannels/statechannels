@@ -3,7 +3,7 @@ import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/walle
 import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
 
-import {ProtocolAction, SignState} from '../protocols/actions';
+import {SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
 
 type ChannelStateWithSupported = ChannelState & {
@@ -11,21 +11,22 @@ type ChannelStateWithSupported = ChannelState & {
   latestSignedByMe: SignedStateWithHash;
 };
 
-type HandlerResult = Either<Error, ProtocolAction>;
-type StepResult = Either<Error, ChannelStateWithSupported>;
+type HandlerResult = Either<UpdateChannelError, SignState>;
+type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
   appData: string;
 }
 
-enum Errors {
+export enum Errors {
+  channelNotFound = 'channel not found',
   invalidLatestState = 'must have latest state',
   notInRunningStage = 'channel must be in running state',
   notMyTurn = 'it is not my turn',
 }
 
-class UpdateChannelError extends Error {
+export class UpdateChannelError extends Error {
   readonly type = 'UpdateChannelError';
   constructor(reason: Errors, public readonly data: any = undefined) {
     super(reason);
@@ -41,7 +42,7 @@ const ensureSupportedStateExists = (
   hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
-  if (cs.supported.turnNum + (1 % cs.supported.participants.length) === cs.myIndex)
+  if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
     return right(cs);
   return left(new UpdateChannelError(Errors.notMyTurn));
 }
