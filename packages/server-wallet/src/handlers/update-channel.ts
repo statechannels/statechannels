@@ -19,16 +19,16 @@ export interface UpdateChannelHandlerParams {
   appData: string;
 }
 
-export enum Errors {
-  channelNotFound = 'channel not found',
+export enum UpdateChannelErrors {
   invalidLatestState = 'must have latest state',
   notInRunningStage = 'channel must be in running state',
   notMyTurn = 'it is not my turn',
+  channelNotFound = 'channel not found',
 }
 
 export class UpdateChannelError extends Error {
   readonly type = 'UpdateChannelError';
-  constructor(reason: Errors, public readonly data: any = undefined) {
+  constructor(reason: UpdateChannelErrors, public readonly data: any = undefined) {
     super(reason);
   }
 }
@@ -39,16 +39,19 @@ const hasSupportedState = (cs: ChannelState): cs is ChannelStateWithSupported =>
 const ensureSupportedStateExists = (
   cs: ChannelState
 ): Either<UpdateChannelError, ChannelStateWithSupported> =>
-  hasSupportedState(cs) ? right(cs) : left(new UpdateChannelError(Errors.invalidLatestState));
+  hasSupportedState(cs)
+    ? right(cs)
+    : left(new UpdateChannelError(UpdateChannelErrors.invalidLatestState));
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
   if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
     return right(cs);
-  return left(new UpdateChannelError(Errors.notMyTurn));
+  return left(new UpdateChannelError(UpdateChannelErrors.notMyTurn));
 }
 
 function hasRunningTurnNumber(cs: ChannelStateWithSupported): StepResult {
-  if (cs.supported.turnNum < 3) return left(new UpdateChannelError(Errors.notInRunningStage));
+  if (cs.supported.turnNum < 3)
+    return left(new UpdateChannelError(UpdateChannelErrors.notInRunningStage));
   return right(cs);
 }
 
