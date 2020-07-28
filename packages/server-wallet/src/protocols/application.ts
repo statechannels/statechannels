@@ -3,7 +3,7 @@ import {BN, isSimpleAllocation, checkThat} from '@statechannels/wallet-core';
 import {match} from '../match';
 
 import {Protocol, stage, ProtocolResult, ChannelState} from './state';
-import {noAction, error, signState} from './actions';
+import {noAction, error, signStateProtocolResult} from './actions';
 
 type FundingStatus = 'Funded' | 'Not Funded';
 export type ProtocolState = {app: ChannelState};
@@ -11,7 +11,7 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult => {
   if (!ps.app.latestSignedByMe) {
     return error('Expected a signed state by me');
   }
-  return signState({
+  return signStateProtocolResult({
     channelId: ps.app.channelId,
     ...ps.app.latestSignedByMe,
     turnNum: 3,

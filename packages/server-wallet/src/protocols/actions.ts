@@ -37,13 +37,13 @@ export const submitTransaction = (props: Omit<SubmitTransaction, 'type'>): Proto
     })
   );
 
-export const signState = (props: Omit<SignState, 'type'>): ProtocolResult =>
-  right(
-    some({
-      type: 'SignState',
-      ...props,
-    })
-  );
+export const signState = (props: Omit<SignState, 'type'>): SignState => ({
+  type: 'SignState',
+  ...props,
+});
+
+export const signStateProtocolResult = (props: Omit<SignState, 'type'>): ProtocolResult =>
+  right(some(signState(props)));
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
   a: ProtocolAction
