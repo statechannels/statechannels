@@ -17,8 +17,8 @@ const users = [
     // if it is not '/', like: '/test-site/img/image.jpg'.
     image: '/img/undraw_open_source.svg',
     infoLink: 'https://www.facebook.com',
-    pinned: true,
-  },
+    pinned: true
+  }
 ];
 
 const siteConfig = {
@@ -31,7 +31,7 @@ const siteConfig = {
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: 'nitro-protocol',
+  projectName: 'docs-website',
   organizationName: 'statechannels',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
@@ -41,7 +41,7 @@ const siteConfig = {
   headerLinks: [
     {doc: 'overview', label: 'Docs'},
     {doc: 'contract-api/contract-inheritance', label: 'Contract API'},
-    {page: 'help', label: 'Help'},
+    {page: 'help', label: 'Help'}
   ],
 
   // If you have users set above, you add it here:
@@ -55,18 +55,18 @@ const siteConfig = {
   /* Colors for website */
   colors: {
     primaryColor: '#3531FF',
-    secondaryColor: '#46A5D0',
+    secondaryColor: '#46A5D0'
   },
 
   markdownPlugins: [
     // Highlight admonitions.
-    require('remarkable-admonitions')({icon: 'svg-inline'}),
+    require('remarkable-admonitions')({icon: 'svg-inline'})
   ],
 
   /* Custom fonts for website */
 
   fonts: {
-    myFont: ['Chivo', 'sans-serif'],
+    myFont: ['Chivo', 'sans-serif']
   },
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
@@ -78,18 +78,18 @@ const siteConfig = {
 
     hljs: function(hljs) {
       return hljsDefineSolidity(hljs);
-    },
+    }
   },
 
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.6.2/dist/mermaid.min.js',
+    'https://unpkg.com/mermaid@8.6.2/dist/mermaid.min.js'
   ],
 
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Chivo&display=swap',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css'
   ],
 
   // On page navigation for the current documentation page.
@@ -110,7 +110,7 @@ const siteConfig = {
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   repoUrl: 'https://github.com/statechannels/statechannels',
-  packageUrl: 'https://www.npmjs.com/package/@statechannels/nitro-protocol',
+  packageUrl: 'https://www.npmjs.com/package/@statechannels/nitro-protocol'
 };
 
 module.exports = siteConfig;
