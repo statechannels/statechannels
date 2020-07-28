@@ -82,13 +82,7 @@ export class Wallet implements WalletInterface {
 
       const {outgoing, channelResult} = await Store.signState(
         channelId,
-        {
-          ...channelConstants,
-          turnNum: 0,
-          isFinal: false,
-          appData,
-          outcome,
-        },
+        {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
         tx
       );
 
@@ -97,20 +91,27 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): Result {
-    return knex.transaction(async tx => {
-      const channel = await Store.getChannel(channelId, tx);
+    const {outbox} = await knex.transaction(
+      async (tx): Promise<{outbox: any}> => {
+        const channel = await Store.getChannel(channelId, tx);
 
-      if (!channel)
-        throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
-          channelId,
-        });
+        if (!channel)
+          throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
+            channelId,
+          });
 
-      const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+        const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
+        const {outgoing} = await Store.signState(channelId, nextState, tx);
 
-      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
-    });
+        return {outbox: outgoing.map(n => n.notice)};
+      }
+    );
+
+    const {channelResults, outbox: nextOutbox} = await takeActions([channelId]);
+
+    return {outbox: outbox.concat(nextOutbox), channelResults};
   }
+
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
     return knex.transaction(async tx => {
       const channel = await Store.getChannel(channelId, tx);
