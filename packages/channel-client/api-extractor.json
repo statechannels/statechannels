@@ -10,7 +10,7 @@
 
   "docModel": {
     "enabled": true,
-    "apiJsonFilePath": "../../docs-website/docs/generated-apis/channel-client.api.json"
+    "apiJsonFilePath": "../docs-website/docs/generated-apis/channel-client.api.json"
   },
   "dtsRollup": {
     "enabled": true
