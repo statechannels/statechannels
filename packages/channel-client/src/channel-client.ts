@@ -96,6 +96,31 @@ export class ChannelClient implements BrowserChannelClientInterface {
   /**
    * Registers a callback that will fire when a state channel is updated.
    *
+   * @remarks
+   *
+   * The ChannelUpdated event is emitted when any of the following occurs:
+   * <ul>
+   * <li> A state is received via {@link @statechannels/channel-client#ChannelClient.updateChannel| updateChannel()}</li>
+   * <li> A state is received from another participant via {@link @statechannels/channel-client#ChannelClient.pushMessage | pushMessage()}</li>
+   * <li> Changes to the state of the blockchain are detected (e.g funding or challenges)</li>
+   * </ul>
+   *
+   * In the first two cases, this notification is only triggered when the wallet verifies that the state causes the 'top state' to change.
+   *
+   * The 'top state' is the state drawn from the set of supported states that has the highest turn number.
+   *
+   * (We have glossed over / left undefined what happens in the case where there is more than one top state).
+   *
+   * In particular, this means that
+   * <ul>
+   * <li> incorrectly formatted</li>
+   * <li> incorrectly signed</li>
+   * <li> otherwise unsupported</li>
+   * <li> out-of-date</li>
+   * </ul>
+   *
+   * states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification <b>unless</b> it means that a conclusion proof is now available.
+   *
    * @param callback - A function that accepts a ChannelUpdatedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
@@ -109,6 +134,10 @@ export class ChannelClient implements BrowserChannelClientInterface {
   /**
    * Registers a callback that will fire when a state channel is proposed.
    *
+   * @remarks
+   *
+   * Triggered when the wallet receives a message containing a new channel.
+   * The App might respond by calling {@link @statechannels/channel-client#ChannelClient.joinChannel| joinChannel()}.
    * @param callback - A function that accepts a ChannelProposedNotification.
    * @returns A function that will unregister the callback when invoked.
    *
@@ -236,6 +265,12 @@ export class ChannelClient implements BrowserChannelClientInterface {
 
   /**
    * Requests a close for a channel
+   *
+   * @remarks
+   *
+   * The wallet will respond to this request with an error if it is not your turn.
+   * If it is your turn, the wallet will respond as soon as it has signed an `isFinal` state, and the channel is updated to `closing` status.
+   * The channel may later update to `closed` status only when other channel participants have responded in kind: this can be detected by listening to {@link @statechannels/channel-client#ChannelClient.onChannelUpdated | Channel Updated} events and filtering on the channel status.
    *
    * @param channelId - id for the state channel
    * @returns A promise that resolves to a ChannelResult.

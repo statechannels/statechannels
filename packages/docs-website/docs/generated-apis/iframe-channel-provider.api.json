@@ -1,0 +1,1575 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "7.9.2",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "@statechannels/iframe-channel-provider!",
+  "docComment": "",
+  "name": "@statechannels/iframe-channel-provider",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "@statechannels/iframe-channel-provider!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Variable",
+          "canonicalReference": "@statechannels/iframe-channel-provider!channelProvider:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "channelProvider: "
+            },
+            {
+              "kind": "Reference",
+              "text": "IFrameChannelProvider",
+              "canonicalReference": "@statechannels/iframe-channel-provider!~IFrameChannelProvider:class"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "channelProvider",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface ChannelProviderInterface "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "ChannelProviderInterface",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#destinationAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "destinationAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#off:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "off: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OffType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "off",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#on:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "on: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OnType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "on",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#send:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "send<MethodName extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "MethodName"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[MethodName]['request']['params']"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[MethodName]['response']['result']>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "method",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                },
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "MethodName",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "send"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#signingAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "signingAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "signingAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#subscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "subscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "subscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#unsubscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "unsubscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "unsubscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#walletVersion:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "walletVersion?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "walletVersion",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!EventType:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface EventType extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "NotificationType",
+              "canonicalReference": "@statechannels/client-api-schema!NotificationType:type"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "EventType",
+          "members": [
+            {
+              "kind": "IndexSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!EventType:index(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "[id: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "[unknown]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "id",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface IFrameChannelProviderInterface extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "Web3ChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IFrameChannelProviderInterface",
+          "members": [
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface#mountWalletComponent:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "mountWalletComponent(url?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "url",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "mountWalletComponent"
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcErrorResponse:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isJsonRpcErrorResponse(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "JsonRpcErrorResponse",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcErrorResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isJsonRpcErrorResponse"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcNotification:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isJsonRpcNotification<T>(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "JsonRpcNotification",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<T, any>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 7
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "isJsonRpcNotification"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcResponse:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isJsonRpcResponse(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "JsonRpcResponse",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isJsonRpcResponse"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcError:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type JsonRpcError = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    code: number;\n    message: string;\n    data?: {\n        [key: string]: any;\n    };\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "JsonRpcError",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcErrorResponse:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type JsonRpcErrorResponse = "
+            },
+            {
+              "kind": "Reference",
+              "text": "ErrorResponse",
+              "canonicalReference": "@statechannels/client-api-schema!ErrorResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "JsonRpcErrorResponse",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface JsonRpcNotification<NotificationName = "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ", NotificationParams = "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
+            }
+          ],
+          "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "NotificationName",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "typeParameterName": "NotificationParams",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "JsonRpcNotification",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#jsonrpc:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "jsonrpc: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "'2.0'"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "jsonrpc",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#method:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "NotificationName"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "method",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#params:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "params: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "NotificationParams"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "params",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface JsonRpcRequest<MethodName = "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ", RequestParams = "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
+            }
+          ],
+          "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "MethodName",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "typeParameterName": "RequestParams",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "JsonRpcRequest",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#id:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "id?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "id",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#jsonrpc:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "jsonrpc: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "'2.0'"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "jsonrpc",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#method:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "MethodName"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "method",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#params:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "params: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "RequestParams"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "params",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface JsonRpcResponse<ResponseType = "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
+            }
+          ],
+          "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "ResponseType",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "JsonRpcResponse",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#id:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "id: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "id",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#jsonrpc:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "jsonrpc: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "'2.0'"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "jsonrpc",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#result:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "result: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "ResponseType"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "result",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type OffType = "
+            },
+            {
+              "kind": "Content",
+              "text": "typeof "
+            },
+            {
+              "kind": "Reference",
+              "text": "eventEmitter.off",
+              "canonicalReference": "eventemitter3!~EventEmitter#off:member"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "OffType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type OnType = "
+            },
+            {
+              "kind": "Content",
+              "text": "typeof "
+            },
+            {
+              "kind": "Reference",
+              "text": "eventEmitter.on",
+              "canonicalReference": "eventemitter3!~EventEmitter#on:member"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "OnType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type SubscribeType = "
+            },
+            {
+              "kind": "Content",
+              "text": "(subscriptionType: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Notification",
+              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
+            },
+            {
+              "kind": "Content",
+              "text": "['method'], params?: any) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<string>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "SubscribeType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 6
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type UnsubscribeType = "
+            },
+            {
+              "kind": "Content",
+              "text": "(subscriptionId: string) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<boolean>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "UnsubscribeType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 4
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type WalletJsonRpcAPI = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    CreateChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CreateChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CreateChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CreateChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CreateChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    UpdateChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UpdateChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UpdateChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    PushMessage: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PushMessageRequest",
+              "canonicalReference": "@statechannels/client-api-schema!PushMessageRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PushMessageResponse",
+              "canonicalReference": "@statechannels/client-api-schema!PushMessageResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    CloseChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    JoinChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "JoinChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "JoinChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetState: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetStateRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetStateRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetStateResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetStateResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetWalletInformation: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetWalletInformationRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetWalletInformationResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    EnableEthereum: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "EnableEthereumRequest",
+              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "EnableEthereumResponse",
+              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    ChallengeChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChallengeChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChallengeChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    ApproveBudgetAndFund: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ApproveBudgetAndFundRequest",
+              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ApproveBudgetAndFundResponse",
+              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetBudget: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetBudgetRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetBudgetResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    CloseAndWithdraw: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseAndWithdrawRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseAndWithdrawResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetChannels: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetChannelsRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetChannelsRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetChannelsResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetChannelsResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "WalletJsonRpcAPI",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 54
+          }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface Web3ChannelProviderInterface extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Web3ChannelProviderInterface",
+          "members": [
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface#enable:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "enable(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "enable"
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,6 @@
     "loglevel": "1.6.8"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.8.21",
     "@microsoft/api-extractor": "^7.9.2",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -41,9 +40,8 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
-    "build": "yarn build:typescript && yarn docgen",
+    "build": "yarn build:typescript && api-extractor run --local",
     "build:typescript": "tsc -b .",
-    "docgen": "node scripts/docgen.js",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
     "prepare": "rm -rf lib && yarn build",
