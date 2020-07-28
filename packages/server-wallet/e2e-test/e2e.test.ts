@@ -44,19 +44,13 @@ describe('e2e', () => {
   });
 
   it('can create a channel, send signed state via http', async () => {
-    let channel = await pingClient.createPingChannel();
+    const channel = await pingClient.createPingChannel();
 
     // TODO: Currently the PongController does not join the channel
     // so these tests only confirm that the channel was created
     // within Ping's wallet, that's it. Next up will be for Pong
     // to join the channel and then these tests should check for
     // 'running' status, turnNum 1, etc.
-
-    expect(channel.participants).toStrictEqual([alice(), bob()]);
-    expect(channel.status).toBe('opening');
-    expect(channel.turnNum).toBe(0);
-
-    channel = await pingClient.getChannel(channel.channelId);
 
     expect(channel.participants).toStrictEqual([alice(), bob()]);
     expect(channel.status).toBe('opening');
