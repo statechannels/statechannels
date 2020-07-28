@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "api-documenter": "node scripts/api-documenter.js",
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
     "build": "docusaurus-build",
