@@ -30,7 +30,7 @@ for (let i = 0; i < 3; i++) {
 
 const chainId = '0x1234'; // E.g. '0x1' for mainnnet. Using a mock here
 
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = 0;
 const channel: Channel = {chainId, channelNonce, participants};
 const channelId = getChannelId(channel);
 ```
@@ -52,17 +52,17 @@ Because we are depositing ETH, we must remember to send the right amount of ETH 
 
 ```typescript
 import {ethers} from 'ethers';
-import {randomChannelId} from '@statechannels/nitro-protocol';
+import {randomChannelId, randomChannelId} from '@statechannels/nitro-protocol';
 
 // In lesson5.test.ts
 
 /*
       Get an appropriate representation of 1 wei, and
-      use ethers.HashZero = 0x000...0 as a dummy channelId.
+      use randomChannelId() as a dummy channelId.
       WARNING: don't do this in the wild: you won't be able to recover these funds.
   */
 const amount = ethers.utils.parseUnits('1', 'wei');
-const destination = ethers.constants.HashZero;
+const destination = randomChannelId();
 
 /*
     Attempt to deposit 1 wei against the channel id we created.
