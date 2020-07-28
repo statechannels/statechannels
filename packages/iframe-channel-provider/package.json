@@ -20,6 +20,8 @@
     "pino": "6.2.0"
   },
   "devDependencies": {
+    "@microsoft/api-documenter": "^7.8.21",
+    "@microsoft/api-extractor": "^7.9.2",
     "@statechannels/client-api-schema": "0.0.3",
     "@types/debug": "4.1.5",
     "@types/eslint": "6.1.7",
@@ -65,10 +67,11 @@
   "main": "dist/iframe-channel-provider.js",
   "scripts": {
     "build": "webpack",
-    "build:typescript": "tsc -b .",
+    "build:typescript": "tsc -b . && yarn docgen",
+    "docgen": "node scripts/docgen.js",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
-    "prepare": "rm -rf dist && yarn build",
+    "prepare": "rm -rf dist && yarn build && yarn build:typescript",
     "prepublish": "webpack",
     "test": "jest --watch",
     "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
