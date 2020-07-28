@@ -233,7 +233,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
         channels.shift() as string;
       };
 
-      const handleAction = async (action: ProtocolAction): Promise<any> => {
+      const doAction = async (action: ProtocolAction): Promise<any> => {
         switch (action.type) {
           case 'SignState': {
             const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
@@ -260,12 +260,14 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
       try {
         const nextAction = await Application.protocol({app});
-        // TODO: handleAction might also throw an error.
-        // It would be nice for handleAction to return an Either type, pipe the right values,
+        // TODO: doAction might also throw an error.
+        // It would be nice for doAction to return an Either type, pipe the right values,
         // and handle the left values with setError
-        await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
+        await Either.fold(setError, Option.fold(markChannelAsDone, doAction))(nextAction);
       } catch (err) {
-        // FIXME
+        // TODO This code should not need to catch an arbitrary, unknown error.
+        // doAction could return an Either, and then the error can be handled more explicitly
+        // See https://github.com/statechannels/statechannels/issues/2379
         logger.error({err}, 'Error handling action');
         await setError(err);
       }
