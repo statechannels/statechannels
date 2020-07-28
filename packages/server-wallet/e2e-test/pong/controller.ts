@@ -1,4 +1,5 @@
 import {Message} from '@statechannels/wire-format';
+import {SignedState} from '@statechannels/wallet-core';
 
 import {Wallet} from '../../src/wallet';
 
@@ -6,12 +7,20 @@ export default class PongController {
   private readonly wallet: Wallet = new Wallet();
 
   public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {
-    const {recipient, sender} = message;
+    const {
+      recipient: to,
+      sender: from,
+      data: {signedStates},
+    } = message;
+
+    // FIXME: server-wallet is using wallet-core, not wire-format for
+    // types of messages between parties. e2e-test uses wire-format
+    const convertedSignedStates = (signedStates as unknown) as SignedState[];
 
     const {channelResults, outbox} = await this.wallet.pushMessage({
-      ...message,
-      to: recipient,
-      from: sender,
+      signedStates: convertedSignedStates,
+      to,
+      from,
     });
 
     if (!channelResults) throw Error('sanity check');
@@ -24,7 +33,7 @@ export default class PongController {
 
     return {
       sender: 'pong',
-      recipient: sender,
+      recipient: from,
       data: {
         signedStates: [
           /* TODO: */

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Wallet} from '../../src/wallet';
 import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-channel';
@@ -7,24 +8,29 @@ import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-chann
 export default class PingClient {
   private readonly wallet: Wallet = new Wallet();
 
-  private channelId?: string;
+  constructor(private readonly pongHttpServerURL: string) {}
 
-  constructor(private readonly pongHttpServerURL: string) {
-    console.log(`Created PingClient that pings ${pongHttpServerURL}`);
+  public async getChannel(channelId: string): Promise<ChannelResult> {
+    const {
+      channelResults: [channel],
+    } = await this.wallet.getState({channelId});
+
+    return channel;
   }
 
-  public async createPingChannel(): Promise<void> {
-    if (this.channelId) throw Error(`PingClient channel already created: ${this.channelId}`);
+  public async getChannels(): Promise<ChannelResult[]> {
+    const {channelResults} = await this.wallet.getChannels();
+    return channelResults;
+  }
 
+  public async createPingChannel(): Promise<ChannelResult> {
     const {
-      channelResults: [{channelId}],
       outbox: [{params}],
+      channelResults: [channel],
     } = await this.wallet.createChannel(
       // Re-using test fixture
       createChannelArgs()
     );
-
-    this.channelId = channelId;
 
     const message = await this.messagePongAndExpectReply(params as Message);
 
@@ -33,14 +39,12 @@ export default class PingClient {
       to: message.recipient,
       from: message.sender,
     });
+
+    return channel;
   }
 
-  public async ping(): Promise<void> {
-    if (!this.channelId) throw Error(`PingClient has no channel`);
-
-    const {
-      channelResults: [channel],
-    } = await this.wallet.getState({channelId: this.channelId});
+  public async ping(channelId: string): Promise<void> {
+    const channel = await this.getChannel(channelId);
 
     // Assuming MessageQueued inside the outbox
     const {

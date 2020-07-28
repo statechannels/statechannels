@@ -59,7 +59,7 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Result {
-    return knex.transaction(async tx => {
+    return Channel.transaction(async tx => {
       const {participants, appDefinition, appData, allocations} = args;
       const outcome: Outcome = deserializeAllocations(allocations);
       // TODO: How do we pick a signing address?
@@ -148,7 +148,10 @@ export class Wallet implements WalletInterface {
       await Channel.transaction(async tx => {
         for (const ss of message.signedStates || []) {
           // We ignore unsigned states
-          if (!ss.signatures?.length) return;
+          if (!ss.signatures?.length) {
+            logger.info(`pushMessage received unsigned state`);
+            return;
+          }
 
           const channelId = calculateChannelId(ss);
           let channel = await Channel.query(tx)
@@ -176,6 +179,7 @@ export class Wallet implements WalletInterface {
             const cols: RequiredColumns = {...ss, vars: [addHash(ss)], signingAddress};
 
             channel = Channel.fromJson(cols);
+
             const {channelId} = await Channel.query(tx).insert(channel);
             channelIds.push(channelId);
           } else {

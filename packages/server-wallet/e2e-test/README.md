@@ -28,3 +28,12 @@ The end-to-end test at this point simply spins up the `pong` server and then cre
 ### next steps
 
 This folder should be extracted outside of the `server-wallet` repo at a later point. Logical components are a TypeScript payment client (i.e., the "ping") and an HTTP payment receiving server (i.e., the "pong"). The end-to-end should be a separate package which imports each client and runs through this sort of testing scenario.
+
+### pong database
+
+You must create a new database locally called 'pong', like so:
+
+```bash
+createdb pong
+SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
+```

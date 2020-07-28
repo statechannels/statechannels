@@ -1,17 +1,20 @@
-import {configureEnvVariables} from '@statechannels/devtools';
 import bodyParser from 'body-parser';
 import express from 'express';
 import {Message} from '@statechannels/wire-format';
 
-import '../../src/db/connection'; // This is how the DB is "connected"
+import knex from '../../src/db/connection';
+import {seed as seedSigningWallets} from '../../src/db/seeds/1_signing_wallet_seeds';
 
 import PongController from './controller';
-
-configureEnvVariables();
 
 const controller = new PongController();
 
 const app = express();
+
+app.post('/reset', async (_req, res) => {
+  await seedSigningWallets(knex);
+  res.status(200).send('OK');
+});
 
 app.post('/inbox', bodyParser.json(), async (req, res) =>
   res

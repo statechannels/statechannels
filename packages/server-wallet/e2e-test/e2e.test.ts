@@ -1,26 +1,39 @@
+import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
+
 import knex from '../src/db/connection';
-import {truncate} from '../src/db-admin/db-admin-connection';
 import {seed as seedSigningWallets} from '../src/db/seeds/1_signing_wallet_seeds';
-import {seed as seedChannels} from '../src/db/seeds/2_channel_seeds';
+import {alice, bob} from '../src/wallet/__test__/fixtures/participants';
+import {Channel} from '../src/models/channel';
+import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 
 import PingClient from './ping/client';
+import {
+  killServer,
+  startPongServer,
+  waitForServerToStartAndResetDatabase,
+  PongServer,
+} from './e2e-utils';
+
+jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
 
 describe('e2e', () => {
   let pingClient: PingClient;
+  let pongServer: PongServer;
 
   beforeAll(async () => {
-    // eslint-disable-next-line
-    const pongServerAddress = process.env.SERVER_ADDRESS as string;
+    pongServer = startPongServer();
 
-    pingClient = new PingClient(pongServerAddress);
+    // ⚠️ You must create a new database locally called 'pong', like so:
+    // ❯ createdb pong
+    // ❯ SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
+    await waitForServerToStartAndResetDatabase(pongServer);
 
-    console.log('Truncating database before e2e tests suites run');
-    await truncate(knex);
+    pingClient = new PingClient(`http://127.0.0.1:65535`);
 
-    console.log('Seeding shared database with stuff');
     await seedSigningWallets(knex);
-    await seedChannels();
   });
+
+  afterAll(() => killServer(pongServer));
 
   it('can do a simple end-to-end flow with no signed states', async () => {
     const ret = await pingClient.emptyMessage();
@@ -30,15 +43,39 @@ describe('e2e', () => {
     expect(ret.data.objectives?.length).toBe(0);
   });
 
-  it.skip('can create a channel via http', async () => {
-    await pingClient.createPingChannel();
-    // TODO: The above line should send an HTTP request to Pong, and then Pong should
-    // respond with a message in the response to Ping who should store the value in their
-    // DB. To verify it all worked we should have some kind of function on Ping to check
-    // the latest turnNum it has in its DB for this channel and likewise for Pong over HTTP
+  it('can create a channel, send signed state via http', async () => {
+    let channel = await pingClient.createPingChannel();
+
+    // TODO: Currently the PongController does not join the channel
+    // so these tests only confirm that the channel was created
+    // within Ping's wallet, that's it. Next up will be for Pong
+    // to join the channel and then these tests should check for
+    // 'running' status, turnNum 1, etc.
+
+    expect(channel.participants).toStrictEqual([alice(), bob()]);
+    expect(channel.status).toBe('opening');
+    expect(channel.turnNum).toBe(0);
+
+    channel = await pingClient.getChannel(channel.channelId);
+
+    expect(channel.participants).toStrictEqual([alice(), bob()]);
+    expect(channel.status).toBe('opening');
+    expect(channel.turnNum).toBe(0);
   });
 
-  it.skip('can update a channel via http', async () => {
-    await pingClient.ping();
+  it('can update pre-existing channel, send signed state via http', async () => {
+    const seed = withSupportedState({
+      outcome: simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]),
+      turnNum: 3,
+    })();
+
+    await Channel.query().insert([seed]);
+
+    // TODO: Need to also seed the database with this same channel of the Pong
+
+    await pingClient.ping(seed.channelId);
+
+    // TODO: Add test to confirm that the Pong controller received the signed state
+    // and then proceeded to sign an update and respond with it
   });
 });
