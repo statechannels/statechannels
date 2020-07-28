@@ -223,47 +223,52 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const channelResults: ClientChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
-    const tx = await knex.transaction();
+    await knex.transaction(async tx => {
+      const setError = async (e: Error): Promise<void> => {
+        error = e;
+        await tx.rollback(error);
+      };
+      const markChannelAsDone = async (): Promise<any> => {
+        channels.shift() as string;
+      };
 
-    const setError = async (e: Error): Promise<void> => {
-      error = e;
-      await tx.rollback();
-    };
-    const markChannelAsDone = async (): Promise<any> => {
-      channels.shift() as string;
-    };
-
-    const handleAction = async (action: ProtocolAction): Promise<any> => {
-      switch (action.type) {
-        case 'SignState': {
-          const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
-          outgoing.map(n => outbox.push(n.notice));
-          channelResults.push(channelResult);
-          return;
+      const handleAction = async (action: ProtocolAction): Promise<any> => {
+        switch (action.type) {
+          case 'SignState': {
+            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+            outgoing.map(n => outbox.push(n.notice));
+            channelResults.push(channelResult);
+            return;
+          }
+          default:
+            throw 'Unimplemented';
         }
-        default:
-          throw 'Unimplemented';
+      };
+
+      // For the moment, we are only considering directly funded app channels.
+      // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+      // In the future, we can have an App model which collects all the relevant channels for an app channel,
+      // and a Ledger model which stores ledger-specific data (eg. queued requests)
+      const app = await Store.getChannel(channels[0], tx);
+
+      if (!app) {
+        setError(new Error('Channel not found'));
+
+        throw 'unreachable';
       }
-    };
 
-    // For the moment, we are only considering directly funded app channels.
-    // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-    // In the future, we can have an App model which collects all the relevant channels for an app channel,
-    // and a Ledger model which stores ledger-specific data (eg. queued requests)
-    const app = await Channel.forId(channels[0], undefined);
-
-    try {
-      const nextAction = await Application.protocol({app: app.protocolState});
-      // TODO: handleAction might also throw an error.
-      // It would be nice for handleAction to return an Either type, pipe the right values,
-      // and handle the left values with setError
-      await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
-      await tx.commit();
-    } catch (err) {
-      // FIXME
-      logger.error({err}, 'Error handling action');
-      await setError(err);
-    }
+      try {
+        const nextAction = await Application.protocol({app});
+        // TODO: handleAction might also throw an error.
+        // It would be nice for handleAction to return an Either type, pipe the right values,
+        // and handle the left values with setError
+        await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
+      } catch (err) {
+        // FIXME
+        logger.error({err}, 'Error handling action');
+        await setError(err);
+      }
+    });
   }
 
   return {outbox, error, channelResults};
