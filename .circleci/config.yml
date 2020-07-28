@@ -215,9 +215,11 @@ jobs:
           at: /home/circleci/project
       - run:
           name: wallet setup
+          working_directory: packages/server-wallet
           command: |
             sudo apt install -y postgresql-client || true
-            (cd packages/server-wallet && yarn db:create $PSQL_ARGS && yarn db:migrate $PSQL_ARGS)
+            yarn db:create $PSQL_ARGS
+            yarn db:migrate $PSQL_ARGS
       - run:
           name: test
           command: |
@@ -251,7 +253,8 @@ jobs:
             SERVER_DB_NAME=pong yarn db:migrate $PSQL_ARGS
       - run:
           name: server-wallet-e2e-test
-          command: cd packages/server-wallet && yarn test:e2e
+          working_directory: packages/server-wallet
+          command: yarn test:e2e
           no_output_timeout: 30m
 
   release-pull-request:
