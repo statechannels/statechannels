@@ -14,7 +14,7 @@ export interface JoinChannelHandlerParams {
 
 export enum Errors {
   channelNotFound = 'channel not found',
-  invalidLatestState = 'latest state must be turn 0',
+  invalidTurnNum = 'latest state must be turn 0',
   alreadySignedByMe = 'already signed prefund setup',
 }
 
@@ -33,7 +33,7 @@ const ensureNotSignedByMe = (cs: ChannelState): Either<JoinChannelError, Channel
 
 function ensureLatestStateIsPrefundSetup(cs: ChannelState): StepResult {
   if (cs.latest.turnNum === 0) return right(cs);
-  return left(new JoinChannelError(Errors.invalidLatestState));
+  return left(new JoinChannelError(Errors.invalidTurnNum));
 }
 
 function latest(cs: ChannelState): StateVariables {
