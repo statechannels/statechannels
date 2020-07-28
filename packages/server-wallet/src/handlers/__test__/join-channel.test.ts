@@ -1,32 +1,31 @@
 import matchers from '@pacote/jest-either';
+import {left, right} from 'fp-ts/lib/Either';
 
 import {joinChannel} from '../join-channel';
 import {joinChannelFixture} from '../fixtures/join-channel';
 import {channelStateFixture} from '../../protocols/__test__/fixtures/channel-state';
+import {channel} from '../../models/__test__/fixtures/channel';
+import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
+import {bob, alice} from '../../wallet/__test__/fixtures/signing-wallets';
 expect.extend(matchers);
 
-const args = joinChannelFixture();
+const prefundVars = {turnNum: 0, appData: '0xf00'};
+const runningVars = {turnNum: 7, appData: '0xf00'};
 
-test('validJoin', () => {
-  expect(
-    joinChannel(args, channelStateFixture({latest: {turnNum: 0, appData: 'foo'}}))
-  ).toMatchRight({
-    type: 'SignState',
-    turnNum: 0,
-    appData: 'foo',
-  });
+test.each`
+  input                                                                 | result
+  ${channel({vars: [stateSignedBy(bob())(prefundVars)]}).protocolState} | ${{type: 'SignState', ...prefundVars}}
+  ${channelStateFixture({latest: prefundVars})}                         | ${{type: 'SignState', ...prefundVars}}
+`('happy path', ({input, result}) => {
+  expect(joinChannel(joinChannelFixture(), input)).toMatchObject(right(result));
 });
 
-describe('invalid join', () => {
-  test('when the latest state is not turn 0', () =>
-    expect(joinChannel(args, channelStateFixture({latest: {turnNum: 3}}))).toMatchObject({
-      left: new Error('latest state must be turn 0'),
-    }));
-
-  test('when I have signed a state', () =>
-    expect(
-      joinChannel(args, channelStateFixture({latest: {turnNum: 0}, latestSignedByMe: {turnNum: 0}}))
-    ).toMatchObject({
-      left: new Error('already signed prefund setup'),
-    }));
+test.each`
+  input                                                                          | result
+  ${channelStateFixture({latestSignedByMe: prefundVars})}                        | ${new Error('already signed prefund setup')}
+  ${channel({vars: [stateSignedBy(alice())(prefundVars)]}).protocolState}        | ${new Error('already signed prefund setup')}
+  ${channel({vars: [stateSignedBy(alice(), bob())(prefundVars)]}).protocolState} | ${new Error('already signed prefund setup')}
+  ${channelStateFixture({latest: runningVars})}                                  | ${new Error('latest state must be turn 0')}
+`('error cases', ({input, result}) => {
+  expect(joinChannel(joinChannelFixture(), input)).toMatchObject(left(result));
 });
