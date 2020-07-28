@@ -18,10 +18,23 @@ describe('happy path', () => {
   it('creates a channel', async () => {
     expect(await Channel.query().resultSize()).toEqual(0);
 
-    const appData = '0xa00f00';
+    const appData = '0xaf00';
     const createPromise = w.createChannel(createChannelArgs({appData}));
     await expect(createPromise).resolves.toMatchObject({
       channelResults: [{channelId: expect.any(String)}],
+    });
+
+    await expect(createPromise).resolves.toMatchObject({
+      outbox: [
+        {
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [{turnNum: 0, appData}]},
+          },
+        },
+      ],
+      channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
     });
     const {channelId} = (await createPromise).channelResults[0];
     expect(await Channel.query().resultSize()).toEqual(1);
@@ -34,12 +47,7 @@ describe('happy path', () => {
     expect(updated).toMatchObject({
       latest: expectedState,
       latestSignedByMe: expectedState,
-    });
-  });
-
-  it('sends a message', async () => {
-    await expect(w.createChannel(createChannelArgs())).resolves.toMatchObject({
-      outbox: [{params: {recipient: 'bob', sender: 'alice'}}],
+      supported: undefined,
     });
   });
 });
