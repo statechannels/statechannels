@@ -258,6 +258,8 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   return {outbox, error, channelResults};
 };
 
+// TODO: This should be removed, and not used externally.
+// It is a fill-in until the wallet API is specced out.
 function getOrThrow<E, T>(result: Either.Either<E, T>): T {
   return Either.getOrElseW<E, T>(
     (err: E): T => {
