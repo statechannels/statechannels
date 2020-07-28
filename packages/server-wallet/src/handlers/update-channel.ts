@@ -50,8 +50,7 @@ const ensureSupportedStateExists = (
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
   if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
-    throw new Error('not my turn');
-
+    return right(cs);
   return left(new UpdateChannelError(UpdateChannelError.reasons.notMyTurn));
 }
 
