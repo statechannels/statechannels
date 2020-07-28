@@ -1,4 +1,5 @@
 import matchers from '@pacote/jest-either';
+import {left} from 'fp-ts/lib/Either';
 
 import {updateChannel, UpdateChannelError} from '../update-channel';
 import {updateChannelFixture, signStateFixture} from '../fixtures/update-channel';
@@ -11,10 +12,11 @@ test('validUpdate', () => {
   expect(result).toEqualRight(signStateFixture());
 });
 
-test.skip('Not my turn', () => {
-  const result = updateChannel(
-    updateChannelFixture(),
-    channelStateFixture({supported: {turnNum: 4}})
-  );
-  expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelError.reasons.notMyTurn));
+const notMyTurn = new UpdateChannelError(UpdateChannelError.reasons.notMyTurn);
+
+test.each`
+  updateChannelArgs         | channelState                                      | result
+  ${updateChannelFixture()} | ${channelStateFixture({supported: {turnNum: 4}})} | ${notMyTurn}
+`('error cases', ({updateChannelArgs, channelState, result}) => {
+  expect(updateChannel(updateChannelArgs, channelState)).toMatchObject(left(result));
 });
