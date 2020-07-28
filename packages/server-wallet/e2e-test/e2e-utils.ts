@@ -21,7 +21,6 @@ export const startPongServer = (): PongServer => {
     env: {
       // eslint-disable-next-line
       ...process.env,
-      NODE_ENV: 'development',
       SERVER_DB_NAME: 'pong',
     },
   });
