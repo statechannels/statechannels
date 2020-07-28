@@ -16,8 +16,6 @@ import {
   SignedStateVarsWithHash,
   calculateChannelId,
   convertToParticipant,
-  hashState,
-  SignatureEntry,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -61,40 +59,40 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Result {
-    const {participants, appDefinition, appData, allocations} = args;
-    const outcome: Outcome = deserializeAllocations(allocations);
-    // TODO: How do we pick a signing address?
-    const signingAddress = (await SigningWallet.query().first())?.address;
+    return knex.transaction(async tx => {
+      const {participants, appDefinition, appData, allocations} = args;
+      const outcome: Outcome = deserializeAllocations(allocations);
+      // TODO: How do we pick a signing address?
+      const signingAddress = (await SigningWallet.query().first())?.address;
 
-    const channelConstants: ChannelConstants = {
-      channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
-      participants: participants.map(convertToParticipant),
-      chainId: '0x01',
-      challengeDuration: 9001,
-      appDefinition,
-    };
+      const channelConstants: ChannelConstants = {
+        channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
+        participants: participants.map(convertToParticipant),
+        chainId: '0x01',
+        challengeDuration: 9001,
+        appDefinition,
+      };
 
-    const turnNum = 0;
-    const isFinal = false;
-    const signatures: SignatureEntry[] = [];
-    const s = {appData, outcome, turnNum, isFinal, signatures};
-    const vars: SignedStateVarsWithHash[] = [
-      {...s, stateHash: hashState({...channelConstants, ...s})},
-    ];
+      const vars: SignedStateVarsWithHash[] = [];
 
-    const cols = {...channelConstants, vars, signingAddress};
-    const {channelId} = await Channel.query().insert(cols);
+      const cols = {...channelConstants, vars, signingAddress};
 
-    const channelResult: ChannelResult = {
-      ...args,
-      channelId,
-      turnNum: 0,
-      status: 'opening',
-    };
+      const {channelId} = await Channel.query(tx).insert(cols);
 
-    const {outbox, channelResults} = await takeActions([channelId]);
+      const {outgoing, channelResult} = await Store.signState(
+        channelId,
+        {
+          ...channelConstants,
+          turnNum: 0,
+          isFinal: false,
+          appData,
+          outcome,
+        },
+        tx
+      );
 
-    return {outbox, channelResults: channelResults.concat(channelResult)};
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+    });
   }
 
   async joinChannel(_args: JoinChannelParams): Result {
@@ -114,7 +112,7 @@ export class Wallet implements WalletInterface {
       const nextState = getOrThrow(
         UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
       );
-      const {outgoing, channelResult} = await Store.signState(nextState, tx);
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
 
       return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
     });
@@ -225,7 +223,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
         case 'SignState': {
-          const {outgoing, channelResult} = await Store.signState(action, tx);
+          const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
           outgoing.map(n => outbox.push(n.notice));
           channelResults.push(channelResult);
           return;

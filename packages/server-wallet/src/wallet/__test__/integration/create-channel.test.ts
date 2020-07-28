@@ -27,19 +27,19 @@ describe('happy path', () => {
     expect(await Channel.query().resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, undefined);
-    expect(updated.latest).toMatchObject({
+    const expectedState = {
       turnNum: 0,
       appData,
+    };
+    expect(updated).toMatchObject({
+      latest: expectedState,
+      latestSignedByMe: expectedState,
     });
-    // expect(updated.latestSignedByMe).toMatchObject({
-    //   turnNum: 0,
-    //   appData,
-    // });
   });
 
   it('sends a message', async () => {
     await expect(w.createChannel(createChannelArgs())).resolves.toMatchObject({
-      // outbox: [{notice: {params: {recipient: 'bob', sender: 'alice'}}}],
+      outbox: [{params: {recipient: 'bob', sender: 'alice'}}],
     });
   });
 });
