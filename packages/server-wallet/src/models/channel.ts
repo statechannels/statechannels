@@ -3,11 +3,8 @@ import {
   Participant,
   SignatureEntry,
   SignedState,
-  SignedStateVariables,
   SignedStateVarsWithHash,
   SignedStateWithHash,
-  StateVariables,
-  StateVariablesWithHash,
   calculateChannelId,
   hashState,
   outcomesEqual,
@@ -21,9 +18,7 @@ import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48, Uint256, Bytes} from '../type-aliases';
-import {logger} from '../logger';
 import {ChannelState} from '../protocols/state';
-import {addHash} from '../state-utils';
 import {NotifyApp} from '../protocols/actions';
 
 import {SigningWallet} from './signing-wallet';
@@ -190,73 +185,6 @@ export class Channel extends Model implements RequiredColumns {
     };
   }
 
-  // Modifiers
-  signState(hash: Bytes32): SignedState {
-    const state = this.signedStates.find(s => s.stateHash === hash);
-    if (!state) {
-      throw 'State not found';
-    } else {
-      return this.addState(state, this.signingWallet.signState(state));
-    }
-  }
-
-  signAndAdd(stateVars: StateVariables): SyncState {
-    if (
-      this.isSupportedByMe &&
-      this.latestSignedByMe &&
-      this.latestSignedByMe.turnNum >= stateVars.turnNum
-    ) {
-      logger.error({entry: this.channelId, stateVars}, Errors.staleState);
-      throw Error(Errors.staleState);
-    }
-
-    const state = {...this.channelConstants, ...stateVars};
-
-    const signatureEntry = this.signingWallet.signState(state);
-
-    const signedState = this.addState(stateVars, signatureEntry);
-
-    const sender = this.participants[this.myIndex].participantId;
-    const data = {signedStates: [addHash(signedState)]};
-    const notMe = (_p: any, i: number): boolean => i !== this.myIndex;
-
-    return state.participants.filter(notMe).map(({participantId: recipient}) => ({
-      type: 'NotifyApp',
-      notice: {method: 'MessageQueued', params: {sender, recipient, data}},
-    }));
-  }
-
-  addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
-    const signedStateVars: SignedStateVariables = {
-      ...stateVars,
-      signatures: [signatureEntry],
-    };
-    const stateHash = hashState(this.state(signedStateVars));
-    const withHash: StateVariablesWithHash = {...stateVars, stateHash};
-
-    const {participants} = this.channelConstants;
-
-    // check the signature
-
-    const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
-    let entry = this.vars.find(s => s.stateHash === withHash.stateHash);
-
-    if (!entry) {
-      entry = {...withHash, signatures: []};
-      this.vars.push(entry);
-    }
-
-    if (signerIndex === -1) {
-      throw new Error('State not signed by a participant of this channel');
-    }
-
-    entry.signatures = _.uniqWith(_.concat(entry.signatures, signatureEntry), _.isEqual);
-    this.clearOldStates();
-    this.checkInvariants();
-
-    return this.state(entry);
-  }
-
   // Computed
   get myIndex(): number {
     return this.participants.findIndex(p => p.signingAddress === this.signingAddress);
@@ -293,7 +221,7 @@ export class Channel extends Model implements RequiredColumns {
     return !!this._supported;
   }
 
-  public get support(): Array<SignedState> {
+  public get support(): Array<SignedStateWithHash> {
     return this._support.map(s => ({...this.channelConstants, ...s}));
   }
 
@@ -325,57 +253,16 @@ export class Channel extends Model implements RequiredColumns {
     const latestSupport = this._support;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
-  private state(stateVars: SignedStateVariables): SignedState {
-    return {...this.channelConstants, ...stateVars};
-  }
 
-  private get _signedByMe(): SignedStateWithHash[] {
+  public get signedByMe(): SignedStateWithHash[] {
     return this.signedStates.filter(s => this.mySignature(s.signatures));
   }
 
   private get _latestSupportedByMe(): SignedStateWithHash {
-    return this._signedByMe[0];
+    return this.signedByMe[0];
   }
 
-  private clearOldStates(): void {
-    this.vars = _.reverse(_.sortBy(this.vars, s => s.turnNum));
-    // If we don't have a supported state we don't clean anything out
-    if (this.isSupported) {
-      // The support is returned in descending turn number so we need to grab the last element to find the earliest state
-      const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
-
-      // Find where the first support state is in our current state array
-      const supportIndex = this.vars.findIndex(sv => sv.stateHash === firstSupportStateHash);
-      // Take everything before that
-      this.vars = this.vars.slice(0, supportIndex + 1);
-    }
-  }
-
-  private checkInvariants(): void {
-    const groupedByTurnNum = _.groupBy(this._signedByMe, s => s.turnNum.toString());
-    const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
-
-    if (multipleSignedByMe) {
-      logger.error({entry: this.channelId}, Errors.multipleSignedStates);
-
-      throw Error(Errors.multipleSignedStates);
-    }
-
-    const {signedStates} = this;
-    const turnNums = _.map(signedStates, s => s.turnNum);
-
-    const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
-    if (duplicateTurnNums) {
-      logger.error({signedStates}, Errors.duplicateTurnNums);
-      throw Error(Errors.duplicateTurnNums);
-    }
-    if (!isReverseSorted(turnNums)) {
-      logger.error({signedStates: _.map(signedStates, s => s.turnNum)});
-      throw Error(Errors.notSorted);
-    }
-  }
-
-  private get signedStates(): Array<SignedStateWithHash> {
+  public get signedStates(): Array<SignedStateWithHash> {
     return this.vars.map(s => ({...this.channelConstants, ...s}));
   }
 
@@ -436,16 +323,6 @@ export class Channel extends Model implements RequiredColumns {
     }
     return true;
   }
-}
-
-function isReverseSorted(arr: number[]): boolean {
-  const len = arr.length - 1;
-  for (let i = 0; i < len; ++i) {
-    if (arr[i] < arr[i + 1]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 export enum Errors {
