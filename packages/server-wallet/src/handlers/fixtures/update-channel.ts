@@ -16,6 +16,10 @@ const defaultVars: UpdateChannelHandlerParams = {
 
 export const updateChannelFixture = fixture(defaultVars);
 
+export const signStateFixture = fixture(
+  signState({channelId, ...stateVars({turnNum: lastPostFundTurnNum + 1})})
+);
+
 const defaultChannelState: ChannelState = {
   channelId,
   myIndex: 0,
@@ -25,7 +29,3 @@ const defaultChannelState: ChannelState = {
 };
 
 export const channelStateFixture = fixture(defaultChannelState);
-
-export const signStateFixture = fixture(
-  signState({channelId, ...stateVars({turnNum: lastPostFundTurnNum + 1})})
-);
