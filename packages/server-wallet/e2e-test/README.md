@@ -25,15 +25,21 @@ This is a reference test for how two clients, communicating to each other over H
 
 The end-to-end test at this point simply spins up the `pong` server and then creates a `PingClient` which "pings" the `pong` and gets a signed state update back in return acknowledging the state channel update. It's assumed that both clients already have an open channel with each other stored in their respective databases.
 
+## Running Locally
+
+```bash
+// Ensure database exists and is primed for Ping Client
+NODE_ENV=development yarn db:create
+NODE_ENV=development yarn db:migrate
+
+// Ensure database exists and is primed for Pong Client
+createdb pong
+SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
+
+// Run tests
+NODE_ENV=development yarn test:e2e
+```
+
 ### next steps
 
 This folder should be extracted outside of the `server-wallet` repo at a later point. Logical components are a TypeScript payment client (i.e., the "ping") and an HTTP payment receiving server (i.e., the "pong"). The end-to-end should be a separate package which imports each client and runs through this sort of testing scenario.
-
-### pong database
-
-You must create a new database locally called 'pong', like so:
-
-```bash
-createdb pong
-SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
-```
