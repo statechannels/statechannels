@@ -6,58 +6,45 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "@statechannels/iframe-channel-provider!",
+  "canonicalReference": "@statechannels/channel-client!",
   "docComment": "",
-  "name": "@statechannels/iframe-channel-provider",
+  "name": "@statechannels/channel-client",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "@statechannels/iframe-channel-provider!",
+      "canonicalReference": "@statechannels/channel-client!",
       "name": "",
       "members": [
         {
-          "kind": "Variable",
-          "canonicalReference": "@statechannels/iframe-channel-provider!channelProvider:var",
-          "docComment": "",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface:interface",
+          "docComment": "/**\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "channelProvider: "
+              "text": "export interface BrowserChannelClientInterface extends "
             },
             {
               "kind": "Reference",
-              "text": "IFrameChannelProvider",
-              "canonicalReference": "@statechannels/iframe-channel-provider!~IFrameChannelProvider:class"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "channelProvider",
-          "variableTypeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface",
-          "docComment": "",
-          "excerptTokens": [
+              "text": "ChannelClientInterface",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface:interface"
+            },
             {
               "kind": "Content",
-              "text": "export interface ChannelProviderInterface "
+              "text": " "
             }
           ],
-          "releaseTag": "Public",
-          "name": "ChannelProviderInterface",
+          "releaseTag": "Beta",
+          "name": "BrowserChannelClientInterface",
           "members": [
             {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#destinationAddress:member",
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface#approveBudgetAndFund:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "destinationAddress?: "
+                  "text": "approveBudgetAndFund(playerAmount: "
                 },
                 {
                   "kind": "Content",
@@ -65,106 +52,27 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "destinationAddress",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#off:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "off: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "OffType",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type"
+                  "text": ", hubAmount: "
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "off",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#on:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "on: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "OnType",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type"
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "on",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "MethodSignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#send:member(1)",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "send<MethodName extends "
+                  "text": ", hubAddress: "
                 },
                 {
                   "kind": "Content",
-                  "text": "keyof "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "WalletJsonRpcAPI",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
-                  "text": ">(method: "
+                  "text": ", hubOutcomeAddress: "
                 },
                 {
                   "kind": "Content",
-                  "text": "MethodName"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", params: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "WalletJsonRpcAPI",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
-                },
-                {
-                  "kind": "Content",
-                  "text": "[MethodName]['request']['params']"
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
@@ -181,12 +89,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "WalletJsonRpcAPI",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "[MethodName]['response']['result']>"
+                  "text": ">"
                 },
                 {
                   "kind": "Content",
@@ -197,42 +105,1979 @@
                 "startIndex": 9,
                 "endIndex": 13
               },
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "overloadIndex": 1,
               "parameters": [
                 {
-                  "parameterName": "method",
+                  "parameterName": "playerAmount",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "hubAmount",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                },
+                {
+                  "parameterName": "hubAddress",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 6
+                  }
+                },
+                {
+                  "parameterName": "hubOutcomeAddress",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "name": "approveBudgetAndFund"
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface#closeAndWithdraw:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "closeAndWithdraw(hubParticipantId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | {}>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "hubParticipantId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "closeAndWithdraw"
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface#getBudget:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getBudget(hubAddress: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | {}>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "hubAddress",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getBudget"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface#onBudgetUpdated:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onBudgetUpdated: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(callback: (result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => void) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "onBudgetUpdated",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              }
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "@statechannels/channel-client!ChannelClient:class",
+          "docComment": "/**\n * Class that wraps the JSON-RPC interface of \\@statechannels/iframe-channel-provider\n *\n * @remarks\n *\n * This class exposes a convenient API feturing event emitters and async methods returning Promises. Together with \\@statechannels/iframe-channel-provider, it allows a Dapp to speak to the statechannels wallet.\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class ChannelClient implements "
+            },
+            {
+              "kind": "Reference",
+              "text": "BrowserChannelClientInterface",
+              "canonicalReference": "@statechannels/channel-client!BrowserChannelClientInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "ChannelClient",
+          "members": [
+            {
+              "kind": "Constructor",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient:constructor(1)",
+              "docComment": "/**\n * Create a new instance of the Channel Client\n *\n * @remarks\n *\n * It is possible to pass in a {@link @statechannels/channel-client#FakeChannelProvider | fake channel provider}, which simulates the behaviour of a wallet without requiring an iframe or browser. Useful for development.\n *\n * @param provider - An instance of the \\@statechannels/iframe-channel-provider class, suitably configured\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "constructor(provider: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelProviderInterface",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "provider",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#approveBudgetAndFund:member(1)",
+              "docComment": "/**\n * Requests approval for a new budget for this domain, as well as for an appropriately funded ledger channel with the hub\n *\n * @param receiveCapacity - Amount for me in the ledger channel\n *\n * @param sendCapacity - Amount for the hub in the ledger channel\n *\n * @param hubAddress - Address for the hub,\n *\n * @param hubOutcomeAddress - Ethereum account for the hub\n *\n * @returns A promise that resolves to a DomainBudget\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "approveBudgetAndFund(receiveCapacity: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", sendCapacity: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", hubAddress: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", hubOutcomeAddress: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "receiveCapacity",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "sendCapacity",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                },
+                {
+                  "parameterName": "hubAddress",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 6
+                  }
+                },
+                {
+                  "parameterName": "hubOutcomeAddress",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "name": "approveBudgetAndFund"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#challengeChannel:member(1)",
+              "docComment": "/**\n * Requests a challenge for a channel\n *\n * @param channelId - id for the state channel\n *\n * @returns A promise that resolves to a ChannelResult.\n *\n * @beta\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "challengeChannel(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "challengeChannel"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#channelState:member",
+              "docComment": "/**\n * rxjs Observable which emits ChannelResults for all channels of interest\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelState: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ReplaySubject",
+                  "canonicalReference": "rxjs!ReplaySubject:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "channelState",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#closeAndWithdraw:member(1)",
+              "docComment": "/**\n * Requests the funds to be withdrawn from this domain's ledger channel\n *\n * @param hubAddress - The address of a state channel hub\n *\n * @param hubOutcomeAddress - An ethereum account that the hub's funds will be paid out to TODO this doesn't make sense\n *\n * @returns A promise that resolves to a DomainBudget.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "closeAndWithdraw(hubParticipantId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | {}>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "hubParticipantId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "closeAndWithdraw"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#closeChannel:member(1)",
+              "docComment": "/**\n * Requests a close for a channel\n *\n * @remarks\n *\n * The wallet will respond to this request with an error if it is not your turn. If it is your turn, the wallet will respond as soon as it has signed an `isFinal` state, and the channel is updated to `closing` status. The channel may later update to `closed` status only when other channel participants have responded in kind: this can be detected by listening to {@link @statechannels/channel-client#ChannelClient.onChannelUpdated | Channel Updated} events and filtering on the channel status.\n *\n * @param channelId - id for the state channel\n *\n * @returns A promise that resolves to a ChannelResult.\n *\n * @beta\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "closeChannel(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "closeChannel"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#createChannel:member(1)",
+              "docComment": "/**\n * Requests a new channel to be created\n *\n * @param participants - Array of Participants for this channel\n *\n * @param allocations - Initial allocation of funds for this channel\n *\n * @param appDefinition - Address of ForceMoveApp deployed on chain\n *\n * @param appData - Initial application data for this channel\n *\n * @param fundingStrategy - Direct, Ledger or Virtual funding\n *\n * @returns A promise that resolves to a ChannelResult.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "createChannel(participants: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Participant",
+                  "canonicalReference": "@statechannels/client-api-schema!Participant:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", allocations: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "TokenAllocations",
+                  "canonicalReference": "@statechannels/channel-client!TokenAllocations:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", appDefinition: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", appData: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", fundingStrategy: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "FundingStrategy",
+                  "canonicalReference": "@statechannels/client-api-schema!FundingStrategy:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 12,
+                "endIndex": 16
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "participants",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  }
+                },
+                {
+                  "parameterName": "allocations",
                   "parameterTypeTokenRange": {
                     "startIndex": 4,
                     "endIndex": 5
                   }
                 },
                 {
-                  "parameterName": "params",
+                  "parameterName": "appDefinition",
                   "parameterTypeTokenRange": {
                     "startIndex": 6,
-                    "endIndex": 8
+                    "endIndex": 7
                   }
-                }
-              ],
-              "typeParameters": [
+                },
                 {
-                  "typeParameterName": "MethodName",
-                  "constraintTokenRange": {
-                    "startIndex": 1,
-                    "endIndex": 3
-                  },
-                  "defaultTypeTokenRange": {
-                    "startIndex": 0,
-                    "endIndex": 0
+                  "parameterName": "appData",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 8,
+                    "endIndex": 9
+                  }
+                },
+                {
+                  "parameterName": "fundingStrategy",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 10,
+                    "endIndex": 11
                   }
                 }
               ],
-              "name": "send"
+              "name": "createChannel"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#destinationAddress:member",
+              "docComment": "/**\n * Get my destination address\n *\n * @remarks\n *\n * E.g. an address in MetaMask / other Ethereum wallet\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get destinationAddress(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string | undefined"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#getBudget:member(1)",
+              "docComment": "/**\n * Requests the latest budget for this domain\n *\n * @param hubParticipantId - The id of a state channel hub\n *\n * @returns A promise that resolves to a ChannelResult.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getBudget(hubParticipantId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | {}>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "hubParticipantId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getBudget"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#getChannels:member(1)",
+              "docComment": "/**\n * Requests the latest state for all channels.\n *\n * @param includeClosed - If true, closed channels will be included in the response.\n *\n * @returns A promise that resolves to an array of ChannelResults.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getChannels(includeClosed: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "includeClosed",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getChannels"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#getState:member(1)",
+              "docComment": "/**\n * Requests the latest state for a channel\n *\n * @param channelId - id for the state channel\n *\n * @returns A promise that resolves to a ChannelResult.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getState(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getState"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#joinChannel:member(1)",
+              "docComment": "/**\n * Join a proposed state channel\n *\n * @param channelId - id for the state channel\n *\n * @returns A promise that resolves to a ChannelResult.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "joinChannel(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "joinChannel"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#onBudgetUpdated:member(1)",
+              "docComment": "/**\n * Registers callback that will fire when a domain budget is updated.\n *\n * @param callback - A function that accepts a BudgetUpdatedNotification.\n *\n * @returns A function that will unregister the callback when invoked.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onBudgetUpdated(callback: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "BudgetUpdatedNotification",
+                  "canonicalReference": "@statechannels/client-api-schema!BudgetUpdatedNotification:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "['params']) => void"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "callback",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "onBudgetUpdated"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#onChannelProposed:member(1)",
+              "docComment": "/**\n * Registers a callback that will fire when a state channel is proposed.\n *\n * @remarks\n *\n * Triggered when the wallet receives a message containing a new channel. The App might respond by calling {@link @statechannels/channel-client#ChannelClient.joinChannel | joinChannel()}.\n *\n * @param callback - A function that accepts a ChannelProposedNotification.\n *\n * @returns A function that will unregister the callback when invoked.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onChannelProposed(callback: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelProposedNotification",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelProposedNotification:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "['params']) => void"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "callback",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "onChannelProposed"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#onChannelUpdated:member(1)",
+              "docComment": "/**\n * Registers a callback that will fire when a state channel is updated.\n *\n * @remarks\n *\n * The ChannelUpdated event is emitted when any of the following occurs: <ul> <li> A state is received via {@link @statechannels/channel-client#ChannelClient.updateChannel | updateChannel()}</li> <li> A state is received from another participant via {@link @statechannels/channel-client#ChannelClient.pushMessage | pushMessage()}</li> <li> Changes to the state of the blockchain are detected (e.g funding or challenges)</li> </ul>\n *\n * In the first two cases, this notification is only triggered when the wallet verifies that the state causes the 'top state' to change.\n *\n * The 'top state' is the state drawn from the set of supported states that has the highest turn number.\n *\n * (We have glossed over / left undefined what happens in the case where there is more than one top state).\n *\n * In particular, this means that <ul> <li> incorrectly formatted</li> <li> incorrectly signed</li> <li> otherwise unsupported</li> <li> out-of-date</li> </ul>\n *\n * states will not trigger this notification. Similarly, a countersignature on an already-supported state will not trigger this notification <b>unless</b> it means that a conclusion proof is now available.\n *\n * @param callback - A function that accepts a ChannelUpdatedNotification.\n *\n * @returns A function that will unregister the callback when invoked.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onChannelUpdated(callback: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelUpdatedNotification",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelUpdatedNotification:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "['params']) => void"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "callback",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "onChannelUpdated"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#onMessageQueued:member(1)",
+              "docComment": "/**\n * Registers a callback that will fire when an outbound message is ready to be dispatched.\n *\n * @remarks\n *\n * This method should be hooked up to your applications's messaging layer.\n *\n * @param callback - An function that accepts a MessageQueuedNotification.\n *\n * @returns A function that will unregister the callback when invoked\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onMessageQueued(callback: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "MessageQueuedNotification",
+                  "canonicalReference": "@statechannels/client-api-schema!MessageQueuedNotification:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "['params']) => void"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "callback",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "onMessageQueued"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#provider:member",
+              "docComment": "/**\n * E.g. instance of the \\@statechannels/iframe-channel-provider class, suitably configured\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly provider: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelProviderInterface",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "provider",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#pushMessage:member(1)",
+              "docComment": "/**\n * Accepts inbound messages from other state channel participants.\n *\n * @remarks\n *\n * This method should be hooked up to your applications's messaging layer.\n *\n * @param message - An inbound message.\n *\n * @param y - The second input number\n *\n * @returns A promise that resolves to a PushMessageResult\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "pushMessage(message: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Message",
+                  "canonicalReference": "@statechannels/client-api-schema!Message:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "PushMessageResult",
+                  "canonicalReference": "@statechannels/client-api-schema!PushMessageResult:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "message",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "pushMessage"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#signingAddress:member",
+              "docComment": "/**\n * Get my state channel (ephemeral) signingAddress\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get signingAddress(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string | undefined"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "signingAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#updateChannel:member(1)",
+              "docComment": "/**\n * Updates the state of a channel\n *\n * @param channelId - id for the state channel\n *\n * @param allocations - Updated allocation of funds for this channel\n *\n * @param appData - Updated application data for this channel\n *\n * @returns A promise that resolves to a ChannelResult.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "updateChannel(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", allocations: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "TokenAllocations",
+                  "canonicalReference": "@statechannels/channel-client!TokenAllocations:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", appData: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 11
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "allocations",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                },
+                {
+                  "parameterName": "appData",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 6
+                  }
+                }
+              ],
+              "name": "updateChannel"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!ChannelClient#walletVersion:member",
+              "docComment": "/**\n * Get the wallet version\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get walletVersion(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string | undefined"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "walletVersion",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            }
+          ],
+          "implementsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/channel-client!ChannelClientInterface:interface",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface ChannelClientInterface "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "ChannelClientInterface",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#challengeChannel:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "challengeChannel: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(channelId: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "challengeChannel",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#signingAddress:member",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#channelState:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelState: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ReplaySubject",
+                  "canonicalReference": "rxjs!ReplaySubject:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "channelState",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#closeChannel:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "closeChannel: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(channelId: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "closeChannel",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#createChannel:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "createChannel: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(participants: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Participant",
+                  "canonicalReference": "@statechannels/client-api-schema!Participant:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[], allocations: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Allocation",
+                  "canonicalReference": "@statechannels/client-api-schema!Allocation:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[], appDefinition: string, appData: string, fundingStrategy: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "FundingStrategy",
+                  "canonicalReference": "@statechannels/client-api-schema!FundingStrategy:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "createChannel",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 12
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#destinationAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "destinationAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#getChannels:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getChannels(includeClosed: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "includeClosed",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getChannels"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#getState:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getState: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(channelId: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "getState",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#joinChannel:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "joinChannel: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(channelId: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "joinChannel",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#onChannelProposed:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onChannelProposed: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(callback: (result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => void) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "onChannelProposed",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#onChannelUpdated:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onChannelUpdated: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(callback: (result: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => void) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "onChannelUpdated",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#onMessageQueued:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onMessageQueued: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(callback: (message: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Message",
+                  "canonicalReference": "@statechannels/client-api-schema!Message:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => void) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeFunction",
+                  "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "onMessageQueued",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#provider:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "provider: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelProviderInterface",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "provider",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#pushMessage:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "pushMessage: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(message: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Message",
+                  "canonicalReference": "@statechannels/client-api-schema!Message:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "PushMessageResult",
+                  "canonicalReference": "@statechannels/client-api-schema!PushMessageResult:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "pushMessage",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 8
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#signingAddress:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -248,7 +2093,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "signingAddress",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -257,59 +2102,59 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#subscribe:member",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#updateChannel:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "subscribe: "
+                  "text": "updateChannel: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(channelId: string, allocations: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "SubscribeType",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type"
+                  "text": "Allocation",
+                  "canonicalReference": "@statechannels/client-api-schema!Allocation:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[], appData: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "subscribe",
+              "releaseTag": "Beta",
+              "name": "updateChannel",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 2
+                "endIndex": 8
               }
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#unsubscribe:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "unsubscribe: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "UnsubscribeType",
-                  "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "unsubscribe",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#walletVersion:member",
+              "canonicalReference": "@statechannels/channel-client!ChannelClientInterface#walletVersion:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -325,7 +2170,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "walletVersion",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -336,102 +2181,314 @@
           "extendsTokenRanges": []
         },
         {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!EventType:interface",
-          "docComment": "",
+          "kind": "Variable",
+          "canonicalReference": "@statechannels/channel-client!ErrorCode:var",
+          "docComment": "/**\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface EventType extends "
+              "text": "ErrorCode: "
             },
             {
               "kind": "Reference",
-              "text": "NotificationType",
-              "canonicalReference": "@statechannels/client-api-schema!NotificationType:type"
+              "text": "ErrorCodes",
+              "canonicalReference": "@statechannels/client-api-schema!ErrorCodes:type"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "ErrorCode",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@statechannels/channel-client!EthereumNotEnabledErrorCode:var",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "EthereumNotEnabledErrorCode: "
+            },
+            {
+              "kind": "Content",
+              "text": "100"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "EthereumNotEnabledErrorCode",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider:class",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class FakeBrowserChannelProvider extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FakeChannelProvider",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider:class"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            },
+            {
+              "kind": "Content",
+              "text": "implements "
+            },
+            {
+              "kind": "Reference",
+              "text": "IFrameChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface:interface"
             },
             {
               "kind": "Content",
               "text": " "
             }
           ],
-          "releaseTag": "Public",
-          "name": "EventType",
+          "releaseTag": "Beta",
+          "name": "FakeBrowserChannelProvider",
           "members": [
             {
-              "kind": "IndexSignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!EventType:index(1)",
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#approveBudgetAndFund:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "[id: "
+                  "text": "approveBudgetAndFund(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ApproveBudgetAndFundParams",
+                  "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundParams:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "string"
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "]: "
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "[unknown]"
+                  "text": ">"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
+              "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
-                "endIndex": 4
+                "endIndex": 7
               },
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "overloadIndex": 1,
               "parameters": [
                 {
-                  "parameterName": "id",
+                  "parameterName": "params",
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
                   }
                 }
-              ]
-            }
-          ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 3
-            }
-          ]
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface:interface",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface IFrameChannelProviderInterface extends "
+              ],
+              "name": "approveBudgetAndFund"
             },
             {
-              "kind": "Reference",
-              "text": "Web3ChannelProviderInterface",
-              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface"
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#budget:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "budget: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "budget",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
             },
             {
-              "kind": "Content",
-              "text": " "
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "IFrameChannelProviderInterface",
-          "members": [
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#closeAndWithdraw:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "closeAndWithdraw(_params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "CloseAndWithdrawParams",
+                  "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<{\n        success: boolean;\n    }>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "_params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "closeAndWithdraw"
+            },
             {
-              "kind": "MethodSignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface#mountWalletComponent:member(1)",
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#enable:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "enable(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "enable"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#getBudget:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getBudget(_params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "GetBudgetParams",
+                  "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "_params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getBudget"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#mountWalletComponent:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -460,11 +2517,12 @@
                   "text": ";"
                 }
               ],
+              "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 5
               },
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -476,1045 +2534,176 @@
                 }
               ],
               "name": "mountWalletComponent"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#notifyAppBudgetUpdated:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "notifyAppBudgetUpdated(data: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "data",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "notifyAppBudgetUpdated"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeBrowserChannelProvider#send:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "send<M extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "M"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['request']['params']"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['response']['result']>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "method",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                },
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "M",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "send"
             }
           ],
-          "extendsTokenRanges": [
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          },
+          "implementsTokenRanges": [
             {
-              "startIndex": 1,
-              "endIndex": 3
+              "startIndex": 4,
+              "endIndex": 6
             }
           ]
         },
         {
-          "kind": "Function",
-          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcErrorResponse:function(1)",
+          "kind": "Class",
+          "canonicalReference": "@statechannels/channel-client!FakeChannelProvider:class",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isJsonRpcErrorResponse(message: "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "): "
-            },
-            {
-              "kind": "Reference",
-              "text": "message",
-              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
-            },
-            {
-              "kind": "Content",
-              "text": " is "
-            },
-            {
-              "kind": "Reference",
-              "text": "JsonRpcErrorResponse",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcErrorResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
-          },
-          "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [
-            {
-              "parameterName": "message",
-              "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "name": "isJsonRpcErrorResponse"
-        },
-        {
-          "kind": "Function",
-          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcNotification:function(1)",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare function isJsonRpcNotification<T>(message: "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "): "
-            },
-            {
-              "kind": "Reference",
-              "text": "message",
-              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
-            },
-            {
-              "kind": "Content",
-              "text": " is "
-            },
-            {
-              "kind": "Reference",
-              "text": "JsonRpcNotification",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<T, any>"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 7
-          },
-          "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [
-            {
-              "parameterName": "message",
-              "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "typeParameters": [
-            {
-              "typeParameterName": "T",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              }
-            }
-          ],
-          "name": "isJsonRpcNotification"
-        },
-        {
-          "kind": "Function",
-          "canonicalReference": "@statechannels/iframe-channel-provider!isJsonRpcResponse:function(1)",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare function isJsonRpcResponse(message: "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "): "
-            },
-            {
-              "kind": "Reference",
-              "text": "message",
-              "canonicalReference": "@statechannels/iframe-channel-provider!~message"
-            },
-            {
-              "kind": "Content",
-              "text": " is "
-            },
-            {
-              "kind": "Reference",
-              "text": "JsonRpcResponse",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
-          },
-          "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [
-            {
-              "parameterName": "message",
-              "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "name": "isJsonRpcResponse"
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcError:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type JsonRpcError = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    code: number;\n    message: string;\n    data?: {\n        [key: string]: any;\n    };\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "JsonRpcError",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcErrorResponse:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type JsonRpcErrorResponse = "
-            },
-            {
-              "kind": "Reference",
-              "text": "ErrorResponse",
-              "canonicalReference": "@statechannels/client-api-schema!ErrorResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "JsonRpcErrorResponse",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification:interface",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface JsonRpcNotification<NotificationName = "
-            },
-            {
-              "kind": "Content",
-              "text": "string"
-            },
-            {
-              "kind": "Content",
-              "text": ", NotificationParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
-            }
-          ],
-          "releaseTag": "Public",
-          "typeParameters": [
-            {
-              "typeParameterName": "NotificationName",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "typeParameterName": "NotificationParams",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
-              }
-            }
-          ],
-          "name": "JsonRpcNotification",
-          "members": [
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#jsonrpc:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "jsonrpc: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "'2.0'"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "jsonrpc",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#method:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "method: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "NotificationName"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "method",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcNotification#params:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "params: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "NotificationParams"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "params",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "extendsTokenRanges": []
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest:interface",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface JsonRpcRequest<MethodName = "
-            },
-            {
-              "kind": "Content",
-              "text": "string"
-            },
-            {
-              "kind": "Content",
-              "text": ", RequestParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
-            }
-          ],
-          "releaseTag": "Public",
-          "typeParameters": [
-            {
-              "typeParameterName": "MethodName",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "typeParameterName": "RequestParams",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
-              }
-            }
-          ],
-          "name": "JsonRpcRequest",
-          "members": [
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#id:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "id?: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "number"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "id",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#jsonrpc:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "jsonrpc: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "'2.0'"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "jsonrpc",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#method:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "method: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "MethodName"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "method",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcRequest#params:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "params: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "RequestParams"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "params",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "extendsTokenRanges": []
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse:interface",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface JsonRpcResponse<ResponseType = "
-            },
-            {
-              "kind": "Content",
-              "text": "any"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
-            }
-          ],
-          "releaseTag": "Public",
-          "typeParameters": [
-            {
-              "typeParameterName": "ResponseType",
-              "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "name": "JsonRpcResponse",
-          "members": [
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#id:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "id: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "number"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "id",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#jsonrpc:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "jsonrpc: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "'2.0'"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "jsonrpc",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!JsonRpcResponse#result:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "result: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "ResponseType"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "result",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "extendsTokenRanges": []
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type OffType = "
-            },
-            {
-              "kind": "Content",
-              "text": "typeof "
-            },
-            {
-              "kind": "Reference",
-              "text": "eventEmitter.off",
-              "canonicalReference": "eventemitter3!~EventEmitter#off:member"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "OffType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 3
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type OnType = "
-            },
-            {
-              "kind": "Content",
-              "text": "typeof "
-            },
-            {
-              "kind": "Reference",
-              "text": "eventEmitter.on",
-              "canonicalReference": "eventemitter3!~EventEmitter#on:member"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "OnType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 3
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type SubscribeType = "
-            },
-            {
-              "kind": "Content",
-              "text": "(subscriptionType: "
-            },
-            {
-              "kind": "Reference",
-              "text": "Notification",
-              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
-            },
-            {
-              "kind": "Content",
-              "text": "['method'], params?: any) => "
-            },
-            {
-              "kind": "Reference",
-              "text": "Promise",
-              "canonicalReference": "!Promise:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<string>"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "SubscribeType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 6
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type UnsubscribeType = "
-            },
-            {
-              "kind": "Content",
-              "text": "(subscriptionId: string) => "
-            },
-            {
-              "kind": "Reference",
-              "text": "Promise",
-              "canonicalReference": "!Promise:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<boolean>"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "UnsubscribeType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 4
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type WalletJsonRpcAPI = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    CreateChannel: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CreateChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!CreateChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CreateChannelResponse",
-              "canonicalReference": "@statechannels/client-api-schema!CreateChannelResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    UpdateChannel: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "UpdateChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "UpdateChannelResponse",
-              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    PushMessage: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "PushMessageRequest",
-              "canonicalReference": "@statechannels/client-api-schema!PushMessageRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "PushMessageResponse",
-              "canonicalReference": "@statechannels/client-api-schema!PushMessageResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    CloseChannel: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!CloseChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseChannelResponse",
-              "canonicalReference": "@statechannels/client-api-schema!CloseChannelResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    JoinChannel: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "JoinChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!JoinChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "JoinChannelResponse",
-              "canonicalReference": "@statechannels/client-api-schema!JoinChannelResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    GetState: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetStateRequest",
-              "canonicalReference": "@statechannels/client-api-schema!GetStateRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetStateResponse",
-              "canonicalReference": "@statechannels/client-api-schema!GetStateResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    GetWalletInformation: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetWalletInformationRequest",
-              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetWalletInformationResponse",
-              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    EnableEthereum: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "EnableEthereumRequest",
-              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "EnableEthereumResponse",
-              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    ChallengeChannel: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChallengeChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChallengeChannelResponse",
-              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    ApproveBudgetAndFund: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ApproveBudgetAndFundRequest",
-              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ApproveBudgetAndFundResponse",
-              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    GetBudget: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetBudgetRequest",
-              "canonicalReference": "@statechannels/client-api-schema!GetBudgetRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetBudgetResponse",
-              "canonicalReference": "@statechannels/client-api-schema!GetBudgetResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    CloseAndWithdraw: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseAndWithdrawRequest",
-              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseAndWithdrawResponse",
-              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n    GetChannels: {\n        request: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetChannelsRequest",
-              "canonicalReference": "@statechannels/client-api-schema!GetChannelsRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n        response: "
-            },
-            {
-              "kind": "Reference",
-              "text": "GetChannelsResponse",
-              "canonicalReference": "@statechannels/client-api-schema!GetChannelsResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    };\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "WalletJsonRpcAPI",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 54
-          }
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface Web3ChannelProviderInterface extends "
+              "text": "export declare class FakeChannelProvider implements "
             },
             {
               "kind": "Reference",
@@ -1527,16 +2716,1440 @@
             }
           ],
           "releaseTag": "Public",
-          "name": "Web3ChannelProviderInterface",
+          "name": "FakeChannelProvider",
           "members": [
             {
-              "kind": "MethodSignature",
-              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface#enable:member(1)",
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#closeChannel:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "enable(): "
+                  "text": "protected closeChannel(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "CloseChannelParams",
+                  "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "closeChannel"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#createChannel:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected createChannel(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "CreateChannelParams",
+                  "canonicalReference": "@statechannels/client-api-schema!CreateChannelParams:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "createChannel"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#destinationAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "destinationAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#events:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected events: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EventEmitter",
+                  "canonicalReference": "eventemitter3!~EventEmitter:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EventType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!EventType:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "events",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#findChannel:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "findChannel(channelId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "findChannel"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#getAddress:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected getAddress(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "getAddress"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#getOpponentIndex:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getOpponentIndex(channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getOpponentIndex"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#getPlayerIndex:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected getPlayerIndex(channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getPlayerIndex"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#getState:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected getState({ channelId }: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "GetStateParams",
+                  "canonicalReference": "@statechannels/client-api-schema!GetStateParams:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "{ channelId }",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "getState"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#internalAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "internalAddress: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "internalAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#isChannelResult:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected isChannelResult(data: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "unknown"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "data",
+                  "canonicalReference": "@statechannels/channel-client!~data"
+                },
+                {
+                  "kind": "Content",
+                  "text": " is "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "data",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "isChannelResult"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#joinChannel:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected joinChannel(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "JoinChannelParams",
+                  "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "joinChannel"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#latestState:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "latestState: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "latestState",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 7
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#notifyAppBudgetUpdated:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected notifyAppBudgetUpdated(data: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DomainBudget",
+                  "canonicalReference": "@statechannels/client-api-schema!DomainBudget:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "data",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "notifyAppBudgetUpdated"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#notifyAppChannelUpdated:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected notifyAppChannelUpdated(data: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "data",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "notifyAppChannelUpdated"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#notifyOpponent:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected notifyOpponent(data: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", notificationType: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "data",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "notificationType",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "notifyOpponent"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#off:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "off: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OffType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "off",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#on:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "on: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OnType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "on",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#opponentAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "opponentAddress: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", string>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "opponentAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#opponentIndex:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "opponentIndex: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", 0 | 1>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "opponentIndex",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#playerIndex:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "playerIndex: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", 0 | 1>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "playerIndex",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#pushMessage:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected pushMessage(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Message",
+                  "canonicalReference": "@statechannels/client-api-schema!Message:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "PushMessageResult",
+                  "canonicalReference": "@statechannels/client-api-schema!PushMessageResult:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "pushMessage"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#send:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "send<M extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "M"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['request']['params']"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['response']['result']>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "method",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                },
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "M",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "send"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#setAddress:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "setAddress(address: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "address",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "setAddress"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#setState:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "setState(state: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "state",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "setState"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#signingAddress:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "signingAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "signingAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#subscribe:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "subscribe(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "subscribe"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#unsubscribe:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "unsubscribe(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<boolean>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "unsubscribe"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#updateChannel:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected updateChannel(params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UpdateChannelParams",
+                  "canonicalReference": "@statechannels/client-api-schema!UpdateChannelParams:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelResult",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelResult:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "updateChannel"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#updatePlayerIndex:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "updatePlayerIndex(channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", playerIndex: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "0 | 1"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "playerIndex",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "updatePlayerIndex"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#url:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected url: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "url",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#verifyTurnNum:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "verifyTurnNum(channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/channel-client!~ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", turnNum: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
                 },
                 {
                   "kind": "Reference",
@@ -1552,22 +4165,140 @@
                   "text": ";"
                 }
               ],
+              "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 3
+                "startIndex": 5,
+                "endIndex": 7
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
-              "parameters": [],
-              "name": "enable"
+              "parameters": [
+                {
+                  "parameterName": "channelId",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "turnNum",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "verifyTurnNum"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/channel-client!FakeChannelProvider#walletVersion:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "walletVersion?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "walletVersion",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
             }
           ],
-          "extendsTokenRanges": [
+          "implementsTokenRanges": [
             {
               "startIndex": 1,
               "endIndex": 3
             }
           ]
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/channel-client!TokenAllocations:type",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type TokenAllocations = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Allocation",
+              "canonicalReference": "@statechannels/client-api-schema!Allocation:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[]"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "TokenAllocations",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/channel-client!UnsubscribeFunction:type",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type UnsubscribeFunction = "
+            },
+            {
+              "kind": "Content",
+              "text": "() => void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "UnsubscribeFunction",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@statechannels/channel-client!UserDeclinedErrorCode:var",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "UserDeclinedErrorCode: "
+            },
+            {
+              "kind": "Content",
+              "text": "200"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "UserDeclinedErrorCode",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         }
       ]
     }

@@ -16,12 +16,5 @@ test('Not my turn', () => {
     updateChannelFixture(),
     channelStateFixture({supported: {turnNum: 4}})
   );
-  expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelError.Errors.notMyTurn));
+  expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelError.reasons.notMyTurn));
 });
-
-enum ColorsEnum {
-  white = '#ffffff',
-  black = '#000000',
-}
-
-type Colors = keyof typeof ColorsEnum;
