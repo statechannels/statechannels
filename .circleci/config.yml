@@ -343,6 +343,11 @@ workflows:
       - test:
           requires:
             - prepare
+      
+      - server-wallet-e2e-test:
+          requires:
+            - prepare
+
       - release-pull-request:
           requires:
             - prepare
