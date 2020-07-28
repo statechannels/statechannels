@@ -103,9 +103,12 @@ export class Wallet implements WalletInterface {
       const channel = await Store.getChannel(channelId, tx);
 
       if (!channel)
-        throw new UpdateChannel.UpdateChannelError(UpdateChannel.Errors.channelNotFound, {
-          channelId,
-        });
+        throw new UpdateChannel.UpdateChannelError(
+          UpdateChannel.UpdateChannelError.reasons.channelNotFound,
+          {
+            channelId,
+          }
+        );
 
       const outcome = deserializeAllocations(allocations);
 

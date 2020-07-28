@@ -1,8 +1,5 @@
 import {UpdateChannelHandlerParams} from '../update-channel';
 import {fixture} from '../../wallet/__test__/fixtures/utils';
-import {Uint256} from '../../type-aliases';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
-import {ChannelState} from '../../protocols/state';
 import {signState} from '../../protocols/actions';
 import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 

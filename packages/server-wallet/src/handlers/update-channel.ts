@@ -13,25 +13,28 @@ type ChannelStateWithSupported = ChannelState & {
 
 type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
 type UpdateChannelResult = Either<UpdateChannelError, SignState>;
+
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
   appData: string;
 }
 
-// eslint-disable-next-line import/export
 export class UpdateChannelError extends Error {
   readonly type = 'UpdateChannelError';
-  constructor(reason: UpdateChannelError.Errors, public readonly data: any = undefined) {
+
+  static readonly reasons = {
+    channelNotFound: 'channel not found',
+    invalidLatestState: 'must have latest state',
+    notInRunningStage: 'channel must be in running state',
+    notMyTurn: 'it is not my turn',
+  } as const;
+
+  constructor(
+    reason: typeof UpdateChannelError.reasons[keyof typeof UpdateChannelError.reasons],
+    public readonly data: any = undefined
+  ) {
     super(reason);
-  }
-}
-// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare, import/export
-export namespace UpdateChannelError {
-  export enum Errors {
-    invalidLatestState = 'must have latest state',
-    notInRunningStage = 'channel must be in running state',
-    notMyTurn = 'it is not my turn',
   }
 }
 
@@ -43,17 +46,18 @@ const ensureSupportedStateExists = (
 ): Either<UpdateChannelError, ChannelStateWithSupported> =>
   hasSupportedState(cs)
     ? right(cs)
-    : left(new UpdateChannelError(UpdateChannelError.Errors.invalidLatestState));
+    : left(new UpdateChannelError(UpdateChannelError.reasons.invalidLatestState));
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
   if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
-    return right(cs);
-  return left(new UpdateChannelError(UpdateChannelError.Errors.notMyTurn));
+    throw new Error('not my turn');
+
+  return left(new UpdateChannelError(UpdateChannelError.reasons.notMyTurn));
 }
 
 function hasRunningTurnNumber(cs: ChannelStateWithSupported): StepResult {
   if (cs.supported.turnNum < 3)
-    return left(new UpdateChannelError(UpdateChannelError.Errors.notInRunningStage));
+    return left(new UpdateChannelError(UpdateChannelError.reasons.notInRunningStage));
   return right(cs);
 }
 
