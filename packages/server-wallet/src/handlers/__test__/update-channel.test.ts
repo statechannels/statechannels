@@ -14,12 +14,14 @@ test('validUpdate', () => {
 });
 
 const invalidLatest = new UpdateChannelError(UpdateChannelError.reasons.invalidLatestState);
+const runningTurnNumber = new UpdateChannelError(UpdateChannelError.reasons.notInRunningStage);
 const notMyTurn = new UpdateChannelError(UpdateChannelError.reasons.notMyTurn);
 
 const noSupportedState: ChannelState = {...channelStateFixture(), supported: undefined};
 test.each`
   updateChannelArgs         | channelState                                      | result
   ${updateChannelFixture()} | ${noSupportedState}                               | ${invalidLatest}
+  ${updateChannelFixture()} | ${channelStateFixture({supported: {turnNum: 1}})} | ${runningTurnNumber}
   ${updateChannelFixture()} | ${channelStateFixture({supported: {turnNum: 4}})} | ${notMyTurn}
 `('error cases $result', ({updateChannelArgs, channelState, result}) => {
   expect(updateChannel(updateChannelArgs, channelState)).toMatchObject(left(result));
