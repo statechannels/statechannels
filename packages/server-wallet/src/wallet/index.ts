@@ -30,6 +30,7 @@ import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
+import * as JoinChannel from '../handlers/join-channel';
 
 import {Store} from './store';
 
@@ -95,8 +96,20 @@ export class Wallet implements WalletInterface {
     });
   }
 
-  async joinChannel(_args: JoinChannelParams): Result {
-    throw 'Unimplemented';
+  async joinChannel({channelId}: JoinChannelParams): Result {
+    return knex.transaction(async tx => {
+      const channel = await Store.getChannel(channelId, tx);
+
+      if (!channel)
+        throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
+          channelId,
+        });
+
+      const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+    });
   }
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
     return knex.transaction(async tx => {
