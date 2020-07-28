@@ -34,6 +34,7 @@
     "eslint-plugin-import": "2.20.0",
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
+    "eslint-plugin-unicorn": "21.0.0",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "nodemon": "1.19.4",

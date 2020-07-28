@@ -1,20 +1,13 @@
 import Objection from 'objection';
-import {StateVariables} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seed} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
 import {Channel} from '../../models/channel';
-import {Bytes32} from '../../type-aliases';
-import {SignState} from '../../protocols/actions';
 
 import {stateWithHashSignedBy} from './fixtures/states';
-import {bob} from './fixtures/signingWallets';
-
-function signState(channelId: Bytes32, vars: StateVariables): SignState {
-  return {...vars, type: 'SignState', channelId};
-}
+import {bob} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
@@ -34,24 +27,27 @@ describe('signState', () => {
     c = await Channel.query().insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
   });
 
-  it('signs the state, ', async () => {
+  it('signs the state, returning outgoing messages and a channelResult', async () => {
     await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
 
-    const result = await Store.signState(signState(c.channelId, c.vars[0]), tx);
-    expect(result).toMatchObject([
-      {
-        type: 'NotifyApp',
-        notice: {
-          method: 'MessageQueued',
-          params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+    const result = await Store.signState(c.channelId, c.vars[0], tx);
+    expect(result).toMatchObject({
+      outgoing: [
+        {
+          type: 'NotifyApp',
+          notice: {
+            method: 'MessageQueued',
+            params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+          },
         },
-      },
-    ]);
+      ],
+      channelResult: {turnNum: c.vars[0].turnNum},
+    });
   });
 
   it('uses a transaction', async () => {
-    const updatedC = await Store.signState(signState(c.channelId, c.vars[0]), tx);
+    const updatedC = await Store.signState(c.channelId, c.vars[0], tx);
     expect(updatedC).toBeDefined();
 
     // Fetch the current channel outside the transaction context

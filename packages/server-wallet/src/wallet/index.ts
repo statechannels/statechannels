@@ -16,8 +16,6 @@ import {
   SignedStateVarsWithHash,
   calculateChannelId,
   convertToParticipant,
-  hashState,
-  SignatureEntry,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -31,6 +29,7 @@ import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
+import * as UpdateChannel from '../handlers/update-channel';
 
 import {Store} from './store';
 
@@ -60,48 +59,65 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): Result {
-    const {participants, appDefinition, appData, allocations} = args;
-    const outcome: Outcome = deserializeAllocations(allocations);
-    // TODO: How do we pick a signing address?
-    const signingAddress = (await SigningWallet.query().first())?.address;
+    return knex.transaction(async tx => {
+      const {participants, appDefinition, appData, allocations} = args;
+      const outcome: Outcome = deserializeAllocations(allocations);
+      // TODO: How do we pick a signing address?
+      const signingAddress = (await SigningWallet.query().first())?.address;
 
-    const channelConstants: ChannelConstants = {
-      channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
-      participants: participants.map(convertToParticipant),
-      chainId: '0x01',
-      challengeDuration: 9001,
-      appDefinition,
-    };
+      const channelConstants: ChannelConstants = {
+        channelNonce: await Nonce.next(participants.map(p => p.signingAddress)),
+        participants: participants.map(convertToParticipant),
+        chainId: '0x01',
+        challengeDuration: 9001,
+        appDefinition,
+      };
 
-    const turnNum = 0;
-    const isFinal = false;
-    const signatures: SignatureEntry[] = [];
-    const s = {appData, outcome, turnNum, isFinal, signatures};
-    const vars: SignedStateVarsWithHash[] = [
-      {...s, stateHash: hashState({...channelConstants, ...s})},
-    ];
+      const vars: SignedStateVarsWithHash[] = [];
 
-    const cols = {...channelConstants, vars, signingAddress};
-    const {channelId} = await Channel.query().insert(cols);
+      const cols = {...channelConstants, vars, signingAddress};
 
-    const channelResult: ChannelResult = {
-      ...args,
-      channelId,
-      turnNum: 0,
-      status: 'opening',
-    };
+      const {channelId} = await Channel.query(tx).insert(cols);
 
-    const {outbox, channelResults} = await takeActions([channelId]);
+      const {outgoing, channelResult} = await Store.signState(
+        channelId,
+        {
+          ...channelConstants,
+          turnNum: 0,
+          isFinal: false,
+          appData,
+          outcome,
+        },
+        tx
+      );
 
-    return {outbox, channelResults: channelResults.concat(channelResult)};
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+    });
   }
 
   async joinChannel(_args: JoinChannelParams): Result {
     throw 'Unimplemented';
   }
-  async updateChannel(_args: UpdateChannelParams): Result {
-    throw 'Unimplemented';
+  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
+    return knex.transaction(async tx => {
+      const channel = await Store.getChannel(channelId, tx);
+
+      if (!channel)
+        throw new UpdateChannel.UpdateChannelError(UpdateChannel.Errors.channelNotFound, {
+          channelId,
+        });
+
+      const outcome = deserializeAllocations(allocations);
+
+      const nextState = getOrThrow(
+        UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
+      );
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+
+      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+    });
   }
+
   async closeChannel(_args: CloseChannelParams): Result {
     throw 'Unimplemented';
   }
@@ -207,10 +223,8 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const handleAction = async (action: ProtocolAction): Promise<any> => {
       switch (action.type) {
         case 'SignState': {
-          const notices = await Store.signState(action, tx);
-          notices.map(n => outbox.push(n.notice));
-
-          const {channelResult} = await Channel.forId(action.channelId, tx);
+          const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+          outgoing.map(n => outbox.push(n.notice));
           channelResults.push(channelResult);
           return;
         }
@@ -241,3 +255,13 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
   return {outbox, error, channelResults};
 };
+
+// TODO: This should be removed, and not used externally.
+// It is a fill-in until the wallet API is specced out.
+function getOrThrow<E, T>(result: Either.Either<E, T>): T {
+  return Either.getOrElseW<E, T>(
+    (err: E): T => {
+      throw err;
+    }
+  )(result);
+}

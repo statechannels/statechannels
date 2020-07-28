@@ -1,10 +1,10 @@
-import {StateVariables} from '@statechannels/wallet-core';
+import {StateVariables, calculateChannelId} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {Channel, RequiredColumns} from '../../../models/channel';
 import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/utils';
 import {addHash, dropNonVariables} from '../../../state-utils';
-import {alice, bob} from '../../../wallet/__test__/fixtures/signingWallets';
+import {alice, bob} from '../../../wallet/__test__/fixtures/signing-wallets';
 import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
 
 export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) => {
@@ -23,6 +23,7 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
   const columns: RequiredColumns = _.merge(defaults, props);
 
   columns.vars.map(s => (s = dropNonVariables(addHash({...columns, ...s}))));
+  (columns as any).channelId = calculateChannelId(columns);
   return Channel.fromJson(columns);
 };
 

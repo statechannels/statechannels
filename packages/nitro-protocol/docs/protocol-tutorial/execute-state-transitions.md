@@ -34,7 +34,7 @@ const chainId = '0x1234';
     :~ how many times have these participants
     already run a channel on this chain?
   */
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = 0;
 
 /* 
     Define the challengeDuration 
@@ -280,7 +280,7 @@ import {signState} from '@statechannels/nitro-protocol';
 
 const wallet = Wallet.createRandom();
 const state: State = {
-  channel: {chainId: '0x1', channelNonce: '0x1', participants: [wallet.address]},
+  channel: {chainId: '0x1', channelNonce: 1, participants: [wallet.address]},
   outcome: [],
   turnNum: 1,
   isFinal: false,
