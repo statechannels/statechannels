@@ -761,6 +761,9 @@
       "version-0.1.1/version-0.1.1-overview": {
         "title": "Overview"
       },
+      "version-0.1.1/typescript-api/version-0.1.1-index": {
+        "title": "API Reference"
+      },
       "version-0.1.1/wallet-dev-tutorial/version-0.1.1-clear-a-challenge": {
         "title": "Clear a challenge"
       },
@@ -804,8 +807,8 @@
     },
     "links": {
       "Docs": "Docs",
-      "Contract API": "Contract API",
-      "Help": "Help"
+      "Typescript API": "Typescript API",
+      "Contract API": "Contract API"
     },
     "categories": {
       "Overview": "Overview",

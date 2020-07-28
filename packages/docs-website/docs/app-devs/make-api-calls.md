@@ -5,7 +5,7 @@ title: Make Wallet API calls
 
 ## Direct Funding
 
-In the following diagram, `p = window.channelProvider`, and Client(A/B) is an instance of the [`ChannelClient` class](../channel-client-api/channel-client.channelclient) created by each participants' application.
+In the following diagram, `p = window.channelProvider`, and Client(A/B) is an instance of the [`ChannelClient` class](../typescript-api/channel-client.channelclient) created by each participants' application.
 
 The diagram shows a typical "happy path", directly-funded state channel interaction between two instances A and B of ChannelClient, their respective Wallets, and the Blockchain.
 

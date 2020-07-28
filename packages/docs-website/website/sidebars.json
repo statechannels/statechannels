@@ -1,13 +1,12 @@
 {
   "docs": {
-    "Overview": ["overview"],
+    "Overview": ["overview", "products"],
     "App Developers": [
       "app-devs/app-devs-intro",
       "app-devs/quick-start-contracts",
       "app-devs/quick-start-dapp",
       "app-devs/hook-up-messaging",
       "app-devs/make-api-calls",
-      "typescript-api/channel-client.channelclient",
       "app-devs/recommended-patterns"
     ],
     "Protocol Docs": [

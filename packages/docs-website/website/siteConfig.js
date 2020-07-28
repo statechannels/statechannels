@@ -40,8 +40,8 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'overview', label: 'Docs'},
-    {doc: 'contract-api/contract-inheritance', label: 'Contract API'},
-    {page: 'help', label: 'Help'}
+    {doc: 'typescript-api/index', label: 'Typescript API'},
+    {doc: 'contract-api/contract-inheritance', label: 'Contract API'}
   ],
 
   // If you have users set above, you add it here:
