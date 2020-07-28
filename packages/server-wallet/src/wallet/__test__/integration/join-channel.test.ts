@@ -32,7 +32,7 @@ it('signs the prefund setup ', async () => {
 
   await expect(w.joinChannel({channelId})).resolves.toMatchObject({
     outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}}],
-    channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
+    // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
   });
 
   const updated = await Channel.forId(channelId, undefined);
