@@ -219,7 +219,7 @@ jobs:
           command: |
             sudo apt install -y postgresql-client || true
             yarn db:create $PSQL_ARGS
-            yarn db:migrate $PSQL_ARGS
+            yarn db:migrate
       - run:
           name: test
           command: |
@@ -248,9 +248,9 @@ jobs:
           command: |
             sudo apt install -y postgresql-client || true
             yarn db:create $PSQL_ARGS
-            yarn db:migrate $PSQL_ARGS
+            yarn db:migrate
             createdb pong $PSQL_ARGS
-            SERVER_DB_NAME=pong yarn db:migrate $PSQL_ARGS
+            SERVER_DB_NAME=pong yarn db:migrate
       - run:
           name: server-wallet-e2e-test
           working_directory: packages/server-wallet
