@@ -215,9 +215,11 @@ jobs:
           at: /home/circleci/project
       - run:
           name: wallet setup
+          working_directory: packages/server-wallet
           command: |
             sudo apt install -y postgresql-client || true
-            (cd packages/server-wallet && yarn db:create $PSQL_ARGS && yarn db:migrate $PSQL_ARGS)
+            yarn db:create $PSQL_ARGS
+            yarn db:migrate
       - run:
           name: test
           command: |
@@ -233,6 +235,27 @@ jobs:
       - upload_gas_report:
           package: nitro-protocol
       - notify_slack
+
+  server-wallet-e2e-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            sudo apt install -y postgresql-client || true
+            yarn db:create $PSQL_ARGS
+            yarn db:migrate
+            createdb pong $PSQL_ARGS
+            SERVER_DB_NAME=pong yarn db:migrate
+      - run:
+          name: server-wallet-e2e-test
+          working_directory: packages/server-wallet
+          command: yarn test:e2e
+          no_output_timeout: 30m
 
   release-pull-request:
     <<: *defaults
@@ -326,6 +349,11 @@ workflows:
       - test:
           requires:
             - prepare
+      
+      - server-wallet-e2e-test:
+          requires:
+            - prepare
+
       - release-pull-request:
           requires:
             - prepare

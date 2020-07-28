@@ -10,24 +10,19 @@ module.exports = {
   ],
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:import/typescript',
+    'plugin:import/typescript'
   ],
   rules: {
-    'import/order': [1, {
-      'groups': [
-        'builtin',
-        'external',
-        'internal',
-        'parent',
-        'sibling',
-        'index'
-      ],
-      'newlines-between': 'always'
-    }],
+    'import/order': [
+      1,
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always'
+      }
+    ],
     /**
      * The default setting for Prettier is 'warn' because then it shows as yellow squiggly lines
      * in the VS Code IDE. However, it means `eslint` will not have an error code if there is warning
@@ -36,5 +31,11 @@ module.exports = {
      * associated with that script will fail when run.
      */
     'prettier/prettier': 'warn'
-  }
+  },
+  overrides: [
+    {
+      files: ['**/*.ts'],
+      extends: ['plugin:@typescript-eslint/recommended']
+    }
+  ]
 };

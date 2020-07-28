@@ -34,3 +34,7 @@ NODE_ENV=test yarn db:create
 NODE_ENV=test yarn db:migrate
 yarn test:ci
 ```
+
+### Note on `POSTGRES_USER`
+
+On CircleCI we use `POSTGRES_USER` as `root`, as set in the [CircleCI configuration file](../../.circleci/config.yml) in the monorepo root. Since `NODE_ENV` is set to `test` in that environment, `.env.test` is used, which points to `root` as `SERVER_DB_USER`. When testing locally, however, we expect that `NODE_ENV` is `development`, so `.env.development` is used, which uses `postgres` for `SERVER_DB_USER`. We could unite these two by syncronizing CircleCI and our local environments to both use `postgres` as the user.

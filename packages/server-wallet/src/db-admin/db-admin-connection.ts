@@ -18,6 +18,5 @@ export const truncate = async (
   if (config.nodeEnv !== 'development' && config.nodeEnv !== 'test') {
     throw 'No admin connection allowed';
   }
-
   await Promise.all(tables.map(table => knex.raw(`TRUNCATE TABLE ${table} CASCADE;`)));
 };

@@ -21,6 +21,7 @@ interface ServerWalletConfig {
   debugKnex?: string;
 }
 
+// TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
 const config: ServerWalletConfig = {
   nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
   postgresDatabaseUrl: process.env.SERVER_URL,

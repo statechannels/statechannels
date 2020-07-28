@@ -17,6 +17,7 @@
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.1.4",
+    "@types/body-parser": "^1.19.0",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
@@ -27,6 +28,7 @@
     "@types/prettier": "1.19.0",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
+    "body-parser": "1.19.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
     "eslint-plugin-import": "2.20.0",
@@ -71,10 +73,10 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "start:dev": "ts-node ./scripts/start-dev-server.ts",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
-    "test:ci": "yarn test --bail"
+    "test:ci": "yarn test --bail",
+    "test:e2e": "yarn jest -c ./jest/jest.e2e.config.js"
   }
 }
