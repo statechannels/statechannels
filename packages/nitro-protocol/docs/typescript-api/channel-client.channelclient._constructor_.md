@@ -24,7 +24,7 @@ constructor(provider: ChannelProviderInterface);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  provider | ChannelProviderInterface | An instance of the @<!-- -->statechannels/iframe-channel-provider class, suitably configured |
+|  provider | [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | An instance of the @<!-- -->statechannels/iframe-channel-provider class, suitably configured |
 
 ## Remarks
 

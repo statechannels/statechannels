@@ -13,4 +13,5 @@ hide_title: true
 
 |  Package | Description |
 |  --- | --- |
+|  [@statechannels/channel-client](./channel-client.md) |  |
 |  [@statechannels/iframe-channel-provider](./iframe-channel-provider.md) |  |

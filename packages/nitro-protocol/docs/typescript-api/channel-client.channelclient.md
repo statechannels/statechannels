@@ -37,7 +37,7 @@ This class exposes a convenient API feturing event emitters and async methods re
 |  --- | --- | --- | --- |
 |  [channelState](./channel-client.channelclient.channelstate.md) |  | ReplaySubject&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> rxjs Observable which emits ChannelResults for all channels of interest |
 |  [destinationAddress](./channel-client.channelclient.destinationaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my destination address |
-|  [provider](./channel-client.channelclient.provider.md) |  | ChannelProviderInterface | <b><i>(BETA)</i></b> E.g. instance of the @<!-- -->statechannels/iframe-channel-provider class, suitably configured |
+|  [provider](./channel-client.channelclient.provider.md) |  | [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | <b><i>(BETA)</i></b> E.g. instance of the @<!-- -->statechannels/iframe-channel-provider class, suitably configured |
 |  [signingAddress](./channel-client.channelclient.signingaddress.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get my state channel (ephemeral) signingAddress |
 |  [walletVersion](./channel-client.channelclient.walletversion.md) |  | string &#124; undefined | <b><i>(BETA)</i></b> Get the wallet version |
 

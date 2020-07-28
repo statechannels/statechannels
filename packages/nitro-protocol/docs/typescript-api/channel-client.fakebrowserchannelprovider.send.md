@@ -23,8 +23,8 @@ send<M extends keyof WalletJsonRpcAPI>(method: M, params: WalletJsonRpcAPI[M]['r
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  method | M |  |
-|  params | WalletJsonRpcAPI\[M\]\['request'\]\['params'\] |  |
+|  params | [WalletJsonRpcAPI](./iframe-channel-provider.walletjsonrpcapi.md)<!-- -->\[M\]\['request'\]\['params'\] |  |
 
 <b>Returns:</b>
 
-Promise&lt;WalletJsonRpcAPI\[M\]\['response'\]\['result'\]&gt;
+Promise&lt;[WalletJsonRpcAPI](./iframe-channel-provider.walletjsonrpcapi.md)<!-- -->\[M\]\['response'\]\['result'\]&gt;

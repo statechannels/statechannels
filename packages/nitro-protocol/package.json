@@ -70,7 +70,7 @@
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
-    "docgen": "solidoc",
+    "docgen": "solidoc && node scripts/api-documenter.js",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",

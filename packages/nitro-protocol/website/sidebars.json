@@ -7,7 +7,7 @@
       "app-devs/quick-start-dapp",
       "app-devs/hook-up-messaging",
       "app-devs/make-api-calls",
-      "channel-client-api/channel-client.channelclient",
+      "typescript-api/channel-client.channelclient",
       "app-devs/recommended-patterns"
     ],
     "Protocol Docs": [

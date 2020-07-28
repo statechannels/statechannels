@@ -20,7 +20,7 @@ export declare class FakeBrowserChannelProvider extends FakeChannelProvider impl
 ```
 <b>Extends:</b> [FakeChannelProvider](./channel-client.fakechannelprovider.md)
 
-<b>Implements:</b> IFrameChannelProviderInterface
+<b>Implements:</b> [IFrameChannelProviderInterface](./iframe-channel-provider.iframechannelproviderinterface.md)
 
 ## Properties
 

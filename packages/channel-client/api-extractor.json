@@ -10,7 +10,7 @@
 
   "docModel": {
     "enabled": true,
-    "apiJsonFilePath": "dist/channel-client.api.json"
+    "apiJsonFilePath": "../nitro-protocol/docs/generated-apis/channel-client.api.json"
   },
   "dtsRollup": {
     "enabled": true

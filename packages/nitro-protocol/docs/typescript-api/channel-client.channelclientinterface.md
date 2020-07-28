@@ -33,7 +33,7 @@ export interface ChannelClientInterface
 |  [onChannelProposed](./channel-client.channelclientinterface.onchannelproposed.md) | (callback: (result: ChannelResult) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
 |  [onChannelUpdated](./channel-client.channelclientinterface.onchannelupdated.md) | (callback: (result: ChannelResult) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
 |  [onMessageQueued](./channel-client.channelclientinterface.onmessagequeued.md) | (callback: (message: Message) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
-|  [provider](./channel-client.channelclientinterface.provider.md) | ChannelProviderInterface | <b><i>(BETA)</i></b> |
+|  [provider](./channel-client.channelclientinterface.provider.md) | [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | <b><i>(BETA)</i></b> |
 |  [pushMessage](./channel-client.channelclientinterface.pushmessage.md) | (message: Message) =&gt; Promise&lt;PushMessageResult&gt; | <b><i>(BETA)</i></b> |
 |  [signingAddress](./channel-client.channelclientinterface.signingaddress.md) | string | <b><i>(BETA)</i></b> |
 |  [updateChannel](./channel-client.channelclientinterface.updatechannel.md) | (channelId: string, allocations: Allocation\[\], appData: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
