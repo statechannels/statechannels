@@ -77,6 +77,6 @@
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:ci": "yarn test --bail",
-    "test:e2e": "yarn test e2e-test"
+    "test:e2e": "yarn jest -c ./jest/jest.e2e.config.js"
   }
 }
