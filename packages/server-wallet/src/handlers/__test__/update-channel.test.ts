@@ -11,7 +11,7 @@ test('validUpdate', () => {
   expect(result).toEqualRight(signStateFixture());
 });
 
-test('Not my turn', () => {
+test.skip('Not my turn', () => {
   const result = updateChannel(
     updateChannelFixture(),
     channelStateFixture({supported: {turnNum: 4}})
