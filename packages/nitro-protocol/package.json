@@ -66,7 +66,6 @@
   "scripts": {
     "build": "run-s contract:compile build:typescript build:webpack docgen",
     "build:ci": "yarn build",
-    "build:netlify": "yarn website:deploy",
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
@@ -78,14 +77,12 @@
     "prepare": "yarn patch-package && yarn build",
     "prettier:check": "prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-protocol",
     "test": "run-s test:contracts 'test:app --all'",
     "test:app": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn run-p 'test:ci:contracts --runInBand' 'test:ci:app --runInBand'",
     "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",
-    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
+    "test:contracts": "jest -c ./config/jest/jest.contracts.config.js"
   },
   "types": "lib/src/index.d.ts"
 }

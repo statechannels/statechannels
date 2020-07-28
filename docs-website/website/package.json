@@ -1,13 +1,15 @@
 {
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
+    "build:netlify": "yarn build",
     "examples": "docusaurus-examples",
     "start": "yarn api-documenter && docusaurus-start",
     "build": "yarn api-documenter && docusaurus-build",
     "publish-gh-pages": "docusaurus-publish",
-    "write-translations": "docusaurus-write-translations",
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-protocol",
+    "rename-version": "docusaurus-rename-version",
     "version": "docusaurus-version",
-    "rename-version": "docusaurus-rename-version"
+    "write-translations": "docusaurus-write-translations"
   },
   "devDependencies": {},
   "dependencies": {
