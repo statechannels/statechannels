@@ -19,17 +19,19 @@ export interface UpdateChannelHandlerParams {
   appData: string;
 }
 
-export enum UpdateChannelErrors {
-  invalidLatestState = 'must have latest state',
-  notInRunningStage = 'channel must be in running state',
-  notMyTurn = 'it is not my turn',
-  channelNotFound = 'channel not found',
-}
-
+// eslint-disable-next-line import/export
 export class UpdateChannelError extends Error {
   readonly type = 'UpdateChannelError';
-  constructor(reason: UpdateChannelErrors, public readonly data: any = undefined) {
+  constructor(reason: UpdateChannelError.Errors, public readonly data: any = undefined) {
     super(reason);
+  }
+}
+// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare, import/export
+export namespace UpdateChannelError {
+  export enum Errors {
+    invalidLatestState = 'must have latest state',
+    notInRunningStage = 'channel must be in running state',
+    notMyTurn = 'it is not my turn',
   }
 }
 
@@ -41,17 +43,17 @@ const ensureSupportedStateExists = (
 ): Either<UpdateChannelError, ChannelStateWithSupported> =>
   hasSupportedState(cs)
     ? right(cs)
-    : left(new UpdateChannelError(UpdateChannelErrors.invalidLatestState));
+    : left(new UpdateChannelError(UpdateChannelError.Errors.invalidLatestState));
 
 function isMyTurn(cs: ChannelStateWithSupported): StepResult {
   if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
     return right(cs);
-  return left(new UpdateChannelError(UpdateChannelErrors.notMyTurn));
+  return left(new UpdateChannelError(UpdateChannelError.Errors.notMyTurn));
 }
 
 function hasRunningTurnNumber(cs: ChannelStateWithSupported): StepResult {
   if (cs.supported.turnNum < 3)
-    return left(new UpdateChannelError(UpdateChannelErrors.notInRunningStage));
+    return left(new UpdateChannelError(UpdateChannelError.Errors.notInRunningStage));
   return right(cs);
 }
 

@@ -1,6 +1,6 @@
 import matchers from '@pacote/jest-either';
 
-import {updateChannel, UpdateChannelError, UpdateChannelErrors} from '../update-channel';
+import {updateChannel, UpdateChannelError} from '../update-channel';
 import {
   updateChannelFixture,
   channelStateFixture,
@@ -19,5 +19,5 @@ test('Not my turn', () => {
     updateChannelFixture(),
     channelStateFixture({supported: {turnNum: 4}})
   );
-  expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelErrors.notMyTurn));
+  expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelError.Errors.notMyTurn));
 });
