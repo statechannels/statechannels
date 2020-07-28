@@ -4,14 +4,15 @@ import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState, signState} from '../protocols/actions';
-import {ChannelState, ProtocolResult} from '../protocols/state';
+import {ChannelState} from '../protocols/state';
 
 type ChannelStateWithSupported = ChannelState & {
   supported: SignedStateWithHash;
   latestSignedByMe: SignedStateWithHash;
 };
 
-type StepResult = Either<Error, ChannelStateWithSupported>;
+type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
+type UpdateChannelResult = Either<UpdateChannelError, SignState>;
 export interface UpdateChannelHandlerParams {
   channelId: ChannelId;
   outcome: Outcome;
@@ -64,8 +65,8 @@ const incrementTurnNumber = (args: UpdateChannelHandlerParams) => (
 export function updateChannel(
   args: UpdateChannelHandlerParams,
   channelState: ChannelState
-): ProtocolResult {
-  const signStateVars = (sv: StateVariables): ProtocolResult =>
+): UpdateChannelResult {
+  const signStateVars = (sv: StateVariables): SignState =>
     signState({...sv, channelId: args.channelId});
 
   return pipe(
@@ -74,6 +75,6 @@ export function updateChannel(
     chain(hasRunningTurnNumber),
     chain(isMyTurn),
     map(incrementTurnNumber(args)),
-    chain(signStateVars)
+    map(signStateVars)
   );
 }
