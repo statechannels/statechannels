@@ -244,8 +244,13 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           command: |
             sudo apt install -y postgresql-client || true
-            (cd packages/server-wallet && yarn db:create $PSQL_ARGS && yarn db:migrate $PSQL_ARGS)
-            (cd packages/server-wallet && createdb pong $PSQL_ARGS && SERVER_DB_NAME=pong yarn db:migrate $PSQL_ARGS)
+            (
+              cd packages/server-wallet
+              && yarn db:create $PSQL_ARGS
+              && yarn db:migrate $PSQL_ARGS
+              && createdb pong $PSQL_ARGS
+              && SERVER_DB_NAME=pong yarn db:migrate $PSQL_ARGS
+            )
       - run:
           name: server-wallet-e2e-test
           command: cd packages/server-wallet && yarn test:e2e
