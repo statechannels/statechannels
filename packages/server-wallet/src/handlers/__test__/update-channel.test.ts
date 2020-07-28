@@ -1,11 +1,8 @@
 import matchers from '@pacote/jest-either';
 
 import {updateChannel, UpdateChannelError} from '../update-channel';
-import {
-  updateChannelFixture,
-  channelStateFixture,
-  signStateFixture,
-} from '../fixtures/update-channel';
+import {updateChannelFixture, signStateFixture} from '../fixtures/update-channel';
+import {channelStateFixture} from '../../protocols/__test__/fixtures/channel-state';
 
 expect.extend(matchers);
 
@@ -21,3 +18,10 @@ test('Not my turn', () => {
   );
   expect(result).toEqualLeft(new UpdateChannelError(UpdateChannelError.Errors.notMyTurn));
 });
+
+enum ColorsEnum {
+  white = '#ffffff',
+  black = '#000000',
+}
+
+type Colors = keyof typeof ColorsEnum;

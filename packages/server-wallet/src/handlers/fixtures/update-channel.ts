@@ -19,13 +19,3 @@ export const updateChannelFixture = fixture(defaultVars);
 export const signStateFixture = fixture(
   signState({channelId, ...stateVars({turnNum: lastPostFundTurnNum + 1})})
 );
-
-const defaultChannelState: ChannelState = {
-  channelId,
-  myIndex: 0,
-  supported: stateWithHashSignedBy()({turnNum: lastPostFundTurnNum}),
-  latest: stateWithHashSignedBy()({turnNum: lastPostFundTurnNum}),
-  funding: (): Uint256 => '0x0',
-};
-
-export const channelStateFixture = fixture(defaultChannelState);
