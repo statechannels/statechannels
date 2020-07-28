@@ -111,11 +111,7 @@ export class Wallet implements WalletInterface {
 
       const outcome = deserializeAllocations(allocations);
 
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      const throwError = (error: Error) => {
-        throw error;
-      };
-      const nextState = Either.getOrElseW(throwError)(
+      const nextState = getOrThrow(
         UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
       );
       const {outgoing, channelResult} = await Store.signState(nextState, tx);
@@ -261,3 +257,11 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
   return {outbox, error, channelResults};
 };
+
+function getOrThrow<E, T>(result: Either.Either<E, T>): T {
+  return Either.getOrElseW<E, T>(
+    (err: E): T => {
+      throw err;
+    }
+  )(result);
+}
