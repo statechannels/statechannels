@@ -2664,19 +2664,6 @@
   dependencies:
     "@babel/runtime" "^7.4.4"
 
-"@microsoft/api-documenter@^7.8.21":
-  version "7.8.21"
-  resolved "https://registry.npmjs.org/@microsoft/api-documenter/-/api-documenter-7.8.21.tgz#96dba0c1b6b7db9c1acae9dd1e32e801cdecb853"
-  integrity sha512-ffrJEVNykhSVJL8W/fX95GOF8LsG1BjVjp1exGVdmKltrmpDAlFL6WVs24ii1WUY62lcIjMqgBK4F9DszFZ5UQ==
-  dependencies:
-    "@microsoft/api-extractor-model" "7.8.12"
-    "@microsoft/tsdoc" "0.12.19"
-    "@rushstack/node-core-library" "3.25.0"
-    "@rushstack/ts-command-line" "4.4.6"
-    colors "~1.2.1"
-    js-yaml "~3.13.1"
-    resolve "~1.17.0"
-
 "@microsoft/api-extractor-model@7.8.12":
   version "7.8.12"
   resolved "https://registry.npmjs.org/@microsoft/api-extractor-model/-/api-extractor-model-7.8.12.tgz#d089193ef29275b8b20802498c6bdfab80dcef59"
@@ -14265,14 +14252,6 @@ js-yaml@3.x, js-yaml@^3.13.0, js-yaml@^3.13.1:
   version "3.14.0"
   resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-3.14.0.tgz#a7a34170f26a21bb162424d8adacb4113a69e482"
   integrity sha512-/4IbIeHcD9VMHFqDR/gQ7EdZdLimOvW2DdcxFjdyyZ9NsbS+ccrXqVWDtab/lRl5AlUqmpBx8EhPaWR+OtY17A==
-  dependencies:
-    argparse "^1.0.7"
-    esprima "^4.0.0"
-
-js-yaml@~3.13.1:
-  version "3.13.1"
-  resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
-  integrity sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"

@@ -20,7 +20,6 @@
     "pino": "6.2.0"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.8.21",
     "@microsoft/api-extractor": "^7.9.2",
     "@statechannels/client-api-schema": "0.0.3",
     "@types/debug": "4.1.5",

@@ -8,7 +8,7 @@ const {exec} = require('child_process');
 async function main() {
   await new Promise((resolve, reject) =>
     exec(
-      'api-documenter markdown -i docs/generated-apis -o docs/typescript-api',
+      'api-documenter markdown -i ../docs/generated-apis -o ../docs/typescript-api',
       (err, stdout, stderr) => {
         console.log(stdout);
         console.error(stderr);
@@ -21,7 +21,7 @@ async function main() {
     )
   );
 
-  const dir = '../nitro-protocol/docs/typescript-api';
+  const dir = '../docs/typescript-api';
   const docFiles = await readdir(dir);
   for (const docFile of docFiles) {
     try {
@@ -35,7 +35,7 @@ async function main() {
       const output = [];
       const lines = createInterface({
         input,
-        crlfDelay: Infinity,
+        crlfDelay: Infinity
       });
 
       let title = '';

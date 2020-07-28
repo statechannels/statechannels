@@ -2,8 +2,8 @@
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
     "examples": "docusaurus-examples",
-    "start": "docusaurus-start",
-    "build": "docusaurus-build",
+    "start": "yarn api-documenter && docusaurus-start",
+    "build": "yarn api-documenter && docusaurus-build",
     "publish-gh-pages": "docusaurus-publish",
     "write-translations": "docusaurus-write-translations",
     "version": "docusaurus-version",
@@ -11,6 +11,7 @@
   },
   "devDependencies": {},
   "dependencies": {
+    "@microsoft/api-documenter": "^7.8.21",
     "docusaurus": "1.11.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
