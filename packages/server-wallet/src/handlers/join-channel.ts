@@ -28,7 +28,7 @@ export class JoinChannelError extends Error {
 // The helper functions should be factored out, tested, and reusable
 const hasStateSignedByMe = (cs: ChannelState): boolean => !!cs.latestSignedByMe;
 
-const ensureNotSignedByMe = (cs: ChannelState): Either<JoinChannelError, ChannelState> =>
+const ensureNotSignedByMe = (cs: ChannelState): StepResult =>
   hasStateSignedByMe(cs) ? left(new JoinChannelError(Errors.alreadySignedByMe)) : right(cs);
 
 function ensureLatestStateIsPrefundSetup(cs: ChannelState): StepResult {
