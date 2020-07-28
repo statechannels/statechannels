@@ -65,7 +65,11 @@ describe('e2e', () => {
 
     await Channel.query().insert([seed]);
 
-    // TODO: Need to also seed the database with this same channel of the Pong
+    // TODO: Need to also seed the database with this same channel of the Pong.
+    // The test passes right now because the Pong client blindly accepts the
+    // signed state and doesn't bother doing anything with it -- it considers
+    // it a new channel. Once we call updateChannel on Pong, that will throw
+    // an eror unless we seed its database with this same channel.
 
     await pingClient.ping(seed.channelId);
 
