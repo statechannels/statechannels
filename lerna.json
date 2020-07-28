@@ -1,7 +1,7 @@
 {
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "packages": ["packages/*"],
+  "packages": ["packages/*", "packages/docs-website"],
   "version": "independent",
   "publishConfig": {
     "access": "public",
