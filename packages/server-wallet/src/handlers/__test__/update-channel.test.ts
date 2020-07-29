@@ -2,7 +2,8 @@ import matchers from '@pacote/jest-either';
 import {left} from 'fp-ts/lib/Either';
 
 import {updateChannel, UpdateChannelError} from '../update-channel';
-import {updateChannelFixture, signStateFixture} from '../fixtures/update-channel';
+import {updateChannelFixture} from '../fixtures/update-channel';
+import {signStateFixture} from '../../protocols/__test__/fixtures/actions';
 import {channelStateFixture} from '../../protocols/__test__/fixtures/channel-state';
 import {ChannelState} from '../../protocols/state';
 
