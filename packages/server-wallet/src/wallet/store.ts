@@ -92,10 +92,10 @@ export const Store = {
     const sigValidationResult = validateSignatures(signedState);
     if (isLeft(sigValidationResult)) return sigValidationResult;
 
-    const singingWalletResult = await getSigningWallet(signedState, tx);
-    if (isLeft(singingWalletResult)) return singingWalletResult;
+    const signingWalletResult = await getSigningWallet(signedState, tx);
+    if (isLeft(signingWalletResult)) return signingWalletResult;
 
-    const {address: signingAddress} = singingWalletResult.right;
+    const {address: signingAddress} = signingWalletResult.right;
 
     const cols: RequiredColumns = {
       ...signedState,
