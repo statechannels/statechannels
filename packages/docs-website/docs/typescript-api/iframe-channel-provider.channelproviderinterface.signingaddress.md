@@ -9,6 +9,11 @@ hide_title: true
 
 ## ChannelProviderInterface.signingAddress property
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+The public part of the ephemeral key pair used for signing state channel updates.
+
 <b>Signature:</b>
 
 ```typescript

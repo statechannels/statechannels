@@ -50,7 +50,7 @@ async function main() {
         const homeLink = line.match(/\[Home\]\(.\/index\.md\) &gt; (.*)/);
         if (homeLink) {
           // Skip the breadcrumb for the toplevel index file.
-          if (id !== 'faastjs') {
+          if (id !== 'index') {
             output.push(homeLink[1]);
           }
           skip = true;

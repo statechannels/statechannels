@@ -9,6 +9,12 @@ hide_title: true
 
 ## channel-client package
 
+Make requests to a statechannels wallet using async methods
+
+## Remarks
+
+The [ChannelClient](./channel-client.channelclient.md) class wraps an object implementing the [Channel Provider Interface](./iframe-channel-provider.channelproviderinterface.md) and exposes methods which return Promises. This object could be a [Fake Channel Provider](./channel-client.fakechannelprovider.md)<!-- -->.
+
 ## Classes
 
 |  Class | Description |

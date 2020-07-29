@@ -9,26 +9,35 @@ hide_title: true
 
 ## ChannelProviderInterface interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+The generic JsonRPC provider interface that mimics [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) and the window.ethereum object in the browser.
+
 <b>Signature:</b>
 
 ```typescript
 export interface ChannelProviderInterface 
 ```
 
+## Remarks
+
+Expectation is bidirectional communication between application and the wallet.
+
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [destinationAddress](./iframe-channel-provider.channelproviderinterface.destinationaddress.md) | string |  |
-|  [off](./iframe-channel-provider.channelproviderinterface.off.md) | [OffType](./iframe-channel-provider.offtype.md) |  |
-|  [on](./iframe-channel-provider.channelproviderinterface.on.md) | [OnType](./iframe-channel-provider.ontype.md) |  |
-|  [signingAddress](./iframe-channel-provider.channelproviderinterface.signingaddress.md) | string |  |
-|  [subscribe](./iframe-channel-provider.channelproviderinterface.subscribe.md) | [SubscribeType](./iframe-channel-provider.subscribetype.md) |  |
-|  [unsubscribe](./iframe-channel-provider.channelproviderinterface.unsubscribe.md) | [UnsubscribeType](./iframe-channel-provider.unsubscribetype.md) |  |
-|  [walletVersion](./iframe-channel-provider.channelproviderinterface.walletversion.md) | string |  |
+|  [destinationAddress](./iframe-channel-provider.channelproviderinterface.destinationaddress.md) | string | <b><i>(BETA)</i></b> The ethereum address where on-chain funds will be sent. |
+|  [off](./iframe-channel-provider.channelproviderinterface.off.md) | OffType | <b><i>(BETA)</i></b> eventemitter 'off' for JSON-RPC Notifications. Use this to unregister callbacks. |
+|  [on](./iframe-channel-provider.channelproviderinterface.on.md) | OnType | <b><i>(BETA)</i></b> eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks. |
+|  [signingAddress](./iframe-channel-provider.channelproviderinterface.signingaddress.md) | string | <b><i>(BETA)</i></b> The public part of the ephemeral key pair used for signing state channel updates. |
+|  [subscribe](./iframe-channel-provider.channelproviderinterface.subscribe.md) | SubscribeType | <b><i>(BETA)</i></b> |
+|  [unsubscribe](./iframe-channel-provider.channelproviderinterface.unsubscribe.md) | UnsubscribeType | <b><i>(BETA)</i></b> |
+|  [walletVersion](./iframe-channel-provider.channelproviderinterface.walletversion.md) | string | <b><i>(BETA)</i></b> The ethereum address where on-chain funds will be sent. |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [send(method, params)](./iframe-channel-provider.channelproviderinterface.send.md) |  |
+|  [send(method, params)](./iframe-channel-provider.channelproviderinterface.send.md) | <b><i>(BETA)</i></b> Method for sending requests to the wallet |

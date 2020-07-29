@@ -35,53 +35,91 @@ import { PushMessageResponse } from '@statechannels/client-api-schema';
 import { UpdateChannelRequest } from '@statechannels/client-api-schema';
 import { UpdateChannelResponse } from '@statechannels/client-api-schema';
 
-// Warning: (ae-forgotten-export) The symbol "IFrameChannelProvider" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
+// @beta
 export const channelProvider: IFrameChannelProvider;
 
-// @public (undocumented)
+// @beta
 export interface ChannelProviderInterface {
-    // (undocumented)
     destinationAddress?: string;
-    // (undocumented)
+    // Warning: (ae-incompatible-release-tags) The symbol "off" is marked as @beta, but its signature references "OffType" which is marked as @internal
     off: OffType;
-    // (undocumented)
+    // Warning: (ae-incompatible-release-tags) The symbol "on" is marked as @beta, but its signature references "OnType" which is marked as @internal
     on: OnType;
-    // (undocumented)
     send<MethodName extends keyof WalletJsonRpcAPI>(method: MethodName, params: WalletJsonRpcAPI[MethodName]['request']['params']): Promise<WalletJsonRpcAPI[MethodName]['response']['result']>;
-    // (undocumented)
     signingAddress?: string;
+    // Warning: (ae-incompatible-release-tags) The symbol "subscribe" is marked as @beta, but its signature references "SubscribeType" which is marked as @internal
+    //
     // (undocumented)
     subscribe: SubscribeType;
+    // Warning: (ae-incompatible-release-tags) The symbol "unsubscribe" is marked as @beta, but its signature references "UnsubscribeType" which is marked as @internal
+    //
     // (undocumented)
     unsubscribe: UnsubscribeType;
-    // (undocumented)
     walletVersion?: string;
 }
 
-// @public (undocumented)
+// Warning: (ae-internal-missing-underscore) The name "EventType" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal
 export interface EventType extends NotificationType {
     // (undocumented)
     [id: string]: [unknown];
 }
 
-// @public (undocumented)
-export interface IFrameChannelProviderInterface extends Web3ChannelProviderInterface {
+// @beta
+export class IFrameChannelProvider implements IFrameChannelProviderInterface {
+    constructor();
+    destinationAddress?: string;
+    enable(): Promise<void>;
+    // Warning: (ae-incompatible-release-tags) The symbol "events" is marked as @beta, but its signature references "EventType" which is marked as @internal
+    protected readonly events: EventEmitter<EventType>;
+    // Warning: (ae-forgotten-export) The symbol "IFrameService" needs to be exported by the entry point index.d.ts
+    protected readonly iframe: IFrameService;
+    // Warning: (ae-forgotten-export) The symbol "PostMessageService" needs to be exported by the entry point index.d.ts
+    protected readonly messaging: PostMessageService;
+    protected mounted: boolean;
+    mountWalletComponent(url?: string): Promise<void>;
+    // Warning: (ae-incompatible-release-tags) The symbol "off" is marked as @beta, but its signature references "OffType" which is marked as @internal
+    off: OffType;
+    // Warning: (ae-incompatible-release-tags) The symbol "on" is marked as @beta, but its signature references "OnType" which is marked as @internal
+    on: OnType;
     // (undocumented)
+    protected onMessage(event: MessageEvent): Promise<void>;
+    // (undocumented)
+    send<M extends keyof WalletJsonRpcAPI>(method: M, params: WalletJsonRpcAPI[M]['request']['params']): Promise<WalletJsonRpcAPI[M]['response']['result']>;
+    signingAddress?: string;
+    // Warning: (ae-incompatible-release-tags) The symbol "subscribe" is marked as @beta, but its signature references "SubscribeType" which is marked as @internal
+    //
+    // (undocumented)
+    subscribe: SubscribeType;
+    // (undocumented)
+    protected readonly subscriptions: {
+        [T in keyof NotificationType]: string[];
+    };
+    // Warning: (ae-incompatible-release-tags) The symbol "unsubscribe" is marked as @beta, but its signature references "UnsubscribeType" which is marked as @internal
+    //
+    // (undocumented)
+    unsubscribe: UnsubscribeType;
+    protected url: string;
+    walletReady: Promise<unknown>;
+    walletVersion?: string;
+}
+
+// @beta
+export interface IFrameChannelProviderInterface extends Web3ChannelProviderInterface {
     mountWalletComponent(url?: string): Promise<void>;
 }
 
-// @public (undocumented)
+// @beta
 export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse;
 
-// @public (undocumented)
+// @beta
 export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotification<T, any>;
 
-// @public (undocumented)
+// @beta
 export function isJsonRpcResponse(message: any): message is JsonRpcResponse;
 
-// @public (undocumented)
+// @beta
 export type JsonRpcError = {
     code: number;
     message: string;
@@ -90,56 +128,53 @@ export type JsonRpcError = {
     };
 };
 
-// @public (undocumented)
+// @beta
 export type JsonRpcErrorResponse = ErrorResponse;
 
-// @public (undocumented)
+// @beta
 export interface JsonRpcNotification<NotificationName = string, NotificationParams = any> {
-    // (undocumented)
     jsonrpc: '2.0';
-    // (undocumented)
     method: NotificationName;
-    // (undocumented)
     params: NotificationParams;
 }
 
-// @public (undocumented)
+// @beta
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
-    // (undocumented)
     id?: number;
-    // (undocumented)
     jsonrpc: '2.0';
-    // (undocumented)
     method: MethodName;
-    // (undocumented)
     params: RequestParams;
 }
 
-// @public (undocumented)
+// @beta
 export interface JsonRpcResponse<ResponseType = any> {
-    // (undocumented)
     id: number;
-    // (undocumented)
     jsonrpc: '2.0';
-    // (undocumented)
     result: ResponseType;
 }
 
 // Warning: (ae-forgotten-export) The symbol "eventEmitter" needs to be exported by the entry point index.d.ts
+// Warning: (ae-internal-missing-underscore) The name "OffType" should be prefixed with an underscore because the declaration is marked as @internal
 //
-// @public (undocumented)
+// @internal (undocumented)
 export type OffType = typeof eventEmitter.off;
 
-// @public (undocumented)
+// Warning: (ae-internal-missing-underscore) The name "OnType" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
 export type OnType = typeof eventEmitter.on;
 
-// @public (undocumented)
+// Warning: (ae-internal-missing-underscore) The name "SubscribeType" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
 export type SubscribeType = (subscriptionType: Notification_2['method'], params?: any) => Promise<string>;
 
-// @public (undocumented)
+// Warning: (ae-internal-missing-underscore) The name "UnsubscribeType" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
 export type UnsubscribeType = (subscriptionId: string) => Promise<boolean>;
 
-// @public (undocumented)
+// @beta (undocumented)
 export type WalletJsonRpcAPI = {
     CreateChannel: {
         request: CreateChannelRequest;
@@ -195,13 +230,10 @@ export type WalletJsonRpcAPI = {
     };
 };
 
-// @public (undocumented)
+// @beta
 export interface Web3ChannelProviderInterface extends ChannelProviderInterface {
-    // (undocumented)
     enable(): Promise<void>;
 }
 
-
-// (No @packageDocumentation comment for this package)
 
 ```

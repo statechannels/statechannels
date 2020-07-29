@@ -218,6 +218,4 @@ export type UnsubscribeFunction = () => void;
 export const UserDeclinedErrorCode: 200;
 
 
-// (No @packageDocumentation comment for this package)
-
 ```

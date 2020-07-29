@@ -9,6 +9,11 @@ hide_title: true
 
 ## JsonRpcResponse interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,6 +24,6 @@ export interface JsonRpcResponse<ResponseType = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./iframe-channel-provider.jsonrpcresponse.id.md) | number |  |
-|  [jsonrpc](./iframe-channel-provider.jsonrpcresponse.jsonrpc.md) | '2.0' |  |
-|  [result](./iframe-channel-provider.jsonrpcresponse.result.md) | ResponseType |  |
+|  [id](./iframe-channel-provider.jsonrpcresponse.id.md) | number | <b><i>(BETA)</i></b> Identifier for the response |
+|  [jsonrpc](./iframe-channel-provider.jsonrpcresponse.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |
+|  [result](./iframe-channel-provider.jsonrpcresponse.result.md) | ResponseType | <b><i>(BETA)</i></b> The generic type of the response |

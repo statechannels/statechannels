@@ -10,10 +10,30 @@ import {IFrameService} from './iframe-service';
 import {isJsonRpcNotification} from './types/jsonrpc';
 import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
 
-class IFrameChannelProvider implements IFrameChannelProviderInterface {
+/**
+ * Class for interacting with a statechannels wallet
+ *
+ * @beta
+ */
+export class IFrameChannelProvider implements IFrameChannelProviderInterface {
+  /**
+   * Has the wallet iFrame been mounted?
+   */
   protected mounted = false;
+  /**
+   * EventEmitter instance emitting wallet notifications
+   */
   protected readonly events: EventEmitter<EventType>;
+  /**
+   * Service handling embedding of an iframe onto the page
+   *
+   * @remarks
+   * This iframe runs the wallet code
+   */
   protected readonly iframe: IFrameService;
+  /**
+   * Handles messaging to and from the wallet using postMessage
+   */
   protected readonly messaging: PostMessageService;
   protected readonly subscriptions: {
     [T in keyof NotificationType]: string[];
@@ -25,22 +45,46 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     MessageQueued: [],
     UIUpdate: []
   };
+  /**
+   * The url of the hosted statechannels wallet
+   */
   protected url = '';
 
+  /**
+   * The public part of the ephemeral key pair
+   * @remarks The private part is used for signing state channel updates.
+   */
   public signingAddress?: string;
+  /**
+   * The ethereum address where on-chain funds will be sent.
+   */
   public destinationAddress?: string;
+  /**
+   * The ethereum address where on-chain funds will be sent.
+   */
   public walletVersion?: string;
 
+  /**
+   * Create a new instance of this class
+   *
+   * @beta
+   */
   constructor() {
     this.events = new EventEmitter<EventType>();
     this.iframe = new IFrameService();
     this.messaging = new PostMessageService();
   }
 
+  /**
+   * Is the wallet ready to receive requests?
+   */
   walletReady = new Promise(resolve => {
     window.addEventListener('message', event => event.data === 'WalletReady' && resolve());
   });
 
+  /**
+   * Trigger the mounting of the <iframe/> element
+   */
   async mountWalletComponent(url?: string) {
     if (this.mounted) {
       logger.warn(
@@ -71,6 +115,13 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     this.walletVersion = walletVersion;
   }
 
+  /**
+   * Enable the channel provider
+   *
+   * @remarks
+   * This causes the provider to cache {@link IFrameChannelProvider.signingAddress | signingAddress}, {@link IFrameChannelProvider.destinationAddress | destinationAddress} and {@link IFrameChannelProvider.walletVersion | walletVersion} from the wallet.
+   * @returns Promise which resolves when the wallet has completed the Enable Ethereum workflow.
+   */
   async enable() {
     const {signingAddress, destinationAddress, walletVersion} = await this.send(
       'EnableEthereum',
@@ -111,8 +162,13 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
     return true;
   };
 
+  /**
+   * eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks.
+   */
   on: OnType = (method, params) => this.events.on(method, params);
-
+  /**
+   * eventemitter 'off' for JSON-RPC Notifications. Use this to unregister callbacks.
+   */
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
@@ -137,6 +193,14 @@ class IFrameChannelProvider implements IFrameChannelProviderInterface {
   }
 }
 
+/**
+ * Class instance that is attached to the window object
+ *
+ * @remarks
+ * Accessible via `window.channelProvider`
+ *
+ * @beta
+ */
 const channelProvider = new IFrameChannelProvider();
 
 export {channelProvider};

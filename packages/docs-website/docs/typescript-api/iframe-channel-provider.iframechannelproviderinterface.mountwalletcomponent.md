@@ -9,6 +9,11 @@ hide_title: true
 
 ## IFrameChannelProviderInterface.mountWalletComponent() method
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Trigger the mounting of the <iframe/> element which loads the wallet.
+
 <b>Signature:</b>
 
 ```typescript

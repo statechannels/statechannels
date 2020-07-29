@@ -21,11 +21,11 @@ export declare class FakeChannelProvider implements ChannelProviderInterface
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [destinationAddress](./channel-client.fakechannelprovider.destinationaddress.md) |  | string |  |
-|  [events](./channel-client.fakechannelprovider.events.md) |  | EventEmitter&lt;[EventType](./iframe-channel-provider.eventtype.md)<!-- -->&gt; |  |
+|  [events](./channel-client.fakechannelprovider.events.md) |  | EventEmitter&lt;EventType&gt; |  |
 |  [internalAddress](./channel-client.fakechannelprovider.internaladdress.md) |  | string |  |
 |  [latestState](./channel-client.fakechannelprovider.lateststate.md) |  | Record&lt;ChannelId, ChannelResult&gt; |  |
-|  [off](./channel-client.fakechannelprovider.off.md) |  | [OffType](./iframe-channel-provider.offtype.md) |  |
-|  [on](./channel-client.fakechannelprovider.on.md) |  | [OnType](./iframe-channel-provider.ontype.md) |  |
+|  [off](./channel-client.fakechannelprovider.off.md) |  | OffType |  |
+|  [on](./channel-client.fakechannelprovider.on.md) |  | OnType |  |
 |  [opponentAddress](./channel-client.fakechannelprovider.opponentaddress.md) |  | Record&lt;ChannelId, string&gt; |  |
 |  [opponentIndex](./channel-client.fakechannelprovider.opponentindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; |  |
 |  [playerIndex](./channel-client.fakechannelprovider.playerindex.md) |  | Record&lt;ChannelId, 0 &#124; 1&gt; |  |

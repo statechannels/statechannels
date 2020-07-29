@@ -559,8 +559,65 @@
       "typescript-api/iframe-channel-provider.channelproviderinterface.walletversion": {
         "title": "ChannelProviderInterface.walletVersion property"
       },
-      "typescript-api/iframe-channel-provider.eventtype": {
-        "title": "EventType interface"
+      "typescript-api/iframe-channel-provider.iframechannelprovider._constructor_": {
+        "title": "IFrameChannelProvider.(constructor)"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.destinationaddress": {
+        "title": "IFrameChannelProvider.destinationAddress property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.enable": {
+        "title": "IFrameChannelProvider.enable() method"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.events": {
+        "title": "IFrameChannelProvider.events property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.iframe": {
+        "title": "IFrameChannelProvider.iframe property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider": {
+        "title": "IFrameChannelProvider class"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.messaging": {
+        "title": "IFrameChannelProvider.messaging property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.mounted": {
+        "title": "IFrameChannelProvider.mounted property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.mountwalletcomponent": {
+        "title": "IFrameChannelProvider.mountWalletComponent() method"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.off": {
+        "title": "IFrameChannelProvider.off property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.on": {
+        "title": "IFrameChannelProvider.on property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.onmessage": {
+        "title": "IFrameChannelProvider.onMessage() method"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.send": {
+        "title": "IFrameChannelProvider.send() method"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.signingaddress": {
+        "title": "IFrameChannelProvider.signingAddress property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.subscribe": {
+        "title": "IFrameChannelProvider.subscribe property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.subscriptions": {
+        "title": "IFrameChannelProvider.subscriptions property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.unsubscribe": {
+        "title": "IFrameChannelProvider.unsubscribe property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.url": {
+        "title": "IFrameChannelProvider.url property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.walletready": {
+        "title": "IFrameChannelProvider.walletReady property"
+      },
+      "typescript-api/iframe-channel-provider.iframechannelprovider.walletversion": {
+        "title": "IFrameChannelProvider.walletVersion property"
       },
       "typescript-api/iframe-channel-provider.iframechannelproviderinterface": {
         "title": "IFrameChannelProviderInterface interface"
@@ -624,18 +681,6 @@
       },
       "typescript-api/iframe-channel-provider": {
         "title": "iframe-channel-provider package"
-      },
-      "typescript-api/iframe-channel-provider.offtype": {
-        "title": "OffType type"
-      },
-      "typescript-api/iframe-channel-provider.ontype": {
-        "title": "OnType type"
-      },
-      "typescript-api/iframe-channel-provider.subscribetype": {
-        "title": "SubscribeType type"
-      },
-      "typescript-api/iframe-channel-provider.unsubscribetype": {
-        "title": "UnsubscribeType type"
       },
       "typescript-api/iframe-channel-provider.walletjsonrpcapi": {
         "title": "WalletJsonRpcAPI type"
