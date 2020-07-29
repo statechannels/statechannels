@@ -84,6 +84,8 @@ export default class PingClient {
       to: message.recipient,
       from: message.sender,
     });
+
+    console.log((await this.wallet.getState({channelId})).channelResults[0].turnNum);
   }
 
   public emptyMessage(): Promise<Message> {

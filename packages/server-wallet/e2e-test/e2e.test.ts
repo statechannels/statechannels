@@ -94,7 +94,7 @@ describe('e2e', () => {
     const channel = await pingClient.getChannel(channelId);
 
     // Basic checks to see if updateChannel worked as expected
-    expect(channel.turnNum).toBe(4); // FIXME: Should be 5
+    expect(channel.turnNum).toBe(4); // FIXME: Should be 5, bug in wallet?
 
     // TODO: Add test to confirm that the Pong controller received the signed state
     // and then proceeded to sign an update and respond with it

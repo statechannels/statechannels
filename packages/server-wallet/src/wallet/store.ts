@@ -14,7 +14,7 @@ export const Store = {
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const channel = await Channel.forId(channelId, tx);
     const outgoing = channel.signAndAdd(vars);
-    await Channel.query(tx).update(channel);
+    await Channel.query(tx).upsertGraph(channel);
 
     const {channelResult} = channel;
 

@@ -1,5 +1,10 @@
 import {Message} from '@statechannels/wire-format';
-import {SignedState, makeDestination} from '@statechannels/wallet-core';
+import {
+  SignedState,
+  makeDestination,
+  calculateChannelId,
+  SimpleAllocation,
+} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
 import knex from '../../src/db/connection';
@@ -46,27 +51,40 @@ export default class PongController {
     // types of messages between parties. e2e-test uses wire-format
     const convertedSignedStates = (signedStates as unknown) as SignedState[];
 
-    const {
-      channelResults: [pingsUpdate],
-    } = await this.wallet.pushMessage({
+    // FIXME: At this point, outbox should have ChannelUpdated or something
+    // waiting on https://github.com/statechannels/statechannels/pull/2370
+    await this.wallet.pushMessage({
       signedStates: convertedSignedStates,
       to,
       from,
     });
 
-    // FIXME: At this point, pingsUpdate is undefined, but should be a result
-    // waiting on https://github.com/statechannels/statechannels/pull/2370
-
-    if (!pingsUpdate)
+    if (convertedSignedStates.length === 0) {
       return {
         recipient: from,
         sender: this.myParticipantID,
         data: {signedStates: [], objectives: []},
       };
+    }
+
+    const {
+      channelResults: [channelResult],
+    } = await this.wallet.getState({
+      channelId: calculateChannelId({...convertedSignedStates[0]}),
+    });
+
+    if (channelResult.turnNum < 4) {
+      // TODO: Join Channel
+      return {
+        recipient: from,
+        sender: this.myParticipantID,
+        data: {signedStates: [], objectives: []},
+      };
+    }
 
     const {
       outbox: [messageToSendToPing],
-    } = await this.wallet.updateChannel(pingsUpdate);
+    } = await this.wallet.updateChannel(channelResult);
 
     return messageToSendToPing.params as Message;
   }
