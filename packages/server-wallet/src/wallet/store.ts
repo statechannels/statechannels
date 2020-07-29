@@ -9,6 +9,7 @@ import {
   State,
   calculateChannelId,
   StateVariables,
+  ChannelConstants,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Either, left, right, isLeft} from 'fp-ts/lib/Either';
@@ -92,32 +93,18 @@ export const Store = {
     signedState: SignedState,
     tx: Objection.Transaction
   ): Promise<Either<StoreError, undefined>> {
-    const sigValidationResult = validateSignatures(signedState);
-    if (isLeft(sigValidationResult)) return sigValidationResult;
+    getOrThrow(validateSignatures(signedState));
 
-    const signingWalletResult = await getSigningWallet(signedState, tx);
-    if (isLeft(signingWalletResult)) return signingWalletResult;
+    const {address: signingAddress} = getOrThrow(await getSigningWallet(signedState, tx));
 
-    const {address: signingAddress} = signingWalletResult.right;
-
-    const channelId = calculateChannelId(signedState);
-    let channel = await Channel.query(tx)
-      .where('channelId', channelId)
-      .first();
-
-    if (!channel) {
-      const cols: RequiredColumns = {...signedState, vars: [], signingAddress};
-
-      channel = Channel.fromJson(cols);
-
-      await Channel.query(tx).insert(channel);
-    }
-
+    const channel = await getOrCreateChannel(signedState, signingAddress, tx);
     let channelVars = channel.vars;
 
     channelVars = getOrThrow(addState(channelVars, signedState));
 
-    channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
+    channelVars = getOrThrow(
+      clearOldStates(channelVars, channel.isSupported ? channel.support : undefined)
+    );
 
     const invariantValidationResult = validateInvariants(channelVars, channel.myAddress);
     if (isLeft(invariantValidationResult)) return invariantValidationResult;
@@ -145,18 +132,23 @@ enum StoreErrors {
   staleState = 'Stale state',
 }
 
-function validateSignatures(signedState: SignedState): Either<StoreError, undefined> {
-  const {participants} = signedState;
+async function getOrCreateChannel(
+  constants: ChannelConstants,
+  signingAddress: string,
+  tx: Objection.Transaction
+): Promise<Channel> {
+  const channelId = calculateChannelId(constants);
+  let channel = await Channel.query(tx)
+    .where('channelId', channelId)
+    .first();
 
-  for (const sig of signedState.signatures) {
-    const signerIndex = participants.findIndex(p => p.signingAddress === sig.signer);
-    if (signerIndex === -1) {
-      return left(new StoreError(StoreErrors.invalidSignature, {signedState, signature: sig}));
-    }
+  if (!channel) {
+    const cols: RequiredColumns = {...constants, vars: [], signingAddress};
+    channel = Channel.fromJson(cols);
+    await Channel.query(tx).insert(channel);
   }
-  return right(undefined);
+  return channel;
 }
-
 async function getSigningWallet(
   signedState: SignedState,
   tx: Objection.Transaction
@@ -170,6 +162,21 @@ async function getSigningWallet(
     return left(new StoreError(StoreErrors.notInChannel));
   }
   return right(signingWallet);
+}
+/*
+ * Validator functions
+ */
+
+function validateSignatures(signedState: SignedState): Either<StoreError, undefined> {
+  const {participants} = signedState;
+
+  for (const sig of signedState.signatures) {
+    const signerIndex = participants.findIndex(p => p.signingAddress === sig.signer);
+    if (signerIndex === -1) {
+      return left(new StoreError(StoreErrors.invalidSignature, {signedState, signature: sig}));
+    }
+  }
+  return right(undefined);
 }
 
 function validateStateFreshness(
@@ -220,14 +227,17 @@ function isReverseSorted(arr: number[]): boolean {
   return true;
 }
 
-export function addState(
-  stateVars: SignedStateVarsWithHash[],
+/**
+ * State variable modifiers
+ */
+function addState(
+  vars: SignedStateVarsWithHash[],
   signedState: SignedState
 ): Either<StoreError, SignedStateVarsWithHash[]> {
   const validationResult = validateSignatures(signedState);
   if (isLeft(validationResult)) return validationResult;
 
-  const clonedVariables = _.cloneDeep(stateVars);
+  const clonedVariables = _.cloneDeep(vars);
   const stateHash = hashState(signedState);
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
@@ -245,7 +255,7 @@ export function addState(
 function clearOldStates(
   signedStates: SignedStateVarsWithHash[],
   support: SignedStateWithHash[] | undefined
-): SignedStateVarsWithHash[] {
+): Either<StoreError, SignedStateVarsWithHash[]> {
   const sorted = _.reverse(_.sortBy(signedStates, s => s.turnNum));
   // If we don't have a supported state we don't clean anything out
   if (support && support.length > 0) {
@@ -255,8 +265,8 @@ function clearOldStates(
     // Find where the first support state is in our current state array
     const supportIndex = sorted.findIndex(sv => sv.stateHash === firstSupportStateHash);
     // Take everything before that
-    return sorted.slice(0, supportIndex + 1);
+    return right(sorted.slice(0, supportIndex + 1));
   } else {
-    return sorted;
+    return right(sorted);
   }
 }
