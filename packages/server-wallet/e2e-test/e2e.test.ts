@@ -80,19 +80,14 @@ describe('e2e', () => {
 
     const {channelId} = seed;
 
-    // TODO: Need to also seed the database with this same channel of the Pong.
-    // The test passes right now because the Pong client blindly accepts the
-    // signed state and doesn't bother doing anything with it -- it considers
-    // it a new channel. Once we call updateChannel on Pong, that will throw
-    // an eror unless we seed its database with this same channel.
+    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({
+      turnNum: 3,
+    });
 
-    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({turnNum: 3});
     await pingClient.ping(channelId);
 
-    // Basic checks to see if updateChannel worked as expected
-    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({turnNum: 5});
-
-    // TODO: Add test to confirm that the Pong controller received the signed state
-    // and then proceeded to sign an update and respond with it
+    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({
+      turnNum: 5,
+    });
   });
 });
