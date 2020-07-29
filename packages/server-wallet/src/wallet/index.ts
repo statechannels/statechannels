@@ -193,7 +193,10 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       const doAction = async (action: ProtocolAction): Promise<any> => {
         switch (action.type) {
           case 'SignState': {
-            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+            const signStateResult = await Store.signState(action.channelId, action, tx);
+            if (Either.isLeft(signStateResult)) throw signStateResult;
+            const {outgoing, channelResult} = signStateResult.right;
+
             outgoing.map(n => outbox.push(n.notice));
             channelResults.push(channelResult);
             return;

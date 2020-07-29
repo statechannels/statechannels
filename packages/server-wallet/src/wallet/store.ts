@@ -27,20 +27,20 @@ export const Store = {
     channelId: Bytes32,
     vars: StateVariables,
     tx: Objection.Transaction
-  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+  ): Promise<Either<StoreError, {outgoing: SyncState; channelResult: ChannelResult}>> {
     let channel = await Channel.forId(channelId, tx);
 
     const state: State = {...channel.channelConstants, ...vars};
 
     const validationResult = validateStateFreshness(state, channel);
 
-    if (isLeft(validationResult)) throw validationResult.left;
+    if (isLeft(validationResult)) return validationResult;
 
     const signatureEntry = channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
     const addStateResult = await this.addSignedState(signedState, tx);
-    if (isLeft(addStateResult)) throw addStateResult.left;
+    if (isLeft(addStateResult)) return addStateResult;
 
     channel = await Channel.forId(channelId, tx);
 
