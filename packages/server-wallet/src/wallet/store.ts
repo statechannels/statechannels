@@ -27,7 +27,7 @@ export const Store = {
     vars: StateVariables,
     tx: Objection.Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const channel = await Channel.forId(channelId, tx);
+    let channel = await Channel.forId(channelId, tx);
     const state: State = {...channel.channelConstants, ...vars};
 
     const validationResult = validateStateFreshness(state, channel);
@@ -40,6 +40,7 @@ export const Store = {
     const addStateResult = await this.addSignedState(signedState, tx);
     if (isLeft(addStateResult)) throw addStateResult.left;
 
+    channel = await Channel.forId(channelId, tx);
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
@@ -97,24 +98,30 @@ export const Store = {
 
     const {address: signingAddress} = signingWalletResult.right;
 
-    const cols: RequiredColumns = {
-      ...signedState,
-      vars: [addHash(signedState)],
-      signingAddress,
-    };
-    const channel = Channel.fromJson(cols);
+    const channelId = calculateChannelId(signedState);
+    let channel = await Channel.query(tx)
+      .where('channelId', channelId)
+      .first();
+    console.log(channel);
+    if (!channel) {
+      const cols: RequiredColumns = {...signedState, vars: [], signingAddress};
+
+      channel = Channel.fromJson(cols);
+
+      await Channel.query(tx).insert(channel);
+    }
 
     let channelVars = channel.vars;
-
-    const addResult = addState(channelVars, signedState);
-    if (isLeft(addResult)) throw addResult.left;
+    console.log(channelVars);
+    channelVars = getOrThrow(addState(channelVars, signedState));
 
     channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
 
     const invariantValidationResult = validateInvariants(channelVars, channel.myAddress);
     if (isLeft(invariantValidationResult)) return invariantValidationResult;
+    const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    await Channel.query(tx).upsertGraph(channel);
+    await Channel.query(tx).update(cols);
 
     return right(undefined);
   },
@@ -211,7 +218,7 @@ function isReverseSorted(arr: number[]): boolean {
   return true;
 }
 
-function addState(
+export function addState(
   stateVars: SignedStateVarsWithHash[],
   signedState: SignedState
 ): Either<StoreError, SignedStateVarsWithHash[]> {
