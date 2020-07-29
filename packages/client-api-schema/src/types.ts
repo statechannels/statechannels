@@ -1,56 +1,76 @@
 import {Notification} from './notifications';
-import * as ApproveBudgetAndFund from './methods/ApproveBudgetAndFund';
-import * as ChallengeChannel from './methods/ChallengeChannel';
-import * as CloseAndWithdraw from './methods/CloseAndWithdraw';
-import * as CloseChannel from './methods/CloseChannel';
-import * as CreateChannel from './methods/CreateChannel';
-import * as EnableEthereum from './methods/EnableEthereum';
-import * as GetBudget from './methods/GetBudget';
-import * as GetChannels from './methods/GetChannels';
-import * as GetClientWalletInformation from './methods/GetWalletInformation';
-import * as GetState from './methods/GetState';
-import * as JoinChannel from './methods/JoinChannel';
-import * as PushMessage from './methods/PushMessage';
-import * as UpdateChannel from './methods/UpdateChannel';
+
 import {JsonRpcError} from './utils';
+import {
+  CreateChannelRequest,
+  JoinChannelRequest,
+  UpdateChannelRequest,
+  GetWalletInformationRequest,
+  EnableEthereumRequest,
+  GetStateRequest,
+  PushMessageRequest,
+  ChallengeChannelRequest,
+  GetBudgetRequest,
+  ApproveBudgetAndFundRequest,
+  CloseChannelRequest,
+  CloseAndWithdrawRequest,
+  GetChannelsRequest,
+  CreateChannelResponse,
+  JoinChannelResponse,
+  UpdateChannelResponse,
+  EnableEthereumResponse,
+  GetWalletInformationResponse,
+  GetStateResponse,
+  PushMessageResponse,
+  ChallengeChannelResponse,
+  GetBudgetResponse,
+  CloseChannelResponse,
+  ApproveBudgetAndFundResponse,
+  CloseAndWithdrawResponse,
+  GetChannelsResponse,
+  EnableEthereumError,
+  CloseAndWithdrawError,
+  CloseChannelError,
+  UpdateChannelError
+} from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 
 export type Request =
-  | CreateChannel.CreateChannelRequest
-  | JoinChannel.JoinChannelRequest
-  | UpdateChannel.UpdateChannelRequest
-  | GetClientWalletInformation.GetWalletInformationRequest
-  | EnableEthereum.EnableEthereumRequest
-  | GetState.GetStateRequest
-  | PushMessage.PushMessageRequest
-  | ChallengeChannel.ChallengeChannelRequest
-  | GetBudget.GetBudgetRequest
-  | ApproveBudgetAndFund.ApproveBudgetAndFundRequest
-  | CloseChannel.CloseChannelRequest
-  | CloseAndWithdraw.CloseAndWithdrawRequest
-  | GetChannels.GetChannelsRequest;
+  | CreateChannelRequest
+  | JoinChannelRequest
+  | UpdateChannelRequest
+  | GetWalletInformationRequest
+  | EnableEthereumRequest
+  | GetStateRequest
+  | PushMessageRequest
+  | ChallengeChannelRequest
+  | GetBudgetRequest
+  | ApproveBudgetAndFundRequest
+  | CloseChannelRequest
+  | CloseAndWithdrawRequest
+  | GetChannelsRequest;
 
 export type Response =
-  | CreateChannel.CreateChannelResponse
-  | JoinChannel.JoinChannelResponse
-  | UpdateChannel.UpdateChannelResponse
-  | GetClientWalletInformation.GetWalletInformationResponse
-  | EnableEthereum.EnableEthereumResponse
-  | GetState.GetStateResponse
-  | PushMessage.PushMessageResponse
-  | ChallengeChannel.ChallengeChannelResponse
-  | GetBudget.GetBudgetResponse
-  | CloseChannel.CloseChannelResponse
-  | ApproveBudgetAndFund.ApproveBudgetAndFundResponse
-  | CloseAndWithdraw.CloseAndWithdrawResponse
-  | GetChannels.GetChannelsResponse;
+  | CreateChannelResponse
+  | JoinChannelResponse
+  | UpdateChannelResponse
+  | GetWalletInformationResponse
+  | EnableEthereumResponse
+  | GetStateResponse
+  | PushMessageResponse
+  | ChallengeChannelResponse
+  | GetBudgetResponse
+  | CloseChannelResponse
+  | ApproveBudgetAndFundResponse
+  | CloseAndWithdrawResponse
+  | GetChannelsResponse;
 
 export type ErrorResponse =
-  | EnableEthereum.EnableEthereumError
-  | CloseAndWithdraw.CloseAndWithdrawError
-  | CloseChannel.CloseChannelError
-  | UpdateChannel.UpdateChannelError
+  | EnableEthereumError
+  | CloseAndWithdrawError
+  | CloseChannelError
+  | UpdateChannelError
   | GenericError;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
