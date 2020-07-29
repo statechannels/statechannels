@@ -59,5 +59,6 @@ classDef documented stroke:#3531FF,stroke-width:3px;
 class serverwallet unpublished;
 class nitroprotocol documented;
 class channelclient documented;
+class apischema documented;
 class channelprovider documented;
 </div>
