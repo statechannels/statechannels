@@ -6,19 +6,29 @@ import {Wallet} from 'ethers';
 import {makeDestination, BN} from '@statechannels/wallet-core';
 
 import {Wallet as ServerWallet} from '../../src/wallet';
-import {Bytes32} from '../../src/type-aliases';
+import {Bytes32, Address} from '../../src/type-aliases';
 
 export default class PingClient {
   private readonly wallet: ServerWallet = new ServerWallet();
 
   constructor(private readonly pk: Bytes32, private readonly pongHttpServerURL: string) {}
 
+  public readonly participantId = 'ping';
+
+  public get address(): Address {
+    return new Wallet(this.pk).address;
+  }
+
+  public get destination(): Address {
+    return makeDestination(this.address);
+  }
+
   public get me(): Participant {
-    const {address: signingAddress} = new Wallet(this.pk);
+    const {address: signingAddress, destination, participantId} = this;
     return {
       signingAddress,
-      participantId: 'ping',
-      destination: makeDestination(signingAddress),
+      destination,
+      participantId,
     };
   }
 
