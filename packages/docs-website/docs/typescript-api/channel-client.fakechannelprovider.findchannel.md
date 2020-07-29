@@ -23,4 +23,4 @@ findChannel(channelId: string): ChannelResult;
 
 <b>Returns:</b>
 
-ChannelResult
+[ChannelResult](./client-api-schema.channelresult.md)

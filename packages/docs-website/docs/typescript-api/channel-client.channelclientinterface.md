@@ -23,20 +23,20 @@ export interface ChannelClientInterface
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [challengeChannel](./channel-client.channelclientinterface.challengechannel.md) | (channelId: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [channelState](./channel-client.channelclientinterface.channelstate.md) | ReplaySubject&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [closeChannel](./channel-client.channelclientinterface.closechannel.md) | (channelId: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [createChannel](./channel-client.channelclientinterface.createchannel.md) | (participants: Participant\[\], allocations: Allocation\[\], appDefinition: string, appData: string, fundingStrategy: FundingStrategy) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
+|  [challengeChannel](./channel-client.channelclientinterface.challengechannel.md) | (channelId: string) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [channelState](./channel-client.channelclientinterface.channelstate.md) | ReplaySubject&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [closeChannel](./channel-client.channelclientinterface.closechannel.md) | (channelId: string) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [createChannel](./channel-client.channelclientinterface.createchannel.md) | (participants: [Participant](./client-api-schema.participant.md)<!-- -->\[\], allocations: [Allocation](./client-api-schema.allocation.md)<!-- -->\[\], appDefinition: string, appData: string, fundingStrategy: [FundingStrategy](./client-api-schema.fundingstrategy.md)<!-- -->) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
 |  [destinationAddress](./channel-client.channelclientinterface.destinationaddress.md) | string | <b><i>(BETA)</i></b> |
-|  [getState](./channel-client.channelclientinterface.getstate.md) | (channelId: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [joinChannel](./channel-client.channelclientinterface.joinchannel.md) | (channelId: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
-|  [onChannelProposed](./channel-client.channelclientinterface.onchannelproposed.md) | (callback: (result: ChannelResult) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
-|  [onChannelUpdated](./channel-client.channelclientinterface.onchannelupdated.md) | (callback: (result: ChannelResult) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
-|  [onMessageQueued](./channel-client.channelclientinterface.onmessagequeued.md) | (callback: (message: Message) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
+|  [getState](./channel-client.channelclientinterface.getstate.md) | (channelId: string) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [joinChannel](./channel-client.channelclientinterface.joinchannel.md) | (channelId: string) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [onChannelProposed](./channel-client.channelclientinterface.onchannelproposed.md) | (callback: (result: [ChannelResult](./client-api-schema.channelresult.md)<!-- -->) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
+|  [onChannelUpdated](./channel-client.channelclientinterface.onchannelupdated.md) | (callback: (result: [ChannelResult](./client-api-schema.channelresult.md)<!-- -->) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
+|  [onMessageQueued](./channel-client.channelclientinterface.onmessagequeued.md) | (callback: (message: [Message](./client-api-schema.message.md)<!-- -->) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
 |  [provider](./channel-client.channelclientinterface.provider.md) | [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | <b><i>(BETA)</i></b> |
-|  [pushMessage](./channel-client.channelclientinterface.pushmessage.md) | (message: Message) =&gt; Promise&lt;PushMessageResult&gt; | <b><i>(BETA)</i></b> |
+|  [pushMessage](./channel-client.channelclientinterface.pushmessage.md) | (message: [Message](./client-api-schema.message.md)<!-- -->) =&gt; Promise&lt;[PushMessageResult](./client-api-schema.pushmessageresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
 |  [signingAddress](./channel-client.channelclientinterface.signingaddress.md) | string | <b><i>(BETA)</i></b> |
-|  [updateChannel](./channel-client.channelclientinterface.updatechannel.md) | (channelId: string, allocations: Allocation\[\], appData: string) =&gt; Promise&lt;ChannelResult&gt; | <b><i>(BETA)</i></b> |
+|  [updateChannel](./channel-client.channelclientinterface.updatechannel.md) | (channelId: string, allocations: [Allocation](./client-api-schema.allocation.md)<!-- -->\[\], appData: string) =&gt; Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
 |  [walletVersion](./channel-client.channelclientinterface.walletversion.md) | string | <b><i>(BETA)</i></b> |
 
 ## Methods

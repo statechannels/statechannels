@@ -24,7 +24,7 @@ onMessageQueued(callback: (result: MessageQueuedNotification['params']) => void)
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: MessageQueuedNotification\['params'\]) =&gt; void | An function that accepts a MessageQueuedNotification. |
+|  callback | (result: [MessageQueuedNotification](./client-api-schema.messagequeuednotification.md)<!-- -->\['params'\]) =&gt; void | An function that accepts a MessageQueuedNotification. |
 
 <b>Returns:</b>
 

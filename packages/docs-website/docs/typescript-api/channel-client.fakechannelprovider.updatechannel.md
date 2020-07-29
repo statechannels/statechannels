@@ -19,8 +19,8 @@ protected updateChannel(params: UpdateChannelParams): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | UpdateChannelParams |  |
+|  params | [UpdateChannelParams](./client-api-schema.updatechannelparams.md) |  |
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;

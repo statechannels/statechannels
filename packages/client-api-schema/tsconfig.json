@@ -5,6 +5,8 @@
     "lib": ["es6"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "removeComments": false,
+    "declarationDir": "lib",
     "module": "commonjs",
     "outDir": "lib",
     "target": "es2015",

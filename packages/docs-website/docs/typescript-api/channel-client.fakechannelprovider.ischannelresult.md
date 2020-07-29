@@ -23,4 +23,4 @@ protected isChannelResult(data: unknown): data is ChannelResult;
 
 <b>Returns:</b>
 
-data is ChannelResult
+data is [ChannelResult](./client-api-schema.channelresult.md)

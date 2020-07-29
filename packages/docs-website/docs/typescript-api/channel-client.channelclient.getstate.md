@@ -28,6 +28,6 @@ getState(channelId: string): Promise<ChannelResult>;
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;
 
 A promise that resolves to a ChannelResult.

@@ -24,7 +24,7 @@ onBudgetUpdated(callback: (result: BudgetUpdatedNotification['params']) => void)
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: BudgetUpdatedNotification\['params'\]) =&gt; void | A function that accepts a BudgetUpdatedNotification. |
+|  callback | (result: [BudgetUpdatedNotification](./client-api-schema.budgetupdatednotification.md)<!-- -->\['params'\]) =&gt; void | A function that accepts a BudgetUpdatedNotification. |
 
 <b>Returns:</b>
 

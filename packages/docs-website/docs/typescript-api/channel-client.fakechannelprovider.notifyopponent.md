@@ -19,7 +19,7 @@ protected notifyOpponent(data: ChannelResult, notificationType: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  data | ChannelResult |  |
+|  data | [ChannelResult](./client-api-schema.channelresult.md) |  |
 |  notificationType | string |  |
 
 <b>Returns:</b>

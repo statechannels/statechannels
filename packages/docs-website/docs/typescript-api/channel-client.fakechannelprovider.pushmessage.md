@@ -19,8 +19,8 @@ protected pushMessage(params: Message): Promise<PushMessageResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | Message |  |
+|  params | [Message](./client-api-schema.message.md) |  |
 
 <b>Returns:</b>
 
-Promise&lt;PushMessageResult&gt;
+Promise&lt;[PushMessageResult](./client-api-schema.pushmessageresult.md)<!-- -->&gt;

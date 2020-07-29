@@ -22,8 +22,8 @@ getBudget(_params: GetBudgetParams): Promise<DomainBudget>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  \_params | GetBudgetParams |  |
+|  \_params | [GetBudgetParams](./client-api-schema.getbudgetparams.md) |  |
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;[DomainBudget](./client-api-schema.domainbudget.md)<!-- -->&gt;

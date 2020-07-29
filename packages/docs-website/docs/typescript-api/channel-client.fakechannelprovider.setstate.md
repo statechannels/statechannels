@@ -19,7 +19,7 @@ setState(state: ChannelResult): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  state | ChannelResult |  |
+|  state | [ChannelResult](./client-api-schema.channelresult.md) |  |
 
 <b>Returns:</b>
 
