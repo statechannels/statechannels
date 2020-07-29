@@ -8,13 +8,7 @@ const controller = new PongController();
 
 const app = express();
 
-app.post('/reset', async (_req, res) => {
-  await controller.reset();
-  res.status(200).send('OK');
-});
-
-app.post('/seed', bodyParser.json(), async (req, res) => {
-  await controller.seedWith(req.body);
+app.post('/status', async (_req, res) => {
   res.status(200).send('OK');
 });
 

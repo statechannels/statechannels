@@ -1,18 +1,9 @@
 import {Message} from '@statechannels/wire-format';
-import {
-  SignedState,
-  makeDestination,
-  calculateChannelId,
-  SimpleAllocation,
-} from '@statechannels/wallet-core';
+import {SignedState, makeDestination, calculateChannelId} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
-import knex from '../../src/db/connection';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {SigningWallet} from '../../src/models/signing-wallet';
-import {truncate} from '../../src/db-admin/db-admin-connection';
 import {Wallet} from '../../src/wallet';
-import {Channel} from '../../src/models/channel';
 
 export default class PongController {
   private readonly wallet: Wallet = new Wallet();
@@ -25,19 +16,6 @@ export default class PongController {
       signingAddress: bob().address,
       destination: makeDestination(bob().address),
     };
-  }
-
-  public async reset(): Promise<void> {
-    await truncate(knex);
-    await SigningWallet.query().insert(bob());
-  }
-
-  public async seedWith(channelJson: object): Promise<void> {
-    await Channel.query().insert({
-      ...channelJson,
-      // Test fixture used in e2e.test.ts hard-codes Alice atm
-      signingAddress: this.participantInfo.signingAddress,
-    });
   }
 
   public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {

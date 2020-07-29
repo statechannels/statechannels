@@ -1,4 +1,3 @@
-import {AddressZero} from '@ethersproject/constants';
 import {Participant} from '@statechannels/client-api-schema';
 
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
@@ -6,17 +5,10 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
-import knex from '../src/db/connection';
+import knexPing from '../src/db/connection';
 
 import PingClient from './ping/client';
-import {
-  killServer,
-  startPongServer,
-  waitForServerToStartAndResetDatabase,
-  PongServer,
-  getPongsParticipantInfo,
-  seedPongWithChannel,
-} from './e2e-utils';
+import {killServer, startPongServer, waitForServerToStart, PongServer, knexPong} from './e2e-utils';
 
 jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
 
@@ -28,21 +20,24 @@ describe('e2e', () => {
   let pong: Participant;
 
   beforeAll(async () => {
-    pongServer = startPongServer();
-
-    // ⚠️ You must create a new database locally called 'pong', like so:
-    // ❯ createdb pong
-    // ❯ SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
-    await waitForServerToStartAndResetDatabase(pongServer);
-
+    // Create actors
     pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
+    pongServer = startPongServer();
+    await waitForServerToStart(pongServer);
 
-    // Adds Alice to Ping's Database, Bob is added via /reset on Pong
-    await truncate(knex);
+    // Adds Alice to Ping's Database
+    await truncate(knexPing);
     await SigningWallet.query().insert(alice());
 
+    // Adds Bob to Pong's Database
+    await truncate(knexPong);
+    await SigningWallet.bindKnex(knexPong)
+      .query()
+      .insert(bob());
+
+    // Gets participant info for testing convenience
     ping = pingClient.me;
-    pong = await getPongsParticipantInfo(pongServer);
+    pong = await pingClient.getPongsParticipantInfo();
   });
 
   afterAll(() => killServer(pongServer));
@@ -78,8 +73,10 @@ describe('e2e', () => {
       }
     )();
 
-    await Channel.query().insert([seed]);
-    await seedPongWithChannel(pongServer, seed);
+    await Channel.query().insert([seed]); // Fixture uses alice() default
+    await Channel.bindKnex(knexPong)
+      .query()
+      .insert([{...seed, signingAddress: pong.signingAddress}]);
 
     const {channelId} = seed;
 

@@ -22,6 +22,13 @@ export default class PingClient {
     };
   }
 
+  public async getPongsParticipantInfo(): Promise<Participant> {
+    const {data: participant} = await axios.get<Participant>(
+      `${this.pongHttpServerURL}/participant`
+    );
+    return participant;
+  }
+
   public async getChannel(channelId: string): Promise<ChannelResult> {
     const {
       channelResults: [channel],
@@ -84,8 +91,6 @@ export default class PingClient {
       to: message.recipient,
       from: message.sender,
     });
-
-    console.log((await this.wallet.getState({channelId})).channelResults[0].turnNum);
   }
 
   public emptyMessage(): Promise<Message> {

@@ -2,9 +2,9 @@ import {spawn, ChildProcessWithoutNullStreams} from 'child_process';
 
 import kill = require('tree-kill');
 import axios from 'axios';
-import {Participant} from '@statechannels/client-api-schema';
 
-import {Channel} from '../src/models/channel';
+import Knex = require('knex');
+import {dbCofig} from '../src/db-config';
 
 export type PongServer = {
   url: string;
@@ -43,14 +43,11 @@ export const startPongServer = (): PongServer => {
  * simultaneously ensures that the server is listening and cleans
  * the database of any stale data from previous test runs.
  */
-export const waitForServerToStartAndResetDatabase = (
-  pongServer: PongServer,
-  pingInterval = 1500
-): Promise<void> =>
+export const waitForServerToStart = (pongServer: PongServer, pingInterval = 1500): Promise<void> =>
   new Promise(resolve => {
     const interval = setInterval(async () => {
       try {
-        await axios.post<'OK'>(`${pongServer.url}/reset`);
+        await axios.post<'OK'>(`${pongServer.url}/status`);
         clearInterval(interval);
         resolve();
       } catch {
@@ -59,21 +56,12 @@ export const waitForServerToStartAndResetDatabase = (
     }, pingInterval);
   });
 
-/**
- * Asks the Pong Server to identify itself so that Ping may use this info in the creation
- * of a new channel with Pong.
- */
-export const getPongsParticipantInfo = async (pongServer: PongServer): Promise<Participant> => {
-  const {data: participant} = await axios.get<Participant>(`${pongServer.url}/participant`);
-  return participant;
-};
-
-/**
- * Seeds Pong's database with a channel.
- */
-export const seedPongWithChannel = async (
-  pongServer: PongServer,
-  channel: Channel
-): Promise<void> => axios.post(`${pongServer.url}/seed`, channel.toJSON());
+export const knexPong: Knex = Knex({
+  ...dbCofig,
+  connection: {
+    ...(dbCofig.connection as Knex.StaticConnectionConfig),
+    database: 'pong',
+  },
+});
 
 export const killServer = ({server}: PongServer): void => kill(server.pid);
