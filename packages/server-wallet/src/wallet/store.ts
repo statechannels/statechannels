@@ -65,13 +65,13 @@ export const Store = {
   },
 
   pushMessage: async function(message: Message, tx: Objection.Transaction): Promise<Bytes32[]> {
-    message.signedStates?.forEach(async ss => {
+    for (const ss of message.signedStates || []) {
       getOrThrow(await this.addSignedState(ss, tx));
-    });
+    }
 
-    message.objectives?.forEach(async o => {
+    for (const o of message.objectives || []) {
       getOrThrow(await this.addObjective(o, tx));
-    });
+    }
 
     const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
     // TODO: generate channelIds from objectives
@@ -102,7 +102,7 @@ export const Store = {
     let channel = await Channel.query(tx)
       .where('channelId', channelId)
       .first();
-    console.log(channel);
+
     if (!channel) {
       const cols: RequiredColumns = {...signedState, vars: [], signingAddress};
 

@@ -144,10 +144,8 @@ export class Wallet implements WalletInterface {
 
   async pushMessage(message: AddressedMessage): Result {
     const channelIds = await Channel.transaction(async tx => {
-      return Store.pushMessage(message, tx);
+      return await Store.pushMessage(message, tx);
     });
-
-    // TODO: Generate channelIds from objectives
 
     const {channelResults, outbox} = await takeActions(channelIds);
 
