@@ -1,5 +1,4 @@
 import {Notification} from './notifications';
-
 import {JsonRpcError} from './utils';
 import {
   CreateChannelRequest,
