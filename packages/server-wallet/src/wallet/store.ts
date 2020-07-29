@@ -28,6 +28,7 @@ export const Store = {
     tx: Objection.Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     let channel = await Channel.forId(channelId, tx);
+
     const state: State = {...channel.channelConstants, ...vars};
 
     const validationResult = validateStateFreshness(state, channel);
@@ -41,6 +42,7 @@ export const Store = {
     if (isLeft(addStateResult)) throw addStateResult.left;
 
     channel = await Channel.forId(channelId, tx);
+
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
@@ -112,7 +114,7 @@ export const Store = {
     }
 
     let channelVars = channel.vars;
-    console.log(channelVars);
+
     channelVars = getOrThrow(addState(channelVars, signedState));
 
     channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
@@ -229,9 +231,8 @@ export function addState(
   const stateHash = hashState(signedState);
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
-    const mergedSignatures = _.merge(
-      signedState.signatures,
-      clonedVariables[existingStateIndex].signatures
+    const mergedSignatures = _.uniq(
+      signedState.signatures.concat(clonedVariables[existingStateIndex].signatures)
     );
 
     clonedVariables[existingStateIndex].signatures = mergedSignatures;
