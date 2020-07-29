@@ -86,12 +86,11 @@ describe('e2e', () => {
     // it a new channel. Once we call updateChannel on Pong, that will throw
     // an eror unless we seed its database with this same channel.
 
+    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({turnNum: 3});
     await pingClient.ping(channelId);
 
-    const channel = await pingClient.getChannel(channelId);
-
     // Basic checks to see if updateChannel worked as expected
-    expect(channel.turnNum).toBe(4); // FIXME: Should be 5, bug in wallet?
+    await expect(pingClient.getChannel(channelId)).resolves.toMatchObject({turnNum: 5});
 
     // TODO: Add test to confirm that the Pong controller received the signed state
     // and then proceeded to sign an update and respond with it

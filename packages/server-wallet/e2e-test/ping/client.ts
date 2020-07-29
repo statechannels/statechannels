@@ -87,7 +87,7 @@ export default class PingClient {
     const message = await this.messagePongAndExpectReply(params as Message);
 
     await this.wallet.pushMessage({
-      ...message,
+      signedStates: message.data.signedStates as any,
       to: message.recipient,
       from: message.sender,
     });
