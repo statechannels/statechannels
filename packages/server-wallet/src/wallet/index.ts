@@ -14,18 +14,16 @@ import {
   Message,
   Outcome,
   SignedStateVarsWithHash,
-  calculateChannelId,
   convertToParticipant,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import {Bytes32} from '../type-aliases';
-import {Channel, RequiredColumns} from '../models/channel';
+import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
-import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
@@ -145,57 +143,9 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(message: AddressedMessage): Result {
-    const channelIds: Bytes32[] = [];
-
-    try {
-      await Channel.transaction(async tx => {
-        for (const ss of message.signedStates || []) {
-          // We ignore unsigned states
-          if (!ss.signatures?.length) {
-            logger.info(`pushMessage received unsigned state`);
-            return;
-          }
-
-          const channelId = calculateChannelId(ss);
-          let channel = await Channel.query(tx)
-            .where('channelId', channelId)
-            .first();
-
-          if (!channel) {
-            const addresses = ss.participants.map(p => p.signingAddress);
-            const signingWallet = await SigningWallet.query(tx)
-              .whereIn('address', addresses)
-              .first();
-
-            if (!signingWallet) {
-              logger.error(
-                {
-                  knownWallets: await SigningWallet.query(tx).select(),
-                  addresses,
-                },
-                'Not in channel'
-              );
-              throw Error('Not in channel');
-            }
-
-            const {address: signingAddress} = signingWallet;
-            const cols: RequiredColumns = {...ss, vars: [addHash(ss)], signingAddress};
-
-            channel = Channel.fromJson(cols);
-
-            const {channelId} = await Channel.query(tx).insert(channel);
-            channelIds.push(channelId);
-          } else {
-            ss.signatures?.map(sig => channel.addState(ss, sig));
-            await Channel.query(tx).update(channel);
-            channelIds.push(channel.channelId);
-          }
-        }
-      });
-    } catch (err) {
-      logger.error({err}, 'Could not push message');
-      throw err;
-    }
+    const channelIds = await Channel.transaction(async tx => {
+      return await Store.pushMessage(message, tx);
+    });
 
     const {channelResults, outbox} = await takeActions(channelIds);
 
@@ -265,7 +215,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
 // TODO: This should be removed, and not used externally.
 // It is a fill-in until the wallet API is specced out.
-function getOrThrow<E, T>(result: Either.Either<E, T>): T {
+export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
   return Either.getOrElseW<E, T>(
     (err: E): T => {
       throw err;
