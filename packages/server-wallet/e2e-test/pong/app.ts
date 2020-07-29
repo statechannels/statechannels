@@ -1,12 +1,16 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import {Message} from '@statechannels/wire-format';
+import pino from 'express-pino-logger';
+
+import {logger} from '../../src/logger';
 
 import PongController from './controller';
 
 const controller = new PongController();
 
 const app = express();
+app.use(pino({logger: logger as any}));
 
 app.post('/status', (_req, res) => res.status(200).send('OK'));
 
