@@ -19,6 +19,8 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 
+import {getOrThrow} from '.';
+
 export const Store = {
   signState: async function(
     channelId: Bytes32,
@@ -63,13 +65,11 @@ export const Store = {
 
   pushMessage: async function(message: Message, tx: Objection.Transaction): Promise<Bytes32[]> {
     message.signedStates?.forEach(async ss => {
-      const addResult = await this.addSignedState(ss, tx);
-      if (isLeft(addResult)) throw addResult.left;
+      getOrThrow(await this.addSignedState(ss, tx));
     });
 
     message.objectives?.forEach(async o => {
-      const addResult = await this.addObjective(o, tx);
-      if (isLeft(addResult)) throw addResult.left;
+      getOrThrow(await this.addObjective(o, tx));
     });
 
     const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
