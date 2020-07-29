@@ -319,10 +319,10 @@ export type NotificationType = {
     [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
 };
 
-// @public (undocumented)
+// @public
 export function parseRequest(jsonBlob: object): Request;
 
-// @public (undocumented)
+// @public
 export function parseResponse(jsonBlob: object): Response;
 
 // @public (undocumented)

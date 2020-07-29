@@ -23,8 +23,8 @@ Exposes functions that can validate Responses and Requests, as well as to cast t
 |  [isNotification(message)](./client-api-schema.isnotification.md) |  |
 |  [isRequest(message)](./client-api-schema.isrequest.md) |  |
 |  [isResponse(message)](./client-api-schema.isresponse.md) |  |
-|  [parseRequest(jsonBlob)](./client-api-schema.parserequest.md) |  |
-|  [parseResponse(jsonBlob)](./client-api-schema.parseresponse.md) |  |
+|  [parseRequest(jsonBlob)](./client-api-schema.parserequest.md) | Validates a request against the API schema &amp; returns the input cast to the correctly narrowed type. \* |
+|  [parseResponse(jsonBlob)](./client-api-schema.parseresponse.md) | Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type. \* |
 
 ## Interfaces
 

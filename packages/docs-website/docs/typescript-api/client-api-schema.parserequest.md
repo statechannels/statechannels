@@ -9,6 +9,8 @@ hide_title: true
 
 ## parseRequest() function
 
+Validates a request against the API schema &amp; returns the input cast to the correctly narrowed type. \*
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,8 +21,10 @@ export declare function parseRequest(jsonBlob: object): Request;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  jsonBlob | object |  |
+|  jsonBlob | object | A javascript object that might be a valid [Request](./client-api-schema.request.md) |
 
 <b>Returns:</b>
 
 [Request](./client-api-schema.request.md)
+
+The input, but with the correct type, if it is valid.
