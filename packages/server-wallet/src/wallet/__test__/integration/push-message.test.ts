@@ -5,13 +5,13 @@ import {Wallet} from '../..';
 import {addHash} from '../../../state-utils';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {message} from '../fixtures/messages';
-import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
+import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
 import {channel} from '../../../models/__test__/fixtures/channel';
 
-beforeEach(async () => seed(knex));
+beforeEach(async () => seedAlicesSigningWallet(knex));
 
 it("doesn't throw on an empty message", () => {
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
