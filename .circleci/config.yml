@@ -247,8 +247,8 @@ jobs:
           working_directory: packages/server-wallet
           command: |
             sudo apt install -y postgresql-client || true
-            yarn db:create $PSQL_ARGS
-            yarn db:migrate
+            createdb ping $PSQL_ARGS
+            SERVER_DB_NAME=ping yarn db:migrate
             createdb pong $PSQL_ARGS
             SERVER_DB_NAME=pong yarn db:migrate
       - run:

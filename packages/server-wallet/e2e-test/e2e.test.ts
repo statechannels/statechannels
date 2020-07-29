@@ -1,10 +1,12 @@
-import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
+import {AddressZero} from '@ethersproject/constants';
+import {Participant} from '@statechannels/client-api-schema';
 
-import knex from '../src/db/connection';
-import {seed as seedSigningWallets} from '../src/db/seeds/1_signing_wallet_seeds';
-import {alice, bob} from '../src/wallet/__test__/fixtures/participants';
+import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
+import {SigningWallet} from '../src/models/signing-wallet';
+import {truncate} from '../src/db-admin/db-admin-connection';
+import knex from '../src/db/connection';
 
 import PingClient from './ping/client';
 import {
@@ -12,6 +14,8 @@ import {
   startPongServer,
   waitForServerToStartAndResetDatabase,
   PongServer,
+  getPongsParticipantInfo,
+  seedPongWithChannel,
 } from './e2e-utils';
 
 jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
@@ -19,6 +23,9 @@ jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
 describe('e2e', () => {
   let pingClient: PingClient;
   let pongServer: PongServer;
+
+  let ping: Participant;
+  let pong: Participant;
 
   beforeAll(async () => {
     pongServer = startPongServer();
@@ -28,9 +35,14 @@ describe('e2e', () => {
     // ❯ SERVER_DB_NAME=pong NODE_ENV=development yarn db:migrate
     await waitForServerToStartAndResetDatabase(pongServer);
 
-    pingClient = new PingClient(`http://127.0.0.1:65535`);
+    pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
 
-    await seedSigningWallets(knex);
+    // Adds Alice to Ping's Database, Bob is added via /reset on Pong
+    await truncate(knex);
+    await SigningWallet.query().insert(alice());
+
+    ping = pingClient.me;
+    pong = await getPongsParticipantInfo(pongServer);
   });
 
   afterAll(() => killServer(pongServer));
@@ -44,7 +56,7 @@ describe('e2e', () => {
   });
 
   it('can create a channel, send signed state via http', async () => {
-    const channel = await pingClient.createPingChannel();
+    const channel = await pingClient.createPingChannel(pong);
 
     // TODO: Currently the PongController does not join the channel
     // so these tests only confirm that the channel was created
@@ -52,18 +64,24 @@ describe('e2e', () => {
     // to join the channel and then these tests should check for
     // 'running' status, turnNum 1, etc.
 
-    expect(channel.participants).toStrictEqual([alice(), bob()]);
+    expect(channel.participants).toStrictEqual([ping, pong]);
     expect(channel.status).toBe('opening');
     expect(channel.turnNum).toBe(0);
   });
 
   it('can update pre-existing channel, send signed state via http', async () => {
-    const seed = withSupportedState({
-      outcome: simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]),
-      turnNum: 3,
-    })();
+    const seed = withSupportedState(
+      {turnNum: 3},
+      {
+        channelNonce: 123456789, // something unique for this test
+        participants: [ping, pong],
+      }
+    )();
 
     await Channel.query().insert([seed]);
+    await seedPongWithChannel(pongServer, seed);
+
+    const {channelId} = seed;
 
     // TODO: Need to also seed the database with this same channel of the Pong.
     // The test passes right now because the Pong client blindly accepts the
@@ -71,7 +89,12 @@ describe('e2e', () => {
     // it a new channel. Once we call updateChannel on Pong, that will throw
     // an eror unless we seed its database with this same channel.
 
-    await pingClient.ping(seed.channelId);
+    await pingClient.ping(channelId);
+
+    const channel = await pingClient.getChannel(channelId);
+
+    // Basic checks to see if updateChannel worked as expected
+    expect(channel.turnNum).toBe(4); // FIXME: Should be 5
 
     // TODO: Add test to confirm that the Pong controller received the signed state
     // and then proceeded to sign an update and respond with it

@@ -2,6 +2,9 @@ import {spawn, ChildProcessWithoutNullStreams} from 'child_process';
 
 import kill = require('tree-kill');
 import axios from 'axios';
+import {Participant} from '@statechannels/client-api-schema';
+
+import {Channel} from '../src/models/channel';
 
 export type PongServer = {
   url: string;
@@ -55,5 +58,22 @@ export const waitForServerToStartAndResetDatabase = (
       }
     }, pingInterval);
   });
+
+/**
+ * Asks the Pong Server to identify itself so that Ping may use this info in the creation
+ * of a new channel with Pong.
+ */
+export const getPongsParticipantInfo = async (pongServer: PongServer): Promise<Participant> => {
+  const {data: participant} = await axios.get<Participant>(`${pongServer.url}/participant`);
+  return participant;
+};
+
+/**
+ * Seeds Pong's database with a channel.
+ */
+export const seedPongWithChannel = async (
+  pongServer: PongServer,
+  channel: Channel
+): Promise<void> => axios.post(`${pongServer.url}/seed`, channel.toJSON());
 
 export const killServer = ({server}: PongServer): void => kill(server.pid);

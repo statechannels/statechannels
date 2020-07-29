@@ -187,7 +187,7 @@ export class Wallet implements WalletInterface {
             channelIds.push(channelId);
           } else {
             ss.signatures?.map(sig => channel.addState(ss, sig));
-            await Channel.query(tx).update(channel);
+            await Channel.query(tx).upsertGraph(channel);
             channelIds.push(channel.channelId);
           }
         }

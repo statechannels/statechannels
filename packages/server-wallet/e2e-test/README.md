@@ -29,8 +29,8 @@ The end-to-end test at this point simply spins up the `pong` server and then cre
 
 ```bash
 // Ensure database exists and is primed for Ping Client
-NODE_ENV=development yarn db:create
-NODE_ENV=development yarn db:migrate
+createdb ping
+SERVER_DB_NAME=ping NODE_ENV=development yarn db:migrate
 
 // Ensure database exists and is primed for Pong Client
 createdb pong

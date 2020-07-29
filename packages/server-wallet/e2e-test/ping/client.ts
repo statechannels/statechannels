@@ -1,14 +1,26 @@
+import {AddressZero} from '@ethersproject/constants';
 import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, Participant} from '@statechannels/client-api-schema';
+import {Wallet} from 'ethers';
+import {makeDestination, BN} from '@statechannels/wallet-core';
 
-import {Wallet} from '../../src/wallet';
-import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-channel';
+import {Wallet as ServerWallet} from '../../src/wallet';
+import {Bytes32} from '../../src/type-aliases';
 
 export default class PingClient {
-  private readonly wallet: Wallet = new Wallet();
+  private readonly wallet: ServerWallet = new ServerWallet();
 
-  constructor(private readonly pongHttpServerURL: string) {}
+  constructor(private readonly pk: Bytes32, private readonly pongHttpServerURL: string) {}
+
+  public get me(): Participant {
+    const {address: signingAddress} = new Wallet(this.pk);
+    return {
+      signingAddress,
+      participantId: 'ping',
+      destination: makeDestination(signingAddress),
+    };
+  }
 
   public async getChannel(channelId: string): Promise<ChannelResult> {
     const {
@@ -23,14 +35,28 @@ export default class PingClient {
     return channelResults;
   }
 
-  public async createPingChannel(): Promise<ChannelResult> {
+  public async createPingChannel(pong: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
       channelResults: [channel],
-    } = await this.wallet.createChannel(
-      // Re-using test fixture
-      createChannelArgs()
-    );
+    } = await this.wallet.createChannel({
+      appData: '0x',
+      appDefinition: AddressZero,
+      fundingStrategy: 'Direct',
+      participants: [this.me, pong],
+      allocations: [
+        {
+          token: AddressZero,
+          allocationItems: [
+            {
+              amount: BN.from(0),
+              destination: this.me.destination,
+            },
+            {amount: BN.from(0), destination: pong.destination},
+          ],
+        },
+      ],
+    });
 
     const message = await this.messagePongAndExpectReply(params as Message);
 
