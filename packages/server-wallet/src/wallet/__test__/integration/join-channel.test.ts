@@ -2,7 +2,7 @@ import {simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
-import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
+import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
@@ -15,10 +15,7 @@ beforeEach(async () => {
   w = new Wallet();
 });
 
-// Make sure alice's PK is in the DB
-beforeEach(async () => {
-  await seed(knex);
-});
+beforeEach(async () => seedAlicesSigningWallet(knex));
 
 it('signs the prefund setup ', async () => {
   const appData = '0xf00';

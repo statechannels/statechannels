@@ -1,11 +1,11 @@
 import {Channel, Errors} from '../channel';
-import {seed} from '../../db/seeds/1_signing_wallet_seeds';
+import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import knex from '../../db/connection';
 
 import {channel} from './fixtures/channel';
 
-beforeEach(async () => seed(knex));
+beforeEach(async () => seedAlicesSigningWallet(knex));
 
 it('can insert Channel instances to, and fetch them from, the database', async () => {
   const vars = [stateWithHashSignedBy()()];

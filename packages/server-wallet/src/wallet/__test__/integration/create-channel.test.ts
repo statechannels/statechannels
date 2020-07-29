@@ -1,7 +1,7 @@
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
-import {seed} from '../../../db/seeds/1_signing_wallet_seeds';
+import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
 
@@ -12,8 +12,7 @@ beforeEach(async () => {
 });
 
 describe('happy path', () => {
-  // Make sure alice's PK is in the DB
-  beforeEach(async () => seed(knex));
+  beforeEach(async () => seedAlicesSigningWallet(knex));
 
   it('creates a channel', async () => {
     expect(await Channel.query().resultSize()).toEqual(0);

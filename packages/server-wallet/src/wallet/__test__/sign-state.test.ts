@@ -2,7 +2,7 @@ import Objection from 'objection';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
-import {seed} from '../../db/seeds/1_signing_wallet_seeds';
+import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
 import {Channel} from '../../models/channel';
 
@@ -11,8 +11,7 @@ import {bob} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
-  // Make sure alice's PK is in the DB
-  await seed(knex);
+  await seedAlicesSigningWallet(knex);
 
   // Start the transaction
   tx = await Channel.startTransaction();
