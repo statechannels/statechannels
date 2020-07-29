@@ -7,7 +7,7 @@
   },
   "kind": "Package",
   "canonicalReference": "@statechannels/client-api-schema!",
-  "docComment": "",
+  "docComment": "/**\n * Defines and validates the data types communicated between an app and a wallet\n *\n * @remarks\n *\n * Exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type\n *\n * @packageDocumentation\n */\n",
   "name": "@statechannels/client-api-schema",
   "members": [
     {

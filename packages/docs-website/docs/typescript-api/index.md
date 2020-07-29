@@ -14,5 +14,5 @@ hide_title: true
 |  Package | Description |
 |  --- | --- |
 |  [@statechannels/channel-client](./channel-client.md) | Make requests to a statechannels wallet using async methods |
-|  [@statechannels/client-api-schema](./client-api-schema.md) |  |
+|  [@statechannels/client-api-schema](./client-api-schema.md) | Defines and validates the data types communicated between an app and a wallet |
 |  [@statechannels/iframe-channel-provider](./iframe-channel-provider.md) | Communicate with a statechannels wallet via JSON-RPC over postMessage |

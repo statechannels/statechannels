@@ -9,6 +9,12 @@ hide_title: true
 
 ## client-api-schema package
 
+Defines and validates the data types communicated between an app and a wallet
+
+## Remarks
+
+Exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type
+
 ## Functions
 
 |  Function | Description |

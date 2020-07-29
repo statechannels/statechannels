@@ -404,6 +404,4 @@ export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannel
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 
 
-// (No @packageDocumentation comment for this package)
-
 ```
