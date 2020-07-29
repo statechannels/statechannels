@@ -40,7 +40,9 @@ describe('e2e', () => {
     pong = await pingClient.getPongsParticipantInfo();
   });
 
-  afterAll(() => killServer(pongServer));
+  afterAll(async () => {
+    await killServer(pongServer);
+  });
 
   it('can do a simple end-to-end flow with no signed states', async () => {
     const ret = await pingClient.emptyMessage();

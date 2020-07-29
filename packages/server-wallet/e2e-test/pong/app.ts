@@ -8,9 +8,7 @@ const controller = new PongController();
 
 const app = express();
 
-app.post('/status', async (_req, res) => {
-  res.status(200).send('OK');
-});
+app.post('/status', (_req, res) => res.status(200).send('OK'));
 
 app.get('/participant', (_req, res) =>
   res
