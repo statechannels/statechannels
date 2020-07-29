@@ -17,59 +17,6 @@ search: true
 
 API between the state channel wallet and application.
 
-# DataTypes
-
-## Participant
-
-```json
-{
-  "participantId": "abc123", // allocated by app
-  "signingAddress": "0x123456",
-  "destination": "0xa..."
-}
-```
-
-| Parameter      | Type   | Description                                                     |
-|----------------|--------|-----------------------------------------------------------------|
-| participantId  | String | App allocated id, used for relaying messages to the participant |
-| signingAddress | String | Address used to sign channel updates                            |
-| destination    | String | Address of EOA to receive channel proceeds                      |
-
-Note: in the future we might replace the `appId` with a `contactAddress`, which would allow
-apps to get the wallet to relay messages itself. An example `contactAddress` would be something
-like `https://myserver.com/state_channel_callback`.
-
-## Allocation
-
-```json
-{
-  "token": "0x...", // 0x0 for ETH
-  "allocationItems": [
-    {"destination": "0xa...", "amount": "0x1a"},
-    {"destination": "0xb...", "amount": "0x1a"}
-  ]
-}
-```
-
-## Message
-
-Format of message sent from the wallet to the app, so that the app can then relay it
-to another participant.
-
-```json
-{
-  "recipient": "user123",
-  "sender": "user456",
-  "data": "0x456"
-}
-```
-
-| Parameter | Type   | Description                                                  |
-|-----------|--------|--------------------------------------------------------------|
-| recipient | String | Identifier of user that the message should be relayed to     |
-| sender    | String | Identifier of user that the message is from                  |
-| data      | String | Message payload. Format defined by wallet and opaque to app. |
-
 # Initial API
 
 Still a WIP! Adding methods as we need them.
@@ -106,7 +53,7 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 ### Errors
 
 | Code | Message           | Meaning                                      |
-|------|-------------------|----------------------------------------------|
+| ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
 ## EnableEthereum
@@ -139,7 +86,7 @@ Enables the wallet domain against an ethereum provider (e.g., MetaMask). This tr
 ### Errors
 
 | Code | Message              | Meaning                                                |
-|------|----------------------|--------------------------------------------------------|
+| ---- | -------------------- | ------------------------------------------------------ |
 | 100  | Ethereum Not Enabled | The wallet approval was rejected by the Web3 provider. |
 
 ## GetWalletInformation
@@ -245,7 +192,7 @@ Gets the current data from the wallet on its `signingAddress`, `destinationAddre
 ### Parameters
 
 | Parameter     | Type          | Description                                                       |
-|---------------|---------------|-------------------------------------------------------------------|
+| ------------- | ------------- | ----------------------------------------------------------------- |
 | participants  | Participant[] |                                                                   |
 | allocation    | Allocation    | Starting balances                                                 |
 | appDefinition | Address       | Address of deployed contract that defines the app                 |
@@ -257,7 +204,7 @@ Errors conform to the [JSON-RPC 2.0 error spec](https://www.jsonrpc.org/specific
 Beyond the standard errors from that spec, the following domain-specific errors are possible:
 
 | Code | Message                   | Meaning                                                                                                     |
-|------|---------------------------|-------------------------------------------------------------------------------------------------------------|
+| ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | 1000 | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
 | 1001 | Invalid app definition    | There isn't a contract deployed at the app definition address.                                              |
 | 1002 | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
@@ -318,7 +265,7 @@ Possible response to a `Channel Proposed` event.
 ### Errors
 
 | Code | Message                  | Meaning                                                          |
-|------|--------------------------|------------------------------------------------------------------|
+| ---- | ------------------------ | ---------------------------------------------------------------- |
 | 1100 | Channel not found        | The wallet can't find the channel corresponding to the channelId |
 | 1101 | Invalid State Transition | The wallet contains invalid state data                           |
 
@@ -385,7 +332,7 @@ Possible response to a `Channel Proposed` event.
 ### Errors
 
 | Code | Message            | Meaning                                                                               |
-|------|--------------------|---------------------------------------------------------------------------------------|
+| ---- | ------------------ | ------------------------------------------------------------------------------------- |
 |      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
 |      | Invalid app data   | The app data isn't a valid state for the force-move app defined by the app definition |
 |      | Invalid transition | The state transition implied by this state is invalid                                 |
@@ -504,7 +451,7 @@ The channel may later update to `closed` status only when other channel particip
 ### Errors
 
 | Code | Message       | Meaning                                             |
-|------|---------------|-----------------------------------------------------|
+| ---- | ------------- | --------------------------------------------------- |
 | 300  | Not your turn | You cannot close the channel until it is your turn. |
 
 ## Challenge Channel
@@ -560,7 +507,7 @@ The channel may later update to `closed` status only when other channel particip
 ### Errors
 
 | Code | Message           | Meaning                                                          |
-|------|-------------------|------------------------------------------------------------------|
+| ---- | ----------------- | ---------------------------------------------------------------- |
 |      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 # Events
