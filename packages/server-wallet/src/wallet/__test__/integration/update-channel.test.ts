@@ -21,7 +21,7 @@ it('updates a channel', async () => {
   await Channel.query().insert(c);
 
   const channelId = c.channelId;
-  const current = await Channel.forId(channelId, undefined);
+  const current = await Channel.forId(channelId);
   expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
 
   const appData = '0xa00f00';
@@ -38,7 +38,7 @@ it('updates a channel', async () => {
     channelResult: {channelId, turnNum: 6, appData},
   });
 
-  const updated = await Channel.forId(channelId, undefined);
+  const updated = await Channel.forId(channelId);
   expect(updated.latest).toMatchObject({turnNum: 6, appData});
 });
 

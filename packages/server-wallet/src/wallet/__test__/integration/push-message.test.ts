@@ -126,7 +126,7 @@ it('takes the next action, when the application protocol returns an action', asy
     outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
   });
 
-  const updatedC = await Channel.forId(channelId, undefined);
+  const updatedC = await Channel.forId(channelId);
   expect(updatedC.protocolState).toMatchObject({
     latestSignedByMe: {turnNum: 3},
     supported: {turnNum: 0},

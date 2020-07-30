@@ -38,7 +38,7 @@ describe('happy path', () => {
     const {channelId} = (await createPromise).channelResult;
     expect(await Channel.query().resultSize()).toEqual(1);
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(channelId);
     const expectedState = {
       turnNum: 0,
       appData,
