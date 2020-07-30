@@ -91,8 +91,8 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
-    const {outbox} = await knex.transaction(
-      async (tx): Promise<{outbox: any}> => {
+    const {outbox, channelResult} = await knex.transaction(
+      async (tx): Promise<{outbox: any; channelResult: ChannelResult}> => {
         const channel = await Store.getChannel(channelId, tx);
 
         if (!channel)
@@ -101,19 +101,16 @@ export class Wallet implements WalletInterface {
           });
 
         const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-        const {outgoing} = await Store.signState(channelId, nextState, tx);
+        const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
 
-        return {outbox: outgoing.map(n => n.notice)};
+        return {outbox: outgoing.map(n => n.notice), channelResult};
       }
     );
 
-    const {channelResults, outbox: nextOutbox} = await takeActions([channelId]);
-    const channelResult = channelResults.find(c => c.channelId === channelId);
-    if (!channelResult) {
-      throw new Error('No channel result returned');
-    }
+    const {outbox: nextOutbox, channelResults} = await takeActions([channelId]);
+    const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
-    return {outbox: outbox.concat(nextOutbox), channelResult};
+    return {outbox: outbox.concat(nextOutbox), channelResult: nextChannelResult};
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
