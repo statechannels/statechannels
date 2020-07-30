@@ -36,18 +36,12 @@ export interface ApproveBudgetAndFundParams {
     token: Address;
 }
 
-// Warning: (ae-forgotten-export) The symbol "JsonRpcRequest" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', ApproveBudgetAndFundParams>;
 
-// Warning: (ae-forgotten-export) The symbol "JsonRpcResponse" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<DomainBudget>;
 
-// Warning: (ae-forgotten-export) The symbol "JsonRpcNotification" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
 
@@ -74,11 +68,19 @@ export interface ChannelBudget {
     channelId: Bytes32;
 }
 
+// Warning: (ae-forgotten-export) The symbol "ErrorCodes" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type ChannelClosed = JsonRpcError<ErrorCodes_3['ChannelClosed'], 'Channel closed'>;
+
 // @public (undocumented)
 export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', ChannelResult>;
 
 // @public
 export type ChannelId = string;
+
+// @public (undocumented)
+export type ChannelNotFound = JsonRpcError<ErrorCodes_3['ChannelNotFound'], 'Channel not found'>;
 
 // @public (undocumented)
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
@@ -109,8 +111,6 @@ export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'ch
 // @public (undocumented)
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
 
-// Warning: (ae-forgotten-export) The symbol "JsonRpcError" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type CloseAndWithdrawError = JsonRpcError<ErrorCodes['CloseAndWithdraw']['UserDeclined'], 'User declined'>;
 
@@ -132,7 +132,7 @@ export type CloseAndWithdrawResponse = JsonRpcResponse<{
 // Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type CloseChannelError = NotYourTurn | ChannelNotFound;
+export type CloseChannelError = NotYourTurn_2 | ChannelNotFound_2;
 
 // @public (undocumented)
 export interface CloseChannelParams {
@@ -296,6 +296,17 @@ export type GetWalletInformationResponse = JsonRpcResponse<{
 }>;
 
 // @public (undocumented)
+export type InvalidAppData = JsonRpcError<ErrorCodes_3['InvalidAppData'], 'Invalid app data', {
+    appData: string;
+}>;
+
+// @public (undocumented)
+export type InvalidTransition = JsonRpcError<ErrorCodes_3['InvalidTransition'], 'Invalid transition', {
+    channelStatus: ChannelStatus;
+    proposedUpdate: UpdateChannelParams;
+}>;
+
+// @public (undocumented)
 export function isError(message: JsonRpcMessage): message is ErrorResponse;
 
 // @public (undocumented)
@@ -320,7 +331,56 @@ export type JoinChannelRequest = JsonRpcRequest<'JoinChannel', JoinChannelParams
 export type JoinChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // @public (undocumented)
+export interface JsonRpcError<Code, Message, Data = undefined> {
+    // (undocumented)
+    error: Data extends undefined ? {
+        code: Code;
+        message: Message;
+    } : {
+        code: Code;
+        message: Message;
+        data: Data;
+    };
+    // (undocumented)
+    id: number;
+    // (undocumented)
+    jsonrpc: '2.0';
+}
+
+// @public (undocumented)
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
+
+// @public (undocumented)
+export interface JsonRpcNotification<NotificationName, NotificationParams> {
+    // (undocumented)
+    jsonrpc: '2.0';
+    // (undocumented)
+    method: NotificationName;
+    // (undocumented)
+    params: NotificationParams;
+}
+
+// @public (undocumented)
+export interface JsonRpcRequest<MethodName, RequestParams> {
+    // (undocumented)
+    id: number;
+    // (undocumented)
+    jsonrpc: '2.0';
+    // (undocumented)
+    method: MethodName;
+    // (undocumented)
+    params: RequestParams;
+}
+
+// @public (undocumented)
+export interface JsonRpcResponse<ResultType> {
+    // (undocumented)
+    id: number;
+    // (undocumented)
+    jsonrpc: '2.0';
+    // (undocumented)
+    result: ResultType;
+}
 
 // @public
 export interface Message {
@@ -341,6 +401,9 @@ export type Notification = ChannelProposedNotification | ChannelUpdatedNotificat
 export type NotificationType = {
     [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
 };
+
+// @public (undocumented)
+export type NotYourTurn = JsonRpcError<ErrorCodes_3['NotYourTurn'], 'Not your turn'>;
 
 // @public
 export function parseRequest(jsonBlob: object): Request;
@@ -398,14 +461,8 @@ export type Uint256 = string;
 // @public (undocumented)
 export type Uint48 = number;
 
-// Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "InvalidTransition" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "InvalidAppData" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "NotYourTurn" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ChannelClosed" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export type UpdateChannelError = ChannelNotFound_2 | InvalidTransition | InvalidAppData | NotYourTurn_2 | ChannelClosed;
+export type UpdateChannelError = ChannelNotFound | InvalidTransition | InvalidAppData | NotYourTurn | ChannelClosed;
 
 // @public (undocumented)
 export interface UpdateChannelParams {

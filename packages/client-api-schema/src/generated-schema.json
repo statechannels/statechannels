@@ -123,6 +123,9 @@
       ],
       "type": "object"
     },
+    "ChannelClosed": {
+      "$ref": "#/definitions/JsonRpcError%3C404%2C%22Channel%20closed%22%3E"
+    },
     "ChannelClosingNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelClosed%22%2CChannelResult%3E"
     },
@@ -130,6 +133,9 @@
       "description": "Nitro ChannelId",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
+    },
+    "ChannelNotFound": {
+      "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
     },
     "ChannelProposedNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelProposed%22%2CChannelResult%3E"
@@ -391,6 +397,12 @@
     "GetWalletInformationResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-341-825486248-226-342-825486248-183-343-825486248-0-344%3E"
     },
+    "InvalidAppData": {
+      "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-897-917-1165839259-829-919-1165839259-800-920-1165839259-0-1224%3E"
+    },
+    "InvalidTransition": {
+      "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-727-797-1165839259-654-799-1165839259-622-800-1165839259-0-1224%3E"
+    },
     "JoinChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -619,7 +631,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-727-797-1165839259-654-799-1165839259-622-800-1165839259-0-1224>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -678,7 +690,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-897-917-1165839259-829-919-1165839259-800-920-1165839259-0-1224>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -1701,6 +1713,9 @@
     "MessageQueuedNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22MessageQueued%22%2CMessage%3E"
     },
+    "NotYourTurn": {
+      "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
+    },
     "Notification": {
       "anyOf": [
         {
@@ -1892,19 +1907,19 @@
     "UpdateChannelError": {
       "anyOf": [
         {
-          "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
+          "$ref": "#/definitions/ChannelNotFound"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189%3E"
+          "$ref": "#/definitions/InvalidTransition"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189%3E"
+          "$ref": "#/definitions/InvalidAppData"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
+          "$ref": "#/definitions/NotYourTurn"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C404%2C%22Channel%20closed%22%3E"
+          "$ref": "#/definitions/ChannelClosed"
         }
       ]
     },

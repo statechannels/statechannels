@@ -29,5 +29,6 @@
  * ```
  */
 export * from './types';
+export * from './utils';
 
 export {parseRequest, parseResponse} from './validation';

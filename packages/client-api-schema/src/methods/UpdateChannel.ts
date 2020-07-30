@@ -11,19 +11,19 @@ export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannel
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 
 type ErrorCodes = AllCodes['UpdateChannel'];
-type ChannelNotFound = JsonRpcError<ErrorCodes['ChannelNotFound'], 'Channel not found'>;
-type InvalidTransition = JsonRpcError<
+export type ChannelNotFound = JsonRpcError<ErrorCodes['ChannelNotFound'], 'Channel not found'>;
+export type InvalidTransition = JsonRpcError<
   ErrorCodes['InvalidTransition'],
   'Invalid transition',
   {channelStatus: ChannelStatus; proposedUpdate: UpdateChannelParams}
 >;
-type InvalidAppData = JsonRpcError<
+export type InvalidAppData = JsonRpcError<
   ErrorCodes['InvalidAppData'],
   'Invalid app data',
   {appData: string}
 >;
-type NotYourTurn = JsonRpcError<ErrorCodes['NotYourTurn'], 'Not your turn'>;
-type ChannelClosed = JsonRpcError<ErrorCodes['ChannelClosed'], 'Channel closed'>;
+export type NotYourTurn = JsonRpcError<ErrorCodes['NotYourTurn'], 'Not your turn'>;
+export type ChannelClosed = JsonRpcError<ErrorCodes['ChannelClosed'], 'Channel closed'>;
 
 export type UpdateChannelError =
   | ChannelNotFound
