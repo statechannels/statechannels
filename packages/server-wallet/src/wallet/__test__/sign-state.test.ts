@@ -14,7 +14,7 @@ beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 
   // Start the transaction
-  tx = await Channel.startTransaction();
+  tx = await Store.startTransaction();
 });
 
 afterEach(async () => tx.rollback());
@@ -30,7 +30,7 @@ describe('signState', () => {
     await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
 
-    const result = await Store.signState(c.channelId, c.vars[0], tx);
+    const result = await Store.signState(c.channelId, c.vars[0]);
     expect(result).toMatchObject({
       outgoing: [
         {
@@ -43,17 +43,5 @@ describe('signState', () => {
       ],
       channelResult: {turnNum: c.vars[0].turnNum},
     });
-  });
-
-  it('uses a transaction', async () => {
-    const updatedC = await Store.signState(c.channelId, c.vars[0], tx);
-    expect(updatedC).toBeDefined();
-
-    // Fetch the current channel outside the transaction context
-    const currentC = await Channel.forId(c.channelId, undefined);
-    expect(currentC.latestSignedByMe).toBeUndefined();
-
-    const pendingC = await Channel.forId(c.channelId, tx);
-    expect(pendingC.latestSignedByMe).toBeDefined();
   });
 });

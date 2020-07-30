@@ -26,7 +26,6 @@ import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
-import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 
@@ -60,7 +59,7 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   async createChannel(args: CreateChannelParams): SingleChannelResult {
-    return Channel.transaction(async tx => {
+    return Store.transaction(async () => {
       const {participants, appDefinition, appData, allocations} = args;
       const outcome: Outcome = deserializeAllocations(allocations);
       // TODO: How do we pick a signing address?
@@ -78,22 +77,24 @@ export class Wallet implements WalletInterface {
 
       const cols = {...channelConstants, vars, signingAddress};
 
-      const {channelId} = await Channel.query(tx).insert(cols);
+      const {channelId} = await Channel.query().insert(cols);
 
-      const {outgoing, channelResult} = await Store.signState(
-        channelId,
-        {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
-        tx
-      );
+      const {outgoing, channelResult} = await Store.signState(channelId, {
+        ...channelConstants,
+        turnNum: 0,
+        isFinal: false,
+        appData,
+        outcome,
+      });
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
     });
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
-    const {outbox, channelResult} = await knex.transaction(
-      async (tx): Promise<{outbox: any; channelResult: ChannelResult}> => {
-        const channel = await Store.getChannel(channelId, tx);
+    const {outbox, channelResult} = await Store.transaction(
+      async (): Promise<{outbox: any; channelResult: ChannelResult}> => {
+        const channel = await Store.getChannel(channelId);
 
         if (!channel)
           throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
@@ -101,7 +102,7 @@ export class Wallet implements WalletInterface {
           });
 
         const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-        const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+        const {outgoing, channelResult} = await Store.signState(channelId, nextState);
 
         return {outbox: outgoing.map(n => n.notice), channelResult};
       }
@@ -114,8 +115,8 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
-    return knex.transaction(async tx => {
-      const channel = await Store.getChannel(channelId, tx);
+    return Store.transaction(async () => {
+      const channel = await Store.getChannel(channelId);
 
       if (!channel)
         throw new UpdateChannel.UpdateChannelError(
@@ -130,7 +131,7 @@ export class Wallet implements WalletInterface {
       const nextState = getOrThrow(
         UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
       );
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState);
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
     });
@@ -160,8 +161,8 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(message: AddressedMessage): MultipleChannelResult {
-    const channelIds = await Channel.transaction(async tx => {
-      return await Store.pushMessage(message, tx);
+    const channelIds = await Channel.transaction(async () => {
+      return await Store.pushMessage(message);
     });
 
     const {channelResults, outbox} = await takeActions(channelIds);
@@ -184,9 +185,10 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const channelResults: ClientChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
-    await knex.transaction(async tx => {
+    await Store.transaction(async tx => {
       const setError = async (e: Error): Promise<void> => {
         error = e;
+
         await tx.rollback(error);
       };
       const markChannelAsDone = async (): Promise<any> => {
@@ -196,7 +198,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       const doAction = async (action: ProtocolAction): Promise<any> => {
         switch (action.type) {
           case 'SignState': {
-            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+            const {outgoing, channelResult} = await Store.signState(action.channelId, action);
             outgoing.map(n => outbox.push(n.notice));
             channelResults.push(channelResult);
             return;
@@ -210,7 +212,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
       // In the future, we can have an App model which collects all the relevant channels for an app channel,
       // and a Ledger model which stores ledger-specific data (eg. queued requests)
-      const app = await Store.getChannel(channels[0], tx);
+      const app = await Store.getChannel(channels[0]);
 
       if (!app) {
         setError(new Error('Channel not found'));

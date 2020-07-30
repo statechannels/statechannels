@@ -1,4 +1,3 @@
-import Objection from 'objection';
 import {
   SignedState,
   Objective,
@@ -14,19 +13,23 @@ import {
 import _ from 'lodash';
 import {Either, right} from 'fp-ts/lib/Either';
 import {Bytes32, ChannelResult} from '@statechannels/client-api-schema';
+import Objection from 'objection';
 
 import {Channel, SyncState, RequiredColumns} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
+import knex from '../db/connection';
 
 export const Store = {
+  transaction: <T>(callback: (transaction: Objection.Transaction) => Promise<T>): Promise<T> =>
+    knex.transaction(callback),
+  startTransaction: (): Promise<Objection.Transaction> => knex.transaction(),
   signState: async function(
     channelId: Bytes32,
-    vars: StateVariables,
-    tx: Objection.Transaction
+    vars: StateVariables
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    let channel = await Channel.forId(channelId, tx);
+    let channel = await Channel.forId(channelId);
 
     const state: State = {...channel.channelConstants, ...vars};
 
@@ -35,9 +38,9 @@ export const Store = {
     const signatureEntry = channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
-    await this.addSignedState(signedState, tx);
+    await this.addSignedState(signedState);
 
-    channel = await Channel.forId(channelId, tx);
+    channel = await Channel.forId(channelId);
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -55,20 +58,17 @@ export const Store = {
 
     return {outgoing, channelResult};
   },
-  getChannel: async function(
-    channelId: Bytes32,
-    tx: Objection.Transaction | undefined
-  ): Promise<ChannelState | undefined> {
-    return (await Channel.forId(channelId, tx))?.protocolState;
+  getChannel: async function(channelId: Bytes32): Promise<ChannelState | undefined> {
+    return (await Channel.forId(channelId))?.protocolState;
   },
 
-  pushMessage: async function(message: Message, tx: Objection.Transaction): Promise<Bytes32[]> {
+  pushMessage: async function(message: Message): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss, tx);
+      await this.addSignedState(ss);
     }
 
     for (const o of message.objectives || []) {
-      await this.addObjective(o, tx);
+      await this.addObjective(o);
     }
 
     const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
@@ -77,22 +77,16 @@ export const Store = {
     return stateChannelIds.concat(objectiveChannelIds);
   },
 
-  addObjective: async function(
-    _objective: Objective,
-    _tx: Objection.Transaction
-  ): Promise<Either<StoreError, undefined>> {
+  addObjective: async function(_objective: Objective): Promise<Either<StoreError, undefined>> {
     // TODO: Implement this
     return Promise.resolve(right(undefined));
   },
-  addSignedState: async function(
-    signedState: SignedState,
-    tx: Objection.Transaction
-  ): Promise<number> {
+  addSignedState: async function(signedState: SignedState): Promise<number> {
     validateSignatures(signedState);
 
-    const {address: signingAddress} = await getSigningWallet(signedState, tx);
+    const {address: signingAddress} = await getSigningWallet(signedState);
 
-    const channel = await getOrCreateChannel(signedState, signingAddress, tx);
+    const channel = await getOrCreateChannel(signedState, signingAddress);
     let channelVars = channel.vars;
 
     channelVars = addState(channelVars, signedState);
@@ -102,7 +96,7 @@ export const Store = {
     validateInvariants(channelVars, channel.myAddress);
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    return await Channel.query(tx).update(cols);
+    return await Channel.query().update(cols);
   },
 };
 
@@ -124,27 +118,23 @@ enum StoreErrors {
 
 async function getOrCreateChannel(
   constants: ChannelConstants,
-  signingAddress: string,
-  tx: Objection.Transaction
+  signingAddress: string
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  let channel = await Channel.query(tx)
+  let channel = await Channel.query()
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
     const cols: RequiredColumns = {...constants, vars: [], signingAddress};
     channel = Channel.fromJson(cols);
-    await Channel.query(tx).insert(channel);
+    await Channel.query().insert(channel);
   }
   return channel;
 }
-async function getSigningWallet(
-  signedState: SignedState,
-  tx: Objection.Transaction
-): Promise<SigningWallet> {
+async function getSigningWallet(signedState: SignedState): Promise<SigningWallet> {
   const addresses = signedState.participants.map(p => p.signingAddress);
-  const signingWallet = await SigningWallet.query(tx)
+  const signingWallet = await SigningWallet.query()
     .whereIn('address', addresses)
     .first();
 
