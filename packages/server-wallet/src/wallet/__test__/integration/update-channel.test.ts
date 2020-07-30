@@ -35,7 +35,7 @@ it('updates a channel', async () => {
         },
       },
     ],
-    channelResults: [{channelId, turnNum: 6, appData}],
+    channelResult: {channelId, turnNum: 6, appData},
   });
 
   const updated = await Channel.forId(channelId, undefined);
