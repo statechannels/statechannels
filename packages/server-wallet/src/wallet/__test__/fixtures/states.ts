@@ -60,4 +60,7 @@ export const stateWithHashSignedBy = (
   pk = aliceWallet(),
   ...otherWallets: SigningWallet[]
 ): Fixture<SignedStateWithHash> =>
-  fixture(stateSignedBy(pk, ...otherWallets)() as SignedStateWithHash, addHash);
+  fixture(
+    stateSignedBy(pk, ...otherWallets)() as SignedStateWithHash,
+    flow(overwriteOutcome, addHash)
+  );

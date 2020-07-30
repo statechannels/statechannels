@@ -47,7 +47,9 @@ const prefundSetupSigned = match(ps => stage(ps.app.supported), {
 });
 
 export const protocol: Protocol<ProtocolState> = match(ps => stage(ps.app.latestSignedByMe), {
-  Missing: () => error(`The application protocol requires a signed prefund setup`),
+  // Either means you were proposed a channel or no prefund setup exists
+  Missing: () => noAction,
+
   PrefundSetup: prefundSetupSigned,
   Default: () => noAction,
 });

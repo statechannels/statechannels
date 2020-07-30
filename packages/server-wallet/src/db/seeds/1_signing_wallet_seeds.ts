@@ -6,7 +6,10 @@ import {truncate} from '../../db-admin/db-admin-connection';
 
 const seeds = [alice()];
 
-export async function seed(knex: Knex): Promise<void> {
+export async function seedAlicesSigningWallet(knex: Knex): Promise<void> {
   await truncate(knex);
   await SigningWallet.query().insert(seeds);
 }
+
+// This is the function that `yarn knex seed` executes
+export const seed = seedAlicesSigningWallet;

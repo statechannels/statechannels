@@ -14,22 +14,21 @@ import {
   Message,
   Outcome,
   SignedStateVarsWithHash,
-  calculateChannelId,
   convertToParticipant,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import {Bytes32} from '../type-aliases';
-import {Channel, RequiredColumns} from '../models/channel';
+import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
-import {addHash} from '../state-utils';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
+import * as JoinChannel from '../handlers/join-channel';
 
 import {Store} from './store';
 
@@ -81,13 +80,7 @@ export class Wallet implements WalletInterface {
 
       const {outgoing, channelResult} = await Store.signState(
         channelId,
-        {
-          ...channelConstants,
-          turnNum: 0,
-          isFinal: false,
-          appData,
-          outcome,
-        },
+        {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
         tx
       );
 
@@ -95,9 +88,28 @@ export class Wallet implements WalletInterface {
     });
   }
 
-  async joinChannel(_args: JoinChannelParams): Result {
-    throw 'Unimplemented';
+  async joinChannel({channelId}: JoinChannelParams): Result {
+    const {outbox} = await knex.transaction(
+      async (tx): Promise<{outbox: any}> => {
+        const channel = await Store.getChannel(channelId, tx);
+
+        if (!channel)
+          throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
+            channelId,
+          });
+
+        const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
+        const {outgoing} = await Store.signState(channelId, nextState, tx);
+
+        return {outbox: outgoing.map(n => n.notice)};
+      }
+    );
+
+    const {channelResults, outbox: nextOutbox} = await takeActions([channelId]);
+
+    return {outbox: outbox.concat(nextOutbox), channelResults};
   }
+
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
     return knex.transaction(async tx => {
       const channel = await Store.getChannel(channelId, tx);
@@ -145,57 +157,9 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(message: AddressedMessage): Result {
-    const channelIds: Bytes32[] = [];
-
-    try {
-      await Channel.transaction(async tx => {
-        for (const ss of message.signedStates || []) {
-          // We ignore unsigned states
-          if (!ss.signatures?.length) {
-            logger.info(`pushMessage received unsigned state`);
-            return;
-          }
-
-          const channelId = calculateChannelId(ss);
-          let channel = await Channel.query(tx)
-            .where('channelId', channelId)
-            .first();
-
-          if (!channel) {
-            const addresses = ss.participants.map(p => p.signingAddress);
-            const signingWallet = await SigningWallet.query(tx)
-              .whereIn('address', addresses)
-              .first();
-
-            if (!signingWallet) {
-              logger.error(
-                {
-                  knownWallets: await SigningWallet.query(tx).select(),
-                  addresses,
-                },
-                'Not in channel'
-              );
-              throw Error('Not in channel');
-            }
-
-            const {address: signingAddress} = signingWallet;
-            const cols: RequiredColumns = {...ss, vars: [addHash(ss)], signingAddress};
-
-            channel = Channel.fromJson(cols);
-
-            const {channelId} = await Channel.query(tx).insert(channel);
-            channelIds.push(channelId);
-          } else {
-            ss.signatures?.map(sig => channel.addState(ss, sig));
-            await Channel.query(tx).upsertGraph(channel);
-            channelIds.push(channel.channelId);
-          }
-        }
-      });
-    } catch (err) {
-      logger.error({err}, 'Could not push message');
-      throw err;
-    }
+    const channelIds = await Channel.transaction(async tx => {
+      return await Store.pushMessage(message, tx);
+    });
 
     const {channelResults, outbox} = await takeActions(channelIds);
 
@@ -217,47 +181,54 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const channelResults: ClientChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
-    const tx = await knex.transaction();
+    await knex.transaction(async tx => {
+      const setError = async (e: Error): Promise<void> => {
+        error = e;
+        await tx.rollback(error);
+      };
+      const markChannelAsDone = async (): Promise<any> => {
+        channels.shift() as string;
+      };
 
-    const setError = async (e: Error): Promise<void> => {
-      error = e;
-      await tx.rollback();
-    };
-    const markChannelAsDone = async (): Promise<any> => {
-      channels.shift() as string;
-    };
-
-    const handleAction = async (action: ProtocolAction): Promise<any> => {
-      switch (action.type) {
-        case 'SignState': {
-          const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
-          outgoing.map(n => outbox.push(n.notice));
-          channelResults.push(channelResult);
-          return;
+      const doAction = async (action: ProtocolAction): Promise<any> => {
+        switch (action.type) {
+          case 'SignState': {
+            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+            outgoing.map(n => outbox.push(n.notice));
+            channelResults.push(channelResult);
+            return;
+          }
+          default:
+            throw 'Unimplemented';
         }
-        default:
-          throw 'Unimplemented';
+      };
+
+      // For the moment, we are only considering directly funded app channels.
+      // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+      // In the future, we can have an App model which collects all the relevant channels for an app channel,
+      // and a Ledger model which stores ledger-specific data (eg. queued requests)
+      const app = await Store.getChannel(channels[0], tx);
+
+      if (!app) {
+        setError(new Error('Channel not found'));
+
+        throw 'unreachable';
       }
-    };
 
-    // For the moment, we are only considering directly funded app channels.
-    // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-    // In the future, we can have an App model which collects all the relevant channels for an app channel,
-    // and a Ledger model which stores ledger-specific data (eg. queued requests)
-    const app = await Channel.forId(channels[0], undefined);
-
-    try {
-      const nextAction = await Application.protocol({app: app.protocolState});
-      // TODO: handleAction might also throw an error.
-      // It would be nice for handleAction to return an Either type, pipe the right values,
-      // and handle the left values with setError
-      await Either.fold(setError, Option.fold(markChannelAsDone, handleAction))(nextAction);
-      await tx.commit();
-    } catch (err) {
-      // FIXME
-      logger.error({err}, 'Error handling action');
-      await setError(err);
-    }
+      try {
+        const nextAction = await Application.protocol({app});
+        // TODO: doAction might also throw an error.
+        // It would be nice for doAction to return an Either type, pipe the right values,
+        // and handle the left values with setError
+        await Either.fold(setError, Option.fold(markChannelAsDone, doAction))(nextAction);
+      } catch (err) {
+        // TODO This code should not need to catch an arbitrary, unknown error.
+        // doAction could return an Either, and then the error can be handled more explicitly
+        // See https://github.com/statechannels/statechannels/issues/2379
+        logger.error({err}, 'Error handling action');
+        await setError(err);
+      }
+    });
   }
 
   return {outbox, error, channelResults};
@@ -265,7 +236,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
 // TODO: This should be removed, and not used externally.
 // It is a fill-in until the wallet API is specced out.
-function getOrThrow<E, T>(result: Either.Either<E, T>): T {
+export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
   return Either.getOrElseW<E, T>(
     (err: E): T => {
       throw err;
