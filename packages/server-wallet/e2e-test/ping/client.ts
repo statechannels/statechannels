@@ -1,14 +1,43 @@
+import {AddressZero} from '@ethersproject/constants';
 import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, Participant} from '@statechannels/client-api-schema';
+import {Wallet} from 'ethers';
+import {makeDestination, BN, SignedState} from '@statechannels/wallet-core';
 
-import {Wallet} from '../../src/wallet';
-import {createChannelArgs} from '../../src/wallet/__test__/fixtures/create-channel';
+import {Wallet as ServerWallet} from '../../src/wallet';
+import {Bytes32, Address} from '../../src/type-aliases';
 
 export default class PingClient {
-  private readonly wallet: Wallet = new Wallet();
+  private readonly wallet: ServerWallet = new ServerWallet();
 
-  constructor(private readonly pongHttpServerURL: string) {}
+  constructor(private readonly pk: Bytes32, private readonly pongHttpServerURL: string) {}
+
+  public readonly participantId = 'ping';
+
+  public get address(): Address {
+    return new Wallet(this.pk).address;
+  }
+
+  public get destination(): Address {
+    return makeDestination(this.address);
+  }
+
+  public get me(): Participant {
+    const {address: signingAddress, destination, participantId} = this;
+    return {
+      signingAddress,
+      destination,
+      participantId,
+    };
+  }
+
+  public async getPongsParticipantInfo(): Promise<Participant> {
+    const {data: participant} = await axios.get<Participant>(
+      `${this.pongHttpServerURL}/participant`
+    );
+    return participant;
+  }
 
   public async getChannel(channelId: string): Promise<ChannelResult> {
     const {
@@ -23,14 +52,28 @@ export default class PingClient {
     return channelResults;
   }
 
-  public async createPingChannel(): Promise<ChannelResult> {
+  public async createPingChannel(pong: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
       channelResults: [channel],
-    } = await this.wallet.createChannel(
-      // Re-using test fixture
-      createChannelArgs()
-    );
+    } = await this.wallet.createChannel({
+      appData: '0x',
+      appDefinition: AddressZero,
+      fundingStrategy: 'Direct',
+      participants: [this.me, pong],
+      allocations: [
+        {
+          token: AddressZero,
+          allocationItems: [
+            {
+              amount: BN.from(0),
+              destination: this.me.destination,
+            },
+            {amount: BN.from(0), destination: pong.destination},
+          ],
+        },
+      ],
+    });
 
     const message = await this.messagePongAndExpectReply(params as Message);
 
@@ -51,12 +94,20 @@ export default class PingClient {
       outbox: [{params}],
     } = await this.wallet.updateChannel(channel);
 
-    const message = await this.messagePongAndExpectReply(params as Message);
+    const {
+      recipient: to,
+      sender: from,
+      data: {signedStates: unconvertedSignedStates},
+    } = await this.messagePongAndExpectReply(params as Message);
+
+    // FIXME: server-wallet is using wallet-core, not wire-format for
+    // types of messages between parties. e2e-test uses wire-format
+    const signedStates = unconvertedSignedStates as SignedState[] | undefined;
 
     await this.wallet.pushMessage({
-      ...message,
-      to: message.recipient,
-      from: message.sender,
+      signedStates,
+      to,
+      from,
     });
   }
 

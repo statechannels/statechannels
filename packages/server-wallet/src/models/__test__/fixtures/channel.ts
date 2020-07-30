@@ -31,5 +31,10 @@ export const channelWithVars: Fixture<Channel> = fixture<Channel>(
   channel({vars: [addHash(stateSignedBy()())]})
 );
 
-export const withSupportedState = (stateVars: Partial<StateVariables>): Fixture<Channel> =>
-  fixture(channel({vars: [addHash(stateSignedBy(alice(), bob())({...stateVars}))]}));
+export const withSupportedState = (
+  stateVars: Partial<StateVariables>,
+  channelProps?: DeepPartial<RequiredColumns>
+): Fixture<Channel> =>
+  fixture(
+    channel({vars: [addHash(stateSignedBy(alice(), bob())({...stateVars}))], ...channelProps})
+  );

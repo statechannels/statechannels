@@ -3,6 +3,9 @@ import {spawn, ChildProcessWithoutNullStreams} from 'child_process';
 import kill = require('tree-kill');
 import axios from 'axios';
 
+import Knex = require('knex');
+import {dbCofig} from '../src/db-config';
+
 export type PongServer = {
   url: string;
   server: ChildProcessWithoutNullStreams;
@@ -40,14 +43,11 @@ export const startPongServer = (): PongServer => {
  * simultaneously ensures that the server is listening and cleans
  * the database of any stale data from previous test runs.
  */
-export const waitForServerToStartAndResetDatabase = (
-  pongServer: PongServer,
-  pingInterval = 1500
-): Promise<void> =>
+export const waitForServerToStart = (pongServer: PongServer, pingInterval = 1500): Promise<void> =>
   new Promise(resolve => {
     const interval = setInterval(async () => {
       try {
-        await axios.post<'OK'>(`${pongServer.url}/reset`);
+        await axios.post<'OK'>(`${pongServer.url}/status`);
         clearInterval(interval);
         resolve();
       } catch {
@@ -56,4 +56,15 @@ export const waitForServerToStartAndResetDatabase = (
     }, pingInterval);
   });
 
-export const killServer = ({server}: PongServer): void => kill(server.pid);
+export const knexPong: Knex = Knex({
+  ...dbCofig,
+  connection: {
+    ...(dbCofig.connection as Knex.StaticConnectionConfig),
+    database: 'pong',
+  },
+});
+
+export const killServer = async ({server}: PongServer): Promise<void> => {
+  kill(server.pid);
+  await knexPong.destroy();
+};
