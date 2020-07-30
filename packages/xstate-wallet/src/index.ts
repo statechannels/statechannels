@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import Url from 'url-parse';
 import ReactDOM from 'react-dom';
+import {isRequest} from '@statechannels/client-api-schema';
 
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
@@ -41,7 +42,7 @@ const log = logger.trace.bind(logger);
 
   // Communicate via postMessage
   window.addEventListener('message', event => {
-    if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
+    if (isRequest(event.data)) {
       ADD_LOGS && log({jsonRpcRequest: event.data}, 'INCOMING JSONRPC REQUEST:');
       const {host} = new Url(event.origin);
       channelWallet.pushMessage(event.data, host);
