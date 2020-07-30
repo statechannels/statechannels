@@ -14,5 +14,7 @@
   },
   "dtsRollup": {
     "enabled": true
-  }
+  },
+
+  "newlineKind": "lf"
 }
