@@ -583,8 +583,11 @@
       "typescript-api/client-api-schema.bytes32": {
         "title": "Bytes32 type"
       },
+      "typescript-api/client-api-schema.challengechannelparams.channelid": {
+        "title": "ChallengeChannelParams.channelId property"
+      },
       "typescript-api/client-api-schema.challengechannelparams": {
-        "title": "ChallengeChannelParams type"
+        "title": "ChallengeChannelParams interface"
       },
       "typescript-api/client-api-schema.challengechannelrequest": {
         "title": "ChallengeChannelRequest type"
@@ -646,8 +649,11 @@
       "typescript-api/client-api-schema.closeandwithdrawerror": {
         "title": "CloseAndWithdrawError type"
       },
+      "typescript-api/client-api-schema.closeandwithdrawparams.hubparticipantid": {
+        "title": "CloseAndWithdrawParams.hubParticipantId property"
+      },
       "typescript-api/client-api-schema.closeandwithdrawparams": {
-        "title": "CloseAndWithdrawParams type"
+        "title": "CloseAndWithdrawParams interface"
       },
       "typescript-api/client-api-schema.closeandwithdrawrequest": {
         "title": "CloseAndWithdrawRequest type"
@@ -658,8 +664,11 @@
       "typescript-api/client-api-schema.closechannelerror": {
         "title": "CloseChannelError type"
       },
+      "typescript-api/client-api-schema.closechannelparams.channelid": {
+        "title": "CloseChannelParams.channelId property"
+      },
       "typescript-api/client-api-schema.closechannelparams": {
-        "title": "CloseChannelParams type"
+        "title": "CloseChannelParams interface"
       },
       "typescript-api/client-api-schema.closechannelrequest": {
         "title": "CloseChannelRequest type"
@@ -733,8 +742,11 @@
       "typescript-api/client-api-schema.funds.token": {
         "title": "Funds.token property"
       },
+      "typescript-api/client-api-schema.getbudgetparams.hubparticipantid": {
+        "title": "GetBudgetParams.hubParticipantId property"
+      },
       "typescript-api/client-api-schema.getbudgetparams": {
-        "title": "GetBudgetParams type"
+        "title": "GetBudgetParams interface"
       },
       "typescript-api/client-api-schema.getbudgetrequest": {
         "title": "GetBudgetRequest type"
@@ -742,14 +754,23 @@
       "typescript-api/client-api-schema.getbudgetresponse": {
         "title": "GetBudgetResponse type"
       },
+      "typescript-api/client-api-schema.getchannelsparams.includeclosed": {
+        "title": "GetChannelsParams.includeClosed property"
+      },
+      "typescript-api/client-api-schema.getchannelsparams": {
+        "title": "GetChannelsParams interface"
+      },
       "typescript-api/client-api-schema.getchannelsrequest": {
         "title": "GetChannelsRequest type"
       },
       "typescript-api/client-api-schema.getchannelsresponse": {
         "title": "GetChannelsResponse type"
       },
+      "typescript-api/client-api-schema.getstateparams.channelid": {
+        "title": "GetStateParams.channelId property"
+      },
       "typescript-api/client-api-schema.getstateparams": {
-        "title": "GetStateParams type"
+        "title": "GetStateParams interface"
       },
       "typescript-api/client-api-schema.getstaterequest": {
         "title": "GetStateRequest type"
@@ -775,8 +796,11 @@
       "typescript-api/client-api-schema.isresponse": {
         "title": "isResponse() function"
       },
+      "typescript-api/client-api-schema.joinchannelparams.channelid": {
+        "title": "JoinChannelParams.channelId property"
+      },
       "typescript-api/client-api-schema.joinchannelparams": {
-        "title": "JoinChannelParams type"
+        "title": "JoinChannelParams interface"
       },
       "typescript-api/client-api-schema.joinchannelrequest": {
         "title": "JoinChannelRequest type"

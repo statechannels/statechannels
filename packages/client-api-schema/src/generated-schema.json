@@ -89,8 +89,20 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "ChallengeChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
     "ChallengeChannelRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22ChallengeChannel%22%2Cstructure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22ChallengeChannel%22%2CChallengeChannelParams%3E"
     },
     "ChallengeChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
@@ -202,7 +214,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-341-359-736846332-324-360-736846332-285-361-736846332-0-483%3E"
     },
     "CloseChannelError": {
       "anyOf": [
@@ -347,10 +359,10 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2CGetBudgetParams%3E"
     },
     "GetBudgetResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-307-310-45911622-293-310-45911622-276-311-45911622-244-312-45911622-0-313)%3E"
     },
     "GetChannelsRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-232-258-946177841-202-259-946177841-169-260-946177841-0-329%3E"
     },
     "GetChannelsResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2132-2377-src%2Fdata-types.ts-0-2794%5B%5D%3E"
@@ -1058,7 +1070,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"ChallengeChannel\",structure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387>": {
+    "JsonRpcRequest<\"ChallengeChannel\",ChallengeChannelParams>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1077,16 +1089,7 @@
           "type": "string"
         },
         "params": {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "$ref": "#/definitions/ChannelId"
-            }
-          },
-          "required": [
-            "channelId"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/ChallengeChannelParams"
         }
       },
       "required": [
@@ -1248,7 +1251,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetChannels\",structure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263>": {
+    "JsonRpcRequest<\"GetChannels\",structure-946177841-232-258-946177841-202-259-946177841-169-260-946177841-0-329>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1435,7 +1438,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<(DomainBudget|structure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)>": {
+    "JsonRpcResponse<(DomainBudget|structure-45911622-307-310-45911622-293-310-45911622-276-311-45911622-244-312-45911622-0-313)>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1601,7 +1604,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476>": {
+    "JsonRpcResponse<structure-736846332-341-359-736846332-324-360-736846332-285-361-736846332-0-483>": {
       "additionalProperties": false,
       "properties": {
         "id": {

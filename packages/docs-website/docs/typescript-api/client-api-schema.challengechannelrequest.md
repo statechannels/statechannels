@@ -12,7 +12,5 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-export declare type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {
-    channelId: ChannelId;
-}>;
+export declare type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', ChallengeChannelParams>;
 ```

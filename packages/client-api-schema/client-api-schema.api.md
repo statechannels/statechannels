@@ -55,12 +55,13 @@ export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', Dom
 export type Bytes32 = string;
 
 // @public (undocumented)
-export type ChallengeChannelParams = ChallengeChannelRequest['params'];
+export interface ChallengeChannelParams {
+    // (undocumented)
+    channelId: ChannelId;
+}
 
 // @public (undocumented)
-export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {
-    channelId: ChannelId;
-}>;
+export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', ChallengeChannelParams>;
 
 // @public (undocumented)
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
@@ -114,9 +115,10 @@ export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', C
 export type CloseAndWithdrawError = JsonRpcError<ErrorCodes['CloseAndWithdraw']['UserDeclined'], 'User declined'>;
 
 // @public (undocumented)
-export type CloseAndWithdrawParams = {
+export interface CloseAndWithdrawParams {
+    // (undocumented)
     hubParticipantId: string;
-};
+}
 
 // @public (undocumented)
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
@@ -133,9 +135,10 @@ export type CloseAndWithdrawResponse = JsonRpcResponse<{
 export type CloseChannelError = NotYourTurn | ChannelNotFound;
 
 // @public (undocumented)
-export type CloseChannelParams = {
+export interface CloseChannelParams {
+    // (undocumented)
     channelId: ChannelId;
-};
+}
 
 // @public (undocumented)
 export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelParams>;
@@ -245,15 +248,22 @@ export interface Funds {
 }
 
 // @public (undocumented)
-export type GetBudgetParams = {
+export interface GetBudgetParams {
+    // (undocumented)
     hubParticipantId: string;
-};
+}
 
 // @public (undocumented)
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', GetBudgetParams>;
 
 // @public (undocumented)
 export type GetBudgetResponse = JsonRpcResponse<DomainBudget | {}>;
+
+// @public (undocumented)
+export interface GetChannelsParams {
+    // (undocumented)
+    includeClosed?: boolean;
+}
 
 // @public (undocumented)
 export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {
@@ -264,9 +274,10 @@ export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {
 export type GetChannelsResponse = JsonRpcResponse<ChannelResult[]>;
 
 // @public (undocumented)
-export type GetStateParams = {
+export interface GetStateParams {
+    // (undocumented)
     channelId: ChannelId;
-};
+}
 
 // @public (undocumented)
 export type GetStateRequest = JsonRpcRequest<'GetState', GetStateParams>;
@@ -297,9 +308,10 @@ export function isRequest(message: JsonRpcMessage): message is Request;
 export function isResponse(message: JsonRpcMessage): message is Response;
 
 // @public (undocumented)
-export type JoinChannelParams = {
+export interface JoinChannelParams {
+    // (undocumented)
     channelId: ChannelId;
-};
+}
 
 // @public (undocumented)
 export type JoinChannelRequest = JsonRpcRequest<'JoinChannel', JoinChannelParams>;

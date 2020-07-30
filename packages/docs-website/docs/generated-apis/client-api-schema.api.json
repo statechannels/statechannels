@@ -498,34 +498,46 @@
           }
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type ChallengeChannelParams = "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChallengeChannelRequest",
-              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelRequest:type"
-            },
-            {
-              "kind": "Content",
-              "text": "['params']"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface ChallengeChannelParams "
             }
           ],
           "releaseTag": "Public",
           "name": "ChallengeChannelParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 3
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelParams#channelId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "channelId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -543,16 +555,16 @@
             },
             {
               "kind": "Content",
-              "text": "<'ChallengeChannel', {\n    channelId: "
+              "text": "<'ChallengeChannel', "
             },
             {
               "kind": "Reference",
-              "text": "ChannelId",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
+              "text": "ChallengeChannelParams",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelParams:interface"
             },
             {
               "kind": "Content",
-              "text": ";\n}>"
+              "text": ">"
             },
             {
               "kind": "Content",
@@ -1110,29 +1122,45 @@
           }
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type CloseAndWithdrawParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    hubParticipantId: string;\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface CloseAndWithdrawParams "
             }
           ],
           "releaseTag": "Public",
           "name": "CloseAndWithdrawParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams#hubParticipantId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "hubParticipantId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "hubParticipantId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -1155,7 +1183,7 @@
             {
               "kind": "Reference",
               "text": "CloseAndWithdrawParams",
-              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:type"
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:interface"
             },
             {
               "kind": "Content",
@@ -1239,38 +1267,46 @@
           }
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type CloseChannelParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    channelId: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelId",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface CloseChannelParams "
             }
           ],
           "releaseTag": "Public",
           "name": "CloseChannelParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 4
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams#channelId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "channelId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -1293,7 +1329,7 @@
             {
               "kind": "Reference",
               "text": "CloseChannelParams",
-              "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:type"
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:interface"
             },
             {
               "kind": "Content",
@@ -2000,29 +2036,45 @@
           "extendsTokenRanges": []
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type GetBudgetParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    hubParticipantId: string;\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface GetBudgetParams "
             }
           ],
           "releaseTag": "Public",
           "name": "GetBudgetParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams#hubParticipantId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "hubParticipantId: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "hubParticipantId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -2045,7 +2097,7 @@
             {
               "kind": "Reference",
               "text": "GetBudgetParams",
-              "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:type"
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:interface"
             },
             {
               "kind": "Content",
@@ -2101,6 +2153,47 @@
             "startIndex": 1,
             "endIndex": 5
           }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!GetChannelsParams:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface GetChannelsParams "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "GetChannelsParams",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!GetChannelsParams#includeClosed:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "includeClosed?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "includeClosed",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -2172,38 +2265,46 @@
           }
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!GetStateParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!GetStateParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type GetStateParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    channelId: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelId",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface GetStateParams "
             }
           ],
           "releaseTag": "Public",
           "name": "GetStateParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 4
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!GetStateParams#channelId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "channelId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -2226,7 +2327,7 @@
             {
               "kind": "Reference",
               "text": "GetStateParams",
-              "canonicalReference": "@statechannels/client-api-schema!GetStateParams:type"
+              "canonicalReference": "@statechannels/client-api-schema!GetStateParams:interface"
             },
             {
               "kind": "Content",
@@ -2578,38 +2679,46 @@
           "name": "isResponse"
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:type",
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:interface",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type JoinChannelParams = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    channelId: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelId",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
+              "text": "export interface JoinChannelParams "
             }
           ],
           "releaseTag": "Public",
           "name": "JoinChannelParams",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 4
-          }
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams#channelId:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "channelId: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ChannelId",
+                  "canonicalReference": "@statechannels/client-api-schema!ChannelId:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "channelId",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -2632,7 +2741,7 @@
             {
               "kind": "Reference",
               "text": "JoinChannelParams",
-              "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:type"
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:interface"
             },
             {
               "kind": "Content",

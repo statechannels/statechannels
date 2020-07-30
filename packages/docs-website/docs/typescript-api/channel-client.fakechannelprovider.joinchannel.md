@@ -19,7 +19,7 @@ protected joinChannel(params: JoinChannelParams): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | [JoinChannelParams](./client-api-schema.joinchannelparams.md) |  |
+|  params | JoinChannelParams |  |
 
 <b>Returns:</b>
 

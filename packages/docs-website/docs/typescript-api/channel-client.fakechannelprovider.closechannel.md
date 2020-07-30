@@ -19,7 +19,7 @@ protected closeChannel(params: CloseChannelParams): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | [CloseChannelParams](./client-api-schema.closechannelparams.md) |  |
+|  params | CloseChannelParams |  |
 
 <b>Returns:</b>
 

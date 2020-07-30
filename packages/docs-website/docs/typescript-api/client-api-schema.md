@@ -59,11 +59,18 @@ Example response:
 |  [Allocation](./client-api-schema.allocation.md) | Array of destination-amount pairings for a given token |
 |  [AllocationItem](./client-api-schema.allocationitem.md) | Assigns some amount of an unspecified asset to a destination |
 |  [ApproveBudgetAndFundParams](./client-api-schema.approvebudgetandfundparams.md) |  |
+|  [ChallengeChannelParams](./client-api-schema.challengechannelparams.md) |  |
 |  [ChannelBudget](./client-api-schema.channelbudget.md) |  |
 |  [ChannelResult](./client-api-schema.channelresult.md) |  |
+|  [CloseAndWithdrawParams](./client-api-schema.closeandwithdrawparams.md) |  |
+|  [CloseChannelParams](./client-api-schema.closechannelparams.md) |  |
 |  [CreateChannelParams](./client-api-schema.createchannelparams.md) |  |
 |  [DomainBudget](./client-api-schema.domainbudget.md) |  |
 |  [Funds](./client-api-schema.funds.md) |  |
+|  [GetBudgetParams](./client-api-schema.getbudgetparams.md) |  |
+|  [GetChannelsParams](./client-api-schema.getchannelsparams.md) |  |
+|  [GetStateParams](./client-api-schema.getstateparams.md) |  |
+|  [JoinChannelParams](./client-api-schema.joinchannelparams.md) |  |
 |  [Message](./client-api-schema.message.md) | Format of message sent from the wallet to the app |
 |  [Participant](./client-api-schema.participant.md) | Container for data specific to a single state channel participant |
 |  [TokenBudget](./client-api-schema.tokenbudget.md) |  |
@@ -79,7 +86,6 @@ Example response:
 |  [ApproveBudgetAndFundResponse](./client-api-schema.approvebudgetandfundresponse.md) |  |
 |  [BudgetUpdatedNotification](./client-api-schema.budgetupdatednotification.md) |  |
 |  [Bytes32](./client-api-schema.bytes32.md) | Bytes32  ^0x(\[a-fA-F0-9\]<!-- -->{<!-- -->64<!-- -->}<!-- -->)$ |
-|  [ChallengeChannelParams](./client-api-schema.challengechannelparams.md) |  |
 |  [ChallengeChannelRequest](./client-api-schema.challengechannelrequest.md) |  |
 |  [ChallengeChannelResponse](./client-api-schema.challengechannelresponse.md) |  |
 |  [ChannelClosingNotification](./client-api-schema.channelclosingnotification.md) |  |
@@ -88,11 +94,9 @@ Example response:
 |  [ChannelStatus](./client-api-schema.channelstatus.md) |  |
 |  [ChannelUpdatedNotification](./client-api-schema.channelupdatednotification.md) |  |
 |  [CloseAndWithdrawError](./client-api-schema.closeandwithdrawerror.md) |  |
-|  [CloseAndWithdrawParams](./client-api-schema.closeandwithdrawparams.md) |  |
 |  [CloseAndWithdrawRequest](./client-api-schema.closeandwithdrawrequest.md) |  |
 |  [CloseAndWithdrawResponse](./client-api-schema.closeandwithdrawresponse.md) |  |
 |  [CloseChannelError](./client-api-schema.closechannelerror.md) |  |
-|  [CloseChannelParams](./client-api-schema.closechannelparams.md) |  |
 |  [CloseChannelRequest](./client-api-schema.closechannelrequest.md) |  |
 |  [CloseChannelResponse](./client-api-schema.closechannelresponse.md) |  |
 |  [CreateChannelRequest](./client-api-schema.createchannelrequest.md) |  |
@@ -104,17 +108,14 @@ Example response:
 |  [ErrorResponse](./client-api-schema.errorresponse.md) |  |
 |  [ExternalDestination](./client-api-schema.externaldestination.md) | Nitro ChannelId  ^0x(0<!-- -->{<!-- -->24<!-- -->}<!-- -->)(\[a-fA-F0-9\]<!-- -->{<!-- -->40<!-- -->}<!-- -->)$ |
 |  [FundingStrategy](./client-api-schema.fundingstrategy.md) |  |
-|  [GetBudgetParams](./client-api-schema.getbudgetparams.md) |  |
 |  [GetBudgetRequest](./client-api-schema.getbudgetrequest.md) |  |
 |  [GetBudgetResponse](./client-api-schema.getbudgetresponse.md) |  |
 |  [GetChannelsRequest](./client-api-schema.getchannelsrequest.md) |  |
 |  [GetChannelsResponse](./client-api-schema.getchannelsresponse.md) |  |
-|  [GetStateParams](./client-api-schema.getstateparams.md) |  |
 |  [GetStateRequest](./client-api-schema.getstaterequest.md) |  |
 |  [GetStateResponse](./client-api-schema.getstateresponse.md) |  |
 |  [GetWalletInformationRequest](./client-api-schema.getwalletinformationrequest.md) |  |
 |  [GetWalletInformationResponse](./client-api-schema.getwalletinformationresponse.md) |  |
-|  [JoinChannelParams](./client-api-schema.joinchannelparams.md) |  |
 |  [JoinChannelRequest](./client-api-schema.joinchannelrequest.md) |  |
 |  [JoinChannelResponse](./client-api-schema.joinchannelresponse.md) |  |
 |  [JsonRpcMessage](./client-api-schema.jsonrpcmessage.md) |  |

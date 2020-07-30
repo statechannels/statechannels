@@ -24,7 +24,7 @@ closeAndWithdraw(_params: CloseAndWithdrawParams): Promise<{
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  \_params | [CloseAndWithdrawParams](./client-api-schema.closeandwithdrawparams.md) |  |
+|  \_params | CloseAndWithdrawParams |  |
 
 <b>Returns:</b>
 

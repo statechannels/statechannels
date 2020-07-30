@@ -19,7 +19,7 @@ protected getState({ channelId }: GetStateParams): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { channelId } | [GetStateParams](./client-api-schema.getstateparams.md) |  |
+|  { channelId } | GetStateParams |  |
 
 <b>Returns:</b>
 
