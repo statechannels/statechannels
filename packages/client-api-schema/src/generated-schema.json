@@ -296,7 +296,7 @@
       "type": "object"
     },
     "EnableEthereumError": {
-      "$ref": "#/definitions/JsonRpcError%3C1001732226171%2C%22Ethereum%20Not%20Enabled%22%3E"
+      "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
       "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-502%3E"
@@ -397,14 +397,13 @@
     "JoinChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
-    "JsonRpcError<1001732226171,\"Ethereum Not Enabled\">": {
+    "JsonRpcError<100,\"Ethereum Not Enabled\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
           "additionalProperties": false,
           "properties": {
             "code": {
-              "description": "The wallet approval was rejected by the Web3 provider.",
               "enum": [
                 100
               ],

@@ -101,5 +101,23 @@ export const ErrorCode: ErrorCodes = {
     InvalidAppData: 402,
     NotYourTurn: 403,
     ChannelClosed: 404
+  },
+  PushMessage: {
+    WrongParticipant: 900
+  },
+  CreateChannel: {
+    SigningAddressNotFound: 1000,
+    InvalidAppDefinition: 1001,
+    UnsupportedToken: 1002
+  },
+  JoinChannel: {
+    ChannelNotFound: 1100,
+    InvalidTransition: 1101
+  },
+  GetState: {
+    ChannelNotFound: 1200
+  },
+  ChallengeChannel: {
+    ChannelNotFound: 1300
   }
 };

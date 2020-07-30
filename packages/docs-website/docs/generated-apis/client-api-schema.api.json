@@ -1797,7 +1797,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!ErrorCodes:type",
-          "docComment": "/**\n * Error codes that might be returned by the wallet\n */\n",
+          "docComment": "/**\n * Error codes that might be returned by the wallet\n *\n * @remarks\n *\n * Errors conform to the [JSON-RPC 2.0 error spec](https://www.jsonrpc.org/specification#error_object). Beyond the standard errors from that spec, the following domain-specific errors are possible: <ul> <li> 100: The wallet approval was rejected by the Web3 provider.</li> <li> 200: The user declines</li> <li> 300: You cannot close the channel when it is not your turn</li> <li> 400: Channel not found</li> <li> 900: The message is not addressed to this wallet.</li> <li> 1000: The wallet can't find the signing key corresponding to the first signing address in the participants array.</li> <li> 1001: There isn't a contract deployed at the app definition address. </li> <li> 1002: The wallet doesn't support one or more of the tokens appearing in the allocation.</li> <li> 1100: The wallet can't find the channel corresponding to the channelId</li> <li> 1101: The wallet contains invalid state data</li> <li> 1200: The wallet can't find the channel corresponding to the channelId</li> <li> 1300: The wallet can't find the channel corresponding to the channelId</li> </ul>\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1805,7 +1805,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    EnableEthereum: {\n        EthereumNotEnabled: 100;\n    };\n    CloseAndWithdraw: {\n        UserDeclined: 200;\n    };\n    CloseChannel: {\n        NotYourTurn: 300;\n        ChannelNotFound: 301;\n    };\n    UpdateChannel: {\n        ChannelNotFound: 400;\n        InvalidTransition: 401;\n        InvalidAppData: 402;\n        NotYourTurn: 403;\n        ChannelClosed: 404;\n    };\n}"
+              "text": "{\n    EnableEthereum: {\n        EthereumNotEnabled: 100;\n    };\n    CloseAndWithdraw: {\n        UserDeclined: 200;\n    };\n    CloseChannel: {\n        NotYourTurn: 300;\n        ChannelNotFound: 301;\n    };\n    UpdateChannel: {\n        ChannelNotFound: 400;\n        InvalidTransition: 401;\n        InvalidAppData: 402;\n        NotYourTurn: 403;\n        ChannelClosed: 404;\n    };\n    PushMessage: {\n        WrongParticipant: 900;\n    };\n    CreateChannel: {\n        SigningAddressNotFound: 1000;\n        InvalidAppDefinition: 1001;\n        UnsupportedToken: 1002;\n    };\n    JoinChannel: {\n        ChannelNotFound: 1100;\n        InvalidTransition: 1101;\n    };\n    GetState: {\n        ChannelNotFound: 1200;\n    };\n    ChallengeChannel: {\n        ChannelNotFound: 1300;\n    };\n}"
             },
             {
               "kind": "Content",
