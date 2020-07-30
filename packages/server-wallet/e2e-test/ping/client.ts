@@ -40,9 +40,7 @@ export default class PingClient {
   }
 
   public async getChannel(channelId: string): Promise<ChannelResult> {
-    const {
-      channelResults: [channel],
-    } = await this.wallet.getState({channelId});
+    const {channelResult: channel} = await this.wallet.getState({channelId});
 
     return channel;
   }
@@ -55,7 +53,7 @@ export default class PingClient {
   public async createPingChannel(pong: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
-      channelResults: [channel],
+      channelResult: channel,
     } = await this.wallet.createChannel({
       appData: '0x',
       appDefinition: AddressZero,

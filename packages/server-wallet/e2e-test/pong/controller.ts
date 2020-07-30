@@ -45,9 +45,7 @@ export default class PongController {
       };
     }
 
-    const {
-      channelResults: [channelResult],
-    } = await this.wallet.getState({
+    const {channelResult} = await this.wallet.getState({
       channelId: calculateChannelId({...convertedSignedStates[0]}),
     });
 

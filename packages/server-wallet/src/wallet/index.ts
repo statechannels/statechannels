@@ -39,25 +39,27 @@ export type AddressedMessage = Message & {to: string; from: string};
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-type Result = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
+type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+
 export type WalletInterface = {
   // App channel management
-  createChannel(args: CreateChannelParams): Result;
-  joinChannel(args: JoinChannelParams): Result;
-  updateChannel(args: UpdateChannelParams): Result;
-  closeChannel(args: CloseChannelParams): Result;
-  getChannels(): Result;
-  getState(args: GetStateParams): Result;
+  createChannel(args: CreateChannelParams): SingleChannelResult;
+  joinChannel(args: JoinChannelParams): SingleChannelResult;
+  updateChannel(args: UpdateChannelParams): SingleChannelResult;
+  closeChannel(args: CloseChannelParams): SingleChannelResult;
+  getChannels(): MultipleChannelResult;
+  getState(args: GetStateParams): SingleChannelResult;
 
   // Wallet <-> Wallet communication
-  pushMessage(m: AddressedMessage): Promise<{response?: Message; outbox?: Outgoing[]}>;
+  pushMessage(m: AddressedMessage): MultipleChannelResult;
 
   // Wallet -> App communication
   onNotification(cb: (notice: Notification) => void): {unsubscribe: () => void};
 };
 
 export class Wallet implements WalletInterface {
-  async createChannel(args: CreateChannelParams): Result {
+  async createChannel(args: CreateChannelParams): SingleChannelResult {
     return Channel.transaction(async tx => {
       const {participants, appDefinition, appData, allocations} = args;
       const outcome: Outcome = deserializeAllocations(allocations);
@@ -84,11 +86,11 @@ export class Wallet implements WalletInterface {
         tx
       );
 
-      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+      return {outbox: outgoing.map(n => n.notice), channelResult};
     });
   }
 
-  async joinChannel({channelId}: JoinChannelParams): Result {
+  async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const {outbox} = await knex.transaction(
       async (tx): Promise<{outbox: any}> => {
         const channel = await Store.getChannel(channelId, tx);
@@ -106,11 +108,15 @@ export class Wallet implements WalletInterface {
     );
 
     const {channelResults, outbox: nextOutbox} = await takeActions([channelId]);
+    const channelResult = channelResults.find(c => c.channelId === channelId);
+    if (!channelResult) {
+      throw new Error('No channel result returned');
+    }
 
-    return {outbox: outbox.concat(nextOutbox), channelResults};
+    return {outbox: outbox.concat(nextOutbox), channelResult};
   }
 
-  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
+  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
     return knex.transaction(async tx => {
       const channel = await Store.getChannel(channelId, tx);
 
@@ -129,25 +135,25 @@ export class Wallet implements WalletInterface {
       );
       const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
 
-      return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
+      return {outbox: outgoing.map(n => n.notice), channelResult};
     });
   }
 
-  async closeChannel(_args: CloseChannelParams): Result {
+  async closeChannel(_args: CloseChannelParams): SingleChannelResult {
     throw 'Unimplemented';
   }
-  async getChannels(): Result {
+  async getChannels(): MultipleChannelResult {
     throw 'Unimplemented';
   }
 
-  async getState({channelId}: GetStateParams): Result {
+  async getState({channelId}: GetStateParams): SingleChannelResult {
     try {
       const {channelResult} = await Channel.query()
         .where({channelId})
         .first();
 
       return {
-        channelResults: [channelResult],
+        channelResult,
         outbox: [],
       };
     } catch (err) {
@@ -156,7 +162,7 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  async pushMessage(message: AddressedMessage): Result {
+  async pushMessage(message: AddressedMessage): MultipleChannelResult {
     const channelIds = await Channel.transaction(async tx => {
       return await Store.pushMessage(message, tx);
     });
