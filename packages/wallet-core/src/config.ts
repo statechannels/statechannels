@@ -34,7 +34,7 @@ export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
 if (!process.env.HUB_DESTINATION) {
-  throw new Error('HUB_DESTINATION environment variable must be defined');
+  console.warn('HUB_DESTINATION environment variable should be defined, you might see issues');
 }
 export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
 
