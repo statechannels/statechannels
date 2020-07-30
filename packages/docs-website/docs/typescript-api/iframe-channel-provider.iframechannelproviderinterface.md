@@ -9,6 +9,11 @@ hide_title: true
 
 ## IFrameChannelProviderInterface interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+For environments where the wallet is proxied within an iFrame embedded on the application's DOM.
+
 <b>Signature:</b>
 
 ```typescript
@@ -16,8 +21,12 @@ export interface IFrameChannelProviderInterface extends Web3ChannelProviderInter
 ```
 <b>Extends:</b> [Web3ChannelProviderInterface](./iframe-channel-provider.web3channelproviderinterface.md)
 
+## Remarks
+
+This is as opposed to being injected via an extension background script, in which case the "mounting" is effectively done via the background script and not by the application.
+
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [mountWalletComponent(url)](./iframe-channel-provider.iframechannelproviderinterface.mountwalletcomponent.md) |  |
+|  [mountWalletComponent(url)](./iframe-channel-provider.iframechannelproviderinterface.mountwalletcomponent.md) | <b><i>(BETA)</i></b> Trigger the mounting of the <iframe/> element which loads the wallet. |

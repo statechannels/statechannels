@@ -9,6 +9,11 @@ hide_title: true
 
 ## isJsonRpcErrorResponse() function
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Type guard for [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md)
+
 <b>Signature:</b>
 
 ```typescript
@@ -24,3 +29,5 @@ export declare function isJsonRpcErrorResponse(message: any): message is JsonRpc
 <b>Returns:</b>
 
 message is [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md)
+
+true if the message is a JSON-RPC error response, false otherwise

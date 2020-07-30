@@ -9,40 +9,47 @@ hide_title: true
 
 ## iframe-channel-provider package
 
+Communicate with a statechannels wallet via JSON-RPC over postMessage
+
+## Remarks
+
+Attaches a channelProvider to the window object.
+
+## Classes
+
+|  Class | Description |
+|  --- | --- |
+|  [IFrameChannelProvider](./iframe-channel-provider.iframechannelprovider.md) | <b><i>(BETA)</i></b> Class for interacting with a statechannels wallet |
+
 ## Functions
 
 |  Function | Description |
 |  --- | --- |
-|  [isJsonRpcErrorResponse(message)](./iframe-channel-provider.isjsonrpcerrorresponse.md) |  |
-|  [isJsonRpcNotification(message)](./iframe-channel-provider.isjsonrpcnotification.md) |  |
-|  [isJsonRpcResponse(message)](./iframe-channel-provider.isjsonrpcresponse.md) |  |
+|  [isJsonRpcErrorResponse(message)](./iframe-channel-provider.isjsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md) |
+|  [isJsonRpcNotification(message)](./iframe-channel-provider.isjsonrpcnotification.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md) |
+|  [isJsonRpcResponse(message)](./iframe-channel-provider.isjsonrpcresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md) |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) |  |
-|  [EventType](./iframe-channel-provider.eventtype.md) |  |
-|  [IFrameChannelProviderInterface](./iframe-channel-provider.iframechannelproviderinterface.md) |  |
-|  [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md) |  |
-|  [JsonRpcRequest](./iframe-channel-provider.jsonrpcrequest.md) |  |
-|  [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md) |  |
-|  [Web3ChannelProviderInterface](./iframe-channel-provider.web3channelproviderinterface.md) |  |
+|  [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | <b><i>(BETA)</i></b> The generic JsonRPC provider interface that mimics [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) and the window.ethereum object in the browser. |
+|  [IFrameChannelProviderInterface](./iframe-channel-provider.iframechannelproviderinterface.md) | <b><i>(BETA)</i></b> For environments where the wallet is proxied within an iFrame embedded on the application's DOM. |
+|  [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md) | <b><i>(BETA)</i></b> Specifies notification headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcRequest](./iframe-channel-provider.jsonrpcrequest.md) | <b><i>(BETA)</i></b> Specifies request headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md) | <b><i>(BETA)</i></b> Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [Web3ChannelProviderInterface](./iframe-channel-provider.web3channelproviderinterface.md) | <b><i>(BETA)</i></b> For environments where the destinationAddress is secret until the wallet is "enabled". |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [channelProvider](./iframe-channel-provider.channelprovider.md) |  |
+|  [channelProvider](./iframe-channel-provider.channelprovider.md) | <b><i>(BETA)</i></b> Class instance that is attached to the window object |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [JsonRpcError](./iframe-channel-provider.jsonrpcerror.md) |  |
-|  [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md) |  |
-|  [OffType](./iframe-channel-provider.offtype.md) |  |
-|  [OnType](./iframe-channel-provider.ontype.md) |  |
-|  [SubscribeType](./iframe-channel-provider.subscribetype.md) |  |
-|  [UnsubscribeType](./iframe-channel-provider.unsubscribetype.md) |  |
-|  [WalletJsonRpcAPI](./iframe-channel-provider.walletjsonrpcapi.md) |  |
+|  [JsonRpcError](./iframe-channel-provider.jsonrpcerror.md) | <b><i>(BETA)</i></b> Specifies error headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Specifies error headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [WalletJsonRpcAPI](./iframe-channel-provider.walletjsonrpcapi.md) | <b><i>(BETA)</i></b> |

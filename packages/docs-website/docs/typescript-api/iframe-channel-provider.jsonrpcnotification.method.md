@@ -9,6 +9,11 @@ hide_title: true
 
 ## JsonRpcNotification.method property
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Generic type of the Notification name
+
 <b>Signature:</b>
 
 ```typescript

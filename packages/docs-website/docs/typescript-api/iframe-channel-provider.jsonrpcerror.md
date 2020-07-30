@@ -9,6 +9,11 @@ hide_title: true
 
 ## JsonRpcError type
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies error headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript

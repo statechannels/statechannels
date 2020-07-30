@@ -9,6 +9,11 @@ hide_title: true
 
 ## isJsonRpcNotification() function
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Type guard for [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md)
+
 <b>Signature:</b>
 
 ```typescript
@@ -24,3 +29,5 @@ export declare function isJsonRpcNotification<T>(message: any): message is JsonR
 <b>Returns:</b>
 
 message is [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md)<!-- -->&lt;T, any&gt;
+
+true if the message is a JSON-RPC notification, false otherwise

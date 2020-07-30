@@ -9,6 +9,11 @@ hide_title: true
 
 ## JsonRpcRequest interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies request headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,7 +24,7 @@ export interface JsonRpcRequest<MethodName = string, RequestParams = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./iframe-channel-provider.jsonrpcrequest.id.md) | number |  |
-|  [jsonrpc](./iframe-channel-provider.jsonrpcrequest.jsonrpc.md) | '2.0' |  |
-|  [method](./iframe-channel-provider.jsonrpcrequest.method.md) | MethodName |  |
-|  [params](./iframe-channel-provider.jsonrpcrequest.params.md) | RequestParams |  |
+|  [id](./iframe-channel-provider.jsonrpcrequest.id.md) | number | <b><i>(BETA)</i></b> Identifier for the resquest |
+|  [jsonrpc](./iframe-channel-provider.jsonrpcrequest.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |
+|  [method](./iframe-channel-provider.jsonrpcrequest.method.md) | MethodName | <b><i>(BETA)</i></b> Generic type of the request method |
+|  [params](./iframe-channel-provider.jsonrpcrequest.params.md) | RequestParams | <b><i>(BETA)</i></b> Request parameters |

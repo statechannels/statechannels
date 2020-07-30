@@ -9,6 +9,11 @@ hide_title: true
 
 ## isJsonRpcResponse() function
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Type guard for [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md)
+
 <b>Signature:</b>
 
 ```typescript
@@ -24,3 +29,5 @@ export declare function isJsonRpcResponse(message: any): message is JsonRpcRespo
 <b>Returns:</b>
 
 message is [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md)
+
+true if the message is a JSON-RPC response, false otherwis

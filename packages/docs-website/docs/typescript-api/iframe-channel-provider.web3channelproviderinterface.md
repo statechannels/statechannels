@@ -9,6 +9,11 @@ hide_title: true
 
 ## Web3ChannelProviderInterface interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+For environments where the destinationAddress is secret until the wallet is "enabled".
+
 <b>Signature:</b>
 
 ```typescript
@@ -16,8 +21,12 @@ export interface Web3ChannelProviderInterface extends ChannelProviderInterface
 ```
 <b>Extends:</b> [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md)
 
+## Remarks
+
+This is the case e.g. with [MetaMask](https://docs.metamask.io/guide/ethereum-provider.html#table-of-contents) and its connected accounts feature.
+
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [enable()](./iframe-channel-provider.web3channelproviderinterface.enable.md) |  |
+|  [enable()](./iframe-channel-provider.web3channelproviderinterface.enable.md) | <b><i>(BETA)</i></b> Enable the wallet, causing it to run the Ethereum Enable workflow |

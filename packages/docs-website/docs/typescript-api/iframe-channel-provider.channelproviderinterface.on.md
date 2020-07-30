@@ -9,6 +9,11 @@ hide_title: true
 
 ## ChannelProviderInterface.on property
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks.
+
 <b>Signature:</b>
 
 ```typescript
