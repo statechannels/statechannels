@@ -13,7 +13,6 @@ import {
 import _ from 'lodash';
 import {Either, right} from 'fp-ts/lib/Either';
 import {Bytes32, ChannelResult} from '@statechannels/client-api-schema';
-import Objection from 'objection';
 
 import {Channel, SyncState, RequiredColumns} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -22,9 +21,7 @@ import {ChannelState} from '../protocols/state';
 import knex from '../db/connection';
 
 export const Store = {
-  transaction: <T>(callback: (transaction: Objection.Transaction) => Promise<T>): Promise<T> =>
-    knex.transaction(callback),
-  startTransaction: (): Promise<Objection.Transaction> => knex.transaction(),
+  transaction: knex.transaction,
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables
