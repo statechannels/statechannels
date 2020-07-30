@@ -2,4 +2,4 @@
 
 Core wallet code that can be used in a browser or server wallet.
 
-See docs.statechannels.org
+See https://docs.statechannels.org

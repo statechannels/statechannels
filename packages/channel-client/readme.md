@@ -2,7 +2,7 @@
 
 Javascript class exposing the statechannels wallet API. Used in conjunction with @statechannels/iframe-channel-provider.
 
-See docs.statechannels.org
+See https://docs.statechannels.org
 
 ### API report
 
