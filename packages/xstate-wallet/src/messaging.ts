@@ -71,7 +71,7 @@ export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification | ErrorResponse>;
   readonly requestFeed: Observable<AppRequestEvent>;
 
-  receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
+  receiveRequest(jsonRpcMessage: object, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: DomainBudget): Promise<void>;
   sendChannelNotification(
     method: (ChannelClosingNotification | ChannelUpdatedNotification)['method'],
@@ -169,8 +169,8 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
-  public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
-    const request = parseRequest(jsonRpcRequest);
+  public async receiveRequest(jsonRpcRequest: object, fromDomain: string) {
+    const request = parseRequest(jsonRpcRequest); // If this doesn't throw, we narrow the type to Request
     const {id: requestId} = request;
 
     switch (request.method) {
