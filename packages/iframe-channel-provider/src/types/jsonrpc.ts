@@ -101,6 +101,16 @@ export interface JsonRpcNotification<NotificationName = string, NotificationPara
 export type JsonRpcErrorResponse = ErrorResponse;
 
 /**
+ * Type guard for {@link JsonRpcRequest | JsonRpcRequest}
+ *
+ * @returns true if the message is a JSON-RPC request, false otherwise
+ * @beta
+ */
+export function isJsonRpcRequest<T>(message: any): message is JsonRpcRequest<T, any> {
+  return message.data && message.data.jsonrpc && message.data.jsonrpc === '2.0';
+}
+
+/**
  * Type guard for {@link JsonRpcNotification | JsonRpcNotification}
  *
  * @returns true if the message is a JSON-RPC notification, false otherwise
