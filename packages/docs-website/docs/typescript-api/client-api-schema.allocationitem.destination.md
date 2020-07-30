@@ -9,6 +9,8 @@ hide_title: true
 
 ## AllocationItem.destination property
 
+Address of EOA to receive channel proceeds.
+
 <b>Signature:</b>
 
 ```typescript

@@ -9,6 +9,8 @@ hide_title: true
 
 ## ErrorCodes type
 
+Error codes that might be returned by the wallet
+
 <b>Signature:</b>
 
 ```typescript

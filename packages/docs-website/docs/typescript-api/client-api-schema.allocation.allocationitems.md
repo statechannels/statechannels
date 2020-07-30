@@ -9,6 +9,8 @@ hide_title: true
 
 ## Allocation.allocationItems property
 
+Array of destination-amount pairings
+
 <b>Signature:</b>
 
 ```typescript

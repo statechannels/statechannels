@@ -9,6 +9,8 @@ hide_title: true
 
 ## Allocation.token property
 
+The token contract address
+
 <b>Signature:</b>
 
 ```typescript

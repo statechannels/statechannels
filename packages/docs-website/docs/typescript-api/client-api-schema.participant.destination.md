@@ -9,6 +9,8 @@ hide_title: true
 
 ## Participant.destination property
 
+Address of EOA to receive channel proceeds (the account that'll get the funds).
+
 <b>Signature:</b>
 
 ```typescript

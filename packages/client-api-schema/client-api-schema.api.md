@@ -7,23 +7,19 @@
 // @public
 export type Address = string;
 
-// @public (undocumented)
+// @public
 export interface Allocation {
-    // (undocumented)
     allocationItems: AllocationItem[];
-    // (undocumented)
     token: Address;
 }
 
-// @public (undocumented)
+// @public
 export interface AllocationItem {
-    // (undocumented)
     amount: Uint256;
-    // (undocumented)
     destination: Address;
 }
 
-// @public (undocumented)
+// @public
 export type Allocations = Allocation[];
 
 // @public (undocumented)
@@ -190,7 +186,7 @@ export type EnableEthereumResponse = JsonRpcResponse<{
     walletVersion: string;
 }>;
 
-// @public (undocumented)
+// @public
 export type ErrorCodes = {
     EnableEthereum: {
         EthereumNotEnabled: 100;
@@ -296,13 +292,10 @@ export type JoinChannelResponse = JsonRpcResponse<ChannelResult>;
 // @public (undocumented)
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 
-// @public (undocumented)
+// @public
 export interface Message {
-    // (undocumented)
     data: unknown;
-    // (undocumented)
     recipient: string;
-    // (undocumented)
     sender: string;
 }
 
@@ -325,13 +318,10 @@ export function parseRequest(jsonBlob: object): Request;
 // @public
 export function parseResponse(jsonBlob: object): Response;
 
-// @public (undocumented)
+// @public
 export interface Participant {
-    // (undocumented)
     destination: Address;
-    // (undocumented)
     participantId: string;
-    // (undocumented)
     signingAddress: Address;
 }
 

@@ -9,6 +9,8 @@ hide_title: true
 
 ## Message.recipient property
 
+Identifier of user that the message should be relayed to
+
 <b>Signature:</b>
 
 ```typescript

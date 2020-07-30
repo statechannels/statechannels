@@ -9,6 +9,8 @@ hide_title: true
 
 ## Message.sender property
 
+Identifier of user that the message is from
+
 <b>Signature:</b>
 
 ```typescript

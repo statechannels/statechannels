@@ -9,6 +9,8 @@ hide_title: true
 
 ## Participant.participantId property
 
+App allocated id, used for relaying messages to the participant
+
 <b>Signature:</b>
 
 ```typescript

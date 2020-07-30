@@ -9,6 +9,8 @@ hide_title: true
 
 ## Participant.signingAddress property
 
+Address used to sign channel updates
+
 <b>Signature:</b>
 
 ```typescript

@@ -9,6 +9,8 @@ hide_title: true
 
 ## AllocationItem.amount property
 
+How much funds will be transferred to the destination address.
+
 <b>Signature:</b>
 
 ```typescript

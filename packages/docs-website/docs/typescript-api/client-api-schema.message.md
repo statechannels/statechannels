@@ -9,16 +9,22 @@ hide_title: true
 
 ## Message interface
 
+Format of message sent from the wallet to the app
+
 <b>Signature:</b>
 
 ```typescript
 export interface Message 
 ```
 
+## Remarks
+
+The app relays it to another participant.
+
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./client-api-schema.message.data.md) | unknown |  |
-|  [recipient](./client-api-schema.message.recipient.md) | string |  |
-|  [sender](./client-api-schema.message.sender.md) | string |  |
+|  [data](./client-api-schema.message.data.md) | unknown | Message payload. Format defined by wallet and opaque to app. |
+|  [recipient](./client-api-schema.message.recipient.md) | string | Identifier of user that the message should be relayed to |
+|  [sender](./client-api-schema.message.sender.md) | string | Identifier of user that the message is from |

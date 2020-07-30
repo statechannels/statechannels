@@ -9,6 +9,8 @@ hide_title: true
 
 ## Message.data property
 
+Message payload. Format defined by wallet and opaque to app.
+
 <b>Signature:</b>
 
 ```typescript

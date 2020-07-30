@@ -9,6 +9,8 @@ hide_title: true
 
 ## Allocation interface
 
+Array of destination-amount pairings for a given token
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,5 +21,5 @@ export interface Allocation
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [allocationItems](./client-api-schema.allocation.allocationitems.md) | [AllocationItem](./client-api-schema.allocationitem.md)<!-- -->\[\] |  |
-|  [token](./client-api-schema.allocation.token.md) | [Address](./client-api-schema.address.md) |  |
+|  [allocationItems](./client-api-schema.allocation.allocationitems.md) | [AllocationItem](./client-api-schema.allocationitem.md)<!-- -->\[\] | Array of destination-amount pairings |
+|  [token](./client-api-schema.allocation.token.md) | [Address](./client-api-schema.address.md) | The token contract address |

@@ -9,6 +9,8 @@ hide_title: true
 
 ## Participant interface
 
+Container for data specific to a single state channel participant
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,6 +21,6 @@ export interface Participant
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [destination](./client-api-schema.participant.destination.md) | [Address](./client-api-schema.address.md) |  |
-|  [participantId](./client-api-schema.participant.participantid.md) | string |  |
-|  [signingAddress](./client-api-schema.participant.signingaddress.md) | [Address](./client-api-schema.address.md) |  |
+|  [destination](./client-api-schema.participant.destination.md) | [Address](./client-api-schema.address.md) | Address of EOA to receive channel proceeds (the account that'll get the funds). |
+|  [participantId](./client-api-schema.participant.participantid.md) | string | App allocated id, used for relaying messages to the participant |
+|  [signingAddress](./client-api-schema.participant.signingaddress.md) | [Address](./client-api-schema.address.md) | Address used to sign channel updates |

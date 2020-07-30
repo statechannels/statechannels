@@ -9,7 +9,7 @@ hide_title: true
 
 ## parseResponse() function
 
-Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type. \*
+Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type.
 
 <b>Signature:</b>
 

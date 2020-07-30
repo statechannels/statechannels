@@ -7,7 +7,7 @@
   },
   "kind": "Package",
   "canonicalReference": "@statechannels/client-api-schema!",
-  "docComment": "/**\n * Defines and validates the data types communicated between an app and a wallet\n *\n * @remarks\n *\n * Exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type\n *\n * @packageDocumentation\n */\n",
+  "docComment": "/**\n * Defines and validates the data types communicated between an app and a wallet\n *\n * @remarks\n *\n * Also exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type.\n *\n * Example request:\n * ```json\n * {\n *   \"jsonrpc\": \"2.0\",\n *   \"method\": \"PushMessage\",\n *   \"id\": 1,\n *   \"params\": {\n *     \"recipient\": \"user123\",\n *     \"sender\": \"user456\",\n *     \"data\": \"0x123..\"\n *   }\n * }\n * ```\n *\n * Example response:\n * ```json\n * {\n *   \"jsonrpc\": \"2.0\",\n *   \"id\": 1,\n *   \"result\": {\"success\": true}\n * }\n * ```\n *\n * @packageDocumentation\n */\n",
   "name": "@statechannels/client-api-schema",
   "members": [
     {
@@ -43,7 +43,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!Allocation:interface",
-          "docComment": "",
+          "docComment": "/**\n * Array of destination-amount pairings for a given token\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -56,7 +56,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Allocation#allocationItems:member",
-              "docComment": "",
+              "docComment": "/**\n * Array of destination-amount pairings\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -86,7 +86,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Allocation#token:member",
-              "docComment": "",
+              "docComment": "/**\n * The token contract address\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -115,7 +115,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!AllocationItem:interface",
-          "docComment": "",
+          "docComment": "/**\n * Assigns some amount of an unspecified asset to a destination\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -128,7 +128,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!AllocationItem#amount:member",
-              "docComment": "",
+              "docComment": "/**\n * How much funds will be transferred to the destination address.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -154,7 +154,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!AllocationItem#destination:member",
-              "docComment": "",
+              "docComment": "/**\n * Address of EOA to receive channel proceeds.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -183,7 +183,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!Allocations:type",
-          "docComment": "",
+          "docComment": "/**\n * Included for backwards compatibility\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1797,7 +1797,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!ErrorCodes:type",
-          "docComment": "",
+          "docComment": "/**\n * Error codes that might be returned by the wallet\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2745,7 +2745,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!Message:interface",
-          "docComment": "",
+          "docComment": "/**\n * Format of message sent from the wallet to the app\n *\n * @remarks\n *\n * The app relays it to another participant.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2758,7 +2758,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Message#data:member",
-              "docComment": "",
+              "docComment": "/**\n * Message payload. Format defined by wallet and opaque to app.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -2783,7 +2783,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Message#recipient:member",
-              "docComment": "",
+              "docComment": "/**\n * Identifier of user that the message should be relayed to\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -2808,7 +2808,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Message#sender:member",
-              "docComment": "",
+              "docComment": "/**\n * Identifier of user that the message is from\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3086,7 +3086,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!Participant:interface",
-          "docComment": "",
+          "docComment": "/**\n * Container for data specific to a single state channel participant\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3099,7 +3099,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Participant#destination:member",
-              "docComment": "",
+              "docComment": "/**\n * Address of EOA to receive channel proceeds (the account that'll get the funds).\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3125,7 +3125,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Participant#participantId:member",
-              "docComment": "",
+              "docComment": "/**\n * App allocated id, used for relaying messages to the participant\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3150,7 +3150,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!Participant#signingAddress:member",
-              "docComment": "",
+              "docComment": "/**\n * Address used to sign channel updates\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

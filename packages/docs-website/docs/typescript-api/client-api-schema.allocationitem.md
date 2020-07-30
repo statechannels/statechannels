@@ -9,6 +9,8 @@ hide_title: true
 
 ## AllocationItem interface
 
+Assigns some amount of an unspecified asset to a destination
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,5 +21,5 @@ export interface AllocationItem
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [amount](./client-api-schema.allocationitem.amount.md) | [Uint256](./client-api-schema.uint256.md) |  |
-|  [destination](./client-api-schema.allocationitem.destination.md) | [Address](./client-api-schema.address.md) |  |
+|  [amount](./client-api-schema.allocationitem.amount.md) | [Uint256](./client-api-schema.uint256.md) | How much funds will be transferred to the destination address. |
+|  [destination](./client-api-schema.allocationitem.destination.md) | [Address](./client-api-schema.address.md) | Address of EOA to receive channel proceeds. |

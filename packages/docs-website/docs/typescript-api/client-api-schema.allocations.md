@@ -9,6 +9,8 @@ hide_title: true
 
 ## Allocations type
 
+Included for backwards compatibility
+
 <b>Signature:</b>
 
 ```typescript

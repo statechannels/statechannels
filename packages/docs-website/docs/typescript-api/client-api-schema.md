@@ -13,7 +13,33 @@ Defines and validates the data types communicated between an app and a wallet
 
 ## Remarks
 
-Exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type
+Also exposes functions that can validate Responses and Requests, as well as to cast them as the correct Type.
+
+Example request:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "PushMessage",
+  "id": 1,
+  "params": {
+    "recipient": "user123",
+    "sender": "user456",
+    "data": "0x123.."
+  }
+}
+
+```
+Example response:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {"success": true}
+}
+
+```
 
 ## Functions
 
@@ -23,23 +49,23 @@ Exposes functions that can validate Responses and Requests, as well as to cast t
 |  [isNotification(message)](./client-api-schema.isnotification.md) |  |
 |  [isRequest(message)](./client-api-schema.isrequest.md) |  |
 |  [isResponse(message)](./client-api-schema.isresponse.md) |  |
-|  [parseRequest(jsonBlob)](./client-api-schema.parserequest.md) | Validates a request against the API schema &amp; returns the input cast to the correctly narrowed type. \* |
-|  [parseResponse(jsonBlob)](./client-api-schema.parseresponse.md) | Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type. \* |
+|  [parseRequest(jsonBlob)](./client-api-schema.parserequest.md) | Validates a request against the API schema &amp; returns the input cast to the correctly narrowed type. |
+|  [parseResponse(jsonBlob)](./client-api-schema.parseresponse.md) | Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type. |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [Allocation](./client-api-schema.allocation.md) |  |
-|  [AllocationItem](./client-api-schema.allocationitem.md) |  |
+|  [Allocation](./client-api-schema.allocation.md) | Array of destination-amount pairings for a given token |
+|  [AllocationItem](./client-api-schema.allocationitem.md) | Assigns some amount of an unspecified asset to a destination |
 |  [ApproveBudgetAndFundParams](./client-api-schema.approvebudgetandfundparams.md) |  |
 |  [ChannelBudget](./client-api-schema.channelbudget.md) |  |
 |  [ChannelResult](./client-api-schema.channelresult.md) |  |
 |  [CreateChannelParams](./client-api-schema.createchannelparams.md) |  |
 |  [DomainBudget](./client-api-schema.domainbudget.md) |  |
 |  [Funds](./client-api-schema.funds.md) |  |
-|  [Message](./client-api-schema.message.md) |  |
-|  [Participant](./client-api-schema.participant.md) |  |
+|  [Message](./client-api-schema.message.md) | Format of message sent from the wallet to the app |
+|  [Participant](./client-api-schema.participant.md) | Container for data specific to a single state channel participant |
 |  [TokenBudget](./client-api-schema.tokenbudget.md) |  |
 |  [UpdateChannelParams](./client-api-schema.updatechannelparams.md) |  |
 
@@ -48,7 +74,7 @@ Exposes functions that can validate Responses and Requests, as well as to cast t
 |  Type Alias | Description |
 |  --- | --- |
 |  [Address](./client-api-schema.address.md) | Ethereum Address  ^0x(\[a-fA-F0-9\]<!-- -->{<!-- -->40<!-- -->}<!-- -->)&#124;0$ |
-|  [Allocations](./client-api-schema.allocations.md) |  |
+|  [Allocations](./client-api-schema.allocations.md) | Included for backwards compatibility |
 |  [ApproveBudgetAndFundRequest](./client-api-schema.approvebudgetandfundrequest.md) |  |
 |  [ApproveBudgetAndFundResponse](./client-api-schema.approvebudgetandfundresponse.md) |  |
 |  [BudgetUpdatedNotification](./client-api-schema.budgetupdatednotification.md) |  |
@@ -74,7 +100,7 @@ Exposes functions that can validate Responses and Requests, as well as to cast t
 |  [EnableEthereumError](./client-api-schema.enableethereumerror.md) |  |
 |  [EnableEthereumRequest](./client-api-schema.enableethereumrequest.md) |  |
 |  [EnableEthereumResponse](./client-api-schema.enableethereumresponse.md) |  |
-|  [ErrorCodes](./client-api-schema.errorcodes.md) |  |
+|  [ErrorCodes](./client-api-schema.errorcodes.md) | Error codes that might be returned by the wallet |
 |  [ErrorResponse](./client-api-schema.errorresponse.md) |  |
 |  [ExternalDestination](./client-api-schema.externaldestination.md) | Nitro ChannelId  ^0x(0<!-- -->{<!-- -->24<!-- -->}<!-- -->)(\[a-fA-F0-9\]<!-- -->{<!-- -->40<!-- -->}<!-- -->)$ |
 |  [FundingStrategy](./client-api-schema.fundingstrategy.md) |  |

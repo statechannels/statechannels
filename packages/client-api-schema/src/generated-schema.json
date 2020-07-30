@@ -8,15 +8,18 @@
     },
     "Allocation": {
       "additionalProperties": false,
+      "description": "Array of destination-amount pairings for a given token",
       "properties": {
         "allocationItems": {
+          "description": "Array of destination-amount pairings",
           "items": {
             "$ref": "#/definitions/AllocationItem"
           },
           "type": "array"
         },
         "token": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "The token contract address"
         }
       },
       "required": [
@@ -27,12 +30,15 @@
     },
     "AllocationItem": {
       "additionalProperties": false,
+      "description": "Assigns some amount of an unspecified asset to a destination",
       "properties": {
         "amount": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint256",
+          "description": "How much funds will be transferred to the destination address."
         },
         "destination": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address of EOA to receive channel proceeds."
         }
       },
       "required": [
@@ -290,7 +296,7 @@
       "type": "object"
     },
     "EnableEthereumError": {
-      "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
+      "$ref": "#/definitions/JsonRpcError%3C1001732226171%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
       "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-223-226-721393493-190-227-721393493-153-228-721393493-0-502%3E"
@@ -347,7 +353,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-1851-2096-src%2Fdata-types.ts-0-2354%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2132-2377-src%2Fdata-types.ts-0-2794%5B%5D%3E"
     },
     "GetStateParams": {
       "additionalProperties": false,
@@ -391,13 +397,14 @@
     "JoinChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
-    "JsonRpcError<100,\"Ethereum Not Enabled\">": {
+    "JsonRpcError<1001732226171,\"Ethereum Not Enabled\">": {
       "additionalProperties": false,
       "properties": {
         "error": {
           "additionalProperties": false,
           "properties": {
             "code": {
+              "description": "The wallet approval was rejected by the Web3 provider.",
               "enum": [
                 100
               ],
@@ -1529,7 +1536,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-1851-2096-src/data-types.ts-0-2354[]>": {
+    "JsonRpcResponse<def-interface-src/data-types.ts-2132-2377-src/data-types.ts-0-2794[]>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1668,13 +1675,17 @@
     },
     "Message": {
       "additionalProperties": false,
+      "description": "Format of message sent from the wallet to the app",
       "properties": {
         "data": {
+          "description": "Message payload. Format defined by wallet and opaque to app."
         },
         "recipient": {
+          "description": "Identifier of user that the message should be relayed to",
           "type": "string"
         },
         "sender": {
+          "description": "Identifier of user that the message is from",
           "type": "string"
         }
       },
@@ -1712,15 +1723,19 @@
     },
     "Participant": {
       "additionalProperties": false,
+      "description": "Container for data specific to a single state channel participant",
       "properties": {
         "destination": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address of EOA to receive channel proceeds (the account that'll get the funds)."
         },
         "participantId": {
+          "description": "App allocated id, used for relaying messages to the participant",
           "type": "string"
         },
         "signingAddress": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address used to sign channel updates"
         }
       },
       "required": [
