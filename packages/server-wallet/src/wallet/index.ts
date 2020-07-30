@@ -30,7 +30,7 @@ import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 
-import {Store} from './store';
+import {Store, StoreError} from './store';
 
 export {CreateChannelParams};
 
@@ -39,7 +39,7 @@ export type AddressedMessage = Message & {to: string; from: string};
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-type Result = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+type Result = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]; error?: string}>;
 export type WalletInterface = {
   // App channel management
   createChannel(args: CreateChannelParams): Result;
@@ -78,11 +78,15 @@ export class Wallet implements WalletInterface {
 
       const {channelId} = await Channel.query(tx).insert(cols);
 
-      const {outgoing, channelResult} = await Store.signState(
+      const signStateResult = await Store.signState(
         channelId,
         {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
         tx
       );
+
+      if (Either.isLeft(signStateResult))
+        return {outbox: [], channelResults: [], error: 'createChannel error'};
+      const {outgoing, channelResult} = signStateResult.right;
 
       return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
     });
@@ -90,7 +94,9 @@ export class Wallet implements WalletInterface {
 
   async joinChannel({channelId}: JoinChannelParams): Result {
     const {outbox} = await knex.transaction(
-      async (tx): Promise<{outbox: any}> => {
+      async (
+        tx
+      ): Promise<{outbox: Either.Either<StoreError | JoinChannel.JoinChannelError, any>}> => {
         const channel = await Store.getChannel(channelId, tx);
 
         if (!channel)
@@ -98,16 +104,24 @@ export class Wallet implements WalletInterface {
             channelId,
           });
 
-        const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-        const {outgoing} = await Store.signState(channelId, nextState, tx);
+        const nextStateResult = JoinChannel.joinChannel({channelId}, channel);
+        if (Either.isLeft(nextStateResult)) return {outbox: nextStateResult};
+        const nextState = nextStateResult.right;
 
-        return {outbox: outgoing.map(n => n.notice)};
+        const signStateResult = await Store.signState(channelId, nextState, tx);
+
+        if (Either.isLeft(signStateResult)) return {outbox: signStateResult};
+        const {outgoing} = signStateResult.right;
+
+        return {outbox: Either.right(outgoing.map(n => n.notice))};
       }
     );
 
     const {channelResults, outbox: nextOutbox} = await takeActions([channelId]);
 
-    return {outbox: outbox.concat(nextOutbox), channelResults};
+    if (Either.isLeft(outbox)) return {outbox: [], channelResults: [], error: 'joinChannel error'};
+
+    return {outbox: outbox.right.concat(nextOutbox), channelResults};
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): Result {
@@ -127,7 +141,11 @@ export class Wallet implements WalletInterface {
       const nextState = getOrThrow(
         UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
       );
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      const signStateResult = await Store.signState(channelId, nextState, tx);
+
+      if (Either.isLeft(signStateResult))
+        return {outbox: [], channelResults: [], error: 'updateChannel error'};
+      const {outgoing, channelResult} = signStateResult.right;
 
       return {outbox: outgoing.map(n => n.notice), channelResults: [channelResult]};
     });
@@ -194,7 +212,12 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
         switch (action.type) {
           case 'SignState': {
             const signStateResult = await Store.signState(action.channelId, action, tx);
-            if (Either.isLeft(signStateResult)) throw signStateResult;
+            if (Either.isLeft(signStateResult))
+              return {
+                outbox: [],
+                channelResults: [],
+                error: 'doAction error',
+              };
             const {outgoing, channelResult} = signStateResult.right;
 
             outgoing.map(n => outbox.push(n.notice));

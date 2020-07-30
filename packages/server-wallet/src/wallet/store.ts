@@ -58,7 +58,7 @@ export const Store = {
 
     const {channelResult} = channel;
 
-    return {outgoing, channelResult};
+    return right({outgoing, channelResult});
   },
   getChannel: async function(
     channelId: Bytes32,
@@ -116,7 +116,7 @@ export const Store = {
   },
 };
 
-class StoreError extends Error {
+export class StoreError extends Error {
   readonly type = 'InvariantError';
   constructor(reason: StoreErrors, public readonly data: any = undefined) {
     super(reason);

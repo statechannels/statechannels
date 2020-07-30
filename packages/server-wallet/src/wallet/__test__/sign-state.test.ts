@@ -31,7 +31,7 @@ describe('signState', () => {
     expect(c.latestSignedByMe).toBeUndefined();
 
     const result = await Store.signState(c.channelId, c.vars[0], tx);
-    expect(result).toMatchObject({
+    expect(result).toEqualRight({
       outgoing: [
         {
           type: 'NotifyApp',
