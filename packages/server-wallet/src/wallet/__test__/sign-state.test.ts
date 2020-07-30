@@ -1,4 +1,6 @@
 import Objection from 'objection';
+import matchers from '@pacote/jest-either';
+import {right} from 'fp-ts/lib/Either';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -8,6 +10,8 @@ import {Channel} from '../../models/channel';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob} from './fixtures/signing-wallets';
+
+expect.extend(matchers);
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
@@ -31,23 +35,25 @@ describe('signState', () => {
     expect(c.latestSignedByMe).toBeUndefined();
 
     const result = await Store.signState(c.channelId, c.vars[0], tx);
-    expect(result).toEqualRight({
-      outgoing: [
-        {
-          type: 'NotifyApp',
-          notice: {
-            method: 'MessageQueued',
-            params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+    expect(result).toMatchObject(
+      right({
+        outgoing: [
+          {
+            type: 'NotifyApp',
+            notice: {
+              method: 'MessageQueued',
+              params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+            },
           },
-        },
-      ],
-      channelResult: {turnNum: c.vars[0].turnNum},
-    });
+        ],
+        channelResult: {turnNum: c.vars[0].turnNum},
+      })
+    );
   });
 
   it('uses a transaction', async () => {
     const updatedC = await Store.signState(c.channelId, c.vars[0], tx);
-    expect(updatedC).toBeDefined();
+    expect(updatedC).toBeRight();
 
     // Fetch the current channel outside the transaction context
     const currentC = await Channel.forId(c.channelId, undefined);
