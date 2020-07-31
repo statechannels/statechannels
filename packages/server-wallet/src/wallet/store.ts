@@ -1,4 +1,4 @@
-import Objection from 'objection';
+import {Transaction} from 'objection';
 import {
   SignedState,
   Objective,
@@ -20,12 +20,23 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
+import knex from '../db/connection';
 
 export const Store = {
+  lockApp: async function<T>(channelId: Bytes32, cb: (tx: Transaction) => Promise<T>): Promise<T> {
+    return knex.transaction(async tx => {
+      await Channel.query(tx)
+        .where({channelId})
+        .forUpdate();
+
+      return cb(tx);
+    });
+  },
+
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
-    tx: Objection.Transaction
+    tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     let channel = await Channel.forId(channelId, tx);
 
@@ -36,9 +47,7 @@ export const Store = {
     const signatureEntry = channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
-    await this.addSignedState(signedState, tx);
-
-    channel = await Channel.forId(channelId, tx);
+    channel = await this.addSignedState(signedState, tx);
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -58,12 +67,12 @@ export const Store = {
   },
   getChannel: async function(
     channelId: Bytes32,
-    tx: Objection.Transaction | undefined
+    tx: Transaction | undefined
   ): Promise<ChannelState | undefined> {
     return (await Channel.forId(channelId, tx))?.protocolState;
   },
 
-  pushMessage: async function(message: Message, tx: Objection.Transaction): Promise<Bytes32[]> {
+  pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
       await this.addSignedState(ss, tx);
     }
@@ -80,15 +89,12 @@ export const Store = {
 
   addObjective: async function(
     _objective: Objective,
-    _tx: Objection.Transaction
+    _tx: Transaction
   ): Promise<Either<StoreError, undefined>> {
     // TODO: Implement this
     return Promise.resolve(right(undefined));
   },
-  addSignedState: async function(
-    signedState: SignedState,
-    tx: Objection.Transaction
-  ): Promise<number> {
+  addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
     validateSignatures(signedState);
 
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
@@ -103,7 +109,10 @@ export const Store = {
     validateInvariants(channelVars, channel.myAddress);
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    return await Channel.query(tx).update(cols);
+    return await Channel.query(tx)
+      .update(cols)
+      .returning('*')
+      .first();
   },
 };
 
@@ -126,7 +135,7 @@ class StoreError extends WalletError {
 async function getOrCreateChannel(
   constants: ChannelConstants,
   signingAddress: string,
-  tx: Objection.Transaction
+  tx: Transaction
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
   let channel = await Channel.query(tx)
@@ -140,10 +149,7 @@ async function getOrCreateChannel(
   }
   return channel;
 }
-async function getSigningWallet(
-  signedState: SignedState,
-  tx: Objection.Transaction
-): Promise<SigningWallet> {
+async function getSigningWallet(signedState: SignedState, tx: Transaction): Promise<SigningWallet> {
   const addresses = signedState.participants.map(p => p.signingAddress);
   const signingWallet = await SigningWallet.query(tx)
     .whereIn('address', addresses)
@@ -170,11 +176,7 @@ function validateSignatures(signedState: SignedState): void {
 }
 
 function validateStateFreshness(signedState: State, channel: Channel): void {
-  if (
-    channel.isSupportedByMe &&
-    channel.latestSignedByMe &&
-    channel.latestSignedByMe.turnNum >= signedState.turnNum
-  ) {
+  if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {
     throw new StoreError(StoreError.reasons.staleState);
   }
 }
