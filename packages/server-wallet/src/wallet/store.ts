@@ -36,9 +36,7 @@ export const Store = {
     const signatureEntry = channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
-    await this.addSignedState(signedState, tx);
-
-    channel = await Channel.forId(channelId, tx);
+    channel = await this.addSignedState(signedState, tx);
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -88,7 +86,7 @@ export const Store = {
   addSignedState: async function(
     signedState: SignedState,
     tx: Objection.Transaction
-  ): Promise<number> {
+  ): Promise<Channel> {
     validateSignatures(signedState);
 
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
@@ -103,7 +101,10 @@ export const Store = {
     validateInvariants(channelVars, channel.myAddress);
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    return await Channel.query(tx).update(cols);
+    return await Channel.query(tx)
+      .update(cols)
+      .returning('*')
+      .first();
   },
 };
 
