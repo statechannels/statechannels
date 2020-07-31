@@ -40,9 +40,7 @@ async function seedTestChannels(
   return channelIds;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 (async function(): Promise<void> {
-  // configureEnvVariables();
   const pongServer = startPongServer();
   await waitForServerToStart(pongServer);
 
@@ -74,4 +72,5 @@ async function seedTestChannels(
   await Promise.all(pingPromises);
   console.timeEnd('one ping one pong 100 channels');
   await killServer(pongServer);
+  process.exit(0);
 })();
