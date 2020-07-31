@@ -30,7 +30,7 @@ import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 
-import {Store} from './store';
+import {Store, AppHandler, MissingAppHandler} from './store';
 
 export {CreateChannelParams};
 
@@ -91,22 +91,23 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
+    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
+      const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      return {outbox: outgoing.map(n => n.notice), channelResult};
+    };
+
+    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+      throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.channelNotFound, {
+        channelId,
+      });
+    };
+
     const {outbox, channelResult} = await Store.lockApp(
       channelId,
-      async (tx, channel): Promise<{outbox: any; channelResult: ChannelResult}> => {
-        if (!channel)
-          throw new JoinChannel.JoinChannelError(
-            JoinChannel.JoinChannelError.reasons.channelNotFound,
-            {channelId}
-          );
-
-        const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-        const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
-
-        return {outbox: outgoing.map(n => n.notice), channelResult};
-      }
+      criticalCode,
+      handleMissingChannel
     );
-
     const {outbox: nextOutbox, channelResults} = await takeActions([channelId]);
     const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
@@ -114,13 +115,13 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
-    return Store.lockApp(channelId, async (tx, channel) => {
-      if (!channel)
-        throw new UpdateChannel.UpdateChannelError(
-          UpdateChannel.UpdateChannelError.reasons.channelNotFound,
-          {channelId}
-        );
-
+    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+      throw new UpdateChannel.UpdateChannelError(
+        UpdateChannel.UpdateChannelError.reasons.channelNotFound,
+        {channelId}
+      );
+    };
+    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const outcome = deserializeAllocations(allocations);
 
       const nextState = getOrThrow(
@@ -129,7 +130,9 @@ export class Wallet implements WalletInterface {
       const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
-    });
+    };
+
+    return Store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
   async closeChannel(_args: CloseChannelParams): SingleChannelResult {
