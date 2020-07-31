@@ -110,16 +110,10 @@ export class IFrameService {
   }
 
   async getTarget(): Promise<Window> {
-    /* The below Promise shouldn't be an async executor according to this: 
-       https://eslint.org/docs/rules/no-async-promise-executor */
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async resolve => {
-      if (!this.iframe) {
-        await this.mount();
-      }
-
-      const iframe = this.iframe as HTMLIFrameElement;
-      resolve(iframe.contentWindow as Window);
-    });
+    if (!this.iframe) {
+      await this.mount();
+    }
+    const iframe = this.iframe as HTMLIFrameElement;
+    return iframe.contentWindow as Window;
   }
 }
