@@ -2,7 +2,7 @@ import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {StateVariables} from '@statechannels/wallet-core';
 
-import {Channel} from '../../models/channel';
+import {Channel, ChannelError} from '../../models/channel';
 import {withSupportedState} from '../../models/__test__/fixtures/channel';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -96,4 +96,17 @@ describe('concurrency', () => {
       latest: {turnNum: 6},
     });
   });
+});
+
+describe('Missing channels', () => {
+  it('throws a ChannelError by default', () =>
+    expect(Store.lockApp('foo', _.noop)).rejects.toThrow(
+      new ChannelError(ChannelError.reasons.channelMissing, {channelId: 'foo'})
+    ));
+
+  it('calls the onChannelMissing handler when given', () =>
+    expect(Store.lockApp('foo', _.noop, _.noop)).resolves.not.toThrow());
+
+  it('calls the onChannelMissing handler with the channel Id when given', () =>
+    expect(Store.lockApp('foo', _.noop, _.identity)).resolves.toEqual('foo'));
 });

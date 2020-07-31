@@ -15,12 +15,19 @@ import _ from 'lodash';
 import {Either, right} from 'fp-ts/lib/Either';
 import {Bytes32, ChannelResult} from '@statechannels/client-api-schema';
 
-import {Channel, SyncState, RequiredColumns} from '../models/channel';
+import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
+
+export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
+export type MissingAppHandler<T> = (channelId: string) => T;
+
+const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
+  throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
+};
 
 export const Store = {
   /**
@@ -34,7 +41,8 @@ export const Store = {
    */
   lockApp: async function<T>(
     channelId: Bytes32,
-    cb: (tx: Transaction, channel: ChannelState | undefined) => Promise<T>
+    criticalCode: AppHandler<T>,
+    onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
     return knex.transaction(async tx => {
       const channel = await Channel.query(tx)
@@ -42,7 +50,8 @@ export const Store = {
         .forUpdate()
         .first();
 
-      return cb(tx, channel?.protocolState);
+      if (!channel) return onChannelMissing(channelId);
+      return criticalCode(tx, channel.protocolState);
     });
   },
 
