@@ -20,8 +20,22 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
+import knex from '../db/connection';
 
 export const Store = {
+  lockApp: async function<T>(
+    channelId: Bytes32,
+    cb: (tx: Objection.Transaction) => Promise<T>
+  ): Promise<T> {
+    return knex.transaction(async tx => {
+      await Channel.query(tx)
+        .where({channelId})
+        .forUpdate();
+
+      return cb(tx);
+    });
+  },
+
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
@@ -171,11 +185,7 @@ function validateSignatures(signedState: SignedState): void {
 }
 
 function validateStateFreshness(signedState: State, channel: Channel): void {
-  if (
-    channel.isSupportedByMe &&
-    channel.latestSignedByMe &&
-    channel.latestSignedByMe.turnNum >= signedState.turnNum
-  ) {
+  if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {
     throw new StoreError(StoreError.reasons.staleState);
   }
 }
