@@ -101,10 +101,11 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     }
     this.iframe.setUrl(this.url);
     this.messaging.setUrl(this.url);
+    const walletReady = this.walletReady;
     await this.iframe.mount();
     logger.info('Application successfully mounted Wallet iFrame inside DOM.');
     logger.info('Waiting for wallet ping...');
-    await this.walletReady;
+    await walletReady;
     logger.info('Wallet ready to receive requests');
     const {signingAddress, destinationAddress, walletVersion} = await this.send(
       'GetWalletInformation',
@@ -123,6 +124,12 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    * @returns Promise which resolves when the wallet has completed the Enable Ethereum workflow.
    */
   async enable() {
+    if (!this.mounted) {
+      throw new Error(
+        'ChannelProvider: You must call .mountWalletComponent() before calling .enable()'
+      );
+    }
+
     const {signingAddress, destinationAddress, walletVersion} = await this.send(
       'EnableEthereum',
       {}
