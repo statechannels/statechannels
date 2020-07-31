@@ -3,6 +3,7 @@ import {SignatureEntry, State, signState} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
+import {Values} from '../errors';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -27,7 +28,7 @@ export class SigningWallet extends Model {
 
     const w = new ethers.Wallet(json.privateKey);
     if (w.address !== json.address) {
-      throw new SigningWalletError('Invalid address', {
+      throw new SigningWalletError(SigningWalletError.reasons.invalidAddress, {
         given: json.address,
         correct: w.address,
       });
@@ -46,8 +47,12 @@ export class SigningWallet extends Model {
 
 class SigningWalletError extends Error {
   readonly type = 'SigningWalletError';
+  static readonly reasons = {invalidAddress: 'Invalid address'} as const;
 
-  constructor(reason: string, public readonly data: any = undefined) {
+  constructor(
+    reason: Values<typeof SigningWalletError.reasons>,
+    public readonly data: any = undefined
+  ) {
     super(reason);
   }
 }

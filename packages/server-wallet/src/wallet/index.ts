@@ -96,9 +96,12 @@ export class Wallet implements WalletInterface {
         const channel = await Store.getChannel(channelId, tx);
 
         if (!channel)
-          throw new JoinChannel.JoinChannelError(JoinChannel.Errors.channelNotFound, {
-            channelId,
-          });
+          throw new JoinChannel.JoinChannelError(
+            JoinChannel.JoinChannelError.reasons.channelNotFound,
+            {
+              channelId,
+            }
+          );
 
         const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
         const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);

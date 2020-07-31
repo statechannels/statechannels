@@ -5,6 +5,7 @@ import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
+import {WalletError, Values} from '../errors';
 
 type HandlerResult = Either<JoinChannelError, SignState>;
 type StepResult = Either<JoinChannelError, ChannelState>;
@@ -12,15 +13,19 @@ export interface JoinChannelHandlerParams {
   channelId: ChannelId;
 }
 
-export enum Errors {
-  channelNotFound = 'channel not found',
-  invalidTurnNum = 'latest state must be turn 0',
-  alreadySignedByMe = 'already signed prefund setup',
-}
+export class JoinChannelError extends WalletError {
+  readonly type = WalletError.errors.JoinChannelError;
 
-export class JoinChannelError extends Error {
-  readonly type = 'JoinChannelError';
-  constructor(reason: Errors, public readonly data: any = undefined) {
+  static readonly reasons = {
+    channelNotFound: 'channel not found',
+    invalidTurnNum: 'latest state must be turn 0',
+    alreadySignedByMe: 'already signed prefund setup',
+  } as const;
+
+  constructor(
+    reason: Values<typeof JoinChannelError.reasons>,
+    public readonly data: any = undefined
+  ) {
     super(reason);
   }
 }
@@ -29,11 +34,13 @@ export class JoinChannelError extends Error {
 const hasStateSignedByMe = (cs: ChannelState): boolean => !!cs.latestSignedByMe;
 
 const ensureNotSignedByMe = (cs: ChannelState): StepResult =>
-  hasStateSignedByMe(cs) ? left(new JoinChannelError(Errors.alreadySignedByMe)) : right(cs);
+  hasStateSignedByMe(cs)
+    ? left(new JoinChannelError(JoinChannelError.reasons.alreadySignedByMe))
+    : right(cs);
 
 function ensureLatestStateIsPrefundSetup(cs: ChannelState): StepResult {
   if (cs.latest.turnNum === 0) return right(cs);
-  return left(new JoinChannelError(Errors.invalidTurnNum));
+  return left(new JoinChannelError(JoinChannelError.reasons.invalidTurnNum));
 }
 
 function latest(cs: ChannelState): StateVariables {

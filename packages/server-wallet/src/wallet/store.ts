@@ -19,6 +19,7 @@ import {Channel, SyncState, RequiredColumns} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
+import {WalletError, Values} from '../errors';
 
 export const Store = {
   signState: async function(
@@ -106,20 +107,20 @@ export const Store = {
   },
 };
 
-class StoreError extends Error {
-  readonly type = 'InvariantError';
-  constructor(reason: StoreErrors, public readonly data: any = undefined) {
+class StoreError extends WalletError {
+  readonly type = WalletError.errors.InvariantError;
+
+  static readonly reasons = {
+    duplicateTurnNums: 'multiple states with same turn number',
+    notSorted: 'states not sorted',
+    multipleSignedStates: 'Store signed multiple states for a single turn',
+    invalidSignature: 'Invalid signature',
+    notInChannel: 'Not in channel',
+    staleState: 'Stale state',
+  } as const;
+  constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
   }
-}
-
-enum StoreErrors {
-  duplicateTurnNums = 'multiple states with same turn number',
-  notSorted = 'states not sorted',
-  multipleSignedStates = 'Store signed multiple states for a single turn',
-  invalidSignature = 'Invalid signature',
-  notInChannel = 'Not in channel',
-  staleState = 'Stale state',
 }
 
 async function getOrCreateChannel(
@@ -149,7 +150,7 @@ async function getSigningWallet(
     .first();
 
   if (!signingWallet) {
-    throw new StoreError(StoreErrors.notInChannel);
+    throw new StoreError(StoreError.reasons.notInChannel);
   }
   return signingWallet;
 }
@@ -163,7 +164,7 @@ function validateSignatures(signedState: SignedState): void {
   signedState.signatures.map(sig => {
     const signerIndex = participants.findIndex(p => p.signingAddress === sig.signer);
     if (signerIndex === -1) {
-      throw new StoreError(StoreErrors.invalidSignature, {signedState, signature: sig});
+      throw new StoreError(StoreError.reasons.invalidSignature, {signedState, signature: sig});
     }
   });
 }
@@ -174,7 +175,7 @@ function validateStateFreshness(signedState: State, channel: Channel): void {
     channel.latestSignedByMe &&
     channel.latestSignedByMe.turnNum >= signedState.turnNum
   ) {
-    throw new StoreError(StoreErrors.staleState);
+    throw new StoreError(StoreError.reasons.staleState);
   }
 }
 
@@ -184,17 +185,17 @@ function validateInvariants(stateVars: SignedStateVarsWithHash[], myAddress: str
   const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
 
   if (multipleSignedByMe) {
-    throw new StoreError(StoreErrors.multipleSignedStates);
+    throw new StoreError(StoreError.reasons.multipleSignedStates);
   }
 
   const turnNums = _.map(stateVars, s => s.turnNum);
 
   const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
   if (duplicateTurnNums) {
-    throw new StoreError(StoreErrors.duplicateTurnNums);
+    throw new StoreError(StoreError.reasons.duplicateTurnNums);
   }
   if (!isReverseSorted(turnNums)) {
-    throw new StoreError(StoreErrors.notSorted);
+    throw new StoreError(StoreError.reasons.notSorted);
   }
 }
 
