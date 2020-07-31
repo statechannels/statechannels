@@ -20,7 +20,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Address, Bytes32, Uint48, Uint256, Bytes} from '../type-aliases';
 import {ChannelState} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
-import {WalletError, Values} from '../errors';
+import {WalletError, Values} from '../errors/wallet-error';
 
 import {SigningWallet} from './signing-wallet';
 

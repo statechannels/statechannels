@@ -3,7 +3,7 @@ import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
 import knex from '../db/connection';
-import {WalletError, Values} from '../errors';
+import {WalletError, Values} from '../errors/wallet-error';
 
 export class Nonce extends Model {
   readonly id!: number;
