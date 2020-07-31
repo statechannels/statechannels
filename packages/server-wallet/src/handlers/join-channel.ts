@@ -5,7 +5,7 @@ import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
-import {WalletError, Values} from '../errors';
+import {WalletError, Values} from '../errors/wallet-error';
 
 type HandlerResult = Either<JoinChannelError, SignState>;
 type StepResult = Either<JoinChannelError, ChannelState>;

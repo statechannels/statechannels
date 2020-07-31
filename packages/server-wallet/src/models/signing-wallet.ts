@@ -3,7 +3,7 @@ import {SignatureEntry, State, signState} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
-import {Values} from '../errors';
+import {Values} from '../errors/wallet-error';
 
 export class SigningWallet extends Model {
   readonly id!: number;

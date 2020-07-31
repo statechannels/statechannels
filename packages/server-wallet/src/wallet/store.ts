@@ -19,7 +19,7 @@ import {Channel, SyncState, RequiredColumns} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
-import {WalletError, Values} from '../errors';
+import {WalletError, Values} from '../errors/wallet-error';
 
 export const Store = {
   signState: async function(
