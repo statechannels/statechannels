@@ -132,6 +132,7 @@ export const Store = {
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
     return await Channel.query(tx)
+      .where({channelId: channel.channelId})
       .update(cols)
       .returning('*')
       .first();
