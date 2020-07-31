@@ -111,8 +111,9 @@ describe('concurrency', () => {
       const t2 = Date.now();
 
       // Roughly asserts that the `signState` calls are interwoven
-      // Each `lockApp` call takes ~200ms
-      expect((t2 - t1) / numAttempts).toBeLessThan(250);
+      // Each `lockApp` call takes ~300 on circle:
+      // https://app.circleci.com/pipelines/github/statechannels/statechannels/8354/workflows/885fce85-38f9-4d00-8696-529a86486b1f/jobs/39301
+      expect((t2 - t1) / numAttempts).toBeLessThan(600);
 
       expect([numResolved, numRejected, numSettled]).toMatchObject([numAttempts, 0, numAttempts]);
 
