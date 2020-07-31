@@ -166,6 +166,7 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - run: yarn --frozen-lockfile
+      - run: git diff --exit-code
       - <<: *save_dep
 
       - persist_to_workspace:
@@ -349,7 +350,7 @@ workflows:
       - test:
           requires:
             - prepare
-      
+
       - server-wallet-e2e-test:
           requires:
             - prepare
