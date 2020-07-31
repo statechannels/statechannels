@@ -71,6 +71,10 @@ Example response:
 |  [GetChannelsParams](./client-api-schema.getchannelsparams.md) |  |
 |  [GetStateParams](./client-api-schema.getstateparams.md) |  |
 |  [JoinChannelParams](./client-api-schema.joinchannelparams.md) |  |
+|  [JsonRpcError](./client-api-schema.jsonrpcerror.md) |  |
+|  [JsonRpcNotification](./client-api-schema.jsonrpcnotification.md) |  |
+|  [JsonRpcRequest](./client-api-schema.jsonrpcrequest.md) |  |
+|  [JsonRpcResponse](./client-api-schema.jsonrpcresponse.md) |  |
 |  [Message](./client-api-schema.message.md) | Format of message sent from the wallet to the app |
 |  [Participant](./client-api-schema.participant.md) | Container for data specific to a single state channel participant |
 |  [TokenBudget](./client-api-schema.tokenbudget.md) |  |
@@ -88,8 +92,10 @@ Example response:
 |  [Bytes32](./client-api-schema.bytes32.md) | Bytes32  ^0x(\[a-fA-F0-9\]<!-- -->{<!-- -->64<!-- -->}<!-- -->)$ |
 |  [ChallengeChannelRequest](./client-api-schema.challengechannelrequest.md) |  |
 |  [ChallengeChannelResponse](./client-api-schema.challengechannelresponse.md) |  |
+|  [ChannelClosed](./client-api-schema.channelclosed.md) |  |
 |  [ChannelClosingNotification](./client-api-schema.channelclosingnotification.md) |  |
 |  [ChannelId](./client-api-schema.channelid.md) | Nitro ChannelId  ^0x(\[a-fA-F0-9\]<!-- -->{<!-- -->64<!-- -->}<!-- -->)$ |
+|  [ChannelNotFound](./client-api-schema.channelnotfound.md) |  |
 |  [ChannelProposedNotification](./client-api-schema.channelproposednotification.md) |  |
 |  [ChannelStatus](./client-api-schema.channelstatus.md) |  |
 |  [ChannelUpdatedNotification](./client-api-schema.channelupdatednotification.md) |  |
@@ -116,12 +122,15 @@ Example response:
 |  [GetStateResponse](./client-api-schema.getstateresponse.md) |  |
 |  [GetWalletInformationRequest](./client-api-schema.getwalletinformationrequest.md) |  |
 |  [GetWalletInformationResponse](./client-api-schema.getwalletinformationresponse.md) |  |
+|  [InvalidAppData](./client-api-schema.invalidappdata.md) |  |
+|  [InvalidTransition](./client-api-schema.invalidtransition.md) |  |
 |  [JoinChannelRequest](./client-api-schema.joinchannelrequest.md) |  |
 |  [JoinChannelResponse](./client-api-schema.joinchannelresponse.md) |  |
 |  [JsonRpcMessage](./client-api-schema.jsonrpcmessage.md) |  |
 |  [MessageQueuedNotification](./client-api-schema.messagequeuednotification.md) |  |
 |  [Notification](./client-api-schema.notification.md) |  |
 |  [NotificationType](./client-api-schema.notificationtype.md) |  |
+|  [NotYourTurn](./client-api-schema.notyourturn.md) |  |
 |  [PushMessageParams](./client-api-schema.pushmessageparams.md) |  |
 |  [PushMessageRequest](./client-api-schema.pushmessagerequest.md) |  |
 |  [PushMessageResponse](./client-api-schema.pushmessageresponse.md) |  |

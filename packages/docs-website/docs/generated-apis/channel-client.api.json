@@ -2356,7 +2356,7 @@
                 {
                   "kind": "Reference",
                   "text": "CloseAndWithdrawParams",
-                  "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:type"
+                  "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawParams:interface"
                 },
                 {
                   "kind": "Content",
@@ -2439,7 +2439,7 @@
                 {
                   "kind": "Reference",
                   "text": "GetBudgetParams",
-                  "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:type"
+                  "canonicalReference": "@statechannels/client-api-schema!GetBudgetParams:interface"
                 },
                 {
                   "kind": "Content",
@@ -2730,7 +2730,7 @@
                 {
                   "kind": "Reference",
                   "text": "CloseChannelParams",
-                  "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:type"
+                  "canonicalReference": "@statechannels/client-api-schema!CloseChannelParams:interface"
                 },
                 {
                   "kind": "Content",
@@ -3077,7 +3077,7 @@
                 {
                   "kind": "Reference",
                   "text": "GetStateParams",
-                  "canonicalReference": "@statechannels/client-api-schema!GetStateParams:type"
+                  "canonicalReference": "@statechannels/client-api-schema!GetStateParams:interface"
                 },
                 {
                   "kind": "Content",
@@ -3216,7 +3216,7 @@
                 {
                   "kind": "Reference",
                   "text": "JoinChannelParams",
-                  "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:type"
+                  "canonicalReference": "@statechannels/client-api-schema!JoinChannelParams:interface"
                 },
                 {
                   "kind": "Content",
