@@ -81,11 +81,16 @@ async function seedTestChannels(
     const pingPromises = channelIds.map(c => pingClient.ping(c));
     await Promise.all(pingPromises);
     console.timeEnd('one ping one pong 100 channels');
+    // TODO: Determine why killServer doesn't work node script
+    pongServer.server.kill();
     await killServer(pongServer);
+
     process.exit(0);
   } catch (error) {
     console.error(error);
     if (pongServer) {
+      // TODO: Determine why killServer doesn't work node script
+      pongServer.server.kill();
       await killServer(pongServer);
     }
     process.exit(1);
