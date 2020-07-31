@@ -91,7 +91,8 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
-    const {outbox, channelResult} = await knex.transaction(
+    const {outbox, channelResult} = await Store.lockApp(
+      channelId,
       async (tx): Promise<{outbox: any; channelResult: ChannelResult}> => {
         const channel = await Store.getChannel(channelId, tx);
 
@@ -117,7 +118,7 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
-    return knex.transaction(async tx => {
+    return Store.lockApp(channelId, async tx => {
       const channel = await Store.getChannel(channelId, tx);
 
       if (!channel)
