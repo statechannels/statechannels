@@ -5,7 +5,7 @@ export abstract class WalletError extends Error {
     JoinChannelError: 'JoinChannelError',
     UpdateChannelError: 'UpdateChannelError',
     NonceError: 'NonceError',
-    InvariantError: 'InvariantError',
+    StoreError: 'StoreError',
   } as const;
 
   abstract readonly type: Values<typeof WalletError.errors>;
