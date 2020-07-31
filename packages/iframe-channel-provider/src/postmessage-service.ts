@@ -77,7 +77,7 @@ export class PostMessageService {
 
       logger.info({message}, 'Requesting:');
 
-      this.send(target, message as JsonRpcRequest, this.url);
+      this.send(target, message, this.url);
     });
   }
 
