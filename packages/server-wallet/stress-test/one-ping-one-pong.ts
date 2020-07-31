@@ -49,7 +49,7 @@ async function seedTestChannels(
 }
 
 (async function(): Promise<void> {
-  let pongServer: PongServer;
+  let pongServer: PongServer | undefined = undefined;
   try {
     pongServer = startPongServer();
     await waitForServerToStart(pongServer);
