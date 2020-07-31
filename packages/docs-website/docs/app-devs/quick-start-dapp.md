@@ -27,7 +27,7 @@ require('@statechannels/iframe-channel-provider');
 The channel provider needs to be pointed at our hosted wallet:
 
 ```typescript
-window.channelProvider.mountWalletComponent('https://xstate-wallet.statechannels.org/');
+await window.channelProvider.mountWalletComponent('https://xstate-wallet.statechannels.org/');
 ```
 
 This step mounts the wallet iFrame in your Dapp, configures communication and performs an initial handshake with the wallet.
@@ -35,12 +35,14 @@ This step mounts the wallet iFrame in your Dapp, configures communication and pe
 At some point in your user flow, you will want to enable the wallet:
 
 ```typescript
-window.channelProvider.enable();
+await window.channelProvider.enable();
 ```
 
 If everything is setup correctly, you should see the statechannels wallet UI:
 
 ![](assets/wallet-ui.png)
+
+Because this popup will be triggered, to maintain a good UX you should only call `window.channelProvider.enable()` when the user clicks a button.
 
 ## App <-> Wallet security
 
