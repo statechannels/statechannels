@@ -32,13 +32,17 @@ export const Store = {
    * on a single row in the Channels table. This guarantees that at most one `cb` can be executing
    * concurrently across all wallets.
    */
-  lockApp: async function<T>(channelId: Bytes32, cb: (tx: Transaction) => Promise<T>): Promise<T> {
+  lockApp: async function<T>(
+    channelId: Bytes32,
+    cb: (tx: Transaction, channel: ChannelState | undefined) => Promise<T>
+  ): Promise<T> {
     return knex.transaction(async tx => {
-      await Channel.query(tx)
+      const channel = await Channel.query(tx)
         .where({channelId})
-        .forUpdate();
+        .forUpdate()
+        .first();
 
-      return cb(tx);
+      return cb(tx, channel?.protocolState);
     });
   },
 

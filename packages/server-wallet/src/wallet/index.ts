@@ -93,15 +93,11 @@ export class Wallet implements WalletInterface {
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const {outbox, channelResult} = await Store.lockApp(
       channelId,
-      async (tx): Promise<{outbox: any; channelResult: ChannelResult}> => {
-        const channel = await Store.getChannel(channelId, tx);
-
+      async (tx, channel): Promise<{outbox: any; channelResult: ChannelResult}> => {
         if (!channel)
           throw new JoinChannel.JoinChannelError(
             JoinChannel.JoinChannelError.reasons.channelNotFound,
-            {
-              channelId,
-            }
+            {channelId}
           );
 
         const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
@@ -118,15 +114,11 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
-    return Store.lockApp(channelId, async tx => {
-      const channel = await Store.getChannel(channelId, tx);
-
+    return Store.lockApp(channelId, async (tx, channel) => {
       if (!channel)
         throw new UpdateChannel.UpdateChannelError(
           UpdateChannel.UpdateChannelError.reasons.channelNotFound,
-          {
-            channelId,
-          }
+          {channelId}
         );
 
       const outcome = deserializeAllocations(allocations);
