@@ -23,13 +23,26 @@ import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 
 export const Store = {
-  lockApp: async function<T>(channelId: Bytes32, cb: (tx: Transaction) => Promise<T>): Promise<T> {
+  /**
+   *
+   * @param channelId application channel Id
+   * @param cb critical code to be executed while holding a lock on channelId
+   *
+   * This excutes `cb` within the context of a SQL transaction, after first acquiring a row-level lock
+   * on a single row in the Channels table. This guarantees that at most one `cb` can be executing
+   * concurrently across all wallets.
+   */
+  lockApp: async function<T>(
+    channelId: Bytes32,
+    cb: (tx: Transaction, channel: ChannelState | undefined) => Promise<T>
+  ): Promise<T> {
     return knex.transaction(async tx => {
-      await Channel.query(tx)
+      const channel = await Channel.query(tx)
         .where({channelId})
-        .forUpdate();
+        .forUpdate()
+        .first();
 
-      return cb(tx);
+      return cb(tx, channel?.protocolState);
     });
   },
 
