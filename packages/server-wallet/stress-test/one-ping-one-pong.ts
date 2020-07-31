@@ -41,7 +41,7 @@ async function seedTestChannels(
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-(async function() {
+(async function(): Promise<void> {
   // configureEnvVariables();
   const pongServer = startPongServer();
   await waitForServerToStart(pongServer);
