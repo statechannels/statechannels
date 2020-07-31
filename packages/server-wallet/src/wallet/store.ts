@@ -108,7 +108,7 @@ export const Store = {
 };
 
 class StoreError extends WalletError {
-  readonly type = WalletError.errors.InvariantError;
+  readonly type = WalletError.errors.StoreError;
 
   static readonly reasons = {
     duplicateTurnNums: 'multiple states with same turn number',
