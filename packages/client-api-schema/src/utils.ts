@@ -1,3 +1,5 @@
+import {ErrorResponse} from './types';
+
 /**
  * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
@@ -47,21 +49,21 @@ export interface JsonRpcResponse<ResponseType = object> {
  * Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export type JsonRpcError = {
+export type JsonRpcError<Code extends number, Message, Data = undefined> = {
   /**
    * Error code
    */
-  code: number;
+  code: Code;
   /**
    * Error code
    */
-  message: string;
+  message: Message;
   /**
    * Error data
    */
-  data?: {
-    [key: string]: object;
-  };
+  data?: Data extends undefined
+    ? {code: Code; message: Message}
+    : {code: Code; message: Message; data: Data};
 };
 
 /**
@@ -91,7 +93,7 @@ export interface JsonRpcNotification<NotificationName = string, NotificationPara
  * Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export type JsonRpcErrorResponse;
+export type JsonRpcErrorResponse = ErrorResponse;
 
 /**
  * Type guard for {@link JsonRpcRequest | JsonRpcRequest}
