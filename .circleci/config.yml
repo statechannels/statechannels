@@ -27,7 +27,7 @@ integration_test_settings: &integration_test_settings
 
 save_dep: &save_dep
   save_cache:
-    key: v5-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/channel-client/node_modules
@@ -43,12 +43,12 @@ save_dep: &save_dep
 
 restore_dep: &restore_dep
   restore_cache:
-    key: v5-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_built_artifacts: &save_built_artifacts
   save_cache:
     # Force a new cache on each build
-    key: v4-built-artifacts-cache-{{ epoch }}
+    key: v5-built-artifacts-cache-{{ epoch }}
     paths:
       # Various TypeScript emissions
       - packages/channel-client/lib
@@ -69,7 +69,7 @@ save_built_artifacts: &save_built_artifacts
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
-    key: v4-built-artifacts-cache-
+    key: v5-built-artifacts-cache-
 
 commands:
   log_stats:
