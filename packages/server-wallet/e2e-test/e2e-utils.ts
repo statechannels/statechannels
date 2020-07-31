@@ -66,5 +66,6 @@ export const knexPong: Knex = Knex({
 
 export const killServer = async ({server}: PongServer): Promise<void> => {
   kill(server.pid);
+
   await knexPong.destroy();
 };
