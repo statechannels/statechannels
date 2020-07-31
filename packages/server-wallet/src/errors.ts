@@ -34,3 +34,17 @@ export abstract class WalletError extends Error {
     super(reason);
   }
 }
+
+function hasOwnProperty<X extends {}, Y extends PropertyKey>(
+  obj: X,
+  prop: Y
+): obj is X & Record<Y, unknown> {
+  // eslint-disable-next-line no-prototype-builtins
+  return obj.hasOwnProperty(prop);
+}
+
+export function isWalletError(error: any): error is WalletError {
+  if (!error?.type) return false;
+  if (!(typeof error.type === 'string' || error.type instanceof String)) return false;
+  return hasOwnProperty(WalletError.errors, error.type);
+}
