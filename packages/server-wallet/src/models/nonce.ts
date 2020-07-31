@@ -3,6 +3,7 @@ import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
 import knex from '../db/connection';
+import {WalletError, Values} from '../errors';
 
 export class Nonce extends Model {
   readonly id!: number;
@@ -23,11 +24,11 @@ export class Nonce extends Model {
     const {addresses} = json;
 
     if (!Array.isArray(addresses)) {
-      throw new NonceError('Addresses are not an array', {addresses});
+      throw new NonceError(NonceError.reasons.addressNotInArray, {addresses});
     }
 
     const notAddr = addresses.find(addr => !isAddress(addr));
-    if (notAddr) throw new NonceError('Not an address', {notAddr});
+    if (notAddr) throw new NonceError(NonceError.reasons.notAnAddress, {notAddr});
 
     return json;
   }
@@ -58,15 +59,20 @@ export class Nonce extends Model {
     if (typeof rows[0]?.value === 'number') {
       return rows[0].value;
     } else {
-      throw new NonceError('Nonce too low -- ask for a new nonce');
+      throw new NonceError(NonceError.reasons.nonceTooLow);
     }
   }
 }
 
-class NonceError extends Error {
-  readonly type = 'NonceError';
+class NonceError extends WalletError {
+  readonly type = WalletError.errors.NonceError;
+  static readonly reasons = {
+    addressNotInArray: 'Addresses are not an array',
+    notAnAddress: 'Not an address',
+    nonceTooLow: 'Nonce too low -- ask for a new nonce',
+  } as const;
 
-  constructor(reason: string, public readonly data: any = undefined) {
+  constructor(reason: Values<typeof NonceError.reasons>, public readonly data: any = undefined) {
     super(reason);
   }
 }

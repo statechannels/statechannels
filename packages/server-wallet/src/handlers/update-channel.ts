@@ -5,6 +5,7 @@ import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState, signState} from '../protocols/actions';
 import {ChannelState} from '../protocols/state';
+import {WalletError, Values} from '../errors';
 
 type ChannelStateWithSupported = ChannelState & {
   supported: SignedStateWithHash;
@@ -20,10 +21,8 @@ export interface UpdateChannelHandlerParams {
   appData: string;
 }
 
-// factor this type out if used by other error classes
-type Values<E> = E[keyof E];
-export class UpdateChannelError extends Error {
-  readonly type = 'UpdateChannelError';
+export class UpdateChannelError extends WalletError {
+  readonly type = WalletError.errors.UpdateChannelError;
 
   static readonly reasons = {
     channelNotFound: 'channel not found',

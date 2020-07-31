@@ -20,6 +20,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Address, Bytes32, Uint48, Uint256, Bytes} from '../type-aliases';
 import {ChannelState} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
+import {WalletError, Values} from '../errors';
 
 import {SigningWallet} from './signing-wallet';
 
@@ -105,7 +106,7 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('signingWallet')
       .first();
 
-    if (!result) throw new ChannelError(Errors.channelMissing, {channelId});
+    if (!result) throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 
     return result;
   }
@@ -128,7 +129,7 @@ export class Channel extends Model implements RequiredColumns {
     this.channelId = this.channelId ?? correctChannelId;
 
     if (this.channelId !== correctChannelId) {
-      throw new ChannelError(Errors.invalidChannelId, {
+      throw new ChannelError(ChannelError.reasons.invalidChannelId, {
         given: this.channelId,
         correctChannelId,
       });
@@ -138,7 +139,7 @@ export class Channel extends Model implements RequiredColumns {
       const correctHash = hashState({...this.channelConstants, ...sv});
       sv.stateHash = sv.stateHash ?? correctHash;
       if (sv.stateHash !== correctHash) {
-        throw new ChannelError(Errors.incorrectHash, {
+        throw new ChannelError(ChannelError.reasons.incorrectHash, {
           given: sv.stateHash,
           correctHash,
         });
@@ -325,39 +326,40 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
-export enum Errors {
-  invalidChannelId = 'Invalid channel id',
-  incorrectHash = 'Incorrect hash',
-  duplicateTurnNums = 'multiple states with same turn number',
-  notSorted = 'states not sorted',
-  multipleSignedStates = 'Store signed multiple states for a single turn',
-  staleState = 'Attempting to sign a stale state',
-  channelMissing = 'No channel found with id.',
-  channelFunded = 'Channel already funded.',
-  channelLocked = 'Channel is locked',
-  noBudget = 'No budget exists for domain. ',
-  noAssetBudget = "This domain's budget does contain this asset",
-  channelNotInBudget = "This domain's budget does not reference this channel",
-  noDomainForChannel = 'No domain defined for channel',
-  domainExistsOnChannel = 'Channel already has a domain.',
-  budgetAlreadyExists = 'There already exists a budget for this domain',
-  budgetInsufficient = 'Budget insufficient to reserve funds',
-  amountUnauthorized = 'Amount unauthorized in current budget',
-  cannotFindDestination = 'Cannot find destination for participant',
-  cannotFindPrivateKey = 'Private key missing for your address',
-  notInChannel = 'Attempting to initialize  channel as a non-participant',
-  noLedger = 'No ledger exists with peer',
-  amountNotFound = 'Cannot find allocation entry with destination',
-  invalidNonce = 'Invalid nonce',
-  invalidTransition = 'Invalid transition',
-  invalidAppData = 'Invalid app data',
-  emittingDuringTransaction = 'Attempting to emit event during transaction',
-  notMyTurn = "Cannot update channel unless it's your turn",
-}
+export class ChannelError extends WalletError {
+  readonly type = WalletError.errors.ChannelError;
 
-class ChannelError extends Error {
-  readonly type = 'ChannelError';
-  constructor(reason: Errors, public readonly data: any = undefined) {
+  static readonly reasons = {
+    invalidChannelId: 'Invalid channel id',
+    incorrectHash: 'Incorrect hash',
+    duplicateTurnNums: 'multiple states with same turn number',
+    notSorted: 'states not sorted',
+    multipleSignedStates: 'Store signed multiple states for a single turn',
+    staleState: 'Attempting to sign a stale state',
+    channelMissing: 'No channel found with id.',
+    channelFunded: 'Channel already funded.',
+    channelLocked: 'Channel is locked',
+    noBudget: 'No budget exists for domain. ',
+    noAssetBudget: "This domain's budget does contain this asset",
+    channelNotInBudget: "This domain's budget does not reference this channel",
+    noDomainForChannel: 'No domain defined for channel',
+    domainExistsOnChannel: 'Channel already has a domain.',
+    budgetAlreadyExists: 'There already exists a budget for this domain',
+    budgetInsufficient: 'Budget insufficient to reserve funds',
+    amountUnauthorized: 'Amount unauthorized in current budget',
+    cannotFindDestination: 'Cannot find destination for participant',
+    cannotFindPrivateKey: 'Private key missing for your address',
+    notInChannel: 'Attempting to initialize  channel as a non-participant',
+    noLedger: 'No ledger exists with peer',
+    amountNotFound: 'Cannot find allocation entry with destination',
+    invalidNonce: 'Invalid nonce',
+    invalidTransition: 'Invalid transition',
+    invalidAppData: 'Invalid app data',
+    emittingDuringTransaction: 'Attempting to emit event during transaction',
+    notMyTurn: "Cannot update channel unless it's your turn",
+  } as const;
+
+  constructor(reason: Values<typeof ChannelError.reasons>, public readonly data: any = undefined) {
     super(reason);
   }
 }

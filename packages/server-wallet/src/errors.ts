@@ -17,3 +17,20 @@ export default {
   NOT_OUR_TURN,
   VALUE_LOST,
 };
+
+export type Values<E> = E[keyof E];
+export abstract class WalletError extends Error {
+  static readonly errors = {
+    ChannelError: 'ChannelError',
+    JoinChannelError: 'JoinChannelError',
+    UpdateChannelError: 'UpdateChannelError',
+    NonceError: 'NonceError',
+    InvariantError: 'InvariantError',
+  } as const;
+
+  abstract readonly type: Values<typeof WalletError.errors>;
+  static readonly reasons: {[key: string]: string};
+  constructor(reason: Values<typeof WalletError.reasons>, public readonly data: any = undefined) {
+    super(reason);
+  }
+}

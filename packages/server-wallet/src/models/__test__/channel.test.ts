@@ -1,4 +1,4 @@
-import {Channel, Errors} from '../channel';
+import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import knex from '../../db/connection';
@@ -53,5 +53,5 @@ describe('validation', () => {
         ...channel({vars: [stateWithHashSignedBy()()]}),
         channelId: 'wrongId',
       })
-    ).rejects.toThrow(Errors.invalidChannelId));
+    ).rejects.toThrow(ChannelError.reasons.invalidChannelId));
 });
