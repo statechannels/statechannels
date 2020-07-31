@@ -1,4 +1,4 @@
-import Objection from 'objection';
+import {Transaction} from 'objection';
 import {
   SignedState,
   Objective,
@@ -23,10 +23,7 @@ import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 
 export const Store = {
-  lockApp: async function<T>(
-    channelId: Bytes32,
-    cb: (tx: Objection.Transaction) => Promise<T>
-  ): Promise<T> {
+  lockApp: async function<T>(channelId: Bytes32, cb: (tx: Transaction) => Promise<T>): Promise<T> {
     return knex.transaction(async tx => {
       await Channel.query(tx)
         .where({channelId})
@@ -39,7 +36,7 @@ export const Store = {
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
-    tx: Objection.Transaction
+    tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     let channel = await Channel.forId(channelId, tx);
 
@@ -70,12 +67,12 @@ export const Store = {
   },
   getChannel: async function(
     channelId: Bytes32,
-    tx: Objection.Transaction | undefined
+    tx: Transaction | undefined
   ): Promise<ChannelState | undefined> {
     return (await Channel.forId(channelId, tx))?.protocolState;
   },
 
-  pushMessage: async function(message: Message, tx: Objection.Transaction): Promise<Bytes32[]> {
+  pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
       await this.addSignedState(ss, tx);
     }
@@ -92,15 +89,12 @@ export const Store = {
 
   addObjective: async function(
     _objective: Objective,
-    _tx: Objection.Transaction
+    _tx: Transaction
   ): Promise<Either<StoreError, undefined>> {
     // TODO: Implement this
     return Promise.resolve(right(undefined));
   },
-  addSignedState: async function(
-    signedState: SignedState,
-    tx: Objection.Transaction
-  ): Promise<Channel> {
+  addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
     validateSignatures(signedState);
 
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
@@ -141,7 +135,7 @@ class StoreError extends WalletError {
 async function getOrCreateChannel(
   constants: ChannelConstants,
   signingAddress: string,
-  tx: Objection.Transaction
+  tx: Transaction
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
   let channel = await Channel.query(tx)
@@ -155,10 +149,7 @@ async function getOrCreateChannel(
   }
   return channel;
 }
-async function getSigningWallet(
-  signedState: SignedState,
-  tx: Objection.Transaction
-): Promise<SigningWallet> {
+async function getSigningWallet(signedState: SignedState, tx: Transaction): Promise<SigningWallet> {
   const addresses = signedState.participants.map(p => p.signingAddress);
   const signingWallet = await SigningWallet.query(tx)
     .whereIn('address', addresses)
