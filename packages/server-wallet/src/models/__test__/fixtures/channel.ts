@@ -6,6 +6,7 @@ import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/u
 import {addHash, dropNonVariables} from '../../../state-utils';
 import {alice, bob} from '../../../wallet/__test__/fixtures/signing-wallets';
 import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
+import {SigningWallet} from '../../signing-wallet';
 
 export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) => {
   const {appDefinition, chainId, challengeDuration, channelNonce, participants} = createState();
@@ -33,8 +34,16 @@ export const channelWithVars: Fixture<Channel> = fixture<Channel>(
 
 export const withSupportedState = (
   stateVars: Partial<StateVariables>,
-  channelProps?: DeepPartial<RequiredColumns>
+  channelProps?: DeepPartial<RequiredColumns>,
+  signingWallets?: SigningWallet[]
 ): Fixture<Channel> =>
   fixture(
-    channel({vars: [addHash(stateSignedBy(alice(), bob())({...stateVars}))], ...channelProps})
+    channel({
+      vars: [
+        addHash(
+          stateSignedBy(...(signingWallets ? signingWallets : [alice(), bob()]))({...stateVars})
+        ),
+      ],
+      ...channelProps,
+    })
   );
