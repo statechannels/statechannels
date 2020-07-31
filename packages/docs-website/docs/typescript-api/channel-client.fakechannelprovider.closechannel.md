@@ -23,4 +23,4 @@ protected closeChannel(params: CloseChannelParams): Promise<ChannelResult>;
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;

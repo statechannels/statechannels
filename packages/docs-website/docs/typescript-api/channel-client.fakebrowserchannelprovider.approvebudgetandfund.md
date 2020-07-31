@@ -22,8 +22,8 @@ approveBudgetAndFund(params: ApproveBudgetAndFundParams): Promise<DomainBudget>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | ApproveBudgetAndFundParams |  |
+|  params | [ApproveBudgetAndFundParams](./client-api-schema.approvebudgetandfundparams.md) |  |
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;[DomainBudget](./client-api-schema.domainbudget.md)<!-- -->&gt;

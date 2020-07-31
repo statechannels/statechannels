@@ -24,7 +24,7 @@ onChannelProposed(callback: (result: ChannelProposedNotification['params']) => v
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: ChannelProposedNotification\['params'\]) =&gt; void | A function that accepts a ChannelProposedNotification. |
+|  callback | (result: [ChannelProposedNotification](./client-api-schema.channelproposednotification.md)<!-- -->\['params'\]) =&gt; void | A function that accepts a ChannelProposedNotification. |
 
 <b>Returns:</b>
 

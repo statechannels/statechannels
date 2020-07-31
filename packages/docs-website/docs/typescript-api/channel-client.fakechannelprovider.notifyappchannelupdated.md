@@ -19,7 +19,7 @@ protected notifyAppChannelUpdated(data: ChannelResult): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  data | ChannelResult |  |
+|  data | [ChannelResult](./client-api-schema.channelresult.md) |  |
 
 <b>Returns:</b>
 

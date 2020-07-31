@@ -33,6 +33,12 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
   return JSON.stringify(e);
 }
 
+/**
+ * Validates a request against the API schema & returns the input cast to the correctly narrowed type.
+ *
+ * @param jsonBlob - A javascript object that might be a valid {@link Request}
+ * @returns The input, but with the correct type, if it is valid.
+ */
 export function parseRequest(jsonBlob: object): Request {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
@@ -42,6 +48,13 @@ export function parseRequest(jsonBlob: object): Request {
   }
   return jsonBlob as Request;
 }
+
+/**
+ * Validates a response against the API schema & returns the input cast to the correctly narrowed type.
+ *
+ * @param jsonBlob - A javascript object that might be a valid {@link Response}
+ * @returns The input, but with the correct type, if it is valid.
+ */
 export function parseResponse(jsonBlob: object): Response {
   const valid = validateResponse(jsonBlob);
   if (!valid) {

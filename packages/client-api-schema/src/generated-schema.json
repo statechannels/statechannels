@@ -8,15 +8,18 @@
     },
     "Allocation": {
       "additionalProperties": false,
+      "description": "Array of destination-amount pairings for a given token",
       "properties": {
         "allocationItems": {
+          "description": "Array of destination-amount pairings",
           "items": {
             "$ref": "#/definitions/AllocationItem"
           },
           "type": "array"
         },
         "token": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "The token contract address"
         }
       },
       "required": [
@@ -27,12 +30,15 @@
     },
     "AllocationItem": {
       "additionalProperties": false,
+      "description": "Assigns some amount of an unspecified asset to a destination",
       "properties": {
         "amount": {
-          "$ref": "#/definitions/Uint256"
+          "$ref": "#/definitions/Uint256",
+          "description": "How much funds will be transferred to the destination address."
         },
         "destination": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address of EOA to receive channel proceeds."
         }
       },
       "required": [
@@ -83,8 +89,20 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "ChallengeChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
     "ChallengeChannelRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22ChallengeChannel%22%2Cstructure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22ChallengeChannel%22%2CChallengeChannelParams%3E"
     },
     "ChallengeChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
@@ -105,6 +123,9 @@
       ],
       "type": "object"
     },
+    "ChannelClosed": {
+      "$ref": "#/definitions/JsonRpcError%3C404%2C%22Channel%20closed%22%3E"
+    },
     "ChannelClosingNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelClosed%22%2CChannelResult%3E"
     },
@@ -112,6 +133,9 @@
       "description": "Nitro ChannelId",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
+    },
+    "ChannelNotFound": {
+      "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
     },
     "ChannelProposedNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22ChannelProposed%22%2CChannelResult%3E"
@@ -196,7 +220,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-341-359-736846332-324-360-736846332-285-361-736846332-0-483%3E"
     },
     "CloseChannelError": {
       "anyOf": [
@@ -341,13 +365,13 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2CGetBudgetParams%3E"
     },
     "GetBudgetResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-307-310-45911622-293-310-45911622-276-311-45911622-244-312-45911622-0-313)%3E"
     },
     "GetChannelsRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-232-258-946177841-202-259-946177841-169-260-946177841-0-329%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-1851-2096-src%2Fdata-types.ts-0-2354%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2132-2377-src%2Fdata-types.ts-0-2794%5B%5D%3E"
     },
     "GetStateParams": {
       "additionalProperties": false,
@@ -372,6 +396,12 @@
     },
     "GetWalletInformationResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-243-341-825486248-226-342-825486248-183-343-825486248-0-344%3E"
+    },
+    "InvalidAppData": {
+      "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-897-917-1165839259-829-919-1165839259-800-920-1165839259-0-1224%3E"
+    },
+    "InvalidTransition": {
+      "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-727-797-1165839259-654-799-1165839259-622-800-1165839259-0-1224%3E"
     },
     "JoinChannelParams": {
       "additionalProperties": false,
@@ -601,7 +631,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-727-797-1165839259-654-799-1165839259-622-800-1165839259-0-1224>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -660,7 +690,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-897-917-1165839259-829-919-1165839259-800-920-1165839259-0-1224>": {
       "additionalProperties": false,
       "properties": {
         "error": {
@@ -1052,7 +1082,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"ChallengeChannel\",structure-163729307-290-313-163729307-255-314-163729307-186-315-163729307-0-387>": {
+    "JsonRpcRequest<\"ChallengeChannel\",ChallengeChannelParams>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1071,16 +1101,7 @@
           "type": "string"
         },
         "params": {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "$ref": "#/definitions/ChannelId"
-            }
-          },
-          "required": [
-            "channelId"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/ChallengeChannelParams"
         }
       },
       "required": [
@@ -1242,7 +1263,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetChannels\",structure-946177841-166-192-946177841-136-193-946177841-102-194-946177841-0-263>": {
+    "JsonRpcRequest<\"GetChannels\",structure-946177841-232-258-946177841-202-259-946177841-169-260-946177841-0-329>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1429,7 +1450,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<(DomainBudget|structure-45911622-300-303-45911622-286-303-45911622-269-304-45911622-237-305-45911622-0-306)>": {
+    "JsonRpcResponse<(DomainBudget|structure-45911622-307-310-45911622-293-310-45911622-276-311-45911622-244-312-45911622-0-313)>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1529,7 +1550,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-1851-2096-src/data-types.ts-0-2354[]>": {
+    "JsonRpcResponse<def-interface-src/data-types.ts-2132-2377-src/data-types.ts-0-2794[]>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1595,7 +1616,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-334-352-736846332-317-353-736846332-278-354-736846332-0-476>": {
+    "JsonRpcResponse<structure-736846332-341-359-736846332-324-360-736846332-285-361-736846332-0-483>": {
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1668,13 +1689,17 @@
     },
     "Message": {
       "additionalProperties": false,
+      "description": "Format of message sent from the wallet to the app",
       "properties": {
         "data": {
+          "description": "Message payload. Format defined by wallet and opaque to app."
         },
         "recipient": {
+          "description": "Identifier of user that the message should be relayed to",
           "type": "string"
         },
         "sender": {
+          "description": "Identifier of user that the message is from",
           "type": "string"
         }
       },
@@ -1687,6 +1712,9 @@
     },
     "MessageQueuedNotification": {
       "$ref": "#/definitions/JsonRpcNotification%3C%22MessageQueued%22%2CMessage%3E"
+    },
+    "NotYourTurn": {
+      "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
     },
     "Notification": {
       "anyOf": [
@@ -1712,15 +1740,19 @@
     },
     "Participant": {
       "additionalProperties": false,
+      "description": "Container for data specific to a single state channel participant",
       "properties": {
         "destination": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address of EOA to receive channel proceeds (the account that'll get the funds)."
         },
         "participantId": {
+          "description": "App allocated id, used for relaying messages to the participant",
           "type": "string"
         },
         "signingAddress": {
-          "$ref": "#/definitions/Address"
+          "$ref": "#/definitions/Address",
+          "description": "Address used to sign channel updates"
         }
       },
       "required": [
@@ -1875,19 +1907,19 @@
     "UpdateChannelError": {
       "anyOf": [
         {
-          "$ref": "#/definitions/JsonRpcError%3C400%2C%22Channel%20not%20found%22%3E"
+          "$ref": "#/definitions/ChannelNotFound"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-713-783-1165839259-640-785-1165839259-615-786-1165839259-0-1189%3E"
+          "$ref": "#/definitions/InvalidTransition"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-876-896-1165839259-808-898-1165839259-786-899-1165839259-0-1189%3E"
+          "$ref": "#/definitions/InvalidAppData"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
+          "$ref": "#/definitions/NotYourTurn"
         },
         {
-          "$ref": "#/definitions/JsonRpcError%3C404%2C%22Channel%20closed%22%3E"
+          "$ref": "#/definitions/ChannelClosed"
         }
       ]
     },

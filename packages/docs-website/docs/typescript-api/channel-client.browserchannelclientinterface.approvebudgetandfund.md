@@ -29,4 +29,4 @@ approveBudgetAndFund(playerAmount: string, hubAmount: string, hubAddress: string
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;[DomainBudget](./client-api-schema.domainbudget.md)<!-- -->&gt;

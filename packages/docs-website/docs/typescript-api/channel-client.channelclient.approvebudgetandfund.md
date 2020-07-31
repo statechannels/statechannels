@@ -31,6 +31,6 @@ approveBudgetAndFund(receiveCapacity: string, sendCapacity: string, hubAddress: 
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;[DomainBudget](./client-api-schema.domainbudget.md)<!-- -->&gt;
 
 A promise that resolves to a DomainBudget

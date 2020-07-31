@@ -26,4 +26,4 @@ getBudget(_params: GetBudgetParams): Promise<DomainBudget>;
 
 <b>Returns:</b>
 
-Promise&lt;DomainBudget&gt;
+Promise&lt;[DomainBudget](./client-api-schema.domainbudget.md)<!-- -->&gt;

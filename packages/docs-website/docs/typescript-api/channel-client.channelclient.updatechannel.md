@@ -30,6 +30,6 @@ updateChannel(channelId: string, allocations: TokenAllocations, appData: string)
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;
 
 A promise that resolves to a ChannelResult.

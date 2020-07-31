@@ -19,7 +19,7 @@ protected notifyAppBudgetUpdated(data: DomainBudget): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  data | DomainBudget |  |
+|  data | [DomainBudget](./client-api-schema.domainbudget.md) |  |
 
 <b>Returns:</b>
 

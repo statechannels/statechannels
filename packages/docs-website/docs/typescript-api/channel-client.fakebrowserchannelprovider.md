@@ -26,7 +26,7 @@ export declare class FakeBrowserChannelProvider extends FakeChannelProvider impl
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [budget](./channel-client.fakebrowserchannelprovider.budget.md) |  | DomainBudget | <b><i>(BETA)</i></b> |
+|  [budget](./channel-client.fakebrowserchannelprovider.budget.md) |  | [DomainBudget](./client-api-schema.domainbudget.md) | <b><i>(BETA)</i></b> |
 
 ## Methods
 

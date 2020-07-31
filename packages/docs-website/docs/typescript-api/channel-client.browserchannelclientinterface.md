@@ -24,7 +24,7 @@ export interface BrowserChannelClientInterface extends ChannelClientInterface
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [onBudgetUpdated](./channel-client.browserchannelclientinterface.onbudgetupdated.md) | (callback: (result: DomainBudget) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
+|  [onBudgetUpdated](./channel-client.browserchannelclientinterface.onbudgetupdated.md) | (callback: (result: [DomainBudget](./client-api-schema.domainbudget.md)<!-- -->) =&gt; void) =&gt; [UnsubscribeFunction](./channel-client.unsubscribefunction.md) | <b><i>(BETA)</i></b> |
 
 ## Methods
 

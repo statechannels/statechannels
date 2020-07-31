@@ -19,8 +19,8 @@ protected createChannel(params: CreateChannelParams): Promise<ChannelResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | CreateChannelParams |  |
+|  params | [CreateChannelParams](./client-api-schema.createchannelparams.md) |  |
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;

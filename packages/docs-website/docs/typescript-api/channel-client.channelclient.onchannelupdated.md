@@ -24,7 +24,7 @@ onChannelUpdated(callback: (result: ChannelUpdatedNotification['params']) => voi
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callback | (result: ChannelUpdatedNotification\['params'\]) =&gt; void | A function that accepts a ChannelUpdatedNotification. |
+|  callback | (result: [ChannelUpdatedNotification](./client-api-schema.channelupdatednotification.md)<!-- -->\['params'\]) =&gt; void | A function that accepts a ChannelUpdatedNotification. |
 
 <b>Returns:</b>
 

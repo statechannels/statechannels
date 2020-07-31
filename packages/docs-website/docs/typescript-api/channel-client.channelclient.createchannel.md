@@ -24,14 +24,14 @@ createChannel(participants: Participant[], allocations: TokenAllocations, appDef
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  participants | Participant\[\] | Array of Participants for this channel |
+|  participants | [Participant](./client-api-schema.participant.md)<!-- -->\[\] | Array of Participants for this channel |
 |  allocations | [TokenAllocations](./channel-client.tokenallocations.md) | Initial allocation of funds for this channel |
 |  appDefinition | string | Address of ForceMoveApp deployed on chain |
 |  appData | string | Initial application data for this channel |
-|  fundingStrategy | FundingStrategy | Direct, Ledger or Virtual funding |
+|  fundingStrategy | [FundingStrategy](./client-api-schema.fundingstrategy.md) | Direct, Ledger or Virtual funding |
 
 <b>Returns:</b>
 
-Promise&lt;ChannelResult&gt;
+Promise&lt;[ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt;
 
 A promise that resolves to a ChannelResult.

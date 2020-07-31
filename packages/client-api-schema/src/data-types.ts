@@ -30,23 +30,56 @@ export type Uint48 = number;
  */
 export type Uint256 = string;
 
+/**
+ * Container for data specific to a single state channel participant
+ */
 export interface Participant {
-  participantId: string; // App allocated id, used for relaying messages to the participant
-  signingAddress: Address; // Address used to sign channel updates
-  destination: Address; // Address of EOA to receive channel proceeds (the account that'll get the funds).
+  /**
+   * App allocated id, used for relaying messages to the participant
+   */
+  participantId: string;
+  /**
+   * Address used to sign channel updates
+   */
+  signingAddress: Address;
+  /**
+   * Address of EOA to receive channel proceeds (the account that'll get the funds).
+   */
+  destination: Address;
 }
 
+/**
+ * Assigns some amount of an unspecified asset to a destination
+ */
 export interface AllocationItem {
-  destination: Address; // Address of EOA to receive channel proceeds.
-  amount: Uint256; // How much funds will be transferred to the destination address.
+  /**
+   * Address of EOA to receive channel proceeds.
+   */
+  destination: Address;
+  /**
+   * How much funds will be transferred to the destination address.
+   */
+  amount: Uint256;
 }
 
+/**
+ * Array of destination-amount pairings for a given token
+ */
 export interface Allocation {
-  token: Address; // The token's contract address.
-  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
+  /**
+   * The token contract address
+   */
+  token: Address;
+  /**
+   * Array of destination-amount pairings
+   */
+  allocationItems: AllocationItem[];
 }
 
-export type Allocations = Allocation[]; // included for backwards compatibility
+/**
+ * Included for backwards compatibility
+ */
+export type Allocations = Allocation[];
 
 export interface ChannelBudget {
   channelId: Bytes32;
@@ -90,9 +123,22 @@ export interface ChannelResult {
   turnNum: Uint48;
   challengeExpirationTime?: number;
 }
-
+/**
+ * Format of message sent from the wallet to the app
+ *
+ * @remarks The app relays it to another participant.
+ */
 export interface Message {
-  recipient: string; // Identifier of user that the message should be relayed to
-  sender: string; // Identifier of user that the message is from
-  data: unknown; // Message payload. Format defined by wallet and opaque to app.
+  /**
+   * Identifier of user that the message should be relayed to
+   */
+  recipient: string;
+  /**
+   * Identifier of user that the message is from
+   */
+  sender: string;
+  /**
+   * Message payload. Format defined by wallet and opaque to app.
+   */
+  data: unknown;
 }

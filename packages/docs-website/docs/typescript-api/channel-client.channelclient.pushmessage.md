@@ -24,11 +24,11 @@ pushMessage(message: Message): Promise<PushMessageResult>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | Message | An inbound message. |
+|  message | [Message](./client-api-schema.message.md) | An inbound message. |
 
 <b>Returns:</b>
 
-Promise&lt;PushMessageResult&gt;
+Promise&lt;[PushMessageResult](./client-api-schema.pushmessageresult.md)<!-- -->&gt;
 
 A promise that resolves to a PushMessageResult
 

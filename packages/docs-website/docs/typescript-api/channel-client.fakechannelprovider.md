@@ -23,7 +23,7 @@ export declare class FakeChannelProvider implements ChannelProviderInterface
 |  [destinationAddress](./channel-client.fakechannelprovider.destinationaddress.md) |  | string |  |
 |  [events](./channel-client.fakechannelprovider.events.md) |  | EventEmitter&lt;EventType&gt; |  |
 |  [internalAddress](./channel-client.fakechannelprovider.internaladdress.md) |  | string |  |
-|  [latestState](./channel-client.fakechannelprovider.lateststate.md) |  | Record&lt;ChannelId, ChannelResult&gt; |  |
+|  [latestState](./channel-client.fakechannelprovider.lateststate.md) |  | Record&lt;ChannelId, [ChannelResult](./client-api-schema.channelresult.md)<!-- -->&gt; |  |
 |  [off](./channel-client.fakechannelprovider.off.md) |  | OffType |  |
 |  [on](./channel-client.fakechannelprovider.on.md) |  | OnType |  |
 |  [opponentAddress](./channel-client.fakechannelprovider.opponentaddress.md) |  | Record&lt;ChannelId, string&gt; |  |
