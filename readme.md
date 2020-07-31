@@ -32,11 +32,12 @@ This repository is a monorepo, and contains the following packages maintained wi
 
 - [benchmarking](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
+- [docs-websitel](./packages/docs-website/website) : Documentation website
 - [iframe-channel-provider](./packages/iframe-channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
-- [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
+- [nitro-protocol](./packages/nitro-protocol) : Smart contracts and typescript support
 - [wallet-core](./packages/wallet-core) : Core wallet code that works in node-js and browser contexts
 - [wire-format](./packages/wire-format) : Format of messages that are sent over the wire between wallets
 - [xstate-wallet](./packages/xstate-wallet) : A browser wallet implementation
