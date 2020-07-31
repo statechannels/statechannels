@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {Participant} from '@statechannels/client-api-schema';
 
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
@@ -6,7 +8,13 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
 import knexPing from '../src/db/connection';
-import {knexPong, startPongServer, waitForServerToStart, killServer} from '../e2e-test/e2e-utils';
+import {
+  knexPong,
+  startPongServer,
+  waitForServerToStart,
+  killServer,
+  PongServer,
+} from '../e2e-test/e2e-utils';
 import PingClient from '../e2e-test/ping/client';
 
 async function seedTestChannels(
@@ -41,36 +49,45 @@ async function seedTestChannels(
 }
 
 (async function(): Promise<void> {
-  const pongServer = startPongServer();
-  await waitForServerToStart(pongServer);
+  let pongServer: PongServer;
+  try {
+    pongServer = startPongServer();
+    await waitForServerToStart(pongServer);
 
-  // Adds Alice to Ping's Database
-  await truncate(knexPing);
+    // Adds Alice to Ping's Database
+    await truncate(knexPing);
 
-  await SigningWallet.query(knexPing).insert(alice());
+    await SigningWallet.query(knexPing).insert(alice());
 
-  // Adds Bob to Pong's Database
-  await truncate(knexPong);
-  await SigningWallet.bindKnex(knexPong)
-    .query()
-    .insert(bob());
+    // Adds Bob to Pong's Database
+    await truncate(knexPong);
+    await SigningWallet.bindKnex(knexPong)
+      .query()
+      .insert(bob());
 
-  const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
+    const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
 
-  console.log('seeding channels');
-  const channelIds = await seedTestChannels(
-    pingClient.me,
-    alice().privateKey,
-    await pingClient.getPongsParticipantInfo(),
-    bob().privateKey,
-    100
-  );
+    console.log('seeding channels');
+    const channelIds = await seedTestChannels(
+      pingClient.me,
+      alice().privateKey,
+      await pingClient.getPongsParticipantInfo(),
+      bob().privateKey,
+      100
+    );
 
-  console.log('Starting test');
-  console.time('one ping one pong 100 channels');
-  const pingPromises = channelIds.map(c => pingClient.ping(c));
-  await Promise.all(pingPromises);
-  console.timeEnd('one ping one pong 100 channels');
-  await killServer(pongServer);
-  process.exit(0);
+    console.log('Starting test');
+    console.time('one ping one pong 100 channels');
+    const pingPromises = channelIds.map(c => pingClient.ping(c));
+    await Promise.all(pingPromises);
+    console.timeEnd('one ping one pong 100 channels');
+    await killServer(pongServer);
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    if (pongServer) {
+      await killServer(pongServer);
+    }
+    process.exit(1);
+  }
 })();
