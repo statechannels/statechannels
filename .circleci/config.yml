@@ -260,6 +260,27 @@ jobs:
           command: yarn test:e2e
           no_output_timeout: 30m
 
+  server-wallet-stress-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            sudo apt install -y postgresql-client || true
+            createdb ping $PSQL_ARGS
+            SERVER_DB_NAME=ping yarn db:migrate
+            createdb pong $PSQL_ARGS
+            SERVER_DB_NAME=pong yarn db:migrate
+      - run:
+          name: server-wallet-stress-test
+          working_directory: packages/server-wallet
+          command: yarn test:stress
+          no_output_timeout: 10m
+
   release-pull-request:
     <<: *defaults
     steps:
@@ -350,6 +371,10 @@ workflows:
           requires:
             - prepare
       - test:
+          requires:
+            - prepare
+
+      - server-wallet-stress-test:
           requires:
             - prepare
 
