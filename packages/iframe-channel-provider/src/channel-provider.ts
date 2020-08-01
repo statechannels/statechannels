@@ -1,13 +1,16 @@
 import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
-import {NotificationType, Notification} from '@statechannels/client-api-schema';
+import {
+  NotificationType,
+  Notification,
+  isJsonRpcNotification
+} from '@statechannels/client-api-schema';
 
 import {IFrameChannelProviderInterface} from './types';
 import {WalletJsonRpcAPI} from './types/wallet-api';
 import {logger} from './logger';
 import {PostMessageService} from './postmessage-service';
 import {IFrameService} from './iframe-service';
-import {isJsonRpcNotification} from './types/jsonrpc';
 import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
 
 /**

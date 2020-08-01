@@ -1,5 +1,5 @@
-import {ErrorResponse} from './types';
-
+import {ErrorResponse, Request, Response} from './types';
+import {Notification} from './notifications';
 /**
  * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
@@ -61,7 +61,7 @@ export type JsonRpcError<Code extends number, Message, Data = undefined> = {
   /**
    * Error data
    */
-  data?: Data extends undefined
+  error?: Data extends undefined
     ? {code: Code; message: Message}
     : {code: Code; message: Message; data: Data};
 };
@@ -74,7 +74,10 @@ export type JsonRpcError<Code extends number, Message, Data = undefined> = {
  *
  * @beta
  */
-export interface JsonRpcNotification<NotificationName = string, NotificationParams = object> {
+export interface JsonRpcNotification<
+  NotificationName = Notification['method'],
+  NotificationParams = Notification['params']
+> {
   /**
    * Spec version
    */
@@ -101,7 +104,9 @@ export type JsonRpcErrorResponse = ErrorResponse;
  * @returns true if the message is a JSON-RPC request, false otherwise
  * @beta
  */
-export function isJsonRpcRequest<T>(message: object): message is JsonRpcRequest<T, object> {
+export function isJsonRpcRequest<T extends Request['method']>(
+  message: object
+): message is JsonRpcRequest<T, Request['params']> {
   return 'id' in message && 'params' in message;
 }
 
@@ -111,9 +116,9 @@ export function isJsonRpcRequest<T>(message: object): message is JsonRpcRequest<
  * @returns true if the message is a JSON-RPC notification, false otherwise
  * @beta
  */
-export function isJsonRpcNotification<T>(
+export function isJsonRpcNotification<T extends Notification['method']>(
   message: object
-): message is JsonRpcNotification<T, object> {
+): message is JsonRpcNotification<T, Notification['params']> {
   return 'method' in message && !('id' in message);
 }
 /**
