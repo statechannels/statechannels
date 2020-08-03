@@ -138,8 +138,13 @@ export class Wallet implements WalletInterface {
   async closeChannel(_args: CloseChannelParams): SingleChannelResult {
     throw 'Unimplemented';
   }
+
   async getChannels(): MultipleChannelResult {
-    throw 'Unimplemented';
+    const channels = await Channel.transaction(async tx => await Store.getChannels(tx));
+    return {
+      channelResults: channels.map(channel => channel.channelResult),
+      outbox: [],
+    };
   }
 
   async getState({channelId}: GetStateParams): SingleChannelResult {
