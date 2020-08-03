@@ -13,7 +13,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Either, right} from 'fp-ts/lib/Either';
-import {Bytes32, ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -21,6 +21,7 @@ import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
+import {Bytes32} from '../type-aliases';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
