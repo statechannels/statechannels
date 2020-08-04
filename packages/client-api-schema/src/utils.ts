@@ -10,7 +10,7 @@ export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
    *
    * @remarks To be matched in a response
    */
-  id?: number;
+  id: number;
   /**
    * Spec version
    */
