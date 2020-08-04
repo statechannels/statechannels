@@ -98,17 +98,7 @@ describe('pinging', () => {
 
     const pingScript = childProcess.spawn(`yarn`, args);
     pingScript.on('error', logger.error);
-
-    await new Promise(resolve => {
-      pingScript.on('exit', _data => resolve());
-
-      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
-      // jest warns 'Jest did not exit one second after the test run has completed.'
-      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
-      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
-    });
-
-    await pingScript.kill();
+    await new Promise(resolve => pingScript.on('exit', resolve));
   };
 
   beforeEach(async () => {
