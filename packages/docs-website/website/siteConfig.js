@@ -110,7 +110,12 @@ const siteConfig = {
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   repoUrl: 'https://github.com/statechannels/statechannels',
-  packageUrl: 'https://www.npmjs.com/package/@statechannels/nitro-protocol'
+  packageUrl: 'https://www.npmjs.com/package/@statechannels/nitro-protocol',
+
+  algolia: {
+    apiKey: process.env.ALGOLIA_API_KEY,
+    indexName: 'statechannels'
+  }
 };
 
 module.exports = siteConfig;
