@@ -3,7 +3,7 @@ import express from 'express';
 import {Message} from '@statechannels/wire-format';
 import pino from 'express-pino-logger';
 
-import {logger} from '../../src/logger';
+import {logger} from '../logger';
 
 import PongController from './controller';
 

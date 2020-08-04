@@ -12,6 +12,7 @@
 **/*.log
 build
 lib
+artifacts
 
 manual-test/message-sequence.json
 
