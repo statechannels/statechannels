@@ -53,7 +53,7 @@ export default class PingClient {
   public async createPingChannel(pong: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
-      channelResult: channel,
+      channelResult: {channelId},
     } = await this.wallet.createChannel({
       appData: '0x',
       appDefinition: AddressZero,
@@ -63,25 +63,32 @@ export default class PingClient {
         {
           token: AddressZero,
           allocationItems: [
-            {
-              amount: BN.from(0),
-              destination: this.me.destination,
-            },
+            {amount: BN.from(0), destination: this.destination},
             {amount: BN.from(0), destination: pong.destination},
           ],
         },
       ],
     });
 
-    const message = await this.messagePongAndExpectReply(params as Message);
+    const {
+      recipient: to,
+      sender: from,
+      data: {signedStates: unconvertedSignedStates},
+    } = await this.messagePongAndExpectReply(params as Message);
+
+    // FIXME: server-wallet is using wallet-core, not wire-format for
+    // types of messages between parties. e2e-test uses wire-format
+    const signedStates = unconvertedSignedStates as SignedState[] | undefined;
 
     await this.wallet.pushMessage({
-      ...message,
-      to: message.recipient,
-      from: message.sender,
+      signedStates,
+      to,
+      from,
     });
 
-    return channel;
+    const {channelResult} = await this.wallet.getState({channelId});
+
+    return channelResult;
   }
 
   public async ping(channelId: string): Promise<void> {

@@ -127,6 +127,7 @@ export const Store = {
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
 
     const channel = await getOrCreateChannel(signedState, signingAddress, tx);
+
     let channelVars = channel.vars;
 
     channelVars = addState(channelVars, signedState);
@@ -134,6 +135,7 @@ export const Store = {
     channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
 
     validateInvariants(channelVars, channel.myAddress);
+
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
     return await Channel.query(tx)

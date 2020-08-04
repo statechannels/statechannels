@@ -14,7 +14,7 @@ import {logger} from '../src/logger';
 import PingClient from './ping/client';
 import {killServer, startPongServer, waitForServerToStart, PongServer, knexPong} from './e2e-utils';
 
-jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
+jest.setTimeout(20_000); // Starting up Pong server can take ~5 seconds
 
 let ChannelPing: typeof Channel;
 let ChannelPong: typeof Channel;
@@ -69,15 +69,13 @@ describe('e2e', () => {
   it('can create a channel, send signed state via http', async () => {
     const channel = await pingClient.createPingChannel(pong);
 
-    // TODO: Currently the PongController does not join the channel
-    // so these tests only confirm that the channel was created
-    // within Ping's wallet, that's it. Next up will be for Pong
-    // to join the channel and then these tests should check for
-    // 'running' status, turnNum 1, etc.
-
     expect(channel.participants).toStrictEqual([ping, pong]);
-    expect(channel.status).toBe('opening');
+    expect(channel.status).toBe('funding');
     expect(channel.turnNum).toBe(0);
+
+    expect((await Channel.forId(channel.channelId, undefined)).protocolState).toMatchObject({
+      supported: {turnNum: 0},
+    });
   });
 });
 
