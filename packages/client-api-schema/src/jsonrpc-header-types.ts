@@ -114,6 +114,7 @@ export interface JsonRpcNotification<
  * @returns true if the message is a JSON-RPC request, false otherwise
  * @beta
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
   return (
     'id' in message &&
