@@ -8,7 +8,7 @@
     "api-documenter": "node scripts/api-documenter.js",
     "build:netlify": "yarn build",
     "examples": "docusaurus-examples",
-    "start": "docusaurus-start",
+    "start": "ALGOLIA_API_KEY= docusaurus-start",
     "build": "docusaurus-build",
     "prepare": "yarn api-documenter",
     "publish-gh-pages": "docusaurus-publish",
