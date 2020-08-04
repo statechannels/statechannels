@@ -1,3 +1,5 @@
+import * as childProcess from 'child_process';
+
 import {Participant} from '@statechannels/client-api-schema';
 
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
@@ -7,6 +9,7 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
 import knexPing from '../src/db/connection';
+import {logger} from '../src/logger';
 
 import PingClient from './ping/client';
 import {killServer, startPongServer, waitForServerToStart, PongServer, knexPong} from './e2e-utils';
@@ -103,8 +106,28 @@ it('can update pre-existing channel, send signed state via http', async () => {
   // END SETUP
 
   // SCRIPT
-  const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
-  await pingClient.ping(channelId);
+  const pingScript = childProcess.spawn(`yarn`, [
+    'ts-node',
+    'e2e-test/scripts/ping.ts',
+    '--database',
+    'ping',
+    '--channels',
+    seed.channelId,
+  ]);
+
+  pingScript.on('error', logger.error);
+
+  await new Promise(resolve => {
+    pingScript.on('exit', _data => resolve());
+
+    // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
+    // jest warns 'Jest did not exit one second after the test run has completed.'
+    // This indicates to me that the spawned process does not exit, even after logging 'DONE'
+    pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
+  });
+
+  await pingScript.kill();
+
   // END SCRIPT
 
   // EFFECTS
