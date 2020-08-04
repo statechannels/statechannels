@@ -10,7 +10,7 @@ import knexPing from '../src/db/connection';
 import PingClient from './ping/client';
 import {killServer, startPongServer, waitForServerToStart, PongServer, knexPong} from './e2e-utils';
 
-jest.setTimeout(10_000); // Starting up Pong server can take ~5 seconds
+jest.setTimeout(20_000); // Starting up Pong server can take ~5 seconds
 
 describe('e2e', () => {
   let pingClient: PingClient;

@@ -49,18 +49,11 @@ export default class PongController {
       channelId: calculateChannelId({...convertedSignedStates[0]}),
     });
 
-    if (channelResult.turnNum < 4) {
-      // TODO: Join Channel
-      return {
-        recipient: from,
-        sender: this.myParticipantID,
-        data: {signedStates: [], objectives: []},
-      };
-    }
-
     const {
       outbox: [messageToSendToPing],
-    } = await this.wallet.updateChannel(channelResult);
+    } = await (channelResult.turnNum < 4 ? this.wallet.joinChannel : this.wallet.updateChannel)(
+      channelResult
+    );
 
     return messageToSendToPing.params as Message;
   }

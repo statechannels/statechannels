@@ -3,7 +3,7 @@ import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet} from 'ethers';
-import {makeDestination, BN, SignedState} from '@statechannels/wallet-core';
+import {makeDestination, BN, SignedState, calculateChannelId} from '@statechannels/wallet-core';
 
 import {Wallet as ServerWallet} from '../../src/wallet';
 import {Bytes32, Address} from '../../src/type-aliases';
@@ -53,7 +53,7 @@ export default class PingClient {
   public async createPingChannel(pong: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
-      channelResult: channel,
+      channelResult: {channelId},
     } = await this.wallet.createChannel({
       appData: '0x',
       appDefinition: AddressZero,
@@ -63,10 +63,7 @@ export default class PingClient {
         {
           token: AddressZero,
           allocationItems: [
-            {
-              amount: BN.from(0),
-              destination: this.me.destination,
-            },
+            {amount: BN.from(0), destination: this.destination},
             {amount: BN.from(0), destination: pong.destination},
           ],
         },
@@ -81,7 +78,9 @@ export default class PingClient {
       from: message.sender,
     });
 
-    return channel;
+    const {channelResult} = await this.wallet.getState({channelId});
+
+    return channelResult;
   }
 
   public async ping(channelId: string): Promise<void> {
