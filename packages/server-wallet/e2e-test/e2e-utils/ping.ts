@@ -30,11 +30,12 @@ console.log(`numPings: ${numPings}`);
 (async (): Promise<void> => {
   const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
   await Promise.all(
-    (channels || []).map(async channelId => {
-      for (const _i of _.range(numPings)) {
-        await pingClient.ping(channelId);
-      }
-    })
+    (channels || []).map(async channelId =>
+      _.range(numPings).reduce(
+        async p => p.then(() => pingClient.ping(channelId)),
+        Promise.resolve()
+      )
+    )
   );
 
   process.exit();
