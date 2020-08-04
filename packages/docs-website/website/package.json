@@ -6,7 +6,7 @@
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
-    "build:netlify": "yarn build",
+    "build:netlify": "cd ../../.. && yarn prepare --scope @statechannels/client-api-schema --scope @statechannels/iframe-channel-provider --scope @statechannels/channel-client --scope @statechannels/nitro-protocol && cd packages/docs-website/website && yarn api-documenter && yarn build",
     "examples": "docusaurus-examples",
     "start": "ALGOLIA_API_KEY= docusaurus-start",
     "build": "docusaurus-build",
