@@ -4106,7 +4106,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@statechannels/client-api-schema!parseNotification:function(1)",
-          "docComment": "/**\n * Validates a notification against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link Notification}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "docComment": "/**\n * Validates a notification against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsNotification}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4150,7 +4150,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@statechannels/client-api-schema!parseRequest:function(1)",
-          "docComment": "/**\n * Validates a request against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link Request}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "docComment": "/**\n * Validates a request against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsRequest}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4194,7 +4194,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@statechannels/client-api-schema!parseResponse:function(1)",
-          "docComment": "/**\n * Validates a response against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link Response}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "docComment": "/**\n * Validates a response against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsResponse}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

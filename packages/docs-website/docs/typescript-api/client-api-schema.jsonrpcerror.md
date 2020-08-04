@@ -9,16 +9,21 @@ hide_title: true
 
 ## JsonRpcError interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies error object as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
-export interface JsonRpcError<Code, Message, Data = undefined> 
+export interface JsonRpcError<Code extends number, Message, Data = undefined> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./client-api-schema.jsonrpcerror.error.md) | Data extends undefined ? { code: Code; message: Message; } : { code: Code; message: Message; data: Data; } |  |
-|  [id](./client-api-schema.jsonrpcerror.id.md) | number |  |
-|  [jsonrpc](./client-api-schema.jsonrpcerror.jsonrpc.md) | '2.0' |  |
+|  [code](./client-api-schema.jsonrpcerror.code.md) | Code | <b><i>(BETA)</i></b> Error code |
+|  [data](./client-api-schema.jsonrpcerror.data.md) | Data | <b><i>(BETA)</i></b> Error data |
+|  [message](./client-api-schema.jsonrpcerror.message.md) | Message | <b><i>(BETA)</i></b> Error code |

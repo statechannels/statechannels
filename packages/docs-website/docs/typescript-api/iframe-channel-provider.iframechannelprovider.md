@@ -40,7 +40,7 @@ export declare class IFrameChannelProvider implements IFrameChannelProviderInter
 |  [on](./iframe-channel-provider.iframechannelprovider.on.md) |  | OnType | <b><i>(BETA)</i></b> eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks. |
 |  [signingAddress](./iframe-channel-provider.iframechannelprovider.signingaddress.md) |  | string | <b><i>(BETA)</i></b> The public part of the ephemeral key pair |
 |  [subscribe](./iframe-channel-provider.iframechannelprovider.subscribe.md) |  | SubscribeType | <b><i>(BETA)</i></b> |
-|  [subscriptions](./iframe-channel-provider.iframechannelprovider.subscriptions.md) |  | { \[T in keyof [NotificationType](./client-api-schema.notificationtype.md)<!-- -->\]: string\[\]; } | <b><i>(BETA)</i></b> |
+|  [subscriptions](./iframe-channel-provider.iframechannelprovider.subscriptions.md) |  | { \[T in keyof [StateChannelsNotificationType](./client-api-schema.statechannelsnotificationtype.md)<!-- -->\]: string\[\]; } | <b><i>(BETA)</i></b> |
 |  [unsubscribe](./iframe-channel-provider.iframechannelprovider.unsubscribe.md) |  | UnsubscribeType | <b><i>(BETA)</i></b> |
 |  [url](./iframe-channel-provider.iframechannelprovider.url.md) |  | string | <b><i>(BETA)</i></b> The url of the hosted statechannels wallet |
 |  [walletReady](./iframe-channel-provider.iframechannelprovider.walletready.md) |  | Promise&lt;unknown&gt; | <b><i>(BETA)</i></b> Is the wallet ready to receive requests? |

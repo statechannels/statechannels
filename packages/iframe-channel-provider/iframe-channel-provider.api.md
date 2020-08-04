@@ -16,7 +16,6 @@ import { CreateChannelRequest } from '@statechannels/client-api-schema';
 import { CreateChannelResponse } from '@statechannels/client-api-schema';
 import { EnableEthereumRequest } from '@statechannels/client-api-schema';
 import { EnableEthereumResponse } from '@statechannels/client-api-schema';
-import { ErrorResponse } from '@statechannels/client-api-schema';
 import EventEmitter from 'eventemitter3';
 import { GetBudgetRequest } from '@statechannels/client-api-schema';
 import { GetBudgetResponse } from '@statechannels/client-api-schema';
@@ -28,10 +27,12 @@ import { GetWalletInformationRequest } from '@statechannels/client-api-schema';
 import { GetWalletInformationResponse } from '@statechannels/client-api-schema';
 import { JoinChannelRequest } from '@statechannels/client-api-schema';
 import { JoinChannelResponse } from '@statechannels/client-api-schema';
-import { Notification as Notification_2 } from '@statechannels/client-api-schema';
-import { NotificationType } from '@statechannels/client-api-schema';
+import { JsonRpcRequest } from '@statechannels/client-api-schema';
 import { PushMessageRequest } from '@statechannels/client-api-schema';
 import { PushMessageResponse } from '@statechannels/client-api-schema';
+import { StateChannelsNotification } from '@statechannels/client-api-schema';
+import { StateChannelsNotificationType } from '@statechannels/client-api-schema';
+import { StateChannelsResponse } from '@statechannels/client-api-schema';
 import { UpdateChannelRequest } from '@statechannels/client-api-schema';
 import { UpdateChannelResponse } from '@statechannels/client-api-schema';
 
@@ -61,7 +62,7 @@ export interface ChannelProviderInterface {
 // Warning: (ae-internal-missing-underscore) The name "EventType" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal
-export interface EventType extends NotificationType {
+export interface EventType extends StateChannelsNotificationType {
     // (undocumented)
     [id: string]: [unknown];
 }
@@ -94,7 +95,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     subscribe: SubscribeType;
     // (undocumented)
     protected readonly subscriptions: {
-        [T in keyof NotificationType]: string[];
+        [T in keyof StateChannelsNotificationType]: string[];
     };
     // Warning: (ae-incompatible-release-tags) The symbol "unsubscribe" is marked as @beta, but its signature references "UnsubscribeType" which is marked as @internal
     //
@@ -108,49 +109,6 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
 // @beta
 export interface IFrameChannelProviderInterface extends Web3ChannelProviderInterface {
     mountWalletComponent(url?: string): Promise<void>;
-}
-
-// @beta
-export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse;
-
-// @beta
-export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotification<T, any>;
-
-// @beta
-export function isJsonRpcResponse(message: any): message is JsonRpcResponse;
-
-// @beta
-export type JsonRpcError = {
-    code: number;
-    message: string;
-    data?: {
-        [key: string]: any;
-    };
-};
-
-// @beta
-export type JsonRpcErrorResponse = ErrorResponse;
-
-// @beta
-export interface JsonRpcNotification<NotificationName = string, NotificationParams = any> {
-    jsonrpc: '2.0';
-    method: NotificationName;
-    params: NotificationParams;
-}
-
-// @beta
-export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
-    id?: number;
-    jsonrpc: '2.0';
-    method: MethodName;
-    params: RequestParams;
-}
-
-// @beta
-export interface JsonRpcResponse<ResponseType = any> {
-    id: number;
-    jsonrpc: '2.0';
-    result: ResponseType;
 }
 
 // Warning: (ae-forgotten-export) The symbol "eventEmitter" needs to be exported by the entry point index.d.ts
@@ -167,7 +125,7 @@ export type OnType = typeof eventEmitter.on;
 // Warning: (ae-internal-missing-underscore) The name "SubscribeType" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal (undocumented)
-export type SubscribeType = (subscriptionType: Notification_2['method'], params?: any) => Promise<string>;
+export type SubscribeType = (subscriptionType: StateChannelsNotification['method'], params?: any) => Promise<string>;
 
 // Warning: (ae-internal-missing-underscore) The name "UnsubscribeType" should be prefixed with an underscore because the declaration is marked as @internal
 //

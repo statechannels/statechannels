@@ -45,10 +45,15 @@ Example response:
 
 |  Function | Description |
 |  --- | --- |
-|  [isError(message)](./client-api-schema.iserror.md) |  |
-|  [isNotification(message)](./client-api-schema.isnotification.md) |  |
-|  [isRequest(message)](./client-api-schema.isrequest.md) |  |
-|  [isResponse(message)](./client-api-schema.isresponse.md) |  |
+|  [isJsonRpcErrorResponse(message)](./client-api-schema.isjsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcErrorResponse](./client-api-schema.jsonrpcerrorresponse.md) |
+|  [isJsonRpcNotification(message)](./client-api-schema.isjsonrpcnotification.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcNotification](./client-api-schema.jsonrpcnotification.md) |
+|  [isJsonRpcRequest(message)](./client-api-schema.isjsonrpcrequest.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcRequest](./client-api-schema.jsonrpcrequest.md) |
+|  [isJsonRpcResponse(message)](./client-api-schema.isjsonrpcresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcResponse](./client-api-schema.jsonrpcresponse.md) |
+|  [isStateChannelsErrorResponse(message)](./client-api-schema.isstatechannelserrorresponse.md) |  |
+|  [isStateChannelsNotification(message)](./client-api-schema.isstatechannelsnotification.md) |  |
+|  [isStateChannelsRequest(message)](./client-api-schema.isstatechannelsrequest.md) |  |
+|  [isStateChannelsResponse(message)](./client-api-schema.isstatechannelsresponse.md) |  |
+|  [parseNotification(jsonBlob)](./client-api-schema.parsenotification.md) | Validates a notification against the API schema &amp; returns the input cast to the correctly narrowed type. |
 |  [parseRequest(jsonBlob)](./client-api-schema.parserequest.md) | Validates a request against the API schema &amp; returns the input cast to the correctly narrowed type. |
 |  [parseResponse(jsonBlob)](./client-api-schema.parseresponse.md) | Validates a response against the API schema &amp; returns the input cast to the correctly narrowed type. |
 
@@ -71,10 +76,11 @@ Example response:
 |  [GetChannelsParams](./client-api-schema.getchannelsparams.md) |  |
 |  [GetStateParams](./client-api-schema.getstateparams.md) |  |
 |  [JoinChannelParams](./client-api-schema.joinchannelparams.md) |  |
-|  [JsonRpcError](./client-api-schema.jsonrpcerror.md) |  |
-|  [JsonRpcNotification](./client-api-schema.jsonrpcnotification.md) |  |
-|  [JsonRpcRequest](./client-api-schema.jsonrpcrequest.md) |  |
-|  [JsonRpcResponse](./client-api-schema.jsonrpcresponse.md) |  |
+|  [JsonRpcError](./client-api-schema.jsonrpcerror.md) | <b><i>(BETA)</i></b> Specifies error object as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcErrorResponse](./client-api-schema.jsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcNotification](./client-api-schema.jsonrpcnotification.md) | <b><i>(BETA)</i></b> Specifies notification headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcRequest](./client-api-schema.jsonrpcrequest.md) | <b><i>(BETA)</i></b> Specifies request headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
+|  [JsonRpcResponse](./client-api-schema.jsonrpcresponse.md) | <b><i>(BETA)</i></b> Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
 |  [Message](./client-api-schema.message.md) | Format of message sent from the wallet to the app |
 |  [Participant](./client-api-schema.participant.md) | Container for data specific to a single state channel participant |
 |  [TokenBudget](./client-api-schema.tokenbudget.md) |  |
@@ -111,7 +117,6 @@ Example response:
 |  [EnableEthereumRequest](./client-api-schema.enableethereumrequest.md) |  |
 |  [EnableEthereumResponse](./client-api-schema.enableethereumresponse.md) |  |
 |  [ErrorCodes](./client-api-schema.errorcodes.md) | Error codes that might be returned by the wallet |
-|  [ErrorResponse](./client-api-schema.errorresponse.md) |  |
 |  [ExternalDestination](./client-api-schema.externaldestination.md) | Nitro ChannelId  ^0x(0<!-- -->{<!-- -->24<!-- -->}<!-- -->)(\[a-fA-F0-9\]<!-- -->{<!-- -->40<!-- -->}<!-- -->)$ |
 |  [FundingStrategy](./client-api-schema.fundingstrategy.md) |  |
 |  [GetBudgetRequest](./client-api-schema.getbudgetrequest.md) |  |
@@ -126,17 +131,18 @@ Example response:
 |  [InvalidTransition](./client-api-schema.invalidtransition.md) |  |
 |  [JoinChannelRequest](./client-api-schema.joinchannelrequest.md) |  |
 |  [JoinChannelResponse](./client-api-schema.joinchannelresponse.md) |  |
-|  [JsonRpcMessage](./client-api-schema.jsonrpcmessage.md) |  |
 |  [MessageQueuedNotification](./client-api-schema.messagequeuednotification.md) |  |
-|  [Notification](./client-api-schema.notification.md) |  |
-|  [NotificationType](./client-api-schema.notificationtype.md) |  |
 |  [NotYourTurn](./client-api-schema.notyourturn.md) |  |
 |  [PushMessageParams](./client-api-schema.pushmessageparams.md) |  |
 |  [PushMessageRequest](./client-api-schema.pushmessagerequest.md) |  |
 |  [PushMessageResponse](./client-api-schema.pushmessageresponse.md) |  |
 |  [PushMessageResult](./client-api-schema.pushmessageresult.md) |  |
-|  [Request](./client-api-schema.request.md) |  |
-|  [Response](./client-api-schema.response.md) |  |
+|  [StateChannelsErrorResponse](./client-api-schema.statechannelserrorresponse.md) |  |
+|  [StateChannelsJsonRpcMessage](./client-api-schema.statechannelsjsonrpcmessage.md) |  |
+|  [StateChannelsNotification](./client-api-schema.statechannelsnotification.md) |  |
+|  [StateChannelsNotificationType](./client-api-schema.statechannelsnotificationtype.md) |  |
+|  [StateChannelsRequest](./client-api-schema.statechannelsrequest.md) |  |
+|  [StateChannelsResponse](./client-api-schema.statechannelsresponse.md) |  |
 |  [UiNotification](./client-api-schema.uinotification.md) |  |
 |  [Uint256](./client-api-schema.uint256.md) | Uint256  ^0x(\[a-fA-F0-9\]<!-- -->{<!-- -->64<!-- -->}<!-- -->)$ |
 |  [Uint48](./client-api-schema.uint48.md) |  |
