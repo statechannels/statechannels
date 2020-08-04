@@ -86,7 +86,7 @@
     "test:ci": "yarn test --bail",
     "test:e2e": "SERVER_DB_NAME=ping yarn jest -c ./jest/jest.e2e.config.js",
     "test:stress:v0": "NODE_ENV=test SERVER_DB_NAME=ping yarn ts-node ./e2e-test/stress-test.ts --numChannels 100 --numPings 1",
-    "test:stress:v1": "NODE_ENV=test SERVER_DB_NAME=ping yarn ts-node ./e2e-test/stress-test.ts --numChannels 100 --numPings 100 ",
+    "test:stress:v1": "NODE_ENV=test SERVER_DB_NAME=ping yarn ts-node ./e2e-test/stress-test.ts --numChannels 100 --numPings 25 ",
     "test:stress": "yarn test:stress:v1"
   }
 }
