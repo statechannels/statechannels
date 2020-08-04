@@ -6,18 +6,21 @@ import Knex from 'knex';
 import _ from 'lodash';
 
 import {dbConfig} from '../../src/db-config';
-import PingClient from '../ping/client';
+import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 
-const {database, channels, numPings} = yargs
-  .command('ping', 'Ping many channels concurrently')
-  .example('ping --database ping --channels 0xf00 0x123 0xabc', 'Pings three channels')
+const {database, channels, numPayments} = yargs
+  .command('payer', 'Makes (fake) payments on many channels concurrently')
+  .example(
+    'payer --database payer --channels 0xf00 0x123 0xabc',
+    'Makes payments with three channels'
+  )
   .options({
     database: {type: 'string', demandOption: true},
     channels: {type: 'array', demandOption: true},
-    numPings: {type: 'number'},
+    numPayments: {type: 'number'},
   })
-  .default({numPings: 1})
+  .default({numPayments: 1})
   .coerce('channels', (channels: number[]): string[] =>
     channels.map(channel => channel.toString(16))
   ).argv;
@@ -25,14 +28,14 @@ const {database, channels, numPings} = yargs
 const knex = Knex(_.merge(dbConfig, {connection: {database}}));
 Model.knex(knex);
 
-console.log(`numPings: ${numPings}`);
+console.log(`numPayments: ${numPayments}`);
 
 (async (): Promise<void> => {
-  const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
+  const payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
   await Promise.all(
     (channels || []).map(async channelId =>
-      _.range(numPings).reduce(
-        async p => p.then(() => pingClient.ping(channelId)),
+      _.range(numPayments).reduce(
+        async p => p.then(() => payerClient.makePayment(channelId)),
         Promise.resolve()
       )
     )

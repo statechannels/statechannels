@@ -8,68 +8,74 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
-import knexPing from '../src/db/connection';
+import knexPayer from '../src/db/connection';
 import {logger} from '../src/logger';
 
-import PingClient from './ping/client';
-import {killServer, startPongServer, waitForServerToStart, PongServer, knexPong} from './e2e-utils';
+import PayerClient from './payer/client';
+import {
+  killServer,
+  waitForServerToStart,
+  ReceiverServer,
+  knexReceiver,
+  startReceiverServer,
+} from './e2e-utils';
 
 jest.setTimeout(20_000); // Starting up Pong server can take ~5 seconds
 
-let ChannelPing: typeof Channel;
-let ChannelPong: typeof Channel;
-let SWPing: typeof SigningWallet;
-let SWPong: typeof SigningWallet;
+let ChannelPayer: typeof Channel;
+let ChannelReceiver: typeof Channel;
+let SWPayer: typeof SigningWallet;
+let SWReceiver: typeof SigningWallet;
 
-let pongServer: PongServer;
+let receiverServer: ReceiverServer;
 beforeAll(async () => {
-  pongServer = startPongServer();
-  await waitForServerToStart(pongServer);
+  receiverServer = startReceiverServer();
+  await waitForServerToStart(receiverServer);
 
-  [ChannelPing, ChannelPong] = [knexPing, knexPong].map(knex => Channel.bindKnex(knex));
-  [SWPing, SWPong] = [knexPing, knexPong].map(knex => SigningWallet.bindKnex(knex));
+  [ChannelPayer, ChannelReceiver] = [knexPayer, knexReceiver].map(knex => Channel.bindKnex(knex));
+  [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
 });
 
 beforeEach(async () => {
-  await Promise.all([knexPing, knexPong].map(db => truncate(db)));
-  // Adds Alice to Ping's Database
-  await SWPing.query().insert(alice());
+  await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
+  // Adds Alice to Payer's Database
+  await SWPayer.query().insert(alice());
 
-  // Adds Bob to Pong's Database
-  await SWPong.query().insert(bob());
+  // Adds Bob to Receiver's Database
+  await SWReceiver.query().insert(bob());
 });
 
 afterAll(async () => {
-  await killServer(pongServer);
+  await killServer(receiverServer);
 });
 
 describe('e2e', () => {
-  let pingClient: PingClient;
+  let payerClient: PayerClient;
 
-  let ping: Participant;
-  let pong: Participant;
+  let payer: Participant;
+  let receiver: Participant;
 
   beforeAll(async () => {
     // Create actors
-    pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
+    payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
 
     // Gets participant info for testing convenience
-    ping = pingClient.me;
-    pong = await pingClient.getPongsParticipantInfo();
+    payer = payerClient.me;
+    receiver = await payerClient.getReceiversParticipantInfo();
   });
 
   it('can do a simple end-to-end flow with no signed states', async () => {
-    const ret = await pingClient.emptyMessage();
-    expect(ret.sender).toBe('pong');
-    expect(ret.recipient).toBe('ping');
+    const ret = await payerClient.emptyMessage();
+    expect(ret.sender).toBe('receiver');
+    expect(ret.recipient).toBe('payer');
     expect(ret.data.signedStates?.length).toBe(0);
     expect(ret.data.objectives?.length).toBe(0);
   });
 
   it('can create a channel, send signed state via http', async () => {
-    const channel = await pingClient.createPingChannel(pong);
+    const channel = await payerClient.createPayerChannel(receiver);
 
-    expect(channel.participants).toStrictEqual([ping, pong]);
+    expect(channel.participants).toStrictEqual([payer, receiver]);
     expect(channel.status).toBe('funding');
     expect(channel.turnNum).toBe(0);
 
@@ -79,38 +85,38 @@ describe('e2e', () => {
   });
 });
 
-describe('pinging', () => {
+describe('payments', () => {
   let channelId: string;
 
-  const triggerPings = async (numPings?: number): Promise<void> => {
+  const triggerPayments = async (numPayments?: number): Promise<void> => {
     let args = [
       'ts-node',
-      'e2e-test/e2e-utils/ping.ts',
+      'e2e-test/e2e-utils/payer.ts',
       '--database',
-      'ping',
+      'payer',
       '--channels',
       channelId,
     ];
 
-    if (numPings) args = args.concat(['--numPings', numPings.toString()]);
+    if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-    const pingScript = childProcess.spawn(`yarn`, args);
-    pingScript.on('error', logger.error);
-    await new Promise(resolve => pingScript.on('exit', resolve));
+    const payerScript = childProcess.spawn(`yarn`, args);
+    payerScript.on('error', logger.error);
+    await new Promise(resolve => payerScript.on('exit', resolve));
   };
 
   beforeEach(async () => {
-    const [ping, pong] = [aliceP(), bobP()];
+    const [payer, receiver] = [aliceP(), bobP()];
     const seed = withSupportedState(
       {turnNum: 3},
       {
         channelNonce: 123456789, // something unique for this test
-        participants: [ping, pong],
+        participants: [payer, receiver],
       }
     )();
 
-    await ChannelPing.query().insert([seed]); // Fixture uses alice() default
-    await ChannelPong.query().insert([{...seed, signingAddress: pong.signingAddress}]);
+    await ChannelPayer.query().insert([seed]); // Fixture uses alice() default
+    await ChannelReceiver.query().insert([{...seed, signingAddress: receiver.signingAddress}]);
 
     channelId = seed.channelId;
   });
@@ -121,23 +127,23 @@ describe('pinging', () => {
     });
 
   it('can update pre-existing channel, send signed state via http', async () => {
-    await expectSupportedState(ChannelPing, 3);
-    await expectSupportedState(ChannelPong, 3);
+    await expectSupportedState(ChannelPayer, 3);
+    await expectSupportedState(ChannelReceiver, 3);
 
-    await triggerPings();
+    await triggerPayments();
 
-    await expectSupportedState(ChannelPing, 5);
-    await expectSupportedState(ChannelPong, 5);
+    await expectSupportedState(ChannelPayer, 5);
+    await expectSupportedState(ChannelReceiver, 5);
   });
 
   it('can update pre-existing channels multiple times', async () => {
-    await expectSupportedState(ChannelPing, 3);
-    await expectSupportedState(ChannelPong, 3);
+    await expectSupportedState(ChannelPayer, 3);
+    await expectSupportedState(ChannelReceiver, 3);
 
-    const numPings = 5;
-    await triggerPings(numPings);
+    const numPayments = 5;
+    await triggerPayments(numPayments);
 
-    await expectSupportedState(ChannelPing, 3 + 2 * numPings);
-    await expectSupportedState(ChannelPong, 3 + 2 * numPings);
+    await expectSupportedState(ChannelPayer, 3 + 2 * numPayments);
+    await expectSupportedState(ChannelReceiver, 3 + 2 * numPayments);
   });
 });

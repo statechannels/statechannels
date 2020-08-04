@@ -6,25 +6,25 @@ import axios from 'axios';
 import Knex = require('knex');
 import {dbConfig} from '../src/db-config';
 
-export type PongServer = {
+export type ReceiverServer = {
   url: string;
   server: ChildProcessWithoutNullStreams;
 };
 
 /**
- * Starts the Pong Express server in a separate process. Needs to be
+ * Starts the Receiver Express server in a separate process. Needs to be
  * a separate process because it relies on process.env variables which
- * should not be shared between Ping and Pong -- particularly SERVER_DB_NAME
- * which indicates that Ping and Pong use separate databases, despite
+ * should not be shared between Payer and Receiver -- particularly SERVER_DB_NAME
+ * which indicates that Payer and Receiver use separate databases, despite
  * conveniently re-using the same PostgreSQL instance.
  */
-export const startPongServer = (): PongServer => {
-  const server = spawn('yarn', ['ts-node', './e2e-test/pong/server'], {
+export const startReceiverServer = (): ReceiverServer => {
+  const server = spawn('yarn', ['ts-node', './e2e-test/receiver/server'], {
     stdio: 'pipe',
     env: {
       // eslint-disable-next-line
       ...process.env,
-      SERVER_DB_NAME: 'pong',
+      SERVER_DB_NAME: 'receiver',
     },
   });
 
@@ -39,15 +39,18 @@ export const startPongServer = (): PongServer => {
 };
 
 /**
- * Pings the server at /reset until the API responds with OK;
+ * Payers the server at /reset until the API responds with OK;
  * simultaneously ensures that the server is listening and cleans
  * the database of any stale data from previous test runs.
  */
-export const waitForServerToStart = (pongServer: PongServer, pingInterval = 1500): Promise<void> =>
+export const waitForServerToStart = (
+  receiverServer: ReceiverServer,
+  pingInterval = 1500
+): Promise<void> =>
   new Promise(resolve => {
     const interval = setInterval(async () => {
       try {
-        await axios.post<'OK'>(`${pongServer.url}/status`);
+        await axios.post<'OK'>(`${receiverServer.url}/status`);
         clearInterval(interval);
         resolve();
       } catch {
@@ -56,16 +59,16 @@ export const waitForServerToStart = (pongServer: PongServer, pingInterval = 1500
     }, pingInterval);
   });
 
-export const knexPong: Knex = Knex({
+export const knexReceiver: Knex = Knex({
   ...dbConfig,
   connection: {
     ...(dbConfig.connection as Knex.StaticConnectionConfig),
-    database: 'pong',
+    database: 'receiver',
   },
 });
 
-export const killServer = async ({server}: PongServer): Promise<void> => {
+export const killServer = async ({server}: ReceiverServer): Promise<void> => {
   kill(server.pid);
 
-  await knexPong.destroy();
+  await knexReceiver.destroy();
 };

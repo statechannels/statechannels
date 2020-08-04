@@ -5,10 +5,10 @@ import {Participant} from '@statechannels/client-api-schema';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
 
-export default class PongController {
+export default class ReceiverController {
   private readonly wallet: Wallet = new Wallet();
 
-  private readonly myParticipantID: string = 'pong';
+  private readonly myParticipantID: string = 'receiver';
 
   public get participantInfo(): Participant {
     return {
@@ -50,11 +50,11 @@ export default class PongController {
     });
 
     const {
-      outbox: [messageToSendToPing],
+      outbox: [messageToSendToPayer],
     } = await (channelResult.turnNum < 4 ? this.wallet.joinChannel : this.wallet.updateChannel)(
       channelResult
     );
 
-    return messageToSendToPing.params as Message;
+    return messageToSendToPayer.params as Message;
   }
 }
