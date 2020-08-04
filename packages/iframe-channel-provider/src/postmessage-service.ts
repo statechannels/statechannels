@@ -2,10 +2,8 @@ import {
   StateChannelsResponse,
   StateChannelsErrorResponse,
   JsonRpcRequest,
-  isJsonRpcErrorResponse,
   isJsonRpcResponse,
-  isStateChannelsErrorResponse,
-  ErrorCodes
+  isStateChannelsErrorResponse
 } from '@statechannels/client-api-schema';
 
 import {logger} from './logger';

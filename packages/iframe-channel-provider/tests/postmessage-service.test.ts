@@ -1,5 +1,6 @@
-import {PostMessageService} from '../src/postmessage-service';
 import {JsonRpcRequest, JsonRpcResponse} from '@statechannels/client-api-schema';
+
+import {PostMessageService} from '../src/postmessage-service';
 import {IFrameService} from '../src/iframe-service';
 import {logger} from '../src/logger';
 

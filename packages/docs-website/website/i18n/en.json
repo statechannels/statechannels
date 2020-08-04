@@ -604,11 +604,17 @@
       "typescript-api/client-api-schema.channelbudget": {
         "title": "ChannelBudget interface"
       },
+      "typescript-api/client-api-schema.channelclosed": {
+        "title": "ChannelClosed type"
+      },
       "typescript-api/client-api-schema.channelclosingnotification": {
         "title": "ChannelClosingNotification type"
       },
       "typescript-api/client-api-schema.channelid": {
         "title": "ChannelId type"
+      },
+      "typescript-api/client-api-schema.channelnotfound": {
+        "title": "ChannelNotFound type"
       },
       "typescript-api/client-api-schema.channelproposednotification": {
         "title": "ChannelProposedNotification type"
@@ -784,6 +790,12 @@
       "typescript-api/client-api-schema.getwalletinformationresponse": {
         "title": "GetWalletInformationResponse type"
       },
+      "typescript-api/client-api-schema.invalidappdata": {
+        "title": "InvalidAppData type"
+      },
+      "typescript-api/client-api-schema.invalidtransition": {
+        "title": "InvalidTransition type"
+      },
       "typescript-api/client-api-schema.iserror": {
         "title": "isError() function"
       },
@@ -808,8 +820,59 @@
       "typescript-api/client-api-schema.joinchannelresponse": {
         "title": "JoinChannelResponse type"
       },
+      "typescript-api/client-api-schema.jsonrpcerror.error": {
+        "title": "JsonRpcError.error property"
+      },
+      "typescript-api/client-api-schema.jsonrpcerror.id": {
+        "title": "JsonRpcError.id property"
+      },
+      "typescript-api/client-api-schema.jsonrpcerror.jsonrpc": {
+        "title": "JsonRpcError.jsonrpc property"
+      },
+      "typescript-api/client-api-schema.jsonrpcerror": {
+        "title": "JsonRpcError interface"
+      },
       "typescript-api/client-api-schema.jsonrpcmessage": {
         "title": "JsonRpcMessage type"
+      },
+      "typescript-api/client-api-schema.jsonrpcnotification.jsonrpc": {
+        "title": "JsonRpcNotification.jsonrpc property"
+      },
+      "typescript-api/client-api-schema.jsonrpcnotification": {
+        "title": "JsonRpcNotification interface"
+      },
+      "typescript-api/client-api-schema.jsonrpcnotification.method": {
+        "title": "JsonRpcNotification.method property"
+      },
+      "typescript-api/client-api-schema.jsonrpcnotification.params": {
+        "title": "JsonRpcNotification.params property"
+      },
+      "typescript-api/client-api-schema.jsonrpcrequest.id": {
+        "title": "JsonRpcRequest.id property"
+      },
+      "typescript-api/client-api-schema.jsonrpcrequest.jsonrpc": {
+        "title": "JsonRpcRequest.jsonrpc property"
+      },
+      "typescript-api/client-api-schema.jsonrpcrequest": {
+        "title": "JsonRpcRequest interface"
+      },
+      "typescript-api/client-api-schema.jsonrpcrequest.method": {
+        "title": "JsonRpcRequest.method property"
+      },
+      "typescript-api/client-api-schema.jsonrpcrequest.params": {
+        "title": "JsonRpcRequest.params property"
+      },
+      "typescript-api/client-api-schema.jsonrpcresponse.id": {
+        "title": "JsonRpcResponse.id property"
+      },
+      "typescript-api/client-api-schema.jsonrpcresponse.jsonrpc": {
+        "title": "JsonRpcResponse.jsonrpc property"
+      },
+      "typescript-api/client-api-schema.jsonrpcresponse": {
+        "title": "JsonRpcResponse interface"
+      },
+      "typescript-api/client-api-schema.jsonrpcresponse.result": {
+        "title": "JsonRpcResponse.result property"
       },
       "typescript-api/client-api-schema": {
         "title": "client-api-schema package"
@@ -834,6 +897,9 @@
       },
       "typescript-api/client-api-schema.notificationtype": {
         "title": "NotificationType type"
+      },
+      "typescript-api/client-api-schema.notyourturn": {
+        "title": "NotYourTurn type"
       },
       "typescript-api/client-api-schema.parserequest": {
         "title": "parseRequest() function"

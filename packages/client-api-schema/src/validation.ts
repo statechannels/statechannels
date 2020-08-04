@@ -38,7 +38,7 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
 /**
  * Validates a request against the API schema & returns the input cast to the correctly narrowed type.
  *
- * @param jsonBlob - A javascript object that might be a valid {@link Request}
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsRequest}
  * @returns The input, but with the correct type, if it is valid.
  */
 export function parseRequest(jsonBlob: object): StateChannelsRequest {
@@ -54,7 +54,7 @@ export function parseRequest(jsonBlob: object): StateChannelsRequest {
 /**
  * Validates a response against the API schema & returns the input cast to the correctly narrowed type.
  *
- * @param jsonBlob - A javascript object that might be a valid {@link Response}
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsResponse}
  * @returns The input, but with the correct type, if it is valid.
  */
 export function parseResponse(jsonBlob: object): StateChannelsResponse {
@@ -74,7 +74,7 @@ export function parseResponse(jsonBlob: object): StateChannelsResponse {
 /**
  * Validates a notification against the API schema & returns the input cast to the correctly narrowed type.
  *
- * @param jsonBlob - A javascript object that might be a valid {@link Notification}
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsNotification}
  * @returns The input, but with the correct type, if it is valid.
  */
 export function parseNotification(jsonBlob: object): StateChannelsNotification {
