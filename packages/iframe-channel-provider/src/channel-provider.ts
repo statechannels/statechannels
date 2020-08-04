@@ -3,7 +3,7 @@ import {Guid} from 'guid-typescript';
 import {
   NotificationType,
   StateChannelsNotification,
-  isJsonRpcNotification,
+  isStateChannelsNotification,
   parseNotification
 } from '@statechannels/client-api-schema';
 
@@ -183,18 +183,16 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
-    if (isJsonRpcNotification(event.data)) {
-      const message = parseNotification(event.data);
-      const notificationMethod = message.method;
-      const notificationParams = message.params;
-      this.events.emit(notificationMethod, notificationParams);
-      if ('showWallet' in message.params) {
-        this.iframe.setVisibility(message.params.showWallet);
-      } else {
-        this.subscriptions[notificationMethod].forEach(id => {
-          this.events.emit(id, notificationParams);
-        });
-      }
+    const message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+    const notificationMethod = message.method;
+    const notificationParams = message.params;
+    this.events.emit(notificationMethod, notificationParams);
+    if ('showWallet' in message.params) {
+      this.iframe.setVisibility(message.params.showWallet);
+    } else {
+      this.subscriptions[notificationMethod].forEach(id => {
+        this.events.emit(id, notificationParams);
+      });
     }
   }
 }

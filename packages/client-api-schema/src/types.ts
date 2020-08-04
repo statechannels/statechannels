@@ -95,10 +95,10 @@ export function isStateChannelsRequest(
   return 'id' in message && 'params' in message;
 }
 
-export function isStateChannelsError(
+export function isStateChannelsErrorResponse(
   message: StateChannelsJsonRpcMessage
 ): message is StateChannelsErrorResponse {
-  return 'id' in message && 'error' in message;
+  return 'id' in message && 'message' in message && 'error' in message;
 }
 
 export * from './notifications';

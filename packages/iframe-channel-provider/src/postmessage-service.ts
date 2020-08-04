@@ -4,6 +4,7 @@ import {
   JsonRpcRequest,
   isJsonRpcErrorResponse,
   isJsonRpcResponse,
+  isStateChannelsErrorResponse,
   ErrorCodes
 } from '@statechannels/client-api-schema';
 
@@ -116,8 +117,8 @@ export class PostMessageService {
           window.removeEventListener('message', listener);
           logger.info({response: event.data}, 'Received response');
           resolve(event.data.result);
-        } else if (isJsonRpcErrorResponse(event.data)) {
-          reject(new RpcError(event.data.error));
+        } else if (isStateChannelsErrorResponse(event.data)) {
+          reject(new RpcError(event.data.message));
         }
       }
     };

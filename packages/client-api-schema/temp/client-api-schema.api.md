@@ -373,7 +373,7 @@ export function isJsonRpcRequest(message: any): message is JsonRpcRequest;
 export function isJsonRpcResponse<ResponseType = object>(message: object): message is JsonRpcResponse<ResponseType>;
 
 // @public (undocumented)
-export function isStateChannelsError(message: StateChannelsJsonRpcMessage): message is StateChannelsErrorResponse;
+export function isStateChannelsErrorResponse(message: StateChannelsJsonRpcMessage): message is StateChannelsErrorResponse;
 
 // @public (undocumented)
 export function isStateChannelsNotification(message: StateChannelsJsonRpcMessage): message is StateChannelsNotification;

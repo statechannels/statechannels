@@ -2912,12 +2912,12 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsError:function(1)",
+          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsErrorResponse:function(1)",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isStateChannelsError(message: "
+              "text": "export declare function isStateChannelsErrorResponse(message: "
             },
             {
               "kind": "Reference",
@@ -2962,7 +2962,7 @@
               }
             }
           ],
-          "name": "isStateChannelsError"
+          "name": "isStateChannelsErrorResponse"
         },
         {
           "kind": "Function",
