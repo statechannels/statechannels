@@ -46,23 +46,24 @@ export function configureEnvVariables(): void {
     return;
   }
 
-  const NODE_ENV = process.env.NODE_ENV;
-
-  if (!NODE_ENV) {
-    throw new Error('The NODE_ENV environment variable is required but was not specified.');
+  if (!process.env.NODE_ENV) {
+    console.warn('[@statechannels/devtools] NODE_ENV is undefined — setting to "development"');
+    process.env.NODE_ENV = 'development';
   }
+
+  const NODE_ENV = process.env.NODE_ENV;
 
   // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
   // NOTE: dotenv joins paths with cwd https://www.npmjs.com/package/dotenv#path
-  let dotenvFiles = [
-    `.env.${NODE_ENV}.local`,
+  let dotenvFiles = ['.env'];
+
+  if (NODE_ENV) dotenvFiles = dotenvFiles.concat([`.env.${NODE_ENV}.local`, `.env.${NODE_ENV}`]);
+
+  if (NODE_ENV && NODE_ENV !== 'test')
     // Don't include `.env.local` for `test` environment
     // since normally you expect tests to produce the same
     // results for everyone
-    NODE_ENV !== 'test' && `.env.local`,
-    `.env.${NODE_ENV}`,
-    '.env'
-  ].filter((x): x is string => !!x);
+    dotenvFiles.push('.env.local');
 
   const monorepoDotenvFiles = dotenvFiles.slice(0);
 
