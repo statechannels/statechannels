@@ -29,6 +29,6 @@
  * ```
  */
 export * from './types';
-export * from './utils';
+export * from './jsonrpc-header-types';
 
 export {parseRequest, parseResponse} from './validation';

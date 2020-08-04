@@ -1,4 +1,4 @@
-import {JsonRpcRequest, JsonRpcResponse} from '../utils';
+import {JsonRpcRequest, JsonRpcResponse} from '../jsonrpc-header-types';
 import {ChannelId, ChannelResult} from '../data-types';
 
 export interface ChallengeChannelParams {

@@ -1,4 +1,4 @@
-import {JsonRpcNotification} from './utils';
+import {JsonRpcNotification} from './jsonrpc-header-types';
 import {ChannelResult, Message, DomainBudget} from './data-types';
 
 // these notifications come *from* the wallet, which is not strictly how JSON-RPC should work

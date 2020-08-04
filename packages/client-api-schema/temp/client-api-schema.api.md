@@ -434,7 +434,7 @@ export interface JsonRpcNotification<NotificationName = Notification['method'], 
 
 // @beta
 export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
-    id?: number;
+    id: number;
     jsonrpc: '2.0';
     method: MethodName;
     params: RequestParams;

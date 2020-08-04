@@ -1,5 +1,5 @@
 import {Notification} from './notifications';
-import {JsonRpcError} from './utils';
+import {JsonRpcError} from './jsonrpc-header-types';
 import {
   CreateChannelRequest,
   JoinChannelRequest,
@@ -78,7 +78,6 @@ export function isResponse(message: JsonRpcMessage): message is Response {
   return 'id' in message && 'result' in message;
 }
 
-// TODO can we delete these?
 export function isNotification(message: JsonRpcMessage): message is Notification {
   return !('id' in message);
 }

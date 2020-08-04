@@ -1,4 +1,4 @@
-import {JsonRpcRequest, JsonRpcResponse} from '../utils';
+import {JsonRpcRequest, JsonRpcResponse} from '../jsonrpc-header-types';
 import {Message} from '../data-types';
 
 export type PushMessageParams = PushMessageRequest['params']; // included for backwards compatibility

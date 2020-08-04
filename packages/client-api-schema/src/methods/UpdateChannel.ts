@@ -1,5 +1,5 @@
 import {ChannelId, Allocation, ChannelResult, ChannelStatus} from '../data-types';
-import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
+import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
 import {ErrorCodes as AllCodes} from '../error-codes';
 
 export interface UpdateChannelParams {
