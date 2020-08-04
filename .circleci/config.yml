@@ -107,11 +107,11 @@ commands:
           path: /home/circleci/project/packages/<< parameters.package >>/gas.md
           destination: << parameters.package >>-gas.md
 
-  upload_e2e_logs:
-    description: 'Upload e2e logs'
+  upload_artifacts:
+    description: 'Upload generic artifacts'
     steps:
       - store_artifacts:
-          path: /home/circleci/project/logs
+          path: /home/circleci/project/artifacts
 
   notify_slack:
     description: 'Notify slack '
@@ -259,6 +259,29 @@ jobs:
           working_directory: packages/server-wallet
           command: yarn test:e2e
           no_output_timeout: 30m
+      - upload_artifacts
+
+  server-wallet-stress-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            sudo apt install -y postgresql-client || true
+            createdb ping $PSQL_ARGS
+            SERVER_DB_NAME=ping yarn db:migrate
+            createdb pong $PSQL_ARGS
+            SERVER_DB_NAME=pong yarn db:migrate
+      - run:
+          name: server-wallet-stress-test
+          working_directory: packages/server-wallet
+          command: yarn test:stress
+          no_output_timeout: 10m
+      - upload_artifacts
 
   release-pull-request:
     <<: *defaults
@@ -350,6 +373,10 @@ workflows:
           requires:
             - prepare
       - test:
+          requires:
+            - prepare
+
+      - server-wallet-stress-test:
           requires:
             - prepare
 

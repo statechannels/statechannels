@@ -29,6 +29,7 @@ jest-cache/
 **/*.log
 e2e.log
 logs/**/*
+artifacts
 
 # local env vars
 .env.local
