@@ -30,12 +30,7 @@ export const error = (error: string | Error): ProtocolResult =>
   typeof error === 'string' ? left(new Error(error)) : left(error);
 
 export const submitTransaction = (props: Omit<SubmitTransaction, 'type'>): ProtocolResult =>
-  right(
-    some({
-      type: 'SubmitTransaction',
-      ...props,
-    })
-  );
+  right(some({type: 'SubmitTransaction', ...props}));
 
 export const signState = (props: Omit<SignState, 'type'>): SignState => ({
   type: 'SignState',

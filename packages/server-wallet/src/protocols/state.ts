@@ -5,6 +5,7 @@ import {
   serializeAllocation,
   checkThat,
   isAllocation,
+  State,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
@@ -31,7 +32,7 @@ export type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | '
  *
  * Useful for partitioning the protocol state to decide what action to next take.
  */
-export const stage = (state: SignedStateWithHash | undefined): Stage =>
+export const stage = (state: State | undefined): Stage =>
   !state
     ? 'Missing'
     : state.isFinal
