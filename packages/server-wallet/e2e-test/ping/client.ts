@@ -3,7 +3,7 @@ import axios from 'axios';
 import {Message} from '@statechannels/wire-format';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet} from 'ethers';
-import {makeDestination, BN, SignedState, calculateChannelId} from '@statechannels/wallet-core';
+import {makeDestination, BN, SignedState} from '@statechannels/wallet-core';
 
 import {Wallet as ServerWallet} from '../../src/wallet';
 import {Bytes32, Address} from '../../src/type-aliases';
