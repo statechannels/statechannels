@@ -7995,6 +7995,16 @@ cli-table3@0.5.1:
   optionalDependencies:
     colors "^1.1.2"
 
+cli-table3@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.0.tgz#b7b1bc65ca8e7b5cef9124e13dc2b21e2ce4faee"
+  integrity sha512-gnB85c3MGC7Nm9I/FkiasNBOKjOiO1RNuXXarQms37q4QMpWdlbBgD/VnOStA2faG1dpXMv31RFApjX1/QdgWQ==
+  dependencies:
+    object-assign "^4.1.0"
+    string-width "^4.2.0"
+  optionalDependencies:
+    colors "^1.1.2"
+
 cli-table@0.3.1:
   version "0.3.1"
   resolved "https://registry.npmjs.org/cli-table/-/cli-table-0.3.1.tgz#f53b05266a8b1a0b934b3d0821e6e2dc5914ae23"
@@ -23345,6 +23355,11 @@ unique-string@^2.0.0:
   integrity sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==
   dependencies:
     crypto-random-string "^2.0.0"
+
+unitimer@3.13.0:
+  version "3.13.0"
+  resolved "https://registry.npmjs.org/unitimer/-/unitimer-3.13.0.tgz#df79d048dfdafe207107d30b7de2ff8a5f4f8d3f"
+  integrity sha512-S8vcYXgQgoru3x1YLTnF1I+BWrgC3wI5qOGj0zaau0Hdw3oyqpJDfdE39G4FBcte9mnbZ46J76mwTGrEag/ujA==
 
 universal-user-agent@^4.0.0:
   version "4.0.1"
