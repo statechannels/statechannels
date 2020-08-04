@@ -3363,7 +3363,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#message:member",
-              "docComment": "/**\n * Error code\n */\n",
+              "docComment": "/**\n * Error message\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

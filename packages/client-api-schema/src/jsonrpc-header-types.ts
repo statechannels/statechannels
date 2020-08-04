@@ -53,7 +53,7 @@ export interface JsonRpcError<Code extends number, Message, Data = undefined> {
    */
   code: Code;
   /**
-   * Error code
+   * Error message
    */
   message: Message;
   /**
