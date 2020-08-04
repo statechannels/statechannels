@@ -4,7 +4,7 @@ import kill = require('tree-kill');
 import axios from 'axios';
 
 import Knex = require('knex');
-import {dbCofig} from '../src/db-config';
+import {dbConfig} from '../src/db-config';
 
 export type PongServer = {
   url: string;
@@ -57,9 +57,9 @@ export const waitForServerToStart = (pongServer: PongServer, pingInterval = 1500
   });
 
 export const knexPong: Knex = Knex({
-  ...dbCofig,
+  ...dbConfig,
   connection: {
-    ...(dbCofig.connection as Knex.StaticConnectionConfig),
+    ...(dbConfig.connection as Knex.StaticConnectionConfig),
     database: 'pong',
   },
 });
