@@ -5,9 +5,9 @@ import pino from 'express-pino-logger';
 
 import {logger} from '../logger';
 
-import PongController from './controller';
+import ReceiverController from './controller';
 
-const controller = new PongController();
+const controller = new ReceiverController();
 
 const app = express();
 app.use(pino({logger: logger as any}));

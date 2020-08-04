@@ -8,12 +8,12 @@ import {makeDestination, BN, SignedState} from '@statechannels/wallet-core';
 import {Wallet as ServerWallet} from '../../src/wallet';
 import {Bytes32, Address} from '../../src/type-aliases';
 
-export default class PingClient {
+export default class PayerClient {
   private readonly wallet: ServerWallet = new ServerWallet();
 
-  constructor(private readonly pk: Bytes32, private readonly pongHttpServerURL: string) {}
+  constructor(private readonly pk: Bytes32, private readonly receiverHttpServerURL: string) {}
 
-  public readonly participantId = 'ping';
+  public readonly participantId = 'payer';
 
   public get address(): Address {
     return new Wallet(this.pk).address;
@@ -32,9 +32,9 @@ export default class PingClient {
     };
   }
 
-  public async getPongsParticipantInfo(): Promise<Participant> {
+  public async getReceiversParticipantInfo(): Promise<Participant> {
     const {data: participant} = await axios.get<Participant>(
-      `${this.pongHttpServerURL}/participant`
+      `${this.receiverHttpServerURL}/participant`
     );
     return participant;
   }
@@ -50,7 +50,7 @@ export default class PingClient {
     return channelResults;
   }
 
-  public async createPingChannel(pong: Participant): Promise<ChannelResult> {
+  public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
       channelResult: {channelId},
@@ -58,13 +58,16 @@ export default class PingClient {
       appData: '0x',
       appDefinition: AddressZero,
       fundingStrategy: 'Direct',
-      participants: [this.me, pong],
+      participants: [this.me, receiver],
       allocations: [
         {
           token: AddressZero,
           allocationItems: [
-            {amount: BN.from(0), destination: this.destination},
-            {amount: BN.from(0), destination: pong.destination},
+            {
+              amount: BN.from(0),
+              destination: this.destination,
+            },
+            {amount: BN.from(0), destination: receiver.destination},
           ],
         },
       ],
@@ -74,7 +77,7 @@ export default class PingClient {
       recipient: to,
       sender: from,
       data: {signedStates: unconvertedSignedStates},
-    } = await this.messagePongAndExpectReply(params as Message);
+    } = await this.messageReceiverAndExpectReply(params as Message);
 
     // FIXME: server-wallet is using wallet-core, not wire-format for
     // types of messages between parties. e2e-test uses wire-format
@@ -91,7 +94,7 @@ export default class PingClient {
     return channelResult;
   }
 
-  public async ping(channelId: string): Promise<void> {
+  public async makePayment(channelId: string): Promise<void> {
     const channel = await this.getChannel(channelId);
 
     // Assuming MessageQueued inside the outbox
@@ -103,7 +106,7 @@ export default class PingClient {
       recipient: to,
       sender: from,
       data: {signedStates: unconvertedSignedStates},
-    } = await this.messagePongAndExpectReply(params as Message);
+    } = await this.messageReceiverAndExpectReply(params as Message);
 
     // FIXME: server-wallet is using wallet-core, not wire-format for
     // types of messages between parties. e2e-test uses wire-format
@@ -117,15 +120,15 @@ export default class PingClient {
   }
 
   public emptyMessage(): Promise<Message> {
-    return this.messagePongAndExpectReply({
-      sender: 'ping',
-      recipient: 'pong',
+    return this.messageReceiverAndExpectReply({
+      sender: 'payer',
+      recipient: 'receiver',
       data: {signedStates: [], objectives: []},
     });
   }
 
-  private async messagePongAndExpectReply(message: Message): Promise<Message> {
-    const {data: reply} = await axios.post(this.pongHttpServerURL + '/inbox', {message});
+  private async messageReceiverAndExpectReply(message: Message): Promise<Message> {
+    const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
     return reply;
   }
 }

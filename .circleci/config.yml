@@ -250,10 +250,10 @@ jobs:
           working_directory: packages/server-wallet
           command: |
             sudo apt install -y postgresql-client || true
-            createdb ping $PSQL_ARGS
-            SERVER_DB_NAME=ping yarn db:migrate
-            createdb pong $PSQL_ARGS
-            SERVER_DB_NAME=pong yarn db:migrate
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
       - run:
           name: server-wallet-e2e-test
           working_directory: packages/server-wallet
@@ -272,10 +272,10 @@ jobs:
           working_directory: packages/server-wallet
           command: |
             sudo apt install -y postgresql-client || true
-            createdb ping $PSQL_ARGS
-            SERVER_DB_NAME=ping yarn db:migrate
-            createdb pong $PSQL_ARGS
-            SERVER_DB_NAME=pong yarn db:migrate
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
       - run:
           name: server-wallet-stress-test
           working_directory: packages/server-wallet

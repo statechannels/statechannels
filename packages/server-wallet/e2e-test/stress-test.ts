@@ -10,20 +10,22 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
-import knexPing from '../src/db/connection';
+import knexPayer from '../src/db/connection';
 import {
-  knexPong,
-  startPongServer,
+  knexReceiver,
   waitForServerToStart,
   killServer,
-  PongServer,
+  ReceiverServer,
+  startReceiverServer,
 } from '../e2e-test/e2e-utils';
-import PingClient from '../e2e-test/ping/client';
+
+import PayerClient from './payer/client';
+
 async function seedTestChannels(
-  ping: Participant,
-  pingPrivateKey: string,
-  pong: Participant,
-  pongPrivateKey: string,
+  payer: Participant,
+  payerPrivateKey: string,
+  receiver: Participant,
+  receiverPrivateKey: string,
   numOfChannels: number
 ): Promise<string[]> {
   const channelIds: string[] = [];
@@ -32,67 +34,67 @@ async function seedTestChannels(
       {turnNum: 3},
       {
         channelNonce: i,
-        participants: [ping, pong],
+        participants: [payer, receiver],
       },
       [
-        SigningWallet.fromJson({privateKey: pingPrivateKey}),
-        SigningWallet.fromJson({privateKey: pongPrivateKey}),
+        SigningWallet.fromJson({privateKey: payerPrivateKey}),
+        SigningWallet.fromJson({privateKey: receiverPrivateKey}),
       ]
     )();
-    await Channel.bindKnex(knexPing)
+    await Channel.bindKnex(knexPayer)
       .query()
-      .insert([{...seed, signingAddress: ping.signingAddress}]); // Fixture uses alice() default
-    await Channel.bindKnex(knexPong)
+      .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default
+    await Channel.bindKnex(knexReceiver)
       .query()
-      .insert([{...seed, signingAddress: pong.signingAddress}]);
+      .insert([{...seed, signingAddress: receiver.signingAddress}]);
     channelIds.push(seed.channelId);
   }
   return channelIds;
 }
 
 (async function(): Promise<void> {
-  const {numChannels, numPings} = yargs
+  const {numChannels, numPayments} = yargs
     .command('stress-test', 'Performs a a basic stress test')
     .example(
-      'stress-test --numChannels 20 --numPings 5',
-      'Runs the stress test using 20 channels calling ping 5 times on each channel'
+      'stress-test --numChannels 20 --numPayments 5',
+      'Runs the stress test using 20 channels calling makePayment 5 times on each channel'
     )
     .options({
       numChannels: {type: 'number'},
-      numPings: {type: 'number'},
+      numPayments: {type: 'number'},
     })
-    .default({numPings: 1, numChannels: 100}).argv;
+    .default({numPayments: 1, numChannels: 100}).argv;
 
   process.on('exit', async () => {
-    if (pongServer) {
+    if (receiverServer) {
       // TODO: Determine why killServer doesn't work node script
-      pongServer.server.kill();
-      await killServer(pongServer);
+      receiverServer.server.kill();
+      await killServer(receiverServer);
     }
   });
-  let pongServer: PongServer | undefined = undefined;
+  let receiverServer: ReceiverServer | undefined = undefined;
   try {
-    pongServer = startPongServer();
-    await waitForServerToStart(pongServer);
+    receiverServer = startReceiverServer();
+    await waitForServerToStart(receiverServer);
 
-    // Adds Alice to Ping's Database
-    await truncate(knexPing);
+    // Adds Alice to Payer's Database
+    await truncate(knexPayer);
 
-    await SigningWallet.query(knexPing).insert(alice());
+    await SigningWallet.query(knexPayer).insert(alice());
 
-    // Adds Bob to Pong's Database
-    await truncate(knexPong);
-    await SigningWallet.bindKnex(knexPong)
+    // Adds Bob to Receiver's Database
+    await truncate(knexReceiver);
+    await SigningWallet.bindKnex(knexReceiver)
       .query()
       .insert(bob());
 
-    const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
+    const payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
 
     console.log('seeding channels');
     const channelIds = await seedTestChannels(
-      pingClient.me,
+      payerClient.me,
       alice().privateKey,
-      await pingClient.getPongsParticipantInfo(),
+      await payerClient.getReceiversParticipantInfo(),
       bob().privateKey,
       numChannels
     );
@@ -108,15 +110,15 @@ async function seedTestChannels(
 
     console.log('Starting test');
 
-    const pingPromises = channelIds.map(async c => {
-      for (let i = 0; i < numPings; i++) {
+    const paymentPromises = channelIds.map(async c => {
+      for (let i = 0; i < numPayments; i++) {
         channelTimers[c].start();
-        await pingClient.ping(c);
+        await payerClient.makePayment(c);
 
         channelTimers[c].stop();
       }
     });
-    await Promise.all(pingPromises);
+    await Promise.all(paymentPromises);
 
     fullTimer.stop();
     const maxUpdate = Math.max(...Object.keys(channelTimers).map(k => channelTimers[k].max()));
@@ -132,8 +134,13 @@ async function seedTestChannels(
     const table = new Table({head: ['Action', 'Min (MS)', 'Max (MS)', 'Avg (MS)']});
 
     table.push(
-      ['Individual ping call', minUpdate, maxUpdate, meanUpdate],
-      [`${numPings} consecutive calls of ping`, minPerChannel, maxPerChannel, meanPerChannel]
+      ['Individual makePayment call', minUpdate, maxUpdate, meanUpdate],
+      [
+        `${numPayments} consecutive calls of makePayment`,
+        minPerChannel,
+        maxPerChannel,
+        meanPerChannel,
+      ]
     );
     console.log(table.toString());
     process.exit(0);
