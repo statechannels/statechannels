@@ -70,12 +70,20 @@ export default class PingClient {
       ],
     });
 
-    const message = await this.messagePongAndExpectReply(params as Message);
+    const {
+      recipient: to,
+      sender: from,
+      data: {signedStates: unconvertedSignedStates},
+    } = await this.messagePongAndExpectReply(params as Message);
+
+    // FIXME: server-wallet is using wallet-core, not wire-format for
+    // types of messages between parties. e2e-test uses wire-format
+    const signedStates = unconvertedSignedStates as SignedState[] | undefined;
 
     await this.wallet.pushMessage({
-      ...message,
-      to: message.recipient,
-      from: message.sender,
+      signedStates,
+      to,
+      from,
     });
 
     const {channelResult} = await this.wallet.getState({channelId});
