@@ -2,7 +2,11 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {Notification, Response, ErrorResponse} from '@statechannels/client-api-schema';
+import {
+  StateChannelsNotification,
+  StateChannelsResponse,
+  StateChannelsErrorResponse
+} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
 import {
   Message,
@@ -183,13 +187,15 @@ export class ChannelWallet {
     }
   }
 
-  public async pushMessage(jsonRpcMessage, fromDomain) {
+  public async pushMessage(jsonRpcMessage: object, fromDomain: string) {
     // Update any workflows waiting on an observable
     await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
   }
 
   public onSendMessage(
-    callback: (jsonRpcMessage: Notification | Response | ErrorResponse) => void
+    callback: (
+      jsonRpcMessage: StateChannelsNotification | StateChannelsResponse | StateChannelsErrorResponse
+    ) => void
   ) {
     this.messagingService.outboxFeed.subscribe(m => callback(m));
   }
