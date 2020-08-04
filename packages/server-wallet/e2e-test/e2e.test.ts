@@ -26,11 +26,12 @@ beforeAll(async () => {
   pongServer = startPongServer();
   await waitForServerToStart(pongServer);
 
-  await Promise.all([knexPing, knexPong].map(db => truncate(db)));
-
   [ChannelPing, ChannelPong] = [knexPing, knexPong].map(knex => Channel.bindKnex(knex));
   [SWPing, SWPong] = [knexPing, knexPong].map(knex => SigningWallet.bindKnex(knex));
+});
 
+beforeEach(async () => {
+  await Promise.all([knexPing, knexPong].map(db => truncate(db)));
   // Adds Alice to Ping's Database
   await SWPing.query().insert(alice());
 
@@ -80,58 +81,102 @@ describe('e2e', () => {
   });
 });
 
-it('can update pre-existing channel, send signed state via http', async () => {
-  // SETUP
-  const [ping, pong] = [aliceP(), bobP()];
-  const seed = withSupportedState(
-    {turnNum: 3},
-    {
-      channelNonce: 123456789, // something unique for this test
-      participants: [ping, pong],
-    }
-  )();
+describe('pinging', () => {
+  let channelId: string;
 
-  await ChannelPing.query().insert([seed]); // Fixture uses alice() default
-  await ChannelPong.query().insert([{...seed, signingAddress: pong.signingAddress}]);
+  beforeEach(async () => {
+    const [ping, pong] = [aliceP(), bobP()];
+    const seed = withSupportedState(
+      {turnNum: 3},
+      {
+        channelNonce: 123456789, // something unique for this test
+        participants: [ping, pong],
+      }
+    )();
 
-  const {channelId} = seed;
+    await ChannelPing.query().insert([seed]); // Fixture uses alice() default
+    await ChannelPong.query().insert([{...seed, signingAddress: pong.signingAddress}]);
+
+    channelId = seed.channelId;
+  });
 
   const expectSupportedState = async (C: typeof Channel, turnNum: number): Promise<any> =>
     expect(C.forId(channelId, undefined).then(c => c.protocolState)).resolves.toMatchObject({
       latest: {turnNum},
     });
 
-  await expectSupportedState(ChannelPing, 3);
-  await expectSupportedState(ChannelPong, 3);
-  // END SETUP
+  it('can update pre-existing channel, send signed state via http', async () => {
+    await expectSupportedState(ChannelPing, 3);
+    await expectSupportedState(ChannelPong, 3);
 
-  // SCRIPT
-  const pingScript = childProcess.spawn(`yarn`, [
-    'ts-node',
-    'e2e-test/scripts/ping.ts',
-    '--database',
-    'ping',
-    '--channels',
-    seed.channelId,
-  ]);
+    // SCRIPT
+    const pingScript = childProcess.spawn(`yarn`, [
+      'ts-node',
+      'e2e-test/scripts/ping.ts',
+      '--database',
+      'ping',
+      '--channels',
+      channelId,
+    ]);
 
-  pingScript.on('error', logger.error);
+    pingScript.on('error', logger.error);
 
-  await new Promise(resolve => {
-    pingScript.on('exit', _data => resolve());
+    await new Promise(resolve => {
+      pingScript.on('exit', _data => resolve());
 
-    // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
-    // jest warns 'Jest did not exit one second after the test run has completed.'
-    // This indicates to me that the spawned process does not exit, even after logging 'DONE'
-    pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
+      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
+      // jest warns 'Jest did not exit one second after the test run has completed.'
+      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
+      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
+    });
+
+    await pingScript.kill();
+
+    // END SCRIPT
+
+    // EFFECTS
+    await expectSupportedState(ChannelPing, 5);
+    await expectSupportedState(ChannelPong, 5);
+    // END EFFECTS
   });
 
-  await pingScript.kill();
+  it('can update pre-existing channels multiple times', async () => {
+    await expectSupportedState(ChannelPing, 3);
+    await expectSupportedState(ChannelPong, 3);
+    // END SETUP
 
-  // END SCRIPT
+    // SCRIPT
+    const numPings = 5;
+    const pingScript = childProcess.spawn('yarn', [
+      'ts-node',
+      'e2e-test/scripts/ping.ts',
+      '--database',
+      'ping',
+      '--channels',
+      channelId,
+      `--numPings`,
+      `${numPings}`,
+    ]);
 
-  // EFFECTS
-  await expectSupportedState(ChannelPing, 5);
-  await expectSupportedState(ChannelPong, 5);
-  // END EFFECTS
+    pingScript.stdout.on('data', data => logger.info({data: data?.toString()}, 'DATA'));
+    pingScript.on('error', err => logger.error(err.toString()));
+
+    await new Promise(resolve => {
+      pingScript.on('exit', _data => resolve());
+
+      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
+      // jest warns 'Jest did not exit one second after the test run has completed.'
+      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
+      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
+    });
+
+    await pingScript.kill();
+
+    // END SCRIPT
+
+    // EFFECTS
+    await expectSupportedState(ChannelPing, 3 + 2 * numPings);
+    await expectSupportedState(ChannelPong, 3 + 2 * numPings);
+    // END EFFECTS
+  });
 });

@@ -9,13 +9,15 @@ import {dbCofig} from '../../src/db-config';
 import PingClient from '../ping/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 
-const {database, channels} = yargs
+const {database, channels, numPings} = yargs
   .command('ping', 'Ping many channels concurrently')
   .example('ping --database ping --channels 0xf00 0x123 0xabc', 'Pings three channels')
   .options({
     database: {type: 'string', demandOption: true},
     channels: {type: 'array', demandOption: true},
+    numPings: {type: 'number'},
   })
+  .default({numPings: 1})
   .coerce('channels', (channels: number[]): string[] =>
     channels.map(channel => channel.toString(16))
   ).argv;
@@ -23,9 +25,18 @@ const {database, channels} = yargs
 const knex = Knex(_.merge(dbCofig, {connection: {database}}));
 Model.knex(knex);
 
+console.log(`numPings: ${numPings}`);
+
 (async (): Promise<any> => {
   const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
-  await Promise.all((channels || []).map(async channelId => pingClient.ping(channelId)));
+  await Promise.all(
+    (channels || []).map(async channelId => {
+      for (const i of _.range(numPings)) {
+        console.log(`PINGING ${i}`);
+        await pingClient.ping(channelId);
+      }
+    })
+  );
 
   console.log('DONE');
 })();
