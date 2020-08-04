@@ -29,6 +29,7 @@ import * as Application from '../protocols/application';
 import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
+import * as ChannelState from '../protocols/state';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -138,8 +139,13 @@ export class Wallet implements WalletInterface {
   async closeChannel(_args: CloseChannelParams): SingleChannelResult {
     throw 'Unimplemented';
   }
+
   async getChannels(): MultipleChannelResult {
-    throw 'Unimplemented';
+    const channelStates = await Store.getChannels();
+    return {
+      channelResults: channelStates.map(ChannelState.toChannelResult),
+      outbox: [],
+    };
   }
 
   async getState({channelId}: GetStateParams): SingleChannelResult {

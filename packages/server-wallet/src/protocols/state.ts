@@ -1,6 +1,12 @@
 import {Either} from 'fp-ts/lib/Either';
 import {Option} from 'fp-ts/lib/Option';
-import {SignedStateWithHash} from '@statechannels/wallet-core';
+import {
+  SignedStateWithHash,
+  serializeAllocation,
+  checkThat,
+  isAllocation,
+} from '@statechannels/wallet-core';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Uint256} from '../type-aliases';
 
@@ -38,6 +44,22 @@ export const stage = (state: SignedStateWithHash | undefined): Stage =>
 
 // FIXME: This should be a union of the errors that the client-api-schema specifies.
 export type ProtocolError = Error;
+
+export const toChannelResult = (channelState: ChannelState): ChannelResult => {
+  const {channelId, supported} = channelState;
+
+  const {outcome, appData, turnNum, participants, appDefinition} = supported || channelState.latest;
+
+  return {
+    appData,
+    appDefinition,
+    channelId,
+    participants,
+    turnNum,
+    allocations: serializeAllocation(checkThat(outcome, isAllocation)),
+    status: channelState.supported ? 'funding' : 'opening', // FIXME
+  };
+};
 
 /*
 A protocol should accept a "protocol state", and return or resolve to

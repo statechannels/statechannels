@@ -8,17 +8,13 @@ import {
   calculateChannelId,
   hashState,
   outcomesEqual,
-  checkThat,
-  isAllocation,
-  serializeAllocation,
-  Outcome,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
-import {Address, Bytes32, Uint48, Uint256, Bytes} from '../type-aliases';
-import {ChannelState} from '../protocols/state';
+import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
+import {ChannelState, toChannelResult} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
 
@@ -161,29 +157,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get channelResult(): ChannelResult {
-    const {channelId, participants, appDefinition} = this;
-
-    let outcome: Outcome;
-    let appData: Bytes;
-    let turnNum: number;
-
-    if (!this.supported) {
-      ({outcome, appData, turnNum} = this.latest);
-    } else {
-      ({outcome, appData, turnNum} = this.supported);
-    }
-
-    const allocations = serializeAllocation(checkThat(outcome, isAllocation));
-
-    return {
-      channelId,
-      participants,
-      appData,
-      allocations,
-      appDefinition,
-      status: this.supported ? 'funding' : 'opening', // FIXME
-      turnNum,
-    };
+    return toChannelResult(this.protocolState);
   }
 
   // Computed
