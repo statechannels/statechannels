@@ -141,7 +141,7 @@ export class Wallet implements WalletInterface {
   }
 
   async getChannels(): MultipleChannelResult {
-    const channelStates = await Channel.transaction(async tx => await Store.getChannels(tx));
+    const channelStates = await Store.getChannels();
     return {
       channelResults: channelStates.map(ChannelState.toChannelResult),
       outbox: [],
