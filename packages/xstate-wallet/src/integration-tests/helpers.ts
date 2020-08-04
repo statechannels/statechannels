@@ -7,7 +7,7 @@ import {
   makeDestination
 } from '@statechannels/wallet-core';
 import {
-  isNotification,
+  isStateChannelsNotification,
   PushMessageRequest,
   JoinChannelRequest,
   CreateChannelRequest,
@@ -133,7 +133,7 @@ export class Player {
 
 export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(async message => {
-    if (isNotification(message) && message.method === 'MessageQueued') {
+    if (isStateChannelsNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
       ADD_LOGS && log({pushMessageRequest}, 'MESSAGE A->B:');
       await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
@@ -141,7 +141,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   });
 
   playerB.channelWallet.onSendMessage(message => {
-    if (isNotification(message) && message.method === 'MessageQueued') {
+    if (isStateChannelsNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
       ADD_LOGS && log({pushMessageRequest}, 'MESSAGE B->A:');
 

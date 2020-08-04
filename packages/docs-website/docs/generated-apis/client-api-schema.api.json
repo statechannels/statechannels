@@ -1935,68 +1935,6 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!ErrorResponse:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type ErrorResponse = "
-            },
-            {
-              "kind": "Reference",
-              "text": "EnableEthereumError",
-              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumError:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseAndWithdrawError",
-              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawError:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "CloseChannelError",
-              "canonicalReference": "@statechannels/client-api-schema!CloseChannelError:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "UpdateChannelError",
-              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelError:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericError",
-              "canonicalReference": "@statechannels/client-api-schema!~GenericError:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "ErrorResponse",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 10
-          }
-        },
-        {
-          "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!ExternalDestination:type",
           "docComment": "/**\n * Nitro ChannelId  @pattern ^0x(0{24})([a-fA-F0-9]{40})$\n */\n",
           "excerptTokens": [
@@ -2638,17 +2576,32 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "@statechannels/client-api-schema!isError:function(1)",
-          "docComment": "",
+          "canonicalReference": "@statechannels/client-api-schema!isJsonRpcErrorResponse:function(1)",
+          "docComment": "/**\n * Type guard for {@link JsonRpcErrorResponse | JsonRpcErrorResponse}\n *\n * @returns true if the message is a JSON-RPC error response, false otherwise\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isError(message: "
+              "text": "export declare function isJsonRpcErrorResponse<Code extends "
             },
             {
-              "kind": "Reference",
-              "text": "JsonRpcMessage",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcMessage:type"
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ", Message, Data = "
+            },
+            {
+              "kind": "Content",
+              "text": "undefined"
+            },
+            {
+              "kind": "Content",
+              "text": ">(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
             },
             {
               "kind": "Content",
@@ -2665,8 +2618,21 @@
             },
             {
               "kind": "Reference",
-              "text": "ErrorResponse",
-              "canonicalReference": "@statechannels/client-api-schema!ErrorResponse:type"
+              "text": "JsonRpcErrorResponse",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "JsonRpcError",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<Code, Message, Data>>"
             },
             {
               "kind": "Content",
@@ -2674,35 +2640,85 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
+            "startIndex": 7,
+            "endIndex": 13
           },
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "overloadIndex": 1,
           "parameters": [
             {
               "parameterName": "message",
               "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
+                "startIndex": 5,
+                "endIndex": 6
               }
             }
           ],
-          "name": "isError"
+          "typeParameters": [
+            {
+              "typeParameterName": "Code",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "Message",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "Data",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "isJsonRpcErrorResponse"
         },
         {
           "kind": "Function",
-          "canonicalReference": "@statechannels/client-api-schema!isNotification:function(1)",
-          "docComment": "",
+          "canonicalReference": "@statechannels/client-api-schema!isJsonRpcNotification:function(1)",
+          "docComment": "/**\n * Type guard for {@link JsonRpcNotification | JsonRpcNotification}\n *\n * @returns true if the message is a JSON-RPC notification, false otherwise\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isNotification(message: "
+              "text": "export declare function isJsonRpcNotification<Name extends "
             },
             {
-              "kind": "Reference",
-              "text": "JsonRpcMessage",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcMessage:type"
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ", Params extends "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": ">(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
             },
             {
               "kind": "Content",
@@ -2719,8 +2735,12 @@
             },
             {
               "kind": "Reference",
-              "text": "Notification",
-              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
+              "text": "JsonRpcNotification",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcNotification:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<Name, Params>"
             },
             {
               "kind": "Content",
@@ -2728,35 +2748,58 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
+            "startIndex": 7,
+            "endIndex": 11
           },
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "overloadIndex": 1,
           "parameters": [
             {
               "parameterName": "message",
               "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
+                "startIndex": 5,
+                "endIndex": 6
               }
             }
           ],
-          "name": "isNotification"
+          "typeParameters": [
+            {
+              "typeParameterName": "Name",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "Params",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "isJsonRpcNotification"
         },
         {
           "kind": "Function",
-          "canonicalReference": "@statechannels/client-api-schema!isRequest:function(1)",
-          "docComment": "",
+          "canonicalReference": "@statechannels/client-api-schema!isJsonRpcRequest:function(1)",
+          "docComment": "/**\n * Type guard for {@link JsonRpcRequest | JsonRpcRequest}\n *\n * @returns true if the message is a JSON-RPC request, false otherwise\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isRequest(message: "
+              "text": "export declare function isJsonRpcRequest(message: "
             },
             {
-              "kind": "Reference",
-              "text": "JsonRpcMessage",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcMessage:type"
+              "kind": "Content",
+              "text": "any"
             },
             {
               "kind": "Content",
@@ -2773,8 +2816,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Request",
-              "canonicalReference": "@statechannels/client-api-schema!Request:type"
+              "text": "JsonRpcRequest",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest:interface"
             },
             {
               "kind": "Content",
@@ -2785,7 +2828,7 @@
             "startIndex": 3,
             "endIndex": 6
           },
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "overloadIndex": 1,
           "parameters": [
             {
@@ -2796,21 +2839,28 @@
               }
             }
           ],
-          "name": "isRequest"
+          "name": "isJsonRpcRequest"
         },
         {
           "kind": "Function",
-          "canonicalReference": "@statechannels/client-api-schema!isResponse:function(1)",
-          "docComment": "",
+          "canonicalReference": "@statechannels/client-api-schema!isJsonRpcResponse:function(1)",
+          "docComment": "/**\n * Type guard for {@link JsonRpcResponse | JsonRpcResponse}\n *\n * @returns true if the message is a JSON-RPC response, false otherwis\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function isResponse(message: "
+              "text": "export declare function isJsonRpcResponse<ResponseType = "
             },
             {
-              "kind": "Reference",
-              "text": "JsonRpcMessage",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcMessage:type"
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": ">(message: "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
             },
             {
               "kind": "Content",
@@ -2827,8 +2877,79 @@
             },
             {
               "kind": "Reference",
-              "text": "Response",
-              "canonicalReference": "@statechannels/client-api-schema!Response:type"
+              "text": "JsonRpcResponse",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcResponse:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<ResponseType>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 9
+          },
+          "releaseTag": "Beta",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "ResponseType",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isJsonRpcResponse"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsErrorResponse:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isStateChannelsErrorResponse(message: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsJsonRpcMessage",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsJsonRpcMessage:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/client-api-schema!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsErrorResponse",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsErrorResponse:type"
             },
             {
               "kind": "Content",
@@ -2850,7 +2971,169 @@
               }
             }
           ],
-          "name": "isResponse"
+          "name": "isStateChannelsErrorResponse"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsNotification:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isStateChannelsNotification(message: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsJsonRpcMessage",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsJsonRpcMessage:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/client-api-schema!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isStateChannelsNotification"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsRequest:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isStateChannelsRequest(message: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsJsonRpcMessage",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsJsonRpcMessage:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/client-api-schema!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsRequest",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isStateChannelsRequest"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@statechannels/client-api-schema!isStateChannelsResponse:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function isStateChannelsResponse(message: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsJsonRpcMessage",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsJsonRpcMessage:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "message",
+              "canonicalReference": "@statechannels/client-api-schema!~message"
+            },
+            {
+              "kind": "Content",
+              "text": " is "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsResponse",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "message",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "isStateChannelsResponse"
         },
         {
           "kind": "Interface",
@@ -2975,11 +3258,19 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!JsonRpcError:interface",
-          "docComment": "",
+          "docComment": "/**\n * Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification}\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface JsonRpcError<Code, Message, Data = "
+              "text": "export interface JsonRpcError<Code extends "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ", Message, Data = "
             },
             {
               "kind": "Content",
@@ -2990,13 +3281,13 @@
               "text": "> "
             }
           ],
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "typeParameters": [
             {
               "typeParameterName": "Code",
               "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 1,
+                "endIndex": 2
               },
               "defaultTypeTokenRange": {
                 "startIndex": 0,
@@ -3021,8 +3312,8 @@
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
+                "startIndex": 3,
+                "endIndex": 4
               }
             }
           ],
@@ -3030,8 +3321,120 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#error:member",
-              "docComment": "",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#code:member",
+              "docComment": "/**\n * Error code\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "code: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Code"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "code",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#data:member",
+              "docComment": "/**\n * Error data\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "data?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Data"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "data",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#message:member",
+              "docComment": "/**\n * Error message\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "message: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Message"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "message",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse:interface",
+          "docComment": "/**\n * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification}\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface JsonRpcErrorResponse<Error = "
+            },
+            {
+              "kind": "Content",
+              "text": "any"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
+            }
+          ],
+          "releaseTag": "Beta",
+          "typeParameters": [
+            {
+              "typeParameterName": "Error",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "JsonRpcErrorResponse",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse#error:member",
+              "docComment": "/**\n * The generic type of the response\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3039,14 +3442,14 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "Data extends undefined ? {\n        code: Code;\n        message: Message;\n    } : {\n        code: Code;\n        message: Message;\n        data: Data;\n    }"
+                  "text": "Error"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "error",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3055,8 +3458,8 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#id:member",
-              "docComment": "",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse#id:member",
+              "docComment": "/**\n * Identifier for the response\n *\n * @remarks\n *\n * Matches that of a request\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3071,7 +3474,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "id",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3080,8 +3483,8 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@statechannels/client-api-schema!JsonRpcError#jsonrpc:member",
-              "docComment": "",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse#jsonrpc:member",
+              "docComment": "/**\n * Spec version\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3096,7 +3499,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "jsonrpc",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3107,75 +3510,38 @@
           "extendsTokenRanges": []
         },
         {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!JsonRpcMessage:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type JsonRpcMessage = "
-            },
-            {
-              "kind": "Reference",
-              "text": "Request",
-              "canonicalReference": "@statechannels/client-api-schema!Request:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "Response",
-              "canonicalReference": "@statechannels/client-api-schema!Response:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "Notification",
-              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "ErrorResponse",
-              "canonicalReference": "@statechannels/client-api-schema!ErrorResponse:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "JsonRpcMessage",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 8
-          }
-        },
-        {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!JsonRpcNotification:interface",
-          "docComment": "",
+          "docComment": "/**\n * Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification}\n *\n * @remarks\n *\n * Note one difference to the JSON-RPC spec is that notifications originate from the wallet (i.e. the Server, not the Client).\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface JsonRpcNotification<NotificationName, NotificationParams> "
+              "text": "export interface JsonRpcNotification<NotificationName extends "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ", NotificationParams extends "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
             }
           ],
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "typeParameters": [
             {
               "typeParameterName": "NotificationName",
               "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 1,
+                "endIndex": 2
               },
               "defaultTypeTokenRange": {
                 "startIndex": 0,
@@ -3185,8 +3551,8 @@
             {
               "typeParameterName": "NotificationParams",
               "constraintTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 3,
+                "endIndex": 4
               },
               "defaultTypeTokenRange": {
                 "startIndex": 0,
@@ -3199,7 +3565,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcNotification#jsonrpc:member",
-              "docComment": "",
+              "docComment": "/**\n * Spec version\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3214,7 +3580,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "jsonrpc",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3224,7 +3590,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcNotification#method:member",
-              "docComment": "",
+              "docComment": "/**\n * Generic type of the Notification name\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3239,7 +3605,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "method",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3249,7 +3615,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcNotification#params:member",
-              "docComment": "",
+              "docComment": "/**\n * Generic type of the Notification parameters\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3264,7 +3630,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "params",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3277,14 +3643,30 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest:interface",
-          "docComment": "",
+          "docComment": "/**\n * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification}\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface JsonRpcRequest<MethodName, RequestParams> "
+              "text": "export interface JsonRpcRequest<MethodName = "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            },
+            {
+              "kind": "Content",
+              "text": ", RequestParams = "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
             }
           ],
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "typeParameters": [
             {
               "typeParameterName": "MethodName",
@@ -3293,8 +3675,8 @@
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -3304,8 +3686,8 @@
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 3,
+                "endIndex": 4
               }
             }
           ],
@@ -3314,7 +3696,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest#id:member",
-              "docComment": "",
+              "docComment": "/**\n * Identifier for the resquest\n *\n * @remarks\n *\n * To be matched in a response\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3329,7 +3711,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "id",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3339,7 +3721,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest#jsonrpc:member",
-              "docComment": "",
+              "docComment": "/**\n * Spec version\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3354,7 +3736,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "jsonrpc",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3364,7 +3746,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest#method:member",
-              "docComment": "",
+              "docComment": "/**\n * Generic type of the request method\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3379,7 +3761,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "method",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3389,7 +3771,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcRequest#params:member",
-              "docComment": "",
+              "docComment": "/**\n * Request parameters\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3404,7 +3786,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "params",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3417,24 +3799,32 @@
         {
           "kind": "Interface",
           "canonicalReference": "@statechannels/client-api-schema!JsonRpcResponse:interface",
-          "docComment": "",
+          "docComment": "/**\n * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification}\n *\n * @beta\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface JsonRpcResponse<ResultType> "
+              "text": "export interface JsonRpcResponse<ResponseType = "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": "> "
             }
           ],
-          "releaseTag": "Public",
+          "releaseTag": "Beta",
           "typeParameters": [
             {
-              "typeParameterName": "ResultType",
+              "typeParameterName": "ResponseType",
               "constraintTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -3443,7 +3833,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcResponse#id:member",
-              "docComment": "",
+              "docComment": "/**\n * Identifier for the response\n *\n * @remarks\n *\n * Matches that of a request\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3458,7 +3848,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "id",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3468,7 +3858,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcResponse#jsonrpc:member",
-              "docComment": "",
+              "docComment": "/**\n * Spec version\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3483,7 +3873,7 @@
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "jsonrpc",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3493,7 +3883,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@statechannels/client-api-schema!JsonRpcResponse#result:member",
-              "docComment": "",
+              "docComment": "/**\n * The generic type of the response\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -3501,14 +3891,14 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "ResultType"
+                  "text": "ResponseType"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
-              "releaseTag": "Public",
+              "releaseTag": "Beta",
               "name": "result",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -3650,129 +4040,6 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!Notification:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type Notification = "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelProposedNotification",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelProposedNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelUpdatedNotification",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelUpdatedNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChannelClosingNotification",
-              "canonicalReference": "@statechannels/client-api-schema!ChannelClosingNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "BudgetUpdatedNotification",
-              "canonicalReference": "@statechannels/client-api-schema!BudgetUpdatedNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "MessageQueuedNotification",
-              "canonicalReference": "@statechannels/client-api-schema!MessageQueuedNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": " | "
-            },
-            {
-              "kind": "Reference",
-              "text": "UiNotification",
-              "canonicalReference": "@statechannels/client-api-schema!UiNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "Notification",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 12
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!NotificationType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type NotificationType = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    [T in "
-            },
-            {
-              "kind": "Reference",
-              "text": "Notification",
-              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
-            },
-            {
-              "kind": "Content",
-              "text": "['method']]: ["
-            },
-            {
-              "kind": "Reference",
-              "text": "FilterByMethod",
-              "canonicalReference": "@statechannels/client-api-schema!~FilterByMethod:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "Notification",
-              "canonicalReference": "@statechannels/client-api-schema!Notification:type"
-            },
-            {
-              "kind": "Content",
-              "text": ", T>['params']];\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "NotificationType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 8
-          }
-        },
-        {
-          "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!NotYourTurn:type",
           "docComment": "",
           "excerptTokens": [
@@ -3812,8 +4079,52 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "@statechannels/client-api-schema!parseNotification:function(1)",
+          "docComment": "/**\n * Validates a notification against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsNotification}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function parseNotification(jsonBlob: "
+            },
+            {
+              "kind": "Content",
+              "text": "object"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "jsonBlob",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "name": "parseNotification"
+        },
+        {
+          "kind": "Function",
           "canonicalReference": "@statechannels/client-api-schema!parseRequest:function(1)",
-          "docComment": "/**\n * Validates a request against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link Request}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "docComment": "/**\n * Validates a request against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsRequest}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3829,8 +4140,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Request",
-              "canonicalReference": "@statechannels/client-api-schema!Request:type"
+              "text": "StateChannelsRequest",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsRequest:type"
             },
             {
               "kind": "Content",
@@ -3857,7 +4168,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@statechannels/client-api-schema!parseResponse:function(1)",
-          "docComment": "/**\n * Validates a response against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link Response}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
+          "docComment": "/**\n * Validates a response against the API schema & returns the input cast to the correctly narrowed type.\n *\n * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsResponse}\n *\n * @returns The input, but with the correct type, if it is valid.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3873,8 +4184,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Response",
-              "canonicalReference": "@statechannels/client-api-schema!Response:type"
+              "text": "StateChannelsResponse",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsResponse:type"
             },
             {
               "kind": "Content",
@@ -4126,12 +4437,289 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!Request:type",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsError:type",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type Request = "
+              "text": "export declare type StateChannelsError = "
+            },
+            {
+              "kind": "Reference",
+              "text": "EnableEthereumError",
+              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumError:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseAndWithdrawError",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawError:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseChannelError",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelError:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "UpdateChannelError",
+              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelError:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "GenericError",
+              "canonicalReference": "@statechannels/client-api-schema!~GenericError:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsError",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 10
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsErrorResponse:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsErrorResponse = "
+            },
+            {
+              "kind": "Reference",
+              "text": "JsonRpcErrorResponse",
+              "canonicalReference": "@statechannels/client-api-schema!JsonRpcErrorResponse:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsError",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsError:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsErrorResponse",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 5
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsJsonRpcMessage:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsJsonRpcMessage = "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsRequest",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsResponse",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsErrorResponse",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsErrorResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsJsonRpcMessage",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 8
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsNotification = "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChannelProposedNotification",
+              "canonicalReference": "@statechannels/client-api-schema!ChannelProposedNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChannelUpdatedNotification",
+              "canonicalReference": "@statechannels/client-api-schema!ChannelUpdatedNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChannelClosingNotification",
+              "canonicalReference": "@statechannels/client-api-schema!ChannelClosingNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "BudgetUpdatedNotification",
+              "canonicalReference": "@statechannels/client-api-schema!BudgetUpdatedNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "MessageQueuedNotification",
+              "canonicalReference": "@statechannels/client-api-schema!MessageQueuedNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "UiNotification",
+              "canonicalReference": "@statechannels/client-api-schema!UiNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsNotification",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 12
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotificationType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsNotificationType = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    [T in "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": "['method']]: ["
+            },
+            {
+              "kind": "Reference",
+              "text": "FilterByMethod",
+              "canonicalReference": "@statechannels/client-api-schema!~FilterByMethod:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", T>['params']];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsNotificationType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 8
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsRequest:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsRequest = "
             },
             {
               "kind": "Reference",
@@ -4252,7 +4840,7 @@
             }
           ],
           "releaseTag": "Public",
-          "name": "Request",
+          "name": "StateChannelsRequest",
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 26
@@ -4260,12 +4848,12 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!Response:type",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsResponse:type",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type Response = "
+              "text": "export declare type StateChannelsResponse = "
             },
             {
               "kind": "Reference",
@@ -4386,7 +4974,7 @@
             }
           ],
           "releaseTag": "Public",
-          "name": "Response",
+          "name": "StateChannelsResponse",
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 26

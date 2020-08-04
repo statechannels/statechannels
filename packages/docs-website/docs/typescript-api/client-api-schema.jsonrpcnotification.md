@@ -9,16 +9,25 @@ hide_title: true
 
 ## JsonRpcNotification interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies notification headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
-export interface JsonRpcNotification<NotificationName, NotificationParams> 
+export interface JsonRpcNotification<NotificationName extends string, NotificationParams extends object> 
 ```
+
+## Remarks
+
+Note one difference to the JSON-RPC spec is that notifications originate from the wallet (i.e. the Server, not the Client).
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [jsonrpc](./client-api-schema.jsonrpcnotification.jsonrpc.md) | '2.0' |  |
-|  [method](./client-api-schema.jsonrpcnotification.method.md) | NotificationName |  |
-|  [params](./client-api-schema.jsonrpcnotification.params.md) | NotificationParams |  |
+|  [jsonrpc](./client-api-schema.jsonrpcnotification.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |
+|  [method](./client-api-schema.jsonrpcnotification.method.md) | NotificationName | <b><i>(BETA)</i></b> Generic type of the Notification name |
+|  [params](./client-api-schema.jsonrpcnotification.params.md) | NotificationParams | <b><i>(BETA)</i></b> Generic type of the Notification parameters |

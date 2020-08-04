@@ -1,21 +1,14 @@
 /**
- * Note these types are very generic and duplicated (but not exported)
- * inside the client-api-schema package, too.
- */
-
-import {ErrorResponse} from '@statechannels/client-api-schema';
-
-/**
  * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
+export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
   /**
    * Identifier for the resquest
    *
    * @remarks To be matched in a response
    */
-  id?: number;
+  id: number;
   /**
    * Spec version
    */
@@ -34,7 +27,7 @@ export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
  * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export interface JsonRpcResponse<ResponseType = any> {
+export interface JsonRpcResponse<ResponseType = object> {
   /**
    * Identifier for the response
    * @remarks Matches that of a request
@@ -51,25 +44,44 @@ export interface JsonRpcResponse<ResponseType = any> {
 }
 
 /**
- * Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
+ * Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export type JsonRpcError = {
+export interface JsonRpcError<Code extends number, Message, Data = undefined> {
   /**
    * Error code
    */
-  code: number;
+  code: Code;
   /**
-   * Error code
+   * Error message
    */
-  message: string;
+  message: Message;
   /**
    * Error data
    */
-  data?: {
-    [key: string]: any;
-  };
-};
+  data?: Data;
+}
+
+/**
+ * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
+ * @beta
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface JsonRpcErrorResponse<Error = any> {
+  /**
+   * Identifier for the response
+   * @remarks Matches that of a request
+   */
+  id: number;
+  /**
+   * Spec version
+   */
+  jsonrpc: '2.0';
+  /**
+   * The generic type of the response
+   */
+  error: Error;
+}
 
 /**
  * Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
@@ -79,7 +91,10 @@ export type JsonRpcError = {
  *
  * @beta
  */
-export interface JsonRpcNotification<NotificationName = string, NotificationParams = any> {
+export interface JsonRpcNotification<
+  NotificationName extends string,
+  NotificationParams extends object
+> {
   /**
    * Spec version
    */
@@ -95,10 +110,21 @@ export interface JsonRpcNotification<NotificationName = string, NotificationPara
 }
 
 /**
- * Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
+ * Type guard for {@link JsonRpcRequest | JsonRpcRequest}
+ *
+ * @returns true if the message is a JSON-RPC request, false otherwise
  * @beta
  */
-export type JsonRpcErrorResponse = ErrorResponse;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
+  return (
+    'id' in message &&
+    'params' in message &&
+    'method' in message &&
+    'jsonrpc' in message &&
+    message['jsonrpc'] === '2.0'
+  );
+}
 
 /**
  * Type guard for {@link JsonRpcNotification | JsonRpcNotification}
@@ -106,7 +132,9 @@ export type JsonRpcErrorResponse = ErrorResponse;
  * @returns true if the message is a JSON-RPC notification, false otherwise
  * @beta
  */
-export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotification<T, any> {
+export function isJsonRpcNotification<Name extends string, Params extends object>(
+  message: object
+): message is JsonRpcNotification<Name, Params> {
   return 'method' in message && !('id' in message);
 }
 /**
@@ -115,7 +143,9 @@ export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotifi
  * @returns true if the message is a JSON-RPC response, false otherwis
  * @beta
  */
-export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
+export function isJsonRpcResponse<ResponseType = object>(
+  message: object
+): message is JsonRpcResponse<ResponseType> {
   return 'result' in message;
 }
 /**
@@ -124,6 +154,8 @@ export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
  * @returns true if the message is a JSON-RPC error response, false otherwise
  * @beta
  */
-export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
-  return 'error' in message;
+export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(
+  message: object
+): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>> {
+  return 'id' in message && 'error' in message;
 }

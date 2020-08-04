@@ -1,7 +1,7 @@
 // need to use this syntax, because ajv uses export= style exports
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
-import {Request, Response} from './types';
+import {StateChannelsRequest, StateChannelsResponse, StateChannelsNotification} from './types';
 
 // You need to pass `jsonPointers: true`
 const ajv = new Ajv({jsonPointers: true, verbose: true});
@@ -11,8 +11,12 @@ const apiSchema = require('./generated-schema.json'); // because https://github.
 
 ajv.addSchema(apiSchema, 'api.json');
 
-export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/Request'});
-export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/Response'});
+export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/StateChannelsRequest'});
+export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/StateChannelsResponse'});
+export const validateNotification = ajv.compile({
+  $ref: 'api.json#/definitions/StateChannelsNotification'
+});
+
 function prettyPrintError(e: Ajv.ErrorObject): string {
   switch (e.keyword) {
     case 'additionalProperties': {
@@ -36,26 +40,26 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
 /**
  * Validates a request against the API schema & returns the input cast to the correctly narrowed type.
  *
- * @param jsonBlob - A javascript object that might be a valid {@link Request}
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsRequest}
  * @returns The input, but with the correct type, if it is valid.
  */
-export function parseRequest(jsonBlob: object): Request {
+export function parseRequest(jsonBlob: object): StateChannelsRequest {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
     throw new Error(
       `Validation Error: ${validateRequest.errors?.map(e => prettyPrintError(e)).join(`;\n`)}`
     );
   }
-  return jsonBlob as Request;
+  return jsonBlob as StateChannelsRequest;
 }
 
 /**
  * Validates a response against the API schema & returns the input cast to the correctly narrowed type.
  *
- * @param jsonBlob - A javascript object that might be a valid {@link Response}
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsResponse}
  * @returns The input, but with the correct type, if it is valid.
  */
-export function parseResponse(jsonBlob: object): Response {
+export function parseResponse(jsonBlob: object): StateChannelsResponse {
   const valid = validateResponse(jsonBlob);
   if (!valid) {
     throw new Error(
@@ -66,5 +70,25 @@ export function parseResponse(jsonBlob: object): Response {
       `
     );
   }
-  return jsonBlob as Response;
+  return jsonBlob as StateChannelsResponse;
+}
+
+/**
+ * Validates a notification against the API schema & returns the input cast to the correctly narrowed type.
+ *
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsNotification}
+ * @returns The input, but with the correct type, if it is valid.
+ */
+export function parseNotification(jsonBlob: object): StateChannelsNotification {
+  const valid = validateNotification(jsonBlob);
+  if (!valid) {
+    throw new Error(
+      `
+      Validation Error:
+        input: ${JSON.stringify(jsonBlob)};\n
+        ${validateNotification.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+      `
+    );
+  }
+  return jsonBlob as StateChannelsNotification;
 }

@@ -14,17 +14,17 @@ Validates a response against the API schema &amp; returns the input cast to the 
 <b>Signature:</b>
 
 ```typescript
-export declare function parseResponse(jsonBlob: object): Response;
+export declare function parseResponse(jsonBlob: object): StateChannelsResponse;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  jsonBlob | object | A javascript object that might be a valid [Response](./client-api-schema.response.md) |
+|  jsonBlob | object | A javascript object that might be a valid [StateChannelsResponse](./client-api-schema.statechannelsresponse.md) |
 
 <b>Returns:</b>
 
-[Response](./client-api-schema.response.md)
+[StateChannelsResponse](./client-api-schema.statechannelsresponse.md)
 
 The input, but with the correct type, if it is valid.

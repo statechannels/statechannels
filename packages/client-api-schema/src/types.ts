@@ -1,5 +1,5 @@
-import {Notification} from './notifications';
-import {JsonRpcError} from './utils';
+import {StateChannelsNotification} from './notifications';
+import {JsonRpcError, JsonRpcErrorResponse} from './jsonrpc-header-types';
 import {
   CreateChannelRequest,
   JoinChannelRequest,
@@ -35,7 +35,7 @@ import {
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 
-export type Request =
+export type StateChannelsRequest =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
@@ -50,7 +50,7 @@ export type Request =
   | CloseAndWithdrawRequest
   | GetChannelsRequest;
 
-export type Response =
+export type StateChannelsResponse =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
@@ -65,28 +65,42 @@ export type Response =
   | CloseAndWithdrawResponse
   | GetChannelsResponse;
 
-export type ErrorResponse =
+export type StateChannelsError =
   | EnableEthereumError
   | CloseAndWithdrawError
   | CloseChannelError
   | UpdateChannelError
   | GenericError;
 
-export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
+export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
 
-export function isResponse(message: JsonRpcMessage): message is Response {
+export type StateChannelsJsonRpcMessage =
+  | StateChannelsRequest
+  | StateChannelsResponse
+  | StateChannelsNotification
+  | StateChannelsErrorResponse;
+
+export function isStateChannelsResponse(
+  message: StateChannelsJsonRpcMessage
+): message is StateChannelsResponse {
   return 'id' in message && 'result' in message;
 }
 
-export function isNotification(message: JsonRpcMessage): message is Notification {
+export function isStateChannelsNotification(
+  message: StateChannelsJsonRpcMessage
+): message is StateChannelsNotification {
   return !('id' in message);
 }
-export function isRequest(message: JsonRpcMessage): message is Request {
+export function isStateChannelsRequest(
+  message: StateChannelsJsonRpcMessage
+): message is StateChannelsRequest {
   return 'id' in message && 'params' in message;
 }
 
-export function isError(message: JsonRpcMessage): message is ErrorResponse {
-  return 'id' in message && 'error' in message;
+export function isStateChannelsErrorResponse(
+  message: StateChannelsJsonRpcMessage
+): message is StateChannelsErrorResponse {
+  return 'id' in message && 'message' in message && 'error' in message;
 }
 
 export * from './notifications';

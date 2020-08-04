@@ -36,12 +36,18 @@ export interface ApproveBudgetAndFundParams {
     token: Address;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "ApproveBudgetAndFundRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', ApproveBudgetAndFundParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "ApproveBudgetAndFundResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<DomainBudget>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "BudgetUpdatedNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
 
@@ -54,9 +60,13 @@ export interface ChallengeChannelParams {
     channelId: ChannelId;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChallengeChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', ChallengeChannelParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChallengeChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
@@ -69,19 +79,26 @@ export interface ChannelBudget {
 }
 
 // Warning: (ae-forgotten-export) The symbol "ErrorCodes" needs to be exported by the entry point index.d.ts
+// Warning: (ae-incompatible-release-tags) The symbol "ChannelClosed" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
 //
 // @public (undocumented)
 export type ChannelClosed = JsonRpcError<ErrorCodes_3['ChannelClosed'], 'Channel closed'>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChannelClosingNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', ChannelResult>;
 
 // @public
 export type ChannelId = string;
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChannelNotFound" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
+//
 // @public (undocumented)
 export type ChannelNotFound = JsonRpcError<ErrorCodes_3['ChannelNotFound'], 'Channel not found'>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChannelProposedNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 
@@ -108,9 +125,13 @@ export interface ChannelResult {
 // @public (undocumented)
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'challenging' | 'responding' | 'closing' | 'closed';
 
+// Warning: (ae-incompatible-release-tags) The symbol "ChannelUpdatedNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "CloseAndWithdrawError" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
+//
 // @public (undocumented)
 export type CloseAndWithdrawError = JsonRpcError<ErrorCodes['CloseAndWithdraw']['UserDeclined'], 'User declined'>;
 
@@ -120,9 +141,13 @@ export interface CloseAndWithdrawParams {
     hubParticipantId: string;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "CloseAndWithdrawRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "CloseAndWithdrawResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type CloseAndWithdrawResponse = JsonRpcResponse<{
     success: boolean;
@@ -140,9 +165,13 @@ export interface CloseChannelParams {
     channelId: ChannelId;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "CloseChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "CloseChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
@@ -160,9 +189,13 @@ export interface CreateChannelParams {
     participants: Participant[];
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "CreateChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "CreateChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
 
@@ -176,12 +209,18 @@ export interface DomainBudget {
     hubAddress: string;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "EnableEthereumError" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
+//
 // @public (undocumented)
 export type EnableEthereumError = JsonRpcError<ErrorCodes['EnableEthereum']['EthereumNotEnabled'], 'Ethereum Not Enabled'>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "EnableEthereumRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "EnableEthereumResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type EnableEthereumResponse = JsonRpcResponse<{
     signingAddress: Address;
@@ -228,11 +267,6 @@ export type ErrorCodes = {
     };
 };
 
-// Warning: (ae-forgotten-export) The symbol "GenericError" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type ErrorResponse = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
-
 // @public
 export type ExternalDestination = string;
 
@@ -253,9 +287,13 @@ export interface GetBudgetParams {
     hubParticipantId: string;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetBudgetRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', GetBudgetParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetBudgetResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type GetBudgetResponse = JsonRpcResponse<DomainBudget | {}>;
 
@@ -265,11 +303,15 @@ export interface GetChannelsParams {
     includeClosed?: boolean;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetChannelsRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {
     includeClosed?: boolean;
 }>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetChannelsResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type GetChannelsResponse = JsonRpcResponse<ChannelResult[]>;
 
@@ -279,15 +321,23 @@ export interface GetStateParams {
     channelId: ChannelId;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetStateRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type GetStateRequest = JsonRpcRequest<'GetState', GetStateParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetStateResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type GetStateResponse = JsonRpcResponse<ChannelResult>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetWalletInformationRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type GetWalletInformationRequest = JsonRpcRequest<'GetWalletInformation', {}>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GetWalletInformationResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type GetWalletInformationResponse = JsonRpcResponse<{
     signingAddress: Address;
@@ -295,28 +345,44 @@ export type GetWalletInformationResponse = JsonRpcResponse<{
     walletVersion: string;
 }>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "InvalidAppData" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
+//
 // @public (undocumented)
 export type InvalidAppData = JsonRpcError<ErrorCodes_3['InvalidAppData'], 'Invalid app data', {
     appData: string;
 }>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "InvalidTransition" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
+//
 // @public (undocumented)
 export type InvalidTransition = JsonRpcError<ErrorCodes_3['InvalidTransition'], 'Invalid transition', {
     channelStatus: ChannelStatus;
     proposedUpdate: UpdateChannelParams;
 }>;
 
-// @public (undocumented)
-export function isError(message: JsonRpcMessage): message is ErrorResponse;
+// @beta
+export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(message: object): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>>;
+
+// @beta
+export function isJsonRpcNotification<Name extends string, Params extends object>(message: object): message is JsonRpcNotification<Name, Params>;
+
+// @beta
+export function isJsonRpcRequest(message: any): message is JsonRpcRequest;
+
+// @beta
+export function isJsonRpcResponse<ResponseType = object>(message: object): message is JsonRpcResponse<ResponseType>;
 
 // @public (undocumented)
-export function isNotification(message: JsonRpcMessage): message is Notification;
+export function isStateChannelsErrorResponse(message: StateChannelsJsonRpcMessage): message is StateChannelsErrorResponse;
 
 // @public (undocumented)
-export function isRequest(message: JsonRpcMessage): message is Request;
+export function isStateChannelsNotification(message: StateChannelsJsonRpcMessage): message is StateChannelsNotification;
 
 // @public (undocumented)
-export function isResponse(message: JsonRpcMessage): message is Response;
+export function isStateChannelsRequest(message: StateChannelsJsonRpcMessage): message is StateChannelsRequest;
+
+// @public (undocumented)
+export function isStateChannelsResponse(message: StateChannelsJsonRpcMessage): message is StateChannelsResponse;
 
 // @public (undocumented)
 export interface JoinChannelParams {
@@ -324,62 +390,50 @@ export interface JoinChannelParams {
     channelId: ChannelId;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "JoinChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type JoinChannelRequest = JsonRpcRequest<'JoinChannel', JoinChannelParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "JoinChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type JoinChannelResponse = JsonRpcResponse<ChannelResult>;
 
-// @public (undocumented)
-export interface JsonRpcError<Code, Message, Data = undefined> {
-    // (undocumented)
-    error: Data extends undefined ? {
-        code: Code;
-        message: Message;
-    } : {
-        code: Code;
-        message: Message;
-        data: Data;
-    };
-    // (undocumented)
+// @beta
+export interface JsonRpcError<Code extends number, Message, Data = undefined> {
+    code: Code;
+    data?: Data;
+    message: Message;
+}
+
+// @beta
+export interface JsonRpcErrorResponse<Error = any> {
+    error: Error;
     id: number;
-    // (undocumented)
     jsonrpc: '2.0';
 }
 
-// @public (undocumented)
-export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
-
-// @public (undocumented)
-export interface JsonRpcNotification<NotificationName, NotificationParams> {
-    // (undocumented)
+// @beta
+export interface JsonRpcNotification<NotificationName extends string, NotificationParams extends object> {
     jsonrpc: '2.0';
-    // (undocumented)
     method: NotificationName;
-    // (undocumented)
     params: NotificationParams;
 }
 
-// @public (undocumented)
-export interface JsonRpcRequest<MethodName, RequestParams> {
-    // (undocumented)
+// @beta
+export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
     id: number;
-    // (undocumented)
     jsonrpc: '2.0';
-    // (undocumented)
     method: MethodName;
-    // (undocumented)
     params: RequestParams;
 }
 
-// @public (undocumented)
-export interface JsonRpcResponse<ResultType> {
-    // (undocumented)
+// @beta
+export interface JsonRpcResponse<ResponseType = object> {
     id: number;
-    // (undocumented)
     jsonrpc: '2.0';
-    // (undocumented)
-    result: ResultType;
+    result: ResponseType;
 }
 
 // @public
@@ -389,27 +443,24 @@ export interface Message {
     sender: string;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "MessageQueuedNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 
-// @public (undocumented)
-export type Notification = ChannelProposedNotification | ChannelUpdatedNotification | ChannelClosingNotification | BudgetUpdatedNotification | MessageQueuedNotification | UiNotification;
-
-// Warning: (ae-forgotten-export) The symbol "FilterByMethod" needs to be exported by the entry point index.d.ts
+// Warning: (ae-incompatible-release-tags) The symbol "NotYourTurn" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
 //
-// @public (undocumented)
-export type NotificationType = {
-    [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
-};
-
 // @public (undocumented)
 export type NotYourTurn = JsonRpcError<ErrorCodes_3['NotYourTurn'], 'Not your turn'>;
 
 // @public
-export function parseRequest(jsonBlob: object): Request;
+export function parseNotification(jsonBlob: object): StateChannelsNotification;
 
 // @public
-export function parseResponse(jsonBlob: object): Response;
+export function parseRequest(jsonBlob: object): StateChannelsRequest;
+
+// @public
+export function parseResponse(jsonBlob: object): StateChannelsResponse;
 
 // @public
 export interface Participant {
@@ -421,9 +472,13 @@ export interface Participant {
 // @public (undocumented)
 export type PushMessageParams = PushMessageRequest['params'];
 
+// Warning: (ae-incompatible-release-tags) The symbol "PushMessageRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type PushMessageRequest = JsonRpcRequest<'PushMessage', Message>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "PushMessageResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type PushMessageResponse = JsonRpcResponse<PushMessageResult>;
 
@@ -432,11 +487,34 @@ export type PushMessageResult = {
     success: boolean;
 };
 
+// Warning: (ae-forgotten-export) The symbol "GenericError" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export type Request = CreateChannelRequest | JoinChannelRequest | UpdateChannelRequest | GetWalletInformationRequest | EnableEthereumRequest | GetStateRequest | PushMessageRequest | ChallengeChannelRequest | GetBudgetRequest | ApproveBudgetAndFundRequest | CloseChannelRequest | CloseAndWithdrawRequest | GetChannelsRequest;
+export type StateChannelsError = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
+
+// Warning: (ae-incompatible-release-tags) The symbol "StateChannelsErrorResponse" is marked as @public, but its signature references "JsonRpcErrorResponse" which is marked as @beta
+//
+// @public (undocumented)
+export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
 
 // @public (undocumented)
-export type Response = CreateChannelResponse | JoinChannelResponse | UpdateChannelResponse | GetWalletInformationResponse | EnableEthereumResponse | GetStateResponse | PushMessageResponse | ChallengeChannelResponse | GetBudgetResponse | CloseChannelResponse | ApproveBudgetAndFundResponse | CloseAndWithdrawResponse | GetChannelsResponse;
+export type StateChannelsJsonRpcMessage = StateChannelsRequest | StateChannelsResponse | StateChannelsNotification | StateChannelsErrorResponse;
+
+// @public (undocumented)
+export type StateChannelsNotification = ChannelProposedNotification | ChannelUpdatedNotification | ChannelClosingNotification | BudgetUpdatedNotification | MessageQueuedNotification | UiNotification;
+
+// Warning: (ae-forgotten-export) The symbol "FilterByMethod" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type StateChannelsNotificationType = {
+    [T in StateChannelsNotification['method']]: [FilterByMethod<StateChannelsNotification, T>['params']];
+};
+
+// @public (undocumented)
+export type StateChannelsRequest = CreateChannelRequest | JoinChannelRequest | UpdateChannelRequest | GetWalletInformationRequest | EnableEthereumRequest | GetStateRequest | PushMessageRequest | ChallengeChannelRequest | GetBudgetRequest | ApproveBudgetAndFundRequest | CloseChannelRequest | CloseAndWithdrawRequest | GetChannelsRequest;
+
+// @public (undocumented)
+export type StateChannelsResponse = CreateChannelResponse | JoinChannelResponse | UpdateChannelResponse | GetWalletInformationResponse | EnableEthereumResponse | GetStateResponse | PushMessageResponse | ChallengeChannelResponse | GetBudgetResponse | CloseChannelResponse | ApproveBudgetAndFundResponse | CloseAndWithdrawResponse | GetChannelsResponse;
 
 // @public (undocumented)
 export interface TokenBudget {
@@ -450,6 +528,8 @@ export interface TokenBudget {
     token: Address;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "UiNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
 // @public (undocumented)
 export type UiNotification = JsonRpcNotification<'UIUpdate', {
     showWallet: boolean;
@@ -474,9 +554,13 @@ export interface UpdateChannelParams {
     channelId: ChannelId;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "UpdateChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
 // @public (undocumented)
 export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannelParams>;
 
+// Warning: (ae-incompatible-release-tags) The symbol "UpdateChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
 // @public (undocumented)
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 

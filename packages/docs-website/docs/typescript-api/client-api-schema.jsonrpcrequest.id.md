@@ -9,8 +9,17 @@ hide_title: true
 
 ## JsonRpcRequest.id property
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Identifier for the resquest
+
 <b>Signature:</b>
 
 ```typescript
 id: number;
 ```
+
+## Remarks
+
+To be matched in a response

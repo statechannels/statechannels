@@ -5,16 +5,15 @@ import {
   UpdateChannelRequest,
   CloseChannelRequest,
   JoinChannelRequest,
-  Response,
+  StateChannelsResponse,
   ChannelResult,
-  Notification,
+  StateChannelsNotification,
   ChannelClosingNotification,
   ChannelUpdatedNotification,
-  Request,
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
   CloseAndWithdrawRequest,
-  ErrorResponse,
+  StateChannelsErrorResponse,
   ChallengeChannelRequest,
   FundingStrategy,
   parseResponse
@@ -59,19 +58,23 @@ type ChannelRequest =
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
   CreateChannelRequest: [CreateChannelRequest];
-  SendMessage: [Response | Notification | ErrorResponse];
+  SendMessage: [StateChannelsResponse | StateChannelsNotification | StateChannelsErrorResponse];
 }
 
-export const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
-  'method' in m && m.method === 'ChannelUpdated';
-export const isChannelProposed = (m: Response | Notification): m is ChannelProposedNotification =>
-  'method' in m && m.method === 'ChannelProposed';
+export const isChannelUpdated = (
+  m: StateChannelsResponse | StateChannelsNotification
+): m is ChannelUpdatedNotification => 'method' in m && m.method === 'ChannelUpdated';
+export const isChannelProposed = (
+  m: StateChannelsResponse | StateChannelsNotification
+): m is ChannelProposedNotification => 'method' in m && m.method === 'ChannelProposed';
 
 export interface MessagingServiceInterface {
-  readonly outboxFeed: Observable<Response | Notification | ErrorResponse>;
+  readonly outboxFeed: Observable<
+    StateChannelsResponse | StateChannelsNotification | StateChannelsErrorResponse
+  >;
   readonly requestFeed: Observable<AppRequestEvent>;
 
-  receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
+  receiveRequest(jsonRpcMessage: object, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: DomainBudget): Promise<void>;
   sendChannelNotification(
     method: (ChannelClosingNotification | ChannelUpdatedNotification)['method'],
@@ -83,8 +86,8 @@ export interface MessagingServiceInterface {
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
-  sendResponse(id: number, result: Response['result']): Promise<void>;
-  sendError(id: number, error: ErrorResponse['error']): Promise<void>;
+  sendResponse(id: number, result: StateChannelsResponse['result']): Promise<void>;
+  sendError(id: number, error: StateChannelsErrorResponse['error']): Promise<void>;
 }
 
 export class MessagingService implements MessagingServiceInterface {
@@ -94,7 +97,7 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter = new EventEmitter();
   }
 
-  public get outboxFeed(): Observable<Response> {
+  public get outboxFeed(): Observable<StateChannelsResponse> {
     return fromEvent(this.eventEmitter, 'SendMessage');
   }
 
@@ -102,18 +105,18 @@ export class MessagingService implements MessagingServiceInterface {
     return fromEvent(this.eventEmitter, 'AppRequest');
   }
 
-  public async sendResponse(id: number, result: Response['result']) {
+  public async sendResponse(id: number, result: StateChannelsResponse['result']) {
     const response = parseResponse({id, jsonrpc: '2.0', result});
     this.eventEmitter.emit('SendMessage', response);
   }
 
-  public async sendError(id: number, error: ErrorResponse['error']) {
-    const response = {id, jsonrpc: '2.0', error} as ErrorResponse; // typescript can't handle this otherwise
+  public async sendError(id: number, error: StateChannelsErrorResponse['error']) {
+    const response = {id, jsonrpc: '2.0', error} as StateChannelsErrorResponse; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', response);
   }
 
   public async sendBudgetNotification(notificationData: DomainBudget) {
-    const notification: Notification = {
+    const notification: StateChannelsNotification = {
       jsonrpc: '2.0',
       method: 'BudgetUpdated',
       params: serializeDomainBudget(notificationData)
@@ -132,7 +135,11 @@ export class MessagingService implements MessagingServiceInterface {
   );
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(method, notificationData) {
-    const notification = {jsonrpc: '2.0', method, params: notificationData} as Notification; // typescript can't handle this otherwise
+    const notification = {
+      jsonrpc: '2.0',
+      method,
+      params: notificationData
+    } as StateChannelsNotification; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', notification);
   }
 
@@ -150,7 +157,7 @@ export class MessagingService implements MessagingServiceInterface {
       .map(p => p.participantId);
 
     filteredRecipients.forEach(recipient => {
-      const notification: Notification = {
+      const notification: StateChannelsNotification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
         params: validateMessage(serializeMessage(message, recipient, sender))
@@ -161,7 +168,7 @@ export class MessagingService implements MessagingServiceInterface {
 
   public sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
     const showWallet = displayMessage === 'Show';
-    const notification: Notification = {
+    const notification: StateChannelsNotification = {
       jsonrpc: '2.0',
       method: 'UIUpdate',
       params: {showWallet}
@@ -169,8 +176,8 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
-  public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
-    const request = parseRequest(jsonRpcRequest);
+  public async receiveRequest(jsonRpcRequest: object, fromDomain: string) {
+    const request = parseRequest(jsonRpcRequest); // If this doesn't throw, we narrow the type to Request
     const {id: requestId} = request;
 
     switch (request.method) {
