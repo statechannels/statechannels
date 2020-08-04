@@ -59,11 +59,7 @@ describe('e2e', () => {
     expect(channel.status).toBe('funding');
     expect(channel.turnNum).toBe(0);
 
-    const inspectedChannel = await Channel.query()
-      .where({channelId: channel.channelId})
-      .first();
-
-    expect(inspectedChannel.supported).toBeDefined();
+    expect((await Channel.forId(channel.channelId)).protocolState).toMatchObject({ supported: { turnNum: 0 } });
   });
 
   it('can update pre-existing channel, send signed state via http', async () => {
