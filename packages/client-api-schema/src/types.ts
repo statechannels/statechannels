@@ -32,7 +32,6 @@ import {
   CloseChannelError,
   UpdateChannelError
 } from './methods';
-import {ErrorCodes} from './error-codes';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 

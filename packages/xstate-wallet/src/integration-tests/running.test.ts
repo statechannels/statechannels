@@ -1,6 +1,6 @@
 import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
-import {ErrorResponse, ErrorCodes} from '@statechannels/client-api-schema';
+import {StateChannelsError, ErrorCodes} from '@statechannels/client-api-schema';
 
 import {FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID} from '../config';
@@ -8,7 +8,7 @@ import {CHAIN_NETWORK_ID} from '../config';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 jest.setTimeout(30000);
 
-const resolveOnError = (player: Player, errorCode: ErrorResponse['error']['code']) =>
+const resolveOnError = (player: Player, errorCode: StateChannelsError['code']) =>
   new Promise((resolve, reject) => {
     setTimeout(() => reject(`Timed out waiting for error code ${errorCode}`), 3000);
     player.messagingService.outboxFeed.subscribe(message => {

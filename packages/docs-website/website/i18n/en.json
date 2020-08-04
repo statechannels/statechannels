@@ -946,6 +946,9 @@
       "typescript-api/client-api-schema.pushmessageresult": {
         "title": "PushMessageResult type"
       },
+      "typescript-api/client-api-schema.statechannelserror": {
+        "title": "StateChannelsError type"
+      },
       "typescript-api/client-api-schema.statechannelserrorresponse": {
         "title": "StateChannelsErrorResponse type"
       },
