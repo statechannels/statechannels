@@ -14,7 +14,7 @@ export interface PostMessageServiceOptions {
 
 class RpcError extends Error {
   constructor(readonly error: ErrorResponse['error']) {
-    super(error.message);
+    super(error?.message);
   }
 }
 
