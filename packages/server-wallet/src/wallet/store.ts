@@ -94,8 +94,8 @@ export const Store = {
     return (await Channel.forId(channelId, tx))?.protocolState;
   },
 
-  getChannels: async function(tx: Transaction | undefined): Promise<Channel[]> {
-    return await Channel.query(tx);
+  getChannels: async function(tx: Transaction | undefined): Promise<ChannelState[]> {
+    return (await Channel.query(tx)).map(channel => channel.protocolState);
   },
 
   pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
