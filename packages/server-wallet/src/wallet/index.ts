@@ -3,7 +3,7 @@ import {
   ChannelResult as ClientChannelResult,
   UpdateChannelParams,
   CreateChannelParams,
-  Notification,
+  StateChannelsNotification,
   JoinChannelParams,
   CloseChannelParams,
   ChannelResult,
@@ -55,7 +55,7 @@ export type WalletInterface = {
   pushMessage(m: AddressedMessage): MultipleChannelResult;
 
   // Wallet -> App communication
-  onNotification(cb: (notice: Notification) => void): {unsubscribe: () => void};
+  onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
 };
 
 export class Wallet implements WalletInterface {
@@ -167,7 +167,7 @@ export class Wallet implements WalletInterface {
 
     return {outbox, channelResults};
   }
-  onNotification(_cb: (notice: Notification) => void): {unsubscribe: () => void} {
+  onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
   }
 }
