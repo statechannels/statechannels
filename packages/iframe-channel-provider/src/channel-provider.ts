@@ -1,9 +1,8 @@
 import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {
-  NotificationType,
+  StateChannelsNotificationType,
   StateChannelsNotification,
-  isStateChannelsNotification,
   parseNotification
 } from '@statechannels/client-api-schema';
 
@@ -40,7 +39,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    */
   protected readonly messaging: PostMessageService;
   protected readonly subscriptions: {
-    [T in keyof NotificationType]: string[];
+    [T in keyof StateChannelsNotificationType]: string[];
   } = {
     ChannelProposed: [],
     ChannelUpdated: [],
@@ -185,7 +184,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   protected async onMessage(event: MessageEvent) {
     const message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
     const notificationMethod = message.method;
-    const notificationParams = message.params;
+    const notificationParams = message.params as any;
     this.events.emit(notificationMethod, notificationParams);
     if ('showWallet' in message.params) {
       this.iframe.setVisibility(message.params.showWallet);

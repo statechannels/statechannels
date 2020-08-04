@@ -448,13 +448,6 @@ export interface Message {
 // @public (undocumented)
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 
-// Warning: (ae-forgotten-export) The symbol "FilterByMethod" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type NotificationType = {
-    [T in StateChannelsNotification['method']]: [FilterByMethod<StateChannelsNotification, T>['params']];
-};
-
 // Warning: (ae-incompatible-release-tags) The symbol "NotYourTurn" is marked as @public, but its signature references "JsonRpcError" which is marked as @beta
 //
 // @public (undocumented)
@@ -504,6 +497,13 @@ export type StateChannelsJsonRpcMessage = StateChannelsRequest | StateChannelsRe
 
 // @public (undocumented)
 export type StateChannelsNotification = ChannelProposedNotification | ChannelUpdatedNotification | ChannelClosingNotification | BudgetUpdatedNotification | MessageQueuedNotification | UiNotification;
+
+// Warning: (ae-forgotten-export) The symbol "FilterByMethod" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type StateChannelsNotificationType = {
+    [T in StateChannelsNotification['method']]: [FilterByMethod<StateChannelsNotification, T>['params']];
+};
 
 // @public (undocumented)
 export type StateChannelsRequest = CreateChannelRequest | JoinChannelRequest | UpdateChannelRequest | GetWalletInformationRequest | EnableEthereumRequest | GetStateRequest | PushMessageRequest | ChallengeChannelRequest | GetBudgetRequest | ApproveBudgetAndFundRequest | CloseChannelRequest | CloseAndWithdrawRequest | GetChannelsRequest;

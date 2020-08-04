@@ -4066,58 +4066,6 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@statechannels/client-api-schema!NotificationType:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type NotificationType = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    [T in "
-            },
-            {
-              "kind": "Reference",
-              "text": "StateChannelsNotification",
-              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": "['method']]: ["
-            },
-            {
-              "kind": "Reference",
-              "text": "FilterByMethod",
-              "canonicalReference": "@statechannels/client-api-schema!~FilterByMethod:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "StateChannelsNotification",
-              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
-            },
-            {
-              "kind": "Content",
-              "text": ", T>['params']];\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "NotificationType",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 8
-          }
-        },
-        {
-          "kind": "TypeAlias",
           "canonicalReference": "@statechannels/client-api-schema!NotYourTurn:type",
           "docComment": "",
           "excerptTokens": [
@@ -4697,6 +4645,58 @@
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 12
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotificationType:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type StateChannelsNotificationType = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    [T in "
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": "['method']]: ["
+            },
+            {
+              "kind": "Reference",
+              "text": "FilterByMethod",
+              "canonicalReference": "@statechannels/client-api-schema!~FilterByMethod:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "StateChannelsNotification",
+              "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotification:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", T>['params']];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "StateChannelsNotificationType",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 8
           }
         },
         {

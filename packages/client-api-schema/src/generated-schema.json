@@ -872,7 +872,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1258>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1271>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1885,7 +1885,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1258%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1271%3E"
     },
     "Uint256": {
       "description": "Uint256",

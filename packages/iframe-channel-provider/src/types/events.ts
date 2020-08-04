@@ -1,11 +1,14 @@
 import EventEmitter from 'eventemitter3';
-import {NotificationType, StateChannelsNotification} from '@statechannels/client-api-schema';
+import {
+  StateChannelsNotificationType,
+  StateChannelsNotification
+} from '@statechannels/client-api-schema';
 
 /**
  * Globally-unique-identifier header
  * @internal
  */
-export interface EventType extends NotificationType {
+export interface EventType extends StateChannelsNotificationType {
   [id: string]: [unknown]; // guid
 }
 const eventEmitter = new EventEmitter<EventType>();

@@ -21,7 +21,7 @@ export type StateChannelsNotification =
 
 type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
 
-export type NotificationType = {
+export type StateChannelsNotificationType = {
   [T in StateChannelsNotification['method']]: [
     FilterByMethod<StateChannelsNotification, T>['params']
   ];
