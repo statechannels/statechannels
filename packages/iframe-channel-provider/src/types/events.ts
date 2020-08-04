@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import {NotificationType, Notification} from '@statechannels/client-api-schema';
+import {NotificationType, StateChannelsNotification} from '@statechannels/client-api-schema';
 
 /**
  * Globally-unique-identifier header
@@ -21,7 +21,7 @@ export type OffType = typeof eventEmitter.off;
  * @internal
  */
 export type SubscribeType = (
-  subscriptionType: Notification['method'],
+  subscriptionType: StateChannelsNotification['method'],
   params?: any
 ) => Promise<string>;
 /**

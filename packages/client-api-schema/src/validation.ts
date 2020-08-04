@@ -1,7 +1,7 @@
 // need to use this syntax, because ajv uses export= style exports
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
-import {Request, Response, Notification} from './types';
+import {StateChannelsRequest, StateChannelsResponse, StateChannelsNotification} from './types';
 
 // You need to pass `jsonPointers: true`
 const ajv = new Ajv({jsonPointers: true, verbose: true});
@@ -41,14 +41,14 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
  * @param jsonBlob - A javascript object that might be a valid {@link Request}
  * @returns The input, but with the correct type, if it is valid.
  */
-export function parseRequest(jsonBlob: object): Request {
+export function parseRequest(jsonBlob: object): StateChannelsRequest {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
     throw new Error(
       `Validation Error: ${validateRequest.errors?.map(e => prettyPrintError(e)).join(`;\n`)}`
     );
   }
-  return jsonBlob as Request;
+  return jsonBlob as StateChannelsRequest;
 }
 
 /**
@@ -57,7 +57,7 @@ export function parseRequest(jsonBlob: object): Request {
  * @param jsonBlob - A javascript object that might be a valid {@link Response}
  * @returns The input, but with the correct type, if it is valid.
  */
-export function parseResponse(jsonBlob: object): Response {
+export function parseResponse(jsonBlob: object): StateChannelsResponse {
   const valid = validateResponse(jsonBlob);
   if (!valid) {
     throw new Error(
@@ -68,7 +68,7 @@ export function parseResponse(jsonBlob: object): Response {
       `
     );
   }
-  return jsonBlob as Response;
+  return jsonBlob as StateChannelsResponse;
 }
 
 /**
@@ -77,7 +77,7 @@ export function parseResponse(jsonBlob: object): Response {
  * @param jsonBlob - A javascript object that might be a valid {@link Notification}
  * @returns The input, but with the correct type, if it is valid.
  */
-export function parseNotification(jsonBlob: object): Notification {
+export function parseNotification(jsonBlob: object): StateChannelsNotification {
   const valid = validateNotification(jsonBlob);
   if (!valid) {
     throw new Error(
@@ -88,5 +88,5 @@ export function parseNotification(jsonBlob: object): Notification {
       `
     );
   }
-  return jsonBlob as Notification;
+  return jsonBlob as StateChannelsNotification;
 }

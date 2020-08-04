@@ -2,8 +2,9 @@ import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {
   NotificationType,
-  Notification,
-  isJsonRpcNotification
+  StateChannelsNotification,
+  isJsonRpcNotification,
+  parseNotification
 } from '@statechannels/client-api-schema';
 
 import {IFrameChannelProviderInterface} from './types';
@@ -164,8 +165,8 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
 
   unsubscribe: UnsubscribeType = async subscriptionId => {
     Object.keys(this.subscriptions).forEach(method => {
-      this.subscriptions[method as Notification['method']] = this.subscriptions[
-        method as Notification['method']
+      this.subscriptions[method as StateChannelsNotification['method']] = this.subscriptions[
+        method as StateChannelsNotification['method']
       ].filter((id: string) => id != subscriptionId);
     });
 
@@ -182,17 +183,12 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
-    const message = event.data;
-    if (!message.jsonrpc) {
-      return;
-    }
-
-    if (isJsonRpcNotification<keyof NotificationType>(message)) {
-      // TODO: use schema validations as better type guards
+    if (isJsonRpcNotification(event.data)) {
+      const message = parseNotification(event.data);
       const notificationMethod = message.method;
       const notificationParams = message.params;
       this.events.emit(notificationMethod, notificationParams);
-      if (notificationMethod === 'UIUpdate') {
+      if ('showWallet' in message.params) {
         this.iframe.setVisibility(message.params.showWallet);
       } else {
         this.subscriptions[notificationMethod].forEach(id => {

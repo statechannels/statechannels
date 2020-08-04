@@ -322,25 +322,6 @@
     "EnableEthereumResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-297-383-721393493-280-384-721393493-243-385-721393493-0-517%3E"
     },
-    "ErrorResponse": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/EnableEthereumError"
-        },
-        {
-          "$ref": "#/definitions/CloseAndWithdrawError"
-        },
-        {
-          "$ref": "#/definitions/CloseChannelError"
-        },
-        {
-          "$ref": "#/definitions/UpdateChannelError"
-        },
-        {
-          "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
-        }
-      ]
-    },
     "FundingStrategy": {
       "enum": [
         "Direct",
@@ -423,7 +404,7 @@
     },
     "JsonRpcError<100,\"Ethereum Not Enabled\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -432,28 +413,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                100
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Ethereum Not Enabled"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -471,7 +434,7 @@
     },
     "JsonRpcError<200,\"User declined\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -480,28 +443,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                200
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "User declined"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -519,7 +464,7 @@
     },
     "JsonRpcError<300,\"Not your turn\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -528,28 +473,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                300
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Not your turn"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -567,7 +494,7 @@
     },
     "JsonRpcError<301,\"Channel not found\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -576,28 +503,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                301
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Channel not found"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -615,7 +524,7 @@
     },
     "JsonRpcError<400,\"Channel not found\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -624,28 +533,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                400
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Channel not found"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -663,7 +554,7 @@
     },
     "JsonRpcError<401,\"Invalid transition\",structure-1165839259-742-812-1165839259-669-814-1165839259-637-815-1165839259-0-1239>": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -672,43 +563,20 @@
           ],
           "type": "number"
         },
-        "error": {
+        "data": {
           "additionalProperties": false,
           "description": "Error data",
           "properties": {
-            "code": {
-              "enum": [
-                401
-              ],
-              "type": "number"
+            "channelStatus": {
+              "$ref": "#/definitions/ChannelStatus"
             },
-            "data": {
-              "additionalProperties": false,
-              "properties": {
-                "channelStatus": {
-                  "$ref": "#/definitions/ChannelStatus"
-                },
-                "proposedUpdate": {
-                  "$ref": "#/definitions/UpdateChannelParams"
-                }
-              },
-              "required": [
-                "channelStatus",
-                "proposedUpdate"
-              ],
-              "type": "object"
-            },
-            "message": {
-              "enum": [
-                "Invalid transition"
-              ],
-              "type": "string"
+            "proposedUpdate": {
+              "$ref": "#/definitions/UpdateChannelParams"
             }
           },
           "required": [
-            "code",
-            "message",
-            "data"
+            "channelStatus",
+            "proposedUpdate"
           ],
           "type": "object"
         },
@@ -728,7 +596,7 @@
     },
     "JsonRpcError<402,\"Invalid app data\",structure-1165839259-912-932-1165839259-844-934-1165839259-815-935-1165839259-0-1239>": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -737,39 +605,16 @@
           ],
           "type": "number"
         },
-        "error": {
+        "data": {
           "additionalProperties": false,
           "description": "Error data",
           "properties": {
-            "code": {
-              "enum": [
-                402
-              ],
-              "type": "number"
-            },
-            "data": {
-              "additionalProperties": false,
-              "properties": {
-                "appData": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "appData"
-              ],
-              "type": "object"
-            },
-            "message": {
-              "enum": [
-                "Invalid app data"
-              ],
+            "appData": {
               "type": "string"
             }
           },
           "required": [
-            "code",
-            "message",
-            "data"
+            "appData"
           ],
           "type": "object"
         },
@@ -789,7 +634,7 @@
     },
     "JsonRpcError<403,\"Not your turn\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -798,28 +643,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                403
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Not your turn"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -837,7 +664,7 @@
     },
     "JsonRpcError<404,\"Channel closed\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -846,28 +673,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                404
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Channel closed"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -885,7 +694,7 @@
     },
     "JsonRpcError<500,\"Wallet error\">": {
       "additionalProperties": false,
-      "description": "Specifies error headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
           "description": "Error code",
@@ -894,28 +703,10 @@
           ],
           "type": "number"
         },
-        "error": {
-          "additionalProperties": false,
+        "data": {
           "description": "Error data",
-          "properties": {
-            "code": {
-              "enum": [
-                500
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Wallet error"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
+          "not": {
+          }
         },
         "message": {
           "description": "Error code",
@@ -930,22 +721,6 @@
         "message"
       ],
       "type": "object"
-    },
-    "JsonRpcMessage": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Request"
-        },
-        {
-          "$ref": "#/definitions/Response"
-        },
-        {
-          "$ref": "#/definitions/Notification"
-        },
-        {
-          "$ref": "#/definitions/ErrorResponse"
-        }
-      ]
     },
     "JsonRpcNotification<\"BudgetUpdated\",DomainBudget>": {
       "additionalProperties": false,
@@ -1097,7 +872,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1211>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1258>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1897,28 +1672,6 @@
     "NotYourTurn": {
       "$ref": "#/definitions/JsonRpcError%3C403%2C%22Not%20your%20turn%22%3E"
     },
-    "Notification": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/ChannelProposedNotification"
-        },
-        {
-          "$ref": "#/definitions/ChannelUpdatedNotification"
-        },
-        {
-          "$ref": "#/definitions/ChannelClosingNotification"
-        },
-        {
-          "$ref": "#/definitions/BudgetUpdatedNotification"
-        },
-        {
-          "$ref": "#/definitions/MessageQueuedNotification"
-        },
-        {
-          "$ref": "#/definitions/UiNotification"
-        }
-      ]
-    },
     "Participant": {
       "additionalProperties": false,
       "description": "Container for data specific to a single state channel participant",
@@ -1961,7 +1714,64 @@
       ],
       "type": "object"
     },
-    "Request": {
+    "StateChannelsErrorResponse": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EnableEthereumError"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawError"
+        },
+        {
+          "$ref": "#/definitions/CloseChannelError"
+        },
+        {
+          "$ref": "#/definitions/UpdateChannelError"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
+        }
+      ]
+    },
+    "StateChannelsJsonRpcMessage": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/StateChannelsRequest"
+        },
+        {
+          "$ref": "#/definitions/StateChannelsResponse"
+        },
+        {
+          "$ref": "#/definitions/StateChannelsNotification"
+        },
+        {
+          "$ref": "#/definitions/StateChannelsErrorResponse"
+        }
+      ]
+    },
+    "StateChannelsNotification": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ChannelProposedNotification"
+        },
+        {
+          "$ref": "#/definitions/ChannelUpdatedNotification"
+        },
+        {
+          "$ref": "#/definitions/ChannelClosingNotification"
+        },
+        {
+          "$ref": "#/definitions/BudgetUpdatedNotification"
+        },
+        {
+          "$ref": "#/definitions/MessageQueuedNotification"
+        },
+        {
+          "$ref": "#/definitions/UiNotification"
+        }
+      ]
+    },
+    "StateChannelsRequest": {
       "anyOf": [
         {
           "$ref": "#/definitions/CreateChannelRequest"
@@ -2004,7 +1814,7 @@
         }
       ]
     },
-    "Response": {
+    "StateChannelsResponse": {
       "anyOf": [
         {
           "$ref": "#/definitions/CreateChannelResponse"
@@ -2075,7 +1885,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1211%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1258%3E"
     },
     "Uint256": {
       "description": "Uint256",

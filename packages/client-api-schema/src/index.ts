@@ -31,4 +31,4 @@
 export * from './types';
 export * from './jsonrpc-header-types';
 
-export {parseRequest, parseResponse} from './validation';
+export {parseRequest, parseResponse, parseNotification} from './validation';

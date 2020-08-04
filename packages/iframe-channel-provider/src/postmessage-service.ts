@@ -1,8 +1,10 @@
 import {
-  ErrorResponse,
+  StateChannelsResponse,
+  StateChannelsErrorResponse,
   JsonRpcRequest,
+  isJsonRpcErrorResponse,
   isJsonRpcResponse,
-  isJsonRpcErrorResponse
+  ErrorCodes
 } from '@statechannels/client-api-schema';
 
 import {logger} from './logger';
@@ -13,8 +15,8 @@ export interface PostMessageServiceOptions {
 }
 
 class RpcError extends Error {
-  constructor(readonly error: ErrorResponse['error']) {
-    super(error?.message);
+  constructor(readonly error: StateChannelsErrorResponse['message']) {
+    super(error);
   }
 }
 
@@ -62,21 +64,24 @@ export class PostMessageService {
   private requestNumber = 0;
   async request<ResultType = any>(
     target: Window,
-    message: JsonRpcRequest,
+    messageWithOptionalId: Omit<JsonRpcRequest, 'id'> & {id?: number}, // Make id an optional key
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
     // Some tests rely on being able to supply the id on the message
     // We should not allow this in production, as we cannot guarantee unique
     // message ids.
-    if (message.id) logger.error('message id should not be defined');
+    if (messageWithOptionalId.id) logger.error('message id should not be defined');
 
     // message IDs should be unique
-    message.id = message.id || this.requestNumber++;
+    const message: JsonRpcRequest = {
+      ...messageWithOptionalId,
+      id: messageWithOptionalId.id || this.requestNumber++
+    };
 
     return new Promise<ResultType>((resolve, reject) => {
       window.addEventListener(
         'message',
-        this.createListenerForMessage(message, resolve, reject, callback)
+        this.createListenerForRequest(message, resolve, reject, callback)
       );
 
       logger.info({message}, 'Requesting:');
@@ -95,15 +100,15 @@ export class PostMessageService {
     this.attempts = 0;
   }
 
-  protected createListenerForMessage<ResultType = any>(
-    message: JsonRpcRequest,
+  protected createListenerForRequest<ResultType extends StateChannelsResponse['result']>(
+    request: JsonRpcRequest,
     resolve: (value?: ResultType) => void,
     reject: (reason?: any) => void,
     callback?: (result: ResultType) => void
   ) {
     const listener = (event: MessageEvent) => {
-      if (event.data && event.data.jsonrpc && event.data.id === message.id) {
-        if (isJsonRpcResponse(event.data)) {
+      if (event.data && event.data.jsonrpc && event.data.id === request.id) {
+        if (isJsonRpcResponse<ResultType>(event.data)) {
           if (callback) {
             callback(event.data.result);
           }
