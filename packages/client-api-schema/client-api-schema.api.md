@@ -368,18 +368,6 @@ export type InvalidTransition = JsonRpcError<ErrorCodes_3['InvalidTransition'], 
 // @public (undocumented)
 export function isError(message: JsonRpcMessage): message is ErrorResponse;
 
-// @beta
-export function isJsonRpcErrorResponse(message: object): message is JsonRpcErrorResponse;
-
-// @beta
-export function isJsonRpcNotification<T extends Notification['method']>(message: object): message is JsonRpcNotification<T, Notification['params']>;
-
-// @beta
-export function isJsonRpcRequest<T extends Request['method']>(message: object): message is JsonRpcRequest<T, Request['params']>;
-
-// @beta
-export function isJsonRpcResponse(message: object): message is JsonRpcResponse;
-
 // @public (undocumented)
 export function isNotification(message: JsonRpcMessage): message is Notification;
 
@@ -419,14 +407,11 @@ export type JsonRpcError<Code extends number, Message, Data = undefined> = {
     };
 };
 
-// @beta
-export type JsonRpcErrorResponse = ErrorResponse;
-
 // @public (undocumented)
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 
 // @beta
-export interface JsonRpcNotification<NotificationName = Notification['method'], NotificationParams = Notification['params']> {
+export interface JsonRpcNotification<NotificationName extends string, NotificationParams extends object> {
     jsonrpc: '2.0';
     method: NotificationName;
     params: NotificationParams;
