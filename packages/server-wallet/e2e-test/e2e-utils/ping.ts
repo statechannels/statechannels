@@ -27,7 +27,7 @@ Model.knex(knex);
 
 console.log(`numPings: ${numPings}`);
 
-(async (): Promise<any> => {
+(async (): Promise<void> => {
   const pingClient = new PingClient(alice().privateKey, `http://127.0.0.1:65535`);
   await Promise.all(
     (channels || []).map(async channelId => {
