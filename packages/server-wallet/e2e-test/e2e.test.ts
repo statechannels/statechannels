@@ -59,7 +59,7 @@ describe('e2e', () => {
     expect(channel.status).toBe('funding');
     expect(channel.turnNum).toBe(0);
 
-    expect((await Channel.forId(channel.channelId)).protocolState).toMatchObject({
+    expect((await Channel.forId(channel.channelId, undefined)).protocolState).toMatchObject({
       supported: {turnNum: 0},
     });
   });
