@@ -11,9 +11,11 @@ const apiSchema = require('./generated-schema.json'); // because https://github.
 
 ajv.addSchema(apiSchema, 'api.json');
 
-export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/Request'});
-export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/Response'});
-export const validateNotification = ajv.compile({$ref: 'api.json#/definitions/Notification'});
+export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/StateChannelsRequest'});
+export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/StateChannelsResponse'});
+export const validateNotification = ajv.compile({
+  $ref: 'api.json#/definitions/StateChannelsNotification'
+});
 
 function prettyPrintError(e: Ajv.ErrorObject): string {
   switch (e.keyword) {

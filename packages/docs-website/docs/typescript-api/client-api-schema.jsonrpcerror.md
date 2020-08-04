@@ -26,4 +26,4 @@ export interface JsonRpcError<Code extends number, Message, Data = undefined>
 |  --- | --- | --- |
 |  [code](./client-api-schema.jsonrpcerror.code.md) | Code | <b><i>(BETA)</i></b> Error code |
 |  [data](./client-api-schema.jsonrpcerror.data.md) | Data | <b><i>(BETA)</i></b> Error data |
-|  [message](./client-api-schema.jsonrpcerror.message.md) | Message | <b><i>(BETA)</i></b> Error code |
+|  [message](./client-api-schema.jsonrpcerror.message.md) | Message | <b><i>(BETA)</i></b> Error message |
