@@ -48,8 +48,8 @@
     "ts-jest": "25.0.0",
     "ts-node": "8.9.1",
     "typescript": "3.7.5",
-    "yargs": "^15.4.1",
-    "unitimer": "3.13.0"
+    "unitimer": "3.13.0",
+    "yargs": "^15.4.1"
   },
   "license": "MIT",
   "lint-staged": {
