@@ -20,7 +20,7 @@ import {
   startReceiverServer,
 } from './e2e-utils';
 
-jest.setTimeout(20_000); // Starting up Pong server can take ~5 seconds
+jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds
 
 let ChannelPayer: typeof Channel;
 let ChannelReceiver: typeof Channel;
