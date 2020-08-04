@@ -9,16 +9,21 @@ hide_title: true
 
 ## JsonRpcResponse interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
-export interface JsonRpcResponse<ResultType> 
+export interface JsonRpcResponse<ResponseType = object> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./client-api-schema.jsonrpcresponse.id.md) | number |  |
-|  [jsonrpc](./client-api-schema.jsonrpcresponse.jsonrpc.md) | '2.0' |  |
-|  [result](./client-api-schema.jsonrpcresponse.result.md) | ResultType |  |
+|  [id](./client-api-schema.jsonrpcresponse.id.md) | number | <b><i>(BETA)</i></b> Identifier for the response |
+|  [jsonrpc](./client-api-schema.jsonrpcresponse.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |
+|  [result](./client-api-schema.jsonrpcresponse.result.md) | ResponseType | <b><i>(BETA)</i></b> The generic type of the response |

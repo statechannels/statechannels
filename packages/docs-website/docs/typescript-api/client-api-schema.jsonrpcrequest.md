@@ -9,17 +9,22 @@ hide_title: true
 
 ## JsonRpcRequest interface
 
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+Specifies request headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+
 <b>Signature:</b>
 
 ```typescript
-export interface JsonRpcRequest<MethodName, RequestParams> 
+export interface JsonRpcRequest<MethodName = string, RequestParams = object> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./client-api-schema.jsonrpcrequest.id.md) | number |  |
-|  [jsonrpc](./client-api-schema.jsonrpcrequest.jsonrpc.md) | '2.0' |  |
-|  [method](./client-api-schema.jsonrpcrequest.method.md) | MethodName |  |
-|  [params](./client-api-schema.jsonrpcrequest.params.md) | RequestParams |  |
+|  [id](./client-api-schema.jsonrpcrequest.id.md) | number | <b><i>(BETA)</i></b> Identifier for the resquest |
+|  [jsonrpc](./client-api-schema.jsonrpcrequest.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |
+|  [method](./client-api-schema.jsonrpcrequest.method.md) | MethodName | <b><i>(BETA)</i></b> Generic type of the request method |
+|  [params](./client-api-schema.jsonrpcrequest.params.md) | RequestParams | <b><i>(BETA)</i></b> Request parameters |

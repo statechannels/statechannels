@@ -1,4 +1,4 @@
-import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../utils';
+import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
 import {Address} from '../data-types';
 import {ErrorCodes} from '../error-codes';
 

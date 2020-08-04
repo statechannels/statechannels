@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {StateVariables, serializeChannelEntry} from '@statechannels/wallet-core';
-import {FundingStrategy, ErrorResponse} from '@statechannels/client-api-schema';
+import {FundingStrategy, StateChannelsError} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {
@@ -328,7 +328,7 @@ export const workflow = (
           const matches = reason => new RegExp(reason).test(error.message);
 
           // TODO: Catch other errors
-          let message: ErrorResponse['error'];
+          let message: StateChannelsError;
           if (matches(Errors.channelMissing)) message = {code: 400, message: 'Channel not found'};
           else if (matches(Errors.notMyTurn)) message = {code: 403, message: 'Not your turn'};
           else {
@@ -351,7 +351,7 @@ export const workflow = (
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
 
-          let message: ErrorResponse['error'];
+          let message: StateChannelsError;
           if (matches(Errors.notMyTurn)) message = {code: 300, message: 'Not your turn'};
           else if (matches(Errors.channelMissing))
             message = {code: 301, message: 'Channel not found'};

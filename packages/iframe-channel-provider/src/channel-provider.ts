@@ -1,13 +1,16 @@
 import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
-import {NotificationType, Notification} from '@statechannels/client-api-schema';
+import {
+  StateChannelsNotificationType,
+  StateChannelsNotification,
+  parseNotification
+} from '@statechannels/client-api-schema';
 
 import {IFrameChannelProviderInterface} from './types';
 import {WalletJsonRpcAPI} from './types/wallet-api';
 import {logger} from './logger';
 import {PostMessageService} from './postmessage-service';
 import {IFrameService} from './iframe-service';
-import {isJsonRpcNotification} from './types/jsonrpc';
 import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
 
 /**
@@ -36,7 +39,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    */
   protected readonly messaging: PostMessageService;
   protected readonly subscriptions: {
-    [T in keyof NotificationType]: string[];
+    [T in keyof StateChannelsNotificationType]: string[];
   } = {
     ChannelProposed: [],
     ChannelUpdated: [],
@@ -161,8 +164,8 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
 
   unsubscribe: UnsubscribeType = async subscriptionId => {
     Object.keys(this.subscriptions).forEach(method => {
-      this.subscriptions[method as Notification['method']] = this.subscriptions[
-        method as Notification['method']
+      this.subscriptions[method as StateChannelsNotification['method']] = this.subscriptions[
+        method as StateChannelsNotification['method']
       ].filter((id: string) => id != subscriptionId);
     });
 
@@ -179,23 +182,16 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
-    const message = event.data;
-    if (!message.jsonrpc) {
-      return;
-    }
-
-    if (isJsonRpcNotification<keyof NotificationType>(message)) {
-      // TODO: use schema validations as better type guards
-      const notificationMethod = message.method;
-      const notificationParams = message.params;
-      this.events.emit(notificationMethod, notificationParams);
-      if (notificationMethod === 'UIUpdate') {
-        this.iframe.setVisibility(message.params.showWallet);
-      } else {
-        this.subscriptions[notificationMethod].forEach(id => {
-          this.events.emit(id, notificationParams);
-        });
-      }
+    const message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+    const notificationMethod = message.method;
+    const notificationParams = message.params as any;
+    this.events.emit(notificationMethod, notificationParams);
+    if ('showWallet' in message.params) {
+      this.iframe.setVisibility(message.params.showWallet);
+    } else {
+      this.subscriptions[notificationMethod].forEach(id => {
+        this.events.emit(id, notificationParams);
+      });
     }
   }
 }

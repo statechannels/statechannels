@@ -16,6 +16,6 @@ hide_title: true
 
 ```typescript
 protected readonly subscriptions: {
-        [T in keyof NotificationType]: string[];
+        [T in keyof StateChannelsNotificationType]: string[];
     };
 ```

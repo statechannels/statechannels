@@ -21,23 +21,12 @@ Attaches a channelProvider to the window object.
 |  --- | --- |
 |  [IFrameChannelProvider](./iframe-channel-provider.iframechannelprovider.md) | <b><i>(BETA)</i></b> Class for interacting with a statechannels wallet |
 
-## Functions
-
-|  Function | Description |
-|  --- | --- |
-|  [isJsonRpcErrorResponse(message)](./iframe-channel-provider.isjsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md) |
-|  [isJsonRpcNotification(message)](./iframe-channel-provider.isjsonrpcnotification.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md) |
-|  [isJsonRpcResponse(message)](./iframe-channel-provider.isjsonrpcresponse.md) | <b><i>(BETA)</i></b> Type guard for [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md) |
-
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
 |  [ChannelProviderInterface](./iframe-channel-provider.channelproviderinterface.md) | <b><i>(BETA)</i></b> The generic JsonRPC provider interface that mimics [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) and the window.ethereum object in the browser. |
 |  [IFrameChannelProviderInterface](./iframe-channel-provider.iframechannelproviderinterface.md) | <b><i>(BETA)</i></b> For environments where the wallet is proxied within an iFrame embedded on the application's DOM. |
-|  [JsonRpcNotification](./iframe-channel-provider.jsonrpcnotification.md) | <b><i>(BETA)</i></b> Specifies notification headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
-|  [JsonRpcRequest](./iframe-channel-provider.jsonrpcrequest.md) | <b><i>(BETA)</i></b> Specifies request headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
-|  [JsonRpcResponse](./iframe-channel-provider.jsonrpcresponse.md) | <b><i>(BETA)</i></b> Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
 |  [Web3ChannelProviderInterface](./iframe-channel-provider.web3channelproviderinterface.md) | <b><i>(BETA)</i></b> For environments where the destinationAddress is secret until the wallet is "enabled". |
 
 ## Variables
@@ -50,6 +39,4 @@ Attaches a channelProvider to the window object.
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [JsonRpcError](./iframe-channel-provider.jsonrpcerror.md) | <b><i>(BETA)</i></b> Specifies error headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
-|  [JsonRpcErrorResponse](./iframe-channel-provider.jsonrpcerrorresponse.md) | <b><i>(BETA)</i></b> Specifies error headers as per [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) |
 |  [WalletJsonRpcAPI](./iframe-channel-provider.walletjsonrpcapi.md) | <b><i>(BETA)</i></b> |

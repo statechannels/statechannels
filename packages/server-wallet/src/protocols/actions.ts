@@ -1,4 +1,4 @@
-import {Notification} from '@statechannels/client-api-schema';
+import {StateChannelsNotification} from '@statechannels/client-api-schema';
 import {StateVariables} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {right, left} from 'fp-ts/lib/Either';
@@ -12,7 +12,7 @@ import {ProtocolResult} from './state';
 Actions that protocols can declare.
 */
 
-export type Notice = Omit<Notification, 'jsonrpc'>;
+export type Notice = Omit<StateChannelsNotification, 'jsonrpc'>;
 export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
 export type NotifyApp = {type: 'NotifyApp'; notice: Notice};
 export type SubmitTransaction = {

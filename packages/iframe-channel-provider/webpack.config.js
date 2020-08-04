@@ -12,7 +12,7 @@ const baseConfig = {
     ]
   },
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.ts', '.js'],
     mainFields: ['unpkg', 'browser', 'module', 'main']
   }
 };

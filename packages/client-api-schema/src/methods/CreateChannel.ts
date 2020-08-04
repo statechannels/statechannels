@@ -1,5 +1,5 @@
 import {Participant, Allocation, Address, ChannelResult} from '../data-types';
-import {JsonRpcRequest, JsonRpcResponse} from '../utils';
+import {JsonRpcRequest, JsonRpcResponse} from '../jsonrpc-header-types';
 
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export interface CreateChannelParams {

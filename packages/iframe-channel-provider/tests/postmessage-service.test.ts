@@ -1,5 +1,6 @@
+import {JsonRpcRequest, JsonRpcResponse} from '@statechannels/client-api-schema';
+
 import {PostMessageService} from '../src/postmessage-service';
-import {JsonRpcRequest, JsonRpcResponse} from '../src/types/jsonrpc';
 import {IFrameService} from '../src/iframe-service';
 import {logger} from '../src/logger';
 
@@ -15,13 +16,13 @@ describe('PostMessageService', () => {
     id: 123,
     method: 'foo',
     params: ['bar', 1, true]
-  } as JsonRpcRequest;
+  } as JsonRpcRequest<any, any>;
 
   const response = {
     jsonrpc: '2.0',
     id: 123,
     result: {isFooBar: true}
-  } as JsonRpcResponse;
+  } as JsonRpcResponse<any>;
 
   beforeEach(async () => {
     postMessageService = new PostMessageService({timeoutMs: 1000, maxRetries: 5});
@@ -36,7 +37,7 @@ describe('PostMessageService', () => {
   it('should send a message', () => {
     return new Promise(done => {
       target.addEventListener('message', (event: MessageEvent) => {
-        const receivedMessage = event.data as JsonRpcRequest;
+        const receivedMessage = event.data as JsonRpcRequest<any, any>;
         expect(receivedMessage).toEqual(request);
         done();
       });
@@ -62,7 +63,7 @@ describe('PostMessageService', () => {
       jest.useRealTimers();
 
       target.addEventListener('message', (event: MessageEvent) => {
-        const receivedMessage = event.data as JsonRpcRequest;
+        const receivedMessage = event.data as JsonRpcRequest<any, any>;
         expect(receivedMessage).toEqual(request);
         done();
       });
@@ -88,7 +89,7 @@ describe('PostMessageService', () => {
 
   it('should request and respond', async () => {
     target.onmessage = (event: MessageEvent) => {
-      const receivedRequest = event.data as JsonRpcRequest;
+      const receivedRequest = event.data as JsonRpcRequest<any, any>;
       expect(receivedRequest).toEqual(request);
       target.parent.postMessage(response, '*');
     };
