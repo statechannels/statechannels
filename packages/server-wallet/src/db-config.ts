@@ -3,7 +3,7 @@ import {knexSnakeCaseMappers} from 'objection';
 
 import config from './config';
 
-export const dbCofig: Config = {
+export const dbConfig: Config = {
   client: 'postgres',
   connection: config.postgresDatabaseUrl || {
     host: config.postgresHost,
