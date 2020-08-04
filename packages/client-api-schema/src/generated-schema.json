@@ -722,6 +722,33 @@
       ],
       "type": "object"
     },
+    "JsonRpcErrorResponse<StateChannelsError>": {
+      "additionalProperties": false,
+      "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/StateChannelsError",
+          "description": "The generic type of the response"
+        },
+        "id": {
+          "description": "Identifier for the response",
+          "type": "number"
+        },
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
     "JsonRpcNotification<\"BudgetUpdated\",DomainBudget>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
@@ -1714,7 +1741,7 @@
       ],
       "type": "object"
     },
-    "StateChannelsErrorResponse": {
+    "StateChannelsError": {
       "anyOf": [
         {
           "$ref": "#/definitions/EnableEthereumError"
@@ -1732,6 +1759,9 @@
           "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
         }
       ]
+    },
+    "StateChannelsErrorResponse": {
+      "$ref": "#/definitions/JsonRpcErrorResponse%3CStateChannelsError%3E"
     },
     "StateChannelsJsonRpcMessage": {
       "anyOf": [

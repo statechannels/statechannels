@@ -361,7 +361,7 @@ export type InvalidTransition = JsonRpcError<ErrorCodes_3['InvalidTransition'], 
 }>;
 
 // @beta
-export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(message: object): message is JsonRpcErrorResponse<Code, Message, Data>;
+export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(message: object): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>>;
 
 // @beta
 export function isJsonRpcNotification<Name extends string, Params extends object>(message: object): message is JsonRpcNotification<Name, Params>;
@@ -408,8 +408,8 @@ export interface JsonRpcError<Code extends number, Message, Data = undefined> {
 }
 
 // @beta
-export interface JsonRpcErrorResponse<Code extends number, Message, Data = undefined> {
-    error: JsonRpcError<Code, Message, Data>;
+export interface JsonRpcErrorResponse<Error = any> {
+    error: Error;
     id: number;
     jsonrpc: '2.0';
 }
@@ -490,7 +490,12 @@ export type PushMessageResult = {
 // Warning: (ae-forgotten-export) The symbol "GenericError" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type StateChannelsErrorResponse = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
+export type StateChannelsError = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
+
+// Warning: (ae-incompatible-release-tags) The symbol "StateChannelsErrorResponse" is marked as @public, but its signature references "JsonRpcErrorResponse" which is marked as @beta
+//
+// @public (undocumented)
+export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
 
 // @public (undocumented)
 export type StateChannelsJsonRpcMessage = StateChannelsRequest | StateChannelsResponse | StateChannelsNotification | StateChannelsErrorResponse;

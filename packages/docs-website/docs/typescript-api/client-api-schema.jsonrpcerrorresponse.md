@@ -17,13 +17,13 @@ Specifies response headers as per [JSON-RPC 2.0 Specification](https://www.jsonr
 <b>Signature:</b>
 
 ```typescript
-export interface JsonRpcErrorResponse<Code extends number, Message, Data = undefined> 
+export interface JsonRpcErrorResponse<Error = any> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./client-api-schema.jsonrpcerrorresponse.error.md) | [JsonRpcError](./client-api-schema.jsonrpcerror.md)<!-- -->&lt;Code, Message, Data&gt; | <b><i>(BETA)</i></b> The generic type of the response |
+|  [error](./client-api-schema.jsonrpcerrorresponse.error.md) | Error | <b><i>(BETA)</i></b> The generic type of the response |
 |  [id](./client-api-schema.jsonrpcerrorresponse.id.md) | number | <b><i>(BETA)</i></b> Identifier for the response |
 |  [jsonrpc](./client-api-schema.jsonrpcerrorresponse.jsonrpc.md) | '2.0' | <b><i>(BETA)</i></b> Spec version |

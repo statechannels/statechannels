@@ -66,7 +66,8 @@ export interface JsonRpcError<Code extends number, Message, Data = undefined> {
  * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
-export interface JsonRpcErrorResponse<Code extends number, Message, Data = undefined> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface JsonRpcErrorResponse<Error = any> {
   /**
    * Identifier for the response
    * @remarks Matches that of a request
@@ -79,7 +80,7 @@ export interface JsonRpcErrorResponse<Code extends number, Message, Data = undef
   /**
    * The generic type of the response
    */
-  error: JsonRpcError<Code, Message, Data>;
+  error: Error;
 }
 
 /**
@@ -155,6 +156,6 @@ export function isJsonRpcResponse<ResponseType = object>(
  */
 export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(
   message: object
-): message is JsonRpcErrorResponse<Code, Message, Data> {
+): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>> {
   return 'id' in message && 'error' in message;
 }

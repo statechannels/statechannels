@@ -14,8 +14,8 @@ export interface PostMessageServiceOptions {
 }
 
 class RpcError extends Error {
-  constructor(readonly error: StateChannelsErrorResponse['message']) {
-    super(error);
+  constructor(readonly error: StateChannelsErrorResponse['error']) {
+    super(error.message);
   }
 }
 
@@ -116,7 +116,7 @@ export class PostMessageService {
           logger.info({response: event.data}, 'Received response');
           resolve(event.data.result);
         } else if (isStateChannelsErrorResponse(event.data)) {
-          reject(new RpcError(event.data.message));
+          reject(new RpcError(event.data.error));
         }
       }
     };

@@ -17,7 +17,7 @@ Type guard for [JsonRpcErrorResponse](./client-api-schema.jsonrpcerrorresponse.m
 <b>Signature:</b>
 
 ```typescript
-export declare function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(message: object): message is JsonRpcErrorResponse<Code, Message, Data>;
+export declare function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(message: object): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>>;
 ```
 
 ## Parameters
@@ -28,6 +28,6 @@ export declare function isJsonRpcErrorResponse<Code extends number, Message, Dat
 
 <b>Returns:</b>
 
-message is [JsonRpcErrorResponse](./client-api-schema.jsonrpcerrorresponse.md)<!-- -->&lt;Code, Message, Data&gt;
+message is [JsonRpcErrorResponse](./client-api-schema.jsonrpcerrorresponse.md)<!-- -->&lt;[JsonRpcError](./client-api-schema.jsonrpcerror.md)<!-- -->&lt;Code, Message, Data&gt;&gt;
 
 true if the message is a JSON-RPC error response, false otherwise

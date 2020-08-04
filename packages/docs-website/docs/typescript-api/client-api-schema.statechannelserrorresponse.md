@@ -12,5 +12,5 @@ hide_title: true
 <b>Signature:</b>
 
 ```typescript
-export declare type StateChannelsErrorResponse = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
+export declare type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
 ```

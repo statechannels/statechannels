@@ -1,5 +1,5 @@
 import {StateChannelsNotification} from './notifications';
-import {JsonRpcError} from './jsonrpc-header-types';
+import {JsonRpcError, JsonRpcErrorResponse} from './jsonrpc-header-types';
 import {
   CreateChannelRequest,
   JoinChannelRequest,
@@ -32,6 +32,7 @@ import {
   CloseChannelError,
   UpdateChannelError
 } from './methods';
+import {ErrorCodes} from './error-codes';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 
@@ -65,12 +66,14 @@ export type StateChannelsResponse =
   | CloseAndWithdrawResponse
   | GetChannelsResponse;
 
-export type StateChannelsErrorResponse =
+export type StateChannelsError =
   | EnableEthereumError
   | CloseAndWithdrawError
   | CloseChannelError
   | UpdateChannelError
   | GenericError;
+
+export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
 
 export type StateChannelsJsonRpcMessage =
   | StateChannelsRequest

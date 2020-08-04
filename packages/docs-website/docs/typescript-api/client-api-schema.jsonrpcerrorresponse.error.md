@@ -17,5 +17,5 @@ The generic type of the response
 <b>Signature:</b>
 
 ```typescript
-error: JsonRpcError<Code, Message, Data>;
+error: Error;
 ```

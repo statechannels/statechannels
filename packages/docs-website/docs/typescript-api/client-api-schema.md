@@ -137,6 +137,7 @@ Example response:
 |  [PushMessageRequest](./client-api-schema.pushmessagerequest.md) |  |
 |  [PushMessageResponse](./client-api-schema.pushmessageresponse.md) |  |
 |  [PushMessageResult](./client-api-schema.pushmessageresult.md) |  |
+|  [StateChannelsError](./client-api-schema.statechannelserror.md) |  |
 |  [StateChannelsErrorResponse](./client-api-schema.statechannelserrorresponse.md) |  |
 |  [StateChannelsJsonRpcMessage](./client-api-schema.statechannelsjsonrpcmessage.md) |  |
 |  [StateChannelsNotification](./client-api-schema.statechannelsnotification.md) |  |
