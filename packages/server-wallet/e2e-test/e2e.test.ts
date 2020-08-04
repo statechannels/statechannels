@@ -84,6 +84,33 @@ describe('e2e', () => {
 describe('pinging', () => {
   let channelId: string;
 
+  const triggerPings = async (numPings?: number): Promise<void> => {
+    let args = [
+      'ts-node',
+      'e2e-test/e2e-utils/ping.ts',
+      '--database',
+      'ping',
+      '--channels',
+      channelId,
+    ];
+
+    if (numPings) args = args.concat(['--numPings', numPings.toString()]);
+
+    const pingScript = childProcess.spawn(`yarn`, args);
+    pingScript.on('error', logger.error);
+
+    await new Promise(resolve => {
+      pingScript.on('exit', _data => resolve());
+
+      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
+      // jest warns 'Jest did not exit one second after the test run has completed.'
+      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
+      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
+    });
+
+    await pingScript.kill();
+  };
+
   beforeEach(async () => {
     const [ping, pong] = [aliceP(), bobP()];
     const seed = withSupportedState(
@@ -109,74 +136,20 @@ describe('pinging', () => {
     await expectSupportedState(ChannelPing, 3);
     await expectSupportedState(ChannelPong, 3);
 
-    // SCRIPT
-    const pingScript = childProcess.spawn(`yarn`, [
-      'ts-node',
-      'e2e-test/scripts/ping.ts',
-      '--database',
-      'ping',
-      '--channels',
-      channelId,
-    ]);
+    await triggerPings();
 
-    pingScript.on('error', logger.error);
-
-    await new Promise(resolve => {
-      pingScript.on('exit', _data => resolve());
-
-      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
-      // jest warns 'Jest did not exit one second after the test run has completed.'
-      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
-      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
-    });
-
-    await pingScript.kill();
-
-    // END SCRIPT
-
-    // EFFECTS
     await expectSupportedState(ChannelPing, 5);
     await expectSupportedState(ChannelPong, 5);
-    // END EFFECTS
   });
 
   it('can update pre-existing channels multiple times', async () => {
     await expectSupportedState(ChannelPing, 3);
     await expectSupportedState(ChannelPong, 3);
-    // END SETUP
 
-    // SCRIPT
     const numPings = 5;
-    const pingScript = childProcess.spawn('yarn', [
-      'ts-node',
-      'e2e-test/scripts/ping.ts',
-      '--database',
-      'ping',
-      '--channels',
-      channelId,
-      `--numPings`,
-      `${numPings}`,
-    ]);
+    await triggerPings(numPings);
 
-    pingScript.stdout.on('data', data => logger.info({data: data?.toString()}, 'DATA'));
-    pingScript.on('error', err => logger.error(err.toString()));
-
-    await new Promise(resolve => {
-      pingScript.on('exit', _data => resolve());
-
-      // FIXME: I would expect `.on('exit', resolve)` to work, but it does not,
-      // jest warns 'Jest did not exit one second after the test run has completed.'
-      // This indicates to me that the spawned process does not exit, even after logging 'DONE'
-      pingScript.stdout.on('data', data => data.toString() === 'DONE\n' && resolve());
-    });
-
-    await pingScript.kill();
-
-    // END SCRIPT
-
-    // EFFECTS
     await expectSupportedState(ChannelPing, 3 + 2 * numPings);
     await expectSupportedState(ChannelPong, 3 + 2 * numPings);
-    // END EFFECTS
   });
 });
