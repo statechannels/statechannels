@@ -3,8 +3,8 @@
 import {Participant} from '@statechannels/client-api-schema';
 import yargs from 'yargs';
 import Table from 'cli-table3';
-import {Timer} from 'unitimer';
-import createTimer from 'unitimer';
+import createTimer, {Timer} from 'unitimer';
+
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
@@ -51,16 +51,16 @@ async function seedTestChannels(
 }
 
 (async function(): Promise<void> {
- const { numChannels, numPings} = yargs
-  .command('stress-test', 'Ping many channels concurrently')
+  const {numChannels, numPings} = yargs
+    .command('stress-test', 'Performs a a basic stress test')
     .example(
       'stress-test --numChannels 20 --numPings 5',
       'Runs the stress test using 20 channels calling ping 5 times on each channel'
     )
-  .options({
-    numChannels: {type: 'number'},
-    numPings: {type: 'number'},
-  })
+    .options({
+      numChannels: {type: 'number'},
+      numPings: {type: 'number'},
+    })
     .default({numPings: 1, numChannels: 100}).argv;
 
   process.on('exit', async () => {
@@ -132,8 +132,8 @@ async function seedTestChannels(
     const table = new Table({head: ['Action', 'Min (MS)', 'Max (MS)', 'Avg (MS)']});
 
     table.push(
-      ['Individual Ping call', minUpdate, maxUpdate, meanUpdate],
-      [`${numPings} consecutive calls of Ping`, minPerChannel, maxPerChannel, meanPerChannel]
+      ['Individual ping call', minUpdate, maxUpdate, meanUpdate],
+      [`${numPings} consecutive calls of ping`, minPerChannel, maxPerChannel, meanPerChannel]
     );
     console.log(table.toString());
     process.exit(0);
