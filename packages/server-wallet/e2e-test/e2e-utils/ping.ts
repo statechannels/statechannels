@@ -5,7 +5,7 @@ import {Model} from 'objection';
 import Knex from 'knex';
 import _ from 'lodash';
 
-import {dbCofig} from '../../src/db-config';
+import {dbConfig} from '../../src/db-config';
 import PingClient from '../ping/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 
@@ -22,7 +22,7 @@ const {database, channels, numPings} = yargs
     channels.map(channel => channel.toString(16))
   ).argv;
 
-const knex = Knex(_.merge(dbCofig, {connection: {database}}));
+const knex = Knex(_.merge(dbConfig, {connection: {database}}));
 Model.knex(knex);
 
 console.log(`numPings: ${numPings}`);
