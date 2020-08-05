@@ -223,12 +223,13 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
         throw 'unreachable';
       }
 
+      const nextAction = Application.protocol({app});
+
       try {
-        const nextAction = await Application.protocol({app});
         // TODO: doAction might also throw an error.
         // It would be nice for doAction to return an Either type, pipe the right values,
         // and handle the left values with setError
-        await Either.fold(setError, Option.fold(markChannelAsDone, doAction))(nextAction);
+        Either.fold(setError, Option.fold(markChannelAsDone, doAction))(nextAction);
       } catch (err) {
         // TODO This code should not need to catch an arbitrary, unknown error.
         // doAction could return an Either, and then the error can be handled more explicitly

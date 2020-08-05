@@ -72,4 +72,4 @@ export type ProtocolResult<A extends ProtocolAction = ProtocolAction> = Either<
   ProtocolError,
   Option<A>
 >;
-export type Protocol<PS> = (ps: PS) => ProtocolResult | Promise<ProtocolResult>;
+export type Protocol<PS> = (ps: PS) => ProtocolResult;

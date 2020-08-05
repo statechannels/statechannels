@@ -19,7 +19,7 @@ it('generates an action to sign the post fund setup', async () => {
     withSupportedState(prefundState)({app: {funding}})
   );
 
-  expect(await protocol(protocolState)).toMatchRight(some({type: 'SignState', ...postFundState}));
+  expect(protocol(protocolState)).toMatchRight(some({type: 'SignState', ...postFundState}));
 });
 
 it('generates no actions if the post fund setup is signed', async () => {
@@ -28,11 +28,11 @@ it('generates no actions if the post fund setup is signed', async () => {
     withSupportedState(postFundState)({app: {funding}})
   );
 
-  expect(await protocol(protocolState)).toMatchRight(none);
+  expect(protocol(protocolState)).toMatchRight(none);
 });
 
 // TODO: Figure out what to with this
 it.skip('returns an error if there is no pre fund setup', async () => {
   const protocolState = applicationProtocolState();
-  expect(await protocol(protocolState)).toBeLeft();
+  expect(protocol(protocolState)).toBeLeft();
 });
