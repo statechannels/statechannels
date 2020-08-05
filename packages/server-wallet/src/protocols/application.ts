@@ -1,7 +1,7 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signStateProtocolResult, noAction} from './actions';
+import {signStateResult, noAction} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -31,7 +31,7 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | undefined => {
   } = ps;
 
   if (isPrefundSetup(supported) && isPrefundSetup(latestSignedByMe) && isFunded(ps))
-    return signStateProtocolResult({channelId, ...latestSignedByMe, turnNum: 3});
+    return signStateResult({channelId, ...latestSignedByMe, turnNum: 3});
   else return;
 };
 

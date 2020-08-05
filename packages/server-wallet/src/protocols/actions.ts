@@ -29,16 +29,20 @@ export const noAction = right(none);
 export const error = (error: string | Error): ProtocolResult =>
   typeof error === 'string' ? left(new Error(error)) : left(error);
 
-export const submitTransaction = (props: Omit<SubmitTransaction, 'type'>): ProtocolResult =>
-  right(some({type: 'SubmitTransaction', ...props}));
+const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
+  props: Omit<A, 'type'>
+): A => ({...props, type} as A);
+export const submitTransaction = actionConstructor<SubmitTransaction>('SubmitTransaction');
+export const notifyApp = actionConstructor<NotifyApp>('NotifyApp');
+export const signState = actionConstructor<SignState>('SignState');
 
-export const signState = (props: Omit<SignState, 'type'>): SignState => ({
-  type: 'SignState',
-  ...props,
-});
+const resultConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
+  props: Omit<A, 'type'>
+): ProtocolResult<A> => right(some(actionConstructor(type)(props)));
 
-export const signStateProtocolResult = (props: Omit<SignState, 'type'>): ProtocolResult =>
-  right(some(signState(props)));
+export const signStateResult = resultConstructor<SignState>('SignState');
+export const notifyAppResult = resultConstructor<NotifyApp>('NotifyApp');
+export const submitTransactionResult = resultConstructor<SubmitTransaction>('SubmitTransaction');
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
   a: ProtocolAction

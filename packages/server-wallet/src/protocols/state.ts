@@ -68,5 +68,8 @@ A protocol should accept a "protocol state", and return or resolve to
 - or, a protocol error
 A protocol should never reject or throw.
 */
-export type ProtocolResult = Either<ProtocolError, Option<ProtocolAction>>;
+export type ProtocolResult<A extends ProtocolAction = ProtocolAction> = Either<
+  ProtocolError,
+  Option<A>
+>;
 export type Protocol<PS> = (ps: PS) => ProtocolResult | Promise<ProtocolResult>;
