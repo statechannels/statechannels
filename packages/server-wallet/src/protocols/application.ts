@@ -37,4 +37,7 @@ const notifyChannelProposed = (ps: ProtocolState): ProtocolResult | false =>
   notifyApp({notice: {method: 'ChannelProposed', params: toChannelResult(ps.app)}});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+  // The protocol should be re-run until it returns the same result, and that happens
+  // when there's either no action or a notification.
+  // Thus, it is IMPORTANT that notices come last.
   signPostFundSetup(ps) || notifyChannelProposed(ps) || noAction;
