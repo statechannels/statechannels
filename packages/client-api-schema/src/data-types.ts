@@ -1,3 +1,4 @@
+/* eslint-disable tsdoc/syntax */ // because @pattern is used by ts-json-schema-generator
 /**
  * Ethereum Address
  * @pattern  ^0x([a-fA-F0-9]{40})|0$
