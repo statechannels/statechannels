@@ -1,6 +1,6 @@
 {
   "name": "@statechannels/iframe-channel-provider",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "browser": "dist/iframe-channel-provider.js",
   "browserslist": {
     "production": [
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.9.2",
-    "@statechannels/client-api-schema": "0.0.3",
+    "@statechannels/client-api-schema": "^0.2.0",
     "@types/debug": "4.1.5",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",

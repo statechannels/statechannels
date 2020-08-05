@@ -97,6 +97,24 @@ To run all tests:
 yarn test
 ```
 
+### Publishing packages
+
+All of the public packages in this repository are kept in lockstep. Use, e.g.
+
+```shell
+yarn lerna version minor
+```
+
+to increase the version in all of them (this works for the docs website, too).
+
+Use
+
+```shell
+yarn lerna publish from-git
+```
+
+to publish the packages to npm (you will need to be logged in with `npm login`), as well as pushing the version update to git.
+
 ## Community
 
 State Channels Forums: https://research.statechannels.org/
