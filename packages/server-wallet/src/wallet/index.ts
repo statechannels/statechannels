@@ -32,8 +32,6 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 
 export {CreateChannelParams};
 
-export type AddressedMessage = Message & {to: string; from: string};
-
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
@@ -50,7 +48,7 @@ export type WalletInterface = {
   getState(args: GetStateParams): SingleChannelResult;
 
   // Wallet <-> Wallet communication
-  pushMessage(m: AddressedMessage): MultipleChannelResult;
+  pushMessage(m: Message): MultipleChannelResult;
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
@@ -161,7 +159,7 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  async pushMessage(message: AddressedMessage): MultipleChannelResult {
+  async pushMessage(message: Message): MultipleChannelResult {
     const channelIds = await Channel.transaction(async tx => {
       return await Store.pushMessage(message, tx);
     });

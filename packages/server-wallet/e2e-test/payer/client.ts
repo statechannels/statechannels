@@ -1,11 +1,11 @@
 import {AddressZero} from '@ethersproject/constants';
 import axios from 'axios';
-import {Message} from '@statechannels/wire-format';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet} from 'ethers';
-import {makeDestination, BN, SignedState} from '@statechannels/wallet-core';
+import {makeDestination, BN, Message} from '@statechannels/wallet-core';
+import {Message as WireMessage} from '@statechannels/wire-format';
 
-import {Wallet as ServerWallet} from '../../src/wallet';
+import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 
 export default class PayerClient {
@@ -73,21 +73,9 @@ export default class PayerClient {
       ],
     });
 
-    const {
-      recipient: to,
-      sender: from,
-      data: {signedStates: unconvertedSignedStates},
-    } = await this.messageReceiverAndExpectReply(params as Message);
+    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Message);
 
-    // FIXME: server-wallet is using wallet-core, not wire-format for
-    // types of messages between parties. e2e-test uses wire-format
-    const signedStates = unconvertedSignedStates as SignedState[] | undefined;
-
-    await this.wallet.pushMessage({
-      signedStates,
-      to,
-      from,
-    });
+    await this.wallet.pushMessage(reply);
 
     const {channelResult} = await this.wallet.getState({channelId});
 
@@ -102,28 +90,15 @@ export default class PayerClient {
       outbox: [{params}],
     } = await this.wallet.updateChannel(channel);
 
-    const {
-      recipient: to,
-      sender: from,
-      data: {signedStates: unconvertedSignedStates},
-    } = await this.messageReceiverAndExpectReply(params as Message);
+    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Message);
 
-    // FIXME: server-wallet is using wallet-core, not wire-format for
-    // types of messages between parties. e2e-test uses wire-format
-    const signedStates = unconvertedSignedStates as SignedState[] | undefined;
-
-    await this.wallet.pushMessage({
-      signedStates,
-      to,
-      from,
-    });
+    await this.wallet.pushMessage(reply);
   }
 
   public emptyMessage(): Promise<Message> {
     return this.messageReceiverAndExpectReply({
-      sender: 'payer',
-      recipient: 'receiver',
-      data: {signedStates: [], objectives: []},
+      signedStates: [],
+      objectives: [],
     });
   }
 
