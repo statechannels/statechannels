@@ -1277,6 +1277,1040 @@
       },
       "version-0.1.1/wallet-devs/version-0.1.1-tutorial": {
         "title": "Tutorial"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-hook-up-messaging": {
+        "title": "Hook up your messaging layer"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-app-devs-intro": {
+        "title": "Introduction"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-make-api-calls": {
+        "title": "Make Wallet API calls"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-quick-start-contracts": {
+        "title": "Quick start (contracts)"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-quick-start-dapp": {
+        "title": "Quick start (Dapp)"
+      },
+      "version-0.2.0/app-devs/version-0.2.0-recommended-patterns": {
+        "title": "Recommended patterns"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-asset-holder": {
+        "title": "AssetHolder.sol"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-consensus-app": {
+        "title": "ConsensusApp.sol"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-force-move": {
+        "title": "ForceMove.sol"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-contract-devs-intro": {
+        "title": "Introduction"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-nitro-adjudicator": {
+        "title": "NitroAdjudicator.sol",
+        "sidebar_label": "NitroAdjudicator.sol"
+      },
+      "version-0.2.0/implementation-notes/version-0.2.0-single-asset-payments": {
+        "title": "SingleAssetPayments.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-Address": {
+        "title": "Address.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-Adjudicator": {
+        "title": "Adjudicator.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-AssetHolder": {
+        "title": "AssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ConsensusApp": {
+        "title": "ConsensusApp.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-Context": {
+        "title": "Context.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-CountingApp": {
+        "title": "CountingApp.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ERC20": {
+        "title": "ERC20.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ERC20AssetHolder": {
+        "title": "ERC20AssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ETHAssetHolder": {
+        "title": "ETHAssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ForceMove": {
+        "title": "ForceMove.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-ForceMoveApp": {
+        "title": "ForceMoveApp.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-IAssetHolder": {
+        "title": "IAssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-IERC20": {
+        "title": "IERC20.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-IForceMove": {
+        "title": "IForceMove.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-NitroAdjudicator": {
+        "title": "NitroAdjudicator.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-Outcome": {
+        "title": "Outcome.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-SafeMath": {
+        "title": "SafeMath.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-SingleAssetPayments": {
+        "title": "SingleAssetPayments.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TESTAssetHolder": {
+        "title": "TESTAssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TESTAssetHolder2": {
+        "title": "TESTAssetHolder2.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TestErc20AssetHolder": {
+        "title": "TestErc20AssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TestEthAssetHolder": {
+        "title": "TestEthAssetHolder.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TESTForceMove": {
+        "title": "TESTForceMove.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TESTNitroAdjudicator": {
+        "title": "TESTNitroAdjudicator.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-Token": {
+        "title": "Token.sol"
+      },
+      "version-0.2.0/natspec/version-0.2.0-TrivialApp": {
+        "title": "TrivialApp.sol"
+      },
+      "version-0.2.0/version-0.2.0-overview": {
+        "title": "Overview"
+      },
+      "version-0.2.0/version-0.2.0-products": {
+        "title": "Our products"
+      },
+      "version-0.2.0/protocol-docs/client-specification/version-0.2.0-auxiliary-protocols": {
+        "title": "Auxiliary Protocols",
+        "sidebar_label": "Auxiliary Protocols"
+      },
+      "version-0.2.0/protocol-docs/version-0.2.0-wallet-devs-intro": {
+        "title": "Introduction"
+      },
+      "version-0.2.0/protocol-docs/version-0.2.0-quick-start": {
+        "title": "Quick Start"
+      },
+      "version-0.2.0/protocol-docs/version-0.2.0-tutorial": {
+        "title": "Tutorial"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-clear-a-challenge": {
+        "title": "Clear a challenge"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-deposit-assets": {
+        "title": "Deposit Assets"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-execute-state-transitions": {
+        "title": "Execute state transitions off chain"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-finalize-a-channel-happy": {
+        "title": "Finalize a channel (happy)"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-finalize-a-channel-sad": {
+        "title": "Finalize a channel (sad)"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-off-chain-funding": {
+        "title": "Off-chain funding"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-outcomes": {
+        "title": "Understand Outcomes"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-release-assets": {
+        "title": "Release assets"
+      },
+      "version-0.2.0/protocol-tutorial/version-0.2.0-understand-channel-storage": {
+        "title": "Understand channel storage"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.browserchannelclientinterface.approvebudgetandfund": {
+        "title": "BrowserChannelClientInterface.approveBudgetAndFund() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.browserchannelclientinterface.closeandwithdraw": {
+        "title": "BrowserChannelClientInterface.closeAndWithdraw() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.browserchannelclientinterface.getbudget": {
+        "title": "BrowserChannelClientInterface.getBudget() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.browserchannelclientinterface": {
+        "title": "BrowserChannelClientInterface interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.browserchannelclientinterface.onbudgetupdated": {
+        "title": "BrowserChannelClientInterface.onBudgetUpdated property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient._constructor_": {
+        "title": "ChannelClient.(constructor)"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.approvebudgetandfund": {
+        "title": "ChannelClient.approveBudgetAndFund() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.challengechannel": {
+        "title": "ChannelClient.challengeChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.channelstate": {
+        "title": "ChannelClient.channelState property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.closeandwithdraw": {
+        "title": "ChannelClient.closeAndWithdraw() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.closechannel": {
+        "title": "ChannelClient.closeChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.createchannel": {
+        "title": "ChannelClient.createChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.destinationaddress": {
+        "title": "ChannelClient.destinationAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.getbudget": {
+        "title": "ChannelClient.getBudget() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.getchannels": {
+        "title": "ChannelClient.getChannels() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.getstate": {
+        "title": "ChannelClient.getState() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.joinchannel": {
+        "title": "ChannelClient.joinChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient": {
+        "title": "ChannelClient class"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.onbudgetupdated": {
+        "title": "ChannelClient.onBudgetUpdated() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.onchannelproposed": {
+        "title": "ChannelClient.onChannelProposed() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.onchannelupdated": {
+        "title": "ChannelClient.onChannelUpdated() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.onmessagequeued": {
+        "title": "ChannelClient.onMessageQueued() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.provider": {
+        "title": "ChannelClient.provider property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.pushmessage": {
+        "title": "ChannelClient.pushMessage() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.signingaddress": {
+        "title": "ChannelClient.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.updatechannel": {
+        "title": "ChannelClient.updateChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclient.walletversion": {
+        "title": "ChannelClient.walletVersion property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.challengechannel": {
+        "title": "ChannelClientInterface.challengeChannel property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.channelstate": {
+        "title": "ChannelClientInterface.channelState property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.closechannel": {
+        "title": "ChannelClientInterface.closeChannel property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.createchannel": {
+        "title": "ChannelClientInterface.createChannel property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.destinationaddress": {
+        "title": "ChannelClientInterface.destinationAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.getchannels": {
+        "title": "ChannelClientInterface.getChannels() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.getstate": {
+        "title": "ChannelClientInterface.getState property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.joinchannel": {
+        "title": "ChannelClientInterface.joinChannel property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface": {
+        "title": "ChannelClientInterface interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.onchannelproposed": {
+        "title": "ChannelClientInterface.onChannelProposed property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.onchannelupdated": {
+        "title": "ChannelClientInterface.onChannelUpdated property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.onmessagequeued": {
+        "title": "ChannelClientInterface.onMessageQueued property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.provider": {
+        "title": "ChannelClientInterface.provider property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.pushmessage": {
+        "title": "ChannelClientInterface.pushMessage property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.signingaddress": {
+        "title": "ChannelClientInterface.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.updatechannel": {
+        "title": "ChannelClientInterface.updateChannel property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.channelclientinterface.walletversion": {
+        "title": "ChannelClientInterface.walletVersion property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.errorcode": {
+        "title": "ErrorCode variable"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.ethereumnotenablederrorcode": {
+        "title": "EthereumNotEnabledErrorCode variable"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.approvebudgetandfund": {
+        "title": "FakeBrowserChannelProvider.approveBudgetAndFund() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.budget": {
+        "title": "FakeBrowserChannelProvider.budget property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.closeandwithdraw": {
+        "title": "FakeBrowserChannelProvider.closeAndWithdraw() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.enable": {
+        "title": "FakeBrowserChannelProvider.enable() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.getbudget": {
+        "title": "FakeBrowserChannelProvider.getBudget() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider": {
+        "title": "FakeBrowserChannelProvider class"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.mountwalletcomponent": {
+        "title": "FakeBrowserChannelProvider.mountWalletComponent() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.notifyappbudgetupdated": {
+        "title": "FakeBrowserChannelProvider.notifyAppBudgetUpdated() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakebrowserchannelprovider.send": {
+        "title": "FakeBrowserChannelProvider.send() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.closechannel": {
+        "title": "FakeChannelProvider.closeChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.createchannel": {
+        "title": "FakeChannelProvider.createChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.destinationaddress": {
+        "title": "FakeChannelProvider.destinationAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.events": {
+        "title": "FakeChannelProvider.events property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.findchannel": {
+        "title": "FakeChannelProvider.findChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.getaddress": {
+        "title": "FakeChannelProvider.getAddress() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.getopponentindex": {
+        "title": "FakeChannelProvider.getOpponentIndex() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.getplayerindex": {
+        "title": "FakeChannelProvider.getPlayerIndex() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.getstate": {
+        "title": "FakeChannelProvider.getState() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.internaladdress": {
+        "title": "FakeChannelProvider.internalAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.ischannelresult": {
+        "title": "FakeChannelProvider.isChannelResult() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.joinchannel": {
+        "title": "FakeChannelProvider.joinChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.lateststate": {
+        "title": "FakeChannelProvider.latestState property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider": {
+        "title": "FakeChannelProvider class"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.notifyappbudgetupdated": {
+        "title": "FakeChannelProvider.notifyAppBudgetUpdated() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.notifyappchannelupdated": {
+        "title": "FakeChannelProvider.notifyAppChannelUpdated() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.notifyopponent": {
+        "title": "FakeChannelProvider.notifyOpponent() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.off": {
+        "title": "FakeChannelProvider.off property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.on": {
+        "title": "FakeChannelProvider.on property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.opponentaddress": {
+        "title": "FakeChannelProvider.opponentAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.opponentindex": {
+        "title": "FakeChannelProvider.opponentIndex property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.playerindex": {
+        "title": "FakeChannelProvider.playerIndex property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.pushmessage": {
+        "title": "FakeChannelProvider.pushMessage() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.send": {
+        "title": "FakeChannelProvider.send() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.setaddress": {
+        "title": "FakeChannelProvider.setAddress() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.setstate": {
+        "title": "FakeChannelProvider.setState() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.signingaddress": {
+        "title": "FakeChannelProvider.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.subscribe": {
+        "title": "FakeChannelProvider.subscribe() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.unsubscribe": {
+        "title": "FakeChannelProvider.unsubscribe() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.updatechannel": {
+        "title": "FakeChannelProvider.updateChannel() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.updateplayerindex": {
+        "title": "FakeChannelProvider.updatePlayerIndex() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.url": {
+        "title": "FakeChannelProvider.url property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.verifyturnnum": {
+        "title": "FakeChannelProvider.verifyTurnNum() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.fakechannelprovider.walletversion": {
+        "title": "FakeChannelProvider.walletVersion property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client": {
+        "title": "channel-client package"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.tokenallocations": {
+        "title": "TokenAllocations type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.unsubscribefunction": {
+        "title": "UnsubscribeFunction type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-channel-client.userdeclinederrorcode": {
+        "title": "UserDeclinedErrorCode variable"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.address": {
+        "title": "Address type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocation.allocationitems": {
+        "title": "Allocation.allocationItems property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocation": {
+        "title": "Allocation interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocation.token": {
+        "title": "Allocation.token property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocationitem.amount": {
+        "title": "AllocationItem.amount property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocationitem.destination": {
+        "title": "AllocationItem.destination property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocationitem": {
+        "title": "AllocationItem interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.allocations": {
+        "title": "Allocations type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams.hub": {
+        "title": "ApproveBudgetAndFundParams.hub property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams": {
+        "title": "ApproveBudgetAndFundParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams.playerparticipantid": {
+        "title": "ApproveBudgetAndFundParams.playerParticipantId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams.requestedreceivecapacity": {
+        "title": "ApproveBudgetAndFundParams.requestedReceiveCapacity property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams.requestedsendcapacity": {
+        "title": "ApproveBudgetAndFundParams.requestedSendCapacity property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundparams.token": {
+        "title": "ApproveBudgetAndFundParams.token property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundrequest": {
+        "title": "ApproveBudgetAndFundRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.approvebudgetandfundresponse": {
+        "title": "ApproveBudgetAndFundResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.budgetupdatednotification": {
+        "title": "BudgetUpdatedNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.bytes32": {
+        "title": "Bytes32 type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.challengechannelparams.channelid": {
+        "title": "ChallengeChannelParams.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.challengechannelparams": {
+        "title": "ChallengeChannelParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.challengechannelrequest": {
+        "title": "ChallengeChannelRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.challengechannelresponse": {
+        "title": "ChallengeChannelResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelbudget.amount": {
+        "title": "ChannelBudget.amount property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelbudget.channelid": {
+        "title": "ChannelBudget.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelbudget": {
+        "title": "ChannelBudget interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelclosed": {
+        "title": "ChannelClosed type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelclosingnotification": {
+        "title": "ChannelClosingNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelid": {
+        "title": "ChannelId type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelnotfound": {
+        "title": "ChannelNotFound type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelproposednotification": {
+        "title": "ChannelProposedNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.allocations": {
+        "title": "ChannelResult.allocations property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.appdata": {
+        "title": "ChannelResult.appData property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.appdefinition": {
+        "title": "ChannelResult.appDefinition property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.challengeexpirationtime": {
+        "title": "ChannelResult.challengeExpirationTime property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.channelid": {
+        "title": "ChannelResult.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult": {
+        "title": "ChannelResult interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.participants": {
+        "title": "ChannelResult.participants property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.status": {
+        "title": "ChannelResult.status property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelresult.turnnum": {
+        "title": "ChannelResult.turnNum property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelstatus": {
+        "title": "ChannelStatus type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.channelupdatednotification": {
+        "title": "ChannelUpdatedNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closeandwithdrawerror": {
+        "title": "CloseAndWithdrawError type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closeandwithdrawparams.hubparticipantid": {
+        "title": "CloseAndWithdrawParams.hubParticipantId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closeandwithdrawparams": {
+        "title": "CloseAndWithdrawParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closeandwithdrawrequest": {
+        "title": "CloseAndWithdrawRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closeandwithdrawresponse": {
+        "title": "CloseAndWithdrawResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closechannelerror": {
+        "title": "CloseChannelError type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closechannelparams.channelid": {
+        "title": "CloseChannelParams.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closechannelparams": {
+        "title": "CloseChannelParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closechannelrequest": {
+        "title": "CloseChannelRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.closechannelresponse": {
+        "title": "CloseChannelResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams.allocations": {
+        "title": "CreateChannelParams.allocations property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams.appdata": {
+        "title": "CreateChannelParams.appData property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams.appdefinition": {
+        "title": "CreateChannelParams.appDefinition property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams.fundingstrategy": {
+        "title": "CreateChannelParams.fundingStrategy property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams": {
+        "title": "CreateChannelParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelparams.participants": {
+        "title": "CreateChannelParams.participants property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelrequest": {
+        "title": "CreateChannelRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.createchannelresponse": {
+        "title": "CreateChannelResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.domainbudget.budgets": {
+        "title": "DomainBudget.budgets property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.domainbudget.domain": {
+        "title": "DomainBudget.domain property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.domainbudget.hubaddress": {
+        "title": "DomainBudget.hubAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.domainbudget": {
+        "title": "DomainBudget interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.enableethereumerror": {
+        "title": "EnableEthereumError type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.enableethereumrequest": {
+        "title": "EnableEthereumRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.enableethereumresponse": {
+        "title": "EnableEthereumResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.errorcodes": {
+        "title": "ErrorCodes type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.externaldestination": {
+        "title": "ExternalDestination type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.fundingstrategy": {
+        "title": "FundingStrategy type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.funds.amount": {
+        "title": "Funds.amount property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.funds": {
+        "title": "Funds interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.funds.token": {
+        "title": "Funds.token property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getbudgetparams.hubparticipantid": {
+        "title": "GetBudgetParams.hubParticipantId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getbudgetparams": {
+        "title": "GetBudgetParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getbudgetrequest": {
+        "title": "GetBudgetRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getbudgetresponse": {
+        "title": "GetBudgetResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getchannelsparams.includeclosed": {
+        "title": "GetChannelsParams.includeClosed property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getchannelsparams": {
+        "title": "GetChannelsParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getchannelsrequest": {
+        "title": "GetChannelsRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getchannelsresponse": {
+        "title": "GetChannelsResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getstateparams.channelid": {
+        "title": "GetStateParams.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getstateparams": {
+        "title": "GetStateParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getstaterequest": {
+        "title": "GetStateRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getstateresponse": {
+        "title": "GetStateResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getwalletinformationrequest": {
+        "title": "GetWalletInformationRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.getwalletinformationresponse": {
+        "title": "GetWalletInformationResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.invalidappdata": {
+        "title": "InvalidAppData type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.invalidtransition": {
+        "title": "InvalidTransition type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isjsonrpcerrorresponse": {
+        "title": "isJsonRpcErrorResponse() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isjsonrpcnotification": {
+        "title": "isJsonRpcNotification() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isjsonrpcrequest": {
+        "title": "isJsonRpcRequest() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isjsonrpcresponse": {
+        "title": "isJsonRpcResponse() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isstatechannelserrorresponse": {
+        "title": "isStateChannelsErrorResponse() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isstatechannelsnotification": {
+        "title": "isStateChannelsNotification() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isstatechannelsrequest": {
+        "title": "isStateChannelsRequest() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.isstatechannelsresponse": {
+        "title": "isStateChannelsResponse() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.joinchannelparams.channelid": {
+        "title": "JoinChannelParams.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.joinchannelparams": {
+        "title": "JoinChannelParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.joinchannelrequest": {
+        "title": "JoinChannelRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.joinchannelresponse": {
+        "title": "JoinChannelResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerror.code": {
+        "title": "JsonRpcError.code property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerror.data": {
+        "title": "JsonRpcError.data property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerror": {
+        "title": "JsonRpcError interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerror.message": {
+        "title": "JsonRpcError.message property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerrorresponse.error": {
+        "title": "JsonRpcErrorResponse.error property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerrorresponse.id": {
+        "title": "JsonRpcErrorResponse.id property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerrorresponse.jsonrpc": {
+        "title": "JsonRpcErrorResponse.jsonrpc property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcerrorresponse": {
+        "title": "JsonRpcErrorResponse interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcnotification.jsonrpc": {
+        "title": "JsonRpcNotification.jsonrpc property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcnotification": {
+        "title": "JsonRpcNotification interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcnotification.method": {
+        "title": "JsonRpcNotification.method property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcnotification.params": {
+        "title": "JsonRpcNotification.params property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcrequest.id": {
+        "title": "JsonRpcRequest.id property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcrequest.jsonrpc": {
+        "title": "JsonRpcRequest.jsonrpc property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcrequest": {
+        "title": "JsonRpcRequest interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcrequest.method": {
+        "title": "JsonRpcRequest.method property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcrequest.params": {
+        "title": "JsonRpcRequest.params property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcresponse.id": {
+        "title": "JsonRpcResponse.id property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcresponse.jsonrpc": {
+        "title": "JsonRpcResponse.jsonrpc property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcresponse": {
+        "title": "JsonRpcResponse interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.jsonrpcresponse.result": {
+        "title": "JsonRpcResponse.result property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema": {
+        "title": "client-api-schema package"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.message.data": {
+        "title": "Message.data property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.message": {
+        "title": "Message interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.message.recipient": {
+        "title": "Message.recipient property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.message.sender": {
+        "title": "Message.sender property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.messagequeuednotification": {
+        "title": "MessageQueuedNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.notyourturn": {
+        "title": "NotYourTurn type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.parsenotification": {
+        "title": "parseNotification() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.parserequest": {
+        "title": "parseRequest() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.parseresponse": {
+        "title": "parseResponse() function"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.participant.destination": {
+        "title": "Participant.destination property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.participant": {
+        "title": "Participant interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.participant.participantid": {
+        "title": "Participant.participantId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.participant.signingaddress": {
+        "title": "Participant.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.pushmessageparams": {
+        "title": "PushMessageParams type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.pushmessagerequest": {
+        "title": "PushMessageRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.pushmessageresponse": {
+        "title": "PushMessageResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.pushmessageresult": {
+        "title": "PushMessageResult type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelserror": {
+        "title": "StateChannelsError type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelserrorresponse": {
+        "title": "StateChannelsErrorResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelsjsonrpcmessage": {
+        "title": "StateChannelsJsonRpcMessage type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelsnotification": {
+        "title": "StateChannelsNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelsnotificationtype": {
+        "title": "StateChannelsNotificationType type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelsrequest": {
+        "title": "StateChannelsRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.statechannelsresponse": {
+        "title": "StateChannelsResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.tokenbudget.availablereceivecapacity": {
+        "title": "TokenBudget.availableReceiveCapacity property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.tokenbudget.availablesendcapacity": {
+        "title": "TokenBudget.availableSendCapacity property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.tokenbudget.channels": {
+        "title": "TokenBudget.channels property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.tokenbudget": {
+        "title": "TokenBudget interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.tokenbudget.token": {
+        "title": "TokenBudget.token property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.uinotification": {
+        "title": "UiNotification type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.uint256": {
+        "title": "Uint256 type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.uint48": {
+        "title": "Uint48 type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelerror": {
+        "title": "UpdateChannelError type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelparams.allocations": {
+        "title": "UpdateChannelParams.allocations property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelparams.appdata": {
+        "title": "UpdateChannelParams.appData property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelparams.channelid": {
+        "title": "UpdateChannelParams.channelId property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelparams": {
+        "title": "UpdateChannelParams interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelrequest": {
+        "title": "UpdateChannelRequest type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-client-api-schema.updatechannelresponse": {
+        "title": "UpdateChannelResponse type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelprovider": {
+        "title": "channelProvider variable"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.destinationaddress": {
+        "title": "ChannelProviderInterface.destinationAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface": {
+        "title": "ChannelProviderInterface interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.off": {
+        "title": "ChannelProviderInterface.off property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.on": {
+        "title": "ChannelProviderInterface.on property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.send": {
+        "title": "ChannelProviderInterface.send() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.signingaddress": {
+        "title": "ChannelProviderInterface.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.subscribe": {
+        "title": "ChannelProviderInterface.subscribe property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.unsubscribe": {
+        "title": "ChannelProviderInterface.unsubscribe property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.channelproviderinterface.walletversion": {
+        "title": "ChannelProviderInterface.walletVersion property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider._constructor_": {
+        "title": "IFrameChannelProvider.(constructor)"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.destinationaddress": {
+        "title": "IFrameChannelProvider.destinationAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.enable": {
+        "title": "IFrameChannelProvider.enable() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.events": {
+        "title": "IFrameChannelProvider.events property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.iframe": {
+        "title": "IFrameChannelProvider.iframe property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider": {
+        "title": "IFrameChannelProvider class"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.messaging": {
+        "title": "IFrameChannelProvider.messaging property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.mounted": {
+        "title": "IFrameChannelProvider.mounted property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.mountwalletcomponent": {
+        "title": "IFrameChannelProvider.mountWalletComponent() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.off": {
+        "title": "IFrameChannelProvider.off property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.on": {
+        "title": "IFrameChannelProvider.on property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.onmessage": {
+        "title": "IFrameChannelProvider.onMessage() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.send": {
+        "title": "IFrameChannelProvider.send() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.signingaddress": {
+        "title": "IFrameChannelProvider.signingAddress property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.subscribe": {
+        "title": "IFrameChannelProvider.subscribe property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.subscriptions": {
+        "title": "IFrameChannelProvider.subscriptions property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.unsubscribe": {
+        "title": "IFrameChannelProvider.unsubscribe property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.url": {
+        "title": "IFrameChannelProvider.url property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.walletready": {
+        "title": "IFrameChannelProvider.walletReady property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelprovider.walletversion": {
+        "title": "IFrameChannelProvider.walletVersion property"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelproviderinterface": {
+        "title": "IFrameChannelProviderInterface interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.iframechannelproviderinterface.mountwalletcomponent": {
+        "title": "IFrameChannelProviderInterface.mountWalletComponent() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider": {
+        "title": "iframe-channel-provider package"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.walletjsonrpcapi": {
+        "title": "WalletJsonRpcAPI type"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.web3channelproviderinterface.enable": {
+        "title": "Web3ChannelProviderInterface.enable() method"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-iframe-channel-provider.web3channelproviderinterface": {
+        "title": "Web3ChannelProviderInterface interface"
+      },
+      "version-0.2.0/typescript-api/version-0.2.0-index": {
+        "title": "API Reference"
       }
     },
     "links": {
