@@ -1,12 +1,8 @@
 import {StateChannelsNotification} from '@statechannels/client-api-schema';
 import {StateVariables} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
-import {right, left} from 'fp-ts/lib/Either';
 
 import {Bytes32} from '../type-aliases';
-import {none, some} from '../match';
-
-import {ProtocolResult} from './state';
 
 /*
 Actions that protocols can declare.
@@ -25,9 +21,7 @@ export type SubmitTransaction = {
 Action creators
 */
 
-export const noAction = right(none);
-export const error = (error: string | Error): ProtocolResult =>
-  typeof error === 'string' ? left(new Error(error)) : left(error);
+export const noAction = undefined;
 
 const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
   props: Omit<A, 'type'>
@@ -35,14 +29,6 @@ const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['t
 export const submitTransaction = actionConstructor<SubmitTransaction>('SubmitTransaction');
 export const notifyApp = actionConstructor<NotifyApp>('NotifyApp');
 export const signState = actionConstructor<SignState>('SignState');
-
-const resultConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
-  props: Omit<A, 'type'>
-): ProtocolResult<A> => right(some(actionConstructor(type)(props)));
-
-export const signStateResult = resultConstructor<SignState>('SignState');
-export const notifyAppResult = resultConstructor<NotifyApp>('NotifyApp');
-export const submitTransactionResult = resultConstructor<SubmitTransaction>('SubmitTransaction');
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
   a: ProtocolAction
