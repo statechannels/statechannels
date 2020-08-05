@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import {Message} from '@statechannels/wire-format';
+import {Message} from '@statechannels/wallet-core';
 import pino from 'express-pino-logger';
 
 import {logger} from '../logger';
@@ -10,6 +10,7 @@ import ReceiverController from './controller';
 const controller = new ReceiverController();
 
 const app = express();
+
 app.use(pino({logger: logger as any}));
 
 app.post('/status', (_req, res) => res.status(200).send('OK'));

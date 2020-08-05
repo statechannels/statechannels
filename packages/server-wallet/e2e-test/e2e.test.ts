@@ -28,6 +28,7 @@ let SWPayer: typeof SigningWallet;
 let SWReceiver: typeof SigningWallet;
 
 let receiverServer: ReceiverServer;
+
 beforeAll(async () => {
   receiverServer = startReceiverServer();
   await waitForServerToStart(receiverServer);
@@ -65,11 +66,9 @@ describe('e2e', () => {
   });
 
   it('can do a simple end-to-end flow with no signed states', async () => {
-    const ret = await payerClient.emptyMessage();
-    expect(ret.sender).toBe('receiver');
-    expect(ret.recipient).toBe('payer');
-    expect(ret.data.signedStates?.length).toBe(0);
-    expect(ret.data.objectives?.length).toBe(0);
+    const {signedStates, objectives} = await payerClient.emptyMessage();
+    expect(signedStates?.length).toBe(0);
+    expect(objectives?.length).toBe(0);
   });
 
   it('can create a channel, send signed state via http', async () => {
