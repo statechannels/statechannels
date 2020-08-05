@@ -1,6 +1,5 @@
 import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 import {
-  ChannelResult as ClientChannelResult,
   UpdateChannelParams,
   CreateChannelParams,
   StateChannelsNotification,
@@ -21,7 +20,7 @@ import * as Either from 'fp-ts/lib/Either';
 import {Bytes32} from '../type-aliases';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Outgoing, ProtocolAction} from '../protocols/actions';
+import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
@@ -178,13 +177,13 @@ export class Wallet implements WalletInterface {
 
 type ExecutionResult = {
   outbox: Outgoing[];
-  channelResults: ClientChannelResult[];
+  channelResults: ChannelResult[];
   error?: any;
 };
 
 const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
-  const channelResults: ClientChannelResult[] = [];
+  const channelResults: ChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
     await Store.lockApp(channels[0], async tx => {
@@ -222,7 +221,10 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       const nextAction = Application.protocol({app});
 
       if (!nextAction) markChannelAsDone();
-      else {
+      else if (isOutgoing(nextAction)) {
+        outbox.push(nextAction.notice);
+        markChannelAsDone();
+      } else {
         try {
           await doAction(nextAction);
         } catch (err) {
