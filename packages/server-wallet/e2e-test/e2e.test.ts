@@ -91,7 +91,8 @@ describe('payments', () => {
   const triggerPayments = async (numPayments?: number): Promise<void> => {
     let args = [
       'ts-node',
-      'e2e-test/e2e-utils/payer.ts',
+      'e2e-test/payer',
+      'start',
       '--database',
       'payer',
       '--channels',
@@ -101,7 +102,9 @@ describe('payments', () => {
     if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
     const payerScript = childProcess.spawn(`yarn`, args);
+
     payerScript.on('error', logger.error);
+
     await new Promise(resolve => payerScript.on('exit', resolve));
   };
 
