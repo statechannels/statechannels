@@ -3398,6 +3398,30 @@
   dependencies:
     type-detect "4.0.8"
 
+"@statechannels/devtools@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@statechannels/devtools/-/devtools-0.1.4.tgz#1257825523e93ddd6af91d153bed86562c1eea48"
+  integrity sha512-4KPqG03UJNs1Lh+gvNoqIt8cIX4OaDlTY9JREOkD4GoI0uCs8uu4+tRcCtdl+Plt0qei39/vw4yk901r5yZMQA==
+  dependencies:
+    chai "4.2.0"
+    detect-port "1.3.0"
+    dotenv "8.2.0"
+    dotenv-expand "5.1.0"
+    etherlime "2.3.3"
+    etherlime-lib "1.1.5"
+    ethers "4.0.45"
+    fs-extra "8.1.0"
+    ganache-cli "6.9.1"
+    jest "25.1.0"
+    lockfile "1.0.4"
+    pino "6.2.0"
+    pino-pretty "^4.0.0"
+    solc "0.6.1"
+    tcp-port-used "1.0.1"
+    tree-kill "1.2.1"
+    write-json-file "4.2.0"
+    yargs "15.1.0"
+
 "@storybook/addon-actions@5.3.9":
   version "5.3.9"
   resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-5.3.9.tgz#fc8b1d912c87f418e69c2b52031d29465bb4867b"
@@ -18345,6 +18369,23 @@ pino-pretty@^2.2.2:
     readable-stream "^3.0.6"
     split2 "^3.0.0"
 
+pino-pretty@^4.0.0:
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/pino-pretty/-/pino-pretty-4.1.0.tgz#ad47ae00d4f3959cfadcdd691b1ebdcbdd61e42e"
+  integrity sha512-D4rORz/7SCZ0AGeWw9QFXsJ+ky3jDOqi/ABFzxxCk5BtEelEgJ6AABFew7TosHGw7I1t8VuMaGdTVNoYMZc+jg==
+  dependencies:
+    "@hapi/bourne" "^2.0.0"
+    args "^5.0.1"
+    chalk "^4.0.0"
+    dateformat "^3.0.3"
+    fast-safe-stringify "^2.0.7"
+    jmespath "^0.15.0"
+    joycon "^2.2.5"
+    pump "^3.0.0"
+    readable-stream "^3.6.0"
+    split2 "^3.1.1"
+    strip-json-comments "^3.1.1"
+
 pino-std-serializers@^2.4.0, pino-std-serializers@^2.4.2:
   version "2.4.2"
   resolved "https://registry.npmjs.org/pino-std-serializers/-/pino-std-serializers-2.4.2.tgz#cb5e3e58c358b26f88969d7e619ae54bdfcc1ae1"
@@ -22225,7 +22266,7 @@ strip-json-comments@^2.0.1, strip-json-comments@~2.0.1:
   resolved "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
   integrity sha1-PFMZQukIwml8DsNEhYwobHygpgo=
 
-strip-json-comments@^3.0.1:
+strip-json-comments@^3.0.1, strip-json-comments@^3.1.1:
   version "3.1.1"
   resolved "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==

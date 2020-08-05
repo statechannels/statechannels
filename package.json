@@ -63,9 +63,6 @@
     "packages": [
       "packages/*",
       "packages/docs-website/*"
-    ],
-    "nohoist": [
-      "**/ethers"
     ]
   }
 }
