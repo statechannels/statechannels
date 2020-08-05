@@ -40,8 +40,6 @@ export default {
     const knex = Knex(_.merge(dbConfig, {connection: {database}}));
     Model.knex(knex);
 
-    console.log(`numPayments: ${numPayments}`);
-
     const payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
 
     await Promise.all(
