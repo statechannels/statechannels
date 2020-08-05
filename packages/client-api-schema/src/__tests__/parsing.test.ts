@@ -2,17 +2,21 @@ import {
   validateRequest,
   parseRequest,
   validateNotification,
-  parseNotification
+  parseNotification,
+  validateErrorResponse,
+  parseErrorResponse
 } from '../validation';
+import {parseResponse} from '../../lib/src';
+import {validateResponse} from '../../lib/src/validation';
 
 import {goodRequests} from './sample_messages/requests/good';
 import {badRequests} from './sample_messages/requests/bad';
 import {badNotifications} from './sample_messages/notifications/bad';
 import {goodNotifications} from './sample_messages/notifications/good';
 import {goodResponses} from './sample_messages/responses/good';
-import {parseResponse} from '../../lib/src';
-import {validateResponse} from '../../lib/src/validation';
 import {badResponses} from './sample_messages/responses/bad';
+import {goodErrorResponses} from './sample_messages/error-responses/good';
+import {badErrorResponses} from './sample_messages/error-responses/bad';
 
 describe('requests', () => {
   for (const request of goodRequests) {
@@ -55,6 +59,21 @@ describe('responses', () => {
     it(`detects a dodgy      response and throws`, () => {
       expect(() => parseResponse(response)).toThrow();
       expect(validateResponse(response)).toBe(false);
+    });
+  }
+});
+
+describe('error responses', () => {
+  for (const response of goodErrorResponses) {
+    it(`validates and parses ${response.error.code}: ${response.error.message}`, () => {
+      expect(parseErrorResponse(response)).toEqual(response);
+      expect(validateErrorResponse(response)).toBe(true);
+    });
+  }
+  for (const response of badErrorResponses) {
+    it(`detects a dodgy      ${response.error.code} error response and throws`, () => {
+      expect(() => parseErrorResponse(response)).toThrow();
+      expect(validateErrorResponse(response)).toBe(false);
     });
   }
 });
