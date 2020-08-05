@@ -5,8 +5,10 @@ import {
   parseNotification
 } from '../validation';
 
-import {goodRequests, goodNotifications} from './good_sample_messages';
-import {badRequests, badNotifications} from './bad_sample_messages';
+import {goodRequests} from './sample_messages/requests/good';
+import {badRequests} from './sample_messages/requests/bad';
+import {badNotifications} from './sample_messages/notifications/bad';
+import {goodNotifications} from './sample_messages/notifications/good';
 
 describe('requests', () => {
   for (const request of goodRequests) {
