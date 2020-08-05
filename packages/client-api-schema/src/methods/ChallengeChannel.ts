@@ -8,7 +8,7 @@ export interface ChallengeChannelParams {
 export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', ChallengeChannelParams>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
-type ErrorCodes = AllErrors['GetState'];
+type ErrorCodes = AllErrors['ChallengeChannel'];
 type ChannelNotFound = JsonRpcError<ErrorCodes['ChannelNotFound'], 'Could not find channel'>;
 
 export type ChallengeChannelError = ChannelNotFound;

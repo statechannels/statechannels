@@ -54,6 +54,11 @@ export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', Dom
 // @public
 export type Bytes32 = string;
 
+// Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type ChallengeChannelError = ChannelNotFound_5;
+
 // @public (undocumented)
 export interface ChallengeChannelParams {
     // (undocumented)
@@ -174,6 +179,13 @@ export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelPar
 //
 // @public (undocumented)
 export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
+
+// Warning: (ae-forgotten-export) The symbol "SigningAddressNotFound" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "InvalidAppDefinition" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "UnsupportedToken" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition | UnsupportedToken;
 
 // @public (undocumented)
 export interface CreateChannelParams {
@@ -315,6 +327,11 @@ export type GetChannelsRequest = JsonRpcRequest<'GetChannels', {
 // @public (undocumented)
 export type GetChannelsResponse = JsonRpcResponse<ChannelResult[]>;
 
+// Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type GetStateError = ChannelNotFound_4;
+
 // @public (undocumented)
 export interface GetStateParams {
     // (undocumented)
@@ -383,6 +400,12 @@ export function isStateChannelsRequest(message: StateChannelsJsonRpcMessage): me
 
 // @public (undocumented)
 export function isStateChannelsResponse(message: StateChannelsJsonRpcMessage): message is StateChannelsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "InvalidTransition" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type JoinChannelError = ChannelNotFound_3 | InvalidTransition_2;
 
 // @public (undocumented)
 export interface JoinChannelParams {
@@ -469,6 +492,11 @@ export interface Participant {
     signingAddress: Address;
 }
 
+// Warning: (ae-forgotten-export) The symbol "NotYourTurn" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type PushMessageError = NotYourTurn_3;
+
 // @public (undocumented)
 export type PushMessageParams = PushMessageRequest['params'];
 
@@ -490,7 +518,7 @@ export type PushMessageResult = {
 // Warning: (ae-forgotten-export) The symbol "GenericError" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type StateChannelsError = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | GenericError;
+export type StateChannelsError = EnableEthereumError | CloseAndWithdrawError | CloseChannelError | UpdateChannelError | PushMessageError | JoinChannelError | GetStateError | CreateChannelError | ChallengeChannelError | PushMessageError | GenericError;
 
 // Warning: (ae-incompatible-release-tags) The symbol "StateChannelsErrorResponse" is marked as @public, but its signature references "JsonRpcErrorResponse" which is marked as @beta
 //

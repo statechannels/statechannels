@@ -80,6 +80,7 @@ export type StateChannelsError =
   | GetStateError
   | CreateChannelError
   | ChallengeChannelError
+  | PushMessageError
   | GenericError;
 
 export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
