@@ -477,6 +477,9 @@ export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Mes
 export type NotYourTurn = JsonRpcError<ErrorCodes_3['NotYourTurn'], 'Not your turn'>;
 
 // @public
+export function parseErrorResponse(jsonBlob: object): StateChannelsErrorResponse;
+
+// @public
 export function parseNotification(jsonBlob: object): StateChannelsNotification;
 
 // @public
