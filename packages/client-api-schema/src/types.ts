@@ -30,7 +30,12 @@ import {
   EnableEthereumError,
   CloseAndWithdrawError,
   CloseChannelError,
-  UpdateChannelError
+  UpdateChannelError,
+  PushMessageError,
+  JoinChannelError,
+  GetStateError,
+  CreateChannelError,
+  ChallengeChannelError
 } from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
@@ -70,6 +75,11 @@ export type StateChannelsError =
   | CloseAndWithdrawError
   | CloseChannelError
   | UpdateChannelError
+  | PushMessageError
+  | JoinChannelError
+  | GetStateError
+  | CreateChannelError
+  | ChallengeChannelError
   | GenericError;
 
 export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
