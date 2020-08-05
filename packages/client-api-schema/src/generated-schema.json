@@ -352,7 +352,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-247-273-946177841-217-274-946177841-184-275-946177841-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2132-2377-src%2Fdata-types.ts-0-2794%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2222-2467-src%2Fdata-types.ts-0-2884%5B%5D%3E"
     },
     "GetStateParams": {
       "additionalProperties": false,
@@ -1517,7 +1517,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-2132-2377-src/data-types.ts-0-2794[]>": {
+    "JsonRpcResponse<def-interface-src/data-types.ts-2222-2467-src/data-types.ts-0-2884[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
