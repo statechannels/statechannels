@@ -115,6 +115,12 @@ yarn lerna publish from-git
 
 to publish the packages to npm (you will need to be logged in with `npm login`), as well as pushing the version update to git.
 
+## Typescript doc comments
+
+These should adhere to the [TSDoc standard](https://github.com/Microsoft/tsdoc). You can try the [TSDoc playground](https://microsoft.github.io/tsdoc/).
+
+Doc comments will appear in our documentation at https://docs.statechannels.org.
+
 ## Community
 
 State Channels Forums: https://research.statechannels.org/
