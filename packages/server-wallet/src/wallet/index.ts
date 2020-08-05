@@ -1,6 +1,5 @@
 import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 import {
-  ChannelResult as ClientChannelResult,
   UpdateChannelParams,
   CreateChannelParams,
   StateChannelsNotification,
@@ -17,16 +16,14 @@ import {
   convertToParticipant,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
 
 import {Bytes32} from '../type-aliases';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Outgoing, ProtocolAction} from '../protocols/actions';
+import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
-import knex from '../db/connection';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
@@ -180,22 +177,22 @@ export class Wallet implements WalletInterface {
 
 type ExecutionResult = {
   outbox: Outgoing[];
-  channelResults: ClientChannelResult[];
+  channelResults: ChannelResult[];
   error?: any;
 };
 
 const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
-  const channelResults: ClientChannelResult[] = [];
+  const channelResults: ChannelResult[] = [];
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
-    await knex.transaction(async tx => {
+    await Store.lockApp(channels[0], async tx => {
       const setError = async (e: Error): Promise<void> => {
         error = e;
         await tx.rollback(error);
       };
-      const markChannelAsDone = async (): Promise<any> => {
-        channels.shift() as string;
+      const markChannelAsDone = (): void => {
+        channels.shift();
       };
 
       const doAction = async (action: ProtocolAction): Promise<any> => {
@@ -218,23 +215,22 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       const app = await Store.getChannel(channels[0], tx);
 
       if (!app) {
-        setError(new Error('Channel not found'));
-
-        throw 'unreachable';
+        throw new Error('Channel not found');
       }
 
-      try {
-        const nextAction = await Application.protocol({app});
-        // TODO: doAction might also throw an error.
-        // It would be nice for doAction to return an Either type, pipe the right values,
-        // and handle the left values with setError
-        await Either.fold(setError, Option.fold(markChannelAsDone, doAction))(nextAction);
-      } catch (err) {
-        // TODO This code should not need to catch an arbitrary, unknown error.
-        // doAction could return an Either, and then the error can be handled more explicitly
-        // See https://github.com/statechannels/statechannels/issues/2379
-        logger.error({err}, 'Error handling action');
-        await setError(err);
+      const nextAction = Application.protocol({app});
+
+      if (!nextAction) markChannelAsDone();
+      else if (isOutgoing(nextAction)) {
+        outbox.push(nextAction.notice);
+        markChannelAsDone();
+      } else {
+        try {
+          await doAction(nextAction);
+        } catch (err) {
+          logger.error({err}, 'Error handling action');
+          await setError(err);
+        }
       }
     });
   }

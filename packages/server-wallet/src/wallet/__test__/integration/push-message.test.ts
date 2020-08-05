@@ -17,6 +17,7 @@ it("doesn't throw on an empty message", () => {
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
 });
 
+const zero = 0;
 const four = 4;
 const five = 5;
 const six = 6;
@@ -32,7 +33,7 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy(alice(), bob())({turnNum: four}),
   ];
 
-  await wallet.pushMessage(message({signedStates: signedStates}));
+  await wallet.pushMessage(message({signedStates}));
 
   const channelsAfter = await Channel.query().select();
 
@@ -43,6 +44,17 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
 });
 
+it('returns a ChannelProposed notification when receiving the first state', async () => {
+  const channelsBefore = await Channel.query().select();
+  expect(channelsBefore).toHaveLength(0);
+
+  const signedStates = [stateSignedBy(alice())({turnNum: zero})];
+
+  await expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
+    outbox: [{method: 'ChannelProposed', params: {turnNum: zero}}],
+  });
+});
+
 it('stores states for multiple channels', async () => {
   const channelsBefore = await Channel.query().select();
   expect(channelsBefore).toHaveLength(0);
@@ -51,7 +63,7 @@ it('stores states for multiple channels', async () => {
     stateSignedBy(alice(), bob())({turnNum: five}),
     stateSignedBy(alice(), bob())({turnNum: five, channelNonce: 567}),
   ];
-  await wallet.pushMessage(message({signedStates: signedStates}));
+  await wallet.pushMessage(message({signedStates}));
 
   const channelsAfter = await Channel.query().select();
 
