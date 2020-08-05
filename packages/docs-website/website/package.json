@@ -2,6 +2,7 @@
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
   "version": "0.1.6",
+  "private": "true",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "scripts": {
@@ -14,7 +15,7 @@
     "publish-gh-pages": "docusaurus-publish",
     "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=build/docs-website",
     "rename-version": "docusaurus-rename-version",
-    "version": "docusaurus-version",
+    "version": "docusaurus-version $npm_package_version",
     "write-translations": "docusaurus-write-translations"
   },
   "devDependencies": {
