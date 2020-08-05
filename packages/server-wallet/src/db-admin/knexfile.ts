@@ -4,7 +4,7 @@ import * as path from 'path';
 import {configureEnvVariables} from '@statechannels/devtools';
 import {Config} from 'knex';
 
-import {dbConfig} from '../db-config';
+import {dbConfig} from '../db/config';
 import config from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');

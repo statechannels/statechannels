@@ -5,7 +5,7 @@ import {Model} from 'objection';
 import Knex from 'knex';
 import _ from 'lodash';
 
-import {dbConfig} from '../../src/db-config';
+import {dbConfig} from '../../src/db/config';
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 

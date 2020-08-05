@@ -4,7 +4,7 @@ import kill = require('tree-kill');
 import axios from 'axios';
 
 import Knex = require('knex');
-import {dbConfig} from '../src/db-config';
+import {dbConfig} from '../src/db/config';
 
 export type ReceiverServer = {
   url: string;
