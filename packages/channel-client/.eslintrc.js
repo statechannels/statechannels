@@ -4,7 +4,7 @@ module.exports = {
     es6: true
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier', 'jest'],
+  plugins: ['@typescript-eslint', 'prettier', 'jest', 'eslint-plugin-tsdoc'],
   extends: [
     '../../.eslintrc.js',
     'eslint:recommended',
@@ -15,6 +15,7 @@ module.exports = {
   ],
   rules: {
     'prettier/prettier': ['warn'],
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    'tsdoc/syntax': 'warn'
   }
 };
