@@ -42,7 +42,7 @@
     "eventemitter3": "4.0.0",
     "file-loader": "5.0.2",
     "filter-async-rxjs-pipe": "0.1.5",
-    "fork-ts-checker-webpack-plugin": "5.0.7",
+    "fork-ts-checker-webpack-plugin": "1.5.0",
     "git-revision-webpack-plugin": "3.0.6",
     "guid-typescript": "1.0.9",
     "html-webpack-plugin": "4.0.0-beta.5",
