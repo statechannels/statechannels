@@ -119,9 +119,7 @@ describe('channel results', () => {
     // The Channel model adds the state hash before persisting
 
     const stateVar = signedStates.map(addHash)[1];
-    const record = await Channel.query()
-      .where('channelId', calculateChannelId(stateVar))
-      .first();
+    const record = await Channel.forId(calculateChannelId(stateVar), undefined);
 
     expect(stateVar).toMatchObject(record.vars[0]);
   });
