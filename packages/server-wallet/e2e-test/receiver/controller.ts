@@ -1,5 +1,5 @@
 import {Message as WireMessage} from '@statechannels/wire-format';
-import {Message, makeDestination, calculateChannelId} from '@statechannels/wallet-core';
+import {Message, makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
@@ -21,9 +21,9 @@ export default class ReceiverController {
   public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {
     const {signedStates} = message;
 
-    // FIXME: At this point, outbox should have ChannelUpdated or something
-    // waiting on https://github.com/statechannels/statechannels/pull/2370
-    await this.wallet.pushMessage(message);
+    const {
+      channelResults: [channelResult],
+    } = await this.wallet.pushMessage(message);
 
     if (!signedStates || signedStates?.length === 0) {
       return {
@@ -31,15 +31,11 @@ export default class ReceiverController {
         objectives: [],
       };
     } else {
-      const {channelResult} = await this.wallet.getState({
-        channelId: calculateChannelId(signedStates[0]),
-      });
-
       const {
         outbox: [messageToSendToPayer],
-      } = await (channelResult.turnNum < 4 ? this.wallet.joinChannel : this.wallet.updateChannel)(
-        channelResult
-      );
+      } = await (channelResult.status === 'proposed'
+        ? this.wallet.joinChannel
+        : this.wallet.updateChannel)(channelResult);
 
       return (messageToSendToPayer.params as WireMessage).data as Message;
     }
