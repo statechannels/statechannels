@@ -7,6 +7,8 @@ import {dbConfig} from '../../src/db/config';
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 
+import {PerformanceTimer} from './timers';
+
 export default {
   command: 'start',
 
@@ -42,14 +44,24 @@ export default {
 
     const payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
 
+    const performanceTimer = new PerformanceTimer(channels || [], numPayments);
     await Promise.all(
       (channels || []).map((channelId: string) =>
         _.range(numPayments).reduce(
-          p => p.then(() => payerClient.makePayment(channelId)),
+          p =>
+            p.then(() => {
+              performanceTimer.start(channelId);
+              return payerClient.makePayment(channelId).then(() => {
+                performanceTimer.stop(channelId);
+              });
+            }),
           Promise.resolve()
         )
       )
     );
+
+    const timingResults = performanceTimer.calculateResults();
+    process.send && process.send(JSON.stringify(timingResults));
 
     process.exit(0);
   },
