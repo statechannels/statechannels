@@ -5,5 +5,7 @@ module.exports = {
     }
   },
   preset: 'ts-jest',
-  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)']
+  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+  testEnvironment: 'jsdom',
+  testEnvironmentOptions: {url: 'http://bar.com/', resources: 'usable', runScripts: 'dangerously'}
 };
