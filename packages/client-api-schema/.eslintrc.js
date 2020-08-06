@@ -9,6 +9,10 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:jest/style'
   ],
+  plugins: ['eslint-plugin-tsdoc'],
+  rules: {
+    'tsdoc/syntax': 'warn'
+  },
   env: {
     node: true,
     es6: true

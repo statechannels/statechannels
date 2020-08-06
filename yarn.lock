@@ -2720,10 +2720,25 @@
     source-map "~0.6.1"
     typescript "~3.9.5"
 
+"@microsoft/tsdoc-config@0.13.5":
+  version "0.13.5"
+  resolved "https://registry.npmjs.org/@microsoft/tsdoc-config/-/tsdoc-config-0.13.5.tgz#2efeb27f5e4d191b8356aa4eb09e146c0813070c"
+  integrity sha512-KlnIdTRnPSsU9Coz9wzDAkT8JCLopP3ec1sgsgo7trwE6QLMKRpM4hZi2uzVX897SW49Q4f439auGBcQLnZQfA==
+  dependencies:
+    "@microsoft/tsdoc" "0.12.20"
+    ajv "~6.12.3"
+    jju "~1.4.0"
+    resolve "~1.12.0"
+
 "@microsoft/tsdoc@0.12.19":
   version "0.12.19"
   resolved "https://registry.npmjs.org/@microsoft/tsdoc/-/tsdoc-0.12.19.tgz#2173ccb92469aaf62031fa9499d21b16d07f9b57"
   integrity sha512-IpgPxHrNxZiMNUSXqR1l/gePKPkfAmIKoDRP9hp7OwjU29ZR8WCJsOJ8iBKgw0Qk+pFwR+8Y1cy8ImLY6e9m4A==
+
+"@microsoft/tsdoc@0.12.20":
+  version "0.12.20"
+  resolved "https://registry.npmjs.org/@microsoft/tsdoc/-/tsdoc-0.12.20.tgz#4261285f666ee0c0378f810585dd4ec5bbfa8852"
+  integrity sha512-/b13m37QZYPV6nCOiqkFyvlQjlTNvAcQpgFZ6ZKIqtStJxNdqVo/frULubxMUMWi6p9Uo5f4BRlguv5ViFcL0A==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -4436,9 +4451,9 @@
     "@types/chai" "*"
 
 "@types/chai@*", "@types/chai@^4.2.9":
-  version "4.2.11"
-  resolved "https://registry.npmjs.org/@types/chai/-/chai-4.2.11.tgz#d3614d6c5f500142358e6ed24e1bf16657536c50"
-  integrity sha512-t7uW6eFafjO+qJ3BIV2gGUyZs27egcNRkUdalkud+Qa3+kg//f129iuOFivHDXQ+vnU3fDXuwgv0cqMCbcE8sw==
+  version "4.2.12"
+  resolved "https://registry.npmjs.org/@types/chai/-/chai-4.2.12.tgz#6160ae454cd89dae05adc3bb97997f488b608201"
+  integrity sha512-aN5IAC8QNtSUdQzxu7lGBgYAOuU1tmRU4c9dIq5OKGf/SBVjXo+ffM2wEjudAWbgpOhy60nLoAGH1xm8fpCKFQ==
 
 "@types/chai@4.2.0":
   version "4.2.0"
@@ -5776,7 +5791,7 @@ ajv@6.11.0:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.12.0, ajv@^6.12.2, ajv@^6.5.5, ajv@^6.9.1:
+ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.12.0, ajv@^6.12.2, ajv@^6.5.5, ajv@^6.9.1, ajv@~6.12.3:
   version "6.12.3"
   resolved "https://registry.npmjs.org/ajv/-/ajv-6.12.3.tgz#18c5af38a111ddeb4f2697bd78d68abc1cabd706"
   integrity sha512-4K0cK3L1hsqk9xIb2z9vs/XU+PGJZ9PNpJRDS9YLzmNdX6jmVPfamLvTJr0aDAusnHyCHO6MjzlkAsgtqp9teA==
@@ -10509,6 +10524,14 @@ eslint-plugin-react@7.19.0:
     semver "^6.3.0"
     string.prototype.matchall "^4.0.2"
     xregexp "^4.3.0"
+
+eslint-plugin-tsdoc@^0.2.6:
+  version "0.2.6"
+  resolved "https://registry.npmjs.org/eslint-plugin-tsdoc/-/eslint-plugin-tsdoc-0.2.6.tgz#8e63aeff24708da5a01ac2bef1e46c4cd779ce09"
+  integrity sha512-pU6/VVEOlC85BrUjsqZGGSRy41N+PHfWXokqjpQRWT1LSpBsAEbRpsueNYSFS+93Sx9CFD0511kjLKVySRbLbg==
+  dependencies:
+    "@microsoft/tsdoc" "0.12.20"
+    "@microsoft/tsdoc-config" "0.13.5"
 
 eslint-plugin-unicorn@21.0.0:
   version "21.0.0"
@@ -20659,6 +20682,13 @@ resolve@^2.0.0-next.1:
   version "2.0.0-next.1"
   resolved "https://registry.npmjs.org/resolve/-/resolve-2.0.0-next.1.tgz#4d96ccb89bf82d54ab037241ae053db4e92bb5f1"
   integrity sha512-ZGTmuLZAW++TDjgslfUMRZcv7kXHv8z0zwxvuRWOPjnqc56HVsn1lVaqsWOZeQ8MwiilPVJLrcPVKG909QsAfA==
+  dependencies:
+    path-parse "^1.0.6"
+
+resolve@~1.12.0:
+  version "1.12.3"
+  resolved "https://registry.npmjs.org/resolve/-/resolve-1.12.3.tgz#96d5253df8005ce19795c14338f2a013c38a8c15"
+  integrity sha512-hF6+hAPlxjqHWrw4p1rF3Wztbgxd4AjA5VlUzY5zcTb4J8D3JK4/1RjU48pHz2PJWzGVsLB1VWZkvJzhK2CCOA==
   dependencies:
     path-parse "^1.0.6"
 
