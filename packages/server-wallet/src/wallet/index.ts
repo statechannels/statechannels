@@ -208,9 +208,8 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       const doAction = async (action: ProtocolAction): Promise<any> => {
         switch (action.type) {
           case 'SignState': {
-            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
+            const {outgoing} = await Store.signState(action.channelId, action, tx);
             outgoing.map(n => outbox.push(n.notice));
-            channelResults.push(channelResult);
             return;
           }
           default:

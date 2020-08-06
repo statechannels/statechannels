@@ -49,8 +49,8 @@ const expectResults = async (
   p: Promise<{channelResults: ChannelResult[]}>,
   channelResults: Partial<ChannelResult>[]
 ): Promise<void> => {
-  await expect(p).resolves.toMatchObject({channelResults});
   await expect(p.then(data => data.channelResults)).resolves.toHaveLength(channelResults.length);
+  await expect(p).resolves.toMatchObject({channelResults});
 };
 
 describe('channel results', () => {
@@ -178,10 +178,9 @@ it('takes the next action, when the application protocol returns an action', asy
   expect(c.supported).toBeUndefined();
   const {channelId} = c;
 
-  await expect(
-    wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}))
-  ).resolves.toMatchObject({
-    channelResults: [{channelId, status: 'funding'}],
+  const p = wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}));
+  await expectResults(p, [{channelId, status: 'opening'}]);
+  await expect(p).resolves.toMatchObject({
     outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
   });
 
