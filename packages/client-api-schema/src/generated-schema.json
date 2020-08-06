@@ -352,7 +352,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-247-273-946177841-217-274-946177841-184-275-946177841-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2222-2467-src%2Fdata-types.ts-0-2884%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2698-2994-src%2Fdata-types.ts-0-3411%5B%5D%3E"
     },
     "GetStateParams": {
       "additionalProperties": false,
@@ -899,7 +899,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1271>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1517,7 +1517,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-2222-2467-src/data-types.ts-0-2884[]>": {
+    "JsonRpcResponse<def-interface-src/data-types.ts-2698-2994-src/data-types.ts-0-3411[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1915,7 +1915,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1271%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345%3E"
     },
     "Uint256": {
       "description": "Uint256",
