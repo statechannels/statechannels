@@ -15,22 +15,7 @@ beforeAll(() => {
 
 describe('Client-Provider-Wallet', () => {
   it('Mounts the iframe pointed at the hosted wallet, and enables', async () => {
-    const mountPromise = channelProvider.mountWalletComponent(
-      'https://xstate-wallet.statechannels.org/'
-    );
-
-    // const walletReadyMessage: WalletReady = {
-    //   jsonrpc: '2.0',
-    //   method: 'WalletReady',
-    //   params: {}
-    // };
-
-    // window.dispatchEvent(
-    //   new MessageEvent('message', {
-    //     origin: 'https://xstate-wallet.statechannels.org/',
-    //     data: walletReadyMessage
-    //   })
-    // );
+    const mountPromise = channelProvider.mountWalletComponent('http://localhost:3055');
     console.log(channelProvider);
     await mountPromise;
     await channelProvider.enable();
