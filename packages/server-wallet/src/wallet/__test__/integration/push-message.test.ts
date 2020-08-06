@@ -9,7 +9,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
-import {channel} from '../../../models/__test__/fixtures/channel';
+import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 
 beforeEach(async () => seedAlicesSigningWallet(knex));
 
@@ -44,14 +44,51 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
 });
 
-it('returns a ChannelProposed notification when receiving the first state', async () => {
-  const channelsBefore = await Channel.query().select();
-  expect(channelsBefore).toHaveLength(0);
+describe('channel results', () => {
+  it("returns a 'proposed' channel result when receiving the first state from a peer", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
 
-  const signedStates = [stateSignedBy(alice())({turnNum: zero})];
+    const signedStates = [stateSignedBy(bob())({turnNum: zero})];
 
-  await expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-    outbox: [{method: 'ChannelProposed', params: {turnNum: zero}}],
+    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
+      channelResults: [{turnNum: zero, status: 'proposed'}],
+    });
+  });
+
+  it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+    const {channelId} = await Channel.query().insert(withSupportedState({turnNum: 8})());
+
+    const signedStates = [stateSignedBy(bob())({turnNum: 9})];
+
+    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
+      channelResults: [{channelId, turnNum: 9, status: 'running'}],
+    });
+  });
+
+  it("returns a 'closing' channel result when receiving a state in a channel that is now closing", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+    const {channelId} = await Channel.query().insert(withSupportedState({turnNum: 8})());
+
+    const signedStates = [stateSignedBy(bob())({turnNum: 9, isFinal: true})];
+
+    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
+      channelResults: [{channelId, turnNum: 9, status: 'closing'}],
+    });
+  });
+
+  it("returns a 'closing' channel result when receiving a state in a channel that is now closed", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+
+    const signedStates = [stateSignedBy(alice(), bob())({turnNum: 9, isFinal: true})];
+
+    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
+      channelResults: [{turnNum: 9, status: 'closed'}],
+    });
   });
 });
 

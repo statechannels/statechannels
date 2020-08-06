@@ -168,6 +168,7 @@ export class Wallet implements WalletInterface {
 
     return {outbox, channelResults};
   }
+
   onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
   }
@@ -185,12 +186,23 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
     await Store.lockApp(channels[0], async tx => {
+      // For the moment, we are only considering directly funded app channels.
+      // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+      // In the future, we can have an App model which collects all the relevant channels for an app channel,
+      // and a Ledger model which stores ledger-specific data (eg. queued requests)
+      const app = await Store.getChannel(channels[0], tx);
+
+      if (!app) {
+        throw new Error('Channel not found');
+      }
+
       const setError = async (e: Error): Promise<void> => {
         error = e;
         await tx.rollback(error);
       };
       const markChannelAsDone = (): void => {
         channels.shift();
+        channelResults.push(ChannelState.toChannelResult(app));
       };
 
       const doAction = async (action: ProtocolAction): Promise<any> => {
@@ -205,16 +217,6 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
             throw 'Unimplemented';
         }
       };
-
-      // For the moment, we are only considering directly funded app channels.
-      // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-      // In the future, we can have an App model which collects all the relevant channels for an app channel,
-      // and a Ledger model which stores ledger-specific data (eg. queued requests)
-      const app = await Store.getChannel(channels[0], tx);
-
-      if (!app) {
-        throw new Error('Channel not found');
-      }
 
       const nextAction = Application.protocol({app});
 
