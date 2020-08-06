@@ -15,9 +15,7 @@ beforeAll(() => {
 
 describe('Client-Provider-Wallet', () => {
   it('Mounts the iframe pointed at the hosted wallet, and enables', async () => {
-    const mountPromise = channelProvider.mountWalletComponent('http://localhost:3055');
-    console.log(channelProvider);
-    await mountPromise;
+    await channelProvider.mountWalletComponent('http://localhost:3055');
     await channelProvider.enable();
     expect(channelProvider.walletVersion).toBeDefined();
   });
