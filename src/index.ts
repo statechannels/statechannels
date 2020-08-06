@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import Url from 'url-parse';
 import ReactDOM from 'react-dom';
-import {isStateChannelsRequest} from '@statechannels/client-api-schema';
+import {isStateChannelsRequest, WalletReady} from '@statechannels/client-api-schema';
 
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
@@ -53,7 +53,12 @@ const log = logger.trace.bind(logger);
     ADD_LOGS && log({jsonRpcResponse: message}, 'OUTGOING JSONRPC REQUEST:');
   });
 
-  window.parent.postMessage('WalletReady', '*');
+  const walletReadyMessage: WalletReady = {
+    jsonrpc: '2.0',
+    method: 'WalletReady',
+    params: {}
+  };
+  window.parent.postMessage(walletReadyMessage, '*');
 
   ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
