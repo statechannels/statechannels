@@ -144,12 +144,13 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get protocolState(): ChannelState {
-    const {channelId, myIndex, supported, latest, latestSignedByMe} = this;
+    const {channelId, myIndex, supported, latest, latestSignedByMe, support} = this;
 
     return {
       myIndex: myIndex as 0 | 1,
       channelId,
       supported,
+      support,
       latest,
       latestSignedByMe,
       funding: (): Uint256 => '0x0', // TODO: This needs to be populated from the chain
