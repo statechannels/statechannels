@@ -105,14 +105,14 @@ export interface Funds {
 }
 
 export type ChannelStatus =
-  | 'proposed'
-  | 'opening'
-  | 'funding'
-  | 'running'
-  | 'challenging'
-  | 'responding'
-  | 'closing'
-  | 'closed';
+  | 'proposed' // The wallet is storing this channel, but you have not.
+  | 'opening' // You have joined the channel, but it's not ready to use.
+  | 'funding' // Same as 'opening'?
+  | 'running' // You are free to use the channel.
+  | 'challenging' // You cannot use the channel right now. There is a challenge ongoing, but you do not need to do anything.
+  | 'responding' // There is a challenge ongoing, and you must call `updateChannel` in order for the wallet to respond to the challenge.
+  | 'closing' // You cannot use the channel anymore, but your funds are still locked up.
+  | 'closed'; // Your funds have been released from the channel.
 
 export interface ChannelResult {
   participants: Participant[];
