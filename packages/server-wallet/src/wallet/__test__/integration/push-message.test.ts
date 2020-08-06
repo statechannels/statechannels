@@ -1,4 +1,5 @@
 import {calculateChannelId, simpleEthAllocation} from '@statechannels/wallet-core';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -44,6 +45,14 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
 });
 
+const expectResults = async (
+  p: Promise<{channelResults: ChannelResult[]}>,
+  channelResults: Partial<ChannelResult>[]
+): Promise<void> => {
+  await expect(p).resolves.toMatchObject({channelResults});
+  await expect(p.then(data => data.channelResults)).resolves.toHaveLength(channelResults.length);
+};
+
 describe('channel results', () => {
   it("returns a 'proposed' channel result when receiving the first state from a peer", async () => {
     const channelsBefore = await Channel.query().select();
@@ -51,9 +60,9 @@ describe('channel results', () => {
 
     const signedStates = [stateSignedBy(bob())({turnNum: zero})];
 
-    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-      channelResults: [{turnNum: zero, status: 'proposed'}],
-    });
+    await expectResults(wallet.pushMessage(message({signedStates})), [
+      {turnNum: zero, status: 'proposed'},
+    ]);
   });
 
   it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
@@ -61,11 +70,10 @@ describe('channel results', () => {
     expect(channelsBefore).toHaveLength(0);
     const {channelId} = await Channel.query().insert(withSupportedState({turnNum: 8})());
 
-    const signedStates = [stateSignedBy(bob())({turnNum: 9})];
-
-    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-      channelResults: [{channelId, turnNum: 9, status: 'running'}],
-    });
+    return expectResults(
+      wallet.pushMessage(message({signedStates: [stateSignedBy(bob())({turnNum: 9})]})),
+      [{channelId, turnNum: 9, status: 'running'}]
+    );
   });
 
   it("returns a 'closing' channel result when receiving a state in a channel that is now closing", async () => {
@@ -75,9 +83,9 @@ describe('channel results', () => {
 
     const signedStates = [stateSignedBy(bob())({turnNum: 9, isFinal: true})];
 
-    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-      channelResults: [{channelId, turnNum: 9, status: 'closing'}],
-    });
+    return expectResults(wallet.pushMessage(message({signedStates})), [
+      {channelId, turnNum: 9, status: 'closing'},
+    ]);
   });
 
   it("returns a 'closing' channel result when receiving a state in a channel that is now closed", async () => {
@@ -86,35 +94,37 @@ describe('channel results', () => {
 
     const signedStates = [stateSignedBy(alice(), bob())({turnNum: 9, isFinal: true})];
 
-    return expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-      channelResults: [{turnNum: 9, status: 'closed'}],
-    });
+    return expectResults(wallet.pushMessage(message({signedStates})), [
+      {turnNum: 9, status: 'closed'},
+    ]);
   });
-});
 
-it('stores states for multiple channels', async () => {
-  const channelsBefore = await Channel.query().select();
-  expect(channelsBefore).toHaveLength(0);
+  it('stores states for multiple channels', async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
 
-  const signedStates = [
-    stateSignedBy(alice(), bob())({turnNum: five}),
-    stateSignedBy(alice(), bob())({turnNum: five, channelNonce: 567}),
-  ];
-  await wallet.pushMessage(message({signedStates}));
+    const signedStates = [
+      stateSignedBy(alice(), bob())({turnNum: five}),
+      stateSignedBy(alice(), bob())({turnNum: six, channelNonce: 567, appData: '0xf00'}),
+    ];
+    const p = wallet.pushMessage(message({signedStates}));
 
-  const channelsAfter = await Channel.query().select();
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0xf00'}]);
 
-  expect(channelsAfter).toHaveLength(2);
-  expect(channelsAfter[0].vars).toHaveLength(1);
+    const channelsAfter = await Channel.query().select();
 
-  // The Channel model adds the state hash before persisting
+    expect(channelsAfter).toHaveLength(2);
+    expect(channelsAfter[0].vars).toHaveLength(1);
 
-  const stateVar = signedStates.map(addHash)[1];
-  const record = await Channel.query()
-    .where('channelId', calculateChannelId(stateVar))
-    .first();
+    // The Channel model adds the state hash before persisting
 
-  expect(stateVar).toMatchObject(record.vars[0]);
+    const stateVar = signedStates.map(addHash)[1];
+    const record = await Channel.query()
+      .where('channelId', calculateChannelId(stateVar))
+      .first();
+
+    expect(stateVar).toMatchObject(record.vars[0]);
+  });
 });
 
 it("Doesn't store stale states", async () => {
