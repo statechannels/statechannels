@@ -22,10 +22,7 @@
           "description": "The token contract address"
         }
       },
-      "required": [
-        "token",
-        "allocationItems"
-      ],
+      "required": ["token", "allocationItems"],
       "type": "object"
     },
     "AllocationItem": {
@@ -41,10 +38,7 @@
           "description": "Address of EOA to receive channel proceeds."
         }
       },
-      "required": [
-        "destination",
-        "amount"
-      ],
+      "required": ["destination", "amount"],
       "type": "object"
     },
     "ApproveBudgetAndFundParams": {
@@ -99,9 +93,7 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": [
-        "channelId"
-      ],
+      "required": ["channelId"],
       "type": "object"
     },
     "ChallengeChannelRequest": {
@@ -120,10 +112,7 @@
           "$ref": "#/definitions/Bytes32"
         }
       },
-      "required": [
-        "channelId",
-        "amount"
-      ],
+      "required": ["channelId", "amount"],
       "type": "object"
     },
     "ChannelClosed": {
@@ -214,9 +203,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "hubParticipantId"
-      ],
+      "required": ["hubParticipantId"],
       "type": "object"
     },
     "CloseAndWithdrawRequest": {
@@ -242,9 +229,7 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": [
-        "channelId"
-      ],
+      "required": ["channelId"],
       "type": "object"
     },
     "CloseChannelRequest": {
@@ -291,13 +276,7 @@
           "type": "array"
         }
       },
-      "required": [
-        "participants",
-        "allocations",
-        "appDefinition",
-        "appData",
-        "fundingStrategy"
-      ],
+      "required": ["participants", "allocations", "appDefinition", "appData", "fundingStrategy"],
       "type": "object"
     },
     "CreateChannelRequest": {
@@ -322,11 +301,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "domain",
-        "hubAddress",
-        "budgets"
-      ],
+      "required": ["domain", "hubAddress", "budgets"],
       "type": "object"
     },
     "EnableEthereumError": {
@@ -339,11 +314,7 @@
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-297-383-721393493-280-384-721393493-243-385-721393493-0-517%3E"
     },
     "FundingStrategy": {
-      "enum": [
-        "Direct",
-        "Ledger",
-        "Virtual"
-      ],
+      "enum": ["Direct", "Ledger", "Virtual"],
       "type": "string"
     },
     "GetBudgetParams": {
@@ -353,9 +324,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "hubParticipantId"
-      ],
+      "required": ["hubParticipantId"],
       "type": "object"
     },
     "GetBudgetRequest": {
@@ -380,9 +349,7 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": [
-        "channelId"
-      ],
+      "required": ["channelId"],
       "type": "object"
     },
     "GetStateRequest": {
@@ -420,9 +387,7 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": [
-        "channelId"
-      ],
+      "required": ["channelId"],
       "type": "object"
     },
     "JoinChannelRequest": {
@@ -437,28 +402,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            100
-          ],
+          "enum": [100],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Ethereum Not Enabled"
-          ],
+          "enum": ["Ethereum Not Enabled"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1000,\"Could not find signing address\">": {
@@ -467,28 +424,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1000
-          ],
+          "enum": [1000],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Could not find signing address"
-          ],
+          "enum": ["Could not find signing address"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1001,\"Invalid App Definition\">": {
@@ -497,28 +446,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1001
-          ],
+          "enum": [1001],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Invalid App Definition"
-          ],
+          "enum": ["Invalid App Definition"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1002,\"This token is not supported\">": {
@@ -527,28 +468,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1002
-          ],
+          "enum": [1002],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "This token is not supported"
-          ],
+          "enum": ["This token is not supported"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1100,\"Could not find channel\">": {
@@ -557,28 +490,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1100
-          ],
+          "enum": [1100],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
+          "enum": ["Could not find channel"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1101,\"Invalid Transition\">": {
@@ -587,28 +512,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1101
-          ],
+          "enum": [1101],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Invalid Transition"
-          ],
+          "enum": ["Invalid Transition"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1200,\"Could not find channel\">": {
@@ -617,28 +534,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1200
-          ],
+          "enum": [1200],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
+          "enum": ["Could not find channel"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<1300,\"Could not find channel\">": {
@@ -647,28 +556,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            1300
-          ],
+          "enum": [1300],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
+          "enum": ["Could not find channel"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<200,\"User declined\">": {
@@ -677,28 +578,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            200
-          ],
+          "enum": [200],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "User declined"
-          ],
+          "enum": ["User declined"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<300,\"Not your turn\">": {
@@ -707,28 +600,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            300
-          ],
+          "enum": [300],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Not your turn"
-          ],
+          "enum": ["Not your turn"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<301,\"Channel not found\">": {
@@ -737,28 +622,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            301
-          ],
+          "enum": [301],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Channel not found"
-          ],
+          "enum": ["Channel not found"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<400,\"Channel not found\">": {
@@ -767,28 +644,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            400
-          ],
+          "enum": [400],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Channel not found"
-          ],
+          "enum": ["Channel not found"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<401,\"Invalid transition\",structure-1165839259-742-812-1165839259-669-814-1165839259-637-815-1165839259-0-1239>": {
@@ -797,9 +666,7 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            401
-          ],
+          "enum": [401],
           "type": "number"
         },
         "data": {
@@ -813,24 +680,16 @@
               "$ref": "#/definitions/UpdateChannelParams"
             }
           },
-          "required": [
-            "channelStatus",
-            "proposedUpdate"
-          ],
+          "required": ["channelStatus", "proposedUpdate"],
           "type": "object"
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Invalid transition"
-          ],
+          "enum": ["Invalid transition"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<402,\"Invalid app data\",structure-1165839259-912-932-1165839259-844-934-1165839259-815-935-1165839259-0-1239>": {
@@ -839,9 +698,7 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            402
-          ],
+          "enum": [402],
           "type": "number"
         },
         "data": {
@@ -852,23 +709,16 @@
               "type": "string"
             }
           },
-          "required": [
-            "appData"
-          ],
+          "required": ["appData"],
           "type": "object"
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Invalid app data"
-          ],
+          "enum": ["Invalid app data"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<403,\"Not your turn\">": {
@@ -877,28 +727,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            403
-          ],
+          "enum": [403],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Not your turn"
-          ],
+          "enum": ["Not your turn"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<404,\"Channel closed\">": {
@@ -907,28 +749,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            404
-          ],
+          "enum": [404],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Channel closed"
-          ],
+          "enum": ["Channel closed"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<500,\"Wallet error\">": {
@@ -937,28 +771,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            500
-          ],
+          "enum": [500],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Wallet error"
-          ],
+          "enum": ["Wallet error"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcError<900,\"Wrong participant\">": {
@@ -967,28 +793,20 @@
       "properties": {
         "code": {
           "description": "Error code",
-          "enum": [
-            900
-          ],
+          "enum": [900],
           "type": "number"
         },
         "data": {
           "description": "Error data",
-          "not": {
-          }
+          "not": {}
         },
         "message": {
           "description": "Error message",
-          "enum": [
-            "Wrong participant"
-          ],
+          "enum": ["Wrong participant"],
           "type": "string"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "type": "object"
     },
     "JsonRpcErrorResponse<StateChannelsError>": {
@@ -1005,17 +823,11 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "error"
-      ],
+      "required": ["id", "jsonrpc", "error"],
       "type": "object"
     },
     "JsonRpcNotification<\"BudgetUpdated\",DomainBudget>": {
@@ -1024,16 +836,12 @@
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "BudgetUpdated"
-          ],
+          "enum": ["BudgetUpdated"],
           "type": "string"
         },
         "params": {
@@ -1041,11 +849,7 @@
           "description": "Generic type of the Notification parameters"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcNotification<\"ChannelClosed\",ChannelResult>": {
@@ -1054,16 +858,12 @@
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelClosed"
-          ],
+          "enum": ["ChannelClosed"],
           "type": "string"
         },
         "params": {
@@ -1071,11 +871,7 @@
           "description": "Generic type of the Notification parameters"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcNotification<\"ChannelProposed\",ChannelResult>": {
@@ -1084,16 +880,12 @@
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelProposed"
-          ],
+          "enum": ["ChannelProposed"],
           "type": "string"
         },
         "params": {
@@ -1101,11 +893,7 @@
           "description": "Generic type of the Notification parameters"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcNotification<\"ChannelUpdated\",ChannelResult>": {
@@ -1114,16 +902,12 @@
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelUpdated"
-          ],
+          "enum": ["ChannelUpdated"],
           "type": "string"
         },
         "params": {
@@ -1131,11 +915,7 @@
           "description": "Generic type of the Notification parameters"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcNotification<\"MessageQueued\",Message>": {
@@ -1144,16 +924,12 @@
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "MessageQueued"
-          ],
+          "enum": ["MessageQueued"],
           "type": "string"
         },
         "params": {
@@ -1161,29 +937,21 @@
           "description": "Generic type of the Notification parameters"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1353>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the Notification name",
-          "enum": [
-            "UIUpdate"
-          ],
+          "enum": ["UIUpdate"],
           "type": "string"
         },
         "params": {
@@ -1194,17 +962,34 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "showWallet"
-          ],
+          "required": ["showWallet"],
           "type": "object"
         }
       },
-      "required": [
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["jsonrpc", "method", "params"],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"WalletReady\",structure-683137520-880-883-683137520-845-884-683137520-819-885-683137520-0-1353>": {
+      "additionalProperties": false,
+      "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": ["2.0"],
+          "type": "string"
+        },
+        "method": {
+          "description": "Generic type of the Notification name",
+          "enum": ["WalletReady"],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "description": "Generic type of the Notification parameters",
+          "type": "object"
+        }
+      },
+      "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"ApproveBudgetAndFund\",ApproveBudgetAndFundParams>": {
@@ -1217,16 +1002,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "ApproveBudgetAndFund"
-          ],
+          "enum": ["ApproveBudgetAndFund"],
           "type": "string"
         },
         "params": {
@@ -1234,12 +1015,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"ChallengeChannel\",ChallengeChannelParams>": {
@@ -1252,16 +1028,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "ChallengeChannel"
-          ],
+          "enum": ["ChallengeChannel"],
           "type": "string"
         },
         "params": {
@@ -1269,12 +1041,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"CloseAndWithdraw\",CloseAndWithdrawParams>": {
@@ -1287,16 +1054,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "CloseAndWithdraw"
-          ],
+          "enum": ["CloseAndWithdraw"],
           "type": "string"
         },
         "params": {
@@ -1304,12 +1067,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"CloseChannel\",CloseChannelParams>": {
@@ -1322,16 +1080,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "CloseChannel"
-          ],
+          "enum": ["CloseChannel"],
           "type": "string"
         },
         "params": {
@@ -1339,12 +1093,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"CreateChannel\",CreateChannelParams>": {
@@ -1357,16 +1106,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "CreateChannel"
-          ],
+          "enum": ["CreateChannel"],
           "type": "string"
         },
         "params": {
@@ -1374,12 +1119,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"EnableEthereum\",structure-721393493-238-241-721393493-205-242-721393493-168-243-721393493-0-517>": {
@@ -1392,16 +1132,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "EnableEthereum"
-          ],
+          "enum": ["EnableEthereum"],
           "type": "string"
         },
         "params": {
@@ -1410,12 +1146,7 @@
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"GetBudget\",GetBudgetParams>": {
@@ -1428,16 +1159,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "GetBudget"
-          ],
+          "enum": ["GetBudget"],
           "type": "string"
         },
         "params": {
@@ -1445,12 +1172,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"GetChannels\",structure-946177841-247-273-946177841-217-274-946177841-184-275-946177841-0-344>": {
@@ -1463,16 +1185,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "GetChannels"
-          ],
+          "enum": ["GetChannels"],
           "type": "string"
         },
         "params": {
@@ -1486,12 +1204,7 @@
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"GetState\",GetStateParams>": {
@@ -1504,16 +1217,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "GetState"
-          ],
+          "enum": ["GetState"],
           "type": "string"
         },
         "params": {
@@ -1521,12 +1230,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-193-196-825486248-154-197-825486248-111-198-825486248-0-359>": {
@@ -1539,16 +1243,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "GetWalletInformation"
-          ],
+          "enum": ["GetWalletInformation"],
           "type": "string"
         },
         "params": {
@@ -1557,12 +1257,7 @@
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"JoinChannel\",JoinChannelParams>": {
@@ -1575,16 +1270,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "JoinChannel"
-          ],
+          "enum": ["JoinChannel"],
           "type": "string"
         },
         "params": {
@@ -1592,12 +1283,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"PushMessage\",Message>": {
@@ -1610,16 +1296,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "PushMessage"
-          ],
+          "enum": ["PushMessage"],
           "type": "string"
         },
         "params": {
@@ -1627,12 +1309,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcRequest<\"UpdateChannel\",UpdateChannelParams>": {
@@ -1645,16 +1322,12 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "method": {
           "description": "Generic type of the request method",
-          "enum": [
-            "UpdateChannel"
-          ],
+          "enum": ["UpdateChannel"],
           "type": "string"
         },
         "params": {
@@ -1662,12 +1335,7 @@
           "description": "Request parameters"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
+      "required": ["id", "jsonrpc", "method", "params"],
       "type": "object"
     },
     "JsonRpcResponse<(DomainBudget|structure-45911622-322-325-45911622-308-325-45911622-291-326-45911622-259-327-45911622-0-328)>": {
@@ -1680,9 +1348,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1698,11 +1364,7 @@
           "description": "The generic type of the response"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<ChannelResult>": {
@@ -1715,9 +1377,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1725,11 +1385,7 @@
           "description": "The generic type of the response"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<DomainBudget>": {
@@ -1742,9 +1398,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1752,11 +1406,7 @@
           "description": "The generic type of the response"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<PushMessageResult>": {
@@ -1769,9 +1419,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1779,11 +1427,7 @@
           "description": "The generic type of the response"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<def-interface-src/data-types.ts-2747-3043-src/data-types.ts-0-3460[]>": {
@@ -1796,9 +1440,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1809,11 +1451,7 @@
           "type": "array"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<structure-721393493-297-383-721393493-280-384-721393493-243-385-721393493-0-517>": {
@@ -1826,9 +1464,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1845,19 +1481,11 @@
               "type": "string"
             }
           },
-          "required": [
-            "signingAddress",
-            "destinationAddress",
-            "walletVersion"
-          ],
+          "required": ["signingAddress", "destinationAddress", "walletVersion"],
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<structure-736846332-356-374-736846332-339-375-736846332-300-376-736846332-0-498>": {
@@ -1870,9 +1498,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1883,17 +1509,11 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "success"
-          ],
+          "required": ["success"],
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "JsonRpcResponse<structure-825486248-258-356-825486248-241-357-825486248-198-358-825486248-0-359>": {
@@ -1906,9 +1526,7 @@
         },
         "jsonrpc": {
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
+          "enum": ["2.0"],
           "type": "string"
         },
         "result": {
@@ -1925,18 +1543,11 @@
               "type": "string"
             }
           },
-          "required": [
-            "signingAddress",
-            "walletVersion"
-          ],
+          "required": ["signingAddress", "walletVersion"],
           "type": "object"
         }
       },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
+      "required": ["id", "jsonrpc", "result"],
       "type": "object"
     },
     "Message": {
@@ -1955,11 +1566,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "recipient",
-        "sender",
-        "data"
-      ],
+      "required": ["recipient", "sender", "data"],
       "type": "object"
     },
     "MessageQueuedNotification": {
@@ -1985,11 +1592,7 @@
           "description": "Address used to sign channel updates"
         }
       },
-      "required": [
-        "participantId",
-        "signingAddress",
-        "destination"
-      ],
+      "required": ["participantId", "signingAddress", "destination"],
       "type": "object"
     },
     "PushMessageError": {
@@ -2008,9 +1611,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "success"
-      ],
+      "required": ["success"],
       "type": "object"
     },
     "StateChannelsError": {
@@ -2085,6 +1686,9 @@
         },
         {
           "$ref": "#/definitions/UiNotification"
+        },
+        {
+          "$ref": "#/definitions/WalletReady"
         }
       ]
     },
@@ -2193,16 +1797,11 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": [
-        "token",
-        "availableReceiveCapacity",
-        "availableSendCapacity",
-        "channels"
-      ],
+      "required": ["token", "availableReceiveCapacity", "availableSendCapacity", "channels"],
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-795-817-683137520-763-818-683137520-734-819-683137520-0-1353%3E"
     },
     "Uint256": {
       "description": "Uint256",
@@ -2247,11 +1846,7 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": [
-        "channelId",
-        "allocations",
-        "appData"
-      ],
+      "required": ["channelId", "allocations", "appData"],
       "type": "object"
     },
     "UpdateChannelRequest": {
@@ -2259,6 +1854,9 @@
     },
     "UpdateChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "WalletReady": {
+      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-683137520-880-883-683137520-845-884-683137520-819-885-683137520-0-1353%3E"
     }
   }
 }

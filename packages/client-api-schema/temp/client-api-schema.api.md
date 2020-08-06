@@ -532,7 +532,7 @@ export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError
 export type StateChannelsJsonRpcMessage = StateChannelsRequest | StateChannelsResponse | StateChannelsNotification | StateChannelsErrorResponse;
 
 // @public (undocumented)
-export type StateChannelsNotification = ChannelProposedNotification | ChannelUpdatedNotification | ChannelClosingNotification | BudgetUpdatedNotification | MessageQueuedNotification | UiNotification;
+export type StateChannelsNotification = ChannelProposedNotification | ChannelUpdatedNotification | ChannelClosingNotification | BudgetUpdatedNotification | MessageQueuedNotification | UiNotification | WalletReady;
 
 // Warning: (ae-forgotten-export) The symbol "FilterByMethod" needs to be exported by the entry point index.d.ts
 //
@@ -594,6 +594,11 @@ export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannel
 //
 // @public (undocumented)
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
+
+// Warning: (ae-incompatible-release-tags) The symbol "WalletReady" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
+//
+// @public (undocumented)
+export type WalletReady = JsonRpcNotification<'WalletReady', {}>;
 
 
 ```

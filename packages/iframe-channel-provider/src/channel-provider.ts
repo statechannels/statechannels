@@ -46,7 +46,8 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     ChannelClosed: [],
     BudgetUpdated: [],
     MessageQueued: [],
-    UIUpdate: []
+    UIUpdate: [],
+    WalletReady: []
   };
   /**
    * The url of the hosted statechannels wallet
@@ -82,7 +83,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    * Is the wallet ready to receive requests?
    */
   walletReady = new Promise(resolve => {
-    window.addEventListener('message', event => event.data === 'WalletReady' && resolve());
+    window.addEventListener('message', event => event.data.method === 'WalletReady' && resolve());
   });
 
   /**
