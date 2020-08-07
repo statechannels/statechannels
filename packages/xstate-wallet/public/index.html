@@ -3,6 +3,15 @@
   <head>
     <% if (process.env.WINDOW_CRYPTO_POLYFILL) { %>
     <script src="https://unpkg.com/window-crypto"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.11/web3.min.js"
+      integrity="sha512-6lf28FmolQdo4ap44cXw7j+thYEZzS1/kXxDkX1ppO//SHCageBS1HmYdqkkL819WfGtQ+7TE+uXEwsxjJXEKQ=="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      window.web3 = new Web3(new Web3.providers.HttpProvider('${RPC_ENDPOINT}'));
+      window.ethereum = window.web3.currentProvider;
+    </script>
     <% } %> <% if (process.env.NODE_ENV === 'production') { %>
     <script type="text/javascript" src="./enable-segment.js"></script>
     <% } %>
