@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <% if (process.env.NODE_ENV === 'development') { %>
+    <% if (process.env.WINDOW_CRYPTO_POLYFILL === 'development') { %>
     <script src="https://unpkg.com/window-crypto"></script>
     <% } %> <% if (process.env.NODE_ENV === 'production') { %>
     <script type="text/javascript" src="./enable-segment.js"></script>
@@ -15,6 +15,6 @@
     <meta name="description" content="A State Channels Wallet." />
     <title>State Channels Wallet</title>
   </head>
-  <% if (process.env.NODE_ENV === 'development') { %> using window-crypto package <% } %>
+  <% if (process.env.WINDOW_CRYPTO_POLYFILL ) { %> Using window-crypto package as a polyfill <% } %>
   <div id="root"></div>
 </html>
