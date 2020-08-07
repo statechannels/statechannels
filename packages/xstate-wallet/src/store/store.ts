@@ -25,7 +25,7 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
-import {CHAIN_NETWORK_ID, HUB} from '../config';
+import {CHAIN_NETWORK_ID, HUB, NODE_ENV} from '../config';
 import {checkThat, recordToArray} from '../utils';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
@@ -75,7 +75,19 @@ export class Store {
 
       if (!privateKeys?.length && !currentAddress) {
         // generate the first private key
-        const {privateKey} = Wallet.createRandom();
+        let privateKey;
+        try {
+          ({privateKey} = Wallet.createRandom());
+        } catch (e) {
+          if (NODE_ENV !== 'development') {
+            throw e;
+          } else {
+            console.warn(e);
+            console.warn(
+              'The warning above would be a runtime error if the NODE_ENV was not `development`. The error has been supressed to aid testing in jsdom.'
+            );
+          }
+        }
         privateKeys = [privateKey];
       }
 

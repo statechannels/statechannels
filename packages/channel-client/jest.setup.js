@@ -1,2 +1,2 @@
-window.crypto = require('@trust/webcrypto');
-console.log(window.crypto.getRandomValues);
+var webcrypto = require('@trust/webcrypto');
+window.crypto = webcrypto;

@@ -8,9 +8,7 @@ require('@statechannels/iframe-channel-provider');
 let channelProvider: IFrameChannelProviderInterface;
 
 beforeAll(() => {
-  window.addEventListener('message', event => console.log(event.data));
   channelProvider = (window as any).channelProvider;
-  console.log(window.location.href);
 });
 
 describe('Client-Provider-Wallet', () => {
