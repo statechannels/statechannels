@@ -75,19 +75,7 @@ export class Store {
 
       if (!privateKeys?.length && !currentAddress) {
         // generate the first private key
-        let privateKey;
-        try {
-          ({privateKey} = Wallet.createRandom());
-        } catch (e) {
-          if (NODE_ENV !== 'development') {
-            throw e;
-          } else {
-            console.warn(e);
-            console.warn(
-              'The warning above would be a runtime error if the NODE_ENV was not `development`. The error has been supressed to aid testing in jsdom.'
-            );
-          }
-        }
+        const {privateKey} = Wallet.createRandom();
         privateKeys = [privateKey];
       }
 
