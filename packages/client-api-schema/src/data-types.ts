@@ -105,7 +105,7 @@ export interface Funds {
 }
 
 export type ChannelStatus =
-  | 'proposed' // The wallet is storing this channel, but you have not.
+  | 'proposed' // The wallet is storing this channel, but you have not joined it -- ie. you have not yet signed a state.
   | 'opening' // You have joined the channel, but it's not ready to use.
   | 'funding' // Same as 'opening'?
   | 'running' // You are free to use the channel.
