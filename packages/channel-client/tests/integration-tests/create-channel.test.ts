@@ -4,7 +4,7 @@ import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-prov
 import {ChannelClient} from '@statechannels/channel-client';
 
 import {sleep} from './helpers';
-
+jest.setTimeout(10000);
 require('@statechannels/iframe-channel-provider');
 
 const participants = [
@@ -64,7 +64,8 @@ describe('Client-Provider-Wallet', () => {
       appData,
       fundingStrategy
     );
-    sleep(100); // wait for UI
+    await sleep(200); // wait for UI
+    console.log(iframe.contentWindow?.document.body.innerHTML);
     iframe.contentWindow?.document.getElementById('yes')?.click();
     await createChannelPromise;
   });
