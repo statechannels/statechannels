@@ -9,8 +9,21 @@
       crossorigin="anonymous"
     ></script>
     <script>
-      window.web3 = new Web3(new Web3.providers.HttpProvider('${RPC_ENDPOINT}'));
+      window.web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
       window.ethereum = window.web3.currentProvider;
+      window.ethereum.enable = () =>
+        new Promise(r => {
+          console.log('window.ethereum.enable() was called');
+          web3.eth.getAccounts().then(lst => {
+            web3.eth.defaultAccount = lst[0];
+            console.log('Using address ' + web3.eth.defaultAccount);
+            window.ethereum.selectedAddress = web3.eth.defaultAccount;
+            r([window.ethereum.selectedAddress]);
+          });
+        });
+      window.ethereum.networkVersion = 9001;
+      window.ethereum.on = () => {};
+      window.ethereum.enable();
     </script>
     <% } %> <% if (process.env.NODE_ENV === 'production') { %>
     <script type="text/javascript" src="./enable-segment.js"></script>
