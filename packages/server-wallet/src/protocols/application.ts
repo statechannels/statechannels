@@ -1,7 +1,7 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage, toChannelResult} from './state';
-import {signState, noAction, notifyApp} from './actions';
+import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {signState, noAction} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -13,7 +13,7 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 // const isPostfundSetup = stageGuard('PostfundSetup');
 // const isRunning = stageGuard('Running');
 // const isFinal = stageGuard('Final');
-const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
+// const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
 const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   if (!supported) return false;
@@ -31,13 +31,8 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isFunded(ps) &&
   signState({channelId: ps.app.channelId, ...ps.app.latestSignedByMe, turnNum: 3});
 
-const notifyChannelProposed = (ps: ProtocolState): ProtocolResult | false =>
-  isPrefundSetup(ps.app.latestSignedByMe) &&
-  isMissing(ps.app.supported) &&
-  notifyApp({notice: {method: 'ChannelProposed', params: toChannelResult(ps.app)}});
-
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
   // The protocol should be re-run until it returns the same result, and that happens
   // when there's either no action or a notification.
   // Thus, it is IMPORTANT that notices come last.
-  signPostFundSetup(ps) || notifyChannelProposed(ps) || noAction;
+  signPostFundSetup(ps) || noAction;

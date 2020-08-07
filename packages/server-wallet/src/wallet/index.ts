@@ -168,6 +168,7 @@ export class Wallet implements WalletInterface {
 
     return {outbox, channelResults};
   }
+
   onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
   }
@@ -185,27 +186,6 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   let error: Error | undefined = undefined;
   while (channels.length && !error) {
     await Store.lockApp(channels[0], async tx => {
-      const setError = async (e: Error): Promise<void> => {
-        error = e;
-        await tx.rollback(error);
-      };
-      const markChannelAsDone = (): void => {
-        channels.shift();
-      };
-
-      const doAction = async (action: ProtocolAction): Promise<any> => {
-        switch (action.type) {
-          case 'SignState': {
-            const {outgoing, channelResult} = await Store.signState(action.channelId, action, tx);
-            outgoing.map(n => outbox.push(n.notice));
-            channelResults.push(channelResult);
-            return;
-          }
-          default:
-            throw 'Unimplemented';
-        }
-      };
-
       // For the moment, we are only considering directly funded app channels.
       // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
       // In the future, we can have an App model which collects all the relevant channels for an app channel,
@@ -215,6 +195,27 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
       if (!app) {
         throw new Error('Channel not found');
       }
+
+      const setError = async (e: Error): Promise<void> => {
+        error = e;
+        await tx.rollback(error);
+      };
+      const markChannelAsDone = (): void => {
+        channels.shift();
+        channelResults.push(ChannelState.toChannelResult(app));
+      };
+
+      const doAction = async (action: ProtocolAction): Promise<any> => {
+        switch (action.type) {
+          case 'SignState': {
+            const {outgoing} = await Store.signState(action.channelId, action, tx);
+            outgoing.map(n => outbox.push(n.notice));
+            return;
+          }
+          default:
+            throw 'Unimplemented';
+        }
+      };
 
       const nextAction = Application.protocol({app});
 

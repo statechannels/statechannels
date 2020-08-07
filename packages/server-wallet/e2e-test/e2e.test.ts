@@ -73,7 +73,7 @@ describe('e2e', () => {
     const channel = await payerClient.createPayerChannel(receiver);
 
     expect(channel.participants).toStrictEqual([payer, receiver]);
-    expect(channel.status).toBe('funding');
+    expect(channel.status).toBe('opening');
     expect(channel.turnNum).toBe(0);
 
     expect((await Channel.forId(channel.channelId, undefined)).protocolState).toMatchObject({

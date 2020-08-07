@@ -1,4 +1,5 @@
 import {calculateChannelId, simpleEthAllocation} from '@statechannels/wallet-core';
+import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -9,7 +10,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
-import {channel} from '../../../models/__test__/fixtures/channel';
+import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 
 beforeEach(async () => seedAlicesSigningWallet(knex));
 
@@ -44,40 +45,84 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
 });
 
-it('returns a ChannelProposed notification when receiving the first state', async () => {
-  const channelsBefore = await Channel.query().select();
-  expect(channelsBefore).toHaveLength(0);
+const expectResults = async (
+  p: Promise<{channelResults: ChannelResult[]}>,
+  channelResults: Partial<ChannelResult>[]
+): Promise<void> => {
+  await expect(p.then(data => data.channelResults)).resolves.toHaveLength(channelResults.length);
+  await expect(p).resolves.toMatchObject({channelResults});
+};
 
-  const signedStates = [stateSignedBy(alice())({turnNum: zero})];
+describe('channel results', () => {
+  it("returns a 'proposed' channel result when receiving the first state from a peer", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
 
-  await expect(wallet.pushMessage(message({signedStates}))).resolves.toMatchObject({
-    outbox: [{method: 'ChannelProposed', params: {turnNum: zero}}],
+    const signedStates = [stateSignedBy(bob())({turnNum: zero})];
+
+    await expectResults(wallet.pushMessage(message({signedStates})), [
+      {turnNum: zero, status: 'proposed'},
+    ]);
   });
-});
 
-it('stores states for multiple channels', async () => {
-  const channelsBefore = await Channel.query().select();
-  expect(channelsBefore).toHaveLength(0);
+  it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+    const {channelId} = await Channel.query().insert(withSupportedState({turnNum: 8})());
 
-  const signedStates = [
-    stateSignedBy(alice(), bob())({turnNum: five}),
-    stateSignedBy(alice(), bob())({turnNum: five, channelNonce: 567}),
-  ];
-  await wallet.pushMessage(message({signedStates}));
+    return expectResults(
+      wallet.pushMessage(message({signedStates: [stateSignedBy(bob())({turnNum: 9})]})),
+      [{channelId, turnNum: 9, status: 'running'}]
+    );
+  });
 
-  const channelsAfter = await Channel.query().select();
+  it("returns a 'closing' channel result when receiving a state in a channel that is now closing", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+    const {channelId} = await Channel.query().insert(withSupportedState({turnNum: 8})());
 
-  expect(channelsAfter).toHaveLength(2);
-  expect(channelsAfter[0].vars).toHaveLength(1);
+    const signedStates = [stateSignedBy(bob())({turnNum: 9, isFinal: true})];
 
-  // The Channel model adds the state hash before persisting
+    return expectResults(wallet.pushMessage(message({signedStates})), [
+      {channelId, turnNum: 9, status: 'closing'},
+    ]);
+  });
 
-  const stateVar = signedStates.map(addHash)[1];
-  const record = await Channel.query()
-    .where('channelId', calculateChannelId(stateVar))
-    .first();
+  it("returns a 'closing' channel result when receiving a state in a channel that is now closed", async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
 
-  expect(stateVar).toMatchObject(record.vars[0]);
+    const signedStates = [stateSignedBy(alice(), bob())({turnNum: 9, isFinal: true})];
+
+    return expectResults(wallet.pushMessage(message({signedStates})), [
+      {turnNum: 9, status: 'closed'},
+    ]);
+  });
+
+  it('stores states for multiple channels', async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+
+    const signedStates = [
+      stateSignedBy(alice(), bob())({turnNum: five}),
+      stateSignedBy(alice(), bob())({turnNum: six, channelNonce: 567, appData: '0xf00'}),
+    ];
+    const p = wallet.pushMessage(message({signedStates}));
+
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0xf00'}]);
+
+    const channelsAfter = await Channel.query().select();
+
+    expect(channelsAfter).toHaveLength(2);
+    expect(channelsAfter[0].vars).toHaveLength(1);
+
+    // The Channel model adds the state hash before persisting
+
+    const stateVar = signedStates.map(addHash)[1];
+    const record = await Channel.forId(calculateChannelId(stateVar), undefined);
+
+    expect(stateVar).toMatchObject(record.vars[0]);
+  });
 });
 
 it("Doesn't store stale states", async () => {
@@ -131,10 +176,9 @@ it('takes the next action, when the application protocol returns an action', asy
   expect(c.supported).toBeUndefined();
   const {channelId} = c;
 
-  await expect(
-    wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}))
-  ).resolves.toMatchObject({
-    channelResults: [{channelId, status: 'funding'}],
+  const p = wallet.pushMessage(message({signedStates: [stateSignedBy(bob())(state)]}));
+  await expectResults(p, [{channelId, status: 'opening'}]);
+  await expect(p).resolves.toMatchObject({
     outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
   });
 
