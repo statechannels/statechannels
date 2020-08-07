@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <% if (process.env.NODE_ENV === 'production') { %>
+    <% if (process.env.NODE_ENV === 'development') { %>
+    <script src="https://unpkg.com/window-crypto"></script>
+    <% } %> <% if (process.env.NODE_ENV === 'production') { %>
     <script type="text/javascript" src="./enable-segment.js"></script>
     <% } %>
 
@@ -13,5 +15,6 @@
     <meta name="description" content="A State Channels Wallet." />
     <title>State Channels Wallet</title>
   </head>
+  <% if (process.env.NODE_ENV === 'development') { %> using window-crypto package <% } %>
   <div id="root"></div>
 </html>
