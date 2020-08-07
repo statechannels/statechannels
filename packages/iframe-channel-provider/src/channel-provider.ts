@@ -3,7 +3,12 @@ import {Guid} from 'guid-typescript';
 import {
   StateChannelsNotificationType,
   StateChannelsNotification,
-  parseNotification
+  parseNotification,
+  isJsonRpcNotification,
+  isJsonRpcResponse,
+  parseResponse,
+  isJsonRpcErrorResponse,
+  parseErrorResponse
 } from '@statechannels/client-api-schema';
 
 import {IFrameChannelProviderInterface} from './types';
@@ -183,10 +188,14 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
-    if (!event.data.jsonrpc) {
-      return;
-    }
-    const message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+    let message;
+    if (isJsonRpcNotification(event.data)) {
+      message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+    } else if (isJsonRpcResponse(event.data)) {
+      message = parseResponse(event.data);
+    } else if (isJsonRpcErrorResponse(event.data)) {
+      message = parseErrorResponse(event.data);
+    } else return;
     const notificationMethod = message.method;
     const notificationParams = message.params as any;
     this.events.emit(notificationMethod, notificationParams);
