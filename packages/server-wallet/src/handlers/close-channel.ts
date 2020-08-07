@@ -22,6 +22,7 @@ export class CloseChannelError extends WalletError {
   static readonly reasons = {
     noSupportedState: 'no supported state',
     notMyTurn: 'not my turn',
+    channelMissing: 'channel not found',
   } as const;
 
   constructor(

@@ -25,6 +25,7 @@ import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import * as UpdateChannel from '../handlers/update-channel';
+import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 
@@ -131,8 +132,21 @@ export class Wallet implements WalletInterface {
     return Store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
-  async closeChannel(_args: CloseChannelParams): SingleChannelResult {
-    throw 'Unimplemented';
+  async closeChannel({channelId}: CloseChannelParams): SingleChannelResult {
+    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+      throw new CloseChannel.CloseChannelError(
+        CloseChannel.CloseChannelError.reasons.channelMissing,
+        {channelId}
+      );
+    };
+    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
+      const nextState = getOrThrow(CloseChannel.closeChannel({channelId}, channel));
+      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+
+      return {outbox: outgoing.map(n => n.notice), channelResult};
+    };
+
+    return Store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
   async getChannels(): MultipleChannelResult {
