@@ -73,7 +73,7 @@ export class MemoryBackend implements DBBackend {
   }
 
   public async getDestinationAddress() {
-    return this._destinationAddress || window.ethereum.selectedAddress;
+    return this._destinationAddress;
   }
 
   public async setPrivateKey(key: string, value: string) {
