@@ -3,6 +3,7 @@ export abstract class WalletError extends Error {
   static readonly errors = {
     ChannelError: 'ChannelError',
     JoinChannelError: 'JoinChannelError',
+    CloseChannelError: 'CloseChannelError',
     UpdateChannelError: 'UpdateChannelError',
     NonceError: 'NonceError',
     StoreError: 'StoreError',
