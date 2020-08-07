@@ -9,8 +9,21 @@ import {MemoryBackend} from './store/memory-backend';
 import {TestStore} from './test-store';
 import {MessagingService} from './/messaging';
 import {machine} from './workflows/approve-budget-and-fund';
+import {NODE_ENV} from 'config';
 
-const {privateKey} = ethers.Wallet.createRandom();
+let privateKey;
+try {
+  ({privateKey} = ethers.Wallet.createRandom());
+} catch (e) {
+  if (NODE_ENV !== 'development') {
+    throw e;
+  } else {
+    console.warn(e);
+    console.warn(
+      'The warning above would be a runtime error if the NODE_ENV was not `development`. The error has been supressed to aid testing in jsdom.'
+    );
+  }
+}
 const chain = new ChainWatcher();
 const backend = new MemoryBackend();
 const store = new TestStore(chain, backend);
