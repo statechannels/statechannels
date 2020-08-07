@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 
 import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
-import {ChannelClient} from '@statechannels/channel-client';
+// import {ChannelClient} from '@statechannels/channel-client';
+import {ChannelClient} from '../../src/channel-client';
 
 import {sleep} from './helpers';
 jest.setTimeout(10000);
