@@ -25,7 +25,7 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
-import {CHAIN_NETWORK_ID, HUB, NODE_ENV} from '../config';
+import {CHAIN_NETWORK_ID, HUB} from '../config';
 import {checkThat, recordToArray} from '../utils';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';

@@ -9,7 +9,6 @@ import {MemoryBackend} from './store/memory-backend';
 import {TestStore} from './test-store';
 import {MessagingService} from './/messaging';
 import {machine} from './workflows/approve-budget-and-fund';
-import {NODE_ENV} from 'config';
 
 const {privateKey} = ethers.Wallet.createRandom();
 const chain = new ChainWatcher();
