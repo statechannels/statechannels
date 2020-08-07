@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <% if (process.env.WINDOW_CRYPTO_POLYFILL === 'development') { %>
+    <% if (process.env.WINDOW_CRYPTO_POLYFILL) { %>
     <script src="https://unpkg.com/window-crypto"></script>
     <% } %> <% if (process.env.NODE_ENV === 'production') { %>
     <script type="text/javascript" src="./enable-segment.js"></script>
