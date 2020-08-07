@@ -43,6 +43,7 @@ const fundingStrategy = 'Direct';
 let channelProvider: IFrameChannelProviderInterface;
 let channelClient: ChannelClient;
 let iframe: HTMLIFrameElement;
+let signingAddress: string;
 
 beforeAll(async () => {
   channelProvider = (window as any).channelProvider;
@@ -57,6 +58,8 @@ beforeAll(async () => {
 
 describe('Client-Provider-Wallet', () => {
   it('Calls createChannel()', async () => {
+    signingAddress = channelProvider.signingAddress as string;
+    participants[0].signingAddress = signingAddress;
     const createChannelPromise = channelClient.createChannel(
       participants,
       allocations,
