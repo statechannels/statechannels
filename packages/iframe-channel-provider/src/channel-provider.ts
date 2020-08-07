@@ -191,21 +191,21 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     let message;
     if (isJsonRpcNotification(event.data)) {
       message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+      const notificationMethod = message.method;
+      const notificationParams = message.params as any;
+      this.events.emit(notificationMethod, notificationParams);
+      if ('showWallet' in message.params) {
+        this.iframe.setVisibility(message.params.showWallet);
+      } else {
+        this.subscriptions[notificationMethod].forEach(id => {
+          this.events.emit(id, notificationParams);
+        });
+      }
     } else if (isJsonRpcResponse(event.data)) {
       message = parseResponse(event.data);
     } else if (isJsonRpcErrorResponse(event.data)) {
       message = parseErrorResponse(event.data);
     } else return;
-    const notificationMethod = message.method;
-    const notificationParams = message.params as any;
-    this.events.emit(notificationMethod, notificationParams);
-    if ('showWallet' in message.params) {
-      this.iframe.setVisibility(message.params.showWallet);
-    } else {
-      this.subscriptions[notificationMethod].forEach(id => {
-        this.events.emit(id, notificationParams);
-      });
-    }
   }
 }
 
