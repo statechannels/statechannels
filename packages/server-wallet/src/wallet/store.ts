@@ -10,8 +10,11 @@ import {
   calculateChannelId,
   StateVariables,
   ChannelConstants,
+  Participant,
+  makeDestination,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
+import {HashZero} from '@ethersproject/constants';
 import {Either, right} from 'fp-ts/lib/Either';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
@@ -31,6 +34,16 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export const Store = {
+  getFirstParticipant: async function(): Promise<Participant> {
+    const signingKey = await SigningWallet.query().first();
+    if (!signingKey) throw new StoreError(StoreError.reasons.missingSigningKey);
+    return {
+      participantId: signingKey.address,
+      signingAddress: signingKey.address,
+      destination: makeDestination(HashZero),
+    };
+  },
+
   /**
    *
    * @param channelId application channel Id
@@ -156,6 +169,7 @@ class StoreError extends WalletError {
     invalidSignature: 'Invalid signature',
     notInChannel: 'Not in channel',
     staleState: 'Stale state',
+    missingSigningKey: 'Missing a signing key',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
