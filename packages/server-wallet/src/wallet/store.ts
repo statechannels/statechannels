@@ -38,7 +38,7 @@ export const Store = {
     const signingKey = await SigningWallet.query().first();
     if (!signingKey) throw new StoreError(StoreError.reasons.missingSigningKey);
     return {
-      participantId: 'unspecified',
+      participantId: signingKey.address,
       signingAddress: signingKey.address,
       destination: makeDestination(HashZero),
     };
