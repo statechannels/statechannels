@@ -167,25 +167,55 @@ it("doesn't store states for unknown signing addresses", async () => {
   );
 });
 
-it('takes the next action, when the application protocol returns an action', async () => {
-  const state = stateSignedBy()({outcome: simpleEthAllocation([])});
+describe('when the application protocol returns an action', () => {
+  it('signs the postfund setup when the prefund setup is supported', async () => {
+    const state = stateSignedBy()({outcome: simpleEthAllocation([])});
 
-  const c = channel({vars: [addHash(state)]});
-  await Channel.query().insert(c);
+    const c = channel({vars: [addHash(state)]});
+    await Channel.query().insert(c);
 
-  expect(c.latestSignedByMe?.turnNum).toEqual(0);
-  expect(c.supported).toBeUndefined();
-  const {channelId} = c;
+    expect(c.latestSignedByMe?.turnNum).toEqual(0);
+    expect(c.supported).toBeUndefined();
+    const {channelId} = c;
 
-  const p = wallet.pushMessage(message({signedStates: [stateSignedBy([bob()])(state)]}));
-  await expectResults(p, [{channelId, status: 'opening'}]);
-  await expect(p).resolves.toMatchObject({
-    outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
+    const p = wallet.pushMessage(message({signedStates: [stateSignedBy([bob()])(state)]}));
+    await expectResults(p, [{channelId, status: 'opening'}]);
+    await expect(p).resolves.toMatchObject({
+      outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
+    });
+
+    const updatedC = await Channel.forId(channelId, undefined);
+    expect(updatedC.protocolState).toMatchObject({
+      latestSignedByMe: {turnNum: 3},
+      supported: {turnNum: 0},
+    });
   });
 
-  const updatedC = await Channel.forId(channelId, undefined);
-  expect(updatedC.protocolState).toMatchObject({
-    latestSignedByMe: {turnNum: 3},
-    supported: {turnNum: 0},
+  it('forms a conclusion proof when the peer wishes to close the channel', async () => {
+    const turnNum = 6;
+    const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
+
+    const c = channel({vars: [addHash(state)]});
+    await Channel.query().insert(c);
+
+    const {channelId} = c;
+
+    const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
+    const p = wallet.pushMessage(message({signedStates: [stateSignedBy([bob()])(finalState)]}));
+    await expectResults(p, [{channelId, status: 'closed'}]);
+    await expect(p).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {data: {signedStates: [{turnNum: turnNum + 1, isFinal: true}]}},
+        },
+      ],
+    });
+
+    const updatedC = await Channel.forId(channelId, undefined);
+    expect(updatedC.protocolState).toMatchObject({
+      latestSignedByMe: {turnNum: turnNum + 1},
+      supported: {turnNum: turnNum + 1},
+    });
   });
 });
