@@ -72,6 +72,7 @@ describe('Client-Provider-Wallet', () => {
     await sleep(200); // wait for UI
     console.log(iframe.contentWindow?.document.body.innerHTML);
     iframe.contentWindow?.document.getElementById('yes')?.click();
-    await createChannelPromise;
+    const channelResult = await createChannelPromise;
+    expect(channelResult).toBeDefined();
   });
 });

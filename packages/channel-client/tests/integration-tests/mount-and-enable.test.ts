@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 
 import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
+
 import {sleep} from './helpers';
 
 require('@statechannels/iframe-channel-provider');
