@@ -1,10 +1,11 @@
-import {simpleEthAllocation, BN, Uint256} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, Uint256, State} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
 
 import {protocol} from '../application';
 import {alice} from '../../wallet/__test__/fixtures/participants';
+import {SignState} from '../actions';
 
-import {applicationProtocolState, withSupportedState} from './fixtures/application-protocol-state';
+import {applicationProtocolState} from './fixtures/application-protocol-state';
 
 expect.extend(matchers);
 
@@ -13,34 +14,33 @@ const prefundState = {outcome, turnNum: 0};
 const postFundState = {outcome, turnNum: 3};
 const closingState = {outcome, turnNum: 4, isFinal: true};
 
-it('generates an action to sign the post fund setup', async () => {
-  const funding = (): Uint256 => BN.from(5);
-  const protocolState = applicationProtocolState(
-    withSupportedState(prefundState)({app: {funding}})
-  );
+const runningState = {outcome, turnNum: 7};
+const closingState2 = {outcome, turnNum: 8, isFinal: true};
 
-  expect(protocol(protocolState)).toMatchObject({type: 'SignState', ...postFundState});
+const funded = (): Uint256 => BN.from(5);
+const notFunded = (): Uint256 => BN.from(0);
+
+const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
+
+test.each`
+  supported        | latestSignedByMe | latest           | funding   | action                      | cond                                                                  | result
+  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${funded} | ${signState(postFundState)} | ${'when the prefund state is supported, and the channel is funded'}   | ${'signs the postfund state'}
+  ${closingState}  | ${postFundState} | ${closingState}  | ${funded} | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
+  ${closingState2} | ${runningState}  | ${closingState2} | ${funded} | ${signState(closingState2)} | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
+`('$result $cond', ({supported, latest, latestSignedByMe, funding, action}) => {
+  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
+  expect(protocol(ps)).toMatchObject(action);
 });
 
-it('generates an action to sign a final state when the channel is closing', async () => {
-  const protocolState = applicationProtocolState({
-    app: {latestSignedByMe: postFundState, supported: closingState},
-  });
-
-  expect(protocol(protocolState)).toMatchObject({type: 'SignState', ...closingState});
-});
-
-it('generates no actions if the post fund setup is signed', async () => {
-  const funding = (): Uint256 => BN.from(5);
-  const protocolState = applicationProtocolState(
-    withSupportedState(postFundState)({app: {funding}})
-  );
-
-  expect(protocol(protocolState)).toBeUndefined();
-});
-
-// TODO: Figure out what to with this
-it.skip('returns an error if there is no pre fund setup', async () => {
-  const protocolState = applicationProtocolState();
-  expect(protocol(protocolState)).toBeLeft();
+test.each`
+  supported        | latestSignedByMe | latest           | funding      | cond
+  ${undefined}     | ${prefundState}  | ${prefundState}  | ${funded}    | ${'when I have signed the prefund state, but it is not supported'}
+  ${undefined}     | ${undefined}     | ${undefined}     | ${funded}    | ${'when there is no state'}
+  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${notFunded} | ${'when the prefund state is supported, and the channel is funded'}
+  ${prefundState}  | ${postFundState} | ${postFundState} | ${funded}    | ${'when the prefund state is supported, and I have signed the postfund state'}
+  ${postFundState} | ${postFundState} | ${postFundState} | ${funded}    | ${'when the postfund state is supported'}
+  ${closingState}  | ${closingState}  | ${closingState}  | ${funded}    | ${'when I have signed a final state'}
+`('takes no action $cond', ({supported, latest, latestSignedByMe, funding}) => {
+  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
+  expect(protocol(ps)).toBeUndefined();
 });
