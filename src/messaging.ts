@@ -131,15 +131,15 @@ export class MessagingService implements MessagingServiceInterface {
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(
     method: ChannelProposedNotification['method'],
-    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+    notificationData: ChannelResult & {fundingStrategy: FundingStrategy} // TODO this breaks validation in the provider
   );
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(method, notificationData) {
-    const notification = {
+    const notification: StateChannelsNotification = {
       jsonrpc: '2.0',
       method,
       params: notificationData
-    } as StateChannelsNotification; // typescript can't handle this otherwise
+    };
     this.eventEmitter.emit('SendMessage', notification);
   }
 
