@@ -47,13 +47,10 @@ const addSignatures = (wallets: SigningWallet[]) => (s: State): SignedState => (
   signatures: wallets.map(sw => _signState(s, sw)),
 });
 
-export const stateSignedBy = (
-  defaultWallet = aliceWallet(),
-  ...otherWallets: SigningWallet[]
-): Fixture<SignedState> =>
+export const stateSignedBy = (signingWallets = [aliceWallet()]): Fixture<SignedState> =>
   fixture<SignedState>(
     _.merge({signatures: []}, defaultState),
-    flow(overwriteOutcome, addSignatures([defaultWallet, ...otherWallets]))
+    flow(overwriteOutcome, addSignatures(signingWallets))
   );
 
 export const stateWithHashSignedBy = (
@@ -61,6 +58,6 @@ export const stateWithHashSignedBy = (
   ...otherWallets: SigningWallet[]
 ): Fixture<SignedStateWithHash> =>
   fixture(
-    stateSignedBy(pk, ...otherWallets)() as SignedStateWithHash,
+    stateSignedBy([pk, ...otherWallets])() as SignedStateWithHash,
     flow(overwriteOutcome, addHash)
   );

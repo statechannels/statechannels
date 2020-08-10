@@ -18,6 +18,7 @@ import {
   ReceiverServer,
   startReceiverServer,
 } from '../e2e-test/e2e-utils';
+import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import PayerClient from './payer/client';
 
@@ -30,17 +31,15 @@ async function seedTestChannels(
 ): Promise<string[]> {
   const channelIds: string[] = [];
   for (let i = 0; i < numOfChannels; i++) {
-    const seed = withSupportedState(
-      {turnNum: 3},
-      {
-        channelNonce: i,
-        participants: [payer, receiver],
-      },
-      [
-        SigningWallet.fromJson({privateKey: payerPrivateKey}),
-        SigningWallet.fromJson({privateKey: receiverPrivateKey}),
-      ]
-    )();
+    const seed = withSupportedState([
+      SigningWallet.fromJson({privateKey: payerPrivateKey}),
+      SigningWallet.fromJson({privateKey: receiverPrivateKey}),
+    ])({
+      channelNonce: i,
+      participants: [payer, receiver],
+      vars: [stateVars({turnNum: 3})],
+    });
+
     await Channel.bindKnex(knexPayer)
       .query()
       .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default

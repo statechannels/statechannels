@@ -11,6 +11,6 @@ export const applicationProtocolState = fixture({app: channel().protocolState});
 export const withSupportedState = (stateVars: Partial<StateVariables>): Fixture<ProtocolState> =>
   fixture(
     applicationProtocolState({
-      app: channelWithSupportedState(stateVars)().protocolState,
+      app: channelWithSupportedState()({vars: [stateVars]}).protocolState,
     })
   );
