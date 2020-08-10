@@ -4,7 +4,8 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {addHash} from '../../../state-utils';
-import {alice, bob} from '../fixtures/signing-wallets';
+import {alice, bob, charlie} from '../fixtures/signing-wallets';
+import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
 import {message} from '../fixtures/messages';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
@@ -82,17 +83,19 @@ describe('channel results', () => {
   it("returns a 'closing' channel result when receiving a state in a channel that is now closing", async () => {
     const channelsBefore = await Channel.query().select();
     expect(channelsBefore).toHaveLength(0);
-    const {channelId} = await Channel.query().insert(
-      withSupportedState()({vars: [stateVars({turnNum: 8})]})
-    );
-    const signedStates = [stateSignedBy([bob()])({turnNum: 9, isFinal: true})];
 
+    const participants = [aliceP(), bobP(), charlieP()];
+    const vars = [stateVars({turnNum: 9})];
+    const channel = withSupportedState([alice(), bob(), charlie()])({vars, participants});
+    const {channelId} = await Channel.query().insert(channel);
+
+    const signedStates = [stateSignedBy([bob()])({turnNum: 10, isFinal: true, participants})];
     return expectResults(wallet.pushMessage(message({signedStates})), [
-      {channelId, turnNum: 9, status: 'closing'},
+      {channelId, turnNum: 10, status: 'closing'},
     ]);
   });
 
-  it("returns a 'closing' channel result when receiving a state in a channel that is now closed", async () => {
+  it("returns a 'closed' channel result when receiving a state in a channel that is now closed", async () => {
     const channelsBefore = await Channel.query().select();
     expect(channelsBefore).toHaveLength(0);
 
