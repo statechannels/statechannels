@@ -374,7 +374,7 @@ jobs:
       - run:
           command: mkdir logs
       - run:
-          command: yarn start-servers
+          command: SC_ENV=integration-tests yarn start-servers
           background: true
       - run: (cd packages/integration-tests && yarn test)
 
