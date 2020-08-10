@@ -8,5 +8,5 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
   testEnvironment: 'jsdom',
   testEnvironmentOptions: {url: 'http://anything.com', resources: 'usable'},
-  setupFiles = ['./jest.setup.ts']
+  setupFiles: ['./jest.setup.ts']
 };
