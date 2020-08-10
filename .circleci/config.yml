@@ -158,20 +158,6 @@ commands:
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
 
-  integration-tests:
-  <<: *defaults
-    description: 'Running integration tests'
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /home/circleci/project
-      - run:
-          command: mkdir logs
-      - run:
-          command: yarn start-servers
-          background: true
-      - run: (cd packages/integration-tests && yarn test)
-
 jobs:
   prepare:
     <<: *defaults
@@ -377,6 +363,20 @@ jobs:
             git rebase origin/master
             git push origin deploy
       - notify_slack
+
+  integration-tests:
+    <<: *defaults
+    description: 'Running integration tests'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: mkdir logs
+      - run:
+          command: yarn start-servers
+          background: true
+      - run: (cd packages/integration-tests && yarn test)
 
 workflows:
   statechannels:
