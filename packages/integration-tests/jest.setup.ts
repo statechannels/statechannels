@@ -1,6 +1,7 @@
 import waitOn from 'wait-on';
 
-const WALLET_URL = 'https://localhost:3000';
+const WALLET_URL = 'https://localhost:3055';
+
 export default async (): Promise<void> => {
   const resources = [WALLET_URL];
   const opts = {resources, delay: 1000, interval: 2000, timeout: 120000};

@@ -376,7 +376,7 @@ jobs:
       - run:
           command: SC_ENV=integration-tests yarn start-servers
           background: true
-      - run: (cd packages/integration-tests && yarn test)
+      - run: (cd packages/integration-tests && yarn integration-tests)
 
 workflows:
   statechannels:

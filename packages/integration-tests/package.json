@@ -19,7 +19,6 @@
   "license": "MIT",
   "repository": "statechannels/monorepo/blob/master/packages/integration-tests",
   "scripts": {
-    "test": "jest",
-    "test:ci": "jest"
+    "integration-tests": "jest"
   }
 }
