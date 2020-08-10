@@ -57,6 +57,7 @@
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
     "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod",
+    "start-servers": "./bin/start-servers.sh",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "lerna run test --stream --concurrency 8",
     "test:ci": "lerna run test:ci --stream --no-sort --include-dependents",

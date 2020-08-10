@@ -158,6 +158,25 @@ commands:
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
 
+  integration-test:
+    description: 'Running integration tests'
+    steps:
+      - checkout
+      - log_stats:
+          file: integration-test-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: mkdir logs
+      - run:
+          command: yarn start-servers
+          background: true
+      - run: (cd packages/integration-tests && yarn test)
+      - upload_logs:
+          file: integration-test-stats
+      - upload_e2e_logs
+      - upload_e2e_screenshots
+
 jobs:
   prepare:
     <<: *defaults
@@ -373,6 +392,10 @@ workflows:
           requires:
             - prepare
       - test:
+          requires:
+            - prepare
+
+      - integration-test:
           requires:
             - prepare
 
