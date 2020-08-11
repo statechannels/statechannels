@@ -3253,7 +3253,7 @@
     "@rimble/utils" "^1.2.3"
     rimble-ui "^0.9.1"
 
-"@rimble/icons@^1.0.2":
+"@rimble/icons@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@rimble/icons/-/icons-1.1.0.tgz#e69bdff01190c304af95fae578a5d1b90f34e14d"
   integrity sha512-lR6cVMe/wum6bi6H5qmUH0wEPvCg269XdYMaRwgxpvqbhu0gytH9vTSMkWhbaBLWjmALONt/qjDCQGCESQ+qbg==
@@ -20984,24 +20984,6 @@ rgba-regex@^1.0.0:
   resolved "https://registry.npmjs.org/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
   integrity sha1-QzdOLiyglosO8VI0YLfXMP8i7rM=
 
-rimble-ui@0.14.0:
-  version "0.14.0"
-  resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.14.0.tgz#86623865c62398da51326f8760b033b60a82f755"
-  integrity sha512-fwWCYuJCwOAcagt9PZT7cxLbAieF8XijglJCrYqReWKcbY64QES0CK9W/rlLlT/SXJIZw4eNO75b2QV43++ojA==
-  dependencies:
-    "@d8660091/react-popper" "^1.0.4"
-    "@rimble/icons" "^1.0.2"
-    "@styled-system/prop-types" "^5.1.2"
-    "@styled-system/theme-get" "^5.1.2"
-    "@svgr/rollup" "^4.2.0"
-    clipboard "^2.0.4"
-    ethereum-blockies "^0.1.1"
-    mixin-deep "^2.0.1"
-    polished "^3.2.0"
-    qrcode.react "^0.9.3"
-    set-value "^3.0.1"
-    styled-system "^5.1.5"
-
 rimble-ui@^0.9.1:
   version "0.9.8"
   resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.9.8.tgz#9d4fd612e2ca24b413ffa3b7daa36c418922e8e8"
@@ -21017,6 +20999,23 @@ rimble-ui@^0.9.1:
     rmdi "^1.0.1"
     set-value "^3.0.1"
     styled-system "^4.1.0"
+
+"rimble-ui@https://github.com/ConsenSys/rimble-ui#46e9798fcf97d89b0ffa748c6abddcc7ea214f22":
+  version "0.14.0"
+  resolved "https://github.com/ConsenSys/rimble-ui#46e9798fcf97d89b0ffa748c6abddcc7ea214f22"
+  dependencies:
+    "@d8660091/react-popper" "^1.0.4"
+    "@rimble/icons" "^1.1.0"
+    "@styled-system/prop-types" "^5.1.2"
+    "@styled-system/theme-get" "^5.1.2"
+    "@svgr/rollup" "^4.2.0"
+    clipboard "^2.0.4"
+    ethereum-blockies "^0.1.1"
+    mixin-deep "^2.0.1"
+    polished "^3.2.0"
+    qrcode.react "^0.9.3"
+    set-value "^3.0.1"
+    styled-system "^5.1.5"
 
 rimraf@2, rimraf@^2.2.8, rimraf@^2.5.4, rimraf@^2.6.1, rimraf@^2.6.2, rimraf@^2.6.3, rimraf@^2.7.1:
   version "2.7.1"
