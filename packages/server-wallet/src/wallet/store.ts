@@ -46,6 +46,13 @@ export const Store = {
   },
 
   getOrCreateSigningAddress: async function(tx: Transaction): Promise<string> {
+    // needed to avoid the race condition that would insert 2 private keys into an empty table:
+    // 1. tx1 queries an empty table.
+    // 2. tx2 queries an empty table.
+    // 3. tx1 inserts a new private key.
+    // 4. tx2 inserts a new private key.
+    // Default Postgres isolation level is Read Committed
+    await tx.raw('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
     let signingWallet = await SigningWallet.query(tx).first();
     if (!signingWallet) {
       const randomWallet = ethers.Wallet.createRandom();
