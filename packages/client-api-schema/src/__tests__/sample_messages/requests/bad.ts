@@ -1,4 +1,4 @@
-export const createChannel = {
+const createChannel = {
   jsonrpc: '2.0',
   id: 1581594378830,
   method: 'CreateChannel',
@@ -30,7 +30,7 @@ export const createChannel = {
   }
 };
 
-export const closeChannel = {
+const closeChannel = {
   jsonrpc: '2.0',
   id: 1581594323759,
   method: 'CloseChannel',
@@ -38,3 +38,5 @@ export const closeChannel = {
     channelId: '0x430869383d611bBB1ce7Ca207024E7901bC26b40'
   }
 };
+
+export const badRequests = [createChannel, closeChannel];

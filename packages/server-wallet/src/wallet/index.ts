@@ -14,6 +14,7 @@ import {
   Outcome,
   SignedStateVarsWithHash,
   convertToParticipant,
+  Participant,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 
@@ -28,6 +29,7 @@ import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
+import {isWalletError} from '../errors/wallet-error';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -40,6 +42,9 @@ type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelRe
 type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
 export type WalletInterface = {
+  // App utilities
+  getParticipant(): Promise<Participant | undefined>;
+
   // App channel management
   createChannel(args: CreateChannelParams): SingleChannelResult;
   joinChannel(args: JoinChannelParams): SingleChannelResult;
@@ -56,6 +61,19 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
+  public async getParticipant(): Promise<Participant | undefined> {
+    let participant: Participant | undefined = undefined;
+
+    try {
+      participant = await Store.getFirstParticipant();
+    } catch (e) {
+      if (isWalletError(e)) logger.error('Wallet failed to get a participant', e);
+      else throw e;
+    }
+
+    return participant;
+  }
+
   async createChannel(args: CreateChannelParams): SingleChannelResult {
     return Channel.transaction(async tx => {
       const {participants, appDefinition, appData, allocations} = args;

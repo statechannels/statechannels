@@ -1,5 +1,3 @@
-import * as childProcess from 'child_process';
-
 import {Participant} from '@statechannels/client-api-schema';
 
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
@@ -9,7 +7,6 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
 import knexPayer from '../src/db/connection';
-import {logger} from '../src/logger';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import PayerClient from './payer/client';
@@ -19,6 +16,7 @@ import {
   ReceiverServer,
   knexReceiver,
   startReceiverServer,
+  triggerPayments,
 } from './e2e-utils';
 
 jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds
@@ -88,26 +86,6 @@ describe('e2e', () => {
 describe('payments', () => {
   let channelId: string;
 
-  const triggerPayments = async (numPayments?: number): Promise<void> => {
-    let args = [
-      'ts-node',
-      'e2e-test/payer',
-      'start',
-      '--database',
-      'payer',
-      '--channels',
-      channelId,
-    ];
-
-    if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
-
-    const payerScript = childProcess.spawn(`yarn`, args);
-
-    payerScript.on('error', logger.error);
-
-    await new Promise(resolve => payerScript.on('exit', resolve));
-  };
-
   beforeEach(async () => {
     const [payer, receiver] = [aliceP(), bobP()];
     const seed = withSupportedState()({
@@ -131,7 +109,7 @@ describe('payments', () => {
     await expectSupportedState(ChannelPayer, 3);
     await expectSupportedState(ChannelReceiver, 3);
 
-    await triggerPayments();
+    await triggerPayments([channelId]);
 
     await expectSupportedState(ChannelPayer, 5);
     await expectSupportedState(ChannelReceiver, 5);
@@ -142,7 +120,7 @@ describe('payments', () => {
     await expectSupportedState(ChannelReceiver, 3);
 
     const numPayments = 5;
-    await triggerPayments(numPayments);
+    await triggerPayments([channelId], numPayments);
 
     await expectSupportedState(ChannelPayer, 3 + 2 * numPayments);
     await expectSupportedState(ChannelReceiver, 3 + 2 * numPayments);

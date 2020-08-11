@@ -364,6 +364,20 @@ jobs:
             git push origin deploy
       - notify_slack
 
+  integration-tests:
+    <<: *defaults
+    description: 'Running integration tests'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: mkdir logs
+      - run:
+          command: SC_ENV=integration-tests yarn start-servers
+          background: true
+      - run: (cd packages/integration-tests && yarn integration-tests)
+
 workflows:
   statechannels:
     jobs:
@@ -373,6 +387,10 @@ workflows:
           requires:
             - prepare
       - test:
+          requires:
+            - prepare
+
+      - integration-tests:
           requires:
             - prepare
 

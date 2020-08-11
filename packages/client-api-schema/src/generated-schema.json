@@ -89,6 +89,9 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "ChallengeChannelError": {
+      "$ref": "#/definitions/JsonRpcError%3C1300%2C%22Could%20not%20find%20channel%22%3E"
+    },
     "ChallengeChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -250,6 +253,19 @@
     "CloseChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
+    "CreateChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C1000%2C%22Could%20not%20find%20signing%20address%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C1001%2C%22Invalid%20App%20Definition%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C1002%2C%22This%20token%20is%20not%20supported%22%3E"
+        }
+      ]
+    },
     "CreateChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -354,6 +370,9 @@
     "GetChannelsResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2747-3043-src%2Fdata-types.ts-0-3460%5B%5D%3E"
     },
+    "GetStateError": {
+      "$ref": "#/definitions/JsonRpcError%3C1200%2C%22Could%20not%20find%20channel%22%3E"
+    },
     "GetStateParams": {
       "additionalProperties": false,
       "properties": {
@@ -383,6 +402,16 @@
     },
     "InvalidTransition": {
       "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-742-812-1165839259-669-814-1165839259-637-815-1165839259-0-1239%3E"
+    },
+    "JoinChannelError": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/JsonRpcError%3C1100%2C%22Could%20not%20find%20channel%22%3E"
+        },
+        {
+          "$ref": "#/definitions/JsonRpcError%3C1101%2C%22Invalid%20Transition%22%3E"
+        }
+      ]
     },
     "JoinChannelParams": {
       "additionalProperties": false,
@@ -422,6 +451,216 @@
           "description": "Error message",
           "enum": [
             "Ethereum Not Enabled"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1000,\"Could not find signing address\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1000
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Could not find signing address"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1001,\"Invalid App Definition\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1001
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Invalid App Definition"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1002,\"This token is not supported\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1002
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "This token is not supported"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1100,\"Could not find channel\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1100
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Could not find channel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1101,\"Invalid Transition\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1101
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Invalid Transition"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1200,\"Could not find channel\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1200
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Could not find channel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "JsonRpcError<1300,\"Could not find channel\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            1300
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Could not find channel"
           ],
           "type": "string"
         }
@@ -722,6 +961,36 @@
       ],
       "type": "object"
     },
+    "JsonRpcError<900,\"Wrong participant\">": {
+      "additionalProperties": false,
+      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "code": {
+          "description": "Error code",
+          "enum": [
+            900
+          ],
+          "type": "number"
+        },
+        "data": {
+          "description": "Error data",
+          "not": {
+          }
+        },
+        "message": {
+          "description": "Error message",
+          "enum": [
+            "Wrong participant"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
     "JsonRpcErrorResponse<StateChannelsError>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
@@ -899,7 +1168,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -928,6 +1197,37 @@
           "required": [
             "showWallet"
           ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"WalletReady\",structure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427>": {
+      "additionalProperties": false,
+      "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "description": "Generic type of the Notification name",
+          "enum": [
+            "WalletReady"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "description": "Generic type of the Notification parameters",
           "type": "object"
         }
       },
@@ -1723,6 +2023,9 @@
       ],
       "type": "object"
     },
+    "PushMessageError": {
+      "$ref": "#/definitions/JsonRpcError%3C900%2C%22Wrong%20participant%22%3E"
+    },
     "PushMessageRequest": {
       "$ref": "#/definitions/JsonRpcRequest%3C%22PushMessage%22%2CMessage%3E"
     },
@@ -1754,6 +2057,21 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelError"
+        },
+        {
+          "$ref": "#/definitions/PushMessageError"
+        },
+        {
+          "$ref": "#/definitions/JoinChannelError"
+        },
+        {
+          "$ref": "#/definitions/GetStateError"
+        },
+        {
+          "$ref": "#/definitions/CreateChannelError"
+        },
+        {
+          "$ref": "#/definitions/ChallengeChannelError"
         },
         {
           "$ref": "#/definitions/JsonRpcError%3C500%2C%22Wallet%20error%22%3E"
@@ -1798,6 +2116,9 @@
         },
         {
           "$ref": "#/definitions/UiNotification"
+        },
+        {
+          "$ref": "#/definitions/WalletReady"
         }
       ]
     },
@@ -1915,7 +2236,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427%3E"
     },
     "Uint256": {
       "description": "Uint256",
@@ -1972,6 +2293,9 @@
     },
     "UpdateChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "WalletReady": {
+      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427%3E"
     }
   }
 }

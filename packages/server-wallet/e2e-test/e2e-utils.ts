@@ -1,4 +1,5 @@
-import {spawn, ChildProcessWithoutNullStreams} from 'child_process';
+import {ChildProcessWithoutNullStreams, fork, spawn} from 'child_process';
+import {join} from 'path';
 
 import kill = require('tree-kill');
 import axios from 'axios';
@@ -6,9 +7,28 @@ import axios from 'axios';
 import Knex = require('knex');
 import {dbConfig} from '../src/db/config';
 
+import {PerformanceTimer} from './payer/timers';
+
 export type ReceiverServer = {
   url: string;
   server: ChildProcessWithoutNullStreams;
+};
+
+export const triggerPayments = async (
+  channelIds: string[],
+  numPayments?: number
+): Promise<void> => {
+  let args = ['start', '--database', 'payer', '--channels', ...channelIds];
+
+  if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
+
+  const payerScript = fork(join(__dirname, './payer/index.ts'), args, {
+    execArgv: ['-r', 'ts-node/register'],
+  });
+  payerScript.on('message', message =>
+    console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
+  );
+  await new Promise(resolve => payerScript.on('exit', resolve));
 };
 
 /**

@@ -1,7 +1,12 @@
 // need to use this syntax, because ajv uses export= style exports
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
-import {StateChannelsRequest, StateChannelsResponse, StateChannelsNotification} from './types';
+import {
+  StateChannelsRequest,
+  StateChannelsResponse,
+  StateChannelsNotification,
+  StateChannelsErrorResponse
+} from './types';
 
 // You need to pass `jsonPointers: true`
 const ajv = new Ajv({jsonPointers: true, verbose: true});
@@ -13,6 +18,9 @@ ajv.addSchema(apiSchema, 'api.json');
 
 export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/StateChannelsRequest'});
 export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/StateChannelsResponse'});
+export const validateErrorResponse = ajv.compile({
+  $ref: 'api.json#/definitions/StateChannelsErrorResponse'
+});
 export const validateNotification = ajv.compile({
   $ref: 'api.json#/definitions/StateChannelsNotification'
 });
@@ -91,4 +99,24 @@ export function parseNotification(jsonBlob: object): StateChannelsNotification {
     );
   }
   return jsonBlob as StateChannelsNotification;
+}
+
+/**
+ * Validates an error response against the API schema & returns the input cast to the correctly narrowed type.
+ *
+ * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsErrorResponse}
+ * @returns The input, but with the correct type, if it is valid.
+ */
+export function parseErrorResponse(jsonBlob: object): StateChannelsErrorResponse {
+  const valid = validateErrorResponse(jsonBlob);
+  if (!valid) {
+    throw new Error(
+      `
+      Validation Error:
+        input: ${JSON.stringify(jsonBlob)};\n
+        ${validateNotification.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+      `
+    );
+  }
+  return jsonBlob as StateChannelsErrorResponse;
 }

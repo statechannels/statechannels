@@ -15,7 +15,6 @@ import {
   CloseAndWithdrawRequest,
   StateChannelsErrorResponse,
   ChallengeChannelRequest,
-  FundingStrategy,
   parseResponse
 } from '@statechannels/client-api-schema';
 import {fromEvent, Observable} from 'rxjs';
@@ -82,7 +81,7 @@ export interface MessagingServiceInterface {
   );
   sendChannelNotification(
     method: ChannelProposedNotification['method'],
-    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+    notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
@@ -131,15 +130,15 @@ export class MessagingService implements MessagingServiceInterface {
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(
     method: ChannelProposedNotification['method'],
-    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+    notificationData: ChannelResult
   );
   // eslint-disable-next-line no-dupe-class-members
   public async sendChannelNotification(method, notificationData) {
-    const notification = {
+    const notification: StateChannelsNotification = {
       jsonrpc: '2.0',
       method,
       params: notificationData
-    } as StateChannelsNotification; // typescript can't handle this otherwise
+    };
     this.eventEmitter.emit('SendMessage', notification);
   }
 

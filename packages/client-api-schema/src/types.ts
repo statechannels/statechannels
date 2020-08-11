@@ -30,7 +30,12 @@ import {
   EnableEthereumError,
   CloseAndWithdrawError,
   CloseChannelError,
-  UpdateChannelError
+  UpdateChannelError,
+  PushMessageError,
+  JoinChannelError,
+  GetStateError,
+  CreateChannelError,
+  ChallengeChannelError
 } from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
@@ -70,6 +75,12 @@ export type StateChannelsError =
   | CloseAndWithdrawError
   | CloseChannelError
   | UpdateChannelError
+  | PushMessageError
+  | JoinChannelError
+  | GetStateError
+  | CreateChannelError
+  | ChallengeChannelError
+  | PushMessageError
   | GenericError;
 
 export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
@@ -83,24 +94,30 @@ export type StateChannelsJsonRpcMessage =
 export function isStateChannelsResponse(
   message: StateChannelsJsonRpcMessage
 ): message is StateChannelsResponse {
-  return 'id' in message && 'result' in message;
+  return message && typeof message == 'object' && 'id' in message && 'result' in message;
 }
 
 export function isStateChannelsNotification(
   message: StateChannelsJsonRpcMessage
 ): message is StateChannelsNotification {
-  return !('id' in message);
+  return message && typeof message == 'object' && !('id' in message);
 }
 export function isStateChannelsRequest(
   message: StateChannelsJsonRpcMessage
 ): message is StateChannelsRequest {
-  return 'id' in message && 'params' in message;
+  return message && message && typeof message == 'object' && 'id' in message && 'params' in message;
 }
 
 export function isStateChannelsErrorResponse(
   message: StateChannelsJsonRpcMessage
 ): message is StateChannelsErrorResponse {
-  return 'id' in message && 'message' in message && 'error' in message;
+  return (
+    message &&
+    typeof message == 'object' &&
+    'id' in message &&
+    'message' in message &&
+    'error' in message
+  );
 }
 
 export * from './notifications';

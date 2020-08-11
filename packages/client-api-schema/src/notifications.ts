@@ -12,6 +12,7 @@ export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', Ch
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
 export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
+export type WalletReady = JsonRpcNotification<'WalletReady', {}>;
 
 export type StateChannelsNotification =
   | ChannelProposedNotification
@@ -19,7 +20,8 @@ export type StateChannelsNotification =
   | ChannelClosingNotification
   | BudgetUpdatedNotification
   | MessageQueuedNotification
-  | UiNotification;
+  | UiNotification
+  | WalletReady;
 
 type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
 
