@@ -29,6 +29,7 @@ const eslint = require('eslint');
 const GitRevisionPlugin = require('git-revision-webpack-plugin');
 const gitRevisionPlugin = new GitRevisionPlugin();
 const postcssNormalize = require('postcss-normalize');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const appPackageJson = require(paths.appPackageJson);
 
@@ -506,6 +507,7 @@ module.exports = function(webpackEnv) {
       ]
     },
     plugins: [
+      new BundleAnalyzerPlugin(),
       gitRevisionPlugin,
 
       // Generates an `index.html` file with the <script> injected.
