@@ -17,6 +17,7 @@ import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {Either, right} from 'fp-ts/lib/Either';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {ethers} from 'ethers';
 
 import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -42,6 +43,17 @@ export const Store = {
       signingAddress: signingKey.address,
       destination: makeDestination(HashZero),
     };
+  },
+
+  getOrCreateSigningAddress: async function(): Promise<string> {
+    let signingWallet = await SigningWallet.query().first();
+    if (!signingWallet) {
+      const randomWallet = ethers.Wallet.createRandom();
+      signingWallet = await SigningWallet.query()
+        .insert({privateKey: randomWallet.privateKey, address: randomWallet.address})
+        .returning('*');
+    }
+    return signingWallet.address;
   },
 
   /**
