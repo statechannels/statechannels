@@ -3,7 +3,7 @@
 import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 
 import {sleep} from './helpers';
-
+jest.setTimeout(10000);
 require('@statechannels/iframe-channel-provider');
 
 let channelProvider: IFrameChannelProviderInterface;
