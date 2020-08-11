@@ -17,13 +17,13 @@ test('validClose', () => {
 const notMyTurnErr = new CloseChannelError(CloseChannelError.reasons.notMyTurn);
 const noSupportedStateErr = new CloseChannelError(CloseChannelError.reasons.noSupportedState);
 
-const noSupportedState: ChannelState = channelStateFixture({supported: undefined});
+const noSupportedState: ChannelState = channelStateFixture({}, {supported: undefined});
 const evenTurnedSupportedState = channelStateFixture({supported: {turnNum: 4}});
 
 test.each`
   channelState                | error
   ${noSupportedState}         | ${noSupportedStateErr}
   ${evenTurnedSupportedState} | ${notMyTurnErr}
-`('error cases $result', ({channelState, error}) => {
+`('error cases $error', ({channelState, error}) => {
   expect(closeChannel(channelState)).toEqualLeft(error);
 });
