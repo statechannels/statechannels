@@ -1,5 +1,10 @@
+import {configureEnvVariables} from '@statechannels/devtools';
+configureEnvVariables();
+
 import adminKnex from '../src/db-admin/db-admin-connection';
 import knex from '../src/db/connection';
+ 
+ 
 
 beforeAll(async () => {
   await adminKnex.migrate.rollback();

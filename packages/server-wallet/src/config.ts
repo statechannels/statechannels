@@ -1,10 +1,6 @@
-import {configureEnvVariables} from '@statechannels/devtools';
-
 /**
  * This should be the only file that reads from the environment.
  */
-
-configureEnvVariables();
 
 interface ServerWalletConfig {
   nodeEnv: 'test' | 'development' | 'production';

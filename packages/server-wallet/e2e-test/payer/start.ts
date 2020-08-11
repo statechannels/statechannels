@@ -2,6 +2,8 @@ import {Argv} from 'yargs';
 import {Model} from 'objection';
 import Knex from 'knex';
 import _ from 'lodash';
+import {configureEnvVariables} from '@statechannels/devtools';
+configureEnvVariables();
 
 import {dbConfig} from '../../src/db/config';
 import PayerClient from '../payer/client';
