@@ -3,7 +3,12 @@ import {Guid} from 'guid-typescript';
 import {
   StateChannelsNotificationType,
   StateChannelsNotification,
-  parseNotification
+  parseNotification,
+  isJsonRpcNotification,
+  isJsonRpcResponse,
+  parseResponse,
+  isJsonRpcErrorResponse,
+  parseErrorResponse
 } from '@statechannels/client-api-schema';
 
 import {IFrameChannelProviderInterface} from './types';
@@ -46,7 +51,8 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     ChannelClosed: [],
     BudgetUpdated: [],
     MessageQueued: [],
-    UIUpdate: []
+    UIUpdate: [],
+    WalletReady: []
   };
   /**
    * The url of the hosted statechannels wallet
@@ -82,7 +88,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    * Is the wallet ready to receive requests?
    */
   walletReady = new Promise(resolve => {
-    window.addEventListener('message', event => event.data === 'WalletReady' && resolve());
+    window.addEventListener('message', event => event.data.method === 'WalletReady' && resolve());
   });
 
   /**
@@ -182,20 +188,24 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
-    if (!event.data.jsonrpc) {
-      return;
-    }
-    const message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
-    const notificationMethod = message.method;
-    const notificationParams = message.params as any;
-    this.events.emit(notificationMethod, notificationParams);
-    if ('showWallet' in message.params) {
-      this.iframe.setVisibility(message.params.showWallet);
-    } else {
-      this.subscriptions[notificationMethod].forEach(id => {
-        this.events.emit(id, notificationParams);
-      });
-    }
+    let message;
+    if (isJsonRpcNotification(event.data)) {
+      message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
+      const notificationMethod = message.method;
+      const notificationParams = message.params as any;
+      this.events.emit(notificationMethod, notificationParams);
+      if ('showWallet' in message.params) {
+        this.iframe.setVisibility(message.params.showWallet);
+      } else {
+        this.subscriptions[notificationMethod].forEach(id => {
+          this.events.emit(id, notificationParams);
+        });
+      }
+    } else if (isJsonRpcResponse(event.data)) {
+      message = parseResponse(event.data);
+    } else if (isJsonRpcErrorResponse(event.data)) {
+      message = parseErrorResponse(event.data);
+    } else return;
   }
 }
 

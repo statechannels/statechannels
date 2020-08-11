@@ -51,16 +51,16 @@ void (async () => {
       devServer.close();
     }
   });
-  
+
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 
-  if (process.env.TARGET_NETWORK === "development") {
+  if (process.env.TARGET_NETWORK === 'development') {
     // Add contract addresses to process.env if running ganache
-    const {deployer} = await (await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX));    
+    const {deployer} = await await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX);
     const deployedArtifacts = await deploy(deployer);
     process.env = {...process.env, ...deployedArtifacts};
   }
-  
+
   const isInteractive = process.stdout.isTTY;
 
   const {checkBrowsers} = require('react-dev-utils/browsersHelper');

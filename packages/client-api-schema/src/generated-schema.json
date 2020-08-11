@@ -1168,7 +1168,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1197,6 +1197,37 @@
           "required": [
             "showWallet"
           ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JsonRpcNotification<\"WalletReady\",structure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427>": {
+      "additionalProperties": false,
+      "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "description": "Generic type of the Notification name",
+          "enum": [
+            "WalletReady"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "description": "Generic type of the Notification parameters",
           "type": "object"
         }
       },
@@ -2085,6 +2116,9 @@
         },
         {
           "$ref": "#/definitions/UiNotification"
+        },
+        {
+          "$ref": "#/definitions/WalletReady"
         }
       ]
     },
@@ -2202,7 +2236,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1345%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427%3E"
     },
     "Uint256": {
       "description": "Uint256",
@@ -2259,6 +2293,9 @@
     },
     "UpdateChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
+    },
+    "WalletReady": {
+      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427%3E"
     }
   }
 }
