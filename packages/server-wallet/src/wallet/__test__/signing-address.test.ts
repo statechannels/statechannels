@@ -15,17 +15,17 @@ beforeEach(async () => {
 
 describe('signingAddress', () => {
   it('generate address then get address', async () => {
-    const signignAddress = await Store.getOrCreateSigningAddress(tx);
-    expect(signignAddress).toBeDefined();
-    expect(ethers.utils.isAddress(signignAddress)).toBeTruthy();
+    const signingAddress = await Store.getOrCreateSigningAddress(tx);
+    expect(signingAddress).toBeDefined();
+    expect(ethers.utils.isAddress(signingAddress)).toBeTruthy();
 
-    const signignAddress2 = await Store.getOrCreateSigningAddress(tx);
-    expect(signignAddress).toEqual(signignAddress2);
+    const signingAddress2 = await Store.getOrCreateSigningAddress(tx);
+    expect(signingAddress).toEqual(signingAddress2);
   });
 
   it('prepopulated address returned correctly', async () => {
     await seedAlicesSigningWallet(knex);
-    const signignAddress = await Store.getOrCreateSigningAddress(tx);
-    expect(signignAddress).toEqual(alice().signingAddress);
+    const signingAddress = await Store.getOrCreateSigningAddress(tx);
+    expect(signingAddress).toEqual(alice().signingAddress);
   });
 });
