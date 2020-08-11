@@ -75,7 +75,9 @@ export class Wallet implements WalletInterface {
   }
 
   public async getSigningAddress(): Promise<string> {
-    return await Store.getOrCreateSigningAddress();
+    return SigningWallet.transaction(async tx => {
+      return await Store.getOrCreateSigningAddress(tx);
+    });
   }
 
   async createChannel(args: CreateChannelParams): SingleChannelResult {
