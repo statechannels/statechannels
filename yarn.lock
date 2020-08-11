@@ -1124,7 +1124,7 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.0", "@babel/runtime@^7.4.2", "@babel/runtime@^7.4.4", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.0", "@babel/runtime@^7.4.4", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
   version "7.10.5"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.10.5.tgz#303d8bd440ecd5a491eae6117fd3367698674c5c"
   integrity sha512-otddXKhdNn7d0ptoFRHtMLa8LqDxLYwTjB4nYgM1yy5N6gU/MUf8zqyyLltCH3yAVitBzmwK4us+DD0l/MauAg==
@@ -20984,23 +20984,7 @@ rgba-regex@^1.0.0:
   resolved "https://registry.npmjs.org/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
   integrity sha1-QzdOLiyglosO8VI0YLfXMP8i7rM=
 
-rimble-ui@^0.9.1:
-  version "0.9.8"
-  resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.9.8.tgz#9d4fd612e2ca24b413ffa3b7daa36c418922e8e8"
-  integrity sha512-brhTTh4UwpRZusqclcqrbj2N9zgejIxMty+/gIdCLT0Gsgfz1OZes0OeFDFjqVYCHK5DrRiaCjybpCG+rtfNfw==
-  dependencies:
-    "@d8660091/react-popper" "^1.0.4"
-    "@svgr/rollup" "^4.2.0"
-    clipboard "^2.0.4"
-    ethereum-blockies "^0.1.1"
-    mixin-deep "^2.0.1"
-    polished "^3.2.0"
-    qrcode.react "^0.9.3"
-    rmdi "^1.0.1"
-    set-value "^3.0.1"
-    styled-system "^4.1.0"
-
-"rimble-ui@https://github.com/ConsenSys/rimble-ui#46e9798fcf97d89b0ffa748c6abddcc7ea214f22":
+rimble-ui@^0.9.1, "rimble-ui@https://github.com/ConsenSys/rimble-ui#46e9798fcf97d89b0ffa748c6abddcc7ea214f22":
   version "0.14.0"
   resolved "https://github.com/ConsenSys/rimble-ui#46e9798fcf97d89b0ffa748c6abddcc7ea214f22"
   dependencies:
@@ -21052,13 +21036,6 @@ rlp@^2.0.0, rlp@^2.2.3:
   integrity sha512-HAfAmL6SDYNWPUOJNrM500x4Thn4PZsEy5pijPh40U9WfNk0z15hUYzO9xVIMAdIHdFtD8CBDHd75Td1g36Mjg==
   dependencies:
     bn.js "^4.11.1"
-
-rmdi@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/rmdi/-/rmdi-1.0.1.tgz#0284dacf86105181bc9b14df61df8ba8728631d6"
-  integrity sha512-1oxFIH6/mZrw6HN6M0PCogMf783FUKOD2tZW5HyX+Ok6nUodd4kob2UvzzFtaEx7GuD8KzaQPid/pbFjO5D7uw==
-  dependencies:
-    styled-system "^2.0.0"
 
 rollup-plugin-babel@^4.3.3:
   version "4.4.0"
@@ -22602,21 +22579,6 @@ styled-components@5.0.0:
     hoist-non-react-statics "^3.0.0"
     shallowequal "^1.1.0"
     supports-color "^5.5.0"
-
-styled-system@^2.0.0:
-  version "2.3.6"
-  resolved "https://registry.npmjs.org/styled-system/-/styled-system-2.3.6.tgz#a38c1ffa04a5c35adec46473984e463c48b16f7c"
-  integrity sha512-lGAh/8tC70f5hBUD7w0UOWCKyOBK2AzzWKu9BGzqla/Yjx8PzrvaciA7uATbm493hXTfRrecSdLdrIUET5IYnA==
-  dependencies:
-    prop-types "^15.6.0"
-
-styled-system@^4.1.0:
-  version "4.2.4"
-  resolved "https://registry.npmjs.org/styled-system/-/styled-system-4.2.4.tgz#8909f91396c30b92295b4eddec5f7b89f8c8d767"
-  integrity sha512-44X7n09gDvwx7yjquEXsjiNALK0dxGgAJdpO5cb/PdL+D4mhSLKWig4/EhH4vHJLbwu/kumURHyvKxygaBfg0A==
-  dependencies:
-    "@babel/runtime" "^7.4.2"
-    prop-types "^15.7.2"
 
 styled-system@^5.1.5:
   version "5.1.5"
