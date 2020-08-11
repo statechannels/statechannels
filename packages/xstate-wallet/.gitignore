@@ -30,3 +30,6 @@ info.log
 
 # Config files for visualizer
 /src/workflows/*.config.js
+
+# webpack-bundle-analyzer output
+bundle-report.html

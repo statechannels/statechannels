@@ -507,7 +507,7 @@ module.exports = function(webpackEnv) {
       ]
     },
     plugins: [
-      new BundleAnalyzerPlugin(),
+      new BundleAnalyzerPlugin({analyzerMode: 'static', reportFilename: '../bundle-report.html'}),
       gitRevisionPlugin,
 
       // Generates an `index.html` file with the <script> injected.
