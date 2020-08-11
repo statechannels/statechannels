@@ -17,7 +17,15 @@ const _bob: Participant = {
   ),
   participantId: 'bob',
 };
+const _charlie: Participant = {
+  signingAddress: wallets.charlie().address,
+  destination: makeDestination(
+    '0xcccc000000000000000000000000000000000000000000000000000000000003'
+  ),
+  participantId: 'bob',
+};
 
 export const participant = fixture(_alice);
 export const alice = fixture(_alice);
 export const bob = fixture(_bob);
+export const charlie = fixture(_charlie);

@@ -7,6 +7,7 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
 import knexPayer from '../src/db/connection';
+import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import PayerClient from './payer/client';
 import {
@@ -87,13 +88,11 @@ describe('payments', () => {
 
   beforeEach(async () => {
     const [payer, receiver] = [aliceP(), bobP()];
-    const seed = withSupportedState(
-      {turnNum: 3},
-      {
-        channelNonce: 123456789, // something unique for this test
-        participants: [payer, receiver],
-      }
-    )();
+    const seed = withSupportedState()({
+      channelNonce: 123456789, // something unique for this test
+      participants: [payer, receiver],
+      vars: [stateVars({turnNum: 3})],
+    });
 
     await ChannelPayer.query().insert([seed]); // Fixture uses alice() default
     await ChannelReceiver.query().insert([{...seed, signingAddress: receiver.signingAddress}]);

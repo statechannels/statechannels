@@ -13,19 +13,19 @@ const prefundVars = {turnNum: 0, appData: '0xf00'};
 const runningVars = {turnNum: 7, appData: '0xf00'};
 
 test.each`
-  input                                                                 | result
-  ${channel({vars: [stateSignedBy(bob())(prefundVars)]}).protocolState} | ${{type: 'SignState', ...prefundVars}}
-  ${channelStateFixture({latest: prefundVars})}                         | ${{type: 'SignState', ...prefundVars}}
+  input                                                                        | result
+  ${channel({vars: [stateSignedBy([bob()])(prefundVars)]}).protocolState}      | ${{type: 'SignState', ...prefundVars}}
+  ${channelStateFixture({latest: prefundVars}, {latestSignedByMe: undefined})} | ${{type: 'SignState', ...prefundVars}}
 `('happy path', ({input, result}) => {
   expect(joinChannel(joinChannelFixture(), input)).toMatchObject(right(result));
 });
 
 test.each`
-  input                                                                          | result
-  ${channelStateFixture({latestSignedByMe: prefundVars})}                        | ${new Error('already signed prefund setup')}
-  ${channel({vars: [stateSignedBy(alice())(prefundVars)]}).protocolState}        | ${new Error('already signed prefund setup')}
-  ${channel({vars: [stateSignedBy(alice(), bob())(prefundVars)]}).protocolState} | ${new Error('already signed prefund setup')}
-  ${channelStateFixture({latest: runningVars})}                                  | ${new Error('latest state must be turn 0')}
-`('error cases', ({input, result}) => {
+  row  | input                                                                            | result
+  ${1} | ${channelStateFixture({latestSignedByMe: prefundVars})}                          | ${new Error('already signed prefund setup')}
+  ${2} | ${channel({vars: [stateSignedBy([alice()])(prefundVars)]}).protocolState}        | ${new Error('already signed prefund setup')}
+  ${3} | ${channel({vars: [stateSignedBy([alice(), bob()])(prefundVars)]}).protocolState} | ${new Error('already signed prefund setup')}
+  ${4} | ${channelStateFixture({latest: runningVars}, {latestSignedByMe: undefined})}     | ${new Error('latest state must be turn 0')}
+`('error cases $row', ({input, result}) => {
   expect(joinChannel(joinChannelFixture(), input)).toMatchObject(left(result));
 });

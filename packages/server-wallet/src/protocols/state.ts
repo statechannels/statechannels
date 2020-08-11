@@ -23,6 +23,13 @@ export type ChannelState = {
   latestSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => Uint256;
 };
+
+type WithSupported = {supported: SignedStateWithHash};
+type SignedByMe = {latestSignedByMe: SignedStateWithHash};
+
+export type ChannelStateWithMe = ChannelState & SignedByMe;
+export type ChannelStateWithSupported = ChannelState & SignedByMe & WithSupported;
+
 export type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | 'Final';
 /**
  *

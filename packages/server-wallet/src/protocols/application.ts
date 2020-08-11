@@ -12,7 +12,7 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 // These are currently unused, but will be used
 // const isPostfundSetup = stageGuard('PostfundSetup');
 // const isRunning = stageGuard('Running');
-// const isFinal = stageGuard('Final');
+const isFinal = stageGuard('Final');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
 const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
@@ -31,8 +31,10 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isFunded(ps) &&
   signState({channelId: ps.app.channelId, ...ps.app.latestSignedByMe, turnNum: 3});
 
+const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
+  isFinal(ps.app.supported) &&
+  !isFinal(ps.app.latestSignedByMe) &&
+  signState({channelId: ps.app.channelId, ...ps.app.supported});
+
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  // The protocol should be re-run until it returns the same result, and that happens
-  // when there's either no action or a notification.
-  // Thus, it is IMPORTANT that notices come last.
-  signPostFundSetup(ps) || noAction;
+  signPostFundSetup(ps) || signFinalState(ps) || noAction;

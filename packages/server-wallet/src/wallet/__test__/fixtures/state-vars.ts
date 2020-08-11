@@ -10,7 +10,7 @@ import {alice, bob} from './participants';
 import {fixture, overwriteOutcome} from './utils';
 
 const defaultVars: StateVariables = {
-  appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  appData: '0x',
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([

@@ -1,16 +1,13 @@
 import {Either, left, right, chain, map} from 'fp-ts/lib/Either';
-import {SignedStateWithHash, StateVariables, Outcome} from '@statechannels/wallet-core';
+import {StateVariables, Outcome} from '@statechannels/wallet-core';
 import {pipe} from 'fp-ts/lib/function';
 import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState, signState} from '../protocols/actions';
-import {ChannelState} from '../protocols/state';
+import {ChannelState, ChannelStateWithSupported} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 
-type ChannelStateWithSupported = ChannelState & {
-  supported: SignedStateWithHash;
-  latestSignedByMe: SignedStateWithHash;
-};
+import {hasSupportedState, isMyTurn} from './helpers';
 
 type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
 type UpdateChannelResult = Either<UpdateChannelError, SignState>;
@@ -39,8 +36,6 @@ export class UpdateChannelError extends WalletError {
   }
 }
 
-const hasSupportedState = (cs: ChannelState): cs is ChannelStateWithSupported => !!cs.supported;
-
 // The helper functions should be factored out, tested, and reusable
 const ensureSupportedStateExists = (
   cs: ChannelState
@@ -49,9 +44,8 @@ const ensureSupportedStateExists = (
     ? right(cs)
     : left(new UpdateChannelError(UpdateChannelError.reasons.invalidLatestState));
 
-function isMyTurn(cs: ChannelStateWithSupported): StepResult {
-  if ((cs.supported.turnNum + 1) % cs.supported.participants.length === cs.myIndex)
-    return right(cs);
+function ensureItIsMyTurn(cs: ChannelStateWithSupported): StepResult {
+  if (isMyTurn(cs)) return right(cs);
   return left(new UpdateChannelError(UpdateChannelError.reasons.notMyTurn));
 }
 
@@ -82,7 +76,7 @@ export function updateChannel(
     channelState,
     ensureSupportedStateExists,
     chain(hasRunningTurnNumber),
-    chain(isMyTurn),
+    chain(ensureItIsMyTurn),
     map(incrementTurnNumber(args)),
     map(signStateVars)
   );

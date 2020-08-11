@@ -8,6 +8,7 @@ import knexPayer from '../src/db/connection';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {truncate} from '../src/db-admin/db-admin-connection';
+import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import {
   ReceiverServer,
@@ -41,17 +42,14 @@ async function seedTestChannels(
 ): Promise<string[]> {
   const channelIds: string[] = [];
   for (let i = 0; i < numOfChannels; i++) {
-    const seed = withSupportedState(
-      {turnNum: 3},
-      {
-        channelNonce: i,
-        participants: [payer, receiver],
-      },
-      [
-        SigningWallet.fromJson({privateKey: payerPrivateKey}),
-        SigningWallet.fromJson({privateKey: receiverPrivateKey}),
-      ]
-    )();
+    const seed = withSupportedState([
+      SigningWallet.fromJson({privateKey: payerPrivateKey}),
+      SigningWallet.fromJson({privateKey: receiverPrivateKey}),
+    ])({
+      vars: [stateVars({turnNum: 3})],
+      channelNonce: i,
+      participants: [payer, receiver],
+    });
     await Channel.bindKnex(knexPayer)
       .query()
       .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default

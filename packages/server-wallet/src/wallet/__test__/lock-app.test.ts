@@ -12,7 +12,7 @@ import {stateVars} from './fixtures/state-vars';
 
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
-  const c = withSupportedState(stateVars({turnNum: 5}))();
+  const c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
   await Channel.query().insert(c);
 
   const {channelId, latest} = c;
@@ -44,7 +44,7 @@ describe('concurrency', () => {
 
   beforeEach(async () => {
     await seedAlicesSigningWallet(knex);
-    c = withSupportedState(stateVars({turnNum: 5}))();
+    c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
     await Channel.query().insert(c);
     channelId = c.channelId;
 
@@ -85,7 +85,7 @@ describe('concurrency', () => {
   });
 
   // It takes ~5s to insert ten states
-  const MANY_INSERTS_TIMEOUT = 10_000;
+  const MANY_INSERTS_TIMEOUT = 20_000;
   it(
     'works when run concurrently with different channels',
     async () => {
@@ -94,7 +94,7 @@ describe('concurrency', () => {
       numAttempts = 10;
       const channelIds = await Promise.all(
         _.range(numAttempts).map(async channelNonce => {
-          const c = withSupportedState(stateVars({turnNum: 5}), {channelNonce})();
+          const c = withSupportedState()({vars: [stateVars({turnNum: 5})], channelNonce});
           await Channel.query().insert(c);
           return c.channelId;
         })
