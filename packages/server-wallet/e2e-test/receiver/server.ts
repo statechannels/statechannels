@@ -1,8 +1,7 @@
 import {configureEnvVariables} from '@statechannels/devtools';
+configureEnvVariables();
 
 import app from './app';
-
-configureEnvVariables();
 
 app.listen(65535, '127.0.0.1');
 
