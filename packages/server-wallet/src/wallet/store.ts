@@ -45,12 +45,17 @@ export const Store = {
     };
   },
 
-  getOrCreateSigningAddress: async function(): Promise<string> {
+  getOrCreateSigningAddress: async function(_tx: Transaction): Promise<string> {
     let signingWallet = await SigningWallet.query().first();
     if (!signingWallet) {
       const randomWallet = ethers.Wallet.createRandom();
+      // returning('*') only works with Postgres
+      // https://vincit.github.io/objection.js/recipes/returning-tricks.html
       signingWallet = await SigningWallet.query()
-        .insert({privateKey: randomWallet.privateKey, address: randomWallet.address})
+        .insert({
+          privateKey: randomWallet.privateKey,
+          address: randomWallet.address,
+        })
         .returning('*');
     }
     return signingWallet.address;
