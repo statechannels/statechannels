@@ -45,10 +45,8 @@ function ensureItIsMyTurn(cs: ChannelStateWithSupported): StepResult {
   return left(new CloseChannelError(CloseChannelError.reasons.notMyTurn));
 }
 
-export function closeChannel(
-  {channelId}: CloseChannelHandlerParams,
-  channelState: ChannelState
-): HandlerResult {
+export function closeChannel(channelState: ChannelState): HandlerResult {
+  const {channelId} = channelState;
   const signStateAction = (sv: StateVariables): SignState =>
     signState({...sv, channelId, isFinal: true, turnNum: sv.turnNum + 1});
 

@@ -140,7 +140,7 @@ export class Wallet implements WalletInterface {
       );
     };
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
-      const nextState = getOrThrow(CloseChannel.closeChannel({channelId}, channel));
+      const nextState = getOrThrow(CloseChannel.closeChannel(channel));
       const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
 
       return {outbox: outgoing.map(n => n.notice), channelResult};

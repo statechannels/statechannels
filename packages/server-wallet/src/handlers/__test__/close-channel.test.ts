@@ -9,8 +9,7 @@ expect.extend(matchers);
 
 test('validClose', () => {
   const cs = channelStateFixture();
-  const {channelId} = cs;
-  expect(closeChannel({channelId}, cs)).toMatchRight(
+  expect(closeChannel(cs)).toMatchRight(
     signStateFixture({isFinal: true, turnNum: cs.supported.turnNum + 1})
   );
 });
@@ -18,11 +17,13 @@ test('validClose', () => {
 const notMyTurnErr = new CloseChannelError(CloseChannelError.reasons.notMyTurn);
 const noSupportedStateErr = new CloseChannelError(CloseChannelError.reasons.noSupportedState);
 
-const noSupportedState: ChannelState = {...channelStateFixture(), supported: undefined};
+const noSupportedState: ChannelState = channelStateFixture({supported: undefined});
+const evenTurnedSupportedState = channelStateFixture({supported: {turnNum: 4}});
+
 test.each`
-  channelState                                      | result
-  ${noSupportedState}                               | ${noSupportedStateErr}
-  ${channelStateFixture({supported: {turnNum: 4}})} | ${notMyTurnErr}
-`('error cases $result', ({channelState, result}) => {
-  expect(closeChannel({channelId: channelState.channelId}, channelState)).toEqualLeft(result);
+  channelState                | error
+  ${noSupportedState}         | ${noSupportedStateErr}
+  ${evenTurnedSupportedState} | ${notMyTurnErr}
+`('error cases $result', ({channelState, error}) => {
+  expect(closeChannel(channelState)).toEqualLeft(error);
 });
