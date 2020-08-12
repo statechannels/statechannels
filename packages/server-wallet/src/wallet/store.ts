@@ -29,6 +29,13 @@ import {Bytes32} from '../type-aliases';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
+class UniqueViolationError extends Error {
+  columns: string[] = [];
+}
+
+function isUniqueViolationError(error: any): error is UniqueViolationError {
+  return error?.name === 'UniqueViolationError' && error?.columns[0] === 'one_row_constraint';
+}
 
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
@@ -45,27 +52,25 @@ export const Store = {
     };
   },
 
-  getOrCreateSigningAddress: async function(tx: Transaction): Promise<string> {
-    // needed to avoid the race condition that would insert 2 private keys into an empty table:
-    // 1. tx1 queries an empty table.
-    // 2. tx2 queries an empty table.
-    // 3. tx1 inserts a new private key.
-    // 4. tx2 inserts a new private key.
-    // Default Postgres isolation level is Read Committed
-    await tx.raw('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
-    let signingWallet = await SigningWallet.query(tx).first();
-    if (!signingWallet) {
-      const randomWallet = ethers.Wallet.createRandom();
+  getOrCreateSigningAddress: async function(): Promise<string> {
+    const randomWallet = ethers.Wallet.createRandom();
+    // signing_wallets table allows for only one row via database constraints
+    try {
       // returning('*') only works with Postgres
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
-      signingWallet = await SigningWallet.query(tx)
+      const signingWallet = await SigningWallet.query()
         .insert({
           privateKey: randomWallet.privateKey,
           address: randomWallet.address,
         })
         .returning('*');
+      return signingWallet.address;
+    } catch (error) {
+      if (isUniqueViolationError(error)) {
+        return (await SigningWallet.query().first()).address;
+      }
+      throw error;
     }
-    return signingWallet.address;
   },
 
   /**
