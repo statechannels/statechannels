@@ -18,7 +18,7 @@ interface ServerWalletConfig {
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
-const config: ServerWalletConfig = {
+const config = {
   nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
   postgresDatabaseUrl: process.env.SERVER_URL,
   postgresHost: process.env.SERVER_HOST,
@@ -41,4 +41,11 @@ if (['test', 'development', 'production'].indexOf(config.nodeEnv) === -1) {
   throw new Error(`Invalid NODE_ENV: ${config.nodeEnv}`);
 }
 
-export default config;
+function validate(config: ServerWalletConfig): ServerWalletConfig {
+  if (!config.postgresDBUser) throw 'Unknown postgres user';
+  return config;
+}
+
+const validated = validate(config);
+
+export default validated;
