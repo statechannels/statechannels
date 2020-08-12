@@ -34,7 +34,7 @@ class UniqueViolationError extends Error {
 }
 
 function isUniqueViolationError(error: any): error is UniqueViolationError {
-  return error?.name === 'UniqueViolationError' && error?.columns[0] === 'one_row_constraint';
+  return error?.name === 'UniqueViolationError' && error?.columns[0] === 'enforce_one_row';
 }
 
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
