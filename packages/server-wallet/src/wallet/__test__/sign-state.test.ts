@@ -1,4 +1,5 @@
 import Objection from 'objection';
+import {signState} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -7,7 +8,7 @@ import knex from '../../db/connection';
 import {Channel} from '../../models/channel';
 
 import {stateWithHashSignedBy} from './fixtures/states';
-import {bob} from './fixtures/signing-wallets';
+import {bob, alice} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
@@ -29,7 +30,7 @@ describe('signState', () => {
   it('signs the state, returning outgoing messages and a channelResult', async () => {
     await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
-
+    const signature = signState({...c.vars[0], ...c.channelConstants}, alice().privateKey);
     const result = await Store.signState(c.channelId, c.vars[0], tx);
     expect(result).toMatchObject({
       outgoing: [
@@ -37,7 +38,11 @@ describe('signState', () => {
           type: 'NotifyApp',
           notice: {
             method: 'MessageQueued',
-            params: {data: {signedStates: [{...c.vars[0], signatures: expect.any(Object)}]}},
+            params: {
+              data: {
+                signedStates: [{...c.vars[0], signatures: [{signature, signer: alice().address}]}],
+              },
+            },
           },
         },
       ],
