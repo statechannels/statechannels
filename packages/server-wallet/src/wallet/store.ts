@@ -12,6 +12,7 @@ import {
   ChannelConstants,
   Participant,
   makeDestination,
+  getSignerAddress,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -241,8 +242,12 @@ function validateSignatures(signedState: SignedState): void {
   const {participants} = signedState;
 
   signedState.signatures.map(sig => {
-    const signerIndex = participants.findIndex(p => p.signingAddress === sig.signer);
-    if (signerIndex === -1) {
+    const signerAddress = getSignerAddress(signedState, sig.signature);
+    // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
+    const validSignature =
+      participants.find(p => p.signingAddress === signerAddress) && sig.signer === signerAddress;
+
+    if (!validSignature) {
       throw new StoreError(StoreError.reasons.invalidSignature, {signedState, signature: sig});
     }
   });
