@@ -56,7 +56,6 @@
     "src/**/*.ts": "eslint --max-warnings=0"
   },
   "main": "lib/src/wallet/index.js",
-  "types": "lib/src/wallet/index.d.ts",
   "private": true,
   "resolutions": {
     "broccoli": "3.3.3",
@@ -86,5 +85,6 @@
     "test:ci": "yarn test --bail",
     "test:e2e": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
     "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
-  }
+  },
+  "types": "lib/src/wallet/index.d.ts"
 }
