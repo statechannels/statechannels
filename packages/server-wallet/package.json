@@ -55,8 +55,7 @@
   "lint-staged": {
     "src/**/*.ts": "eslint --max-warnings=0"
   },
-  "main": "lib/src/wallet/index.js",
-  "types": "lib/src/wallet/index.d.ts",
+  "main": "src/wallet/index.ts",
   "private": true,
   "resolutions": {
     "broccoli": "3.3.3",
