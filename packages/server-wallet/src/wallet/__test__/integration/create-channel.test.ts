@@ -49,6 +49,19 @@ describe('happy path', () => {
       supported: undefined,
     });
   });
+
+  it('creates many channels', async () => {
+    expect(await Channel.query().resultSize()).toEqual(0);
+
+    const createArgs = createChannelArgs({appData: '0xaf00'});
+    const NUM_CHANNELS = 10;
+    const createPromises = Array(NUM_CHANNELS)
+      .fill(createArgs)
+      .map(w.createChannel);
+    await expect(Promise.all(createPromises)).resolves.not.toThrow();
+
+    expect(await Channel.query().resultSize()).toEqual(NUM_CHANNELS);
+  }, 10_000);
 });
 
 it("doesn't create a channel if it doesn't have a signing wallet", () =>
