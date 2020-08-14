@@ -27,6 +27,7 @@ import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
+import {isValidTransition} from '../transition-validator';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -170,7 +171,9 @@ export const Store = {
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
 
     const channel = await getOrCreateChannel(signedState, signingAddress, tx);
-
+    if (channel.supported && !isValidTransition(channel.supported, signedState)) {
+      throw new StoreError('Invalid state transition', {from: channel.supported, to: signedState});
+    }
     let channelVars = channel.vars;
 
     channelVars = addState(channelVars, signedState);
@@ -200,6 +203,7 @@ class StoreError extends WalletError {
     notInChannel: 'Not in channel',
     staleState: 'Stale state',
     missingSigningKey: 'Missing a signing key',
+    invalidTransition: 'Invalid state transition',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
