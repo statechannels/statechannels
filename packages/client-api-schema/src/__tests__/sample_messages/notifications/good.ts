@@ -78,7 +78,6 @@ const message = {
     signedState: {
       signature: {
         r: '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c4',
-        recoveryParam: 1,
         s: '0x6ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d507',
         v: 28
       },

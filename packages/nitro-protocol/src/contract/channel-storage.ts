@@ -1,5 +1,7 @@
 import {constants, utils} from 'ethers';
 
+import * as hashing from '../hashing';
+
 import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
 import {Address, Bytes, Bytes32, Uint48} from './types';
@@ -34,7 +36,7 @@ const CHANNEL_DATA_LITE_TYPE = `tuple(
 
 export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
-  const hash = utils.keccak256(encodeChannelData(channelData));
+  const hash = hashing.hash(encodeChannelData(channelData));
   const fingerprint = utils.hexDataSlice(hash, 12);
 
   const storage =

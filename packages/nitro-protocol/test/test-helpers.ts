@@ -13,6 +13,7 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
+import {hash} from '../src/hashing';
 
 // Interfaces
 
@@ -170,7 +171,7 @@ export function randomChannelId(channelNonce = 0) {
     participants[i] = ethers.Wallet.createRandom().address;
   }
   // Compute channelId
-  const channelId = utils.keccak256(
+  const channelId = hash(
     utils.defaultAbiCoder.encode(
       ['uint256', 'address[]', 'uint256'],
       [1234, participants, channelNonce]

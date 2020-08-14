@@ -1,5 +1,7 @@
 import {utils} from 'ethers';
 
+import {hash} from '../hashing';
+
 import {Channel, getChannelId} from './channel';
 import {encodeOutcome, hashOutcome, Outcome} from './outcome';
 import {Address, Bytes32, Uint256, Uint48} from './types';
@@ -37,7 +39,7 @@ export function getVariablePart(state: State): VariablePart {
 
 export function hashAppPart(state: State): Bytes32 {
   const {challengeDuration, appDefinition, appData} = state;
-  return utils.keccak256(
+  return hash(
     utils.defaultAbiCoder.encode(
       ['uint256', 'address', 'bytes'],
       [challengeDuration, appDefinition, appData]
@@ -51,7 +53,7 @@ export function hashState(state: State): Bytes32 {
   const appPartHash = hashAppPart(state);
   const outcomeHash = hashOutcome(state.outcome);
 
-  return utils.keccak256(
+  return hash(
     utils.defaultAbiCoder.encode(
       [
         'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',

@@ -1,5 +1,7 @@
 import {utils} from 'ethers';
 
+import {hash} from '../hashing';
+
 import {Address, Bytes, Bytes32, Uint256} from './types';
 
 export enum AssetOutcomeType {
@@ -117,7 +119,7 @@ export function decodeOutcomeItem(
 
 // Asset outcome functions
 export function hashAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
-  return utils.keccak256(encodeAssetOutcome(allocationOrGuarantee));
+  return hash(encodeAssetOutcome(allocationOrGuarantee));
 }
 export function encodeAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
   let encodedData;
@@ -140,7 +142,7 @@ export type Outcome = AssetOutcome[];
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
-  return utils.keccak256(utils.defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
+  return hash(utils.defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
 }
 
 export function decodeOutcome(encodedOutcome: Bytes): Outcome {

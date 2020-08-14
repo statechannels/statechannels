@@ -23,11 +23,11 @@ describe('signatures', () => {
       const signedState = signState(state, wallet.privateKey);
 
       const hashedState = hashState(state);
-      const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+      const {r, s, v} = splitSignature(await wallet.signMessage(arrayify(hashedState)));
 
       expect(signedState).toMatchObject({
         state,
-        signature,
+        signature: {r, s, v},
       });
 
       expect(getStateSignerAddress(signedState)).toEqual(wallet.address);

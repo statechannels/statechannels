@@ -1,9 +1,9 @@
 import {ethers, Wallet, utils} from 'ethers';
+import {hashPersonalMessage, ecsign} from 'ethereumjs-util';
 
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
-
 // This is the same as the ethers Signature type
 // But we redefine it here to prevent the below issue
 // for consumers of this package:
@@ -11,7 +11,7 @@ import {hashState, State} from './contract/state';
 export interface Signature {
   r: string;
   s: string;
-  recoveryParam?: number;
+
   v?: number;
 }
 
@@ -82,6 +82,13 @@ export function signChallengeMessage(
 }
 
 function signData(hashedData: string, privateKey: string): utils.Signature {
-  const signingKey = new utils.SigningKey(privateKey);
-  return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
+  const signature = ecsign(
+    hashPersonalMessage(Buffer.from(hashedData.substr(2), 'hex')),
+    Buffer.from(privateKey.substr(2), 'hex')
+  );
+  return {
+    r: `0x${signature.r.toString('hex')}`,
+    s: `0x${signature.s.toString('hex')}`,
+    v: signature.v,
+  };
 }
