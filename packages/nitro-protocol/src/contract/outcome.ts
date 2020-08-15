@@ -1,8 +1,9 @@
-import {utils} from 'ethers';
+// import {utils} from 'ethers';
 
 import {hash} from '../hashing';
 
 import {Address, Bytes, Bytes32, Uint256} from './types';
+import {encode, decode} from './abi';
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
@@ -16,14 +17,14 @@ export interface Guarantee {
 }
 
 export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
-  return utils.defaultAbiCoder.encode(
+  return encode(
     ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
     [[guarantee.targetChannelId, guarantee.destinations]]
   );
 }
 
 export function decodeGuarantee(encodedGuarantee: Bytes): Guarantee {
-  const {targetChannelId, destinations} = utils.defaultAbiCoder.decode(
+  const {targetChannelId, destinations} = decode(
     ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
     encodedGuarantee
   )[0];
@@ -45,14 +46,11 @@ export interface AllocationItem {
 }
 
 export function encodeAllocation(allocation: Allocation): Bytes32 {
-  return utils.defaultAbiCoder.encode(
-    ['tuple(bytes32 destination, uint256 amount)[]'],
-    [allocation]
-  );
+  return encode(['tuple(bytes32 destination, uint256 amount)[]'], [allocation]);
 }
 
 export function decodeAllocation(encodedAllocation: Bytes): Allocation {
-  const allocationItems = utils.defaultAbiCoder.decode(
+  const allocationItems = decode(
     ['tuple(bytes32 destination, uint256 amount)[]'],
     encodedAllocation
   )[0];
@@ -93,7 +91,7 @@ export function encodeAssetOutcomeFromBytes(
   assetOutcomeType: AssetOutcomeType,
   encodedAllocationOrGuarantee: Bytes
 ): Bytes32 {
-  return utils.defaultAbiCoder.encode(
+  return encode(
     ['tuple(uint8 assetOutcomeType, bytes allocationOrGuarantee)'],
     [{assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}]
   );
@@ -103,7 +101,7 @@ export function decodeOutcomeItem(
   encodedAssetOutcome: Bytes,
   assetHolderAddress: string
 ): AssetOutcome {
-  const {outcomeType, allocationOrGuarantee} = utils.defaultAbiCoder.decode(
+  const {outcomeType, allocationOrGuarantee} = decode(
     ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
     encodedAssetOutcome
   )[0];
@@ -142,11 +140,11 @@ export type Outcome = AssetOutcome[];
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
-  return hash(utils.defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
+  return hash(encode(['bytes'], [encodedOutcome]));
 }
 
 export function decodeOutcome(encodedOutcome: Bytes): Outcome {
-  const assetOutcomes = utils.defaultAbiCoder.decode(
+  const assetOutcomes = decode(
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
     encodedOutcome
   )[0];
@@ -171,7 +169,7 @@ export function encodeOutcome(outcome: Outcome): Bytes32 {
     };
   });
 
-  return utils.defaultAbiCoder.encode(
+  return encode(
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
     [encodedAssetOutcomes]
   );

@@ -50,10 +50,12 @@ export function hashAppPart(state: State): Bytes32 {
 export function hashState(state: State): Bytes32 {
   const {turnNum, isFinal} = state;
   const channelId = getChannelId(state.channel);
+
   const appPartHash = hashAppPart(state);
+
   const outcomeHash = hashOutcome(state.outcome);
 
-  return hash(
+  const encoded = hash(
     utils.defaultAbiCoder.encode(
       [
         'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
@@ -61,4 +63,6 @@ export function hashState(state: State): Bytes32 {
       [{turnNum, isFinal, channelId, appPartHash, outcomeHash}]
     )
   );
+
+  return encoded;
 }

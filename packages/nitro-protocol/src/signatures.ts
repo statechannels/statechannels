@@ -1,9 +1,14 @@
-import {ethers, Wallet, utils} from 'ethers';
-import {hashPersonalMessage, ecsign} from 'ethereumjs-util';
+import {Wallet, utils, ethers} from 'ethers';
+import {instantiateSecp256k1, Secp256k1} from '@bitauth/libauth';
+import {keccak256} from 'ethers/utils';
 
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
+
+let secp256k1: Secp256k1;
+export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
+
 // This is the same as the ethers Signature type
 // But we redefine it here to prevent the below issue
 // for consumers of this package:
@@ -17,7 +22,7 @@ export interface Signature {
 
 export interface SignedState {
   state: State;
-  signature: Signature;
+  signature: string;
 }
 
 export function getStateSignerAddress(signedState: SignedState): string {
@@ -37,10 +42,10 @@ export function getStateSignerAddress(signedState: SignedState): string {
 }
 
 export function signState(state: State, privateKey: string): SignedState {
-  const wallet = new Wallet(privateKey);
-  if (state.channel.participants.indexOf(wallet.address) < 0) {
-    throw new Error("The state must be signed with a participant's private key");
-  }
+  // const wallet = new Wallet(privateKey);
+  // if (state.channel.participants.indexOf(wallet.address) < 0) {
+  //   throw new Error("The state must be signed with a participant's private key");
+  // }
 
   const hashedState = hashState(state);
 
@@ -64,10 +69,7 @@ export async function signStates(
   return Promise.all(promises);
 }
 
-export function signChallengeMessage(
-  signedStates: SignedState[],
-  privateKey: string
-): utils.Signature {
+export function signChallengeMessage(signedStates: SignedState[], privateKey: string): string {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
@@ -81,14 +83,14 @@ export function signChallengeMessage(
   return signData(challengeHash, privateKey);
 }
 
-function signData(hashedData: string, privateKey: string): utils.Signature {
-  const signature = ecsign(
-    hashPersonalMessage(Buffer.from(hashedData.substr(2), 'hex')),
-    Buffer.from(privateKey.substr(2), 'hex')
+export function signData(hashedData: string, privateKey: string): string {
+  if (!secp256k1) throw 'secp256k1 uninitialized';
+
+  const digest = Buffer.from(keccak256(hashedData), 'hex');
+  const signature = secp256k1.signMessageHashCompact(
+    Buffer.from(privateKey.substr(2), 'hex'),
+    digest
   );
-  return {
-    r: `0x${signature.r.toString('hex')}`,
-    s: `0x${signature.s.toString('hex')}`,
-    v: signature.v,
-  };
+
+  return '0x' + Buffer.from(signature).toString('hex');
 }

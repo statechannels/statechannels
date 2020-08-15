@@ -1,6 +1,6 @@
-import {utils} from 'ethers';
-
 import {Address, Bytes32, Uint256, Uint48} from './types';
+import {encode} from './abi';
+import {keccak256} from './keccak';
 
 export interface Channel {
   channelNonce: Uint48;
@@ -10,10 +10,10 @@ export interface Channel {
 
 export function getChannelId(channel: Channel): Bytes32 {
   const {chainId, participants, channelNonce} = channel;
-  return utils.keccak256(
-    utils.defaultAbiCoder.encode(
-      ['uint256', 'address[]', 'uint256'],
-      [chainId, participants, channelNonce]
-    )
+  const encoded = encode(
+    ['uint256', 'address[]', 'uint256'],
+    [chainId, participants, channelNonce]
   );
+
+  return keccak256(encoded);
 }

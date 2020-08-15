@@ -1,12 +1,26 @@
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
+import {arrayify, splitSignature, verifyMessage, SigningKey} from 'ethers/utils';
 
 import {hashChallengeMessage} from '../../src/contract/challenge';
 import {hashState, State} from '../../src/contract/state';
-import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
+import {
+  getStateSignerAddress,
+  signChallengeMessage,
+  signState,
+  initialized,
+  signData,
+} from '../../src/signatures';
+beforeAll(async () => initialized);
 
 describe('signatures', () => {
+  describe('signData', () => {
+    const privateKey = '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8';
+    it.only('works', async () => {
+      expect(signData('0xf00', privateKey)).toEqual(new SigningKey(privateKey).signDigest('0xf00'));
+    });
+  });
+
   describe('signState', () => {
     it('signs a state', async () => {
       const wallet = Wallet.createRandom();

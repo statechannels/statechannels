@@ -75,6 +75,7 @@ export {
   signChallengeMessage,
   signStates,
   SignedState,
+  initialized,
 } from './signatures';
 
 import * as Signatures from './signatures';
