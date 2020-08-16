@@ -2,8 +2,6 @@ import {AddressZero, HashZero} from 'ethers/constants';
 import {Wallet} from 'ethers';
 
 import {initialized, signState} from './signatures';
-import {getChannelId} from './contract/channel';
-import {hashState} from './contract/state';
 
 const {address, privateKey} = Wallet.createRandom();
 
