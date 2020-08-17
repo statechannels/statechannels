@@ -22,6 +22,7 @@ describe('directly funded app', () => {
   it('signs the prefund setup ', async () => {
     const appData = '0xf00';
     const preFS = {turnNum: 0, appData};
+    const postFS = {turnNum: 3, appData};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
     await Channel.query().insert(c);
 
@@ -30,12 +31,15 @@ describe('directly funded app', () => {
     expect(current.protocolState).toMatchObject({latest: preFS, supported: undefined});
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
-      outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}}],
+      outbox: [
+        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}},
+        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [postFS]}}},
+      ],
       // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
     });
 
     const updated = await Channel.forId(channelId, undefined);
-    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
+    expect(updated.protocolState).toMatchObject({latest: postFS, supported: preFS});
   });
 
   it('signs the prefund setup and postfund setup, when there are no deposits to make', async () => {
