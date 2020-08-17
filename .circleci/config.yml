@@ -12,7 +12,7 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: geoknee/statechannels:node12.16-solc0.6.2 # Fast contract compilation with solc installed
+    - image: geoknee/statechannels:node12.18-solc0.6.9 # Fast contract compilation with solc installed
     - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
       environment:
         POSTGRES_USER: root
