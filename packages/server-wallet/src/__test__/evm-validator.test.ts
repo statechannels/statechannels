@@ -5,7 +5,7 @@ import knex from '../db/connection';
 import {AppBytecode} from '../models/app-bytecode';
 import {CHAIN_ID} from '../wallet/constants';
 import {createState} from '../wallet/__test__/fixtures/states';
-import {isValidTransition} from '../transition-validator';
+import {validateTransitionWithEVM} from '../evm-validator';
 
 const COUNTING_APP_DEFINITION = '0xfffffffffffffffffffffffffffffffffffffffff';
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
@@ -26,7 +26,7 @@ it('returns true for a valid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
   });
-  expect(await isValidTransition(fromState, toState)).toBe(true);
+  expect(await validateTransitionWithEVM(fromState, toState)).toBe(true);
 });
 
 it('returns false for an invalid transition', async () => {
@@ -40,7 +40,7 @@ it('returns false for an invalid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
   });
-  expect(await isValidTransition(fromState, toState)).toBe(false);
+  expect(await validateTransitionWithEVM(fromState, toState)).toBe(false);
 });
 
 it('skips validating when no byte code exists for the app definition', async () => {
@@ -51,5 +51,5 @@ it('skips validating when no byte code exists for the app definition', async () 
   const state = createState({
     appDefinition: UNDEFINED_APP_DEFINITION,
   });
-  expect(await isValidTransition(state, state)).toBe(true);
+  expect(await validateTransitionWithEVM(state, state)).toBe(true);
 });

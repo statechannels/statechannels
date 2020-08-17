@@ -7,7 +7,14 @@ import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
 import {CHAIN_ID} from './wallet/constants';
 
-export const isValidTransition = async (from: State, to: State): Promise<boolean> => {
+/**
+ * Takes two states and runs the validateTransition in an evm (pureevm) if the bytecode exists in the DB.
+ * Returns a promise that resolves to true if the validateTransition returns true false otherwise
+ */
+export const validateTransitionWithEVM = async (
+  from: State,
+  to: State
+): Promise<boolean | undefined> => {
   if (from.appDefinition !== to.appDefinition) {
     throw new Error('States are using different appDefinitions');
   }
@@ -20,6 +27,7 @@ export const isValidTransition = async (from: State, to: State): Promise<boolean
   }
 
   const {data} = await createValidTransitionTransaction(toNitroState(from), toNitroState(to));
+
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),
     Uint8Array.from(Buffer.from(data ? data.toString().substr(2) : '0x0', 'hex'))

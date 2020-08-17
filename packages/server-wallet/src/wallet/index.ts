@@ -60,7 +60,17 @@ export type WalletInterface = {
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
 };
 
+export interface WalletOptions {
+  skipEVMValidation: boolean;
+}
+
 export class Wallet implements WalletInterface {
+  options: WalletOptions = {
+    skipEVMValidation: false,
+  };
+  constructor(options?: Partial<WalletOptions>) {
+    this.options = {...this.options, ...options};
+  }
   public async getParticipant(): Promise<Participant | undefined> {
     let participant: Participant | undefined = undefined;
 
@@ -104,7 +114,8 @@ export class Wallet implements WalletInterface {
       const {outgoing, channelResult} = await Store.signState(
         channelId,
         {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
-        tx
+        tx,
+        this.options.skipEVMValidation
       );
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
@@ -199,7 +210,7 @@ export class Wallet implements WalletInterface {
 
   async pushMessage(message: Message): MultipleChannelResult {
     const channelIds = await Channel.transaction(async tx => {
-      return await Store.pushMessage(message, tx);
+      return await Store.pushMessage(message, tx, this.options.skipEVMValidation);
     });
 
     const {channelResults, outbox} = await takeActions(channelIds);
