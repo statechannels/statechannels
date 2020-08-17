@@ -4,6 +4,7 @@ import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
+import config from '../config';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -40,7 +41,7 @@ export class SigningWallet extends Model {
   signState(state: State): SignatureEntry {
     return {
       signer: this.address,
-      signature: signState(state, this.privateKey),
+      signature: config.signStates ? signState(state, this.privateKey) : '0x',
     };
   }
 }

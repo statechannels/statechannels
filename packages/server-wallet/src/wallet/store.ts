@@ -13,6 +13,7 @@ import {
   Participant,
   makeDestination,
   getSignerAddress,
+  SignatureEntry,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -27,6 +28,7 @@ import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
+import config from '../config';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -239,19 +241,31 @@ async function getSigningWallet(signedState: SignedState, tx: Transaction): Prom
  */
 
 function validateSignatures(signedState: SignedState): void {
-  const {participants} = signedState;
-
-  signedState.signatures.map(sig => {
-    const signerAddress = getSignerAddress(signedState, sig.signature);
-    // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
-    const validSignature =
-      participants.find(p => p.signingAddress === signerAddress) && sig.signer === signerAddress;
-
-    if (!validSignature) {
-      throw new StoreError(StoreError.reasons.invalidSignature, {signedState, signature: sig});
-    }
-  });
+  const validator = config.signStates ? validateSignature : unsafeValidateSignature;
+  signedState.signatures.map(validator(signedState));
 }
+
+const unsafeValidateSignature = (signedState: SignedState) => (sig: SignatureEntry): void => {
+  const {participants} = signedState;
+  // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
+  const validSignature = participants.find(p => p.signingAddress === sig.signer);
+
+  if (!validSignature) {
+    throw new StoreError(StoreError.reasons.invalidSignature, {signedState, signature: sig});
+  }
+};
+
+const validateSignature = (signedState: SignedState) => (sig: SignatureEntry): void => {
+  const signerAddress = getSignerAddress(signedState, sig.signature);
+  const {participants} = signedState;
+  // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
+  const validSignature =
+    participants.find(p => p.signingAddress === signerAddress) && sig.signer === signerAddress;
+
+  if (!validSignature) {
+    throw new StoreError(StoreError.reasons.invalidSignature, {signedState, signature: sig});
+  }
+};
 
 function validateStateFreshness(signedState: State, channel: Channel): void {
   if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {

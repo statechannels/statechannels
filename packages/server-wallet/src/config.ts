@@ -15,6 +15,7 @@ interface ServerWalletConfig {
   chainNetworkID?: string;
   ethAssetHolderAddress?: string;
   debugKnex?: string;
+  signStates: boolean;
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -35,6 +36,7 @@ const config: ServerWalletConfig = {
   chainNetworkID: process.env.CHAIN_NETWORK_ID,
   ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
   debugKnex: process.env.DEBUG_KNEX,
+  signStates: process.env.SIGN_STATES == 'TRUE',
 };
 
 if (['test', 'development', 'production'].indexOf(config.nodeEnv) === -1) {
