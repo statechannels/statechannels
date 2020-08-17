@@ -68,8 +68,11 @@ export class Wallet implements WalletInterface {
   options: WalletOptions = {
     skipEVMValidation: false,
   };
+
   constructor(options?: Partial<WalletOptions>) {
-    this.options = {...this.options, ...options};
+    if (options) {
+      this.options = {...this.options, ...options};
+    }
   }
   public async getParticipant(): Promise<Participant | undefined> {
     let participant: Participant | undefined = undefined;
@@ -115,7 +118,7 @@ export class Wallet implements WalletInterface {
         channelId,
         {...channelConstants, turnNum: 0, isFinal: false, appData, outcome},
         tx,
-        this.options.skipEVMValidation
+        this && this.options.skipEVMValidation
       );
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
