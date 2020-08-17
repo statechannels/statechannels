@@ -22,7 +22,12 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
 
   const currentFunding = funding(allocation.assetHolderAddress);
   const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-  return BN.gte(currentFunding, targetFunding) ? true : false;
+  const funded = BN.gte(currentFunding, targetFunding) ? true : false;
+  // todo: remove this hardcoding. Tracked by https://github.com/statechannels/the-graph/issues/80
+  // This hardcoding is in place due to:
+  // - https://github.com/statechannels/the-graph/issues/74 needs to be implemented.
+  // - Once the api above is implemented, it should be called by the application, the chain watcher, or maybe even another wallet.
+  return true || funded;
 };
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
