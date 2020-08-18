@@ -5,7 +5,7 @@ import {utils} from 'ethers';
 
 import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
-import {CHAIN_ID} from './wallet/constants';
+import config from './config';
 
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm) if the bytecode exists in the DB.
@@ -18,10 +18,14 @@ export const validateTransitionWithEVM = async (
   if (from.appDefinition !== to.appDefinition) {
     throw new Error('States are using different appDefinitions');
   }
-  const bytecode = await AppBytecode.getBytecode(CHAIN_ID, from.appDefinition, undefined);
+  const bytecode = await AppBytecode.getBytecode(
+    config.chainNetworkID,
+    from.appDefinition,
+    undefined
+  );
   if (!bytecode) {
     logger.warn(
-      `No bytecode found for appDefinition ${from.appDefinition} and chain id ${CHAIN_ID}. Skipping valid transition check`
+      `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
     );
     return true;
   }

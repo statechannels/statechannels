@@ -3,7 +3,7 @@ import {utils} from 'ethers';
 import {appBytecode} from '../models/__test__/fixtures/app-bytecode';
 import knex from '../db/connection';
 import {AppBytecode} from '../models/app-bytecode';
-import {CHAIN_ID} from '../wallet/constants';
+import config from '../config';
 import {createState} from '../wallet/__test__/fixtures/states';
 import {validateTransitionWithEVM} from '../evm-validator';
 
@@ -17,7 +17,9 @@ beforeEach(async () => {
 
 it('returns true for a valid transition', async () => {
   // Sanity check that we're validating with byte code
-  expect(await AppBytecode.getBytecode(CHAIN_ID, COUNTING_APP_DEFINITION, undefined)).toBeDefined();
+  expect(
+    await AppBytecode.getBytecode(config.chainNetworkID, COUNTING_APP_DEFINITION, undefined)
+  ).toBeDefined();
   const fromState = createState({
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
@@ -31,7 +33,9 @@ it('returns true for a valid transition', async () => {
 
 it('returns false for an invalid transition', async () => {
   // Sanity check that we're validating with byte code
-  expect(await AppBytecode.getBytecode(CHAIN_ID, COUNTING_APP_DEFINITION, undefined)).toBeDefined();
+  expect(
+    await AppBytecode.getBytecode(config.chainNetworkID, COUNTING_APP_DEFINITION, undefined)
+  ).toBeDefined();
   const fromState = createState({
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
@@ -46,7 +50,7 @@ it('returns false for an invalid transition', async () => {
 it('skips validating when no byte code exists for the app definition', async () => {
   // Sanity check that the bytecode doesn't exist
   expect(
-    await AppBytecode.getBytecode(CHAIN_ID, UNDEFINED_APP_DEFINITION, undefined)
+    await AppBytecode.getBytecode(config.chainNetworkID, UNDEFINED_APP_DEFINITION, undefined)
   ).toBeUndefined();
   const state = createState({
     appDefinition: UNDEFINED_APP_DEFINITION,
