@@ -11,6 +11,7 @@ export const dbConfig: Config = {
     port: Number(walletConfig.postgresPort),
     database: walletConfig.postgresDBName,
     user: walletConfig.postgresDBUser,
+    password: walletConfig.postgresDBPassword,
   },
 
   ...knexSnakeCaseMappers(),
