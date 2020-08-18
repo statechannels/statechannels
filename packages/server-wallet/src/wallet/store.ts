@@ -44,13 +44,8 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 export const Store = {
   getFirstParticipant: async function(): Promise<Participant> {
-    const signingKey = await SigningWallet.query().first();
-    if (!signingKey) throw new StoreError(StoreError.reasons.missingSigningKey);
-    return {
-      participantId: signingKey.address,
-      signingAddress: signingKey.address,
-      destination: makeDestination(HashZero),
-    };
+    const signingAddress = await Store.getOrCreateSigningAddress();
+    return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
   },
 
   getOrCreateSigningAddress: async function(): Promise<string> {
