@@ -117,7 +117,7 @@
     "wait-for-expect": "3.0.2"
   },
   "engines": {
-    "node": "~12.16.0"
+    "node": ">=12.16.0"
   },
   "license": "MIT",
   "main": "index.js",
