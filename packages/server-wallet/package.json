@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "author": "",
   "dependencies": {
     "@statechannels/client-api-schema": "^0.2.0",
