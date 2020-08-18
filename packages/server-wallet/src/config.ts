@@ -9,6 +9,7 @@ interface ServerWalletConfig {
   postgresPort?: string;
   postgresDBName?: string;
   postgresDBUser?: string;
+  postgresDBPassword?: string;
   serverSignerPrivateKey: string;
   serverPrivateKey: string;
   rpcEndpoint?: string;
@@ -25,6 +26,7 @@ const config: ServerWalletConfig = {
   postgresPort: process.env.SERVER_PORT,
   postgresDBName: process.env.SERVER_DB_NAME,
   postgresDBUser: process.env.SERVER_DB_USER,
+  postgresDBPassword: process.env.SERVER_DB_PASSWORD,
   serverSignerPrivateKey:
     process.env.SERVER_SIGNER_PRIVATE_KEY ||
     '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
