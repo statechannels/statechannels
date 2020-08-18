@@ -38,8 +38,9 @@ export {CreateChannelParams};
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
-type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+export type Outbox = {outbox: Outgoing[]};
+type SingleChannelResult = Promise<Outbox & {channelResult: ChannelResult}>;
+type MultipleChannelResult = Promise<Outbox & {channelResults: ChannelResult[]}>;
 
 export type WalletInterface = {
   // App utilities
