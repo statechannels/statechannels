@@ -4,8 +4,6 @@ import {Zero} from '@statechannels/wallet-core';
 
 import {Uint256, Bytes32, Address} from '../type-aliases';
 
-import {Channel} from './channel';
-
 export const REQUIRED_COLUMNS = {
   channelId: 'channelId',
   amount: 'amount',
@@ -22,16 +20,6 @@ export class Funding extends Model implements RequiredColumns {
   static get idColumn(): string[] {
     return ['channelId', 'assetHolder'];
   }
-  static relationMappings = {
-    signingWallet: {
-      relation: Model.BelongsToOneRelation,
-      modelClass: Channel,
-      join: {
-        from: 'funding.channelId',
-        to: 'channel.channelId',
-      },
-    },
-  };
   readonly channelId!: Bytes32;
   readonly amount!: Uint256;
   readonly assetHolder!: Address;

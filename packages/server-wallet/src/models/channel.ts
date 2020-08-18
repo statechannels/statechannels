@@ -99,8 +99,8 @@ export class Channel extends Model implements RequiredColumns {
       relation: Model.HasManyRelation,
       modelClass: Funding,
       join: {
-        from: 'channels.channelId',
-        to: 'funding.channelId',
+        from: 'channels.channel_id',
+        to: 'funding.channel_id',
       },
     },
   };
