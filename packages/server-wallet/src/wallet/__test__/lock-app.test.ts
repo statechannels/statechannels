@@ -88,7 +88,7 @@ describe('concurrency', () => {
   });
 
   // It takes ~5s to insert ten states
-  const MANY_INSERTS_TIMEOUT = 20_000;
+  const MANY_INSERTS_TIMEOUT = 30_000;
   it(
     'works when run concurrently with different channels',
     async () => {
