@@ -113,7 +113,9 @@ Use
 yarn lerna publish from-git
 ```
 
-to publish the packages to npm (you will need to be logged in with `npm login`, and have your HEAD at the tagged commit).
+to publish the packages to npm (you will need to be logged in with `npm login`, and have your HEAD at the tagged commit -- so it's best to not commit between `version` and `publish`).
+
+You may need to manually bump the version of devtools installed at the monorepo root to avoid installation problems.
 
 ## Typescript doc comments
 
