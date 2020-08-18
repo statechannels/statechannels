@@ -28,6 +28,7 @@ import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
+import config from '../config';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -103,8 +104,7 @@ export const Store = {
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
-    tx: Transaction,
-    skipEVMValidation?: boolean
+    tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     let channel = await Channel.forId(channelId, tx);
 
@@ -115,7 +115,7 @@ export const Store = {
     const signatureEntry = channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await this.addSignedState(signedState, tx, skipEVMValidation);
+    channel = await this.addSignedState(signedState, tx);
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -144,13 +144,9 @@ export const Store = {
     return (await Channel.query()).map(channel => channel.protocolState);
   },
 
-  pushMessage: async function(
-    message: Message,
-    tx: Transaction,
-    skipEVMValidation?: boolean
-  ): Promise<Bytes32[]> {
+  pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss, tx, skipEVMValidation);
+      await this.addSignedState(ss, tx);
     }
 
     for (const o of message.objectives || []) {
@@ -171,11 +167,7 @@ export const Store = {
     return Promise.resolve(right(undefined));
   },
 
-  addSignedState: async function(
-    signedState: SignedState,
-    tx: Transaction,
-    skipEVMValidation?: boolean
-  ): Promise<Channel> {
+  addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
     validateSignatures(signedState);
 
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
@@ -183,7 +175,7 @@ export const Store = {
     const channel = await getOrCreateChannel(signedState, signingAddress, tx);
 
     if (
-      !skipEVMValidation &&
+      !config.skipEvmValidation &&
       channel.supported &&
       !validateTransitionWithEVM(channel.supported, signedState)
     ) {
