@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "",
   "dependencies": {
     "@statechannels/client-api-schema": "^0.2.0",
@@ -56,7 +56,6 @@
     "src/**/*.ts": "eslint --max-warnings=0"
   },
   "main": "lib/src/wallet/index.js",
-  "private": true,
   "resolutions": {
     "broccoli": "3.3.3",
     "ethereum-transaction-debugger": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz",
