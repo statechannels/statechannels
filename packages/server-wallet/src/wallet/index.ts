@@ -7,6 +7,8 @@ import {
   CloseChannelParams,
   ChannelResult,
   GetStateParams,
+  Address,
+  ChannelId,
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
@@ -15,8 +17,13 @@ import {
   SignedStateVarsWithHash,
   convertToParticipant,
   Participant,
+  assetHolderAddress,
+  BN,
+  Zero,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
+import {BigNumberish} from 'ethers';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 
 import {Bytes32} from '../type-aliases';
 import {Channel} from '../models/channel';
@@ -30,6 +37,7 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
+import {Funding} from '../models/funding';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -41,6 +49,11 @@ export {CreateChannelParams};
 type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
 type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
+export interface UpdateChannelFundingParams {
+  channelId: ChannelId;
+  token?: Address;
+  amount: BigNumberish;
+}
 export type WalletInterface = {
   // App utilities
   getParticipant(): Promise<Participant | undefined>;
@@ -52,6 +65,8 @@ export type WalletInterface = {
   closeChannel(args: CloseChannelParams): SingleChannelResult;
   getChannels(): MultipleChannelResult;
   getState(args: GetStateParams): SingleChannelResult;
+
+  updateChannelFunding(args: UpdateChannelFundingParams): void;
 
   // Wallet <-> Wallet communication
   pushMessage(m: Message): MultipleChannelResult;
@@ -72,6 +87,20 @@ export class Wallet implements WalletInterface {
     }
 
     return participant;
+  }
+
+  public async updateChannelFunding({
+    channelId,
+    token,
+    amount,
+  }: UpdateChannelFundingParams): SingleChannelResult {
+    const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
+
+    await Funding.updateFunding(channelId, BN.from(amount), assetHolder, undefined);
+
+    const {channelResults, outbox} = await takeActions([channelId]);
+
+    return {outbox, channelResult: channelResults[0]};
   }
 
   public async getSigningAddress(): Promise<string> {

@@ -7,6 +7,7 @@ import {withSupportedState} from '../../models/__test__/fixtures/channel';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
+import {Funding} from '../../models/funding';
 
 import {stateVars} from './fixtures/state-vars';
 
@@ -91,6 +92,7 @@ describe('concurrency', () => {
   it(
     'works when run concurrently with different channels',
     async () => {
+      await Funding.query().truncate();
       await Channel.query().truncate();
 
       numAttempts = 10;
