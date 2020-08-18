@@ -69,10 +69,8 @@ export class Wallet implements WalletInterface {
     skipEVMValidation: false,
   };
 
-  constructor(options?: Partial<WalletOptions>) {
-    if (options) {
-      this.options = {...this.options, ...options};
-    }
+  constructor(options: Partial<WalletOptions> = {}) {
+    this.options = {...this.options, ...options};
   }
   public async getParticipant(): Promise<Participant | undefined> {
     let participant: Participant | undefined = undefined;
