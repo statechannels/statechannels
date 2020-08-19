@@ -24,7 +24,7 @@ async function test() {
 
   console.time('fastSignState');
   const result = iter.map(async () => fastSignState(state, wallet.privateKey));
-  Promise.all(result);
+  await Promise.all(result);
   console.timeEnd('fastSignState');
 }
 
