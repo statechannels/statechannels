@@ -5,7 +5,7 @@ import _ from 'lodash';
 import {signState, fastSignState} from '../src/signatures';
 import {State} from '../src';
 
-async function test() {
+async function benchmark() {
   const wallet = Wallet.createRandom();
   const state: State = {
     channel: {chainId: '0x1', channelNonce: 0x01, participants: [wallet.address]},
@@ -28,4 +28,4 @@ async function test() {
   console.timeEnd('fastSignState');
 }
 
-test();
+benchmark();
