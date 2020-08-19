@@ -101,8 +101,7 @@ export function signChallengeMessage(
 }
 
 function hashMessage(hashedData: string): string {
-  //return utils.hashMessage(utils.arrayify(hashedData));
-  return '0x892af7fd77577473d72bd34f9fff3738a65741be7a5dd7819442b123b8b78a83';
+  return utils.hashMessage(utils.arrayify(hashedData));
 }
 function signData(hashedData: string, privateKey: string): utils.Signature {
   const signingKey = new utils.SigningKey(privateKey);
