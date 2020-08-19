@@ -45,10 +45,6 @@ export function hashAppPart(state: State): Bytes32 {
   );
 }
 
-export function mockedHashState(state: State): Bytes32 {
-  return '0xf00';
-}
-
 export function hashState(state: State): Bytes32 {
   const {turnNum, isFinal} = state;
   const channelId = getChannelId(state.channel);

@@ -3,7 +3,7 @@ import {instantiateSecp256k1, Secp256k1} from '@bitauth/libauth';
 
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
-import {hashState, State, mockedHashState} from './contract/state';
+import {hashState, State} from './contract/state';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
@@ -61,7 +61,7 @@ export async function fastSignState(
   //   throw new Error("The state must be signed with a participant's private key");
   // }
 
-  const hashedState = mockedHashState(state);
+  const hashedState = hashState(state);
 
   const signature = await fastSignData(hashedState, privateKey);
   return {state, signature};
