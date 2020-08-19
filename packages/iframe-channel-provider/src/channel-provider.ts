@@ -87,17 +87,22 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   /**
    * Is the wallet ready to receive requests?
    */
-  walletReady = new Promise(resolve => {
-    window.addEventListener(
-      'message',
-      event => event.origin === this.url && event.data.method === 'WalletReady' && resolve()
-    );
-  });
+  walletReady = (url: string) => {
+    return new Promise(resolve => {
+      const listener = (event: MessageEvent) => {
+        if (event.origin == url && event.data.method === 'WalletReady') {
+          window.removeEventListener('message', listener);
+          resolve();
+        }
+      };
+      window.addEventListener('message', listener);
+    });
+  };
 
   /**
    * Trigger the mounting of the <iframe/> element
    */
-  async mountWalletComponent(url?: string) {
+  async mountWalletComponent(url: string) {
     if (this.mounted) {
       logger.warn(
         'The channel provider has already been mounted: ignoring call to mountWalletComponent'
@@ -107,13 +112,12 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
 
     this.mounted = true;
 
+    this.url = url;
     window.addEventListener('message', this.onMessage.bind(this));
-    if (url) {
-      this.url = url;
-    }
+
     this.iframe.setUrl(this.url);
     this.messaging.setUrl(this.url);
-    const walletReady = this.walletReady;
+    const walletReady = this.walletReady(url);
     await this.iframe.mount();
     logger.info('Application successfully mounted Wallet iFrame inside DOM.');
     logger.info('Waiting for wallet ping...');
