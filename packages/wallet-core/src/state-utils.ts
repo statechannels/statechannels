@@ -4,6 +4,7 @@ import {
   Outcome as NitroOutcome,
   AllocationItem as NitroAllocationItem,
   signState as signNitroState,
+  fastSignState as fastSignNitroState,
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
@@ -81,6 +82,12 @@ export function createSignatureEntry(state: State, privateKey: string): Signatur
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
+  return joinSignature(signature);
+}
+
+export async function fastSignState(state: State, privateKey: string): Promise<string> {
+  const nitroState = toNitroState(state);
+  const {signature} = await fastSignNitroState(nitroState, privateKey);
   return joinSignature(signature);
 }
 
