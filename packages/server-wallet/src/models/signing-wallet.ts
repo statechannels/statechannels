@@ -37,10 +37,10 @@ export class SigningWallet extends Model {
     return json;
   }
 
-  signState(state: State): SignatureEntry {
+  async signState(state: State): Promise<SignatureEntry> {
     return {
       signer: this.address,
-      signature: signState(state, this.privateKey),
+      signature: await signState(state, this.privateKey),
     };
   }
 }

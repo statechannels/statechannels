@@ -6,6 +6,10 @@ import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
 
+const sk = new utils.SigningKey('somePrivateKey');
+
+sk.signDigest('0xf00');
+
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
 
@@ -16,7 +20,6 @@ export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp2
 export interface Signature {
   r: string;
   s: string;
-
   v?: number;
 }
 
@@ -39,6 +42,18 @@ export function getStateSignerAddress(signedState: SignedState): string {
     );
   }
   return recoveredAddress;
+}
+
+export async function quicklySignState(state: State, privateKey: string): Promise<SignedState> {
+  // const wallet = new Wallet(privateKey);
+  // if (state.channel.participants.indexOf(wallet.address) < 0) {
+  //   throw new Error("The state must be signed with a participant's private key");
+  // }
+
+  const hashedState = hashState(state);
+
+  const signature = signData(hashedState, privateKey);
+  return {state, signature};
 }
 
 export function signState(state: State, privateKey: string): SignedState {
@@ -83,14 +98,31 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
   return signData(challengeHash, privateKey);
 }
 
-export function signData(hashedData: string, privateKey: string): string {
-  if (!secp256k1) throw 'secp256k1 uninitialized';
+export async function quicklySignData(hashedData: string, privateKey: string): Promise<string> {
+  await initialized;
 
-  const digest = Buffer.from(keccak256(hashedData), 'hex');
+  const digest = Buffer.from(
+    utils.hashMessage(utils.arrayify(hashedData)),
+
+    'hex'
+  );
   const signature = secp256k1.signMessageHashCompact(
     Buffer.from(privateKey.substr(2), 'hex'),
     digest
   );
 
   return '0x' + Buffer.from(signature).toString('hex');
+}
+
+export function signData(hashedData: string, privateKey: string): Signature {
+  const signingKey = new utils.SigningKey(privateKey);
+  return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
+}
+
+{
+  const ethersSignature = new utils.SigningKey('somePrivateKey').signDigest('someData');
+  const wasmSignature = secp256k1.signMessageHashCompact(
+    Buffer.from('somePrivateKey'.substr(2), 'hex'),
+    'someData'
+  );
 }
