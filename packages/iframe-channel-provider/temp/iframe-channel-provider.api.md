@@ -79,7 +79,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     // Warning: (ae-forgotten-export) The symbol "PostMessageService" needs to be exported by the entry point index.d.ts
     protected readonly messaging: PostMessageService;
     protected mounted: boolean;
-    mountWalletComponent(url?: string): Promise<void>;
+    mountWalletComponent(url: string): Promise<void>;
     // Warning: (ae-incompatible-release-tags) The symbol "off" is marked as @beta, but its signature references "OffType" which is marked as @internal
     off: OffType;
     // Warning: (ae-incompatible-release-tags) The symbol "on" is marked as @beta, but its signature references "OnType" which is marked as @internal
@@ -102,7 +102,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
     // (undocumented)
     unsubscribe: UnsubscribeType;
     protected url: string;
-    walletReady: Promise<unknown>;
+    walletReady: (url: string) => Promise<unknown>;
     walletVersion?: string;
 }
 
