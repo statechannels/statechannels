@@ -110,10 +110,11 @@ export async function fastSignData(hashedData: string, privateKey: string): Prom
 
   const hash = utils.hashMessage(utils.arrayify(hashedData));
   const digest = Buffer.from(hash.substr(2), 'hex');
-  const signature = secp256k1.signMessageHashCompact(
+  const signature = secp256k1.signMessageHashRecoverableCompact(
     Buffer.from(privateKey.substr(2), 'hex'),
     digest
   );
 
-  return '0x' + Buffer.from(signature).toString('hex');
+  const v = 27 + signature.recoveryId;
+  return '0x' + Buffer.from(signature.signature).toString('hex') + v.toString(16);
 }
