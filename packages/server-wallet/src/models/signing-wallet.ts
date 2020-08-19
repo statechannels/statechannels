@@ -1,5 +1,5 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, State, fastSignState} from '@statechannels/wallet-core';
+import {SignatureEntry, State, fastSignState, signState} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
@@ -35,6 +35,13 @@ export class SigningWallet extends Model {
     }
 
     return json;
+  }
+
+  syncSignState(state: State): SignatureEntry {
+    return {
+      signer: this.address,
+      signature: signState(state, this.privateKey),
+    };
   }
 
   async signState(state: State): Promise<SignatureEntry> {
