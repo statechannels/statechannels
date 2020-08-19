@@ -100,15 +100,20 @@ export function signChallengeMessage(
   return signData(challengeHash, privateKey);
 }
 
+function hashMessage(hashedData: string): string {
+  //return utils.hashMessage(utils.arrayify(hashedData));
+  return '0x892af7fd77577473d72bd34f9fff3738a65741be7a5dd7819442b123b8b78a83';
+}
 function signData(hashedData: string, privateKey: string): utils.Signature {
   const signingKey = new utils.SigningKey(privateKey);
-  return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
+
+  return utils.splitSignature(signingKey.signDigest(hashMessage(hashedData)));
 }
 
 export async function fastSignData(hashedData: string, privateKey: string): Promise<string> {
   await initialized;
 
-  const hash = utils.hashMessage(utils.arrayify(hashedData));
+  const hash = hashMessage(hashedData);
   const digest = Buffer.from(hash.substr(2), 'hex');
   const signature = secp256k1.signMessageHashRecoverableCompact(
     Buffer.from(privateKey.substr(2), 'hex'),
