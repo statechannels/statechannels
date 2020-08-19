@@ -88,7 +88,10 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
    * Is the wallet ready to receive requests?
    */
   walletReady = new Promise(resolve => {
-    window.addEventListener('message', event => event.data.method === 'WalletReady' && resolve());
+    window.addEventListener(
+      'message',
+      event => event.origin === this.url && event.data.method === 'WalletReady' && resolve()
+    );
   });
 
   /**
