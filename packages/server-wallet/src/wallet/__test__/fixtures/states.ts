@@ -37,7 +37,7 @@ const defaultState: State = {
 const signatureCache: Record<string, SignatureEntry> = {};
 const _signState = (s: State, sw: SigningWallet): SignatureEntry => {
   const key = `${sw.privateKey}-${hashState(s)}`;
-  return (signatureCache[key] = signatureCache[key] || sw.signState(s));
+  return (signatureCache[key] = signatureCache[key] || sw.syncSignState(s));
 };
 
 export const createState = fixture(defaultState, overwriteOutcome);
