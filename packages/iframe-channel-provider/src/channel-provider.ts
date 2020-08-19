@@ -188,6 +188,10 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
+    if (event.origin !== this.url) {
+      // Do nothing with messages that don't come from the wallet
+      return;
+    }
     let message;
     if (isJsonRpcNotification(event.data)) {
       message = parseNotification(event.data); // Narrows type, throws if it does not fit the schema
