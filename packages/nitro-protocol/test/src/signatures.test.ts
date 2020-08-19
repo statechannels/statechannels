@@ -13,7 +13,7 @@ import {
 
 describe('signatures', () => {
   describe('signState', () => {
-    it.only('sign vs fastSign', async () => {
+    it('sign vs fastSign', async () => {
       const wallet = Wallet.createRandom();
       const state: State = {
         channel: {chainId: '0x1', channelNonce: 0x01, participants: [wallet.address]},
@@ -27,8 +27,6 @@ describe('signatures', () => {
 
       const signedState = signState(state, wallet.privateKey);
       const fastSignedState = fastSignState(state, wallet.privateKey);
-      console.log(utils.joinSignature(signedState.signature));
-      console.log(`The private key is ${wallet.privateKey}`);
       expect(utils.joinSignature(signedState.signature)).toEqual((await fastSignedState).signature);
     });
 
