@@ -12,7 +12,8 @@
     "knex": "0.20.9",
     "objection": "2.1.2",
     "pg": "7.17.1",
-    "pino": "6.2.0"
+    "pino": "6.2.0",
+    "pure-evm": "0.1.3"
   },
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",

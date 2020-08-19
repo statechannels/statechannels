@@ -13,9 +13,10 @@ interface ServerWalletConfig {
   serverSignerPrivateKey: string;
   serverPrivateKey: string;
   rpcEndpoint?: string;
-  chainNetworkID?: string;
+  chainNetworkID: string;
   ethAssetHolderAddress?: string;
   debugKnex?: string;
+  skipEvmValidation: boolean;
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -34,9 +35,10 @@ const config: ServerWalletConfig = {
     process.env.SERVER_PRIVATE_KEY ||
     '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b',
   rpcEndpoint: process.env.RPC_ENDPOINT,
-  chainNetworkID: process.env.CHAIN_NETWORK_ID,
+  chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x0',
   ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
   debugKnex: process.env.DEBUG_KNEX,
+  skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
 };
 
 if (['test', 'development', 'production'].indexOf(config.nodeEnv) === -1) {

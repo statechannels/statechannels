@@ -26,7 +26,7 @@ import {
 } from './types';
 import {BN} from './bignumber';
 
-function toNitroState(state: State): NitroState {
+export function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
   const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
 
