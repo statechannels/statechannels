@@ -8,19 +8,52 @@ require('@statechannels/iframe-channel-provider');
 
 let channelProvider: IFrameChannelProviderInterface;
 
-beforeAll(() => {
+const WALLET_URL = 'http://localhost:3055';
+
+beforeAll(async () => {
   channelProvider = (window as any).channelProvider;
+
+  // workaround for https://github.com/jsdom/jsdom/issues/2745
+  // if no origin exists, replace with the wallet url
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.origin === '') {
+      event.stopImmediatePropagation();
+      const eventWithOrigin: MessageEvent = new MessageEvent('message', {
+        data: event.data,
+        origin: WALLET_URL
+      });
+      window.dispatchEvent(eventWithOrigin);
+    }
+  });
+
+  await channelProvider.mountWalletComponent(WALLET_URL);
 });
 
 describe('Client-Provider-Wallet', () => {
   it('Mounts the iframe pointed at the hosted wallet, and enables', async () => {
-    await channelProvider.mountWalletComponent('http://localhost:3055');
-    expect(() => window.postMessage('', '*')).not.toThrow();
     const iframe = document.getElementById('channelProviderUi') as HTMLIFrameElement;
     const enablePromise = channelProvider.enable();
     await sleep(100); // wait for UI
     iframe.contentWindow?.document.getElementById('connect-with-metamask-button')?.click();
     await enablePromise;
     expect(channelProvider.signingAddress).toBeDefined();
+  });
+
+  it('Copes with an empty message from the wallet url', () => {
+    const event: MessageEvent = new MessageEvent('message', {
+      data: '',
+      origin: WALLET_URL
+    });
+
+    expect(() => window.dispatchEvent(event)).not.toThrow();
+  });
+
+  it('Copes with an empty message from a different url', () => {
+    const event: MessageEvent = new MessageEvent('message', {
+      data: '',
+      origin: 'http://some.origin'
+    });
+
+    expect(() => window.dispatchEvent(event)).not.toThrow();
   });
 });
