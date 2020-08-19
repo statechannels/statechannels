@@ -1179,6 +1179,11 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bitauth/libauth@1.17.1":
+  version "1.17.1"
+  resolved "https://registry.npmjs.org/@bitauth/libauth/-/libauth-1.17.1.tgz#bc5731ce787fbcdebcade8ab6aa3a0bd8cba19e9"
+  integrity sha512-9jwzk1Zr/WWzbDC74rWLaEmtkTIx0B7HbGplCuOENTkfeWzM1j+ifAMkFcbATi9IwBpgB4P0s5eN1Z5uG/5wbg==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.npmjs.org/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
