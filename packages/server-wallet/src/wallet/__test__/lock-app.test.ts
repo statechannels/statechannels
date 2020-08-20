@@ -41,7 +41,6 @@ describe('concurrency', () => {
   let countResolvedPromise: any;
   let countRejectedPromise: any;
   let countSettledPromise: any;
-  let numAttempts: number;
 
   let c: Channel;
 
@@ -51,7 +50,6 @@ describe('concurrency', () => {
     await Channel.query().insert(c);
     channelId = c.channelId;
 
-    numAttempts = 10;
     numResolved = 0;
     numRejected = 0;
     numSettled = 0;
@@ -67,6 +65,7 @@ describe('concurrency', () => {
   });
 
   it('works when run concurrently with the same channel', async () => {
+    const numAttempts = 4;
     await Promise.all(
       _.range(numAttempts).map(() =>
         Store.lockApp(channelId, async tx => Store.signState(channelId, next(c.latest), tx))
@@ -76,7 +75,7 @@ describe('concurrency', () => {
       )
     );
 
-    expect([numResolved, numRejected, numSettled]).toMatchObject([1, 9, 10]);
+    expect([numResolved, numRejected, numSettled]).toMatchObject([1, numAttempts - 1, numAttempts]);
 
     expect(numResolved).toEqual(1);
     expect(numRejected).toEqual(numAttempts - 1);
@@ -87,16 +86,19 @@ describe('concurrency', () => {
     });
   });
 
-  // It takes ~5s to insert ten states
-  const MANY_INSERTS_TIMEOUT = 30_000;
+  // It takes ~650 to sign and store a state, on circle and in a jest test.
+  // Thus, we give the test ample time to finish.
+  const ONE_INSERT = 1200;
+  const NUM_ATTEMPTS = 5;
+  const OVERHEAD = 5_000;
+  const MANY_INSERTS_TIMEOUT = NUM_ATTEMPTS * ONE_INSERT + OVERHEAD;
   it(
-    'works when run concurrently with different channels',
+    `works when run concurrently with ${NUM_ATTEMPTS} different channels`,
     async () => {
       await adminKnex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
 
-      numAttempts = 10;
       const channelIds = await Promise.all(
-        _.range(numAttempts).map(async channelNonce => {
+        _.range(NUM_ATTEMPTS).map(async channelNonce => {
           const c = withSupportedState()({vars: [stateVars({turnNum: 5})], channelNonce});
           await Channel.query().insert(c);
           return c.channelId;
@@ -113,9 +115,9 @@ describe('concurrency', () => {
       );
       const t2 = Date.now();
 
-      expect((t2 - t1) / numAttempts).toBeLessThan(1000);
+      expect((t2 - t1) / NUM_ATTEMPTS).toBeLessThan(ONE_INSERT);
 
-      expect([numResolved, numRejected, numSettled]).toMatchObject([numAttempts, 0, numAttempts]);
+      expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
       await expect(Store.getChannel(channelIds[1], undefined)).resolves.toMatchObject({
         latest: {turnNum: 6},
@@ -126,7 +128,7 @@ describe('concurrency', () => {
 
   test('sign state does not block concurrent updates', async () => {
     await Promise.all(
-      _.range(numAttempts).map(() =>
+      _.range(NUM_ATTEMPTS).map(() =>
         Store.signState(channelId, next(c.latest), undefined as any)
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
@@ -134,9 +136,9 @@ describe('concurrency', () => {
       )
     );
 
-    expect(numResolved).toEqual(10);
+    expect(numResolved).toEqual(NUM_ATTEMPTS);
     expect(numRejected).toEqual(0);
-    expect(numSettled).toEqual(numAttempts);
+    expect(numSettled).toEqual(NUM_ATTEMPTS);
 
     await expect(Store.getChannel(channelId, undefined)).resolves.toMatchObject({
       latest: next(c.latest),
