@@ -17,3 +17,19 @@ export const emptyState = {
     signedStates: [{}]
   }
 };
+
+export const emptyStringObjectives = {
+  recipient: 'alice',
+  sender: 'bob',
+  data: {
+    objectives: ''
+  }
+};
+
+export const nullObjectives = {
+  recipient: 'alice',
+  sender: 'bob',
+  data: {
+    objectives: null
+  }
+};

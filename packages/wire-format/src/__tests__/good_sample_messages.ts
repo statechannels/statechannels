@@ -47,3 +47,15 @@ export const goodMessage = {
     ]
   }
 };
+export const undefinedObjectives1 = {
+  recipient: 'alice',
+  sender: 'bob',
+  data: {
+    objectives: undefined
+  }
+};
+export const undefinedObjectives2 = {
+  recipient: 'alice',
+  sender: 'bob',
+  data: {}
+};
