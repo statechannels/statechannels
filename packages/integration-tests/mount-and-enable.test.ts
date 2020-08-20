@@ -3,28 +3,20 @@
 import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 
 import {sleep} from './helpers';
-jest.setTimeout(10000);
-require('@statechannels/iframe-channel-provider');
+import {injectOriginToBlankPostMessages} from './test-utils';
 
+jest.setTimeout(10000);
 let channelProvider: IFrameChannelProviderInterface;
 
 const WALLET_URL = 'http://localhost:3055';
 
 beforeAll(async () => {
+  require('@statechannels/iframe-channel-provider');
   channelProvider = (window as any).channelProvider;
 
   // workaround for https://github.com/jsdom/jsdom/issues/2745
   // if no origin exists, replace with the wallet url
-  window.addEventListener('message', (event: MessageEvent) => {
-    if (event.origin === '') {
-      event.stopImmediatePropagation();
-      const eventWithOrigin: MessageEvent = new MessageEvent('message', {
-        data: event.data,
-        origin: WALLET_URL
-      });
-      window.dispatchEvent(eventWithOrigin);
-    }
-  });
+  injectOriginToBlankPostMessages(window, WALLET_URL);
 
   await channelProvider.mountWalletComponent(WALLET_URL);
 });
