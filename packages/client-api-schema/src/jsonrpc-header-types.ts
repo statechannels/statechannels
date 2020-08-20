@@ -109,8 +109,8 @@ export interface JsonRpcNotification<
   params: NotificationParams;
 }
 
-function isJsonRpc(message: any) {
-  return typeof message === 'object' && 'jsonrpc' in message;
+function isJsonRpc(message: unknown): boolean {
+  return message && typeof message === 'object' && 'jsonrpc' in message;
 }
 /**
  * Type guard for {@link JsonRpcRequest | JsonRpcRequest}
