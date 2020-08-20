@@ -16,7 +16,7 @@ async function benchmark(): Promise<void> {
   await adminKnex.migrate.latest();
 
   await seedAlicesSigningWallet(knex);
-  const NUM_UPDATES = 20;
+  const NUM_UPDATES = 10;
   const iter = _.range(NUM_UPDATES);
 
   const channels = [];

@@ -37,6 +37,7 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
+import {timerFactory} from '../metrics';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -164,6 +165,7 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
+    const timer = timerFactory(`updateChannel ${channelId}`);
     const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
@@ -176,7 +178,9 @@ export class Wallet implements WalletInterface {
       const nextState = getOrThrow(
         UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
       );
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      const {outgoing, channelResult} = await timer('signing state', async () =>
+        Store.signState(channelId, nextState, tx)
+      );
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };

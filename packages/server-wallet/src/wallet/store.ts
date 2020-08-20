@@ -29,6 +29,7 @@ import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
+import {timerFactory} from '../metrics';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -101,16 +102,19 @@ export const Store = {
     vars: StateVariables,
     tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    let channel = await Channel.forId(channelId, tx);
+    const timer = timerFactory(`  signState ${channelId}`);
+    let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: State = {...channel.channelConstants, ...vars};
 
-    validateStateFreshness(state, channel);
+    await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
-    const signatureEntry = await channel.signingWallet.signState(state);
+    const signatureEntry = await timer('signing', async () =>
+      channel.signingWallet.signState(state)
+    );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await this.addSignedState(signedState, tx);
+    channel = await timer('adding state', async () => this.addSignedState(signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -163,16 +167,26 @@ export const Store = {
   },
 
   addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
-    validateSignatures(signedState);
+    const timer = timerFactory('    add signed state');
 
-    const {address: signingAddress} = await getSigningWallet(signedState, tx);
+    await timer('validating signatures', async () => validateSignatures(signedState));
 
-    const channel = await getOrCreateChannel(signedState, signingAddress, tx);
+    const {address: signingAddress} = await timer('get signing wallet', async () =>
+      getSigningWallet(signedState, tx)
+    );
+
+    const channel = await timer('get channel', async () =>
+      getOrCreateChannel(signedState, signingAddress, tx)
+    );
 
     if (
-      !config.skipEvmValidation &&
-      channel.supported &&
-      !validateTransitionWithEVM(channel.supported, signedState)
+      !(await timer(
+        'validating transition',
+        async () =>
+          !config.skipEvmValidation &&
+          channel.supported &&
+          validateTransitionWithEVM(channel.supported, signedState)
+      ))
     ) {
       throw new StoreError('Invalid state transition', {
         from: channel.supported,
@@ -190,11 +204,15 @@ export const Store = {
 
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    return await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .update(cols)
-      .returning('*')
-      .first();
+    const result = await timer('inserting', async () =>
+      Channel.query(tx)
+        .where({channelId: channel.channelId})
+        .update(cols)
+        .returning('*')
+        .first()
+    );
+
+    return result;
   },
 };
 
