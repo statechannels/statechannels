@@ -167,7 +167,8 @@ export const Store = {
   },
 
   addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
-    const timer = timerFactory('    add signed state');
+    const channelId = calculateChannelId(signedState);
+    const timer = timerFactory(`    add signed state ${channelId}`);
 
     await timer('validating signatures', async () => validateSignatures(signedState));
 
