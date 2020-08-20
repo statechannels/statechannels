@@ -27,6 +27,8 @@ import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
+import {validateTransitionWithEVM} from '../evm-validator';
+import config from '../config';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -44,13 +46,8 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 export const Store = {
   getFirstParticipant: async function(): Promise<Participant> {
-    const signingKey = await SigningWallet.query().first();
-    if (!signingKey) throw new StoreError(StoreError.reasons.missingSigningKey);
-    return {
-      participantId: signingKey.address,
-      signingAddress: signingKey.address,
-      destination: makeDestination(HashZero),
-    };
+    const signingAddress = await Store.getOrCreateSigningAddress();
+    return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
   },
 
   getOrCreateSigningAddress: async function(): Promise<string> {
@@ -164,12 +161,24 @@ export const Store = {
     // TODO: Implement this
     return Promise.resolve(right(undefined));
   },
+
   addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
     validateSignatures(signedState);
 
     const {address: signingAddress} = await getSigningWallet(signedState, tx);
 
     const channel = await getOrCreateChannel(signedState, signingAddress, tx);
+
+    if (
+      !config.skipEvmValidation &&
+      channel.supported &&
+      !validateTransitionWithEVM(channel.supported, signedState)
+    ) {
+      throw new StoreError('Invalid state transition', {
+        from: channel.supported,
+        to: signedState,
+      });
+    }
 
     let channelVars = channel.vars;
 
@@ -200,6 +209,7 @@ class StoreError extends WalletError {
     notInChannel: 'Not in channel',
     staleState: 'Stale state',
     missingSigningKey: 'Missing a signing key',
+    invalidTransition: 'Invalid state transition',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);

@@ -1,10 +1,10 @@
 {
   "name": "@statechannels/jest-gas-reporter",
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Alex Gap <alex@magmo.com>",
   "dependencies": {
-    "@statechannels/devtools": "^0.2.0",
+    "@statechannels/devtools": "^0.3.0",
     "easy-table": "1.1.1",
     "ethers": "4.0.45",
     "path": "0.12.7",
@@ -39,5 +39,6 @@
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build"
   },
-  "types": "lib/src/index.d.ts"
+  "types": "lib/src/index.d.ts",
+  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
 }

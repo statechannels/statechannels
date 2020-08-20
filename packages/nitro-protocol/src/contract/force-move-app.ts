@@ -1,4 +1,5 @@
 import {utils, Contract} from 'ethers';
+import {TransactionRequest} from 'ethers/providers';
 
 import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
 import {State, getVariablePart} from '../contract/state';
@@ -22,4 +23,21 @@ export async function validTransition(
     turnNumB,
     numberOfParticipants
   );
+}
+
+export async function createValidTransitionTransaction(
+  fromState: State,
+  toState: State
+): Promise<TransactionRequest> {
+  const numberOfParticipants = toState.channel.participants.length;
+  const fromVariablePart = getVariablePart(fromState);
+  const toVariablePart = getVariablePart(toState);
+  const turnNumB = toState.turnNum;
+  const data = ForceMoveAppContractInterface.functions.validTransition.encode([
+    fromVariablePart,
+    toVariablePart,
+    turnNumB,
+    numberOfParticipants,
+  ]);
+  return {data};
 }

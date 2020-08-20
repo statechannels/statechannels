@@ -105,7 +105,7 @@ All of the public packages in this repository are kept in lockstep. Use, e.g.
 yarn lerna version minor
 ```
 
-to increase the version in all of them (this works for the docs website, too).
+to increase the version in all of them (this works for the docs website, too), as well as pushing the version update to github.
 
 Use
 
@@ -113,7 +113,9 @@ Use
 yarn lerna publish from-git
 ```
 
-to publish the packages to npm (you will need to be logged in with `npm login`), as well as pushing the version update to git.
+to publish the packages to npm (you will need to be logged in with `npm login`, and have your HEAD at the tagged commit -- so it's best to not commit between `version` and `publish`).
+
+You may need to manually bump the version of devtools installed at the monorepo root to avoid installation problems.
 
 ## Typescript doc comments
 

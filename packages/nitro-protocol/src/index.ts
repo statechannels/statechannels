@@ -36,7 +36,11 @@ export {
 } from './contract/challenge';
 export {Channel, getChannelId} from './contract/channel';
 export {encodeConsensusData, decodeConsensusData, ConsensusData} from './contract/consensus-data';
-export {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';
+export {
+  validTransition,
+  ForceMoveAppContractInterface,
+  createValidTransitionTransaction,
+} from './contract/force-move-app';
 export {
   encodeAllocation,
   encodeOutcome,

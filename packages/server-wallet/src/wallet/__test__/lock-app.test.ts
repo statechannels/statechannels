@@ -7,6 +7,7 @@ import {withSupportedState} from '../../models/__test__/fixtures/channel';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
+import adminKnex from '../../db-admin/db-admin-connection';
 
 import {stateVars} from './fixtures/state-vars';
 
@@ -94,7 +95,7 @@ describe('concurrency', () => {
   it(
     `works when run concurrently with ${NUM_ATTEMPTS} different channels`,
     async () => {
-      await Channel.query().truncate();
+      await adminKnex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
 
       const channelIds = await Promise.all(
         _.range(NUM_ATTEMPTS).map(async channelNonce => {

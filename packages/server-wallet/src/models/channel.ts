@@ -8,17 +8,19 @@ import {
   calculateChannelId,
   hashState,
   outcomesEqual,
+  Zero,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
-import {Address, Bytes32, Uint48, Uint256} from '../type-aliases';
+import {Address, Bytes32, Uint48} from '../type-aliases';
 import {ChannelState, toChannelResult} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
 
 import {SigningWallet} from './signing-wallet';
+import {Funding} from './funding';
 
 export type SyncState = NotifyApp[];
 
@@ -68,6 +70,7 @@ export class Channel extends Model implements RequiredColumns {
   readonly signingAddress!: Address;
 
   readonly signingWallet!: SigningWallet;
+  readonly funding!: Funding[];
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -92,6 +95,14 @@ export class Channel extends Model implements RequiredColumns {
         to: 'signing_wallets.address',
       },
     },
+    funding: {
+      relation: Model.HasManyRelation,
+      modelClass: Funding,
+      join: {
+        from: 'channels.channelId',
+        to: 'funding.channelId',
+      },
+    },
   };
 
   static jsonAttributes = ['vars', 'participants'];
@@ -100,6 +111,7 @@ export class Channel extends Model implements RequiredColumns {
     const result = Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
+      .withGraphFetched('funding')
       .first();
 
     if (!result) throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
@@ -145,7 +157,10 @@ export class Channel extends Model implements RequiredColumns {
 
   get protocolState(): ChannelState {
     const {channelId, myIndex, supported, latest, latestSignedByMe, support} = this;
-
+    const funding = (assetHolder: Address): string => {
+      const result = this.funding.find(f => f.assetHolder === assetHolder);
+      return result ? result.amount : Zero;
+    };
     return {
       myIndex: myIndex as 0 | 1,
       channelId,
@@ -153,7 +168,7 @@ export class Channel extends Model implements RequiredColumns {
       support,
       latest,
       latestSignedByMe,
-      funding: (): Uint256 => '0x0', // TODO: This needs to be populated from the chain
+      funding,
     };
   }
 
