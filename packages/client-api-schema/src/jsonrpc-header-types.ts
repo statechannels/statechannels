@@ -109,6 +109,9 @@ export interface JsonRpcNotification<
   params: NotificationParams;
 }
 
+function isJsonRpc(message: unknown): boolean {
+  return typeof message === 'object' && message !== null && 'jsonrpc' in message;
+}
 /**
  * Type guard for {@link JsonRpcRequest | JsonRpcRequest}
  *
@@ -118,6 +121,7 @@ export interface JsonRpcNotification<
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
   return (
+    isJsonRpc(message) &&
     'id' in message &&
     'params' in message &&
     'method' in message &&
@@ -135,7 +139,7 @@ export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
 export function isJsonRpcNotification<Name extends string, Params extends object>(
   message: object
 ): message is JsonRpcNotification<Name, Params> {
-  return 'method' in message && !('id' in message);
+  return isJsonRpc(message) && 'method' in message && !('id' in message);
 }
 /**
  * Type guard for {@link JsonRpcResponse| JsonRpcResponse}
@@ -146,7 +150,7 @@ export function isJsonRpcNotification<Name extends string, Params extends object
 export function isJsonRpcResponse<ResponseType = object>(
   message: object
 ): message is JsonRpcResponse<ResponseType> {
-  return 'result' in message;
+  return isJsonRpc(message) && 'result' in message;
 }
 /**
  * Type guard for {@link JsonRpcErrorResponse | JsonRpcErrorResponse}
@@ -157,5 +161,5 @@ export function isJsonRpcResponse<ResponseType = object>(
 export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(
   message: object
 ): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>> {
-  return 'id' in message && 'error' in message;
+  return isJsonRpc(message) && 'id' in message && 'error' in message;
 }

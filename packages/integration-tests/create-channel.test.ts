@@ -4,8 +4,9 @@ import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-prov
 import {ChannelClient} from '@statechannels/channel-client';
 
 import {sleep} from './helpers';
+import {injectOriginToBlankPostMessages} from './test-utils';
 jest.setTimeout(10000);
-require('@statechannels/iframe-channel-provider');
+const WALLET_URL = 'http://localhost:3055';
 
 const participants = [
   {
@@ -46,9 +47,14 @@ let iframe: HTMLIFrameElement;
 let signingAddress: string;
 
 beforeAll(async () => {
+  // workaround for https://gitub.com/jsdom/jsdom/issues/2745
+  // if no origin exists, replace with the wallet url
+  injectOriginToBlankPostMessages(window, WALLET_URL);
+
+  require('@statechannels/iframe-channel-provider');
   channelProvider = (window as any).channelProvider;
   channelClient = new ChannelClient(channelProvider);
-  await channelProvider.mountWalletComponent('http://localhost:3055');
+  await channelProvider.mountWalletComponent(WALLET_URL);
   iframe = document.getElementById('channelProviderUi') as HTMLIFrameElement;
   const enablePromise = channelProvider.enable();
   await sleep(100); // wait for UI
