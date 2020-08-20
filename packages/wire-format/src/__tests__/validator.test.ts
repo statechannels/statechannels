@@ -27,5 +27,11 @@ describe('validate message', () => {
     expect(() => validateMessage(bad.emptyState)).toThrow(
       `Validation Error: Missing required property 'appData' at root.data.signedStates[0]`
     );
+    expect(() => validateMessage(bad.emptyStringObjectives)).toThrow(
+      `Validation Error: Property at root.data.objectives should be array`
+    );
+    expect(() => validateMessage(bad.nullObjectives)).toThrow(
+      `Validation Error: Property at root.data.objectives should be array`
+    );
   });
 });
