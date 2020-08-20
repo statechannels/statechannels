@@ -4,7 +4,6 @@ import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
-import {fastSignState} from '../utilities/signatures';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -48,7 +47,10 @@ export class SigningWallet extends Model {
   async signState(state: State): Promise<SignatureEntry> {
     return {
       signer: this.address,
-      signature: (await fastSignState(state, this.privateKey)).signature,
+      // TODO: fastSignState appears to actually slow down updateChannel, the one
+      // place where this is called.
+      // signature: (await fastSignState(state, this.privateKey)).signature
+      signature: signState(state, this.privateKey),
     };
   }
 }
