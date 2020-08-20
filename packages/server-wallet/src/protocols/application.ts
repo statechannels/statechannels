@@ -20,7 +20,7 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
 
   const allocation = checkThat(supported?.outcome, isSimpleAllocation);
 
-  const currentFunding = funding(allocation.assetHolderAddress);
+  const currentFunding = funding[allocation.assetHolderAddress] || 0;
 
   const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
   const funded = BN.gte(currentFunding, targetFunding) ? true : false;

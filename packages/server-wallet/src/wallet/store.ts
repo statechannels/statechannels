@@ -13,12 +13,15 @@ import {
   Participant,
   makeDestination,
   getSignerAddress,
+  assetHolderAddress,
+  Zero,
+  BN,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {Either, right} from 'fp-ts/lib/Either';
-import {ChannelResult} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 
 import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -29,6 +32,9 @@ import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
+import {Funding} from '../models/funding';
+
+import {UpdateChannelFundingParams, ChannelResult} from '.';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -45,6 +51,17 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export const Store = {
+  updateChannelFunding: async function({
+    channelId,
+    token,
+    amount,
+  }: UpdateChannelFundingParams): Promise<any> {
+    const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
+
+    const funding = await Funding.updateFunding(channelId, BN.from(amount), assetHolder, undefined);
+
+    return funding;
+  },
   getFirstParticipant: async function(): Promise<Participant> {
     const signingAddress = await Store.getOrCreateSigningAddress();
     return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};

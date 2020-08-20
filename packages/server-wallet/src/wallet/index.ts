@@ -5,7 +5,7 @@ import {
   StateChannelsNotification,
   JoinChannelParams,
   CloseChannelParams,
-  ChannelResult,
+  ChannelResult as SchemaResult,
   GetStateParams,
   Address,
   ChannelId,
@@ -17,12 +17,8 @@ import {
   SignedStateVarsWithHash,
   convertToParticipant,
   Participant,
-  assetHolderAddress,
-  BN,
-  Zero,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';
@@ -36,7 +32,6 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
-import {Funding} from '../models/funding';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -45,6 +40,8 @@ export {CreateChannelParams};
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
+// Nor does it allow for funding
+export type ChannelResult = SchemaResult & {funding: ChannelState.Funding};
 type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
 type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
@@ -88,15 +85,10 @@ export class Wallet implements WalletInterface {
     return participant;
   }
 
-  public async updateChannelFunding({
-    channelId,
-    token,
-    amount,
-  }: UpdateChannelFundingParams): SingleChannelResult {
-    const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
+  public async updateChannelFunding(updateArgs: UpdateChannelFundingParams): SingleChannelResult {
+    const {channelId} = updateArgs;
 
-    await Funding.updateFunding(channelId, BN.from(amount), assetHolder, undefined);
-
+    await Store.lockApp(channelId, () => Store.updateChannelFunding(updateArgs));
     const {channelResults, outbox} = await takeActions([channelId]);
 
     return {outbox, channelResult: channelResults[0]};

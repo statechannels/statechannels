@@ -43,6 +43,10 @@ it('sends the post fund setup when the funding event is provided', async () => {
         },
       },
     ],
-    channelResult: {channelId: c.channelId, turnNum: 0}, // The turnNum is coming from the supported state so we expect it be 0 still
+    channelResult: {
+      channelId: c.channelId,
+      turnNum: 0,
+      funding: {[ETH_ASSET_HOLDER_ADDRESS]: '0x04'},
+    }, // The turnNum is coming from the supported state so we expect it be 0 still
   });
 });

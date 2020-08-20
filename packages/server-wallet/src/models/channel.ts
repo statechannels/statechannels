@@ -8,16 +8,15 @@ import {
   calculateChannelId,
   hashState,
   outcomesEqual,
-  Zero,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
 import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
-import {ChannelState, toChannelResult} from '../protocols/state';
+import {ChannelState, toChannelResult, Funding as ChannelStateFunding} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
+import {ChannelResult} from '../wallet';
 
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
@@ -157,10 +156,11 @@ export class Channel extends Model implements RequiredColumns {
 
   get protocolState(): ChannelState {
     const {channelId, myIndex, supported, latest, latestSignedByMe, support} = this;
-    const funding = (assetHolder: Address): string => {
-      const result = this.funding.find(f => f.assetHolder === assetHolder);
-      return result ? result.amount : Zero;
-    };
+    const funding: ChannelStateFunding = this.funding.reduce((curr, next) => {
+      curr[next.assetHolder] = next.amount;
+      return curr;
+    }, {} as ChannelStateFunding);
+
     return {
       myIndex: myIndex as 0 | 1,
       channelId,

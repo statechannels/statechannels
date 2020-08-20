@@ -1,3 +1,4 @@
+import {ChannelStatus} from '@statechannels/client-api-schema';
 import {
   SignedStateWithHash,
   serializeAllocation,
@@ -5,12 +6,13 @@ import {
   isAllocation,
   State,
 } from '@statechannels/wallet-core';
-import {ChannelResult, ChannelStatus} from '@statechannels/client-api-schema';
 
 import {Address, Uint256} from '../type-aliases';
+import {ChannelResult} from '../wallet';
 
 import {ProtocolAction} from './actions';
 
+export type Funding = Record<Address, Uint256 | undefined>;
 /*
 The ChannelState type is the data that protocols need about a given channel to decide what to do next.
 */
@@ -21,7 +23,7 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
-  funding: (address: Address) => Uint256;
+  funding: Funding;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -50,7 +52,7 @@ export const stage = (state: State | undefined): Stage =>
     : 'Running';
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, latestSignedByMe, support} = channelState;
+  const {channelId, supported, latest, latestSignedByMe, support, funding} = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
 
@@ -69,7 +71,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
 
   const allocations = serializeAllocation(checkThat(outcome, isAllocation));
 
-  return {appData, appDefinition, channelId, participants, turnNum, allocations, status};
+  return {appData, appDefinition, channelId, participants, turnNum, allocations, status, funding};
 };
 
 /*
