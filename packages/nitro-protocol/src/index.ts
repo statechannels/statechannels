@@ -75,7 +75,6 @@ export {
 
 export {
   signState,
-  fastSignState,
   getStateSignerAddress,
   signChallengeMessage,
   signStates,
