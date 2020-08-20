@@ -7,6 +7,7 @@ import {withSupportedState} from '../../models/__test__/fixtures/channel';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import knex from '../../db/connection';
+import adminKnex from '../../db-admin/db-admin-connection';
 
 import {stateVars} from './fixtures/state-vars';
 
@@ -87,11 +88,11 @@ describe('concurrency', () => {
   });
 
   // It takes ~5s to insert ten states
-  const MANY_INSERTS_TIMEOUT = 20_000;
+  const MANY_INSERTS_TIMEOUT = 30_000;
   it(
     'works when run concurrently with different channels',
     async () => {
-      await Channel.query().truncate();
+      await adminKnex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
 
       numAttempts = 10;
       const channelIds = await Promise.all(
