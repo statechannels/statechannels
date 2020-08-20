@@ -22,10 +22,9 @@ import {
   Zero,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import {BigNumberish} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 
-import {Bytes32} from '../type-aliases';
+import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
@@ -52,7 +51,7 @@ type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: Channe
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
   token?: Address;
-  amount: BigNumberish;
+  amount: Uint256;
 }
 export type WalletInterface = {
   // App utilities

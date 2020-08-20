@@ -1,5 +1,4 @@
 import {Model, Transaction} from 'objection';
-import {BigNumberish} from 'ethers';
 import {Zero} from '@statechannels/wallet-core';
 
 import {Uint256, Bytes32, Address} from '../type-aliases';
@@ -28,7 +27,7 @@ export class Funding extends Model implements RequiredColumns {
     channelId: Bytes32,
     assetHolder: Address,
     tx: Transaction | undefined
-  ): Promise<BigNumberish> {
+  ): Promise<Uint256> {
     const result = await Funding.query(tx)
       .where({channelId, assetHolder})
       .first();
