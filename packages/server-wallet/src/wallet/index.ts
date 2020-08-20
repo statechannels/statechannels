@@ -88,7 +88,7 @@ export class Wallet implements WalletInterface {
   public async updateChannelFunding(updateArgs: UpdateChannelFundingParams): SingleChannelResult {
     const {channelId} = updateArgs;
 
-    await Store.lockApp(channelId, () => Store.updateChannelFunding(updateArgs));
+    await Store.lockApp(channelId, async tx => Store.updateChannelFunding(tx, updateArgs));
     const {channelResults, outbox} = await takeActions([channelId]);
 
     return {outbox, channelResult: channelResults[0]};

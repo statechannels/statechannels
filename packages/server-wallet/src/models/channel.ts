@@ -9,7 +9,15 @@ import {
   hashState,
   outcomesEqual,
 } from '@statechannels/wallet-core';
-import {JSONSchema, Model, Pojo, QueryContext, Transaction, ModelOptions} from 'objection';
+import {
+  JSONSchema,
+  Model,
+  Pojo,
+  QueryContext,
+  Transaction,
+  ModelOptions,
+  QueryBuilder,
+} from 'objection';
 import _ from 'lodash';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
@@ -106,12 +114,15 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static async forId(channelId: Bytes32, tx: Transaction | undefined): Promise<Channel> {
-    const result = Channel.query(tx)
+  static forIdQuery(channelId: Bytes32, tx: Transaction | undefined): QueryBuilder<Channel> {
+    return Channel.query(tx)
       .where({channelId})
       .withGraphFetched('signingWallet')
-      .withGraphFetched('funding')
-      .first();
+      .withGraphFetched('funding');
+  }
+
+  static async forId(channelId: Bytes32, tx: Transaction | undefined): Promise<Channel> {
+    const result = await Channel.forIdQuery(channelId, tx).first();
 
     if (!result) throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 

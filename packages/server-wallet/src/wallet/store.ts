@@ -51,14 +51,13 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export const Store = {
-  updateChannelFunding: async function({
-    channelId,
-    token,
-    amount,
-  }: UpdateChannelFundingParams): Promise<any> {
+  updateChannelFunding: async function(
+    tx: Transaction,
+    {channelId, token, amount}: UpdateChannelFundingParams
+  ): Promise<any> {
     const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
 
-    const funding = await Funding.updateFunding(channelId, BN.from(amount), assetHolder, undefined);
+    const funding = await Funding.updateFunding(channelId, BN.from(amount), assetHolder, tx);
 
     return funding;
   },
@@ -103,8 +102,7 @@ export const Store = {
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
     return knex.transaction(async tx => {
-      const channel = await Channel.query(tx)
-        .where({channelId})
+      const channel = await Channel.forIdQuery(channelId, tx)
         .forUpdate()
         .first();
 
@@ -207,8 +205,7 @@ export const Store = {
 
     const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
 
-    return await Channel.query(tx)
-      .where({channelId: channel.channelId})
+    return await Channel.forIdQuery(channel.channelId, tx)
       .update(cols)
       .returning('*')
       .first();
@@ -239,15 +236,17 @@ async function getOrCreateChannel(
   tx: Transaction
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  let channel = await Channel.query(tx)
-    .where('channelId', channelId)
-    .first();
+  let channel = await Channel.forIdQuery(channelId, tx).first();
 
   if (!channel) {
     const cols: RequiredColumns = {...constants, vars: [], signingAddress};
-    channel = Channel.fromJson(cols);
-    await Channel.query(tx).insert(channel);
+    const insert = Channel.fromJson(cols);
+    channel = await Channel.query(tx)
+      .insert(insert)
+      .withGraphFetched('funding')
+      .withGraphFetched('signingWallet');
   }
+
   return channel;
 }
 async function getSigningWallet(signedState: SignedState, tx: Transaction): Promise<SigningWallet> {

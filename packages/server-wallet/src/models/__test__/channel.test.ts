@@ -1,7 +1,11 @@
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
+import {BN} from '@statechannels/wallet-core';
+
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import knex from '../../db/connection';
+import {Funding} from '../funding';
 
 import {channel} from './fixtures/channel';
 
@@ -54,4 +58,21 @@ describe('validation', () => {
         channelId: 'wrongId',
       })
     ).rejects.toThrow(ChannelError.reasons.invalidChannelId));
+});
+
+test('forId', async () => {
+  const vars = [stateWithHashSignedBy()()];
+  const c1 = channel({vars});
+  await Channel.query().insert(c1);
+
+  expect((await Channel.forId(c1.channelId, undefined)).funding).toEqual([]);
+  await Funding.updateFunding(c1.channelId, BN.from(5), ETH_ASSET_HOLDER_ADDRESS, undefined);
+
+  expect((await Channel.forId(c1.channelId, undefined)).funding).toEqual([
+    {
+      amount: BN.from(5),
+      assetHolder: ETH_ASSET_HOLDER_ADDRESS,
+      channelId: c1.channelId,
+    },
+  ]);
 });
