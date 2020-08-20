@@ -211,9 +211,7 @@ export class Wallet implements WalletInterface {
 
   async getState({channelId}: GetStateParams): SingleChannelResult {
     try {
-      const {channelResult} = await Channel.query()
-        .where({channelId})
-        .first();
+      const {channelResult} = await Channel.forId(channelId, undefined);
 
       return {
         channelResult,
