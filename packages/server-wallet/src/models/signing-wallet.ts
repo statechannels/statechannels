@@ -1,9 +1,10 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, State, fastSignState, signState} from '@statechannels/wallet-core';
+import {SignatureEntry, State, signState} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
+import {fastSignState} from '../utilities/signatures';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -47,7 +48,7 @@ export class SigningWallet extends Model {
   async signState(state: State): Promise<SignatureEntry> {
     return {
       signer: this.address,
-      signature: await fastSignState(state, this.privateKey),
+      signature: (await fastSignState(state, this.privateKey)).signature,
     };
   }
 }

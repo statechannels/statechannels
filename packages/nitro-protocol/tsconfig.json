@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     /* Basic Options */
-    // ["es2017", "esnext.bigint", "dom"] needed for https://github.com/bitauth/libauth#typescript-types
-    "lib": ["es5", "es6", "ES2017", "esnext.bigint", "dom"],
+    "lib": ["es5", "es6"],
     "outDir": "lib" /* Redirect output structure to the directory. */,
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     "target": "es5",
