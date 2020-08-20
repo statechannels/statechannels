@@ -5,6 +5,7 @@ import {Wallet} from 'ethers';
 import {makeDestination, BN, Message} from '@statechannels/wallet-core';
 import {Message as WireMessage} from '@statechannels/wire-format';
 
+import walletConfig from '../../src/config';
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 
@@ -110,10 +111,8 @@ export default class PayerClient {
   }
 }
 
-// eslint-disable-next-line no-process-env
-const TIME = !!process.env.TIMING_METRICS;
 async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
-  if (TIME) {
+  if (walletConfig.timingMetrics) {
     console.time(label);
     const result = await cb();
     console.timeEnd(label);

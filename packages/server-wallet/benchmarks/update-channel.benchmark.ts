@@ -3,6 +3,7 @@ import {AddressZero} from '@ethersproject/constants';
 import {configureEnvVariables} from '@statechannels/devtools';
 configureEnvVariables();
 
+import walletConfig from '../src/config';
 import adminKnex from '../src/db-admin/db-admin-connection';
 import knex from '../src/db/connection';
 import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
@@ -16,7 +17,7 @@ async function benchmark(): Promise<void> {
   await adminKnex.migrate.latest();
 
   await seedAlicesSigningWallet(knex);
-  const NUM_UPDATES = 10;
+  const NUM_UPDATES = walletConfig.timingMetrics ? 5 : 50;
   const iter = _.range(NUM_UPDATES);
 
   const channels = [];

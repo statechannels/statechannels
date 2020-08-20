@@ -17,6 +17,7 @@ interface ServerWalletConfig {
   ethAssetHolderAddress?: string;
   debugKnex?: string;
   skipEvmValidation: boolean;
+  timingMetrics: boolean;
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -39,6 +40,7 @@ const config: ServerWalletConfig = {
   ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
   debugKnex: process.env.DEBUG_KNEX,
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
+  timingMetrics: process.env.TIMING_METRICS === 'ON',
 };
 
 if (['test', 'development', 'production'].indexOf(config.nodeEnv) === -1) {
