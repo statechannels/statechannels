@@ -4,7 +4,7 @@ import * as PureEVM from 'pure-evm';
 import {utils} from 'ethers';
 
 import {AppBytecode} from './models/app-bytecode';
-import {logger} from './logger';
+// import {logger} from './logger';
 import config from './config';
 
 /**
@@ -27,9 +27,9 @@ export const validateTransitionWithEVM = async (
     undefined
   );
   if (!bytecode) {
-    logger.warn(
-      `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
-    );
+    // logger.warn(
+    //   `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
+    // );
     return true;
   }
 
