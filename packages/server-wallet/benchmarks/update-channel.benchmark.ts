@@ -12,13 +12,11 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
 
-async function benchmark(): Promise<void> {
-  await adminKnex.migrate.rollback();
-  await adminKnex.migrate.latest();
+const NUM_UPDATES = walletConfig.timingMetrics ? 5 : 50;
+const iter = _.range(NUM_UPDATES);
 
+async function setup() {
   await seedAlicesSigningWallet(knex);
-  const NUM_UPDATES = walletConfig.timingMetrics ? 5 : 50;
-  const iter = _.range(NUM_UPDATES);
 
   const channels = [];
   for (const channelNonce of iter) {
@@ -28,10 +26,19 @@ async function benchmark(): Promise<void> {
     channels.push(c);
   }
 
+  return channels;
+}
+
+async function benchmark(): Promise<void> {
+  await adminKnex.migrate.rollback();
+  await adminKnex.migrate.latest();
+
+  let channels = await setup();
+
   const wallet = new Wallet();
 
-  const key = `updateChannel x ${NUM_UPDATES}`;
-  console.time(key);
+  let key: string;
+  console.time((key = `serial x ${NUM_UPDATES}`));
   for (const i of iter) {
     await wallet.updateChannel({
       channelId: channels[i].channelId,
@@ -39,6 +46,25 @@ async function benchmark(): Promise<void> {
       appData: '0x',
     });
   }
+  console.timeEnd(key);
+
+  console.time((key = 'setup'));
+  channels = await setup();
+  console.timeEnd(key);
+
+  console.log(channels.length);
+
+  console.time((key = `concurrent x ${NUM_UPDATES}`));
+  await Promise.all(
+    channels.slice(0, 10).map(async channel =>
+      wallet.updateChannel({
+        channelId: channel.channelId,
+        allocations: [{token: AddressZero, allocationItems: []}],
+        appData: '0x',
+      })
+    )
+  );
+
   console.timeEnd(key);
 
   await adminKnex.destroy();
