@@ -1,4 +1,4 @@
-import {simpleEthAllocation, BN, Uint256, State} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
 
 import {protocol} from '../application';
@@ -9,7 +9,8 @@ import {applicationProtocolState} from './fixtures/application-protocol-state';
 
 expect.extend(matchers);
 
-const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
+const amount = BN.from(5);
+const outcome = simpleEthAllocation([{amount, destination: alice().destination}]);
 const prefundState = {outcome, turnNum: 0};
 const postFundState = {outcome, turnNum: 3};
 const closingState = {outcome, turnNum: 4, isFinal: true};
@@ -17,8 +18,8 @@ const closingState = {outcome, turnNum: 4, isFinal: true};
 const runningState = {outcome, turnNum: 7};
 const closingState2 = {outcome, turnNum: 8, isFinal: true};
 
-const funded = (): Uint256 => BN.from(5);
-const notFunded = (): Uint256 => BN.from(0);
+const funded = {[outcome.assetHolderAddress]: amount};
+const notFunded = {[outcome.assetHolderAddress]: BN.from(0)};
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
 
