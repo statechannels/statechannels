@@ -2,8 +2,7 @@
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
 
-// eslint-disable-next-line
-import {Message, SignedState} from './types.js';
+import {Message, SignedState} from './types';
 
 // eslint-disable-next-line
 const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
