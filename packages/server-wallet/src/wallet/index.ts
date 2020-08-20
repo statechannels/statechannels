@@ -48,6 +48,7 @@ export {CreateChannelParams};
 type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
 type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
+export type Outbox = SingleChannelResult | MultipleChannelResult;
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
   token?: Address;
