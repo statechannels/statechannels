@@ -9,6 +9,8 @@ describe('validateRequest', () => {
     expect(messageIsValid(bad.extraProperty)).toBe(false);
     expect(messageIsValid(bad.emptyState)).toBe(false);
     expect(messageIsValid(good.goodMessage)).toBe(true);
+    expect(messageIsValid(good.undefinedObjectives1)).toBe(true);
+    expect(messageIsValid(good.undefinedObjectives2)).toBe(true);
   });
 });
 
