@@ -1,4 +1,4 @@
-import {ethers, Wallet, utils} from 'ethers';
+import {Wallet, utils} from 'ethers';
 
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
@@ -81,7 +81,12 @@ export function signChallengeMessage(
   return signData(challengeHash, privateKey);
 }
 
+function hashMessage(hashedData: string): string {
+  return utils.hashMessage(utils.arrayify(hashedData));
+}
+
 function signData(hashedData: string, privateKey: string): utils.Signature {
   const signingKey = new utils.SigningKey(privateKey);
-  return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
+
+  return utils.splitSignature(signingKey.signDigest(hashMessage(hashedData)));
 }

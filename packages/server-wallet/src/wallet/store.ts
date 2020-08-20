@@ -107,7 +107,7 @@ export const Store = {
 
     validateStateFreshness(state, channel);
 
-    const signatureEntry = channel.signingWallet.signState(state);
+    const signatureEntry = await channel.signingWallet.signState(state);
     const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await this.addSignedState(signedState, tx);

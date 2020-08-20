@@ -64,7 +64,7 @@
   "private": false,
   "repository": "statechannels/monorepo.git",
   "scripts": {
-    "build": "run-s contract:compile build:typescript build:webpack docgen",
+    "build": "run-s contract:compile build:typescript docgen",
     "build:ci": "yarn build",
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",

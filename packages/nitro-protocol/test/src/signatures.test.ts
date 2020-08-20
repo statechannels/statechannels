@@ -1,4 +1,4 @@
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
 
@@ -32,6 +32,7 @@ describe('signatures', () => {
 
       expect(getStateSignerAddress(signedState)).toEqual(wallet.address);
     });
+
     it('throws an exception if signing with non-participant private key', () => {
       const wallet = Wallet.createRandom();
       const state: State = {
