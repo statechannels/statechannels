@@ -2,9 +2,11 @@
 
 import {IFrameChannelProviderInterface} from '@statechannels/iframe-channel-provider';
 import {ChannelClient} from '@statechannels/channel-client';
+import {getChannelId} from '@statechannels/nitro-protocol';
 
 import {sleep} from './helpers';
 import {injectOriginToBlankPostMessages} from './test-utils';
+
 jest.setTimeout(10000);
 const WALLET_URL = 'http://localhost:3055';
 
@@ -63,9 +65,68 @@ beforeAll(async () => {
 });
 
 describe('Client-Provider-Wallet', () => {
-  it('Calls createChannel()', async () => {
+  it('Calls createChannel() with direct funding, and queues an appropriate message', async done => {
     signingAddress = channelProvider.signingAddress as string;
     participants[0].signingAddress = signingAddress;
+
+    const expectedMessage = {
+      recipient: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+      sender: signingAddress,
+      data: {
+        objectives: undefined,
+        signedStates: [
+          {
+            appData,
+            appDefinition,
+            chainId: '9001',
+            challengeDuration: 300,
+            channelId: getChannelId({
+              channelNonce: 0,
+              participants: participants.map(p => p.signingAddress),
+              chainId: '9001'
+            }),
+            channelNonce: 0,
+            isFinal: false,
+            outcome: [
+              {
+                allocationItems: [
+                  {
+                    amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
+                    destination:
+                      '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'
+                  },
+                  {
+                    amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
+                    destination:
+                      '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'
+                  }
+                ],
+                assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'
+              }
+            ],
+            participants: [
+              {
+                destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
+                participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
+                signingAddress
+              },
+              {
+                destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
+                participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+                signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+              }
+            ],
+            signatures: [expect.stringContaining('0x')],
+            turnNum: 0
+          }
+        ]
+      }
+    };
+
+    channelClient.onMessageQueued(message => {
+      expect(message).toMatchObject(expectedMessage);
+      done();
+    });
     const createChannelPromise = channelClient.createChannel(
       participants,
       allocations,
