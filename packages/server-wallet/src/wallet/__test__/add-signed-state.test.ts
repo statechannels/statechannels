@@ -23,6 +23,8 @@ describe('addSignedState', () => {
       signatures: [{signer: alice().address, signature: BOB_SIGNATURE}],
     };
 
-    await expect(Store.addSignedState(signedState, tx)).rejects.toThrow('Invalid signature');
+    await expect(Store.addSignedState(undefined, signedState, tx)).rejects.toThrow(
+      'Invalid signature'
+    );
   });
 });

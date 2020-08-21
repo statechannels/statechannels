@@ -119,7 +119,9 @@ export const Store = {
     );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await timer('adding state', async () => this.addSignedState(signedState, tx));
+    channel = await timer('adding state', async () =>
+      this.addSignedState(channel, signedState, tx)
+    );
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = {signedStates: [addHash(signedState)]};
@@ -150,7 +152,7 @@ export const Store = {
 
   pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss, tx);
+      await this.addSignedState(undefined, ss, tx);
     }
 
     for (const o of message.objectives || []) {
@@ -171,7 +173,11 @@ export const Store = {
     return Promise.resolve(right(undefined));
   },
 
-  addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
+  addSignedState: async function(
+    maybeChannel: Channel | undefined,
+    signedState: SignedState,
+    tx: Transaction
+  ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
     const timer = timerFactory(`    add signed state ${channelId}`);
 
@@ -181,9 +187,9 @@ export const Store = {
       getSigningWallet(signedState, tx)
     );
 
-    const channel = await timer('get channel', async () =>
-      getOrCreateChannel(signedState, signingAddress, tx)
-    );
+    const channel =
+      maybeChannel ||
+      (await timer('get channel', async () => getOrCreateChannel(signedState, signingAddress, tx)));
 
     if (!config.skipEvmValidation && channel.supported) {
       const {supported} = channel;
