@@ -179,19 +179,18 @@ export const Store = {
       getOrCreateChannel(signedState, signingAddress, tx)
     );
 
-    if (
-      !(await timer(
-        'validating transition',
-        async () =>
-          !config.skipEvmValidation &&
-          channel.supported &&
-          validateTransitionWithEVM(channel.supported, signedState)
-      ))
-    ) {
-      throw new StoreError('Invalid state transition', {
-        from: channel.supported,
-        to: signedState,
-      });
+    if (!config.skipEvmValidation && channel.supported) {
+      const {supported} = channel;
+      if (
+        !(await timer('validating transition', async () =>
+          validateTransitionWithEVM(supported, signedState)
+        ))
+      ) {
+        throw new StoreError('Invalid state transition', {
+          from: channel.supported,
+          to: signedState,
+        });
+      }
     }
 
     let channelVars = channel.vars;

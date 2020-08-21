@@ -16,7 +16,10 @@ export const validateTransitionWithEVM = async (
   to: State
 ): Promise<boolean | undefined> => {
   if (from.appDefinition !== to.appDefinition) {
-    throw new Error('States are using different appDefinitions');
+    logger.error('Invalid transition', {
+      error: new Error('States are using different appDefinitions'),
+    });
+    return false;
   }
   const bytecode = await AppBytecode.getBytecode(
     config.chainNetworkID,
