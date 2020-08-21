@@ -1,16 +1,20 @@
 import {instantiateSecp256k1, Secp256k1} from '@bitauth/libauth';
-import {Wallet, utils} from 'ethers';
+import {utils, Wallet} from 'ethers';
 import {State, hashState} from '@statechannels/wallet-core';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
 
+const knownWallets: Record<string, string> = {};
+const cachedAddress = (privateKey: string): string =>
+  knownWallets[privateKey] || (knownWallets[privateKey] = new Wallet(privateKey).address);
+
 export async function fastSignState(
   state: State,
   privateKey: string
 ): Promise<{state: State; signature: string}> {
-  const wallet = new Wallet(privateKey);
-  if (state.participants.map(p => p.signingAddress).indexOf(wallet.address) < 0) {
+  const address = cachedAddress(privateKey);
+  if (state.participants.map(p => p.signingAddress).indexOf(address) < 0) {
     throw new Error("The state must be signed with a participant's private key");
   }
 
