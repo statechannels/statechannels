@@ -8,6 +8,9 @@ import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
 import config from './config';
 
+const MISSING = '0x';
+const bytecodeCache: Record<string, string | undefined> = {};
+
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm) if the bytecode exists in the DB.
  * Returns a promise that resolves to true if the validateTransition returns true false otherwise
@@ -23,8 +26,11 @@ export const validateTransitionWithEVM = async (
     });
     return false;
   }
-  const bytecode = await AppBytecode.getBytecode(config.chainNetworkID, from.appDefinition, tx);
-  if (!bytecode) {
+  const bytecode =
+    bytecodeCache[from.appDefinition] ??
+    (bytecodeCache[from.appDefinition] =
+      (await AppBytecode.getBytecode(config.chainNetworkID, from.appDefinition, tx)) || MISSING);
+  if (bytecode === MISSING) {
     // logger.warn(
     //   `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
     // );
