@@ -51,16 +51,15 @@ async function benchmark(): Promise<void> {
   channels = await setup();
 
   console.time((key = `concurrent x ${NUM_UPDATES}`));
-  false &&
-    (await Promise.all(
-      channels.map(async channel =>
-        wallet.updateChannel({
-          channelId: channel.channelId,
-          allocations: [{token: AddressZero, allocationItems: []}],
-          appData: '0x',
-        })
-      )
-    ));
+  await Promise.all(
+    channels.map(async channel =>
+      wallet.updateChannel({
+        channelId: channel.channelId,
+        allocations: [{token: AddressZero, allocationItems: []}],
+        appData: '0x',
+      })
+    )
+  );
 
   console.timeEnd(key);
 
