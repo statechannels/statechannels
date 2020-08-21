@@ -135,7 +135,7 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
-    "build:ci": "yarn build",
+    "build:ci": "yarn build && yarn build-storybook",
     "build:netlify:production": "yarn build && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
