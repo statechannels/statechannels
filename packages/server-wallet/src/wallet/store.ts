@@ -87,13 +87,18 @@ export const Store = {
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
     return knex.transaction(async tx => {
-      const channel = await Channel.query(tx)
-        .where({channelId})
-        .forUpdate()
-        .first();
+      const timer = timerFactory(`lock app ${channelId}`);
+      const channel = await timer(
+        'getting channel',
+        async () =>
+          await Channel.query(tx)
+            .where({channelId})
+            .forUpdate()
+            .first()
+      );
 
       if (!channel) return onChannelMissing(channelId);
-      return criticalCode(tx, channel.protocolState);
+      return timer('critical code', async () => criticalCode(tx, channel.protocolState));
     });
   },
 
