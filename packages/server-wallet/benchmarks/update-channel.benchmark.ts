@@ -12,7 +12,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
 
-const NUM_UPDATES = walletConfig.timingMetrics ? 10 : 50;
+const NUM_UPDATES = walletConfig.timingMetrics ? 10 : 100;
 const iter = _.range(NUM_UPDATES);
 
 async function setup(): Promise<Channel[]> {
