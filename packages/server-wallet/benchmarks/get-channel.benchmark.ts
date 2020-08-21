@@ -28,6 +28,7 @@ async function benchmark(): Promise<void> {
   const iter = _.range(NUM_CALLS);
   const key = `getChannel x ${NUM_CALLS}`;
   console.time(key);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const _i of iter) {
     await wallet.getState({channelId: c.channelId});
   }
