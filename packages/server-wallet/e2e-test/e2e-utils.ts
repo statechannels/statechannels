@@ -5,9 +5,13 @@ import kill = require('tree-kill');
 import axios from 'axios';
 
 import Knex = require('knex');
+
 import {dbConfig} from '../src/db/config';
 
-import {PerformanceTimer} from './payer/timers';
+// import {PerformanceTimer} from './payer/timers';
+
+// eslint-disable-next-line
+const ClinicBubbleprof = require('@nearform/bubbleprof');
 
 export type ReceiverServer = {
   url: string;
@@ -22,13 +26,29 @@ export const triggerPayments = async (
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const payerScript = fork(join(__dirname, './payer/index.ts'), args, {
-    execArgv: ['-r', 'ts-node/register'],
-  });
-  payerScript.on('message', message =>
-    console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
-  );
-  await new Promise(resolve => payerScript.on('exit', resolve));
+  const bubbleprof = new ClinicBubbleprof();
+  const waitOn = (resolve: any, reject: any): void =>
+    bubbleprof.collect(['node', join(__dirname, '../lib/e2e-test/payer/index.js'), args], function(
+      err: any,
+      filepath: any
+    ) {
+      if (err) reject(err);
+
+      bubbleprof.visualize(filepath, filepath + '.html', function(err: Error) {
+        if (err) reject(err);
+      });
+      console.log('bubbleprof DONE!');
+      resolve();
+    });
+
+  // const payerScript = fork(join(__dirname, '../lib/e2e-test/payer/index.js'), args, {
+  //   execArgv: ['--prof'],
+  // });
+  // payerScript.on('message', message =>
+  //   console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
+  // );
+
+  await new Promise(waitOn);
 };
 
 /**

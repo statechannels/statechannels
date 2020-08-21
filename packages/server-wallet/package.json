@@ -17,6 +17,7 @@
     "pure-evm": "0.1.3"
   },
   "devDependencies": {
+    "@nearform/bubbleprof": "^4.0.4",
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "^0.3.4",
     "@types/body-parser": "^1.19.0",

@@ -16,5 +16,5 @@
     {"path": "../nitro-protocol"},
     {"path": "../wallet-core"}
   ],
-  "include": ["src", "e2e-test"]
+  "include": ["src", "e2e-test", "benchmarks"]
 }
