@@ -124,7 +124,7 @@ export const Store = {
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = {signedStates: [addHash(signedState)]};
+    const data = await timer('adding hash', async () => ({signedStates: [addHash(signedState)]}));
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -202,11 +202,13 @@ export const Store = {
 
     let channelVars = channel.vars;
 
-    channelVars = addState(channelVars, signedState);
+    channelVars = await timer('adding state', async () => addState(channelVars, signedState));
 
     channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
 
-    validateInvariants(channelVars, channel.myAddress);
+    await timer('validating invariants', async () =>
+      validateInvariants(channelVars, channel.myAddress)
+    );
 
     const cols = {...channel.channelConstants, vars: channelVars};
 

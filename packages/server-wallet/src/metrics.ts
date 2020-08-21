@@ -1,5 +1,6 @@
 import walletConfig from './config';
 
+// TODO: We should return a sync and an async timer
 export const timerFactory = (prefix: string) => async <T>(
   label: string,
   cb: () => Promise<T>
