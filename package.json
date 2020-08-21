@@ -79,15 +79,19 @@
     "xstate": "4.9.1"
   },
   "devDependencies": {
-    "@babel/core": "7.8.3",
+    "@babel/core": "^7.11.4",
+    "@babel/preset-env": "^7.11.0",
     "@statechannels/devtools": "^0.3.0",
-    "@storybook/addon-actions": "5.3.9",
-    "@storybook/addon-info": "5.3.9",
-    "@storybook/addon-links": "5.3.9",
-    "@storybook/addons": "5.3.9",
-    "@storybook/react": "5.3.9",
+    "@storybook/addon-actions": "^6.0.16",
+    "@storybook/addon-essentials": "^6.0.16",
+    "@storybook/addon-info": "5.3.19",
+    "@storybook/addon-links": "^6.0.16",
+    "@storybook/addons": "6.0.16",
+    "@storybook/react": "^6.0.16",
     "@types/async-lock": "1.1.1",
     "@types/babel__core": "7.1.7",
+    "@types/babel__preset-env": "^7.9.0",
+    "@types/dotenv-webpack": "^1.8.0",
     "@types/file-loader": "4.2.0",
     "@types/git-revision-webpack-plugin": "3.0.0",
     "@types/html-webpack-plugin": "3.2.2",
@@ -108,11 +112,15 @@
     "@types/webpack-manifest-plugin": "2.1.0",
     "@types/webpack-merge": "4.1.5",
     "@types/workbox-webpack-plugin": "5.0.0",
+    "babel-loader": "^8.1.0",
+    "dotenv-webpack": "^2.0.0",
     "eslint-plugin-react": "7.19.0",
     "fake-indexeddb": "3.0.0",
     "jest": "25.1.0",
     "objects-to-csv": "1.3.6",
     "react-docgen-typescript-loader": "3.6.0",
+    "react-is": "^16.13.1",
+    "storybook": "^6.0.16",
     "ts-jest": "25.0.0",
     "wait-for-expect": "3.0.2"
   },
@@ -122,6 +130,9 @@
   "license": "MIT",
   "main": "index.js",
   "private": false,
+  "resolutions": {
+    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
+  },
   "scripts": {
     "build": "node scripts/build.js",
     "build:ci": "yarn build",
@@ -135,7 +146,8 @@
     "storybook": "start-storybook -p 6006",
     "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
-    "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js"
+    "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js",
+    "build-storybook": "build-storybook"
   },
   "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
 }
