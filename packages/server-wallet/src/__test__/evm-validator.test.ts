@@ -15,6 +15,8 @@ beforeEach(async () => {
   await AppBytecode.query().insert([appBytecode()]);
 });
 
+const mockTx: any = undefined;
+
 it('returns true for a valid transition', async () => {
   // Sanity check that we're validating with byte code
   expect(
@@ -28,7 +30,7 @@ it('returns true for a valid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
   });
-  expect(await validateTransitionWithEVM(fromState, toState)).toBe(true);
+  expect(await validateTransitionWithEVM(fromState, toState, mockTx)).toBe(true);
 });
 
 it('returns false for an invalid transition', async () => {
@@ -44,7 +46,7 @@ it('returns false for an invalid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
   });
-  expect(await validateTransitionWithEVM(fromState, toState)).toBe(false);
+  expect(await validateTransitionWithEVM(fromState, toState, mockTx)).toBe(false);
 });
 
 it('skips validating when no byte code exists for the app definition', async () => {
@@ -55,5 +57,5 @@ it('skips validating when no byte code exists for the app definition', async () 
   const state = createState({
     appDefinition: UNDEFINED_APP_DEFINITION,
   });
-  expect(await validateTransitionWithEVM(state, state)).toBe(true);
+  expect(await validateTransitionWithEVM(state, state, mockTx)).toBe(true);
 });

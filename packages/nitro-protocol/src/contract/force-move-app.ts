@@ -25,10 +25,7 @@ export async function validTransition(
   );
 }
 
-export async function createValidTransitionTransaction(
-  fromState: State,
-  toState: State
-): Promise<TransactionRequest> {
+export function createValidTransitionTransaction(fromState: State, toState: State): {data: string} {
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);
   const toVariablePart = getVariablePart(toState);

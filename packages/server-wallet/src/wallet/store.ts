@@ -29,6 +29,7 @@ import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
+import {timerFactory} from '../metrics';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -86,13 +87,18 @@ export const Store = {
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
     return knex.transaction(async tx => {
-      const channel = await Channel.query(tx)
-        .where({channelId})
-        .forUpdate()
-        .first();
+      const timer = timerFactory(`lock app ${channelId}`);
+      const channel = await timer(
+        'getting channel',
+        async () =>
+          await Channel.query(tx)
+            .where({channelId})
+            .forUpdate()
+            .first()
+      );
 
       if (!channel) return onChannelMissing(channelId);
-      return criticalCode(tx, channel.protocolState);
+      return timer('critical code', async () => criticalCode(tx, channel.protocolState));
     });
   },
 
@@ -101,19 +107,24 @@ export const Store = {
     vars: StateVariables,
     tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    let channel = await Channel.forId(channelId, tx);
+    const timer = timerFactory(`  signState ${channelId}`);
+    let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: State = {...channel.channelConstants, ...vars};
 
-    validateStateFreshness(state, channel);
+    await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
-    const signatureEntry = await channel.signingWallet.signState(state);
+    const signatureEntry = await timer('signing', async () =>
+      channel.signingWallet.signState(state)
+    );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await this.addSignedState(signedState, tx);
+    channel = await timer('adding state', async () =>
+      this.addSignedState(channel, signedState, tx)
+    );
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = {signedStates: [addHash(signedState)]};
+    const data = await timer('adding hash', async () => ({signedStates: [addHash(signedState)]}));
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -141,7 +152,7 @@ export const Store = {
 
   pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss, tx);
+      await this.addSignedState(undefined, ss, tx);
     }
 
     for (const o of message.objectives || []) {
@@ -162,39 +173,54 @@ export const Store = {
     return Promise.resolve(right(undefined));
   },
 
-  addSignedState: async function(signedState: SignedState, tx: Transaction): Promise<Channel> {
-    validateSignatures(signedState);
+  addSignedState: async function(
+    maybeChannel: Channel | undefined,
+    signedState: SignedState,
+    tx: Transaction
+  ): Promise<Channel> {
+    const channelId = calculateChannelId(signedState);
+    const timer = timerFactory(`    add signed state ${channelId}`);
 
-    const {address: signingAddress} = await getSigningWallet(signedState, tx);
+    await timer('validating signatures', async () => validateSignatures(signedState));
 
-    const channel = await getOrCreateChannel(signedState, signingAddress, tx);
+    const channel =
+      maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
-    if (
-      !config.skipEvmValidation &&
-      channel.supported &&
-      !validateTransitionWithEVM(channel.supported, signedState)
-    ) {
-      throw new StoreError('Invalid state transition', {
-        from: channel.supported,
-        to: signedState,
-      });
+    if (!config.skipEvmValidation && channel.supported) {
+      const {supported} = channel;
+      if (
+        !(await timer('validating transition', async () =>
+          validateTransitionWithEVM(supported, signedState, tx)
+        ))
+      ) {
+        throw new StoreError('Invalid state transition', {
+          from: channel.supported,
+          to: signedState,
+        });
+      }
     }
 
     let channelVars = channel.vars;
 
-    channelVars = addState(channelVars, signedState);
+    channelVars = await timer('adding state', async () => addState(channelVars, signedState));
 
     channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
 
-    validateInvariants(channelVars, channel.myAddress);
+    await timer('validating invariants', async () =>
+      validateInvariants(channelVars, channel.myAddress)
+    );
 
-    const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
+    const cols = {...channel.channelConstants, vars: channelVars};
 
-    return await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .update(cols)
-      .returning('*')
-      .first();
+    const result = await timer('updating', async () =>
+      Channel.query(tx)
+        .where({channelId: channel.channelId})
+        .update(cols)
+        .returning('*')
+        .first()
+    );
+
+    return result;
   },
 };
 
@@ -216,25 +242,27 @@ class StoreError extends WalletError {
   }
 }
 
-async function getOrCreateChannel(
-  constants: ChannelConstants,
-  signingAddress: string,
-  tx: Transaction
-): Promise<Channel> {
+async function getOrCreateChannel(constants: ChannelConstants, tx: Transaction): Promise<Channel> {
   const channelId = calculateChannelId(constants);
   let channel = await Channel.query(tx)
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
+    const {address: signingAddress} = await getSigningWallet(constants, tx);
+
     const cols: RequiredColumns = {...constants, vars: [], signingAddress};
     channel = Channel.fromJson(cols);
     await Channel.query(tx).insert(channel);
   }
   return channel;
 }
-async function getSigningWallet(signedState: SignedState, tx: Transaction): Promise<SigningWallet> {
-  const addresses = signedState.participants.map(p => p.signingAddress);
+
+async function getSigningWallet(
+  channel: ChannelConstants,
+  tx: Transaction
+): Promise<SigningWallet> {
+  const addresses = channel.participants.map(p => p.signingAddress);
   const signingWallet = await SigningWallet.query(tx)
     .whereIn('address', addresses)
     .first();
@@ -306,8 +334,6 @@ function addState(
   vars: SignedStateVarsWithHash[],
   signedState: SignedState
 ): SignedStateVarsWithHash[] {
-  validateSignatures(signedState);
-
   const clonedVariables = _.cloneDeep(vars);
   const stateHash = hashState(signedState);
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
