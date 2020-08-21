@@ -12,10 +12,10 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
 
-const NUM_UPDATES = walletConfig.timingMetrics ? 5 : 50;
+const NUM_UPDATES = walletConfig.timingMetrics ? 10 : 50;
 const iter = _.range(NUM_UPDATES);
 
-async function setup() {
+async function setup(): Promise<Channel[]> {
   await seedAlicesSigningWallet(knex);
 
   const channels = [];
@@ -48,15 +48,11 @@ async function benchmark(): Promise<void> {
   }
   console.timeEnd(key);
 
-  console.time((key = 'setup'));
   channels = await setup();
-  console.timeEnd(key);
-
-  console.log(channels.length);
 
   console.time((key = `concurrent x ${NUM_UPDATES}`));
   await Promise.all(
-    channels.slice(0, 10).map(async channel =>
+    channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
         allocations: [{token: AddressZero, allocationItems: []}],

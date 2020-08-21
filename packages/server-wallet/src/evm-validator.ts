@@ -2,9 +2,10 @@ import {State, toNitroState} from '@statechannels/wallet-core';
 import {createValidTransitionTransaction} from '@statechannels/nitro-protocol';
 import * as PureEVM from 'pure-evm';
 import {utils} from 'ethers';
+import Objection from 'objection';
 
 import {AppBytecode} from './models/app-bytecode';
-// import {logger} from './logger';
+import {logger} from './logger';
 import config from './config';
 
 /**
@@ -13,7 +14,8 @@ import config from './config';
  */
 export const validateTransitionWithEVM = async (
   from: State,
-  to: State
+  to: State,
+  tx: Objection.Transaction
 ): Promise<boolean | undefined> => {
   if (from.appDefinition !== to.appDefinition) {
     logger.error('Invalid transition', {
@@ -21,11 +23,7 @@ export const validateTransitionWithEVM = async (
     });
     return false;
   }
-  const bytecode = await AppBytecode.getBytecode(
-    config.chainNetworkID,
-    from.appDefinition,
-    undefined
-  );
+  const bytecode = await AppBytecode.getBytecode(config.chainNetworkID, from.appDefinition, tx);
   if (!bytecode) {
     // logger.warn(
     //   `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
@@ -33,7 +31,7 @@ export const validateTransitionWithEVM = async (
     return true;
   }
 
-  const {data} = await createValidTransitionTransaction(toNitroState(from), toNitroState(to));
+  const {data} = createValidTransitionTransaction(toNitroState(from), toNitroState(to));
 
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),

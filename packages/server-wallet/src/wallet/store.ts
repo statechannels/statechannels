@@ -184,7 +184,7 @@ export const Store = {
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>
-          validateTransitionWithEVM(supported, signedState)
+          validateTransitionWithEVM(supported, signedState, tx)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
