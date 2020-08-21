@@ -334,8 +334,6 @@ function addState(
   vars: SignedStateVarsWithHash[],
   signedState: SignedState
 ): SignedStateVarsWithHash[] {
-  validateSignatures(signedState);
-
   const clonedVariables = _.cloneDeep(vars);
   const stateHash = hashState(signedState);
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
