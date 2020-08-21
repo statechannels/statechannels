@@ -87,15 +87,18 @@ describe('Stress tests', () => {
     await SWReceiver.query().insert(bob());
   });
 
-  it('runs the stress test with 100 channels and 1 payment call', async () => {
+  it.only('runs the stress test with 100 channels and 1 payment call', async () => {
+    console.log('Test start');
+
     const channelIds = await seedTestChannels(
       getParticipant('payer', alice().privateKey),
       alice().privateKey,
       getParticipant('receiver', bob().privateKey),
       bob().privateKey,
-      100
+      10
     );
 
+    console.log('Trigger payments');
     await triggerPayments(channelIds);
 
     for (const channelId of channelIds) {
@@ -110,7 +113,7 @@ describe('Stress tests', () => {
       alice().privateKey,
       getParticipant('receiver', bob().privateKey),
       bob().privateKey,
-      100
+      2
     );
     const numPayments = 25;
     await triggerPayments(channelIds, numPayments);
