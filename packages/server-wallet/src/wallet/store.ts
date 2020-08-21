@@ -183,13 +183,8 @@ export const Store = {
 
     await timer('validating signatures', async () => validateSignatures(signedState));
 
-    const {address: signingAddress} = await timer('get signing wallet', async () =>
-      getSigningWallet(signedState, tx)
-    );
-
     const channel =
-      maybeChannel ||
-      (await timer('get channel', async () => getOrCreateChannel(signedState, signingAddress, tx)));
+      maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
     if (!config.skipEvmValidation && channel.supported) {
       const {supported} = channel;
@@ -213,9 +208,9 @@ export const Store = {
 
     validateInvariants(channelVars, channel.myAddress);
 
-    const cols = {...channel.channelConstants, vars: channelVars, signingAddress};
+    const cols = {...channel.channelConstants, vars: channelVars};
 
-    const result = await timer('inserting', async () =>
+    const result = await timer('updating', async () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
         .update(cols)
@@ -245,25 +240,27 @@ class StoreError extends WalletError {
   }
 }
 
-async function getOrCreateChannel(
-  constants: ChannelConstants,
-  signingAddress: string,
-  tx: Transaction
-): Promise<Channel> {
+async function getOrCreateChannel(constants: ChannelConstants, tx: Transaction): Promise<Channel> {
   const channelId = calculateChannelId(constants);
   let channel = await Channel.query(tx)
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
+    const {address: signingAddress} = await getSigningWallet(constants, tx);
+
     const cols: RequiredColumns = {...constants, vars: [], signingAddress};
     channel = Channel.fromJson(cols);
     await Channel.query(tx).insert(channel);
   }
   return channel;
 }
-async function getSigningWallet(signedState: SignedState, tx: Transaction): Promise<SigningWallet> {
-  const addresses = signedState.participants.map(p => p.signingAddress);
+
+async function getSigningWallet(
+  channel: ChannelConstants,
+  tx: Transaction
+): Promise<SigningWallet> {
+  const addresses = channel.participants.map(p => p.signingAddress);
   const signingWallet = await SigningWallet.query(tx)
     .whereIn('address', addresses)
     .first();
