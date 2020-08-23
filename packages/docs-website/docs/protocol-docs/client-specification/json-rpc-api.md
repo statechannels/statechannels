@@ -24,7 +24,7 @@ This method is used to create a state channel between a set of participants with
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
+| participants            | Participant[]    | Identifying information members of channel |
 | allocations             | Allocation[]      | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
