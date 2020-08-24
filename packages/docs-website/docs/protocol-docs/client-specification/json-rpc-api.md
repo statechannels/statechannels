@@ -129,22 +129,22 @@ Used to take a turn in your channel, or propose an update to a channel or applic
 
 ### Parameters
 
-| Name        | Type         | Description                        |
-| ----------- | ------------ | ---------------------------------- |
-| channelId   | Byttes32     | Derived channel identifier         |
-| allocations | Allocation[] | Updated token balances for channel |
-| appData     | string       | Encoded updated application state  |
+| Name        | Type           | Description                        |
+| ----------- | -------------- | ---------------------------------- |
+| channelId   | `Byttes32`     | Derived channel identifier         |
+| allocations | `Allocation[]` | Updated token balances for channel |
+| appData     | string         | Encoded updated application state  |
 
 ### Response
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
@@ -180,12 +180,12 @@ TODO: (HIGH) What is the correct usage of `JoinChannel`? How would users know ab
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
@@ -247,12 +247,12 @@ TODO: (HIGH) When would it make sense to use `CloseChannel` over `CloseAndWithdr
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
@@ -284,12 +284,12 @@ Initiates an onchain challenge for a given channel. Will take the currently stor
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
@@ -352,12 +352,12 @@ Returns an array of `ChannelResult` objects:
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
@@ -385,12 +385,12 @@ Returns the current state of a given channel.
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participants[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
