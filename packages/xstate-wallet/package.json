@@ -132,7 +132,8 @@
   "main": "index.js",
   "private": false,
   "resolutions": {
-    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
+    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz",
+    "elliptic": "6.5.3"
   },
   "scripts": {
     "build": "node scripts/build.js",
