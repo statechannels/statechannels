@@ -10,28 +10,68 @@ In this section we provide an overview of the JSON RPC schema for the Nitro prot
 
 This method is used to create a state channel between a set of participants with given budgets. It contains information regarding the channel governance (via `appDefition`), type of channel, and initial state of that channel.
 
+There are three different types of channels:
+
+- _Direct Channel_: channels supporting a single application between a fixed set of participants
+- _Ledger Channel_: channels supporting multiple applications between a fixed set of participants using a single state deposit
+- _Virtual Channel_: channels with state deposits that are routed over at least one intermediary, or "hub"
+
+In order to create a virtual channel, you must have first created and funded a ledger channel between client and hub.
+
+A `Participant` contains identifying information about channel members:
+
+| Name           | Type      | Description                                              |
+| -------------- | --------- | -------------------------------------------------------- |
+| participantId  | string    | Unique identifier of channel participant                 |
+| signingAddress | `Address` | Address used to sign channel state updates               |
+| destination    | `Address` | Address to receive funds in case of disputes/withdrawals |
+
+and an `Allocation` tracks information about the channel balance:
+
+| Name            | Type               | Description                                              |
+| --------------- | ------------------ | -------------------------------------------------------- |
+| token           | `Address`          | Address of asset on chain                                |
+| allocationItems | `AllocationItem[]` | Assigns some asset to a given user by address and amount |
+
 ### Parameters
 
 | Name            | Type                            | Description                                |
 | --------------- | ------------------------------- | ------------------------------------------ |
-| participants    | Participant[]                   | Identifying information members of channel |
-| allocations     | Allocation[]                    | Array of funding amounts for participants  |
+| participants    | `Participant[]`                 | Identifying information members of channel |
+| allocations     | `Allocation[]`                  | Array of funding amounts for participants  |
 | appDefinition   | string                          | Address of contract governing the channel  |
 | appData         | string                          | Encoded initial state of app               |
-| fundingStrategy | 'Direct' \|'Ledger' \|'Virtual' | Funding method (type) of channel           |
+| fundingStrategy | `Direct` \|`Ledger` \|`Virtual` | Funding method (type) of channel           |
 
 ### Response
 
+This method returns a `ChannelResult` as part of the JSON RPC Response, which is an object with the following fields:
+
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | Participant[]    | Identifying information members of channel |
-| allocations             | Allocation[]      | Array of funding amounts for participants  |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
 | appData                 | string            | Encoded initial state of app               |
 | appDefinition           | string            | Address of contract governing the channel  |
 | channelId               | string            | Unique channel identifier                  |
-| status                  | ChannelStatus     | Current status of channel                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+
+where the channel status can be one of:
+
+TODO: (HIGH) Decided on finalized statuses. What is opening vs. proposed vs. funding vs. running? Is the channel thrown back into the `funding` state when it runs out of money?
+
+- `proposed`: wallet has stored a channel, but no states are signed
+- `opening`: channel has been joined, but is not properly funded
+- `funding`: ???
+- `running`: channel is ready to use
+- `challenging`: channel is in an ongoing dispute
+- `responding`: channel dispute is ongoing, and it is your turn to create a channel update (must send `UpdateChannel` request)
+- `closing`: channel cannot be used, but funds are still locked
+- `closed`: funds have been released from channel
+
+Generally, the `ChannelResult` type is returned when an update to the channel was made.
 
 ### Errors
 
@@ -51,27 +91,27 @@ TODO: (HIGH) Verify these are all of the expected errors (what if request times 
 
 ## ApproveBudgetAndFund
 
-TODO: (HIGH) Better description
+TODO: (HIGH) Better description of the actual usage of this rpc call. Is this essentially a collateral request? How much of an option do people have to reject these requests? Is this rejection exposed through the wallet, or would it have to be "undone" by some other series of wallet calls? Is this how you install apps in a ledger channel?
 
 Requests approval for a new budget for a given channel participant from the channel counterparties, as well as an associated ledger channel.
 
 ### Parameters
 
-| Name                     | Type        | Description                                         |
-| ------------------------ | ----------- | --------------------------------------------------- |
-| hub                      | Participant | Identifying information for intermediary in channel |
-| playerParticipantId      | string      | Unique identifier of player                         |
-| token                    | string      | Address of asset for channel funding                |
-| requestedSendCapacity    | string      | Max amount sendable in channel                      |
-| requestedReceiveCapacity | string      | Max amount receivable in channel                    |
+| Name                     | Type          | Description                                         |
+| ------------------------ | ------------- | --------------------------------------------------- |
+| hub                      | `Participant` | Identifying information for intermediary in channel |
+| playerParticipantId      | string        | Unique identifier of player                         |
+| token                    | string        | Address of asset for channel funding                |
+| requestedSendCapacity    | string        | Max amount sendable in channel                      |
+| requestedReceiveCapacity | string        | Max amount receivable in channel                    |
 
 ### Response
 
-| Name       | Type          | Description                                                            |
-| ---------- | ------------- | ---------------------------------------------------------------------- |
-| domain     | string        | The channel the funds are attributed to                                |
-| hubAddress | string        | Signing address of channel intermediary                                |
-| budgets    | TokenBudget[] | An array of approved send and received capacity for a list of channels |
+| Name       | Type            | Description                                                            |
+| ---------- | --------------- | ---------------------------------------------------------------------- |
+| domain     | string          | The channel the funds are attributed to                                |
+| hubAddress | string          | Signing address of channel intermediary                                |
+| budgets    | `TokenBudget[]` | An array of approved send and received capacity for a list of channels |
 
 ### Errors
 
@@ -85,7 +125,7 @@ TODO: (HIGH) Define errors in typescript
 
 ## UpdateChannel
 
-TODO: (HIGH) Description
+Used to take a turn in your channel, or propose an update to a channel or application state. The application update must be a valid transition, and properly signed. The updated `ChannelResult` is returned.
 
 ### Parameters
 
@@ -110,6 +150,8 @@ TODO: (HIGH) Description
 
 ### Errors
 
+TODO: (HIGH) Clean up error message types and codes
+
 | Code | Message            | Description                                 |
 | ---- | ------------------ | ------------------------------------------- |
 | 400  | Channel not found  | Could not find channel to update in storage |
@@ -126,13 +168,13 @@ TODO: (HIGH) Description
 
 ## JoinChannel
 
-TODO: (HIGH) Description
+TODO: (HIGH) What is the correct usage of `JoinChannel`? How would users know about the channel itself (i.e. definition)? Under what conditions would you respond with a `JoinChannel` request? What are some things you may want to validate?
 
 ### Parameters
 
-| Name      | Type    | Description               |
-| --------- | ------- | ------------------------- |
-| channelId | Bytes32 | Unique channel identifier |
+| Name      | Type      | Description               |
+| --------- | --------- | ------------------------- |
+| channelId | `Bytes32` | Unique channel identifier |
 
 ### Response
 
@@ -162,7 +204,10 @@ TODO: (HIGH) Description
 
 ## CloseAndWithdraw
 
-TODO: (HIGH) Description
+TODO: (HIGH) Is this description correct? Is this for ledger and virtual channels?
+This is the method used to propose a cooperative channel closure. Can be called on a channel that is properly `running`, and will begin the process of returning funds to the ledger channel.
+
+TODO: (MED): Do channel methods (like `UpdateState` or `CloseAndWithdraw`) have some kind of auto-challenge after timeout behavior? Which methods? Is that configurable?
 
 ### Parameters
 
@@ -190,7 +235,7 @@ TODO: (HIGH) Description
 
 ## CloseChannel
 
-TODO: (HIGH) Description
+TODO: (HIGH) When would it make sense to use `CloseChannel` over `CloseAndWithdraw`?
 
 ### Parameters
 
@@ -226,7 +271,8 @@ TODO: (HIGH) Description
 
 ## ChallengeChannel
 
-TODO: (HIGH) Description
+TODO: (MED) Is there a mechanism to "cancel" challenges?
+Initiates an onchain challenge for a given channel. Will take the currently stored channel state, and put it onchain returning a `ChannelResult` object, and limiting the usage of the channel.
 
 ### Parameters
 
@@ -261,7 +307,8 @@ TODO: (HIGH) Description
 
 ## GetBudget
 
-TODO: (HIGH) Description
+TODO: (MED) Is this correct?
+Returns the amount available to allocate to different applications within your ledger channel.
 
 ### Parameters
 
@@ -291,7 +338,7 @@ TODO: (HIGH) Define errors
 
 ## GetChannels
 
-TODO: (HIGH) Description
+Returns all channels associated with your wallet.
 
 ### Parameters
 
@@ -326,7 +373,7 @@ TODO: (HIGH) Define errors
 
 ## GetState
 
-TODO: (HIGH) Description
+Returns the current state of a given channel.
 
 ### Parameters
 
@@ -390,8 +437,8 @@ TODO: (HIGH) Define errors
 
 ## EnableEthereum
 
-TODO: (HIGH) Description
-
+TODO: (MED) Qs:
+- What is this doing? Where does it get information about the ethereum provider?
 - Name seems to specific, this should be more generic if channels can be chain agnostic
 - How does this relate to the wallet, is this essentially the `connect(...)` method on an ethers `Signer`?
 
@@ -421,7 +468,7 @@ Accepts an empty object as the JSON RPC Request parameters.
 
 ## PushMessage
 
-TODO: (HIGH) Description
+The RPC endpoint that handles sending messages to other potential or current channel participants.
 
 ### Parameters
 
