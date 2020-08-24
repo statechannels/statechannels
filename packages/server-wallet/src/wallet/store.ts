@@ -144,6 +144,17 @@ export const Store = recordFunctionMetrics({
   ): Promise<ChannelState | undefined> {
     return (await Channel.forId(channelId, tx))?.protocolState;
   },
+  getStates: async function(
+    channelId: Bytes32,
+    tx: Transaction | undefined
+  ): Promise<{states: SignedState[]; channelState: ChannelState}> {
+    const channel = await Channel.forId(channelId, tx);
+
+    if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
+
+    const {vars, channelConstants, protocolState: channelState} = channel;
+    return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
+  },
 
   getChannels: async function(): Promise<ChannelState[]> {
     return (await Channel.query()).map(channel => channel.protocolState);
@@ -235,6 +246,7 @@ class StoreError extends WalletError {
     staleState: 'Stale state',
     missingSigningKey: 'Missing a signing key',
     invalidTransition: 'Invalid state transition',
+    channelMissing: 'Channel not found',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
