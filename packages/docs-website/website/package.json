@@ -30,5 +30,11 @@
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "remarkable-admonitions": "0.2.1"
+  },
+  "resolutions": {
+    "elliptic": "6.5.3",
+    "**/elliptic": "6.5.3",
+    "**/**/elliptic": "6.5.3",
+    "**/**/**/elliptic": "6.5.3"
   }
 }

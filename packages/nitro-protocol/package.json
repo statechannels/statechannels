@@ -85,5 +85,11 @@
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js"
   },
   "types": "lib/src/index.d.ts",
-  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
+  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c",
+  "resolutions": {
+    "elliptic": "6.5.3",
+    "**/elliptic": "6.5.3",
+    "**/**/elliptic": "6.5.3",
+    "**/**/**/elliptic": "6.5.3"
+  }
 }
