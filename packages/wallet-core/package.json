@@ -1,17 +1,17 @@
 {
   "name": "@statechannels/wallet-core",
   "description": "State channel wallet components.",
-  "version": "0.3.0",
+  "version": "0.3.3",
   "author": "Alex Gap",
   "dependencies": {
-    "@statechannels/nitro-protocol": "^0.3.0",
-    "@statechannels/wire-format": "^0.3.0",
+    "@statechannels/nitro-protocol": "^0.3.3",
+    "@statechannels/wire-format": "^0.3.3",
     "ethers": "5.0.7",
     "lodash": "4.17.19"
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
-    "@statechannels/devtools": "^0.3.0",
+    "@statechannels/devtools": "^0.3.3",
     "@types/babel__core": "7.1.7",
     "@types/lodash": "4.14.149",
     "awesome-typescript-loader": "5.2.1",
