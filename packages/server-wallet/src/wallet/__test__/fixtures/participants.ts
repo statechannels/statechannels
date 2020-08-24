@@ -22,7 +22,7 @@ const _charlie: Participant = {
   destination: makeDestination(
     '0xcccc000000000000000000000000000000000000000000000000000000000003'
   ),
-  participantId: 'bob',
+  participantId: 'charlie',
 };
 
 export const participant = fixture(_alice);
