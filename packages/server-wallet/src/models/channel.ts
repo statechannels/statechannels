@@ -156,13 +156,14 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get protocolState(): ChannelState {
-    const {channelId, myIndex, supported, latest, latestSignedByMe, support} = this;
+    const {channelId, myIndex, supported, latest, latestSignedByMe, support, participants} = this;
     const funding = (assetHolder: Address): string => {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? result.amount : Zero;
     };
     return {
       myIndex: myIndex as 0 | 1,
+      participants,
       channelId,
       supported,
       support,

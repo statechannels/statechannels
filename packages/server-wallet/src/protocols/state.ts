@@ -4,6 +4,7 @@ import {
   checkThat,
   isAllocation,
   State,
+  Participant,
 } from '@statechannels/wallet-core';
 import {ChannelResult, ChannelStatus} from '@statechannels/client-api-schema';
 
@@ -17,6 +18,7 @@ The ChannelState type is the data that protocols need about a given channel to d
 export type ChannelState = {
   channelId: string;
   myIndex: 0 | 1;
+  participants: Participant[];
   support?: SignedStateWithHash[];
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
