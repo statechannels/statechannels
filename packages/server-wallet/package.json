@@ -6,7 +6,7 @@
   "dependencies": {
     "@bitauth/libauth": "1.17.1",
     "@statechannels/client-api-schema": "^0.3.1",
-    "@statechannels/nitro-protocol": "^0.3.1",
+    "@statechannels/nitro-protocol": "^0.3.2",
     "@statechannels/wallet-core": "^0.3.1",
     "ethers": "5.0.7",
     "fp-ts": "2.7.0",
