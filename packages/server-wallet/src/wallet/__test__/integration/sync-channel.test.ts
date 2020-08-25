@@ -136,6 +136,6 @@ it('pushes states included in the API call', async () => {
 
 it('reject when the channel is not known', async () => {
   await expect(w.syncChannel({channelId: '0xf00', states: []})).rejects.toMatchObject(
-    new Error('Channel not found')
+    new Error('No channel found with id.')
   );
 });
