@@ -85,34 +85,6 @@ Generally, the `ChannelResult` type is returned when an update to the channel st
 
 TODO: (HIGH) Verify these are all of the expected errors (what if request times out? what if some participant refuses to join the channel?)
 
-## ApproveBudgetAndFund
-
-TODO: (HIGH) Better description of the actual usage of this rpc call. Is this essentially a collateral request? How much of an option do people have to reject these requests? Is this rejection exposed through the wallet, or would it have to be "undone" by some other series of wallet calls? Is this how you install apps in a ledger channel?
-
-Requests approval for a new budget for a given channel participant from the channel counterparties, as well as an associated ledger channel.
-
-### Parameters
-
-| Name                     | Type          | Description                                         |
-| ------------------------ | ------------- | --------------------------------------------------- |
-| hub                      | `Participant` | Identifying information for intermediary in channel |
-| playerParticipantId      | string        | Unique identifier of player                         |
-| token                    | string        | Address of asset for channel funding                |
-| requestedSendCapacity    | string        | Max amount sendable in channel                      |
-| requestedReceiveCapacity | string        | Max amount receivable in channel                    |
-
-### Response
-
-| Name       | Type            | Description                                                            |
-| ---------- | --------------- | ---------------------------------------------------------------------- |
-| domain     | string          | The channel the funds are attributed to                                |
-| hubAddress | string          | Signing address of channel intermediary                                |
-| budgets    | `TokenBudget[]` | An array of approved send and received capacity for a list of channels |
-
-### Errors
-
-TODO: (HIGH) Define errors in typescript
-
 ## UpdateChannel
 
 Used to take a turn in your channel, or propose an update to a channel or application state. The application update must be a valid transition, and properly signed. The updated `ChannelResult` is returned.
