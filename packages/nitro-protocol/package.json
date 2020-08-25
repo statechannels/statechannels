@@ -7,7 +7,7 @@
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@openzeppelin/contracts": "3.0.1",
-    "ethers": "4.0.45"
+    "ethers": "4.0.48"
   },
   "devDependencies": {
     "@statechannels/devtools": "^0.3.0",

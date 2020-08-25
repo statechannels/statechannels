@@ -6,7 +6,7 @@
   "dependencies": {
     "@statechannels/client-api-schema": "^0.3.0",
     "@statechannels/iframe-channel-provider": "^0.3.0",
-    "ethers": "4.0.45",
+    "ethers": "4.0.48",
     "eventemitter3": "4.0.0",
     "loglevel": "1.6.8"
   },
