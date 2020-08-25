@@ -234,6 +234,20 @@ Returns all channels associated with your wallet.
 | ------------- | ------------------ | --------------------------------------------------- |
 | includeClosed | boolean (optional) | Whether closed/inactive channels should be included |
 
+TODO: Could use one rpc request endpoint to include optional filtering items to determine which channels to get, i.e.:
+
+```typescript
+type GetChannelsRequestParameters = {
+  includeClosed?: boolean;
+  participants?: Participant[]; // string[] for participantIds?
+  channelId?: Bytes32;
+  status?: ChannelStatus;
+  appDefinition?: Address;
+};
+```
+
+so that if nothing is supplied, it will return all channels and if a participant is supplied, it will return all channels with that participant, etc.
+
 ### Response
 
 Returns a `ChannelResult[]`
