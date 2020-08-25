@@ -8,15 +8,15 @@ In this section we provide an overview of the JSON RPC schema for the Nitro prot
 
 ## CreateChannel
 
-This method is used to create a state channel between a set of participants with given budgets. It contains information regarding the channel governance (via `appDefition`), type of channel, and initial state of that channel.
+This method is used to create a channel between a set of participants with given budgets. It contains information regarding type of channel and initial state of that channel.
 
 There are three different types of channels:
 
-- _Direct Channel_: channels supporting a single application between a fixed set of participants
-- _Ledger Channel_: channels supporting multiple applications between a fixed set of participants using a single state deposit
-- _Virtual Channel_: channels with state deposits that are routed over at least one intermediary, or "hub"
+- _Direct Channel_: channels that support applications between ledger channel counterparties
+- _Ledger Channel_: channels that manage the budgets and allocations between direct and virtual channels
+- _Virtual Channel_: channels that support applications routed over ledger channels
 
-In order to create a virtual channel, you must have first created and funded a ledger channel between client and hub.
+In order to create a virtual or direct channel, you must have first created and funded a ledger channel between client and hub.
 
 A `Participant` contains identifying information about channel members:
 
@@ -71,7 +71,7 @@ TODO: (HIGH) Decided on finalized statuses. What is opening vs. proposed vs. fun
 - `closing`: channel cannot be used, but funds are still locked
 - `closed`: funds have been released from channel
 
-Generally, the `ChannelResult` type is returned when an update to the channel was made.
+Generally, the `ChannelResult` type is returned when an update to the channel state was made.
 
 ### Errors
 
@@ -82,12 +82,6 @@ Generally, the `ChannelResult` type is returned when an update to the channel wa
 | 1002 | UnsupportedToken       | Token in allocations not supported    |
 
 TODO: (HIGH) Verify these are all of the expected errors (what if request times out? what if some participant refuses to join the channel?)
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
 
 ## ApproveBudgetAndFund
 
@@ -116,12 +110,6 @@ Requests approval for a new budget for a given channel participant from the chan
 ### Errors
 
 TODO: (HIGH) Define errors in typescript
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
 
 ## UpdateChannel
 
@@ -160,15 +148,9 @@ TODO: (HIGH) Clean up error message types and codes
 | 403  | Not your turn      | Cannot update channel                       |
 | 404  | Channel closed     | Channel no longer accepting updates         |
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## JoinChannel
 
-TODO: (HIGH) What is the correct usage of `JoinChannel`? How would users know about the channel itself (i.e. definition)? Under what conditions would you respond with a `JoinChannel` request? What are some things you may want to validate?
+Called when you would are joining a channel that has been created. Generally, creating a channel is done, and a notification is sent to the desired counterparty, who then dispatches the `JoinChannel` request.
 
 ### Parameters
 
@@ -196,18 +178,10 @@ TODO: (HIGH) What is the correct usage of `JoinChannel`? How would users know ab
 | 1100 | Channel not found  | Could not find channel to update in storage |
 | 1101 | Invalid transition | Channel cannot be joined                    |
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## CloseAndWithdraw
 
-TODO: (HIGH) Is this description correct? Is this for ledger and virtual channels?
+TODO: (HIGH) Is this description correct? Is this for ledger and virtual channels? Can you partially withdraw from a ledger channel?
 This is the method used to propose a cooperative channel closure. Can be called on a channel that is properly `running`, and will begin the process of returning funds to the ledger channel.
-
-TODO: (MED): Do channel methods (like `UpdateState` or `CloseAndWithdraw`) have some kind of auto-challenge after timeout behavior? Which methods? Is that configurable?
 
 ### Parameters
 
@@ -226,12 +200,6 @@ TODO: (MED): Do channel methods (like `UpdateState` or `CloseAndWithdraw`) have 
 | Code | Message       | Description                                  |
 | ---- | ------------- | -------------------------------------------- |
 | 200  | User declined | Counterparty did not approve channel closure |
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
 
 ## CloseChannel
 
@@ -263,12 +231,6 @@ TODO: (HIGH) When would it make sense to use `CloseChannel` over `CloseAndWithdr
 | 300  | Not your turn     | Not your turn to update channel, cannot close |
 | 301  | Channel not found | Could not find channel to update in storage   |
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## ChallengeChannel
 
 TODO: (MED) Is there a mechanism to "cancel" challenges?
@@ -299,12 +261,6 @@ Initiates an onchain challenge for a given channel. Will take the currently stor
 | ---- | ----------------- | ---------------------------------------------- |
 | 1300 | Channel not found | Could not find channel to challenge in storage |
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## GetBudget
 
 TODO: (MED) Is this correct?
@@ -329,12 +285,6 @@ If the budget cannot be found, this method will return an empty object. Otherwis
 ### Errors
 
 TODO: (HIGH) Define errors
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
 
 ## GetChannels
 
@@ -365,12 +315,6 @@ Returns an array of `ChannelResult` objects:
 
 TODO: (HIGH) Define errors
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## GetState
 
 Returns the current state of a given channel.
@@ -400,12 +344,6 @@ Returns the current state of a given channel.
 | ---- | ----------------- | --------------------------------- |
 | 1200 | Channel not found | Could not find channel in storage |
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## GetWalletInformation
 
 TODO: (HIGH) Description
@@ -429,15 +367,10 @@ Accepts an empty object as the JSON RPC Request parameters.
 
 TODO: (HIGH) Define errors
 
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
-
 ## EnableEthereum
 
 TODO: (MED) Qs:
+
 - What is this doing? Where does it get information about the ethereum provider?
 - Name seems to specific, this should be more generic if channels can be chain agnostic
 - How does this relate to the wallet, is this essentially the `connect(...)` method on an ethers `Signer`?
@@ -459,12 +392,6 @@ Accepts an empty object as the JSON RPC Request parameters.
 | Code | Message              | Description                       |
 | ---- | -------------------- | --------------------------------- |
 | 100  | Ethereum not enabled | Could not connect to eth provider |
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
 
 ## PushMessage
 
@@ -489,9 +416,3 @@ The RPC endpoint that handles sending messages to other potential or current cha
 | Code | Message           | Description                     |
 | ---- | ----------------- | ------------------------------- |
 | 900  | Wrong participant | Not your turn to update channel |
-
-### Example
-
-```typescript
-// TODO: (LOW) Best way to display JSON RPC examples
-```
