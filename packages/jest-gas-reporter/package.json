@@ -40,5 +40,5 @@
     "prepare": "yarn build"
   },
   "types": "lib/src/index.d.ts",
-  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
+  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
 }
