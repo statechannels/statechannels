@@ -20,6 +20,7 @@ import {
   assetHolderAddress,
   BN,
   Zero,
+  SignedStateWithHash,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -56,7 +57,7 @@ export interface UpdateChannelFundingParams {
   amount: Uint256;
 }
 
-type SyncChannelParams = {channelId: ChannelId};
+type SyncChannelParams = {channelId: ChannelId; states: SignedStateWithHash[]};
 
 export type WalletInterface = {
   // App utilities
@@ -84,8 +85,31 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
-  public async syncChannel(_args: SyncChannelParams): SingleChannelResult {
-    throw 'Unimplemented';
+  public async syncChannel({channelId, states: incoming}: SyncChannelParams): SingleChannelResult {
+    return Store.lockApp(
+      channelId,
+      async (tx): SingleChannelResult => {
+        await Store.pushMessage({signedStates: incoming}, tx);
+        const {states, channelState} = await Store.getStates(channelId, tx);
+
+        const {participants, myIndex} = channelState;
+
+        const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
+        const sender = participants[myIndex].participantId;
+
+        return {
+          outbox: peers.map(recipient => ({
+            method: 'MessageQueued',
+            params: {
+              recipient,
+              sender,
+              data: {objectives: [{type: 'SyncChannel', channelId, states}]},
+            },
+          })),
+          channelResult: ChannelState.toChannelResult(channelState),
+        };
+      }
+    );
   }
 
   public async getParticipant(): Promise<Participant | undefined> {

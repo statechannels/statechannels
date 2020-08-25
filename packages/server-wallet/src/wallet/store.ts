@@ -210,17 +210,15 @@ export const Store = recordFunctionMetrics({
       }
     }
 
-    let channelVars = channel.vars;
+    channel.vars = await timer('adding state', async () => addState(channel.vars, signedState));
 
-    channelVars = await timer('adding state', async () => addState(channelVars, signedState));
-
-    channelVars = clearOldStates(channelVars, channel.isSupported ? channel.support : undefined);
+    channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
 
     await timer('validating invariants', async () =>
-      validateInvariants(channelVars, channel.myAddress)
+      validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols = {...channel.channelConstants, vars: channelVars};
+    const cols = {...channel.channelConstants, vars: channel.vars};
 
     const result = await timer('updating', async () =>
       Channel.query(tx)
@@ -350,8 +348,9 @@ function addState(
   const {stateHash} = signedState;
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
-    const mergedSignatures = _.uniq(
-      signedState.signatures.concat(clonedVariables[existingStateIndex].signatures)
+    const mergedSignatures = _.uniqBy(
+      signedState.signatures.concat(clonedVariables[existingStateIndex].signatures),
+      sig => sig.signature
     );
 
     clonedVariables[existingStateIndex].signatures = mergedSignatures;
