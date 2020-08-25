@@ -1,24 +1,10 @@
----
-id: json-rpc-api
-title: JSON RPC Specification
-sidebar_label: JSON RPC Specification
----
+# JSON RPC Specification
 
-In this section we provide an overview of the JSON RPC schema for the Nitro protocol. All methods accept requests and return responses following the [JSON RPC 2.0 specification](https://www.jsonrpc.org/specification).
+## Common Types
 
-## CreateChannel
+### Participant
 
-This method is used to create a channel between a set of participants with given budgets. It contains information regarding type of channel and initial state of that channel.
-
-There are three different types of channels:
-
-- _Direct Channel_: channels that support applications between ledger channel counterparties
-- _Ledger Channel_: channels that manage the budgets and allocations between direct and virtual channels
-- _Virtual Channel_: channels that support applications routed over ledger channels
-
-In order to create a virtual or direct channel, you must have first created and funded a ledger channel between client and hub.
-
-A `Participant` contains identifying information about channel members:
+Contains identifying information about channel members:
 
 | Name           | Type      | Description                                              |
 | -------------- | --------- | -------------------------------------------------------- |
@@ -26,12 +12,46 @@ A `Participant` contains identifying information about channel members:
 | signingAddress | `Address` | Address used to sign channel state updates               |
 | destination    | `Address` | Address to receive funds in case of disputes/withdrawals |
 
-and an `Allocation` tracks information about the channel balance:
+### Allocation
+
+Tracks information about the channel balance:
 
 | Name            | Type               | Description                                              |
 | --------------- | ------------------ | -------------------------------------------------------- |
 | token           | `Address`          | Address of asset on chain                                |
 | allocationItems | `AllocationItem[]` | Assigns some asset to a given user by address and amount |
+
+### ChannelResult
+
+Tracks general information about a channel, typically returned from all methods that update the channel state:
+
+| Name                    | Type              | Description                                |
+| ----------------------- | ----------------- | ------------------------------------------ |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
+| appData                 | string            | Encoded initial state of app               |
+| appDefinition           | string            | Address of contract governing the channel  |
+| channelId               | string            | Unique channel identifier                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
+| turnNum                 | number            | Channel nonce                              |
+| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+
+where the `ChannelStatus` is one of:
+
+- `proposed`: wallet has stored a channel, but no states are signed
+- `opening`: channel has been joined, but is not properly funded
+- `funding`: ???
+- `running`: channel is ready to use
+- `challenging`: channel is in an ongoing dispute
+- `responding`: channel dispute is ongoing, and it is your turn to create a channel update (must send `UpdateChannel` request)
+- `closing`: channel cannot be used, but funds are still locked
+- `closed`: funds have been released from channel
+
+TODO: (HIGH) Decided on finalized statuses. What is opening vs. proposed vs. funding vs. running? Is the channel thrown back into the `funding` state when it runs out of money?
+
+TODO: (MED): What about the `SingleChannelResult` and `MultipleChannelResult` documented in the `server-wallet` package?
+
+## CreateChannel
 
 ### Parameters
 
@@ -45,9 +65,38 @@ and an `Allocation` tracks information about the channel balance:
 
 ### Response
 
-// TODO: (HIGH): What about the `SingleChannelResult` and `MultipleChannelResult` documented in the `server-wallet` package?
+| Name                    | Type              | Description                                |
+| ----------------------- | ----------------- | ------------------------------------------ |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
+| appData                 | string            | Encoded initial state of app               |
+| appDefinition           | string            | Address of contract governing the channel  |
+| channelId               | string            | Unique channel identifier                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
+| turnNum                 | number            | Channel nonce                              |
+| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
-This method returns a `ChannelResult` as part of the JSON RPC Response, which is an object with the following fields:
+### Errors
+
+| Code | Message                | Description                           |
+| ---- | ---------------------- | ------------------------------------- |
+| 1000 | SigningAddressNotFound | Unable to find expected ephemeral key |
+| 1001 | InvalidAppDefinition   | App definition not valid address      |
+| 1002 | UnsupportedToken       | Token in allocations not supported    |
+
+TODO: (HIGH) Verify these are all of the expected errors (what if request times out? what if some participant refuses to join the channel?)
+
+## JoinChannel
+
+Called when you would are joining a channel that has been created. Generally, creating a channel is done, and a notification is sent to the desired counterparty, who then dispatches the `JoinChannel` request.
+
+### Parameters
+
+| Name      | Type      | Description               |
+| --------- | --------- | ------------------------- |
+| channelId | `Bytes32` | Unique channel identifier |
+
+### Response
 
 | Name                    | Type              | Description                                |
 | ----------------------- | ----------------- | ------------------------------------------ |
@@ -60,34 +109,16 @@ This method returns a `ChannelResult` as part of the JSON RPC Response, which is
 | turnNum                 | number            | Channel nonce                              |
 | challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
 
-where the channel status can be one of:
-
-TODO: (HIGH) Decided on finalized statuses. What is opening vs. proposed vs. funding vs. running? Is the channel thrown back into the `funding` state when it runs out of money?
-
-- `proposed`: wallet has stored a channel, but no states are signed
-- `opening`: channel has been joined, but is not properly funded
-- `funding`: ???
-- `running`: channel is ready to use
-- `challenging`: channel is in an ongoing dispute
-- `responding`: channel dispute is ongoing, and it is your turn to create a channel update (must send `UpdateChannel` request)
-- `closing`: channel cannot be used, but funds are still locked
-- `closed`: funds have been released from channel
-
-Generally, the `ChannelResult` type is returned when an update to the channel state was made.
-
 ### Errors
 
-| Code | Message                | Description                           |
-| ---- | ---------------------- | ------------------------------------- |
-| 1000 | SigningAddressNotFound | Unable to find expected ephemeral key |
-| 1001 | InvalidAppDefinition   | App definition not valid address      |
-| 1002 | UnsupportedToken       | Token in allocations not supported    |
-
-TODO: (HIGH) Verify these are all of the expected errors (what if request times out? what if some participant refuses to join the channel?)
+| Code | Message            | Description                                 |
+| ---- | ------------------ | ------------------------------------------- |
+| 1100 | Channel not found  | Could not find channel to update in storage |
+| 1101 | Invalid transition | Channel cannot be joined                    |
 
 ## UpdateChannel
 
-Used to take a turn in your channel, or propose an update to a channel or application state. The application update must be a valid transition, and properly signed. The updated `ChannelResult` is returned.
+Used to take a turn in a channel and returns a `ChannelResult`.
 
 ### Parameters
 
@@ -121,36 +152,6 @@ TODO: (HIGH) Clean up error message types and codes
 | 402  | Invalid app data   | Incorrect encoded app information           |
 | 403  | Not your turn      | Cannot update channel                       |
 | 404  | Channel closed     | Channel no longer accepting updates         |
-
-## JoinChannel
-
-Called when you would are joining a channel that has been created. Generally, creating a channel is done, and a notification is sent to the desired counterparty, who then dispatches the `JoinChannel` request.
-
-### Parameters
-
-| Name      | Type      | Description               |
-| --------- | --------- | ------------------------- |
-| channelId | `Bytes32` | Unique channel identifier |
-
-### Response
-
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
-
-### Errors
-
-| Code | Message            | Description                                 |
-| ---- | ------------------ | ------------------------------------------- |
-| 1100 | Channel not found  | Could not find channel to update in storage |
-| 1101 | Invalid transition | Channel cannot be joined                    |
 
 ## CloseChannel
 
@@ -188,13 +189,58 @@ This is the method used to propose a cooperative channel closure. Can be called 
 
 TODO: (HIGH) Finalize API
 
+### Parameters
+
+| Name      | Type      | Description               |
+| --------- | --------- | ------------------------- |
+| channelId | `Bytes32` | Unique channel identifier |
+
+### Response
+
+| Name                    | Type              | Description                                |
+| ----------------------- | ----------------- | ------------------------------------------ |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
+| appData                 | string            | Encoded initial state of app               |
+| appDefinition           | string            | Address of contract governing the channel  |
+| channelId               | string            | Unique channel identifier                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
+| turnNum                 | number            | Channel nonce                              |
+| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+
+### Errors
+
+TODO: (HIGH) Finalize errors
+
 ## Withdraw
 
 TODO: (HIGH) Finalize API
 
+### Parameters
+
+| Name      | Type      | Description               |
+| --------- | --------- | ------------------------- |
+| channelId | `Bytes32` | Unique channel identifier |
+
+### Response
+
+| Name                    | Type              | Description                                |
+| ----------------------- | ----------------- | ------------------------------------------ |
+| participants            | `Participant[]`   | Identifying information members of channel |
+| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
+| appData                 | string            | Encoded initial state of app               |
+| appDefinition           | string            | Address of contract governing the channel  |
+| channelId               | string            | Unique channel identifier                  |
+| status                  | `ChannelStatus`   | Current status of channel                  |
+| turnNum                 | number            | Channel nonce                              |
+| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+
+### Errors
+
+TODO: (HIGH) Finalize errors
+
 ## ChallengeChannel
 
-TODO: (MED) Is there a mechanism to "cancel" challenges?
 Initiates an onchain challenge for a given channel. Will take the currently stored channel state, and put it onchain returning a `ChannelResult` object, and limiting the usage of the channel.
 
 ### Parameters
@@ -282,10 +328,7 @@ Returns the current state of a given channel.
 
 ## GetWalletInformation
 
-TODO: (HIGH) Description
-
-- Is this a wallet wallet or a channel wallet? Definitely needs a more descriptive name than wallet.
-- How does this wallet relate to the ephemeral keys?
+Returns the generic channel wallet information and version for the channel participant.
 
 ### Parameters
 
