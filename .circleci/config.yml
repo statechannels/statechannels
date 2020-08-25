@@ -17,6 +17,8 @@ defaults: &defaults
       environment:
         POSTGRES_USER: root
 
+# MACROS
+
 integration_test_settings: &integration_test_settings
   resource_class: large
   working_directory: /home/circleci/project
@@ -70,6 +72,8 @@ restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
     key: v5-built-artifacts-cache-
+
+# END MACROS
 
 commands:
   log_stats:
@@ -158,6 +162,14 @@ commands:
           tag: latest
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
 
+  install_postgresql_client:
+    description: 'Install postgresql client'
+    steps:
+      - run:
+          command: |
+            sudo apt-get update
+            sudo apt install -y postgresql-client || true
+
 jobs:
   prepare:
     <<: *defaults
@@ -216,11 +228,11 @@ jobs:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
+      - install_postgresql_client
       - run:
           name: wallet setup
           working_directory: packages/server-wallet
           command: |
-            sudo apt install -y postgresql-client || true
             yarn db:create $PSQL_ARGS
             yarn db:migrate
       - run:
@@ -245,11 +257,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
+      - install_postgresql_client
       - run:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            sudo apt install -y postgresql-client || true
             createdb payer $PSQL_ARGS
             SERVER_DB_NAME=payer yarn db:migrate
             createdb receiver $PSQL_ARGS
@@ -267,11 +279,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
+      - install_postgresql_client
       - run:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            sudo apt install -y postgresql-client || true
             createdb payer $PSQL_ARGS
             SERVER_DB_NAME=payer yarn db:migrate
             createdb receiver $PSQL_ARGS
