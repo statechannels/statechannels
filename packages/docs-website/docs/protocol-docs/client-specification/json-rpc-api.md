@@ -39,8 +39,8 @@ and an `Allocation` tracks information about the channel balance:
 | --------------- | ------------------------------- | ------------------------------------------ |
 | participants    | `Participant[]`                 | Identifying information members of channel |
 | allocations     | `Allocation[]`                  | Array of funding amounts for participants  |
-| appDefinition   | Address                          | Address of contract governing the channel  |
-| appData         | bytes                          | Encoded initial state of app               |
+| appDefinition   | Address                         | Address of contract governing the channel  |
+| appData         | bytes                           | Encoded initial state of app               |
 | fundingStrategy | `Direct` \|`Ledger` \|`Virtual` | Funding method (type) of channel           |
 
 ### Response
@@ -152,32 +152,11 @@ Called when you would are joining a channel that has been created. Generally, cr
 | 1100 | Channel not found  | Could not find channel to update in storage |
 | 1101 | Invalid transition | Channel cannot be joined                    |
 
-## CloseAndWithdraw
-
-TODO: (HIGH) Is this description correct? Is this for ledger and virtual channels? Can you partially withdraw from a ledger channel?
-This is the method used to propose a cooperative channel closure. Can be called on a channel that is properly `running`, and will begin the process of returning funds to the ledger channel.
-
-### Parameters
-
-| Name             | Type   | Description                               |
-| ---------------- | ------ | ----------------------------------------- |
-| hubParticipantId | string | Participant identifier for ledger channel |
-
-### Response
-
-| Name    | Type    | Description                                      |
-| ------- | ------- | ------------------------------------------------ |
-| success | boolean | Whether channel withdrawal and closing succeeded |
-
-### Errors
-
-| Code | Message       | Description                                  |
-| ---- | ------------- | -------------------------------------------- |
-| 200  | User declined | Counterparty did not approve channel closure |
-
 ## CloseChannel
 
-TODO: (HIGH) When would it make sense to use `CloseChannel` over `CloseAndWithdraw`?
+TODO: (HIGH) Finalize API
+
+This is the method used to propose a cooperative channel closure. Can be called on a channel that is properly `running`, and will begin the process of returning funds to the ledger channel for application or virtual channels, or to the `destination` defined for each `Participant`.
 
 ### Parameters
 
@@ -204,6 +183,14 @@ TODO: (HIGH) When would it make sense to use `CloseChannel` over `CloseAndWithdr
 | ---- | ----------------- | --------------------------------------------- |
 | 300  | Not your turn     | Not your turn to update channel, cannot close |
 | 301  | Channel not found | Could not find channel to update in storage   |
+
+## DefundChannel
+
+TODO: (HIGH) Finalize API
+
+## Withdraw
+
+TODO: (HIGH) Finalize API
 
 ## ChallengeChannel
 
@@ -234,31 +221,6 @@ Initiates an onchain challenge for a given channel. Will take the currently stor
 | Code | Message           | Description                                    |
 | ---- | ----------------- | ---------------------------------------------- |
 | 1300 | Channel not found | Could not find channel to challenge in storage |
-
-## GetBudget
-
-TODO: (MED) Is this correct?
-Returns the amount available to allocate to different applications within your ledger channel.
-
-### Parameters
-
-| Name             | Type   | Description                               |
-| ---------------- | ------ | ----------------------------------------- |
-| hubParticipantId | string | Participant identifier for ledger channel |
-
-### Response
-
-If the budget cannot be found, this method will return an empty object. Otherwise, it returns a `DomainBudget`:
-
-| Name       | Type          | Description                                                            |
-| ---------- | ------------- | ---------------------------------------------------------------------- |
-| domain     | string        | The channel the funds are attributed to                                |
-| hubAddress | string        | Signing address of channel intermediary                                |
-| budgets    | TokenBudget[] | An array of approved send and received capacity for a list of channels |
-
-### Errors
-
-TODO: (HIGH) Define errors
 
 ## GetChannels
 
