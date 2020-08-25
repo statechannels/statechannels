@@ -53,6 +53,9 @@ export const stateSignedBy = (signingWallets = [aliceWallet()]): Fixture<SignedS
     flow(overwriteOutcome, addSignatures(signingWallets))
   );
 
+// FIXME: This should be replaced with stateWithHashSignedBy2.
+// The problem with this version is that it is impossible to get a state
+// signed only by bob.
 export const stateWithHashSignedBy = (
   pk = aliceWallet(),
   ...otherWallets: SigningWallet[]
@@ -60,4 +63,12 @@ export const stateWithHashSignedBy = (
   fixture(
     createState() as SignedStateWithHash,
     flow(overwriteOutcome, addSignatures([pk, ...otherWallets]), addHash)
+  );
+
+export const stateWithHashSignedBy2 = (
+  signingWallets: SigningWallet[] = [aliceWallet()]
+): Fixture<SignedStateWithHash> =>
+  fixture(
+    createState() as SignedStateWithHash,
+    flow(overwriteOutcome, addSignatures(signingWallets), addHash)
   );
