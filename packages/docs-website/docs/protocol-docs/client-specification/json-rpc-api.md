@@ -39,8 +39,8 @@ and an `Allocation` tracks information about the channel balance:
 | --------------- | ------------------------------- | ------------------------------------------ |
 | participants    | `Participant[]`                 | Identifying information members of channel |
 | allocations     | `Allocation[]`                  | Array of funding amounts for participants  |
-| appDefinition   | string                          | Address of contract governing the channel  |
-| appData         | string                          | Encoded initial state of app               |
+| appDefinition   | Address                          | Address of contract governing the channel  |
+| appData         | bytes                          | Encoded initial state of app               |
 | fundingStrategy | `Direct` \|`Ledger` \|`Virtual` | Funding method (type) of channel           |
 
 ### Response
