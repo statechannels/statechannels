@@ -8,7 +8,6 @@
 .env.test.local
 .env.production.local
 
-
 **/*.log
 build
 lib
@@ -17,3 +16,5 @@ manual-test/message-sequence.json
 
 tsconfig.tsbuildinfo
 .eslintcache
+
+profiling-data
