@@ -1,5 +1,14 @@
 # JSON RPC Specification
 
+## TODOs
+
+Make decisions on the following:
+
+- Finalize error conventions
+- Finalize methods needed in core rpc interface (used across all envs, and extensible), inc. common getters
+- Finalize API (close channel, defund channel, withdraw)
+- Finalize `ChannelStatus`
+
 ## Common Types
 
 ### Participant
@@ -65,26 +74,18 @@ TODO: (MED): What about the `SingleChannelResult` and `MultipleChannelResult` do
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-| Code | Message                | Description                           |
-| ---- | ---------------------- | ------------------------------------- |
-| 1000 | SigningAddressNotFound | Unable to find expected ephemeral key |
-| 1001 | InvalidAppDefinition   | App definition not valid address      |
-| 1002 | UnsupportedToken       | Token in allocations not supported    |
-
-TODO: (HIGH) Verify these are all of the expected errors (what if request times out? what if some participant refuses to join the channel?)
+| Code | Message                   | Description                                                 |
+| ---- | ------------------------- | ----------------------------------------------------------- |
+| 1400 | Unsupported token         | Token in allocations not supported                          |
+| 1400 | Invalid participants      | Provided participants are invalid                           |
+| 1400 | Invalid app definition    | App definition is not valid address                         |
+| 1400 | Invalid app data          | App data not valid                                          |
+| 1401 | Insufficient funds        | Insufficient funds to create channel with given allocations |
+| 1404 | Signing address not found | Unable to find expected ephemeral key                       |
 
 ## JoinChannel
 
@@ -98,27 +99,18 @@ Called when you would are joining a channel that has been created. Generally, cr
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
 | Code | Message            | Description                                 |
 | ---- | ------------------ | ------------------------------------------- |
-| 1100 | Channel not found  | Could not find channel to update in storage |
-| 1101 | Invalid transition | Channel cannot be joined                    |
+| 1403 | Invalid transition | Channel cannot be joined                    |
+| 1404 | Channel not found  | Could not find channel to update in storage |
 
 ## UpdateChannel
 
-Used to take a turn in a channel and returns a `ChannelResult`.
+Used to take a turn in a channel and returns the updated channel information.
 
 ### Parameters
 
@@ -130,32 +122,18 @@ Used to take a turn in a channel and returns a `ChannelResult`.
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-TODO: (HIGH) Clean up error message types and codes
-
 | Code | Message            | Description                                 |
 | ---- | ------------------ | ------------------------------------------- |
-| 400  | Channel not found  | Could not find channel to update in storage |
-| 401  | Invalid transition | Illegal state transition proposed           |
-| 402  | Invalid app data   | Incorrect encoded app information           |
-| 403  | Not your turn      | Cannot update channel                       |
-| 404  | Channel closed     | Channel no longer accepting updates         |
+| 1400 | Invalid app data   | Incorrect encoded app information           |
+| 1403 | Not your turn      | Cannot update channel                       |
+| 1403 | Invalid transition | Illegal state transition proposed           |
+| 1404 | Channel not found  | Could not find channel to update in storage |
 
 ## CloseChannel
-
-TODO: (HIGH) Finalize API
 
 This is the method used to propose a cooperative channel closure. Can be called on a channel that is properly `running`, and will begin the process of returning funds to the ledger channel for application or virtual channels, or to the `destination` defined for each `Participant`.
 
@@ -167,27 +145,19 @@ This is the method used to propose a cooperative channel closure. Can be called 
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-| Code | Message           | Description                                   |
-| ---- | ----------------- | --------------------------------------------- |
-| 300  | Not your turn     | Not your turn to update channel, cannot close |
-| 301  | Channel not found | Could not find channel to update in storage   |
+| Code | Message            | Description                                   |
+| ---- | ------------------ | --------------------------------------------- |
+| 1403 | Invalid transition | Cannot close channel                          |
+| 1403 | Not your turn      | Not your turn to update channel, cannot close |
+| 1404 | Channel not found  | Could not find channel to update in storage   |
 
 ## DefundChannel
 
-TODO: (HIGH) Finalize API
+Agrees to close channel at current state, and move funds back into ledger channel allocations.
 
 ### Parameters
 
@@ -197,47 +167,42 @@ TODO: (HIGH) Finalize API
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-TODO: (HIGH) Finalize errors
+| Code | Message            | Description                                      |
+| ---- | ------------------ | ------------------------------------------------ |
+| 1403 | Invalid transition | Cannot defund channel                            |
+| 1403 | Not your turn      | Not your turn to update channel, cannot withdraw |
+| 1404 | Channel not found  | Could not find channel to update in storage      |
 
 ## Withdraw
 
-TODO: (HIGH) Finalize API
+Used to send funds from channel to a given destination.
+
+TODO: is this only for ledger channels, or application channels as well?
+TODO: should we use the `Participant.destination`? or is the `destination` is part of the outcome?
 
 ### Parameters
 
-| Name      | Type      | Description               |
-| --------- | --------- | ------------------------- |
-| channelId | `Bytes32` | Unique channel identifier |
+| Name        | Type      | Description               |
+| ----------- | --------- | ------------------------- |
+| channelId   | `Bytes32` | Unique channel identifier |
+| destination | `Address` | Unique channel identifier |
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-TODO: (HIGH) Finalize errors
+| Code | Message             | Description                                      |
+| ---- | ------------------- | ------------------------------------------------ |
+| 1400 | Invalid destination | Destination is not valid address                 |
+| 1403 | Invalid transition  | Cannot withdraw channel                          |
+| 1403 | Not your turn       | Not your turn to update channel, cannot withdraw |
+| 1404 | Channel not found   | Could not find channel to update in storage      |
 
 ## ChallengeChannel
 
@@ -251,22 +216,13 @@ Initiates an onchain challenge for a given channel. Will take the currently stor
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
-| Code | Message           | Description                                    |
-| ---- | ----------------- | ---------------------------------------------- |
-| 1300 | Channel not found | Could not find channel to challenge in storage |
+| Code | Message           | Description                                 |
+| ---- | ----------------- | ------------------------------------------- |
+| 1404 | Channel not found | Could not find channel to update in storage |
 
 ## GetChannels
 
@@ -280,22 +236,7 @@ Returns all channels associated with your wallet.
 
 ### Response
 
-Returns an array of `ChannelResult` objects:
-
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
-
-### Errors
-
-TODO: (HIGH) Define errors
+Returns a `ChannelResult[]`
 
 ## GetState
 
@@ -309,22 +250,13 @@ Returns the current state of a given channel.
 
 ### Response
 
-| Name                    | Type              | Description                                |
-| ----------------------- | ----------------- | ------------------------------------------ |
-| participants            | `Participant[]`   | Identifying information members of channel |
-| allocations             | `Allocation[]`    | Array of funding amounts for participants  |
-| appData                 | string            | Encoded initial state of app               |
-| appDefinition           | string            | Address of contract governing the channel  |
-| channelId               | string            | Unique channel identifier                  |
-| status                  | `ChannelStatus`   | Current status of channel                  |
-| turnNum                 | number            | Channel nonce                              |
-| challengeExpirationTime | number (optional) | Time current challenge on channel elapses  |
+Returns a `ChannelResult`
 
 ### Errors
 
 | Code | Message           | Description                       |
 | ---- | ----------------- | --------------------------------- |
-| 1200 | Channel not found | Could not find channel in storage |
+| 1404 | Channel not found | Could not find channel in storage |
 
 ## GetWalletInformation
 
@@ -344,7 +276,9 @@ Accepts an empty object as the JSON RPC Request parameters.
 
 ### Errors
 
-TODO: (HIGH) Define errors
+| Code | Message          | Description                      |
+| ---- | ---------------- | -------------------------------- |
+| 1404 | Wallet not found | Could not find wallet in storage |
 
 ## PushMessage
 
@@ -366,6 +300,7 @@ The RPC endpoint that handles sending messages to other potential or current cha
 
 ### Errors
 
-| Code | Message           | Description                     |
-| ---- | ----------------- | ------------------------------- |
-| 900  | Wrong participant | Not your turn to update channel |
+| Code | Message               | Description                                  |
+| ---- | --------------------- | -------------------------------------------- |
+| 1404 | Participant not found | Could not find participant                   |
+| 1403 | Unauthorized          | Unauthorized to make calls to channel wallet |
