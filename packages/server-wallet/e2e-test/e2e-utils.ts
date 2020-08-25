@@ -8,7 +8,7 @@ import Knex = require('knex');
 
 import {dbConfig} from '../src/db/config';
 
-// import {PerformanceTimer} from './payer/timers';
+export const PROFILE_DATA_PATH = './profiling-data';
 
 // eslint-disable-next-line
 const ClinicBubbleprof = require('@nearform/bubbleprof');
@@ -23,7 +23,7 @@ export const createVisualization = async (
   outputFileName: string
 ): Promise<void> => {
   return new Promise((resolve: any) => {
-    const bubbleprof = new ClinicBubbleprof({dest: './profiling-data'});
+    const bubbleprof = new ClinicBubbleprof({dest: PROFILE_DATA_PATH});
     bubbleprof.visualize(dataPath, outputFileName, (err: any) => {
       if (err) throw err;
       resolve();
@@ -38,7 +38,7 @@ export const triggerPayments = async (
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const bubbleprof = new ClinicBubbleprof({dest: './profiling-data'});
+  const bubbleprof = new ClinicBubbleprof({dest: PROFILE_DATA_PATH});
   return new Promise((resolve: any): void =>
     bubbleprof.collect(
       ['ts-node', join(__dirname, '/payer/index.ts'), ...args],

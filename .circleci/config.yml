@@ -295,10 +295,10 @@ jobs:
           no_output_timeout: 10m
       - upload_artifacts
       - store_artifacts:
-          path: /home/circleci/project/packages/server-wallet/e2e-test/profiling-data/stress-test-1.html
+          path: /home/circleci/project/packages/server-wallet/profiling-data/stress-test-1-payment.html
           destination: stress-test-1.html
       - store_artifacts:
-          path: /home/circleci/project/packages/server-wallet/e2e-test/profiling-data/stress-test-2.html
+          path: /home/circleci/project/packages/server-wallet/profiling-data/stress-test-25-payment.html
           destination: stress-test-2.html
 
   release-pull-request:
