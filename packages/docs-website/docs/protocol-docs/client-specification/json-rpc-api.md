@@ -45,6 +45,8 @@ and an `Allocation` tracks information about the channel balance:
 
 ### Response
 
+// TODO: (HIGH): What about the `SingleChannelResult` and `MultipleChannelResult` documented in the `server-wallet` package?
+
 This method returns a `ChannelResult` as part of the JSON RPC Response, which is an object with the following fields:
 
 | Name                    | Type              | Description                                |
