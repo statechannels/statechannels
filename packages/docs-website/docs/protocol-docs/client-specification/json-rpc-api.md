@@ -303,32 +303,6 @@ Accepts an empty object as the JSON RPC Request parameters.
 
 TODO: (HIGH) Define errors
 
-## EnableEthereum
-
-TODO: (MED) Qs:
-
-- What is this doing? Where does it get information about the ethereum provider?
-- Name seems to specific, this should be more generic if channels can be chain agnostic
-- How does this relate to the wallet, is this essentially the `connect(...)` method on an ethers `Signer`?
-
-### Parameters
-
-Accepts an empty object as the JSON RPC Request parameters.
-
-### Response
-
-| Name               | Type                | Description                           |
-| ------------------ | ------------------- | ------------------------------------- |
-| signingAddress     | string              | Eth address used to sign from wallet  |
-| destinationAddress | string \| undefined | Where funds should go after a dispute |
-| walletVersion      | string              | Wallet version number                 |
-
-### Errors
-
-| Code | Message              | Description                       |
-| ---- | -------------------- | --------------------------------- |
-| 100  | Ethereum not enabled | Could not connect to eth provider |
-
 ## PushMessage
 
 The RPC endpoint that handles sending messages to other potential or current channel participants.
