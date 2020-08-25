@@ -17,6 +17,7 @@ import {
   knexReceiver,
   killServer,
   triggerPayments,
+  createVisualization,
 } from './e2e-utils';
 const expectSupportedState = async (
   channelId: string,
@@ -87,9 +88,7 @@ describe('Stress tests', () => {
     await SWReceiver.query().insert(bob());
   });
 
-  it.only('runs the stress test with 100 channels and 1 payment call', async () => {
-    console.log('Test start');
-
+  it('runs the stress test with 100 channels and 1 payment call', async () => {
     const channelIds = await seedTestChannels(
       getParticipant('payer', alice().privateKey),
       alice().privateKey,
@@ -98,13 +97,14 @@ describe('Stress tests', () => {
       10
     );
 
-    console.log('Trigger payments');
-    await triggerPayments(channelIds);
+    const profileFile = await triggerPayments(channelIds);
 
     for (const channelId of channelIds) {
       await await expectSupportedState(channelId, ChannelPayer, 5);
       await expectSupportedState(channelId, ChannelReceiver, 5);
     }
+
+    await createVisualization(profileFile, './profiling-data/stress-test-1.html');
   });
 
   it('runs the stress test with 100 channels and 25 payment call', async () => {
@@ -116,12 +116,14 @@ describe('Stress tests', () => {
       2
     );
     const numPayments = 25;
-    await triggerPayments(channelIds, numPayments);
+    const profileFile = await triggerPayments(channelIds, numPayments);
 
     for (const channelId of channelIds) {
       await await expectSupportedState(channelId, ChannelPayer, 3 + 2 * numPayments);
       await expectSupportedState(channelId, ChannelReceiver, 3 + 2 * numPayments);
     }
+
+    await createVisualization(profileFile, './profiling-data/stress-test-2.html');
   });
 
   afterAll(async () => {

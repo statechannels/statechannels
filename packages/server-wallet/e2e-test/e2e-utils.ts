@@ -1,4 +1,4 @@
-import {ChildProcessWithoutNullStreams, fork, spawn} from 'child_process';
+import {ChildProcessWithoutNullStreams, spawn} from 'child_process';
 import {join} from 'path';
 
 import kill = require('tree-kill');
@@ -18,37 +18,36 @@ export type ReceiverServer = {
   server: ChildProcessWithoutNullStreams;
 };
 
+export const createVisualization = async (
+  dataPath: string,
+  outputFileName: string
+): Promise<void> => {
+  return new Promise((resolve: any) => {
+    const bubbleprof = new ClinicBubbleprof({dest: './profiling-data'});
+    bubbleprof.visualize(dataPath, outputFileName, (err: any) => {
+      if (err) throw err;
+      resolve();
+    });
+  });
+};
 export const triggerPayments = async (
   channelIds: string[],
   numPayments?: number
-): Promise<void> => {
+): Promise<string> => {
   let args = ['start', '--database', 'payer', '--channels', ...channelIds];
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const bubbleprof = new ClinicBubbleprof();
-  const waitOn = (resolve: any, reject: any): void =>
-    bubbleprof.collect(['node', join(__dirname, '../lib/e2e-test/payer/index.js'), args], function(
-      err: any,
-      filepath: any
-    ) {
-      if (err) reject(err);
-
-      bubbleprof.visualize(filepath, filepath + '.html', function(err: Error) {
-        if (err) reject(err);
-      });
-      console.log('bubbleprof DONE!');
-      resolve();
-    });
-
-  // const payerScript = fork(join(__dirname, '../lib/e2e-test/payer/index.js'), args, {
-  //   execArgv: ['--prof'],
-  // });
-  // payerScript.on('message', message =>
-  //   console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
-  // );
-
-  await new Promise(waitOn);
+  const bubbleprof = new ClinicBubbleprof({dest: './profiling-data'});
+  return new Promise((resolve: any): void =>
+    bubbleprof.collect(
+      ['ts-node', join(__dirname, '/payer/index.ts'), ...args],
+      (err: any, fileName: string) => {
+        if (err) throw err;
+        resolve(fileName);
+      }
+    )
+  );
 };
 
 /**
