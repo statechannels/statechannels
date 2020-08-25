@@ -18,6 +18,7 @@ import {
   killServer,
   triggerPayments,
   createVisualization,
+  PROFILE_DATA_PATH,
 } from './e2e-utils';
 const expectSupportedState = async (
   channelId: string,
@@ -34,6 +35,10 @@ let SWPayer: typeof SigningWallet;
 let SWReceiver: typeof SigningWallet;
 
 jest.setTimeout(300_000); // 5 min  since stress tests take a long time
+
+const bubbleProfOutputPath = (name: string): string =>
+  `${PROFILE_DATA_PATH}/stress-test-${name}.html`;
+
 async function seedTestChannels(
   payer: Participant,
   payerPrivateKey: string,
@@ -104,7 +109,7 @@ describe('Stress tests', () => {
       await expectSupportedState(channelId, ChannelReceiver, 5);
     }
 
-    await createVisualization(profileFile, './profiling-data/stress-test-1.html');
+    await createVisualization(profileFile, bubbleProfOutputPath('1-payment'));
   });
 
   it('runs the stress test with 100 channels and 25 payment call', async () => {
@@ -123,7 +128,7 @@ describe('Stress tests', () => {
       await expectSupportedState(channelId, ChannelReceiver, 3 + 2 * numPayments);
     }
 
-    await createVisualization(profileFile, './profiling-data/stress-test-2.html');
+    await createVisualization(profileFile, bubbleProfOutputPath('25-payment'));
   });
 
   afterAll(async () => {
