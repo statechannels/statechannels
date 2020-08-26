@@ -20,6 +20,5 @@
   "repository": "statechannels/monorepo/blob/master/packages/integration-tests",
   "scripts": {
     "integration-tests": "jest"
-  },
-  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
+  }
 }
