@@ -6,7 +6,7 @@ Make decisions on the following:
 
 - Finalize error conventions
 - Finalize methods needed in core rpc interface (used across all envs, and extensible), inc. common getters
-- Finalize API (close channel, defund channel, withdraw)
+- Finalize API (close channel, defund channel, withdraw, get channels)
 - Finalize `ChannelStatus`
 
 ## Errors
