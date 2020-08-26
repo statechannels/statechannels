@@ -296,10 +296,10 @@ jobs:
       - upload_artifacts
       - store_artifacts:
           path: /home/circleci/project/packages/server-wallet/profiling-data/stress-test-1-payment.html
-          destination: stress-test-1.html
+          destination: stress-test-1-payment.html
       - store_artifacts:
           path: /home/circleci/project/packages/server-wallet/profiling-data/stress-test-25-payment.html
-          destination: stress-test-2.html
+          destination: stress-test-25-payment.html
 
   release-pull-request:
     <<: *defaults
