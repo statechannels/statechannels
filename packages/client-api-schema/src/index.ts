@@ -27,6 +27,9 @@
  *   "result": {"success": true}
  * }
  * ```
+ *
+ * # Methods
+ * {@link CreateChannel}
  */
 export * from './types';
 export * from './jsonrpc-header-types';

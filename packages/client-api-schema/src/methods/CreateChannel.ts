@@ -3,23 +3,19 @@ import {
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcError,
-  JSONRPCMETHOD
+  JsonRpcErrorResponse
 } from '../jsonrpc-header-types';
-import {ErrorCodes as AllErrors} from '../error-codes';
+import {ErrorCodes} from '../error-codes';
 
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
-export interface CreateChannel extends JSONRPCMETHOD {
+
+/**
+ * Request a new channel
+ */
+export interface CreateChannel {
   request: JsonRpcRequest<'CreateChannel', CreateChannelParams>;
   response: JsonRpcResponse<ChannelResult>;
-  errorResponse: {
-    jsonrpc: '2.0';
-    id: number;
-    error: {
-      code: number;
-      message: Message;
-      data?: any;
-    };
-  };
+  errorResponse: JsonRpcErrorResponse<CreateChannelError>;
 }
 
 export interface CreateChannelParams {
@@ -32,15 +28,18 @@ export interface CreateChannelParams {
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
 
-type ErrorCodes = AllErrors['CreateChannel'];
-type SigningAddressNotFound = JsonRpcError<
-  ErrorCodes['SigningAddressNotFound'],
+export type CreateChannelErrorCodes = ErrorCodes['CreateChannel'];
+export type SigningAddressNotFound = JsonRpcError<
+  CreateChannelErrorCodes['SigningAddressNotFound'],
   'Could not find signing address'
 >;
-type InvalidAppDefinition = JsonRpcError<
-  ErrorCodes['InvalidAppDefinition'],
+export type InvalidAppDefinition = JsonRpcError<
+  CreateChannelErrorCodes['InvalidAppDefinition'],
   'Invalid App Definition'
 >;
-type UnsupportedToken = JsonRpcError<ErrorCodes['UnsupportedToken'], 'This token is not supported'>;
+export type UnsupportedToken = JsonRpcError<
+  CreateChannelErrorCodes['UnsupportedToken'],
+  'This token is not supported'
+>;
 
 export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition | UnsupportedToken;

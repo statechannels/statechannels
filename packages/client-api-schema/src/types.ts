@@ -2,86 +2,84 @@ import {StateChannelsNotification} from './notifications';
 import {JsonRpcError, JsonRpcErrorResponse} from './jsonrpc-header-types';
 import {
   CreateChannelRequest,
-  JoinChannelRequest,
-  UpdateChannelRequest,
-  GetWalletInformationRequest,
-  EnableEthereumRequest,
-  GetStateRequest,
-  PushMessageRequest,
-  ChallengeChannelRequest,
-  GetBudgetRequest,
-  ApproveBudgetAndFundRequest,
-  CloseChannelRequest,
-  CloseAndWithdrawRequest,
-  GetChannelsRequest,
+  // JoinChannelRequest,
+  // UpdateChannelRequest,
+  // GetWalletInformationRequest,
+  // EnableEthereumRequest,
+  // GetStateRequest,
+  // PushMessageRequest,
+  // ChallengeChannelRequest,
+  // GetBudgetRequest,
+  // ApproveBudgetAndFundRequest,
+  // CloseChannelRequest,
+  // CloseAndWithdrawRequest,
+  // GetChannelsRequest,
   CreateChannelResponse,
-  JoinChannelResponse,
-  UpdateChannelResponse,
-  EnableEthereumResponse,
-  GetWalletInformationResponse,
-  GetStateResponse,
-  PushMessageResponse,
-  ChallengeChannelResponse,
-  GetBudgetResponse,
-  CloseChannelResponse,
-  ApproveBudgetAndFundResponse,
-  CloseAndWithdrawResponse,
-  GetChannelsResponse,
-  EnableEthereumError,
-  CloseAndWithdrawError,
-  CloseChannelError,
-  UpdateChannelError,
-  PushMessageError,
-  JoinChannelError,
-  GetStateError,
+  // JoinChannelResponse,
+  // UpdateChannelResponse,
+  // EnableEthereumResponse,
+  // GetWalletInformationResponse,
+  // GetStateResponse,
+  // PushMessageResponse,
+  // ChallengeChannelResponse,
+  // GetBudgetResponse,
+  // CloseChannelResponse,
+  // ApproveBudgetAndFundResponse,
+  // CloseAndWithdrawResponse,
+  // GetChannelsResponse,
+  // EnableEthereumError,
+  // CloseAndWithdrawError,
+  // CloseChannelError,
+  // UpdateChannelError,
+  // PushMessageError,
+  // JoinChannelError,
+  // GetStateError,
   CreateChannelError,
-  ChallengeChannelError,
+  // ChallengeChannelError,
   CreateChannel
 } from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
 
-export type StateChannelsRequest =
-  | CreateChannelRequest
-  | JoinChannelRequest
-  | UpdateChannelRequest
-  | GetWalletInformationRequest
-  | EnableEthereumRequest
-  | GetStateRequest
-  | PushMessageRequest
-  | ChallengeChannelRequest
-  | GetBudgetRequest
-  | ApproveBudgetAndFundRequest
-  | CloseChannelRequest
-  | CloseAndWithdrawRequest
-  | GetChannelsRequest;
+export type StateChannelsRequest = CreateChannelRequest;
+// | JoinChannelRequest
+// | UpdateChannelRequest
+// | GetWalletInformationRequest
+// | EnableEthereumRequest
+// | GetStateRequest
+// | PushMessageRequest
+// | ChallengeChannelRequest
+// | GetBudgetRequest
+// | ApproveBudgetAndFundRequest
+// | CloseChannelRequest
+// | CloseAndWithdrawRequest
+// | GetChannelsRequest;
 
-export type StateChannelsResponse =
-  | CreateChannelResponse
-  | JoinChannelResponse
-  | UpdateChannelResponse
-  | GetWalletInformationResponse
-  | EnableEthereumResponse
-  | GetStateResponse
-  | PushMessageResponse
-  | ChallengeChannelResponse
-  | GetBudgetResponse
-  | CloseChannelResponse
-  | ApproveBudgetAndFundResponse
-  | CloseAndWithdrawResponse
-  | GetChannelsResponse;
+export type StateChannelsResponse = CreateChannelResponse;
+// | JoinChannelResponse
+// | UpdateChannelResponse
+// | GetWalletInformationResponse
+// | EnableEthereumResponse
+// | GetStateResponse
+// | PushMessageResponse
+// | ChallengeChannelResponse
+// | GetBudgetResponse
+// | CloseChannelResponse
+// | ApproveBudgetAndFundResponse
+// | CloseAndWithdrawResponse
+// | GetChannelsResponse;
 
 export type StateChannelsError =
-  | EnableEthereumError
-  | CloseAndWithdrawError
-  | CloseChannelError
-  | UpdateChannelError
-  | PushMessageError
-  | JoinChannelError
-  | GetStateError
+  // | EnableEthereumError
+  // | CloseAndWithdrawError
+  // | CloseChannelError
+  // | UpdateChannelError
+  // | PushMessageError
+  // | JoinChannelError
+  // | GetStateError
   | CreateChannelError
-  | ChallengeChannelError
-  | PushMessageError
+  // | ChallengeChannelError
+  // | PushMessageError
   | GenericError;
 
 export type StateChannelsErrorResponse = JsonRpcErrorResponse<StateChannelsError>;
@@ -123,6 +121,6 @@ export function isStateChannelsErrorResponse(
 
 export * from './notifications';
 export {CreateChannel} from './methods';
-// export * from './methods';
-// export * from './data-types';
-// export * from './error-codes';
+export * from './methods';
+export * from './data-types';
+export * from './error-codes';
