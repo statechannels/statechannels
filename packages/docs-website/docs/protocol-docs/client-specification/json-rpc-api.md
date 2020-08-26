@@ -9,6 +9,29 @@ Make decisions on the following:
 - Finalize API (close channel, defund channel, withdraw)
 - Finalize `ChannelStatus`
 
+## Errors
+
+### Error Codes
+
+The error codes should follow a general [HTTP 4xx]() error code mapping, substituting the 4xx prefix for a domain-specific 14xx prefix. The major error codes are:
+
+- `1400` -- invalid data supplied
+- `1401` -- unauthorized action
+- `1403` -- forbidden action
+- `1404` -- resource not found
+
+### Error Structure
+
+The error codes should indicate the general class of error thrown, while the error object thrown should contain sufficient context for the debugging with the following structure:
+
+| Name    | Type                                 | Description                                           |
+| ------- | ------------------------------------ | ----------------------------------------------------- |
+| code    | number                               | Error code indicating class of error                  |
+| message | string                               | Short description of error (i.e. 'Channel not found') |
+| context | `<T extends ErrorContext = unknown>` | Debug context (i.e. `channelId` for `UpdateChannel`   |
+
+where the `ErrorContext` is a method-specific object.
+
 ## Common Types
 
 ### Participant
