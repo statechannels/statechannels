@@ -1,8 +1,27 @@
-import {Participant, Allocation, Address, ChannelResult} from '../data-types';
-import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
+import {Participant, Allocation, Address, ChannelResult, Message} from '../data-types';
+import {
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcError,
+  JSONRPCMETHOD
+} from '../jsonrpc-header-types';
 import {ErrorCodes as AllErrors} from '../error-codes';
 
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
+export interface CreateChannel extends JSONRPCMETHOD {
+  request: JsonRpcRequest<'CreateChannel', CreateChannelParams>;
+  response: JsonRpcResponse<ChannelResult>;
+  errorResponse: {
+    jsonrpc: '2.0';
+    id: number;
+    error: {
+      code: number;
+      message: Message;
+      data?: any;
+    };
+  };
+}
+
 export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];

@@ -1,3 +1,5 @@
+import {Message} from './data-types';
+
 /**
  * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
@@ -162,4 +164,26 @@ export function isJsonRpcErrorResponse<Code extends number, Message, Data = unde
   message: object
 ): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>> {
   return isJsonRpc(message) && 'id' in message && 'error' in message;
+}
+
+export interface JSONRPCMETHOD {
+  request: {
+    jsonrpc: '2.0';
+    id: number;
+    params: {};
+  };
+  response: {
+    jsonrpc: '2.0';
+    id: number;
+    result: {};
+  };
+  errorResponse: {
+    jsonrpc: '2.0';
+    id: number;
+    error: {
+      code: number;
+      message: Message;
+      data?: any;
+    };
+  };
 }

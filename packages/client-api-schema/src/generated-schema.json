@@ -253,6 +253,105 @@
     "CloseChannelResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
+    "CreateChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "errorResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "error": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "data": {
+                },
+                "message": {
+                  "$ref": "#/definitions/Message"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "type": "object"
+            },
+            "id": {
+              "type": "number"
+            },
+            "jsonrpc": {
+              "enum": [
+                "2.0"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "jsonrpc",
+            "id",
+            "error"
+          ],
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/JsonRpcRequest%3C%22CreateChannel%22%2CCreateChannelParams%3E",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "jsonrpc": {
+              "enum": [
+                "2.0"
+              ],
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": false,
+              "type": "object"
+            }
+          },
+          "required": [
+            "jsonrpc",
+            "id",
+            "params"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "jsonrpc": {
+              "enum": [
+                "2.0"
+              ],
+              "type": "string"
+            },
+            "result": {
+              "additionalProperties": false,
+              "type": "object"
+            }
+          },
+          "required": [
+            "jsonrpc",
+            "id",
+            "result"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "errorResponse",
+        "request",
+        "response"
+      ],
+      "type": "object"
+    },
     "CreateChannelError": {
       "anyOf": [
         {
@@ -2096,6 +2195,21 @@
           "$ref": "#/definitions/StateChannelsErrorResponse"
         }
       ]
+    },
+    "StateChannelsMethods": {
+      "additionalProperties": false,
+      "properties": {
+        "createChannel": {
+          "$ref": "#/definitions/CreateChannel"
+        },
+        "joinChannel": {
+        }
+      },
+      "required": [
+        "createChannel",
+        "joinChannel"
+      ],
+      "type": "object"
     },
     "StateChannelsNotification": {
       "anyOf": [

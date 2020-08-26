@@ -35,7 +35,8 @@ import {
   JoinChannelError,
   GetStateError,
   CreateChannelError,
-  ChallengeChannelError
+  ChallengeChannelError,
+  CreateChannel
 } from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;
@@ -121,6 +122,7 @@ export function isStateChannelsErrorResponse(
 }
 
 export * from './notifications';
-export * from './methods';
-export * from './data-types';
-export * from './error-codes';
+export {CreateChannel} from './methods';
+// export * from './methods';
+// export * from './data-types';
+// export * from './error-codes';

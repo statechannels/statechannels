@@ -529,269 +529,29 @@
       "typescript-api/channel-client.userdeclinederrorcode": {
         "title": "UserDeclinedErrorCode variable"
       },
-      "typescript-api/client-api-schema.address": {
-        "title": "Address type"
-      },
-      "typescript-api/client-api-schema.allocation.allocationitems": {
-        "title": "Allocation.allocationItems property"
-      },
-      "typescript-api/client-api-schema.allocation": {
-        "title": "Allocation interface"
-      },
-      "typescript-api/client-api-schema.allocation.token": {
-        "title": "Allocation.token property"
-      },
-      "typescript-api/client-api-schema.allocationitem.amount": {
-        "title": "AllocationItem.amount property"
-      },
-      "typescript-api/client-api-schema.allocationitem.destination": {
-        "title": "AllocationItem.destination property"
-      },
-      "typescript-api/client-api-schema.allocationitem": {
-        "title": "AllocationItem interface"
-      },
-      "typescript-api/client-api-schema.allocations": {
-        "title": "Allocations type"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams.hub": {
-        "title": "ApproveBudgetAndFundParams.hub property"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams": {
-        "title": "ApproveBudgetAndFundParams interface"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams.playerparticipantid": {
-        "title": "ApproveBudgetAndFundParams.playerParticipantId property"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams.requestedreceivecapacity": {
-        "title": "ApproveBudgetAndFundParams.requestedReceiveCapacity property"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams.requestedsendcapacity": {
-        "title": "ApproveBudgetAndFundParams.requestedSendCapacity property"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundparams.token": {
-        "title": "ApproveBudgetAndFundParams.token property"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundrequest": {
-        "title": "ApproveBudgetAndFundRequest type"
-      },
-      "typescript-api/client-api-schema.approvebudgetandfundresponse": {
-        "title": "ApproveBudgetAndFundResponse type"
-      },
       "typescript-api/client-api-schema.budgetupdatednotification": {
         "title": "BudgetUpdatedNotification type"
-      },
-      "typescript-api/client-api-schema.bytes32": {
-        "title": "Bytes32 type"
-      },
-      "typescript-api/client-api-schema.challengechannelparams.channelid": {
-        "title": "ChallengeChannelParams.channelId property"
-      },
-      "typescript-api/client-api-schema.challengechannelparams": {
-        "title": "ChallengeChannelParams interface"
-      },
-      "typescript-api/client-api-schema.challengechannelrequest": {
-        "title": "ChallengeChannelRequest type"
-      },
-      "typescript-api/client-api-schema.challengechannelresponse": {
-        "title": "ChallengeChannelResponse type"
-      },
-      "typescript-api/client-api-schema.channelbudget.amount": {
-        "title": "ChannelBudget.amount property"
-      },
-      "typescript-api/client-api-schema.channelbudget.channelid": {
-        "title": "ChannelBudget.channelId property"
-      },
-      "typescript-api/client-api-schema.channelbudget": {
-        "title": "ChannelBudget interface"
-      },
-      "typescript-api/client-api-schema.channelclosed": {
-        "title": "ChannelClosed type"
       },
       "typescript-api/client-api-schema.channelclosingnotification": {
         "title": "ChannelClosingNotification type"
       },
-      "typescript-api/client-api-schema.channelid": {
-        "title": "ChannelId type"
-      },
-      "typescript-api/client-api-schema.channelnotfound": {
-        "title": "ChannelNotFound type"
-      },
       "typescript-api/client-api-schema.channelproposednotification": {
         "title": "ChannelProposedNotification type"
-      },
-      "typescript-api/client-api-schema.channelresult.allocations": {
-        "title": "ChannelResult.allocations property"
-      },
-      "typescript-api/client-api-schema.channelresult.appdata": {
-        "title": "ChannelResult.appData property"
-      },
-      "typescript-api/client-api-schema.channelresult.appdefinition": {
-        "title": "ChannelResult.appDefinition property"
-      },
-      "typescript-api/client-api-schema.channelresult.challengeexpirationtime": {
-        "title": "ChannelResult.challengeExpirationTime property"
-      },
-      "typescript-api/client-api-schema.channelresult.channelid": {
-        "title": "ChannelResult.channelId property"
-      },
-      "typescript-api/client-api-schema.channelresult": {
-        "title": "ChannelResult interface"
-      },
-      "typescript-api/client-api-schema.channelresult.participants": {
-        "title": "ChannelResult.participants property"
-      },
-      "typescript-api/client-api-schema.channelresult.status": {
-        "title": "ChannelResult.status property"
-      },
-      "typescript-api/client-api-schema.channelresult.turnnum": {
-        "title": "ChannelResult.turnNum property"
-      },
-      "typescript-api/client-api-schema.channelstatus": {
-        "title": "ChannelStatus type"
       },
       "typescript-api/client-api-schema.channelupdatednotification": {
         "title": "ChannelUpdatedNotification type"
       },
-      "typescript-api/client-api-schema.closeandwithdrawerror": {
-        "title": "CloseAndWithdrawError type"
+      "typescript-api/client-api-schema.createchannel.errorresponse": {
+        "title": "CreateChannel.errorResponse property"
       },
-      "typescript-api/client-api-schema.closeandwithdrawparams.hubparticipantid": {
-        "title": "CloseAndWithdrawParams.hubParticipantId property"
+      "typescript-api/client-api-schema.createchannel": {
+        "title": "CreateChannel interface"
       },
-      "typescript-api/client-api-schema.closeandwithdrawparams": {
-        "title": "CloseAndWithdrawParams interface"
+      "typescript-api/client-api-schema.createchannel.request": {
+        "title": "CreateChannel.request property"
       },
-      "typescript-api/client-api-schema.closeandwithdrawrequest": {
-        "title": "CloseAndWithdrawRequest type"
-      },
-      "typescript-api/client-api-schema.closeandwithdrawresponse": {
-        "title": "CloseAndWithdrawResponse type"
-      },
-      "typescript-api/client-api-schema.closechannelerror": {
-        "title": "CloseChannelError type"
-      },
-      "typescript-api/client-api-schema.closechannelparams.channelid": {
-        "title": "CloseChannelParams.channelId property"
-      },
-      "typescript-api/client-api-schema.closechannelparams": {
-        "title": "CloseChannelParams interface"
-      },
-      "typescript-api/client-api-schema.closechannelrequest": {
-        "title": "CloseChannelRequest type"
-      },
-      "typescript-api/client-api-schema.closechannelresponse": {
-        "title": "CloseChannelResponse type"
-      },
-      "typescript-api/client-api-schema.createchannelparams.allocations": {
-        "title": "CreateChannelParams.allocations property"
-      },
-      "typescript-api/client-api-schema.createchannelparams.appdata": {
-        "title": "CreateChannelParams.appData property"
-      },
-      "typescript-api/client-api-schema.createchannelparams.appdefinition": {
-        "title": "CreateChannelParams.appDefinition property"
-      },
-      "typescript-api/client-api-schema.createchannelparams.fundingstrategy": {
-        "title": "CreateChannelParams.fundingStrategy property"
-      },
-      "typescript-api/client-api-schema.createchannelparams": {
-        "title": "CreateChannelParams interface"
-      },
-      "typescript-api/client-api-schema.createchannelparams.participants": {
-        "title": "CreateChannelParams.participants property"
-      },
-      "typescript-api/client-api-schema.createchannelrequest": {
-        "title": "CreateChannelRequest type"
-      },
-      "typescript-api/client-api-schema.createchannelresponse": {
-        "title": "CreateChannelResponse type"
-      },
-      "typescript-api/client-api-schema.domainbudget.budgets": {
-        "title": "DomainBudget.budgets property"
-      },
-      "typescript-api/client-api-schema.domainbudget.domain": {
-        "title": "DomainBudget.domain property"
-      },
-      "typescript-api/client-api-schema.domainbudget.hubaddress": {
-        "title": "DomainBudget.hubAddress property"
-      },
-      "typescript-api/client-api-schema.domainbudget": {
-        "title": "DomainBudget interface"
-      },
-      "typescript-api/client-api-schema.enableethereumerror": {
-        "title": "EnableEthereumError type"
-      },
-      "typescript-api/client-api-schema.enableethereumrequest": {
-        "title": "EnableEthereumRequest type"
-      },
-      "typescript-api/client-api-schema.enableethereumresponse": {
-        "title": "EnableEthereumResponse type"
-      },
-      "typescript-api/client-api-schema.errorcodes": {
-        "title": "ErrorCodes type"
-      },
-      "typescript-api/client-api-schema.externaldestination": {
-        "title": "ExternalDestination type"
-      },
-      "typescript-api/client-api-schema.fundingstrategy": {
-        "title": "FundingStrategy type"
-      },
-      "typescript-api/client-api-schema.funds.amount": {
-        "title": "Funds.amount property"
-      },
-      "typescript-api/client-api-schema.funds": {
-        "title": "Funds interface"
-      },
-      "typescript-api/client-api-schema.funds.token": {
-        "title": "Funds.token property"
-      },
-      "typescript-api/client-api-schema.getbudgetparams.hubparticipantid": {
-        "title": "GetBudgetParams.hubParticipantId property"
-      },
-      "typescript-api/client-api-schema.getbudgetparams": {
-        "title": "GetBudgetParams interface"
-      },
-      "typescript-api/client-api-schema.getbudgetrequest": {
-        "title": "GetBudgetRequest type"
-      },
-      "typescript-api/client-api-schema.getbudgetresponse": {
-        "title": "GetBudgetResponse type"
-      },
-      "typescript-api/client-api-schema.getchannelsparams.includeclosed": {
-        "title": "GetChannelsParams.includeClosed property"
-      },
-      "typescript-api/client-api-schema.getchannelsparams": {
-        "title": "GetChannelsParams interface"
-      },
-      "typescript-api/client-api-schema.getchannelsrequest": {
-        "title": "GetChannelsRequest type"
-      },
-      "typescript-api/client-api-schema.getchannelsresponse": {
-        "title": "GetChannelsResponse type"
-      },
-      "typescript-api/client-api-schema.getstateparams.channelid": {
-        "title": "GetStateParams.channelId property"
-      },
-      "typescript-api/client-api-schema.getstateparams": {
-        "title": "GetStateParams interface"
-      },
-      "typescript-api/client-api-schema.getstaterequest": {
-        "title": "GetStateRequest type"
-      },
-      "typescript-api/client-api-schema.getstateresponse": {
-        "title": "GetStateResponse type"
-      },
-      "typescript-api/client-api-schema.getwalletinformationrequest": {
-        "title": "GetWalletInformationRequest type"
-      },
-      "typescript-api/client-api-schema.getwalletinformationresponse": {
-        "title": "GetWalletInformationResponse type"
-      },
-      "typescript-api/client-api-schema.invalidappdata": {
-        "title": "InvalidAppData type"
-      },
-      "typescript-api/client-api-schema.invalidtransition": {
-        "title": "InvalidTransition type"
+      "typescript-api/client-api-schema.createchannel.response": {
+        "title": "CreateChannel.response property"
       },
       "typescript-api/client-api-schema.isjsonrpcerrorresponse": {
         "title": "isJsonRpcErrorResponse() function"
@@ -817,18 +577,6 @@
       "typescript-api/client-api-schema.isstatechannelsresponse": {
         "title": "isStateChannelsResponse() function"
       },
-      "typescript-api/client-api-schema.joinchannelparams.channelid": {
-        "title": "JoinChannelParams.channelId property"
-      },
-      "typescript-api/client-api-schema.joinchannelparams": {
-        "title": "JoinChannelParams interface"
-      },
-      "typescript-api/client-api-schema.joinchannelrequest": {
-        "title": "JoinChannelRequest type"
-      },
-      "typescript-api/client-api-schema.joinchannelresponse": {
-        "title": "JoinChannelResponse type"
-      },
       "typescript-api/client-api-schema.jsonrpcerror.code": {
         "title": "JsonRpcError.code property"
       },
@@ -852,6 +600,18 @@
       },
       "typescript-api/client-api-schema.jsonrpcerrorresponse": {
         "title": "JsonRpcErrorResponse interface"
+      },
+      "typescript-api/client-api-schema.jsonrpcmethod.errorresponse": {
+        "title": "JSONRPCMETHOD.errorResponse property"
+      },
+      "typescript-api/client-api-schema.jsonrpcmethod": {
+        "title": "JSONRPCMETHOD interface"
+      },
+      "typescript-api/client-api-schema.jsonrpcmethod.request": {
+        "title": "JSONRPCMETHOD.request property"
+      },
+      "typescript-api/client-api-schema.jsonrpcmethod.response": {
+        "title": "JSONRPCMETHOD.response property"
       },
       "typescript-api/client-api-schema.jsonrpcnotification.jsonrpc": {
         "title": "JsonRpcNotification.jsonrpc property"
@@ -895,23 +655,11 @@
       "typescript-api/client-api-schema": {
         "title": "client-api-schema package"
       },
-      "typescript-api/client-api-schema.message.data": {
-        "title": "Message.data property"
-      },
-      "typescript-api/client-api-schema.message": {
-        "title": "Message interface"
-      },
-      "typescript-api/client-api-schema.message.recipient": {
-        "title": "Message.recipient property"
-      },
-      "typescript-api/client-api-schema.message.sender": {
-        "title": "Message.sender property"
-      },
       "typescript-api/client-api-schema.messagequeuednotification": {
         "title": "MessageQueuedNotification type"
       },
-      "typescript-api/client-api-schema.notyourturn": {
-        "title": "NotYourTurn type"
+      "typescript-api/client-api-schema.parseerrorresponse": {
+        "title": "parseErrorResponse() function"
       },
       "typescript-api/client-api-schema.parsenotification": {
         "title": "parseNotification() function"
@@ -922,30 +670,6 @@
       "typescript-api/client-api-schema.parseresponse": {
         "title": "parseResponse() function"
       },
-      "typescript-api/client-api-schema.participant.destination": {
-        "title": "Participant.destination property"
-      },
-      "typescript-api/client-api-schema.participant": {
-        "title": "Participant interface"
-      },
-      "typescript-api/client-api-schema.participant.participantid": {
-        "title": "Participant.participantId property"
-      },
-      "typescript-api/client-api-schema.participant.signingaddress": {
-        "title": "Participant.signingAddress property"
-      },
-      "typescript-api/client-api-schema.pushmessageparams": {
-        "title": "PushMessageParams type"
-      },
-      "typescript-api/client-api-schema.pushmessagerequest": {
-        "title": "PushMessageRequest type"
-      },
-      "typescript-api/client-api-schema.pushmessageresponse": {
-        "title": "PushMessageResponse type"
-      },
-      "typescript-api/client-api-schema.pushmessageresult": {
-        "title": "PushMessageResult type"
-      },
       "typescript-api/client-api-schema.statechannelserror": {
         "title": "StateChannelsError type"
       },
@@ -954,6 +678,15 @@
       },
       "typescript-api/client-api-schema.statechannelsjsonrpcmessage": {
         "title": "StateChannelsJsonRpcMessage type"
+      },
+      "typescript-api/client-api-schema.statechannelsmethods.createchannel": {
+        "title": "StateChannelsMethods.createChannel property"
+      },
+      "typescript-api/client-api-schema.statechannelsmethods.joinchannel": {
+        "title": "StateChannelsMethods.joinChannel property"
+      },
+      "typescript-api/client-api-schema.statechannelsmethods": {
+        "title": "StateChannelsMethods interface"
       },
       "typescript-api/client-api-schema.statechannelsnotification": {
         "title": "StateChannelsNotification type"
@@ -967,50 +700,11 @@
       "typescript-api/client-api-schema.statechannelsresponse": {
         "title": "StateChannelsResponse type"
       },
-      "typescript-api/client-api-schema.tokenbudget.availablereceivecapacity": {
-        "title": "TokenBudget.availableReceiveCapacity property"
-      },
-      "typescript-api/client-api-schema.tokenbudget.availablesendcapacity": {
-        "title": "TokenBudget.availableSendCapacity property"
-      },
-      "typescript-api/client-api-schema.tokenbudget.channels": {
-        "title": "TokenBudget.channels property"
-      },
-      "typescript-api/client-api-schema.tokenbudget": {
-        "title": "TokenBudget interface"
-      },
-      "typescript-api/client-api-schema.tokenbudget.token": {
-        "title": "TokenBudget.token property"
-      },
       "typescript-api/client-api-schema.uinotification": {
         "title": "UiNotification type"
       },
-      "typescript-api/client-api-schema.uint256": {
-        "title": "Uint256 type"
-      },
-      "typescript-api/client-api-schema.uint48": {
-        "title": "Uint48 type"
-      },
-      "typescript-api/client-api-schema.updatechannelerror": {
-        "title": "UpdateChannelError type"
-      },
-      "typescript-api/client-api-schema.updatechannelparams.allocations": {
-        "title": "UpdateChannelParams.allocations property"
-      },
-      "typescript-api/client-api-schema.updatechannelparams.appdata": {
-        "title": "UpdateChannelParams.appData property"
-      },
-      "typescript-api/client-api-schema.updatechannelparams.channelid": {
-        "title": "UpdateChannelParams.channelId property"
-      },
-      "typescript-api/client-api-schema.updatechannelparams": {
-        "title": "UpdateChannelParams interface"
-      },
-      "typescript-api/client-api-schema.updatechannelrequest": {
-        "title": "UpdateChannelRequest type"
-      },
-      "typescript-api/client-api-schema.updatechannelresponse": {
-        "title": "UpdateChannelResponse type"
+      "typescript-api/client-api-schema.walletready": {
+        "title": "WalletReady type"
       },
       "typescript-api/iframe-channel-provider.channelprovider": {
         "title": "channelProvider variable"
@@ -2311,6 +2005,45 @@
       },
       "version-0.2.0/typescript-api/version-0.2.0-index": {
         "title": "API Reference"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.challengechannelerror": {
+        "title": "ChallengeChannelError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.createchannelerror": {
+        "title": "CreateChannelError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.getstateerror": {
+        "title": "GetStateError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.joinchannelerror": {
+        "title": "JoinChannelError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema": {
+        "title": "client-api-schema package"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.parseerrorresponse": {
+        "title": "parseErrorResponse() function"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.pushmessageerror": {
+        "title": "PushMessageError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.statechannelserror": {
+        "title": "StateChannelsError type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.statechannelsnotification": {
+        "title": "StateChannelsNotification type"
+      },
+      "version-0.3.0/typescript-api/version-0.3.0-client-api-schema.walletready": {
+        "title": "WalletReady type"
+      },
+      "version-0.3.1/typescript-api/version-0.3.1-iframe-channel-provider.iframechannelprovider": {
+        "title": "IFrameChannelProvider class"
+      },
+      "version-0.3.1/typescript-api/version-0.3.1-iframe-channel-provider.iframechannelprovider.mountwalletcomponent": {
+        "title": "IFrameChannelProvider.mountWalletComponent() method"
+      },
+      "version-0.3.1/typescript-api/version-0.3.1-iframe-channel-provider.iframechannelprovider.walletready": {
+        "title": "IFrameChannelProvider.walletReady property"
       }
     },
     "links": {
