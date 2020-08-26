@@ -1,16 +1,16 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "statechannels",
   "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@openzeppelin/contracts": "3.0.1",
-    "ethers": "4.0.45"
+    "ethers": "4.0.48"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.3.0",
+    "@statechannels/devtools": "^0.3.1",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",

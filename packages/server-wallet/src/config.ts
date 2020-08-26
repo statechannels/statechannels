@@ -3,7 +3,7 @@
  */
 
 interface ServerWalletConfig {
-  nodeEnv: 'test' | 'development' | 'production';
+  nodeEnv?: 'test' | 'development' | 'production';
   postgresDatabaseUrl?: string;
   postgresHost?: string;
   postgresPort?: string;
@@ -42,9 +42,5 @@ const config: ServerWalletConfig = {
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
   timingMetrics: process.env.TIMING_METRICS === 'ON',
 };
-
-if (['test', 'development', 'production'].indexOf(config.nodeEnv) === -1) {
-  throw new Error(`Invalid NODE_ENV: ${config.nodeEnv}`);
-}
 
 export default config;
