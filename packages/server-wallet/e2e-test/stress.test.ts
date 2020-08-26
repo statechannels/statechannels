@@ -99,7 +99,7 @@ describe('Stress tests', () => {
       alice().privateKey,
       getParticipant('receiver', bob().privateKey),
       bob().privateKey,
-      10
+      100
     );
 
     const profileFile = await triggerPayments(channelIds);
