@@ -53,7 +53,6 @@
     "postinstall": "patch-package",
     "preinstall": "npx typesync",
     "prepare": "lerna run --concurrency 8 --stream prepare",
-    "publish": "lerna publish --yes from-package patch",
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
     "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod",
