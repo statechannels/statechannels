@@ -1,53 +1,41 @@
-import {ChildProcessWithoutNullStreams, spawn} from 'child_process';
+import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_process';
 import {join} from 'path';
 
 import kill = require('tree-kill');
-import axios from 'axios';
 
 import Knex = require('knex');
+import {Participant, makeDestination} from '@statechannels/wallet-core';
+import {Wallet} from 'ethers';
+import axios from 'axios';
 
 import {dbConfig} from '../src/db/config';
+import {withSupportedState} from '../src/models/__test__/fixtures/channel';
+import {SigningWallet} from '../src/models/signing-wallet';
+import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
+import {Channel} from '../src/models/channel';
 
-export const PROFILE_DATA_PATH = './profiling-data';
-
-// eslint-disable-next-line
-const ClinicBubbleprof = require('@nearform/bubbleprof');
+import {PerformanceTimer} from './payer/timers';
 
 export type ReceiverServer = {
   url: string;
-  server: ChildProcessWithoutNullStreams;
+  server: ChildProcessWithoutNullStreams | ChildProcess;
 };
 
-export const createVisualization = async (
-  dataPath: string,
-  outputFileName: string
-): Promise<void> => {
-  return new Promise((resolve: any) => {
-    const bubbleprof = new ClinicBubbleprof({dest: PROFILE_DATA_PATH});
-    bubbleprof.visualize(dataPath, outputFileName, (err: any) => {
-      if (err) throw err;
-      resolve();
-    });
-  });
-};
 export const triggerPayments = async (
   channelIds: string[],
   numPayments?: number
-): Promise<string> => {
+): Promise<void> => {
   let args = ['start', '--database', 'payer', '--channels', ...channelIds];
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const bubbleprof = new ClinicBubbleprof({dest: PROFILE_DATA_PATH});
-  return new Promise((resolve: any): void =>
-    bubbleprof.collect(
-      ['ts-node', join(__dirname, '/payer/index.ts'), ...args],
-      (err: any, fileName: string) => {
-        if (err) throw err;
-        resolve(fileName);
-      }
-    )
+  const payerScript = fork(join(__dirname, './payer/index.ts'), args, {
+    execArgv: ['-r', 'ts-node/register'],
+  });
+  payerScript.on('message', message =>
+    console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
   );
+  await new Promise(resolve => payerScript.on('exit', resolve));
 };
 
 /**
@@ -111,3 +99,41 @@ export const killServer = async ({server}: ReceiverServer): Promise<void> => {
 
   await knexReceiver.destroy();
 };
+
+export async function seedTestChannels(
+  payer: Participant,
+  payerPrivateKey: string,
+  receiver: Participant,
+  receiverPrivateKey: string,
+  numOfChannels: number,
+  knexPayer: Knex
+): Promise<string[]> {
+  const channelIds: string[] = [];
+  for (let i = 0; i < numOfChannels; i++) {
+    const seed = withSupportedState([
+      SigningWallet.fromJson({privateKey: payerPrivateKey}),
+      SigningWallet.fromJson({privateKey: receiverPrivateKey}),
+    ])({
+      vars: [stateVars({turnNum: 3})],
+      channelNonce: i,
+      participants: [payer, receiver],
+    });
+    await Channel.bindKnex(knexPayer)
+      .query()
+      .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default
+    await Channel.bindKnex(knexReceiver)
+      .query()
+      .insert([{...seed, signingAddress: receiver.signingAddress}]);
+    channelIds.push(seed.channelId);
+  }
+  return channelIds;
+}
+
+export function getParticipant(participantId: string, privateKey: string): Participant {
+  const signingAddress = new Wallet(privateKey).address;
+  return {
+    signingAddress,
+    participantId,
+    destination: makeDestination(signingAddress),
+  };
+}

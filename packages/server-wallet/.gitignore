@@ -17,4 +17,5 @@ manual-test/message-sequence.json
 tsconfig.tsbuildinfo
 .eslintcache
 
+.clinic
 profiling-data
