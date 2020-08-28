@@ -57,17 +57,17 @@ module.exports = {
       },
       items: [
         {
-          to: 'docs/',
+          to: '/',
           label: 'Docs',
           position: 'left'
         },
         {
-          to: 'docs/typescript-api/index',
+          to: '/typescript-api/index',
           label: 'Typescript API',
           position: 'left'
         },
         {
-          to: 'docs/contract-api/contract-inheritance',
+          to: '/contract-api/contract-inheritance',
           label: 'Contract API',
           position: 'left'
         }
