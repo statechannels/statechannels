@@ -22,7 +22,9 @@
     "docusaurus": "docusaurus"
   },
   "devDependencies": {
-    "@types/highlight.js": "9.12.4"
+    "@types/highlight.js": "9.12.4",
+    "@types/react": "^16.9.48",
+    "@types/react-dom": "^16.9.8"
   },
   "dependencies": {
     "@microsoft/api-documenter": "^7.8.21",
