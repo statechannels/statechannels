@@ -76,6 +76,5 @@
     "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
     "test:coverage": "jest --coverage"
   },
-  "types": "dist/src/index.d.ts",
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  "types": "dist/src/index.d.ts"
 }

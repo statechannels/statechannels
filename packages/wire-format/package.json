@@ -44,6 +44,5 @@
     "prepare": "yarn build",
     "test": "jest",
     "test:ci": "yarn test --ci --runInBand"
-  },
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  }
 }

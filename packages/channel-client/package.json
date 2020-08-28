@@ -49,6 +49,5 @@
     "prepare": "rm -rf lib && yarn build",
     "test": "jest",
     "test:ci": "jest --runInBand"
-  },
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  }
 }
