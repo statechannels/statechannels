@@ -1,6 +1,6 @@
 ---
 id: overview
-title: Overview
+title: statechannels docs
 ---
 
 Welcome to the statechannels documentation site!
