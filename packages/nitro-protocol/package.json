@@ -69,6 +69,7 @@
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
+    "generate-api": "yarn docgen",
     "docgen": "solidoc",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
