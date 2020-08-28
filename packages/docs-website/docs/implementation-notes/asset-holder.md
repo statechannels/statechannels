@@ -72,17 +72,6 @@ library Outcome {
 }
 ```
 
-### Example
-
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA     | 5      | 0xDestB     | 2      | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------- | ------ | ----------- | ------ | ---------------- | --- |
-|                                                                                                 |                                                  |                                                                                                       | Destination | Amount | Destination | Amount |                  |     |
-|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |             |        |
-|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |             |        |
-|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |             |
-| <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
-| <td colspan="8" align="center">Outcome</td>                                                     |
-
 ### Destinations
 
 A `Destination` is a `bytes32` and either:
