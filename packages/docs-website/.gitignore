@@ -1,0 +1,5 @@
+docs/generated-apis/
+docs/typescript-api/
+docs/natspec/
+
+.docusaurus
