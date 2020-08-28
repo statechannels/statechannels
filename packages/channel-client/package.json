@@ -42,8 +42,9 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
-    "build": "yarn build:typescript && api-extractor run --local",
+    "build": "yarn build:typescript",
     "build:typescript": "tsc -b .",
+    "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
     "prepare": "rm -rf lib && yarn build",
