@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="150px" height="150px" viewBox="0 0 150 150" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>Slice</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="ethereum-logo" transform="translate(29.000000, 0.000000)" fill-rule="nonzero">
+            <polygon id="Path" fill="#343434" points="46.0291727 0 45.023777 3.41726619 45.023777 102.578417 46.0291727 103.582014 92.0586691 76.3741007"></polygon>
+            <polygon id="Path" fill="#8C8C8C" points="46.0294964 0 0 76.3741007 46.0294964 103.582374 46.0294964 55.452518"></polygon>
+            <polygon id="Path" fill="#3C3C3B" points="46.0291727 112.297338 45.4626259 112.987986 45.4626259 148.311367 46.0291727 149.966403 92.0860072 85.1030935"></polygon>
+            <polygon id="Path" fill="#8C8C8C" points="46.0294964 149.965899 46.0294964 112.296835 0 85.1025899"></polygon>
+            <polygon id="Path" fill="#141414" points="46.0291727 103.581906 92.0579496 76.3743525 46.0291727 55.4527698"></polygon>
+            <polygon id="Path" fill="#393939" points="0.000323741007 76.3743885 46.0291007 103.581942 46.0291007 55.4528058"></polygon>
+        </g>
+    </g>
+</svg>

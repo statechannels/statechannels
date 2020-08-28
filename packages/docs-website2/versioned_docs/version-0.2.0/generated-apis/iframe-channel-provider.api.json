@@ -1,0 +1,1424 @@
+---
+---
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "7.9.2",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "@statechannels/iframe-channel-provider!",
+  "docComment": "/**\n * Communicate with a statechannels wallet via JSON-RPC over postMessage\n *\n * @remarks\n *\n * Attaches a channelProvider to the window object.\n *\n * @packageDocumentation\n */\n",
+  "name": "@statechannels/iframe-channel-provider",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "@statechannels/iframe-channel-provider!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Variable",
+          "canonicalReference": "@statechannels/iframe-channel-provider!channelProvider:var",
+          "docComment": "/**\n * Class instance that is attached to the window object\n *\n * @remarks\n *\n * Accessible via `window.channelProvider`\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "channelProvider: "
+            },
+            {
+              "kind": "Reference",
+              "text": "IFrameChannelProvider",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider:class"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "channelProvider",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface",
+          "docComment": "/**\n * The generic JsonRPC provider interface that mimics {@link https://eips.ethereum.org/EIPS/eip-1193 | EIP-1193} and the window.ethereum object in the browser.\n *\n * @remarks\n *\n * Expectation is bidirectional communication between application and the wallet.\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface ChannelProviderInterface "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "ChannelProviderInterface",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#destinationAddress:member",
+              "docComment": "/**\n * The ethereum address where on-chain funds will be sent.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "destinationAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#off:member",
+              "docComment": "/**\n * eventemitter 'off' for JSON-RPC Notifications. Use this to unregister callbacks.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "off: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OffType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "off",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#on:member",
+              "docComment": "/**\n * eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "on: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OnType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "on",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#send:member(1)",
+              "docComment": "/**\n * Method for sending requests to the wallet\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "send<MethodName extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "MethodName"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[MethodName]['request']['params']"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[MethodName]['response']['result']>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "method",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                },
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "MethodName",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "send"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#signingAddress:member",
+              "docComment": "/**\n * The public part of the ephemeral key pair used for signing state channel updates.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "signingAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "signingAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#subscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "subscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "subscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#unsubscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "unsubscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "unsubscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface#walletVersion:member",
+              "docComment": "/**\n * The ethereum address where on-chain funds will be sent.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "walletVersion?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "walletVersion",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider:class",
+          "docComment": "/**\n * Class for interacting with a statechannels wallet\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class IFrameChannelProvider implements "
+            },
+            {
+              "kind": "Reference",
+              "text": "IFrameChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "IFrameChannelProvider",
+          "members": [
+            {
+              "kind": "Constructor",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider:constructor(1)",
+              "docComment": "/**\n * Create a new instance of this class\n *\n * @beta\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "constructor();"
+                }
+              ],
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": []
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#destinationAddress:member",
+              "docComment": "/**\n * The ethereum address where on-chain funds will be sent.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "destinationAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "destinationAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#enable:member(1)",
+              "docComment": "/**\n * Enable the channel provider\n *\n * @remarks\n *\n * This causes the provider to cache {@link IFrameChannelProvider.signingAddress | signingAddress}, {@link IFrameChannelProvider.destinationAddress | destinationAddress} and {@link IFrameChannelProvider.walletVersion | walletVersion} from the wallet.\n *\n * @returns Promise which resolves when the wallet has completed the Enable Ethereum workflow.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "enable(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "enable"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#events:member",
+              "docComment": "/**\n * EventEmitter instance emitting wallet notifications\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected readonly events: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EventEmitter",
+                  "canonicalReference": "eventemitter3!~EventEmitter:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EventType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!EventType:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "events",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 5
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#iframe:member",
+              "docComment": "/**\n * Service handling embedding of an iframe onto the page\n *\n * @remarks\n *\n * This iframe runs the wallet code\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected readonly iframe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IFrameService",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!IFrameService:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "iframe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#messaging:member",
+              "docComment": "/**\n * Handles messaging to and from the wallet using postMessage\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected readonly messaging: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "PostMessageService",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!PostMessageService:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "messaging",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#mounted:member",
+              "docComment": "/**\n * Has the wallet iFrame been mounted?\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected mounted: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "mounted",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#mountWalletComponent:member(1)",
+              "docComment": "/**\n * Trigger the mounting of the <iframe/> element\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "mountWalletComponent(url: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "url",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "mountWalletComponent"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#off:member",
+              "docComment": "/**\n * eventemitter 'off' for JSON-RPC Notifications. Use this to unregister callbacks.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "off: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OffType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OffType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "off",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#on:member",
+              "docComment": "/**\n * eventemitter 'on' for JSON-RPC Notifications. Use this to register callbacks.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "on: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OnType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!OnType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "on",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#onMessage:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected onMessage(event: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "MessageEvent",
+                  "canonicalReference": "!MessageEvent:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "event",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "onMessage"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#send:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "send<M extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(method: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "M"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", params: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['request']['params']"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WalletJsonRpcAPI",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[M]['response']['result']>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 13
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "method",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                },
+                {
+                  "parameterName": "params",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 8
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "M",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "send"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#signingAddress:member",
+              "docComment": "/**\n * The public part of the ephemeral key pair\n *\n * @remarks\n *\n * The private part is used for signing state channel updates.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "signingAddress?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "signingAddress",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#subscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "subscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!SubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "subscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#subscriptions:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected readonly subscriptions: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "{\n        [T in keyof "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "StateChannelsNotificationType",
+                  "canonicalReference": "@statechannels/client-api-schema!StateChannelsNotificationType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: string[];\n    }"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "subscriptions",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 4
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#unsubscribe:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "unsubscribe: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "UnsubscribeType",
+                  "canonicalReference": "@statechannels/iframe-channel-provider!UnsubscribeType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "unsubscribe",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#url:member",
+              "docComment": "/**\n * The url of the hosted statechannels wallet\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected url: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "url",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#walletReady:member",
+              "docComment": "/**\n * Is the wallet ready to receive requests?\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "walletReady: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(url: string) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<unknown>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "walletReady",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 4
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProvider#walletVersion:member",
+              "docComment": "/**\n * The ethereum address where on-chain funds will be sent.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "walletVersion?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Beta",
+              "name": "walletVersion",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            }
+          ],
+          "implementsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface:interface",
+          "docComment": "/**\n * For environments where the wallet is proxied within an iFrame embedded on the application's DOM.\n *\n * @remarks\n *\n * This is as opposed to being injected via an extension background script, in which case the \"mounting\" is effectively done via the background script and not by the application.\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface IFrameChannelProviderInterface extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "Web3ChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "IFrameChannelProviderInterface",
+          "members": [
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!IFrameChannelProviderInterface#mountWalletComponent:member(1)",
+              "docComment": "/**\n * Trigger the mounting of the <iframe/> element which loads the wallet.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "mountWalletComponent(url?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "url",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "name": "mountWalletComponent"
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@statechannels/iframe-channel-provider!WalletJsonRpcAPI:type",
+          "docComment": "/**\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type WalletJsonRpcAPI = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    CreateChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CreateChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CreateChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CreateChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CreateChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    UpdateChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UpdateChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UpdateChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!UpdateChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    PushMessage: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PushMessageRequest",
+              "canonicalReference": "@statechannels/client-api-schema!PushMessageRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PushMessageResponse",
+              "canonicalReference": "@statechannels/client-api-schema!PushMessageResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    CloseChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CloseChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    JoinChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "JoinChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "JoinChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!JoinChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetState: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetStateRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetStateRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetStateResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetStateResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetWalletInformation: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetWalletInformationRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetWalletInformationResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetWalletInformationResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    EnableEthereum: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "EnableEthereumRequest",
+              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "EnableEthereumResponse",
+              "canonicalReference": "@statechannels/client-api-schema!EnableEthereumResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    ChallengeChannel: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChallengeChannelRequest",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChallengeChannelResponse",
+              "canonicalReference": "@statechannels/client-api-schema!ChallengeChannelResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    ApproveBudgetAndFund: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ApproveBudgetAndFundRequest",
+              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ApproveBudgetAndFundResponse",
+              "canonicalReference": "@statechannels/client-api-schema!ApproveBudgetAndFundResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetBudget: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetBudgetRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetBudgetResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetBudgetResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    CloseAndWithdraw: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseAndWithdrawRequest",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CloseAndWithdrawResponse",
+              "canonicalReference": "@statechannels/client-api-schema!CloseAndWithdrawResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n    GetChannels: {\n        request: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetChannelsRequest",
+              "canonicalReference": "@statechannels/client-api-schema!GetChannelsRequest:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        response: "
+            },
+            {
+              "kind": "Reference",
+              "text": "GetChannelsResponse",
+              "canonicalReference": "@statechannels/client-api-schema!GetChannelsResponse:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    };\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "WalletJsonRpcAPI",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 54
+          }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface:interface",
+          "docComment": "/**\n * For environments where the destinationAddress is secret until the wallet is \"enabled\".\n *\n * @remarks\n *\n * This is the case e.g. with {@link https://docs.metamask.io/guide/ethereum-provider.html#table-of-contents | MetaMask} and its connected accounts feature.\n *\n * @beta\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface Web3ChannelProviderInterface extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChannelProviderInterface",
+              "canonicalReference": "@statechannels/iframe-channel-provider!ChannelProviderInterface:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Beta",
+          "name": "Web3ChannelProviderInterface",
+          "members": [
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "@statechannels/iframe-channel-provider!Web3ChannelProviderInterface#enable:member(1)",
+              "docComment": "/**\n * Enable the wallet, causing it to run the Ethereum Enable workflow\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "enable(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "releaseTag": "Beta",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "enable"
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

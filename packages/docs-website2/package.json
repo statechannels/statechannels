@@ -1,0 +1,41 @@
+{
+  "name": "docs-website",
+  "description": "Documentation for @statechannels packages",
+  "version": "0.3.4",
+  "private": "true",
+  "author": "statechannels",
+  "bugs": "https://github.com/statechannels/statechannels/issues",
+  "scripts": {
+    "api-documenter": "node scripts/api-documenter.js",
+    "build:netlify": "cd ../../.. && yarn prepare --scope @statechannels/client-api-schema --scope @statechannels/iframe-channel-provider --scope @statechannels/channel-client --scope @statechannels/nitro-protocol && cd packages/docs-website/website && yarn api-documenter && yarn build",
+    "examples": "docusaurus-examples",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "prepare": "yarn api-documenter",
+    "publish-gh-pages": "docusaurus-publish",
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=build/docs-website",
+    "rename-version": "docusaurus-rename-version",
+    "version": "docusaurus-version $npm_package_version",
+    "write-translations": "docusaurus-write-translations",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "docusaurus": "docusaurus"
+  },
+  "devDependencies": {
+    "@types/highlight.js": "9.12.4"
+  },
+  "dependencies": {
+    "@microsoft/api-documenter": "^7.8.21",
+    "@statechannels/channel-client": "^0.3.4",
+    "@statechannels/iframe-channel-provider": "^0.3.4",
+    "@statechannels/nitro-protocol": "^0.3.4",
+    "highlight.js": "10.0.2",
+    "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
+    "remarkable-admonitions": "0.2.1",
+    "@docusaurus/core": "2.0.0-alpha.59",
+    "@docusaurus/preset-classic": "2.0.0-alpha.59",
+    "clsx": "^1.1.1",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2"
+  }
+}
