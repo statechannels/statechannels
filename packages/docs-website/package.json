@@ -9,7 +9,7 @@
     "api-documenter": "node scripts/api-documenter.js",
     "build:netlify": "yarn build",
     "examples": "docusaurus-examples",
-    "start": "ALGOLIA_API_KEY='a-secret-that-is-known-to-circleci' yarn trigger-api-generation && yarn api-documenter && docusaurus start",
+    "start": "yarn trigger-api-generation && yarn api-documenter && ALGOLIA_API_KEY='a-secret-that-is-known-to-circleci' docusaurus start",
     "trigger-api-generation": "cd ../.. && yarn lerna run generate-api cd packages/docs-website",
     "build": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
     "publish-gh-pages": "docusaurus-publish",
