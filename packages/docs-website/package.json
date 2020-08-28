@@ -13,7 +13,7 @@
     "build": "docusaurus build",
     "prepare": "yarn api-documenter",
     "publish-gh-pages": "docusaurus-publish",
-    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=build/docs-website",
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=build",
     "rename-version": "docusaurus-rename-version",
     "version": "docusaurus-version $npm_package_version",
     "write-translations": "docusaurus-write-translations",
