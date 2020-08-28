@@ -39,16 +39,13 @@ module.exports = {
           homePageId: 'overview',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
-          path: '../docs-website/docs',
-          sidebarPath:
-            '/Users/georgeknee/statechannels/statechannels/packages/docs-website/sidebars.json'
+          sidebarPath: require.resolve('./sidebars.json')
         },
         blog: {
           path: 'blog'
         },
         theme: {
-          customCss:
-            '/Users/georgeknee/statechannels/statechannels/packages/docs-website/static/css/custom.css'
+          customCss: require.resolve('./src/css/custom.css')
         }
       }
     ]
