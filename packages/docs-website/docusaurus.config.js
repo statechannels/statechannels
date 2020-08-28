@@ -5,10 +5,7 @@ module.exports = {
   baseUrl: '/',
   organizationName: 'statechannels',
   projectName: 'docs-website',
-  scripts: [
-    'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.6.2/dist/mermaid.min.js'
-  ],
+  scripts: ['https://buttons.github.io/buttons.js'],
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Chivo&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css'

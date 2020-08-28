@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/highlight.js": "9.12.4",
+    "@types/mermaid": "^8.2.1",
     "@types/react": "^16.9.48",
     "@types/react-dom": "^16.9.8"
   },
@@ -37,6 +38,7 @@
     "@docusaurus/core": "2.0.0-alpha.59",
     "@docusaurus/preset-classic": "2.0.0-alpha.59",
     "clsx": "^1.1.1",
+    "mermaid": "^8.7.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2"
   }
