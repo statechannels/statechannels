@@ -33,6 +33,7 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          routeBasePath: '/', // Set this value to '/'.
           homePageId: 'overview',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
