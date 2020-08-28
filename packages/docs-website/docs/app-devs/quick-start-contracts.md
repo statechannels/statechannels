@@ -59,15 +59,15 @@ More realistic ForceMoveApp examples exist: such as games of [Rock Paper Scissor
 
 In more complicated applications, it can help to adopt a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine) model, which means the application can be represented in a digram such as this:
 
-<div class="mermaid" align="center">
-  stateDiagram-v2
-    [*] --> Resting
-    Resting --> Propose
-    Propose --> Resting
-    Propose --> Accept
-    Accept --> Reveal
-    Reveal --> Resting
-</div>
+'
+stateDiagram-v2
+[*] --> Resting
+Resting --> Propose
+Propose --> Resting
+Propose --> Accept
+Accept --> Reveal
+Reveal --> Resting
+' />
 
 These finite states could be represented as a Solidity [`enum`](https://solidity.readthedocs.io/en/v0.6.0/types.html#enums). In ForceMove, the participants "leapfrog" each other on this diagram, i.e.:
 

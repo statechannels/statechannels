@@ -1,4 +1,4 @@
-import {React} from 'react';
+import React, {useEffect} from 'react';
 import mermaid from 'mermaid';
 
 mermaid.initialize({
@@ -9,7 +9,11 @@ const Mermaid = ({chart}) => {
   useEffect(() => {
     mermaid.contentLoaded();
   }, []);
-  return <div className="mermaid">{chart}</div>;
+  return (
+    <div className="mermaid" align="center">
+      {chart}
+    </div>
+  );
 };
 
 export default Mermaid;

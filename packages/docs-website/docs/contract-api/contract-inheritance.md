@@ -3,9 +3,11 @@ id: contract-inheritance
 title: Contract Inheritance
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 The following diagram shows how the contracts inherit from one another. Click on a node to see the corresponding API.
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR
 linkStyle default interpolate basis
 AssetHolder
@@ -77,13 +79,13 @@ click TESTForceMove "./natspec/TESTForceMove";
 click TESTNitroAdjudicator "./natspec/TESTNitroAdjudicator";
 click Token "./natspec/Token";
 click TrivialApp "./natspec/TrivialApp";
-</div>
+' />
 
 ---
 
 Key:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR
 linkStyle default interpolate basis
 Abstraction-->|Inherited by| Contract
@@ -103,4 +105,4 @@ class Contract Contract;
 class TestContract TestContract;
 class Interface Interface;
 class DeployedContract DeployedContract
-</div>
+' />

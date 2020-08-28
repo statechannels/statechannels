@@ -48,5 +48,4 @@ class serverwallet unpublished;
 class nitroprotocol documented;
 class channelclient documented;
 class apischema documented;
-class channelprovider documented;
-' />
+class channelprovider documented;' />

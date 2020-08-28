@@ -3,6 +3,8 @@ id: execute-state-transitions
 title: Execute state transitions off chain
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 A state channel can be thought of as an emergent property of data (which we call `state`) exchanged between a fixed set of actors (which we call `participants`). The participants have the ability to digitially sign the states that they exchange, and they also keep track of the underlying `chainId` and `channelNonce` to uniquely identify the interaction they are about to perform.
 
 ## Construct a State with the correct format
@@ -63,7 +65,7 @@ const state: State = {
   challengeDuration,
   outcome,
   appDefinition,
-  appData,
+  appData
 };
 ```
 
@@ -148,7 +150,7 @@ const fromState: State = {
   isFinal: false,
   challengeDuration: 0x0,
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
-  appData: '0x0',
+  appData: '0x0'
 };
 
 /* Construct another state */
@@ -200,7 +202,7 @@ In the following diagram, A is participant 0, B is participant 1 and C is partic
 
 The yellow boxes show who signed what: in the first example, everyone signed their own state. This _is_ acceptable:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 subgraph A
 zero((0))
@@ -211,13 +213,13 @@ end
 subgraph C
 two((2))
 end
-    zero-->one;
-    one-->two;
-</div>
- 
+zero-->one;
+one-->two;
+' />
+
 Alternatively, A could sign a later state in the sequence:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 subgraph " "
 zero((0))
@@ -230,17 +232,16 @@ two((2))
 end
 zero-->one;
 one-->two;
-
-</div>
+' />
 
 or A, B and C could all sign the final state in the sequence:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 subgraph " "
 zero((0))
 end
-subgraph "  "
+subgraph " "
 one((1))
 end
 subgraph "A, B, C"
@@ -248,11 +249,11 @@ two((2))
 end
 zero-->one;
 one-->two;
-</div>
+' />
 
 The following signatures would _not_ be acceptable:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 subgraph " "
 zero((0))
@@ -263,9 +264,9 @@ end
 subgraph A
 two((2))
 end
-    zero-->one;
-    one-->two;
-</div>
+zero-->one;
+one-->two;
+' />
 
 This is because C signed a state _earlier_ in the sequence than the one she is the mover for.
 
@@ -286,7 +287,7 @@ const state: State = {
   isFinal: false,
   appData: '0x0',
   appDefinition: AddressZero,
-  challengeDuration: 0x5,
+  challengeDuration: 0x5
 };
 
 const signedState: SignedState = signState(state, wallet.privateKey);
@@ -322,7 +323,7 @@ for (let i = 1; i <= numStates; i++) {
     appDefinition: AddressZero,
     appData: HashZero,
     challengeDuration: 1,
-    turnNum: largestTurnNum + i - numStates,
+    turnNum: largestTurnNum + i - numStates
   });
 }
 

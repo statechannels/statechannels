@@ -3,6 +3,8 @@ id: understand-channel-storage
 title: Understand channel storage
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 The adjudicator contract stores certain information about any channel that it knows about. Specifically, it stores
 
 - `uint48 turnNumRecord`
@@ -42,7 +44,7 @@ import {ChannelData, channelDataToChannelStorageHash} from '@statechannels/nitro
 
 const channelData: ChannelData = {
   turnNumRecord: largestTurnNum,
-  finalizesAt: 0x0,
+  finalizesAt: 0x0
 };
 const channelStorageHash = channelDataToChannelStorageHash(channelData);
 ```
@@ -73,8 +75,7 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
-
-<div class="mermaid">
+<Mermaid chart='
 graph LR
 linkStyle default interpolate basis
 Open -->|forceMove| Challenge
@@ -84,5 +85,4 @@ Challenge-->|forceMove| Challenge
 Challenge-->|respond| Open
 Challenge-->|checkpoint| Open
 Challenge-->|conclude| Finalized
-Challenge-->|timeout| Finalized
-</div>
+Challenge-->|timeout| Finalized' />

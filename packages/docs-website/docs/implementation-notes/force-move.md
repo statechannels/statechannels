@@ -3,6 +3,8 @@ id: force-move
 title: ForceMove.sol
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 ForceMove.sol is a base contract that is not actually deployed: it is inherited by NitroAdjudicator.sol, which is deployed.
 
 ForceMove is a state channel execution framework. It:
@@ -327,8 +329,7 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
-
-<div class="mermaid">
+<Mermaid chart='
 graph LR
 linkStyle default interpolate basis
 Open -->|forceMove| Challenge
@@ -338,8 +339,7 @@ Challenge-->|forceMove| Challenge
 Challenge-->|respond| Open
 Challenge-->|checkpoint| Open
 Challenge-->|conclude| Finalized
-Challenge-->|timeout| Finalized
-</div>
+Challenge-->|timeout| Finalized' />
 
 Storage costs on-chain are high and tend to dwarf other gas fees. The implementation therefore minimizes on-chain storage as much as possible.
 
