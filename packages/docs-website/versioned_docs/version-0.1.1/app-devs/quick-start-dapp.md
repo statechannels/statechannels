@@ -40,7 +40,7 @@ await window.channelProvider.enable();
 
 If everything is setup correctly, you should see the statechannels wallet UI:
 
-![](assets/wallet-ui.png)
+<img alt="Wallet UI" src='img/wallet-ui.png' />
 
 Because this popup will be triggered, to maintain a good UX you should only call `window.channelProvider.enable()` when the user clicks a button.
 

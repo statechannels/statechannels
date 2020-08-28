@@ -26,7 +26,7 @@
       "protocol-tutorial/off-chain-funding"
     ],
     "Implementation Notes": [
-      "implementation-notes/implementation-notes-intro",
+      "implementation-notes/contract-devs-intro",
       "implementation-notes/asset-holder",
       "implementation-notes/force-move",
       "implementation-notes/nitro-adjudicator",
