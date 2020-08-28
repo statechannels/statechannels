@@ -3,6 +3,8 @@ id: quick-start-contracts
 title: Quick start (contracts)
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 You should begin your application design process by creating a single smart contract conforming to the [`ForceMoveApp`](../contract-api/natspec/ForceMoveApp) interface.
 
 You'll want to pull this interface, as well as the `Outcome` library contract, into your project using your favourite node package manager:
@@ -59,6 +61,7 @@ More realistic ForceMoveApp examples exist: such as games of [Rock Paper Scissor
 
 In more complicated applications, it can help to adopt a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine) model, which means the application can be represented in a digram such as this:
 
+<Mermaid chart=
 '
 stateDiagram-v2
 [*] --> Resting
