@@ -1,0 +1,21 @@
+diff --git a/node_modules/docusaurus/lib/server/generate.js b/node_modules/docusaurus/lib/server/generate.js
+index 873a0c7..39dfd9d 100644
+--- a/node_modules/docusaurus/lib/server/generate.js
++++ b/node_modules/docusaurus/lib/server/generate.js
+@@ -72,7 +72,7 @@ async function execute() {
+ 
+   // create html files for all docs by going through all doc ids
+   const mdToHtml = metadataUtils.mdToHtml(Metadata, siteConfig);
+-  Object.keys(Metadata).forEach((id) => {
++  Object.keys(Metadata).forEach((id, index, array) => {
+     const metadata = Metadata[id];
+     const file = docs.getFile(metadata);
+     if (!file) {
+@@ -81,6 +81,7 @@ async function execute() {
+     const rawContent = metadataUtils.extractMetadata(file).rawContent;
+     const str = docs.getMarkup(rawContent, mdToHtml, metadata, siteConfig);
+     const targetFile = join(buildDir, metadata.permalink);
++    console.log(`Writing html for file ${index} of ${array.length}`);
+     writeFileAndCreateFolder(targetFile, str);
+ 
+     // generate english page redirects when languages are enabled

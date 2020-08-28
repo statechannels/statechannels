@@ -26,7 +26,7 @@
     "@statechannels/channel-client": "^0.3.4",
     "@statechannels/iframe-channel-provider": "^0.3.4",
     "@statechannels/nitro-protocol": "^0.3.4",
-    "docusaurus": "1.11.1",
+    "docusaurus": "^1.14.6",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "remarkable-admonitions": "0.2.1"
