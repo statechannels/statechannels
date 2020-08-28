@@ -27,7 +27,7 @@ For a simple game like Rock Paper Scissors, the advantages of virtual funding ma
 
 ## Application coding
 
-In order for your app to construct state updates of the right format, you'll need to write some Javascript or Typescript helper code. The purpose of this code is to translate between the general-purpose, [protocol-level concepts of `appData` and `outcome`](./quick-start-contracts) and the specific data structures that your application needs to work with. Those structures should mirror those in the Solidity code you have already written. Here's an idea of what we did in Rock Paper Scissors (see the Solidity code [here](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol)):
+In order for your app to construct state updates of the right format, you'll need to write some Javascript or Typescript helper code. The purpose of this code is to translate between the general-purpose, [protocol-level concepts of `appData` and `outcome`](/app-devs/quick-start-contracts) and the specific data structures that your application needs to work with. Those structures should mirror those in the Solidity code you have already written. Here's an idea of what we did in Rock Paper Scissors (see the Solidity code [here](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol)):
 
 ```typescript
 import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
@@ -38,14 +38,14 @@ import {unreachable} from '../utils/unreachable';
 export enum Weapon {
   Rock = 0,
   Paper = 1,
-  Scissors = 2,
+  Scissors = 2
 }
 
 export enum PositionType {
   Start, // 0
   RoundProposed, // 1
   RoundAccepted, // 2
-  Reveal, // 3
+  Reveal // 3
 }
 
 export interface RPSData {
@@ -107,7 +107,7 @@ function toRPSData(appData: AppData): RPSData {
     preCommit: HashZero,
     playerAWeapon: Weapon.Rock,
     playerBWeapon: Weapon.Rock,
-    salt: randomHex(64),
+    salt: randomHex(64)
   };
 
   return {...defaults, ...appData};
@@ -120,7 +120,7 @@ export function encodeAppData(appData: AppData): string {
 export function encodeRPSData(rpsData: RPSData): string {
   return defaultAbiCoder.encode(
     [
-      'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
+      'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
     ],
     [rpsData]
   );
@@ -129,7 +129,7 @@ export function encodeRPSData(rpsData: RPSData): string {
 export function decodeAppData(appDataBytes: string): AppData {
   const parameters = defaultAbiCoder.decode(
     [
-      'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
+      'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
     ],
     appDataBytes
   )[0];
@@ -145,14 +145,14 @@ export function decodeAppData(appDataBytes: string): AppData {
     case PositionType.Start:
       const start: Start = {
         type: 'start',
-        stake,
+        stake
       };
       return start;
     case PositionType.RoundProposed:
       const roundProposed: RoundProposed = {
         type: 'roundProposed',
         stake,
-        preCommit,
+        preCommit
       };
       return roundProposed;
     case PositionType.RoundAccepted:
@@ -160,7 +160,7 @@ export function decodeAppData(appDataBytes: string): AppData {
         type: 'roundAccepted',
         stake,
         preCommit,
-        playerBWeapon,
+        playerBWeapon
       };
       return roundAccepted;
     case PositionType.Reveal:
@@ -169,7 +169,7 @@ export function decodeAppData(appDataBytes: string): AppData {
         playerAWeapon,
         playerBWeapon,
         salt,
-        stake,
+        stake
       };
       return reveal;
     default:
@@ -239,7 +239,7 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     participants,
     allocations,
     appData,
-    challengeExpirationTime,
+    challengeExpirationTime
   } = channelResult;
   return {
     channelId,
@@ -254,7 +254,7 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     aOutcomeAddress: participants[0].destination,
     bOutcomeAddress: participants[1].destination,
     aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString(),
+    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
@@ -265,7 +265,7 @@ const formatParticipants = (
   bOutcomeAddress: string = bAddress
 ) => [
   {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress},
+  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress}
 ];
 
 const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
@@ -274,9 +274,9 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
       token: '0x0', // We are sticking to ETH here
       allocationItems: [
         {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-        {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
-      ],
-    },
+        {destination: bAddress, amount: bigNumberify(bBal).toHexString()}
+      ]
+    }
   ];
 };
 ```

@@ -191,7 +191,7 @@ There is also an optimization where a state can be supported by `n` signatures o
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
 
 :::note
-In most cases where a support proof is required for some change of state of the chain, the entire proof is submitted with the blockchain transaction: no on-chain channel states are involved. The [`respond`](./clear-a-challenge#call-respond) method is an exception to this rule, and allows for the submission of only a single state in certain circumstances, with the support proof being implied by a combination of on-chain storage and submitted data.
+In most cases where a support proof is required for some change of state of the chain, the entire proof is submitted with the blockchain transaction: no on-chain channel states are involved. The [`respond`](/clear-a-challenge#call-respond) method is an exception to this rule, and allows for the submission of only a single state in certain circumstances, with the support proof being implied by a combination of on-chain storage and submitted data.
 :::
 
 :::tip

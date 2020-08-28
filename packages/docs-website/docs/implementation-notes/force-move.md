@@ -369,7 +369,7 @@ When the adjudicator needs to verify the exact state or outcome, the data is pro
 
 **Why include the `outcomeHash`?**
 
-Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./nitro-adjudicator#push-utcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
+Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](/nitro-adjudicator#push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
 
 ---
 
@@ -458,7 +458,7 @@ Implementation:
 - Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
 - Set channelStorageHashes:
   - `turnNumRecord += 1`
-  - Other fields set to their null values (see [Channel Storage](./force-move#channel-storage)).
+  - Other fields set to their null values (see [Channel Storage](/force-move#channel-storage)).
 
 ### `conclude`
 

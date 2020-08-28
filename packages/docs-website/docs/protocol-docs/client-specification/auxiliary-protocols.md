@@ -10,7 +10,7 @@ In this section we provide procedures for various tasks that use Nitro and are v
 
 ## Ledger-funding
 
-This technique involves opening and funding a "consensus game" or "ledger" state channel between the participants, following [the steps for direct funding](../state-channels/quick-start). The [consensus game state machine](../forcemove-and-nitro/consensus-app) is a core part of Nitro protocol. It describes a very simple state channel whose purpose is to fund other channels, by declaring funds be directed to a channel address instead of an externally owned address.
+This technique involves opening and funding a "consensus game" or "ledger" state channel between the participants, A ledger channel is a core part of Nitro protocol. It describes a very simple state channel whose purpose is to fund other channels, by declaring funds be directed to a channel address instead of an externally owned address.
 
 Once in place, the ledger channel can be updated to fund any other state channel the participants are interested in, by following the following auxiliary protocol:
 
