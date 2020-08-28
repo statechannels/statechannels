@@ -8,7 +8,7 @@ const {exec} = require('child_process');
 async function main() {
   await new Promise((resolve, reject) =>
     exec(
-      'api-documenter markdown -i ../docs/generated-apis -o ../docs/typescript-api',
+      'api-documenter markdown -i ./docs/generated-apis -o ./docs/typescript-api',
       (err, stdout, stderr) => {
         console.log(stdout);
         console.error(stderr);
