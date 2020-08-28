@@ -83,6 +83,9 @@ module.exports = {
     algolia: {
       apiKey: process.env.ALGOLIA_API_KEY,
       indexName: 'statechannels'
+    },
+    prism: {
+      additionalLanguages: ['solidity']
     }
   }
 };
