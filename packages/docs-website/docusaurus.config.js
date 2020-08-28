@@ -69,35 +69,6 @@ module.exports = {
           to: 'docs/contract-api/contract-inheritance',
           label: 'Contract API',
           position: 'left'
-        },
-        {
-          label: 'Version',
-          to: 'docs',
-          position: 'right',
-          items: [
-            {
-              label: '0.3.1',
-              to: 'docs/',
-              activeBaseRegex: 'docs/(?!0.1.1|0.2.0|0.3.0|0.3.1|next)'
-            },
-            {
-              label: '0.3.0',
-              to: 'docs/0.3.0/'
-            },
-            {
-              label: '0.2.0',
-              to: 'docs/0.2.0/'
-            },
-            {
-              label: '0.1.1',
-              to: 'docs/0.1.1/'
-            },
-            {
-              label: 'Master/Unreleased',
-              to: 'docs/next/',
-              activeBaseRegex: 'docs/next/(?!support|team|resources)'
-            }
-          ]
         }
       ]
     },
