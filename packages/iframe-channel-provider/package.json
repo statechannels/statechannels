@@ -67,7 +67,8 @@
   "main": "dist/iframe-channel-provider.js",
   "scripts": {
     "build": "webpack",
-    "build:typescript": "tsc -b . && api-extractor run --local",
+    "build:typescript": "tsc -b .",
+    "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "prepare": "rm -rf dist && yarn build && yarn build:typescript",

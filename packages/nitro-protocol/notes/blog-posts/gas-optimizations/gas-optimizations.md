@@ -40,7 +40,7 @@ The main trick to reducing residual gas consumption is to reduce all storage to 
 
 The answer lies in the magic of cryptographic hash functions, which are a core primitive of blockchains. Cryptographic hash functions accept variable length input, are infeasible to invert, and produce fixed length output. By storing only the `keccak256` **hash** of the outcome data, we ensure that only one slot gets used, regardless of the application. Previously, the number of slots required would grow with the complexity of the application data.
 
-![Optimization](./optimization.svg)
+![Optimization](/optimization.svg)
 
 Caption: "Minimizing on chain storage" 1. Originally, a new instance of the SimpleAdjudicator contract was needed for each state channel. 2. The legacy Nitro Adjudicator contract only needs to be deployed once and can support many state channels, albeit at a cost that depends on the complexity of the state channel. 3. The optimized Nitro Adjudicator contract stores the necessary data for each channel in a fixed-length hash, which reduces gas consumption considerably.
 
@@ -52,7 +52,7 @@ The tradeoffs are some extra information in the `CALLDATA`, and the burden of tr
 
 It is important to remember that we are building the infrastructure for _generalized_ state channels -- meaning that SCApp developers can plug their own "rules" into our stack to rapidly develop their application without having to worry about funding and dispute resolution more than they need to. The gas costs will therefore remain dependent on the situation: How many participants are there in the channel? Does this transition confirm to the application specific rules? To get an idea of the overall savings, we concentrate on three main metrics. These are: (1) the 'Happy Path' (setup plus teardown costs: depositing and then concluding and withdrawing funds) and (2) the 'Challenge Path' (raising a dispute plus responding to it). Further, we tested these paths using an almost-trivial state channel application so that the situation-dependent costs are about as small as they could be -- meaning that the reported numbers are to be considered "best case" or lower bounds on typical gas consumption numbers. The figure reveals the savings that we have made:
 
-![Gas Savings](./gas-savings.svg)
+![Gas Savings](/gas-savings.svg)
 
 As you can see, we have achieved a more than 4x improvement in the Happy Path and the Challenge Path that users may tread. As a bonus, the deployment costs are also significantly reduced (~6.5M down to ~4.9M) due to some refactoring and tweaks performed in tandem with the optimization strategy.
 

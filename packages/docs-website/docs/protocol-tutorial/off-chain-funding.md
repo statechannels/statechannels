@@ -3,11 +3,13 @@ id: off-chain-funding
 title: Off-chain funding
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 This advanced section of the tutorial covers funding and defunding channels by redistributing assets off chain. This has the great advantage of removing the need for most on-chain transactions.
 
 ## Indirect funding
 
-Let's introduce one level of indirection between the chain and the state channel we want to fund. We will first set up a ledger channel (L) with a counterparty (we'll call this counterparty "the hub"). We will fund the ledger channel "directly" -- in the same way as we have done [earlier in the tutorial](./deposit-assets).
+Let's introduce one level of indirection between the chain and the state channel we want to fund. We will first set up a ledger channel (L) with a counterparty (we'll call this counterparty "the hub"). We will fund the ledger channel "directly" -- in the same way as we have done [earlier in the tutorial](/protocol-tutorial/deposit-assets).
 
 A ledger channel is a special channel that runs the "null app" (meaning that all transitions are considered invalid, and the channel may only be updated by a state being supported by all participants signing it). The sole purpose of this ledger channel is to reallocate some or all of its funding to other channels and/or state channel participants.
 
@@ -29,7 +31,7 @@ const chainId = '0x1234';
 const ledgerChannel: Channel = {
   chainId,
   channelNonce: bigNumberify(0).toHexString(),
-  participants,
+  participants
 };
 const ledgerChannelId = getChannelId(ledgerChannel);
 
@@ -44,14 +46,14 @@ const sixEachStatePreFS: State = {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: myDestination, amount: parseUnits('6', 'wei').toHexString()},
-        {destination: hubDestination, amount: parseUnits('6', 'wei').toHexString()},
-      ],
-    },
+        {destination: hubDestination, amount: parseUnits('6', 'wei').toHexString()}
+      ]
+    }
   ],
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 1,
+  turnNum: 1
 };
 
 // Collect a support proof by getting all participants to sign this state
@@ -63,7 +65,7 @@ const amount = parseUnits('12', 'wei');
 const destination = ledgerChannelId;
 const expectedHeld = 0;
 const tx0 = ETHAssetHolder.deposit(destination, expectedHeld, amount, {
-  value: amount,
+  value: amount
 });
 await(await tx0).wait();
 
@@ -79,7 +81,7 @@ signState(sixEachStatePostFS, hubSigningKey);
 
 So far, so standard. We have directly funded a channel, but this time we are calling it a ledger channel, L. The funding graph looks like this:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
@@ -90,7 +92,7 @@ ETHAssetHolder-->|12|ledger;
 ledger-->|6|me;
 ledger-->|6|hub;
 classDef external fill:#f96
-</div>
+' />
 
 ---
 
@@ -101,7 +103,7 @@ Let's create the application channel:
 const applicationChannel1: Channel = {
   chainId,
   channelNonce: bigNumberify(1).toHexString(),
-  participants,
+  participants
 };
 const applicationChannel1Id = getChannelId(applicationChannel1);
 
@@ -116,14 +118,14 @@ const threeEachStatePreFS: State = {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: myDestination, amount: parseUnits('3', 'wei').toHexString()},
-        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
-      ],
-    },
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()}
+      ]
+    }
   ],
   appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 1,
+  turnNum: 1
 };
 
 // Collect a support proof by getting all participants to sign this state
@@ -133,7 +135,7 @@ signState(threeEachStatePreFS, hubSigningKey);
 
 We are now in the following situation:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
@@ -151,7 +153,7 @@ app-->|3|hub;
 linkStyle 3,4 opacity:0.2;
 classDef external fill:#f96
 classDef defunded opacity:0.2;
-</div>
+' />
 
 The application channel A1 exists, but it is not yet funded.
 
@@ -174,22 +176,22 @@ const threeEachAndSixForTheApp: State = {
         {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
         {
           destination: applicationChannel1Id,
-          amount: parseUnits('6', 'wei').toHexString(),
-        },
-      ],
-    },
+          amount: parseUnits('6', 'wei').toHexString()
+        }
+      ]
+    }
   ],
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 4,
+  turnNum: 4
 };
 
 // Construct the "post fund setup" state for the application channel
 
 const threeEachStatePostFS: State = {
   ...threeEachStatePreFS,
-  turnNum: 3,
+  turnNum: 3
 };
 
 // Collect a support proof by getting all participants to sign this state
@@ -199,7 +201,7 @@ signState(threeEachStatePostFS, hubSigningKey);
 
 Finally, we have our indirectly funded channel
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
@@ -216,7 +218,7 @@ app((A1))
 app-->|3|me;
 app-->|3|hub;
 classDef external fill:#f96
-</div>
+' />
 
 We could fund more application channels from the same ledger channel in the same way, if we wanted to.
 
@@ -233,13 +235,13 @@ const sixForMe: State = {
   outcome: [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocationItems: [{destination: myDestination, amount: parseUnits('6', 'wei').toHexString()}],
-    },
+      allocationItems: [{destination: myDestination, amount: parseUnits('6', 'wei').toHexString()}]
+    }
   ],
   appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 100,
+  turnNum: 100
 };
 
 // Collect a support proof by getting all participants to sign this state
@@ -247,7 +249,7 @@ signState(sixForMe, mySigningKey);
 signState(sixForMe, hubSigningKey);
 ```
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
@@ -263,7 +265,7 @@ ledger-->|6|app
 app((A1))
 app-->|6|me;
 classDef external fill:#f96
-</div>
+' />
 
 ---
 
@@ -281,14 +283,14 @@ const nineForMeThreeForTheHub: State = {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocationItems: [
         {destination: myDestination, amount: parseUnits('9', 'wei').toHexString()},
-        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()},
-      ],
-    },
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()}
+      ]
+    }
   ],
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
-  turnNum: 5,
+  turnNum: 5
 };
 
 // Collect a support proof by getting all participants to sign this state
@@ -298,7 +300,7 @@ signState(nineForMeThreeForTheHub, hubSigningKey);
 
 and the funding graph now looks like this:
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
@@ -315,9 +317,9 @@ app-->|6|me;
 linkStyle 3 opacity:0.2;
 classDef external fill:#f96
 classDef defunded opacity:0.2;
-</div>
+' />
 The defunded channel A1 can now safely be discarded.
 
 ### Challenging with a deep funding tree
 
-If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-channel-sad).
+If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](/protocol-tutorial/finalize-a-channel-sad).

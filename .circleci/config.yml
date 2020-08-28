@@ -297,6 +297,7 @@ jobs:
 
   release-pull-request:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - attach_workspace:
@@ -307,6 +308,7 @@ jobs:
 
   release-master:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - log_stats:
