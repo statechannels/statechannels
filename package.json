@@ -65,8 +65,7 @@
   },
   "workspaces": {
     "packages": [
-      "packages/*",
-      "packages/docs-website/*"
+      "packages/*"
     ],
     "nohoist": [
       "**/ethers"
