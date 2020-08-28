@@ -21,7 +21,7 @@ async function main() {
     )
   );
 
-  const dir = '../docs/typescript-api';
+  const dir = './docs/typescript-api';
   const docFiles = await readdir(dir);
   for (const docFile of docFiles) {
     try {
