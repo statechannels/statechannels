@@ -38,6 +38,5 @@
     "test": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand"
   },
-  "types": "lib/src/index.d.ts",
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  "types": "lib/src/index.d.ts"
 }

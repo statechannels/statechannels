@@ -149,6 +149,5 @@
     "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
     "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js",
     "build-storybook": "build-storybook"
-  },
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  }
 }

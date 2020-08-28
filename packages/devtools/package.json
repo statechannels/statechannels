@@ -65,6 +65,5 @@
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build:typescript",
     "start:shared-ganache": "node lib/src/ganache/start-ganache-script.js"
-  },
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  }
 }
