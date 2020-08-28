@@ -85,7 +85,8 @@ module.exports = {
       indexName: 'statechannels'
     },
     prism: {
-      additionalLanguages: ['solidity']
+      additionalLanguages: ['solidity'],
+      theme: require('prism-react-renderer/themes/oceanicNext')
     }
   }
 };
