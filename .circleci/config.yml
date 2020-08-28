@@ -317,7 +317,7 @@ jobs:
           no_output_timeout: 10m
       - run:
           command: |
-            cp ./.clinic/*.html  /home/circleci/project/artifacts
+            cp /home/circleci/project/packages/server-wallet/.clinic/*.html  /home/circleci/project/artifacts
       - upload_artifacts
 
   release-pull-request:

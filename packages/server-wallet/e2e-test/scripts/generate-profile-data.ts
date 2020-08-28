@@ -1,6 +1,6 @@
-import {spawn} from 'child_process';
+import {exec} from 'child_process';
 
-import _ from 'lodash';
+import {configureEnvVariables} from '@statechannels/devtools';
 
 import {
   waitForServerToStart,
@@ -15,13 +15,13 @@ import {SigningWallet} from '../../src/models/signing-wallet';
 import {truncate} from '../../src/db-admin/db-admin-connection';
 import knexPayer from '../../src/db/connection';
 
+import kill = require('tree-kill');
+
 const startReceiver = async (profiling: 'FlameGraph' | 'BubbleProf'): Promise<ReceiverServer> => {
   if (profiling === 'FlameGraph') {
-    const server = spawn(
+    const server = exec(
       `npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`,
       {
-        stdio: 'inherit',
-        shell: true,
         env: {
           // eslint-disable-next-line
           ...process.env,
@@ -34,11 +34,9 @@ const startReceiver = async (profiling: 'FlameGraph' | 'BubbleProf'): Promise<Re
       url: `http://127.0.0.1:65535`,
     };
   } else {
-    const server = spawn(
+    const server = exec(
       `npx clinic bubbleprof --collect-only -- node  ./lib/e2e-test/receiver/server.js`,
       {
-        stdio: 'inherit',
-        shell: true,
         env: {
           // eslint-disable-next-line
           ...process.env,
@@ -77,12 +75,7 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph'): Promise<void> {
   );
   await triggerPayments(channelIds);
 
-  // TODO: This is hacky but bubbleprof and flamegraph seem to take different kill signals
-  if (type === 'BubbleProf') {
-    await receiverServer.server.kill('SIGINT');
-  } else {
-    await receiverServer.server.kill('SIGTERM');
-  }
+  kill(receiverServer.server.pid, 'SIGINT');
 
   return new Promise(resolve => {
     receiverServer.server.on('exit', () => {
@@ -92,6 +85,7 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph'): Promise<void> {
 }
 
 (async function(): Promise<void> {
+  configureEnvVariables();
   // TODO: Use yargs?
   const type =
     process.argv.slice(2)[0].toLowerCase() === 'flamegraph' ? 'FlameGraph' : 'BubbleProf';
