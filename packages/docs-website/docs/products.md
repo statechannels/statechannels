@@ -7,7 +7,7 @@ import Mermaid from '@theme/Mermaid';
 
 The following diagram describes our tech stack. Clicking on a node will take you to the repository for that product. The products with a thick border are covered by the documentation on this site.
 
-<div className="mermaid" align="center">
+<Mermaid chart='
 flowchart TB;
 linkStyle default interpolate basis;
 subgraph A [application layer];
@@ -49,4 +49,4 @@ class nitroprotocol documented;
 class channelclient documented;
 class apischema documented;
 class channelprovider documented;
-</div>
+' />
