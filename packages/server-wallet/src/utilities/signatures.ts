@@ -1,6 +1,6 @@
-import {instantiateSecp256k1, Secp256k1} from '@bitauth/libauth';
+import {instantiateSecp256k1, Secp256k1, RecoveryId} from '@bitauth/libauth';
 import {utils, Wallet} from 'ethers';
-import {State, hashState} from '@statechannels/wallet-core';
+import {State, hashState, calculateChannelId} from '@statechannels/wallet-core';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
@@ -22,6 +22,33 @@ export async function fastSignState(
 
   const signature = await fastSignData(hashedState, privateKey);
   return {state, signature};
+}
+
+export function fastRecoverAddress(state: State, signature: string): string {
+  const stateHash = hashState(state);
+  const recover = Number.parseInt('0x' + signature.slice(-2)) - 27;
+
+  const digest = Buffer.from(hashMessage(stateHash).substr(2), 'hex');
+  const recoveredAddress = utils.computeAddress(
+    secp256k1.recoverPublicKeyCompressed(
+      Buffer.from(signature.slice(2, -2), 'hex'),
+      recover as RecoveryId,
+      digest
+    )
+  );
+
+  const {participants} = state;
+
+  const signingAddresses = participants.map(p => p.signingAddress);
+
+  if (signingAddresses.indexOf(recoveredAddress) < 0) {
+    throw new Error(
+      `Recovered address ${recoveredAddress} is not a participant in channel ${calculateChannelId(
+        state
+      )}`
+    );
+  }
+  return recoveredAddress;
 }
 
 export async function fastSignData(hashedData: string, privateKey: string): Promise<string> {
