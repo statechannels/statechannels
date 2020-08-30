@@ -4,11 +4,13 @@ title: Auxiliary Protocols
 sidebar_label: Auxiliary Protocols
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 In this section we provide procedures for various tasks that use Nitro and are value preserving for all participants: that is to say, a series of state channel network configurations connected by Nitro operations that preserves the extractable assets for each participant.
 
 ## Ledger-funding
 
-This technique involves opening and funding a "consensus game" or "ledger" state channel between the participants, following [the steps for direct funding](../state-channels/quick-start). The [consensus game state machine](../forcemove-and-nitro/consensus-app) is a core part of Nitro protocol. It describes a very simple state channel whose purpose is to fund other channels, by declaring funds be directed to a channel address instead of an externally owned address.
+This technique involves opening and funding a "consensus game" or "ledger" state channel between the participants, A ledger channel is a core part of Nitro protocol. It describes a very simple state channel whose purpose is to fund other channels, by declaring funds be directed to a channel address instead of an externally owned address.
 
 Once in place, the ledger channel can be updated to fund any other state channel the participants are interested in, by following the following auxiliary protocol:
 
@@ -17,7 +19,7 @@ Once in place, the ledger channel can be updated to fund any other state channel
 
 Such an application channel is said to be ledger-funded; no blockchain transactions are required to fund or de-fund a ledger-funded channel. Disputes are still resolved on chain.
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph TD
 linkStyle default interpolate basis
 BC[fa:fa-landmark]
@@ -25,7 +27,7 @@ L((L))
 C((C))
 BC-->L
 L-->C
-</div>
+' />
 
 ## Topping-up  
 Assume C wishes to increase their balance in a funded channel by x
@@ -57,7 +59,7 @@ For example, we wish to take a game of Rock Paper Scissors and make it directly 
 
 This technique leverages a pair (or more) of existing ledger channels L1, L2 to fund a channel among participants who are not all participating in either of those ledger channels. To be opened and closed safely, guarantor channels G1, G2 are used to re-prioritize the ledger channel payouts. A channel V that is funded in this way is said to be virtually-funded; no blockchain transactions are required to fund or de-fund a virtually-funded channel, and the participants do not need to share an on chain deposit. Instead they need to have a ledger channel open with a shared intermediary. Disputes are still resolved on chain.
 
-<div class="mermaid" align="center">
+<Mermaid chart='
 graph TD
 linkStyle default interpolate basis
 BC1[fa:fa-landmark]
@@ -74,7 +76,7 @@ L2-->G2
 G1-->J
 G2-->J
 J-->V
-</div>
+' />
 
 The auxiliary protocol is:
 

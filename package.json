@@ -3,7 +3,7 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.3.0",
+    "@statechannels/devtools": "^0.3.4",
     "@types/prettier": "1.19.0",
     "eslint-plugin-import": "2.20.0",
     "husky": "3.0.7",
@@ -53,7 +53,6 @@
     "postinstall": "patch-package",
     "preinstall": "npx typesync",
     "prepare": "lerna run --concurrency 8 --stream prepare",
-    "publish": "lerna publish --yes from-package patch",
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
     "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
     "release:netlify:production": "lerna run release:netlify:production --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod",
@@ -65,8 +64,7 @@
   },
   "workspaces": {
     "packages": [
-      "packages/*",
-      "packages/docs-website/*"
+      "packages/*"
     ],
     "nohoist": [
       "**/ethers"

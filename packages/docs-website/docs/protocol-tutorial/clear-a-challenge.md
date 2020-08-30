@@ -35,7 +35,7 @@ await(await tx).wait();
   */
 const channelData: ChannelData = {
   turnNumRecord: largestTurnNum,
-  finalizesAt: 0x0, // 0 here implies the channel is open again
+  finalizesAt: 0x0 // 0 here implies the channel is open again
 };
 const expectedChannelStorageHash = channelDataToChannelStorageHash(channelData);
 
@@ -63,7 +63,7 @@ const responseState: State = {
   outcome: [],
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
   appData: HashZero,
-  challengeDuration,
+  challengeDuration
 };
 
 const responder = wallets[0];
@@ -71,7 +71,7 @@ const responseSignature = await signState(responseState, responder.privateKey).s
 const isFinalAB = [false, false];
 const variablePartAB = [
   getVariablePart(challengeSignedState.state),
-  getVariablePart(responseState),
+  getVariablePart(responseState)
 ];
 
 const tx = NitroAdjudicator.respond(
@@ -88,7 +88,7 @@ await(await tx).wait();
 */
 const expectedChannelStorageHash = channelDataToChannelStorageHash({
   turnNumRecord: largestTurnNum,
-  finalizesAt: 0x0, // 0 here implies the channel is open again.
+  finalizesAt: 0x0 // 0 here implies the channel is open again.
 });
 
 /* 
@@ -99,7 +99,7 @@ expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedC
 
 ## Call `challenge` again
 
-It is important to understand that a challenge may be "cleared" by another more recent challenge. The channel will be left in challenge mode (so it has not really been 'cleared' in that sense), but some [on chain storage](./understand-channel-storage) will be updated, such as the deadline for responding.
+It is important to understand that a challenge may be "cleared" by another more recent challenge. The channel will be left in challenge mode (so it has not really been 'cleared' in that sense), but some [on chain storage](/protocol-tutorial/understand-channel-storage) will be updated, such as the deadline for responding.
 
 ## Extract info from Adjudicator Events
 
@@ -130,7 +130,7 @@ const {
   challenger: eventChallenger,
   isFinal: eventIsFinal,
   fixedPart: eventFixedPart,
-  variableParts: eventVariableParts,
+  variableParts: eventVariableParts
 } = event.args;
 ```
 

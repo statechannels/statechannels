@@ -28,7 +28,7 @@ Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being
 
 The outcome is stored in two places: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
 
-The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. As a part of the process triggered by [`pushOutcome`](./nitro-adjudicator#pushoutcome), a decoded outcome will be stored across multiple asset holder contracts in a number of hashes. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset holder contract in question, as well as some `bytes` that encode a `AssetOutcome`. The `AssetOutcomes` are each stored (abi encoded and hashed) by the asset holder contract specified. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
+The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. As a part of the process triggered by [`pushOutcome`](/implementation-notes/nitro-adjudicator#push-outcome), a decoded outcome will be stored across multiple asset holder contracts in a number of hashes. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset holder contract in question, as well as some `bytes` that encode a `AssetOutcome`. The `AssetOutcomes` are each stored (abi encoded and hashed) by the asset holder contract specified. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
 
 In `Outcome.sol`:
 
@@ -72,22 +72,11 @@ library Outcome {
 }
 ```
 
-### Example
-
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA     | 5      | 0xDestB     | 2      | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------- | ------ | ----------- | ------ | ---------------- | --- |
-|                                                                                                 |                                                  |                                                                                                       | Destination | Amount | Destination | Amount |                  |     |
-|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |             |        |
-|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |             |        |
-|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |             |
-| <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
-| <td colspan="8" align="center">Outcome</td>                                                     |
-
 ### Destinations
 
 A `Destination` is a `bytes32` and either:
 
-1. A `ChannelId` (see the section on [channelId](./force-move#channelid)), or
+1. A `ChannelId` (see the section on [channelId](/implementation-notes/force-move#channelid)), or
 2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
 
 :::tip

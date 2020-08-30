@@ -3,6 +3,8 @@ id: quick-start-dapp
 title: Quick start (Dapp)
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
 By using our reference state channels wallet implementation, you will be able to rapidly develop a statechannels-powered Dapp that does not need to manage keys, interface with an ethereum provider or understand nitro-protocol at all. Instead, it only needs to target our channel-client API.
 
 ## Installing
@@ -40,7 +42,9 @@ await window.channelProvider.enable();
 
 If everything is setup correctly, you should see the statechannels wallet UI:
 
-![](assets/wallet-ui.png)
+<p align="center">
+<img alt="Wallet UI" src={useBaseUrl('img/wallet-ui.png')} className="drop-shadow"/>
+</p>
 
 Because this popup will be triggered, to maintain a good UX you should only call `window.channelProvider.enable()` when the user clicks a button.
 

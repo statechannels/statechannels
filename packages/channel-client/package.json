@@ -1,11 +1,11 @@
 {
   "name": "@statechannels/channel-client",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "version": "0.3.1",
+  "version": "0.3.4",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
-    "@statechannels/client-api-schema": "^0.3.1",
-    "@statechannels/iframe-channel-provider": "^0.3.1",
+    "@statechannels/client-api-schema": "^0.3.4",
+    "@statechannels/iframe-channel-provider": "^0.3.4",
     "ethers": "4.0.48",
     "eventemitter3": "4.0.0",
     "loglevel": "1.6.8"
@@ -42,13 +42,13 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
-    "build": "yarn build:typescript && api-extractor run --local",
+    "build": "yarn build:typescript",
     "build:typescript": "tsc -b .",
+    "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
     "prepare": "rm -rf lib && yarn build",
     "test": "jest",
     "test:ci": "jest --runInBand"
-  },
-  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
+  }
 }

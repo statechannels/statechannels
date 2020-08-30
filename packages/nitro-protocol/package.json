@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "author": "statechannels",
   "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
@@ -10,7 +10,7 @@
     "ethers": "4.0.48"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.3.1",
+    "@statechannels/devtools": "^0.3.4",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
@@ -69,6 +69,7 @@
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
+    "generate-api": "yarn docgen",
     "docgen": "solidoc",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
@@ -84,6 +85,5 @@
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js"
   },
-  "types": "lib/src/index.d.ts",
-  "gitHead": "991fbdfee56075b77c80d068e93e13ffed2f745c"
+  "types": "lib/src/index.d.ts"
 }

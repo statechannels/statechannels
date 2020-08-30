@@ -3,6 +3,8 @@ id: force-move
 title: ForceMove.sol
 ---
 
+import Mermaid from '@theme/Mermaid';
+
 ForceMove.sol is a base contract that is not actually deployed: it is inherited by NitroAdjudicator.sol, which is deployed.
 
 ForceMove is a state channel execution framework. It:
@@ -327,8 +329,7 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
-
-<div class="mermaid">
+<Mermaid chart='
 graph LR
 linkStyle default interpolate basis
 Open -->|forceMove| Challenge
@@ -338,8 +339,7 @@ Challenge-->|forceMove| Challenge
 Challenge-->|respond| Open
 Challenge-->|checkpoint| Open
 Challenge-->|conclude| Finalized
-Challenge-->|timeout| Finalized
-</div>
+Challenge-->|timeout| Finalized' />
 
 Storage costs on-chain are high and tend to dwarf other gas fees. The implementation therefore minimizes on-chain storage as much as possible.
 
@@ -369,7 +369,7 @@ When the adjudicator needs to verify the exact state or outcome, the data is pro
 
 **Why include the `outcomeHash`?**
 
-Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./nitro-adjudicator#push-utcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
+Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](/implementation-notes/nitro-adjudicator#push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
 
 ---
 
@@ -458,14 +458,14 @@ Implementation:
 - Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
 - Set channelStorageHashes:
   - `turnNumRecord += 1`
-  - Other fields set to their null values (see [Channel Storage](./force-move#channel-storage)).
+  - Other fields set to their null values (see [Channel Storage](/implementation-notes/force-move#channel-storage)).
 
 ### `conclude`
 
 If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state and broadcast it. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the channel on-chain. They would do this by calling `conclude` on the adjudicator.
 
 :::tip
-In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](../client-specification/auxiliary-protocols#closing-off-chain).
+In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](/protocol-docs/client-specification/auxiliary-protocols#closing-off-chain).
 :::
 
 The conclude methods allow anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire.
