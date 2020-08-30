@@ -319,7 +319,7 @@ Accepts an empty object as the JSON RPC Request parameters.
 
 ## PushMessage
 
-The RPC endpoint that handles sending messages to other potential or current channel participants.
+The RPC endpoint that processes messages from an application.
 
 ### Parameters
 
@@ -337,7 +337,7 @@ The RPC endpoint that handles sending messages to other potential or current cha
 
 ### Errors
 
-| Code | Message               | Description                                  |
+| Code | Message                | Description                                  |
 | ---- | --------------------- | -------------------------------------------- |
 | 1404 | Participant not found | Could not find participant                   |
 | 1403 | Unauthorized          | Unauthorized to make calls to channel wallet |
