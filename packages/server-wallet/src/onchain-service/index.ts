@@ -27,12 +27,16 @@ type MinimalTransaction = {
   data: string;
 };
 
+type AssetHolderInformation = {
+  assetId: Address;
+  contractAddress: Address;
+};
+
 export interface OnchainServiceInterface {
   // NOTE: will return void and throw an error in final implementation
   registerChannel(
     channelId: Bytes32,
-    assetHolders: Address[],
-    assetIds: string[]
+    assetHolders: AssetHolderInformation[]
   ): Promise<string | undefined>;
   submitTransaction(
     channelId: Bytes32,
@@ -54,10 +58,7 @@ export class OnchainService implements OnchainServiceInterface {
   private store: Map<string, object> = new Map();
 
   // Stores references to all contracts in memory
-  private assetHolders: Map<string, Contract> = new Map();
-
-  // Stores references to assetIds in memory
-  private assetHolderToId: Map<string, string | undefined> = new Map();
+  private assetHolders: Map<string, AssetHolderInformation & {contract: Contract}> = new Map();
 
   // Transaction queue
   private queue = new PriorityQueue({concurrency: 1});
@@ -92,8 +93,7 @@ export class OnchainService implements OnchainServiceInterface {
    */
   public registerChannel(
     channelId: Bytes32,
-    assetHolders: Address[],
-    assetIds: string[]
+    assetHolders: AssetHolderInformation[]
   ): Promise<string | undefined> {
     if (!this.channelWallet) {
       throw new Error(
@@ -108,19 +108,18 @@ export class OnchainService implements OnchainServiceInterface {
 
     // Create and store new contracts if we don't have record of
     // required assetHolders
-    assetHolders.forEach((assetHolder, idx) => {
-      if (this.assetHolders.has(assetHolder)) {
+    assetHolders.forEach(assetHolder => {
+      if (this.assetHolders.has(assetHolder.contractAddress)) {
         return;
       }
       // TODO: Use the AssetHolder abi?
       const contract = new Contract(
-        assetHolder,
+        assetHolder.contractAddress,
         ContractArtifacts.EthAssetHolderArtifact.abi,
         this.provider
       );
       this._registerAssetHolderCallbacks(contract);
-      this.assetHolders.set(assetHolder, contract);
-      this.assetHolderToId.set(assetHolder, assetIds[idx]);
+      this.assetHolders.set(assetHolder.contractAddress, {...assetHolder, contract});
     });
 
     // Add the channel to service storage
@@ -221,7 +220,7 @@ export class OnchainService implements OnchainServiceInterface {
         this.channelWallet.updateChannelFunding({
           channelId: destination,
           amount: amountDeposited.toString(),
-          token: this.assetHolderToId.get(assetHolder.address),
+          token: this.assetHolders.get(assetHolder.address)?.assetId,
         });
       }
     );
