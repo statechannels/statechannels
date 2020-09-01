@@ -37,7 +37,7 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
-import {timerFactory} from '../metrics';
+import {timerFactory, recordFunctionMetrics} from '../metrics';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -248,7 +248,7 @@ type ExecutionResult = {
   error?: any;
 };
 
-const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
+const takeActionsImpl = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
   const channelResults: ChannelResult[] = [];
   let error: Error | undefined = undefined;
@@ -285,7 +285,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
         }
       };
 
-      const nextAction = Application.protocol({app});
+      const nextAction = recordFunctionMetrics(Application.protocol({app}));
 
       if (!nextAction) markChannelAsDone();
       else if (isOutgoing(nextAction)) {
@@ -304,6 +304,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
 
   return {outbox, error, channelResults};
 };
+const takeActions = recordFunctionMetrics(takeActionsImpl);
 
 // TODO: This should be removed, and not used externally.
 // It is a fill-in until the wallet API is specced out.

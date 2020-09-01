@@ -29,7 +29,7 @@ import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
-import {timerFactory} from '../metrics';
+import {timerFactory, recordFunctionMetrics} from '../metrics';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -45,7 +45,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
-export const Store = {
+export const Store = recordFunctionMetrics({
   getFirstParticipant: async function(): Promise<Participant> {
     const signingAddress = await Store.getOrCreateSigningAddress();
     return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
@@ -107,7 +107,7 @@ export const Store = {
     vars: StateVariables,
     tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const timer = timerFactory(`  signState ${channelId}`);
+    const timer = timerFactory(`signState ${channelId}`);
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: State = {...channel.channelConstants, ...vars};
@@ -179,7 +179,7 @@ export const Store = {
     tx: Transaction
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
-    const timer = timerFactory(`    add signed state ${channelId}`);
+    const timer = timerFactory(`add signed state ${channelId}`);
 
     await timer('validating signatures', async () => validateSignatures(signedState));
 
@@ -222,7 +222,7 @@ export const Store = {
 
     return result;
   },
-};
+});
 
 class StoreError extends WalletError {
   readonly type = WalletError.errors.StoreError;

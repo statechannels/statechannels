@@ -2,15 +2,15 @@ import {Message as WireMessage} from '@statechannels/wire-format';
 import {Message, makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
-import walletConfig from '../../src/config';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
+import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 
 export default class ReceiverController {
-  private readonly wallet: Wallet = new Wallet();
+  private readonly wallet: Wallet = recordFunctionMetrics(new Wallet());
 
   private readonly myParticipantID: string = 'receiver';
-
+  private time = timerFactory('controller');
   public get participantInfo(): Participant {
     return {
       participantId: this.myParticipantID,
@@ -24,7 +24,7 @@ export default class ReceiverController {
 
     const {
       channelResults: [channelResult],
-    } = await time('controller: push message', async () => this.wallet.pushMessage(message));
+    } = await this.time('push message', async () => this.wallet.pushMessage(message));
 
     if (!signedStates || signedStates?.length === 0) {
       return {
@@ -34,7 +34,7 @@ export default class ReceiverController {
     } else {
       const {
         outbox: [messageToSendToPayer],
-      } = await time('controller: react', async () =>
+      } = await this.time('react', async () =>
         (channelResult.status === 'proposed' ? this.wallet.joinChannel : this.wallet.updateChannel)(
           channelResult
         )
@@ -42,17 +42,5 @@ export default class ReceiverController {
 
       return (messageToSendToPayer.params as WireMessage).data as Message;
     }
-  }
-}
-
-// eslint-disable-next-line no-process-env
-async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
-  if (walletConfig.timingMetrics) {
-    console.time(label);
-    const result = await cb();
-    console.timeEnd(label);
-    return result;
-  } else {
-    return await cb();
   }
 }
