@@ -1,17 +1,24 @@
-import {ChildProcessWithoutNullStreams, fork, spawn} from 'child_process';
+import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_process';
 import {join} from 'path';
 
 import kill = require('tree-kill');
-import axios from 'axios';
 
 import Knex = require('knex');
+import {Participant, makeDestination} from '@statechannels/wallet-core';
+import {Wallet} from 'ethers';
+import axios from 'axios';
+
 import {dbConfig} from '../src/db/config';
+import {withSupportedState} from '../src/models/__test__/fixtures/channel';
+import {SigningWallet} from '../src/models/signing-wallet';
+import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
+import {Channel} from '../src/models/channel';
 
 import {PerformanceTimer} from './payer/timers';
 
 export type ReceiverServer = {
   url: string;
-  server: ChildProcessWithoutNullStreams;
+  server: ChildProcessWithoutNullStreams | ChildProcess;
 };
 
 export const triggerPayments = async (
@@ -92,3 +99,41 @@ export const killServer = async ({server}: ReceiverServer): Promise<void> => {
 
   await knexReceiver.destroy();
 };
+
+export async function seedTestChannels(
+  payer: Participant,
+  payerPrivateKey: string,
+  receiver: Participant,
+  receiverPrivateKey: string,
+  numOfChannels: number,
+  knexPayer: Knex
+): Promise<string[]> {
+  const channelIds: string[] = [];
+  for (let i = 0; i < numOfChannels; i++) {
+    const seed = withSupportedState([
+      SigningWallet.fromJson({privateKey: payerPrivateKey}),
+      SigningWallet.fromJson({privateKey: receiverPrivateKey}),
+    ])({
+      vars: [stateVars({turnNum: 3})],
+      channelNonce: i,
+      participants: [payer, receiver],
+    });
+    await Channel.bindKnex(knexPayer)
+      .query()
+      .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default
+    await Channel.bindKnex(knexReceiver)
+      .query()
+      .insert([{...seed, signingAddress: receiver.signingAddress}]);
+    channelIds.push(seed.channelId);
+  }
+  return channelIds;
+}
+
+export function getParticipant(participantId: string, privateKey: string): Participant {
+  const signingAddress = new Wallet(privateKey).address;
+  return {
+    signingAddress,
+    participantId,
+    destination: makeDestination(signingAddress),
+  };
+}

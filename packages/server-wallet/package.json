@@ -34,6 +34,7 @@
     "@typescript-eslint/parser": "2.18.0",
     "body-parser": "1.19.0",
     "cli-table3": "0.6.0",
+    "clinic": "7.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
     "eslint-plugin-import": "2.20.0",
@@ -86,7 +87,8 @@
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:ci": "yarn test --bail",
     "test:e2e": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
-    "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
+    "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand",
+    "profile": "./e2e-test/scripts/profile.sh"
   },
   "types": "lib/src/wallet/index.d.ts",
   "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
