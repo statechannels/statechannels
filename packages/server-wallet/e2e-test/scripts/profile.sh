@@ -16,3 +16,7 @@ npx clinic flame --visualize-only .clinic/*.clinic-flame
 echo "Generating bubbleprof"
 SERVER_DB_NAME=payer NODE_ENV=test npx ts-node ./e2e-test/scripts/generate-profile-data.ts bubbleprof
 npx clinic bubbleprof --visualize-only .clinic/*.clinic-bubbleprof
+
+echo "Generating doctor"
+SERVER_DB_NAME=payer NODE_ENV=test npx ts-node ./e2e-test/scripts/generate-profile-data.ts doctor
+npx clinic doctor --visualize-only .clinic/*.clinic-doctor

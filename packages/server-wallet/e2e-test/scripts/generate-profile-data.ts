@@ -17,7 +17,9 @@ import knexPayer from '../../src/db/connection';
 
 import kill = require('tree-kill');
 
-const startReceiver = async (profiling: 'FlameGraph' | 'BubbleProf'): Promise<ReceiverServer> => {
+const startReceiver = async (
+  profiling: 'FlameGraph' | 'BubbleProf' | 'Doctor'
+): Promise<ReceiverServer> => {
   if (profiling === 'FlameGraph') {
     const server = exec(
       `npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`,
@@ -29,6 +31,22 @@ const startReceiver = async (profiling: 'FlameGraph' | 'BubbleProf'): Promise<Re
         },
       }
     );
+    return {
+      server: server,
+      url: `http://127.0.0.1:65535`,
+    };
+  } else if (profiling == 'Doctor') {
+    const server = exec(
+      `npx clinic doctor --collect-only -- node  ./lib/e2e-test/receiver/server.js`,
+      {
+        env: {
+          // eslint-disable-next-line
+          ...process.env,
+          SERVER_DB_NAME: 'receiver',
+        },
+      }
+    );
+
     return {
       server: server,
       url: `http://127.0.0.1:65535`,
@@ -51,7 +69,7 @@ const startReceiver = async (profiling: 'FlameGraph' | 'BubbleProf'): Promise<Re
     };
   }
 };
-async function generateData(type: 'BubbleProf' | 'FlameGraph'): Promise<void> {
+async function generateData(type: 'BubbleProf' | 'FlameGraph'|'Doctor'): Promise<void> {
   const receiverServer = await startReceiver(type);
 
   await waitForServerToStart(receiverServer);
@@ -87,8 +105,9 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph'): Promise<void> {
 (async function(): Promise<void> {
   configureEnvVariables();
   // TODO: Use yargs?
+  const typeArg = process.argv.slice(2)[0].toLowerCase();
   const type =
-    process.argv.slice(2)[0].toLowerCase() === 'flamegraph' ? 'FlameGraph' : 'BubbleProf';
+    typeArg === 'bubbleprof' ? 'BubbleProf' : typeArg === 'flamegraph' ? 'FlameGraph' : 'Doctor';
 
   await generateData(type);
   process.exit(0);
