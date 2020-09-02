@@ -69,7 +69,7 @@ const startReceiver = async (
     };
   }
 };
-async function generateData(type: 'BubbleProf' | 'FlameGraph'|'Doctor'): Promise<void> {
+async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promise<void> {
   const receiverServer = await startReceiver(type);
 
   await waitForServerToStart(receiverServer);
