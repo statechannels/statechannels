@@ -295,6 +295,31 @@ jobs:
           no_output_timeout: 10m
       - upload_artifacts
 
+  server-wallet-profiling:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
+      - run:
+          name: profile
+          working_directory: packages/server-wallet
+          command: yarn profile
+          no_output_timeout: 10m
+      - run:
+          command: |
+            cp /home/circleci/project/packages/server-wallet/.clinic/*.html  /home/circleci/project/artifacts
+      - upload_artifacts
+
   release-pull-request:
     <<: *defaults
     resource_class: large
@@ -408,6 +433,9 @@ workflows:
           requires:
             - prepare
 
+      - server-wallet-profiling:
+          requires:
+            - prepare
       - server-wallet-stress-test:
           requires:
             - prepare

@@ -63,6 +63,7 @@ export default {
     );
 
     const timingResults = performanceTimer.calculateResults();
+    console.log(PerformanceTimer.formatResults(timingResults));
     process.send && process.send(JSON.stringify(timingResults));
 
     process.exit(0);
