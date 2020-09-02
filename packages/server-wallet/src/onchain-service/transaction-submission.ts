@@ -1,5 +1,4 @@
 import {providers, Wallet} from 'ethers';
-import _ from 'lodash';
 import PriorityQueue from 'p-queue';
 
 import {
@@ -67,7 +66,8 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     tx: MinimalTransaction,
     options: TransactionSubmissionOptions = {}
   ): Promise<providers.TransactionResponse> {
-    const attempts = options.maxSendAttempts || 1;
+    // Check via casting to avoid 0 returning falsy values
+    const attempts = typeof options.maxSendAttempts === 'number' ? options.maxSendAttempts : 1;
     if (attempts === 0) {
       throw new TransactionSubmissionError(TransactionSubmissionError.reasons.zeroAttempts, {
         attempts,
@@ -75,7 +75,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     }
 
     const indexedErrors: {[k: string]: string} = {};
-    for (const attempt in _.range(attempts - 1)) {
+    for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const response = await this.queue.add(() => this._sendTransaction(tx));
         return response;
@@ -84,8 +84,8 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
         indexedErrors[attempt.toString()] = e.message;
 
         // Retry IFF known error
-        const knownErr = Object.values(TransactionSubmissionError.knownErrors).find(
-          e.message.includes
+        const knownErr = Object.values(TransactionSubmissionError.knownErrors).find(err =>
+          e.message.includes(err)
         );
         if (!knownErr) {
           throw new TransactionSubmissionError(TransactionSubmissionError.reasons.unknownError, {
