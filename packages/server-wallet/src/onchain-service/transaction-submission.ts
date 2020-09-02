@@ -14,7 +14,7 @@ import {WalletError as ChannelWalletError} from '..';
 
 type Values<E> = E[keyof E];
 
-class TransactionSubmissionError extends ChannelWalletError {
+export class TransactionSubmissionError extends ChannelWalletError {
   readonly type = ChannelWalletError.errors.OnchainError;
 
   // Errors where transactions will be safely retried

@@ -1,0 +1,16 @@
+import {GanacheServer} from '@statechannels/devtools';
+import {utils} from 'ethers';
+
+import config from '../src/config';
+import {deploy} from '../deployment/deploy';
+
+export async function setup(): Promise<void> {
+  const account = {privateKey: config.serverPrivateKey, amount: utils.parseEther('100').toString()};
+  const ganacheServer = new GanacheServer(8545, 1337, [account]);
+  await ganacheServer.ready();
+
+  const deployedArtifacts = await deploy();
+
+  (global as any).__ARTIFACTS__ = deployedArtifacts;
+  (global as any).__GANACHE_SERVER__ = ganacheServer;
+}
