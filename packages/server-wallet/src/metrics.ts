@@ -10,8 +10,7 @@ if (walletConfig.timingMetrics) {
   }
   const log = (entry: PerformanceEntry): void => {
     if (walletConfig.metricsOutputFile) {
-      fs.appendFileSync(walletConfig.metricsOutputFile, JSON.stringify(entry));
-      fs.appendFileSync(walletConfig.metricsOutputFile, '\n');
+      fs.appendFileSync(walletConfig.metricsOutputFile, JSON.stringify(entry) + '\n');
     } else {
       console.log(JSON.stringify(entry));
     }
