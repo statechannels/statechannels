@@ -1,6 +1,7 @@
 import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
 import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
 import TokenArtifact from '../build/contracts/Token.json';
+import AssetHolderArtifact from '../build/contracts/AssetHolder.json';
 import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
 import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
@@ -12,6 +13,7 @@ export const ContractArtifacts = {
   EthAssetHolderArtifact,
   TokenArtifact,
   ConsensusAppArtifact,
+  AssetHolderArtifact,
 };
 
 export {
