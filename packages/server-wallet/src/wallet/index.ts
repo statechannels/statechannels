@@ -173,10 +173,10 @@ export class Wallet implements WalletInterface {
       );
     };
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
-      const outcome = deserializeAllocations(allocations);
+      const outcome = recordFunctionMetrics(deserializeAllocations(allocations));
 
       const nextState = getOrThrow(
-        UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
+        recordFunctionMetrics(UpdateChannel.updateChannel({channelId, appData, outcome}, channel))
       );
       const {outgoing, channelResult} = await timer('signing state', async () =>
         Store.signState(channelId, nextState, tx)
@@ -248,7 +248,7 @@ type ExecutionResult = {
   error?: any;
 };
 
-const takeActionsImpl = async (channels: Bytes32[]): Promise<ExecutionResult> => {
+const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
   const outbox: Outgoing[] = [];
   const channelResults: ChannelResult[] = [];
   let error: Error | undefined = undefined;
@@ -304,7 +304,6 @@ const takeActionsImpl = async (channels: Bytes32[]): Promise<ExecutionResult> =>
 
   return {outbox, error, channelResults};
 };
-const takeActions = recordFunctionMetrics(takeActionsImpl);
 
 // TODO: This should be removed, and not used externally.
 // It is a fill-in until the wallet API is specced out.
