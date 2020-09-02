@@ -49,9 +49,13 @@ it('getSignerAddress vs fastRecover', async () => {
     };
 
     const signedState = await fastSignState(state, privateKey);
-
-    const recovered = getSignerAddress(signedState.state, signedState.signature);
-    const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature);
-    expect(recovered).toEqual(fastRecovered);
+    try {
+      const recovered = getSignerAddress(signedState.state, signedState.signature);
+      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature);
+      expect(recovered).toEqual(fastRecovered);
+    } catch (error) {
+      logger.info({error, state, privateKey});
+      throw error;
+    }
   });
 });
