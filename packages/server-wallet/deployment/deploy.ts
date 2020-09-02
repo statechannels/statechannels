@@ -25,9 +25,14 @@ export async function deploy(): Promise<TestNetworkContext> {
   } = ContractArtifacts;
 
   const nitroAdjudicator = await deployer.deploy(NitroAdjudicatorArtifact);
-  const token = await deployer.deploy(TokenArtifact);
-  const tokenAssetHolder = await deployer.deploy(Erc20AssetHolderArtifact);
-  const ethAssetHolder = await deployer.deploy(EthAssetHolderArtifact);
+  const token = await deployer.deploy(TokenArtifact, {}, 0);
+  const tokenAssetHolder = await deployer.deploy(
+    Erc20AssetHolderArtifact,
+    {},
+    nitroAdjudicator,
+    token
+  );
+  const ethAssetHolder = await deployer.deploy(EthAssetHolderArtifact, {}, nitroAdjudicator);
 
   return {
     nitroAdjudicator,

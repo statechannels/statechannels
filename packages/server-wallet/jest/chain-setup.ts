@@ -4,7 +4,7 @@ import {utils} from 'ethers';
 import config from '../src/config';
 import {deploy} from '../deployment/deploy';
 
-export async function setup(): Promise<void> {
+export default async function setup(): Promise<void> {
   const account = {privateKey: config.serverPrivateKey, amount: utils.parseEther('100').toString()};
   const ganacheServer = new GanacheServer(8545, 1337, [account]);
   await ganacheServer.ready();
