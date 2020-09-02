@@ -1,10 +1,10 @@
 import {Wallet} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';
-import {State, simpleEthAllocation, signState} from '@statechannels/wallet-core';
+import {State, simpleEthAllocation, signState, getSignerAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
-import {fastSignState} from '../signatures';
+import {fastSignState, fastRecoverAddress} from '../signatures';
 import {logger} from '../../logger';
 
 it('sign vs fastSign', async () => {
@@ -30,5 +30,28 @@ it('sign vs fastSign', async () => {
       logger.info({error, state, privateKey});
       throw error;
     }
+  });
+});
+
+it('getSignerAddress vs fastRecover', async () => {
+  _.range(5).map(async channelNonce => {
+    const {address, privateKey} = Wallet.createRandom();
+    const state: State = {
+      chainId: '0x1',
+      channelNonce,
+      participants: [participant({signingAddress: address})],
+      outcome: simpleEthAllocation([]),
+      turnNum: 1,
+      isFinal: false,
+      appData: '0x0',
+      appDefinition: AddressZero,
+      challengeDuration: 0x5,
+    };
+
+    const signedState = await fastSignState(state, privateKey);
+
+    const recovered = getSignerAddress(signedState.state, signedState.signature);
+    const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature);
+    expect(recovered).toEqual(fastRecovered);
   });
 });
