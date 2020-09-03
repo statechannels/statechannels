@@ -66,8 +66,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     tx: MinimalTransaction,
     options: TransactionSubmissionOptions = {}
   ): Promise<providers.TransactionResponse> {
-    // Check via casting to avoid 0 returning falsy values
-    const attempts = typeof options.maxSendAttempts === 'number' ? options.maxSendAttempts : 1;
+    const attempts = options.maxSendAttempts ?? 1;
     if (attempts === 0) {
       throw new TransactionSubmissionError(TransactionSubmissionError.reasons.zeroAttempts, {
         attempts,
