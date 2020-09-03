@@ -12,7 +12,6 @@ import {
   ChannelConstants,
   Participant,
   makeDestination,
-  getSignerAddress,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -30,6 +29,7 @@ import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
+import {fastRecoverAddress} from '../utilities/signatures';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -280,7 +280,8 @@ function validateSignatures(signedState: SignedState): void {
   const {participants} = signedState;
 
   signedState.signatures.map(sig => {
-    const signerAddress = getSignerAddress(signedState, sig.signature);
+    const signerAddress = fastRecoverAddress(signedState, sig.signature);
+
     // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
     const validSignature =
       participants.find(p => p.signingAddress === signerAddress) && sig.signer === signerAddress;
