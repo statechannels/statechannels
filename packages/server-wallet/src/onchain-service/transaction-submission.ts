@@ -24,6 +24,13 @@ export class TransactionSubmissionError extends ChannelWalletError {
     underpricedReplacement: 'replacement transaction underpriced',
   };
 
+  static isKnownErr(errorMessage: string): boolean {
+    const idx = Object.values(TransactionSubmissionError.knownErrors).findIndex(err =>
+      errorMessage.includes(err)
+    );
+    return idx !== -1;
+  }
+
   // Reasons an error is thrown from the transaction submission
   // service
   static readonly reasons = {
@@ -80,14 +87,12 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
         const response = await this.queue.add(() => this._sendTransaction(tx));
         return response;
       } catch (e) {
+        console.log('error sending tx', e.message);
         // Store the error in memory
         indexedErrors[attempt.toString()] = e.message;
 
         // Retry IFF known error
-        const knownErr = Object.values(TransactionSubmissionError.knownErrors).find(err =>
-          e.message.includes(err)
-        );
-        if (!knownErr) {
+        if (!TransactionSubmissionError.isKnownErr(e.message)) {
           throw new TransactionSubmissionError(TransactionSubmissionError.reasons.unknownError, {
             attempt,
             attempts,

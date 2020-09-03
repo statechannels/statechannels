@@ -42,6 +42,7 @@
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-unicorn": "21.0.0",
+    "evt": "1.8.8",
     "express-pino-logger": "^5.0.0",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",

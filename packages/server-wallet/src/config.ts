@@ -14,7 +14,9 @@ interface ServerWalletConfig {
   serverPrivateKey: string;
   rpcEndpoint?: string;
   chainNetworkID: string;
+  erc20Address?: string;
   ethAssetHolderAddress?: string;
+  erc20AssetHolderAddress?: string;
   debugKnex?: string;
   skipEvmValidation: boolean;
   timingMetrics: boolean;
@@ -38,6 +40,8 @@ const config: ServerWalletConfig = {
   rpcEndpoint: process.env.RPC_ENDPOINT,
   chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x0',
   ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  erc20Address: process.env.ERC20_ADDRESS,
+  erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS,
   debugKnex: process.env.DEBUG_KNEX,
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
   timingMetrics: process.env.TIMING_METRICS === 'ON',

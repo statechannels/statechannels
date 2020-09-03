@@ -1,5 +1,6 @@
 import {Address, Bytes32} from '@statechannels/client-api-schema';
-import {providers} from 'ethers';
+import {providers, BigNumber} from 'ethers';
+import {Evt} from 'evt';
 
 // FIXME: replace with
 // import {Wallet as ChannelWallet} from '@statechannels/server-wallet';
@@ -27,10 +28,32 @@ export type MinimalTransaction = Pick<
   'chainId' | 'to' | 'data' | 'value'
 >;
 
+// FIXME: should import from the `nitro-protocol` package, but it is using
+// a different version of ethers so the bignumber types are all messed up
+export type ContractEvent = 'Deposited';
+export interface DepositedEvent {
+  destination: string;
+  amountDeposited: BigNumber;
+  destinationHoldings: BigNumber;
+}
+
+// Used by the chain service to gather all channel events
+export interface ChannelEventRecordMap {
+  Deposited: DepositedEvent & {block: number};
+}
+export type ChannelEventRecord = Partial<
+  {
+    [K in keyof ChannelEventRecordMap]: ChannelEventRecordMap[K];
+  }
+>;
+export type EvtContainer = {
+  [K in keyof ChannelEventRecordMap]: Evt<ChannelEventRecordMap[K] & {block: number}>;
+};
+
 // Defines the interface for the service that is responsible for handling
 // all onchain interactions (i.e. events and transactions)
 export interface OnchainServiceInterface {
-  registerChannel(channelId: Bytes32, assetHolders: AssetHolderInformation[]): Promise<void>;
+  registerChannel(channelId: Bytes32, assetHolders: Address[]): Promise<void>;
 
   // Sends a transaction to chain
   submitTransaction(

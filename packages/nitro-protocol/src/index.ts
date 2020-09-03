@@ -26,6 +26,8 @@ export {
   setupContracts,
 } from '../test/test-helpers';
 export {
+  DepositedEvent,
+  AssetTransferredEvent,
   getAssetTransferredEvent,
   getDepositedEvent,
   convertBytes32ToAddress,

@@ -1,3 +1,4 @@
+/* eslint-disable no-process-env */
 import {GanacheServer} from '@statechannels/devtools';
 import {utils} from 'ethers';
 
@@ -10,6 +11,11 @@ export default async function setup(): Promise<void> {
   await ganacheServer.ready();
 
   const deployedArtifacts = await deploy();
+
+  // TODO: is this the best way to add these addresses?
+  process.env.ETH_ASSET_HOLDER_ADDRESS = deployedArtifacts.ethAssetHolder;
+  process.env.ERC20_ADDRESS = deployedArtifacts.token;
+  process.env.ERC20_ASSET_HOLDER_ADDRESS = deployedArtifacts.tokenAssetHolder;
 
   (global as any).__ARTIFACTS__ = deployedArtifacts;
   (global as any).__GANACHE_SERVER__ = ganacheServer;
