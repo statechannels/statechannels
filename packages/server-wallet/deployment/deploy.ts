@@ -8,10 +8,10 @@ import config from '../src/config';
 // be easily extracted
 
 export type TestNetworkContext = {
-  ethAssetHolder: Address;
-  token: Address;
-  tokenAssetHolder: Address;
-  nitroAdjudicator: Address;
+  ETH_ASSET_HOLDER_ADDRESS: Address;
+  ERC20_ADDRESS: Address;
+  ERC20_ASSET_HOLDER_ADDRESS: Address;
+  NITRO_ADJUDICATOR_ADDRESS: Address;
 };
 
 export async function deploy(): Promise<TestNetworkContext> {
@@ -24,20 +24,20 @@ export async function deploy(): Promise<TestNetworkContext> {
     NitroAdjudicatorArtifact,
   } = ContractArtifacts;
 
-  const nitroAdjudicator = await deployer.deploy(NitroAdjudicatorArtifact);
-  const token = await deployer.deploy(TokenArtifact, {}, 0);
-  const tokenAssetHolder = await deployer.deploy(
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
+  const ERC20_ADDRESS = await deployer.deploy(TokenArtifact, {}, 0);
+  const ERC20_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     Erc20AssetHolderArtifact,
     {},
-    nitroAdjudicator,
-    token
+    NITRO_ADJUDICATOR_ADDRESS,
+    ERC20_ADDRESS
   );
-  const ethAssetHolder = await deployer.deploy(EthAssetHolderArtifact, {}, nitroAdjudicator);
+  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(EthAssetHolderArtifact, {}, NITRO_ADJUDICATOR_ADDRESS);
 
   return {
-    nitroAdjudicator,
-    token,
-    tokenAssetHolder,
-    ethAssetHolder,
+    NITRO_ADJUDICATOR_ADDRESS,
+    ERC20_ADDRESS,
+    ERC20_ASSET_HOLDER_ADDRESS,
+    ETH_ASSET_HOLDER_ADDRESS,
   };
 }

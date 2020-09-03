@@ -1,7 +1,9 @@
 import {Wallet, providers, BigNumber} from 'ethers';
+import {randomChannelId} from '@statechannels/nitro-protocol';
 
 import {TransactionSubmissionService, TransactionSubmissionError} from '../transaction-submission';
 import config from '../../config';
+import {TransactionSubmissionStore} from '../store';
 
 import {MinimalTransaction} from '..';
 
@@ -47,30 +49,32 @@ describe('TransactionSubmissionService.submitTransaction', () => {
   let wallet: Wallet;
   let provider: providers.JsonRpcProvider;
 
+  const channelId = randomChannelId();
+
   beforeEach(async () => {
     provider = new providers.JsonRpcProvider(config.rpcEndpoint);
     wallet = new Wallet(config.serverPrivateKey);
-    service = new TransactionSubmissionService(provider, wallet);
+    service = new TransactionSubmissionService(provider, wallet, new TransactionSubmissionStore());
   });
 
   it('should fail if provided with 0 attempts', async () => {
     const tx = getTransaction();
-    await expect(service.submitTransaction(tx, {maxSendAttempts: 0})).rejects.toEqual(
+    await expect(service.submitTransaction(channelId, tx, {maxSendAttempts: 0})).rejects.toEqual(
       new TransactionSubmissionError(TransactionSubmissionError.reasons.zeroAttempts)
     );
   });
 
   it('should send a transaction successfully', async () => {
     const tx = getTransaction();
-    const response = await service.submitTransaction(tx);
+    const response = await service.submitTransaction(channelId, tx);
     await verifyResponse(response, tx);
   });
 
   it('should send concurrent transactions successfully', async () => {
     const tx = getTransaction();
     const responses = await Promise.all([
-      service.submitTransaction(tx),
-      service.submitTransaction(tx),
+      service.submitTransaction(channelId, tx),
+      service.submitTransaction(channelId, tx),
     ]);
     await Promise.all(responses.map(response => verifyResponse(response, tx)));
   });
@@ -80,10 +84,14 @@ describe('TransactionSubmissionService.submitTransaction', () => {
     const mock = getFailingWallet(TransactionSubmissionError.knownErrors.badNonce);
 
     // Recreate service
-    service = new TransactionSubmissionService(provider, mock as any);
+    service = new TransactionSubmissionService(
+      provider,
+      mock as any,
+      new TransactionSubmissionStore()
+    );
 
     const tx = getTransaction();
-    await expect(service.submitTransaction(tx, {maxSendAttempts: 2})).rejects.toEqual(
+    await expect(service.submitTransaction(channelId, tx, {maxSendAttempts: 2})).rejects.toEqual(
       new TransactionSubmissionError(TransactionSubmissionError.reasons.failedAllAttempts)
     );
   });
@@ -93,10 +101,10 @@ describe('TransactionSubmissionService.submitTransaction', () => {
     const mock = getFailingWallet();
 
     // Recreate service
-    service = new TransactionSubmissionService(provider, mock);
+    service = new TransactionSubmissionService(provider, mock, new TransactionSubmissionStore());
 
     const tx = getTransaction();
-    await expect(service.submitTransaction(tx, {maxSendAttempts: 2})).rejects.toEqual(
+    await expect(service.submitTransaction(channelId, tx, {maxSendAttempts: 2})).rejects.toEqual(
       new TransactionSubmissionError(TransactionSubmissionError.reasons.unknownError)
     );
   });

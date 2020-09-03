@@ -7,6 +7,7 @@ import {OnchainService} from '../onchain-service';
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
 import {Wallet} from '../../../src';
 import config from '../../config';
+import {TransactionSubmissionStore, OnchainServiceStore} from '../store';
 
 jest.mock('../../../src/wallet');
 
@@ -30,9 +31,13 @@ describe('OnchainTransactionService', () => {
   beforeEach(async () => {
     provider = new providers.JsonRpcProvider(config.rpcEndpoint);
     wallet = new EtherWallet(config.serverPrivateKey);
-    transactionService = new TransactionSubmissionService(provider, wallet);
+    transactionService = new TransactionSubmissionService(
+      provider,
+      wallet,
+      new TransactionSubmissionStore()
+    );
     channelWallet = new Wallet();
-    onchainService = new OnchainService(provider, transactionService, {transactionAttempts: 2});
+    onchainService = new OnchainService(provider, transactionService, new OnchainServiceStore());
     onchainService.attachChannelWallet(channelWallet);
     ethAssetHolder = new Contract(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -90,9 +95,7 @@ describe('OnchainTransactionService', () => {
 
     // Check mock
     expect(channelWallet.updateChannelFunding).toHaveBeenCalled();
-
-    await new Promise(resolve => setTimeout(resolve, 5_000));
-  }, 30_000);
+  });
 
   it('should not fail if channel is already registered', async () => {
     await onchainService.registerChannel(channelId, [ethAssetHolder.address]);

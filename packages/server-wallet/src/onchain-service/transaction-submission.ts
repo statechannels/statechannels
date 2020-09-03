@@ -1,20 +1,19 @@
 import {providers, Wallet} from 'ethers';
 import PriorityQueue from 'p-queue';
+import {Bytes32} from '@statechannels/client-api-schema';
 
 import {
   TransactionSubmissionServiceInterface,
   MinimalTransaction,
   TransactionSubmissionOptions,
+  Values,
+  TransactionSubmissionStoreInterface,
 } from './types';
+import {BaseError} from './utils';
+import {TransactionSubmissionStore} from './store';
 
-// FIXME: replace with
-// import {WalletError as ChannelWalletError} from '@statechannels/server-wallet';
-import {WalletError as ChannelWalletError} from '..';
-
-type Values<E> = E[keyof E];
-
-export class TransactionSubmissionError extends ChannelWalletError {
-  readonly type = ChannelWalletError.errors.OnchainError;
+export class TransactionSubmissionError extends BaseError {
+  readonly type = BaseError.errors.OnchainError;
 
   // Errors where transactions will be safely retried
   static readonly knownErrors = {
@@ -22,14 +21,7 @@ export class TransactionSubmissionError extends ChannelWalletError {
     invalidNonce: 'Invalid nonce',
     noHash: 'no transaction hash found in tx response',
     underpricedReplacement: 'replacement transaction underpriced',
-  };
-
-  static isKnownErr(errorMessage: string): boolean {
-    const idx = Object.values(TransactionSubmissionError.knownErrors).findIndex(err =>
-      errorMessage.includes(err)
-    );
-    return idx !== -1;
-  }
+  } as const;
 
   // Reasons an error is thrown from the transaction submission
   // service
@@ -56,20 +48,30 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
   // Queues to handle transactions
   private queue = new PriorityQueue({concurrency: 1});
 
+  // Storage for transactions
+  private store: TransactionSubmissionStoreInterface;
+
   // Memory tracking wallet nonce to assist with retries
   // TODO: maybe replace with NonceManager?
   private memoryNonce = 0;
 
-  constructor(provider: string | providers.JsonRpcProvider, wallet: string | Wallet) {
+  constructor(
+    provider: string | providers.JsonRpcProvider,
+    wallet: string | Wallet,
+    store: TransactionSubmissionStore
+  ) {
     this.provider =
       typeof provider === 'string' ? new providers.JsonRpcProvider(provider) : provider;
     this.wallet =
       typeof wallet === 'string'
         ? new Wallet(wallet, this.provider)
         : wallet.connect(this.provider);
+
+    this.store = store;
   }
 
   public async submitTransaction(
+    channelId: Bytes32,
     tx: MinimalTransaction,
     options: TransactionSubmissionOptions = {}
   ): Promise<providers.TransactionResponse> {
@@ -83,15 +85,19 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     const indexedErrors: {[k: string]: string} = {};
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
-        const response = await this.queue.add(() => this._sendTransaction(tx));
+        const response = await this.queue.add(() => this._sendTransaction(channelId, tx));
         return response;
       } catch (e) {
-        console.log('error sending tx', e.message);
         // Store the error in memory
         indexedErrors[attempt.toString()] = e.message;
 
         // Retry IFF known error
-        if (!TransactionSubmissionError.isKnownErr(e.message)) {
+        if (
+          !TransactionSubmissionError.isKnownErr(
+            e.message,
+            Object.values(TransactionSubmissionError.knownErrors)
+          )
+        ) {
           throw new TransactionSubmissionError(TransactionSubmissionError.reasons.unknownError, {
             attempt,
             attempts,
@@ -107,7 +113,10 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     });
   }
 
-  private async _sendTransaction(tx: MinimalTransaction): Promise<providers.TransactionResponse> {
+  private async _sendTransaction(
+    channelId: string,
+    tx: MinimalTransaction
+  ): Promise<providers.TransactionResponse> {
     // Get the onchain record of wallet nonce
     const chainNonce = await this.wallet.getTransactionCount();
 
@@ -115,7 +124,14 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     const nonce = this.memoryNonce > chainNonce ? this.memoryNonce : chainNonce;
 
     // Send the transaction
-    const response = await this.wallet.sendTransaction(tx);
+    const nonced = {...tx, nonce};
+    await this.store.saveTransactionRequest(channelId, nonced);
+    const response = await this.wallet.sendTransaction(nonced);
+    await this.store.saveTransactionResponse(channelId, response);
+    response
+      .wait()
+      .then(receipt => this.store.saveTransactionReceipt(channelId, receipt))
+      .catch(e => this.store.saveFailedTransaction(channelId, nonced, e.message));
 
     // Update the memory nonce after sent to mempool
     this.memoryNonce = nonce + 1;

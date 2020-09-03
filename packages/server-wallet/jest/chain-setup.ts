@@ -12,10 +12,7 @@ export default async function setup(): Promise<void> {
 
   const deployedArtifacts = await deploy();
 
-  // TODO: is this the best way to add these addresses?
-  process.env.ETH_ASSET_HOLDER_ADDRESS = deployedArtifacts.ethAssetHolder;
-  process.env.ERC20_ADDRESS = deployedArtifacts.token;
-  process.env.ERC20_ASSET_HOLDER_ADDRESS = deployedArtifacts.tokenAssetHolder;
+  process.env = {...process.env, ...deployedArtifacts};
 
   (global as any).__ARTIFACTS__ = deployedArtifacts;
   (global as any).__GANACHE_SERVER__ = ganacheServer;

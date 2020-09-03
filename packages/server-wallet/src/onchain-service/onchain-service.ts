@@ -2,24 +2,25 @@ import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {Bytes32, Address} from '@statechannels/client-api-schema';
 import {providers, Contract, BigNumber, Event, constants} from 'ethers';
 import {Evt} from 'evt';
+import {BN} from '@statechannels/wallet-core';
 
 import {
   MinimalTransaction,
   OnchainServiceInterface,
   AssetHolderInformation,
-  OnchainServiceConfiguration,
   TransactionSubmissionServiceInterface,
-  DEFAULT_MAX_TRANSACTION_ATTEMPTS,
-  ChannelEventRecord,
-  DepositedEvent,
   EvtContainer,
-  ContractEvent,
+  ContractEventName,
   ChannelEventRecordMap,
+  TransactionSubmissionOptions,
+  OnchainServiceStoreInterface,
+  ChannelDepositedEventRecord,
 } from './types';
+import {addEvtHandler, BaseError} from './utils';
 
 // FIXME: replace with
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
-import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '..';
+import {Wallet as ChannelWallet} from '..';
 
 type Values<E> = E[keyof E];
 
@@ -45,8 +46,10 @@ const getAssetHolderInformation = async (
   return {tokenAddress, assetHolderAddress};
 };
 
-class OnchainServiceError extends ChannelWalletError {
-  readonly type = ChannelWalletError.errors.OnchainError;
+class OnchainServiceError extends BaseError {
+  readonly type = BaseError.errors.OnchainError;
+
+  static readonly knownErrors = {} as const;
 
   // Reasons an error is thrown from the transaction submission
   // service
@@ -58,17 +61,15 @@ class OnchainServiceError extends ChannelWalletError {
     reason: Values<typeof OnchainServiceError.reasons>,
     public readonly data: any = undefined
   ) {
-    super(reason);
+    super(reason, data);
   }
 }
 
 export class OnchainService implements OnchainServiceInterface {
   private provider: providers.JsonRpcProvider;
-  private attempts: number;
 
-  // NOTE: V0 has an in-memory store, which will eventually be
-  // shifted to more permanent storage
-  private store: Map<string, ChannelEventRecord> = new Map();
+  // Storage for all events
+  private storage: OnchainServiceStoreInterface;
 
   // Stores references to all contracts in memory
   private assetHolders: Map<string, AssetHolderInformation & {evts: EvtContainer}> = new Map();
@@ -83,15 +84,12 @@ export class OnchainService implements OnchainServiceInterface {
   constructor(
     provider: string | providers.JsonRpcProvider,
     transactionSubmissionService: TransactionSubmissionServiceInterface,
-    config: OnchainServiceConfiguration = {}
+    storage: OnchainServiceStoreInterface
   ) {
-    this.attempts = config.transactionAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
-    if (this.attempts === 0) {
-      throw new Error(`Invalid number of attempts (${this.attempts})`);
-    }
     this.provider =
       typeof provider === 'string' ? new providers.JsonRpcProvider(provider) : provider;
     this.transactionSubmissionService = transactionSubmissionService;
+    this.storage = storage;
   }
 
   public attachChannelWallet(wallet: ChannelWallet): void {
@@ -112,7 +110,7 @@ export class OnchainService implements OnchainServiceInterface {
    *
    * @notice This may not be strictly necessary, but could be useful for the app
    */
-  public attachHandler<T extends ContractEvent>(
+  public attachHandler<T extends ContractEventName>(
     assetHolderAddr: Address,
     event: T,
     callback: (event: ChannelEventRecordMap[T]) => void | Promise<void>,
@@ -130,12 +128,7 @@ export class OnchainService implements OnchainServiceInterface {
     }
 
     // EVT api changes based on the presence of arguments
-    if (filter && timeout) {
-      return evt.attach(filter, timeout, callback);
-    } else if (filter) {
-      return evt.attach(filter, callback);
-    }
-    return evt.attach(callback);
+    return addEvtHandler(evt, callback, filter, timeout);
   }
 
   /**
@@ -146,7 +139,7 @@ export class OnchainService implements OnchainServiceInterface {
    *
    * @notice This may not be strictly necessary, but is useful for testing
    */
-  public detachAllHandlers(assetHolderAddr: Address, event?: ContractEvent): void {
+  public detachAllHandlers(assetHolderAddr: Address, event?: ContractEventName): void {
     const record = this.assetHolders.get(assetHolderAddr);
     if (!record) {
       throw new Error(`Could not find asset holder with service`);
@@ -177,9 +170,8 @@ export class OnchainService implements OnchainServiceInterface {
     }
 
     // Add the channel if it has not been stored
-    if (!this.store.has(channelId)) {
-      this.store.set(channelId, {});
-    }
+    // Store can handle multiple creation calls
+    await this.storage.createChannel(channelId);
 
     // Create and store new contracts if we don't have record of
     // required assetHolders
@@ -199,50 +191,43 @@ export class OnchainService implements OnchainServiceInterface {
 
   public async submitTransaction(
     channelId: Bytes32,
-    tx: MinimalTransaction
+    tx: MinimalTransaction,
+    transactionOptions: TransactionSubmissionOptions = {maxSendAttempts: 5}
   ): Promise<providers.TransactionResponse> {
     if (!this.channelWallet) {
       throw new OnchainServiceError(OnchainServiceError.reasons.noChannelWallet);
     }
 
     // If the channel is not registered, do not send transactions
-    if (!this.store.has(channelId)) {
+    if (!this.storage.hasChannel(channelId)) {
       throw new OnchainServiceError(OnchainServiceError.reasons.notRegistered);
     }
 
-    return this.transactionSubmissionService.submitTransaction(tx, {
-      maxSendAttempts: this.attempts,
-    });
+    return this.transactionSubmissionService.submitTransaction(channelId, tx, transactionOptions);
   }
 
-  private _createDepositEvt(): Evt<DepositedEvent & {block: number}> {
+  private _createDepositEvt(): Evt<ChannelDepositedEventRecord> {
     // Create the evt instances for the contract
-    const depositEvt = Evt.create<DepositedEvent & {block: number}>();
+    const depositEvt = Evt.create<ChannelDepositedEventRecord>();
 
     // Setup deposit evt so it will emit properly formatted event IFF
     // - belongs to a registered channel
     // - is for a subsequent deposit event
     // And execute channel wallet and storage callbacks (wallet callback
     // executed IFF a channel wallet has been attached to the service)
+
+    // FIXME: evt pipe isnt async supported :(
     depositEvt
       .pipe(e => {
-        return this.store.has(e.destination);
+        return this.storage.hasChannel(e.destination);
       })
       .pipe(e => {
-        const record = this.store.get(e.destination);
-        const prevHoldings = record?.Deposited?.destinationHoldings || BigNumber.from(0);
+        const record = this.storage.getLatestEvent(e.destination, 'Deposited');
+        const prevHoldings = record?.destinationHoldings || BigNumber.from(0);
         return prevHoldings.lt(e.destinationHoldings);
       })
       .attach(e => {
-        // Store updated event record
-        const record = this.store.get(e.destination);
-        const updated: ChannelEventRecord = {
-          ...record,
-          Deposited: {
-            ...e,
-          },
-        };
-        this.store.set(e.destination, {...updated});
+        this.storage.saveEvent(e.destination, e);
       });
     return depositEvt;
   }
@@ -260,7 +245,7 @@ export class OnchainService implements OnchainServiceInterface {
       this.channelWallet &&
         this.channelWallet.updateChannelFunding({
           channelId: e.destination,
-          amount: e.amountDeposited.toString(),
+          amount: BN.from(e.amountDeposited),
           token: info.tokenAddress,
         });
     });
@@ -286,6 +271,7 @@ export class OnchainService implements OnchainServiceInterface {
           amountDeposited,
           destinationHoldings,
           block: event.blockNumber,
+          type: 'Deposited',
         });
       }
     );
