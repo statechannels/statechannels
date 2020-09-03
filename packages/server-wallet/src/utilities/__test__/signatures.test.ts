@@ -1,11 +1,18 @@
 import {Wallet} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';
-import {State, simpleEthAllocation, signState, getSignerAddress} from '@statechannels/wallet-core';
+import {
+  State,
+  simpleEthAllocation,
+  signState,
+  getSignerAddress,
+  hashState,
+} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
 import {fastSignState, fastRecoverAddress} from '../signatures';
 import {logger} from '../../logger';
+import {addHash} from '../../state-utils';
 
 it('sign vs fastSign', async () => {
   _.range(5).map(async channelNonce => {
@@ -23,7 +30,7 @@ it('sign vs fastSign', async () => {
     };
 
     const signedState = signState(state, privateKey);
-    const fastSignedState = fastSignState(state, privateKey);
+    const fastSignedState = fastSignState(addHash(state), privateKey);
     try {
       expect(signedState).toEqual((await fastSignedState).signature);
     } catch (error) {
@@ -48,10 +55,11 @@ it('getSignerAddress vs fastRecover', async () => {
       challengeDuration: 0x5,
     };
 
-    const signedState = await fastSignState(state, privateKey);
+    const signedState = await fastSignState(addHash(state), privateKey);
     try {
       const recovered = getSignerAddress(signedState.state, signedState.signature);
-      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature);
+      const stateHash = hashState(signedState.state);
+      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature, stateHash);
       expect(recovered).toEqual(fastRecovered);
     } catch (error) {
       logger.info({error, state, privateKey});

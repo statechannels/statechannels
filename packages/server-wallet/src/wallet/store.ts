@@ -1,17 +1,16 @@
 import {Transaction} from 'objection';
 import {
-  SignedState,
   Objective,
   SignedStateWithHash,
   SignedStateVarsWithHash,
   Message,
-  hashState,
   State,
   calculateChannelId,
   StateVariables,
   ChannelConstants,
   Participant,
   makeDestination,
+  StateWithHash,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -110,7 +109,7 @@ export const Store = recordFunctionMetrics({
     const timer = timerFactory(`signState ${channelId}`);
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
-    const state: State = {...channel.channelConstants, ...vars};
+    const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
@@ -124,7 +123,7 @@ export const Store = recordFunctionMetrics({
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = await timer('adding hash', async () => ({signedStates: [addHash(signedState)]}));
+    const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -152,7 +151,7 @@ export const Store = recordFunctionMetrics({
 
   pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, ss, tx);
+      await this.addSignedState(undefined, addHash(ss), tx);
     }
 
     for (const o of message.objectives || []) {
@@ -175,7 +174,7 @@ export const Store = recordFunctionMetrics({
 
   addSignedState: async function(
     maybeChannel: Channel | undefined,
-    signedState: SignedState,
+    signedState: SignedStateWithHash,
     tx: Transaction
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
@@ -276,11 +275,11 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function validateSignatures(signedState: SignedState): void {
+function validateSignatures(signedState: SignedStateWithHash): void {
   const {participants} = signedState;
 
   signedState.signatures.map(sig => {
-    const signerAddress = fastRecoverAddress(signedState, sig.signature);
+    const signerAddress = fastRecoverAddress(signedState, sig.signature, signedState.stateHash);
 
     // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
     const validSignature =
@@ -333,10 +332,10 @@ function isReverseSorted(arr: number[]): boolean {
  */
 function addState(
   vars: SignedStateVarsWithHash[],
-  signedState: SignedState
+  signedState: SignedStateWithHash
 ): SignedStateVarsWithHash[] {
   const clonedVariables = _.cloneDeep(vars);
-  const stateHash = hashState(signedState);
+  const {stateHash} = signedState;
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
     const mergedSignatures = _.uniq(

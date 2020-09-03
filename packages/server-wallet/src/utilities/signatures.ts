@@ -1,6 +1,6 @@
 import {instantiateSecp256k1, Secp256k1, RecoveryId} from '@bitauth/libauth';
 import {utils, Wallet} from 'ethers';
-import {State, hashState, calculateChannelId} from '@statechannels/wallet-core';
+import {State, calculateChannelId, StateWithHash} from '@statechannels/wallet-core';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
@@ -10,7 +10,7 @@ const cachedAddress = (privateKey: string): string =>
   knownWallets[privateKey] || (knownWallets[privateKey] = new Wallet(privateKey).address);
 
 export async function fastSignState(
-  state: State,
+  state: StateWithHash,
   privateKey: string
 ): Promise<{state: State; signature: string}> {
   const address = cachedAddress(privateKey);
@@ -18,14 +18,13 @@ export async function fastSignState(
     throw new Error("The state must be signed with a participant's private key");
   }
 
-  const hashedState = hashState(state);
+  const {stateHash} = state;
 
-  const signature = await fastSignData(hashedState, privateKey);
+  const signature = await fastSignData(stateHash, privateKey);
   return {state, signature};
 }
 
-export function fastRecoverAddress(state: State, signature: string): string {
-  const stateHash = hashState(state);
+export function fastRecoverAddress(state: State, signature: string, stateHash: string): string {
   const recover = Number.parseInt('0x' + signature.slice(-2)) - 27;
 
   const digest = Buffer.from(hashMessage(stateHash).substr(2), 'hex');
