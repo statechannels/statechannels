@@ -1,6 +1,12 @@
 import {Wallet} from 'ethers';
 import {AddressZero} from '@ethersproject/constants';
-import {State, simpleEthAllocation, signState, getSignerAddress} from '@statechannels/wallet-core';
+import {
+  State,
+  simpleEthAllocation,
+  signState,
+  getSignerAddress,
+  hashState,
+} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
@@ -51,7 +57,8 @@ it('getSignerAddress vs fastRecover', async () => {
     const signedState = await fastSignState(state, privateKey);
     try {
       const recovered = getSignerAddress(signedState.state, signedState.signature);
-      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature);
+      const stateHash = hashState(signedState.state);
+      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature, stateHash);
       expect(recovered).toEqual(fastRecovered);
     } catch (error) {
       logger.info({error, state, privateKey});

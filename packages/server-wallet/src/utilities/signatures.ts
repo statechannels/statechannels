@@ -24,8 +24,7 @@ export async function fastSignState(
   return {state, signature};
 }
 
-export function fastRecoverAddress(state: State, signature: string): string {
-  const stateHash = hashState(state);
+export function fastRecoverAddress(state: State, signature: string, stateHash: string): string {
   const recover = Number.parseInt('0x' + signature.slice(-2)) - 27;
 
   const digest = Buffer.from(hashMessage(stateHash).substr(2), 'hex');
