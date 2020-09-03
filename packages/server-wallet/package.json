@@ -60,7 +60,7 @@
   "lint-staged": {
     "src/**/*.ts": "eslint --max-warnings=0"
   },
-  "main": "lib/src/wallet/index.js",
+  "main": "lib/src/index.js",
   "private": false,
   "resolutions": {
     "broccoli": "3.3.3",
@@ -93,6 +93,6 @@
     "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
     "profile": "./e2e-test/scripts/profile.sh"
   },
-  "types": "lib/src/wallet/index.d.ts",
+  "types": "lib/src/index.d.ts",
   "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
 }
