@@ -10,6 +10,7 @@ import {
   ChannelConstants,
   Participant,
   makeDestination,
+  StateWithHash,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -108,21 +109,21 @@ export const Store = recordFunctionMetrics({
     const timer = timerFactory(`signState ${channelId}`);
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
-    const state: State = {...channel.channelConstants, ...vars};
+    const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
     const signatureEntry = await timer('signing', async () =>
       channel.signingWallet.signState(state)
     );
-    const signedState = addHash({...state, signatures: [signatureEntry]});
+    const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding state', async () =>
       this.addSignedState(channel, signedState, tx)
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = await timer('adding hash', async () => ({signedStates: [addHash(signedState)]}));
+    const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({

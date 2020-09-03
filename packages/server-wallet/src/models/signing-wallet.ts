@@ -1,5 +1,5 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, State, signState} from '@statechannels/wallet-core';
+import {SignatureEntry, State, signState, StateWithHash} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
@@ -45,7 +45,7 @@ export class SigningWallet extends Model {
     };
   }
 
-  async signState(state: State): Promise<SignatureEntry> {
+  async signState(state: StateWithHash): Promise<SignatureEntry> {
     return {
       signer: this.address,
       signature: (await fastSignState(state, this.privateKey)).signature,
