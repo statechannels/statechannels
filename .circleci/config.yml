@@ -318,6 +318,9 @@ jobs:
       - run:
           command: |
             cp /home/circleci/project/packages/server-wallet/.clinic/*.html  /home/circleci/project/artifacts
+      - run:
+          command: |
+            cp /home/circleci/project/packages/server-wallet/metrics.log  /home/circleci/project/artifacts
       - upload_artifacts
 
   release-pull-request:

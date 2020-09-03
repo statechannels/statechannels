@@ -88,7 +88,7 @@
     "test:ci": "yarn test --bail",
     "test:e2e": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
     "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand",
-    "profile": "./e2e-test/scripts/profile.sh"
+    "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh"
   },
   "types": "lib/src/index.d.ts",
   "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"

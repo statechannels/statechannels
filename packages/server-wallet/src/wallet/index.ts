@@ -37,7 +37,7 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
-import {timerFactory} from '../metrics';
+import {timerFactory, recordFunctionMetrics} from '../metrics';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -173,10 +173,10 @@ export class Wallet implements WalletInterface {
       );
     };
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
-      const outcome = deserializeAllocations(allocations);
+      const outcome = recordFunctionMetrics(deserializeAllocations(allocations));
 
       const nextState = getOrThrow(
-        UpdateChannel.updateChannel({channelId, appData, outcome}, channel)
+        recordFunctionMetrics(UpdateChannel.updateChannel({channelId, appData, outcome}, channel))
       );
       const {outgoing, channelResult} = await timer('signing state', async () =>
         Store.signState(channelId, nextState, tx)
@@ -285,7 +285,7 @@ const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
         }
       };
 
-      const nextAction = Application.protocol({app});
+      const nextAction = recordFunctionMetrics(Application.protocol({app}));
 
       if (!nextAction) markChannelAsDone();
       else if (isOutgoing(nextAction)) {
