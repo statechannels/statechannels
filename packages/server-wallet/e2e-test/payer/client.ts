@@ -5,13 +5,13 @@ import {Wallet} from 'ethers';
 import {makeDestination, BN, Message} from '@statechannels/wallet-core';
 import {Message as WireMessage} from '@statechannels/wire-format';
 
-import walletConfig from '../../src/config';
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
+import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 
 export default class PayerClient {
-  private readonly wallet: ServerWallet = new ServerWallet();
-
+  private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet());
+  private time = timerFactory('payerClient');
   constructor(private readonly pk: Bytes32, private readonly receiverHttpServerURL: string) {}
 
   public readonly participantId = 'payer';
@@ -84,18 +84,20 @@ export default class PayerClient {
   }
 
   public async makePayment(channelId: string): Promise<void> {
-    const channel = await time(`get channel ${channelId}`, async () => this.getChannel(channelId));
+    const channel = await this.time(`get channel ${channelId}`, async () =>
+      this.getChannel(channelId)
+    );
 
     // Assuming MessageQueued inside the outbox
     const {
       outbox: [{params}],
-    } = await time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
+    } = await this.time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
 
-    const reply = await time(`send message ${channelId}`, async () =>
+    const reply = await this.time(`send message ${channelId}`, async () =>
       this.messageReceiverAndExpectReply((params as WireMessage).data as Message)
     );
 
-    await time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
+    await this.time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
   }
 
   public emptyMessage(): Promise<Message> {
@@ -108,16 +110,5 @@ export default class PayerClient {
   private async messageReceiverAndExpectReply(message: Message): Promise<Message> {
     const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
     return reply;
-  }
-}
-
-async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
-  if (walletConfig.timingMetrics) {
-    console.time(label);
-    const result = await cb();
-    console.timeEnd(label);
-    return result;
-  } else {
-    return await cb();
   }
 }

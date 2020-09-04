@@ -8,6 +8,7 @@ configureEnvVariables();
 import {dbConfig} from '../../src/db/config';
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {recordFunctionMetrics} from '../../src/metrics';
 
 import {PerformanceTimer} from './timers';
 
@@ -44,7 +45,9 @@ export default {
     const knex = Knex(_.merge(dbConfig, {connection: {database}}));
     Model.knex(knex);
 
-    const payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
+    const payerClient = recordFunctionMetrics(
+      new PayerClient(alice().privateKey, `http://127.0.0.1:65535`)
+    );
 
     const performanceTimer = new PerformanceTimer(channels || [], numPayments);
     await Promise.all(

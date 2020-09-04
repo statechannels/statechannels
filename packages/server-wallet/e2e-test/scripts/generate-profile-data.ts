@@ -69,11 +69,11 @@ const startReceiver = async (
     };
   }
 };
+
+const NUM_CHANNELS = 20;
+const NUM_PAYMENTS = 20;
+
 async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promise<void> {
-  const receiverServer = await startReceiver(type);
-
-  await waitForServerToStart(receiverServer);
-
   const [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
 
   await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
@@ -88,10 +88,15 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promi
     alice().privateKey,
     getParticipant('receiver', bob().privateKey),
     bob().privateKey,
-    100,
+    NUM_CHANNELS,
     knexPayer
   );
-  await triggerPayments(channelIds);
+
+  const receiverServer = await startReceiver(type);
+
+  await waitForServerToStart(receiverServer);
+
+  await triggerPayments(channelIds, NUM_PAYMENTS);
 
   kill(receiverServer.server.pid, 'SIGINT');
 

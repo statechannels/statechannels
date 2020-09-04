@@ -1,6 +1,6 @@
-import {instantiateSecp256k1, Secp256k1} from '@bitauth/libauth';
+import {instantiateSecp256k1, Secp256k1, RecoveryId} from '@bitauth/libauth';
 import {utils, Wallet} from 'ethers';
-import {State, hashState} from '@statechannels/wallet-core';
+import {State, calculateChannelId, StateWithHash} from '@statechannels/wallet-core';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));
@@ -10,7 +10,7 @@ const cachedAddress = (privateKey: string): string =>
   knownWallets[privateKey] || (knownWallets[privateKey] = new Wallet(privateKey).address);
 
 export async function fastSignState(
-  state: State,
+  state: StateWithHash,
   privateKey: string
 ): Promise<{state: State; signature: string}> {
   const address = cachedAddress(privateKey);
@@ -18,10 +18,36 @@ export async function fastSignState(
     throw new Error("The state must be signed with a participant's private key");
   }
 
-  const hashedState = hashState(state);
+  const {stateHash} = state;
 
-  const signature = await fastSignData(hashedState, privateKey);
+  const signature = await fastSignData(stateHash, privateKey);
   return {state, signature};
+}
+
+export function fastRecoverAddress(state: State, signature: string, stateHash: string): string {
+  const recover = Number.parseInt('0x' + signature.slice(-2)) - 27;
+
+  const digest = Buffer.from(hashMessage(stateHash).substr(2), 'hex');
+  const recoveredAddress = utils.computeAddress(
+    secp256k1.recoverPublicKeyCompressed(
+      Buffer.from(signature.slice(2, -2), 'hex'),
+      recover as RecoveryId,
+      digest
+    )
+  );
+
+  const {participants} = state;
+
+  const signingAddresses = participants.map(p => p.signingAddress);
+
+  if (signingAddresses.indexOf(recoveredAddress) < 0) {
+    throw new Error(
+      `Recovered address ${recoveredAddress} is not a participant in channel ${calculateChannelId(
+        state
+      )}`
+    );
+  }
+  return recoveredAddress;
 }
 
 export async function fastSignData(hashedData: string, privateKey: string): Promise<string> {

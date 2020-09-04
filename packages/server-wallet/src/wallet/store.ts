@@ -1,18 +1,16 @@
 import {Transaction} from 'objection';
 import {
-  SignedState,
   Objective,
   SignedStateWithHash,
   SignedStateVarsWithHash,
   Message,
-  hashState,
   State,
   calculateChannelId,
   StateVariables,
   ChannelConstants,
   Participant,
   makeDestination,
-  getSignerAddress,
+  StateWithHash,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -29,7 +27,8 @@ import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import config from '../config';
-import {timerFactory} from '../metrics';
+import {timerFactory, recordFunctionMetrics} from '../metrics';
+import {fastRecoverAddress} from '../utilities/signatures';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -45,7 +44,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
-export const Store = {
+export const Store = recordFunctionMetrics({
   getFirstParticipant: async function(): Promise<Participant> {
     const signingAddress = await Store.getOrCreateSigningAddress();
     return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
@@ -107,10 +106,10 @@ export const Store = {
     vars: StateVariables,
     tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const timer = timerFactory(`  signState ${channelId}`);
+    const timer = timerFactory(`signState ${channelId}`);
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
-    const state: State = {...channel.channelConstants, ...vars};
+    const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
@@ -124,7 +123,7 @@ export const Store = {
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = await timer('adding hash', async () => ({signedStates: [addHash(signedState)]}));
+    const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -152,7 +151,7 @@ export const Store = {
 
   pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, ss, tx);
+      await this.addSignedState(undefined, addHash(ss), tx);
     }
 
     for (const o of message.objectives || []) {
@@ -175,11 +174,11 @@ export const Store = {
 
   addSignedState: async function(
     maybeChannel: Channel | undefined,
-    signedState: SignedState,
+    signedState: SignedStateWithHash,
     tx: Transaction
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
-    const timer = timerFactory(`    add signed state ${channelId}`);
+    const timer = timerFactory(`add signed state ${channelId}`);
 
     await timer('validating signatures', async () => validateSignatures(signedState));
 
@@ -222,7 +221,7 @@ export const Store = {
 
     return result;
   },
-};
+});
 
 class StoreError extends WalletError {
   readonly type = WalletError.errors.StoreError;
@@ -276,11 +275,12 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function validateSignatures(signedState: SignedState): void {
+function validateSignatures(signedState: SignedStateWithHash): void {
   const {participants} = signedState;
 
   signedState.signatures.map(sig => {
-    const signerAddress = getSignerAddress(signedState, sig.signature);
+    const signerAddress = fastRecoverAddress(signedState, sig.signature, signedState.stateHash);
+
     // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
     const validSignature =
       participants.find(p => p.signingAddress === signerAddress) && sig.signer === signerAddress;
@@ -332,10 +332,10 @@ function isReverseSorted(arr: number[]): boolean {
  */
 function addState(
   vars: SignedStateVarsWithHash[],
-  signedState: SignedState
+  signedState: SignedStateWithHash
 ): SignedStateVarsWithHash[] {
   const clonedVariables = _.cloneDeep(vars);
-  const stateHash = hashState(signedState);
+  const {stateHash} = signedState;
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
     const mergedSignatures = _.uniq(

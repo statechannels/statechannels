@@ -20,6 +20,7 @@ interface ServerWalletConfig {
   debugKnex?: string;
   skipEvmValidation: boolean;
   timingMetrics: boolean;
+  metricsOutputFile?: string;
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -45,6 +46,7 @@ const config: ServerWalletConfig = {
   debugKnex: process.env.DEBUG_KNEX,
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
   timingMetrics: process.env.TIMING_METRICS === 'ON',
+  metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
 };
 
 export default config;

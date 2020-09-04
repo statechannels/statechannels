@@ -80,6 +80,7 @@ export interface Signed {
 export interface Hashed {
   stateHash: string;
 }
+export type StateWithHash = State & Hashed;
 export type SignedState = State & Signed;
 export type SignedStateWithHash = SignedState & Hashed;
 
