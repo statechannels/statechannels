@@ -2,6 +2,8 @@ import {providers, Wallet} from 'ethers';
 import PriorityQueue from 'p-queue';
 import {Bytes32} from '@statechannels/client-api-schema';
 
+import {logger} from '../logger';
+
 import {
   TransactionSubmissionServiceInterface,
   MinimalTransaction,
@@ -34,7 +36,8 @@ export class TransactionSubmissionError extends BaseError {
     reason: Values<typeof TransactionSubmissionError.reasons>,
     public readonly data: any = undefined
   ) {
-    super(reason);
+    super(reason, data);
+    logger.error(reason, data);
   }
 }
 
@@ -68,6 +71,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
         : wallet.connect(this.provider);
 
     this.store = store;
+    logger.log(`Transaction service created`);
   }
 
   public async submitTransaction(
@@ -86,6 +90,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const response = await this.queue.add(() => this._sendTransaction(channelId, tx));
+        logger.log(`Transaction sent`, {hash: response.hash, channelId, to: tx.to});
         return response;
       } catch (e) {
         // Store the error in memory
@@ -104,6 +109,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
             indexedErrors,
           });
         }
+        logger.warn(`Failed to send tx`, {attempt, error: e.message});
       }
     }
 
@@ -126,11 +132,19 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     // Send the transaction
     const nonced = {...tx, nonce};
     await this.store.saveTransactionRequest(channelId, nonced);
+    logger.log(`Sending transaction`, {nonce, channelId, to: tx.to});
     const response = await this.wallet.sendTransaction(nonced);
     await this.store.saveTransactionResponse(channelId, response);
     response
       .wait()
-      .then(receipt => this.store.saveTransactionReceipt(channelId, receipt))
+      .then(receipt => {
+        logger.debug(`Transaction mined`, {
+          hash: receipt.transactionHash,
+          to: receipt.to,
+          channelId,
+        });
+        this.store.saveTransactionReceipt(channelId, receipt);
+      })
       .catch(e => this.store.saveFailedTransaction(channelId, nonced, e.message));
 
     // Update the memory nonce after sent to mempool

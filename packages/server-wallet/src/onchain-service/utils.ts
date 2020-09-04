@@ -1,4 +1,5 @@
 import {Evt} from 'evt/lib/types';
+import pino from 'pino';
 
 import {Values} from '../errors/wallet-error';
 
@@ -41,3 +42,5 @@ export const addEvtHandler = (
   }
   return evt.attach(callback);
 };
+
+export const logger = pino();

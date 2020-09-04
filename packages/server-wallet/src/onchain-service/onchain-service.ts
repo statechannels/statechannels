@@ -4,6 +4,8 @@ import {providers, Contract, BigNumber, Event, constants} from 'ethers';
 import {Evt} from 'evt';
 import {BN} from '@statechannels/wallet-core';
 
+import {logger} from '../logger';
+
 import {
   MinimalTransaction,
   OnchainServiceInterface,
@@ -62,6 +64,7 @@ class OnchainServiceError extends BaseError {
     public readonly data: any = undefined
   ) {
     super(reason, data);
+    logger.error(reason, {type: this.type, ...(data || {})});
   }
 }
 
@@ -90,10 +93,12 @@ export class OnchainService implements OnchainServiceInterface {
       typeof provider === 'string' ? new providers.JsonRpcProvider(provider) : provider;
     this.transactionSubmissionService = transactionSubmissionService;
     this.storage = storage;
+    logger.log('OnchainService created');
   }
 
   public attachChannelWallet(wallet: ChannelWallet): void {
     this.channelWallet = wallet;
+    logger.log('Attached ChannelWallet');
   }
 
   /**
@@ -148,12 +153,20 @@ export class OnchainService implements OnchainServiceInterface {
     // Only detach handlers from one event if specified
     if (event) {
       record.evts[event].detach();
+      logger.log(`Detached ${event} handlers`, {
+        assetHolderAddress: record.assetHolderAddress,
+        tokenAddress: record.tokenAddress,
+      });
       return;
     }
 
     // Remove all handlers (user and default)
     Object.values(record.evts).map(evt => {
       evt.detach();
+    });
+    logger.log(`Detached all handlers`, {
+      assetHolderAddress: record.assetHolderAddress,
+      tokenAddress: record.tokenAddress,
     });
   }
 
@@ -187,6 +200,10 @@ export class OnchainService implements OnchainServiceInterface {
         this._registerAssetHolderCallbacks(info);
       })
     );
+    logger.log(`Registered channel`, {
+      channelId,
+      assetHolders,
+    });
   }
 
   public async submitTransaction(
@@ -229,6 +246,8 @@ export class OnchainService implements OnchainServiceInterface {
       .attach(e => {
         this.storage.saveEvent(e.destination, e);
       });
+
+    logger.debug(`Created deposit evt`);
     return depositEvt;
   }
 
@@ -279,5 +298,6 @@ export class OnchainService implements OnchainServiceInterface {
     // Store the information and emitters in mapping
     const evts = {Deposited: depositEvt};
     this.assetHolders.set(info.assetHolderAddress, {...info, evts});
+    logger.debug(`Registered AssetHolder callbacks`, info);
   }
 }
