@@ -57,7 +57,6 @@ class OnchainServiceError extends BaseError {
   // service
   static readonly reasons = {
     notRegistered: 'Must call register channel',
-    noChannelWallet: 'Must attach channel wallet',
   } as const;
   constructor(
     reason: Values<typeof OnchainServiceError.reasons>,
@@ -178,10 +177,6 @@ export class OnchainService implements OnchainServiceInterface {
    * @returns an empty promise that will resolve once the channel is registered
    */
   public async registerChannel(channelId: Bytes32, assetHolders: Address[]): Promise<void> {
-    if (!this.channelWallet) {
-      throw new OnchainServiceError(OnchainServiceError.reasons.noChannelWallet);
-    }
-
     // Add the channel if it has not been stored
     // Store can handle multiple creation calls
     await this.storage.createChannel(channelId);
@@ -211,10 +206,6 @@ export class OnchainService implements OnchainServiceInterface {
     tx: MinimalTransaction,
     transactionOptions: TransactionSubmissionOptions = {maxSendAttempts: 5}
   ): Promise<providers.TransactionResponse> {
-    if (!this.channelWallet) {
-      throw new OnchainServiceError(OnchainServiceError.reasons.noChannelWallet);
-    }
-
     // If the channel is not registered, do not send transactions
     if (!this.storage.hasChannel(channelId)) {
       throw new OnchainServiceError(OnchainServiceError.reasons.notRegistered);
