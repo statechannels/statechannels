@@ -1,16 +1,25 @@
-// Populate env vars as knexfile is used directly in yarn scripts
 import * as path from 'path';
 
-import {configureEnvVariables} from '@statechannels/devtools';
 import {Config} from 'knex';
+
+// Populate env vars as knexfile is used directly in yarn scripts
+// FIXME We should not need to depend on devtools at this step.
+try {
+  require('@statechannels/devtools').configureEnvVariables();
+} catch (err) {
+  if (/Cannot find module '@statechannels\/devtools'/.test(err.message))
+    console.warn(`
+WARNING: @statechannels/devtools not detected.
+         Ensure required env variables are properly configured in the shell.
+    `);
+  else throw err;
+}
 
 import {dbConfig} from '../db/config';
 import config from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
-
-configureEnvVariables();
 
 let knexConfig: Config = {
   ...dbConfig,
