@@ -192,7 +192,7 @@ describe('forceMove', () => {
         await writeGasConsumption('./forceMove.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
-        // Catch ForceMove event
+        // Catch ChallengeRegistered event
         const {
           channelId: eventChannelId,
           turnNumRecord: eventTurnNumRecord,

@@ -1,14 +1,14 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
+import {hashState, State, getFixedPart, getVariablePart} from '../../../src/contract/state';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   NO_ONGOING_CHALLENGE,
@@ -145,6 +145,31 @@ describe('respond', () => {
           channelId,
           newTurnNumRecord: turnNumRecord + 1,
         });
+
+        // Catch ChallengeCleared event
+        const {
+          channelId: eventChannelId,
+          newTurnNumRecord: eventTurnNumRecord,
+          isFinal: eventIsFinal,
+          fixedPart: eventFixedPart,
+          variableParts: eventVariableParts,
+        } = event.args;
+
+        // Check this information is enough to respond
+
+        const fixedPart = getFixedPart(responseState);
+        const variablePart = getVariablePart(responseState);
+
+        expect(eventChannelId).toEqual(channelId);
+        expect(eventTurnNumRecord).toEqual(responseState.turnNum);
+        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
+        expect(eventFixedPart[1]).toEqual(fixedPart.participants);
+        expect(eventFixedPart[2]).toEqual(fixedPart.channelNonce);
+        expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
+        expect(eventFixedPart[4]).toEqual(fixedPart.challengeDuration);
+        expect(eventIsFinal).toEqual(responseState.isFinal);
+        expect(eventVariableParts[0][0]).toEqual(variablePart.outcome);
+        expect(eventVariableParts[0][1]).toEqual(variablePart.appData);
 
         // Compute and check new expected ChannelDataHash
 
