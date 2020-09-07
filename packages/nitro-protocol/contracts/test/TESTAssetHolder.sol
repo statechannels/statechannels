@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 import '../AssetHolder.sol';
@@ -45,7 +46,10 @@ contract TESTAssetHolder is AssetHolder {
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external override {
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes)
+        external
+        override
+    {
         _transferAll(channelId, allocationBytes);
     }
 

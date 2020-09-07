@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -17,7 +18,7 @@ contract TrivialApp is ForceMoveApp {
         VariablePart memory, // b
         uint48, // turnNumB
         uint256 // nParticipants
-    ) public override pure returns (bool) {
+    ) public pure override returns (bool) {
         return true;
     }
 }
