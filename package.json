@@ -3,7 +3,7 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.3.4",
+    "@statechannels/devtools": "^0.3.5",
     "@types/prettier": "1.19.0",
     "eslint-plugin-import": "2.20.0",
     "husky": "3.0.7",
