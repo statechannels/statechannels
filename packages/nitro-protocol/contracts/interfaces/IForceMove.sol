@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT 
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -142,7 +143,9 @@ abstract contract IForceMove {
      */
     event ChallengeRegistered(
         bytes32 indexed channelId,
-        // everything needed to respond or checkpoint
+        // a support proof for the challenge state (everything needed to respond or checkpoint)
+        // this information is redundant (it could be gotten from the CALLDATA)
+        // but is emitted for convenience. This incurs greater gas costs.
         uint48 turnNumRecord,
         uint48 finalizesAt,
         address challenger,
@@ -156,9 +159,42 @@ abstract contract IForceMove {
     /**
      * @dev Indicates that a challenge, previously registered against `channelId`, has been cleared.
      * @param channelId Unique identifier for a state channel.
-     * @param newTurnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+     * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+     * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+     * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+     * @param sigs A list of Signatures that support the latest state (that the adjudicator knows),
+     * @param whoSignedWhat Indexing information to identify which signature was by which participant. If the challenge was cleared via respond, this will be an empty array.
      */
-    event ChallengeCleared(bytes32 indexed channelId, uint48 newTurnNumRecord);
+    event ChallengeCleared(
+        bytes32 indexed channelId,
+        // a support proof for the state that cleared the challenge
+        // this information is redundant (it could be gotten from the CALLDATA)
+        // but is emitted for convenience. This incurs greater gas costs.
+        uint48 turnNumRecord,
+        uint8 isFinalCount,
+        ForceMoveApp.VariablePart[] variableParts,
+        Signature[] sigs,
+        uint8[] whoSignedWhat
+    );
+
+    /**
+     * @dev Indicates that a challenge, previously registered against `channelId`, has been cleared. Overload for challenge cleared via 'respond'
+     * @param channelId Unique identifier for a state channel.
+     * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+     * @param isFinal Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+     * @param variablePart An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+     * @param sig A list of Signatures that support the latest state (that the adjudicator knows),
+     */
+    event ChallengeCleared(
+        bytes32 indexed channelId,
+        // the state that cleared the challenge, WITHOUT a support proof
+        // this information is redundant (it could be gotten from the CALLDATA)
+        // but is emitted for convenience. This incurs greater gas costs.
+        uint48 turnNumRecord,
+        bool isFinal,
+        ForceMoveApp.VariablePart variablePart,
+        Signature sig
+    );
 
     /**
      * @dev Indicates that a challenge has been registered against `channelId`.

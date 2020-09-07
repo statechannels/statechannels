@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
@@ -23,11 +24,7 @@ contract ForceMove is IForceMove {
     function getChannelStorage(bytes32 channelId)
         public
         view
-        returns (
-            uint48 turnNumRecord,
-            uint48 finalizesAt,
-            uint160 fingerprint
-        )
+        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
     {
         (turnNumRecord, finalizesAt, fingerprint) = _getChannelStorage(channelId);
     }
@@ -172,7 +169,7 @@ contract ForceMove is IForceMove {
         );
 
         // effects
-        _clearChallenge(channelId, turnNumRecord + 1);
+        _clearChallenge(channelId, turnNumRecord + 1, isFinalAB[1], variablePartAB[1], sig);
     }
 
     /**
@@ -209,7 +206,14 @@ contract ForceMove is IForceMove {
         );
 
         // effects
-        _clearChallenge(channelId, largestTurnNum);
+        _clearChallenge(
+            channelId,
+            largestTurnNum,
+            isFinalCount,
+            variableParts,
+            sigs,
+            whoSignedWhat
+        );
     }
 
     /**
@@ -549,12 +553,56 @@ contract ForceMove is IForceMove {
      * @dev Clears a challenge by updating the turnNumRecord and resetting the remaining channel storage fields, and emits a ChallengeCleared event.
      * @param channelId Unique identifier for a channel.
      * @param newTurnNumRecord New turnNumRecord to overwrite existing value
+     * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+     * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+     * @param sigs A list of Signatures that support the latest state (that the adjudicator knows),
+     * @param whoSignedWhat Indexing information to identify which signature was by which participant
      */
-    function _clearChallenge(bytes32 channelId, uint48 newTurnNumRecord) internal {
+    function _clearChallenge(
+        bytes32 channelId,
+        uint48 newTurnNumRecord,
+        uint8 isFinalCount,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat
+    ) internal {
         channelStorageHashes[channelId] = _hashChannelData(
             ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
-        emit ChallengeCleared(channelId, newTurnNumRecord);
+
+        // Via checkpoint (support proof emitted)
+        emit ChallengeCleared(
+            channelId,
+            newTurnNumRecord,
+            isFinalCount,
+            variableParts,
+            sigs,
+            whoSignedWhat
+        );
+    }
+
+    /**
+     * @notice Clears a challenge by updating the turnNumRecord and resetting the remaining channel storage fields, and emits a ChallengeCleared event.
+     * @dev Clears a challenge by updating the turnNumRecord and resetting the remaining channel storage fields, and emits a ChallengeCleared event.
+     * @param channelId Unique identifier for a channel.
+     * @param newTurnNumRecord New turnNumRecord to overwrite existing value
+     * @param isFinal Is the state final?
+     * @param variablePart An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+     * @param sig A list of Signatures that support the latest state (that the adjudicator knows),
+     */
+    function _clearChallenge(
+        bytes32 channelId,
+        uint48 newTurnNumRecord,
+        bool isFinal,
+        ForceMoveApp.VariablePart memory variablePart,
+        Signature memory sig
+    ) internal {
+        channelStorageHashes[channelId] = _hashChannelData(
+            ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+        );
+
+        // Via respond (NO support proof emitted)
+        emit ChallengeCleared(channelId, newTurnNumRecord, isFinal, variablePart, sig);
     }
 
     /**
@@ -698,11 +746,7 @@ contract ForceMove is IForceMove {
     function _getChannelStorage(bytes32 channelId)
         internal
         view
-        returns (
-            uint48 turnNumRecord,
-            uint48 finalizesAt,
-            uint160 fingerprint
-        )
+        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
     {
         bytes32 storageHash = channelStorageHashes[channelId];
         uint16 cursor = 256;
@@ -781,21 +825,4 @@ contract ForceMove is IForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
     }
-
-    // events
-    event ChallengeRegistered(
-        bytes32 indexed channelId,
-        // everything needed to respond or checkpoint
-        uint48 turnNumRecord,
-        uint48 finalizesAt,
-        address challenger,
-        bool isFinal,
-        FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts,
-        Signature[] sigs,
-        uint8[] whoSignedWhat
-    );
-
-    event ChallengeCleared(bytes32 indexed channelId, uint48 newTurnNumRecord);
-    event Concluded(bytes32 indexed channelId);
 }
