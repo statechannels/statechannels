@@ -178,10 +178,10 @@ abstract contract IForceMove {
     /**
      * @dev Indicates that a challenge, previously registered against `channelId`, has been cleared. Overload for challenge cleared via 'respond'
      * @param channelId Unique identifier for a state channel.
-     * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
-     * @param isFinal Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
-     * @param variablePart An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
-     * @param sig A list of Signatures that support the latest state (that the adjudicator knows),
+     * @param turnNumRecord The latest turnNum that (the adjudicator knows) is supported by a signature from each participant.
+     * @param isFinal Is the the latest supported state that the adjudicator knows about a final state?
+     * @param variablePart The properties of the state channel that may change with each state update, evaluated at the latest supported state that the adjudicator knows about
+     * @param sig The signatures on the latest supported state that the adjudicator knows about
      */
     event ChallengeCleared(
         bytes32 indexed channelId,
