@@ -135,8 +135,7 @@ abstract contract IForceMove {
      * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @param finalizesAt The unix timestamp when `channelId` will finalize.
      * @param challenger The address of the participant whom registered the challenge.
-     * @param isFinal Boolean denoting whether the challenge state is final.
-     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+     * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
      * @param sigs A list of Signatures that supported the challenge
      * @param whoSignedWhat Indexing information to identify which signature was by which participant
@@ -149,8 +148,7 @@ abstract contract IForceMove {
         uint48 turnNumRecord,
         uint48 finalizesAt,
         address challenger,
-        bool isFinal,
-        FixedPart fixedPart,
+        uint8 isFinalCount,
         ForceMoveApp.VariablePart[] variableParts,
         Signature[] sigs,
         uint8[] whoSignedWhat

@@ -82,8 +82,7 @@ contract ForceMove is IForceMove {
             largestTurnNum,
             uint48(now) + fixedPart.challengeDuration,
             challenger,
-            isFinalCount > 0,
-            fixedPart,
+            isFinalCount,
             variableParts,
             sigs,
             whoSignedWhat
