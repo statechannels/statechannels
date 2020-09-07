@@ -1,13 +1,13 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify, Signature} from 'ethers/utils';
 import {TransactionRequest} from 'ethers/providers';
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
-import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
+import {getFixedPart, getVariablePart, State, VariablePart} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
@@ -190,39 +190,30 @@ describe('forceMove', () => {
       } else {
         const receipt = await (await tx).wait();
         await writeGasConsumption('./forceMove.gas.md', description, receipt.gasUsed);
-        const event = receipt.events.pop();
 
         // Catch ChallengeRegistered event
-        const {
-          channelId: eventChannelId,
-          turnNumRecord: eventTurnNumRecord,
-          finalizesAt: eventFinalizesAt,
-          challenger: eventChallenger,
-          isFinal: eventIsFinal,
-          fixedPart: eventFixedPart,
-          variableParts: eventVariableParts,
-        } = event.args;
+        const event = receipt.events.pop();
 
-        // Check this information is enough to respond
-        expect(eventChannelId).toEqual(channelId);
-        expect(eventTurnNumRecord).toEqual(largestTurnNum);
-        expect(eventChallenger).toEqual(challenger.address);
-        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
-        expect(eventFixedPart[1]).toEqual(fixedPart.participants);
-        expect(eventFixedPart[2]).toEqual(fixedPart.channelNonce);
-        expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
-        expect(eventFixedPart[4]).toEqual(fixedPart.challengeDuration);
-        expect(eventIsFinal).toEqual(isFinalCount > 0);
-        expect(eventVariableParts[eventVariableParts.length - 1][0]).toEqual(
-          variableParts[variableParts.length - 1].outcome
-        );
-        expect(eventVariableParts[eventVariableParts.length - 1][1]).toEqual(
-          variableParts[variableParts.length - 1].appData
-        );
+        // Check this information is enough to respond or checkpoint
+        // (fixed part is assumed known)
+
+        const formatVariablePartForEthers = (variablePart: VariablePart) => [
+          variablePart.outcome,
+          variablePart.appData,
+        ];
+        const formatSignatureForEthers = (sig: Signature) => [sig.v, sig.r, sig.s];
+
+        expect(event.args).toMatchObject({
+          channelId,
+          turnNumRecord: largestTurnNum,
+          isFinalCount,
+          variableParts: variableParts.map(formatVariablePartForEthers),
+          sigs: signatures.map(formatSignatureForEthers),
+        });
 
         const expectedChannelStorage: ChannelData = {
           turnNumRecord: largestTurnNum,
-          finalizesAt: eventFinalizesAt,
+          finalizesAt: event.args.finalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
           outcome,

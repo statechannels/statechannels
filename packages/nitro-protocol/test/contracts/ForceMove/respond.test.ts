@@ -139,40 +139,24 @@ describe('respond', () => {
       } else {
         const receipt = await (await tx).wait();
         await writeGasConsumption('./respond.gas.md', description, receipt.gasUsed);
-        const event = receipt.events.pop();
-
-        expect(event.args).toMatchObject({
-          channelId,
-          newTurnNumRecord: turnNumRecord + 1,
-        });
 
         // Catch ChallengeCleared event
-        const {
-          channelId: eventChannelId,
-          newTurnNumRecord: eventTurnNumRecord,
-          isFinal: eventIsFinal,
-          fixedPart: eventFixedPart,
-          variableParts: eventVariableParts,
-        } = event.args;
+        const event = receipt.events.pop();
 
         // Check this information is enough to respond
-
-        const fixedPart = getFixedPart(responseState);
+        // (fixedPart is assumed known)
         const variablePart = getVariablePart(responseState);
 
-        expect(eventChannelId).toEqual(channelId);
-        expect(eventTurnNumRecord).toEqual(responseState.turnNum);
-        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
-        expect(eventFixedPart[1]).toEqual(fixedPart.participants);
-        expect(eventFixedPart[2]).toEqual(fixedPart.channelNonce);
-        expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
-        expect(eventFixedPart[4]).toEqual(fixedPart.challengeDuration);
-        expect(eventIsFinal).toEqual(responseState.isFinal);
-        expect(eventVariableParts[0][0]).toEqual(variablePart.outcome);
-        expect(eventVariableParts[0][1]).toEqual(variablePart.appData);
+        // The expectation format is coupled to ethers' habit of returning arrays instead of objects
+        expect(event.args).toMatchObject({
+          channelId,
+          turnNumRecord: turnNumRecord + 1,
+          isFinal: responseState.isFinal,
+          variablePart: [variablePart.outcome, variablePart.appData],
+          sig: [responseSignature.v, responseSignature.r, responseSignature.s],
+        });
 
         // Compute and check new expected ChannelDataHash
-
         const expectedChannelStorageHash = channelDataToChannelStorageHash({
           turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
