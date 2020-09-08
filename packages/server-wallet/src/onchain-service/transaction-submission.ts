@@ -71,7 +71,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
         : wallet.connect(this.provider);
 
     this.store = store;
-    logger.log(`Transaction service created`);
+    logger.info(`Transaction service created`);
   }
 
   public async submitTransaction(
@@ -90,7 +90,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const response = await this.queue.add(() => this._sendTransaction(channelId, tx));
-        logger.log(`Transaction sent`, {hash: response.hash, channelId, to: tx.to});
+        logger.info(`Transaction sent`, {hash: response.hash, channelId, to: tx.to});
         return response;
       } catch (e) {
         // Store the error in memory
@@ -132,7 +132,7 @@ export class TransactionSubmissionService implements TransactionSubmissionServic
     // Send the transaction
     const nonced = {...tx, nonce};
     await this.store.saveTransactionRequest(channelId, nonced);
-    logger.log(`Sending transaction`, {nonce, channelId, to: tx.to});
+    logger.info(`Sending transaction`, {nonce, channelId, to: tx.to});
     const response = await this.wallet.sendTransaction(nonced);
     await this.store.saveTransactionResponse(channelId, response);
     response

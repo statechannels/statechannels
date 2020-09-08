@@ -29,19 +29,17 @@ export class TransactionSubmissionStore implements TransactionSubmissionStoreInt
 
   // Stores transactions that are going to be sent to mempool
   // NOTE: assumes only one per channel
-  private readonly requestedTransactions: Map<string, NoncedMinimalTransaction> = new Map();
+  private readonly requestedTransactions: Map<string, NoncedMinimalTransaction[]> = new Map();
 
   // Stores transactions that have been mined
   private readonly minedTransactions: Map<string, providers.TransactionResponse[]> = new Map();
 
   // Used to save a transaction *before* it is sent to mempool
   saveTransactionRequest(channelId: Bytes32, tx: NoncedMinimalTransaction): Promise<void> {
-    // TODO: should this be handled at the store level?
-    if (this.requestedTransactions.has(channelId)) {
-      throw new Error('Transaction in process');
-    }
-    // Add to pending transactions
-    this.requestedTransactions.set(channelId, tx);
+    const existing = this.requestedTransactions.get(channelId) || [];
+    const idx = existing.findIndex(e => e.nonce === tx.nonce);
+    const updated = idx > -1 ? [...existing] : [...existing, tx];
+    this.requestedTransactions.set(channelId, updated);
     return Promise.resolve();
   }
 
@@ -75,10 +73,9 @@ export class TransactionSubmissionStore implements TransactionSubmissionStoreInt
     _reason: string
   ): Promise<void> {
     // Remove from pending if exists
-    const pending = this.requestedTransactions.get(channelId);
-    if (pending?.nonce === tx.nonce) {
-      this.requestedTransactions.delete(channelId);
-    }
+    const existingRequests = this.requestedTransactions.get(channelId) || [];
+    const updatedRequests = existingRequests.filter(x => x.nonce === tx.nonce);
+    this.requestedTransactions.set(channelId, updatedRequests);
 
     // Remove from mined if exists
     const existing = this.minedTransactions.get(channelId) || [];

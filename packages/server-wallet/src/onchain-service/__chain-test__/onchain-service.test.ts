@@ -8,6 +8,7 @@ import {OnchainService} from '../onchain-service';
 import {Wallet} from '../../../src';
 import config from '../../config';
 import {TransactionSubmissionStore, OnchainServiceStore} from '../store';
+import {FundingEvent} from '../types';
 
 jest.mock('../../../src/wallet');
 
@@ -70,11 +71,11 @@ describe('OnchainTransactionService', () => {
     // Send transaction and wait for event
     const p = onchainService.attachHandler(
       ethAssetHolder.address,
-      'Deposited',
-      _e => {
+      'Funding',
+      (_e: FundingEvent) => {
         return;
       },
-      _e => true,
+      (_e: FundingEvent) => true,
       15_000
     );
     const response = await transactionService.submitTransaction(channelId, tx);
@@ -88,9 +89,12 @@ describe('OnchainTransactionService', () => {
     // Wait for event
     const emitted = await p;
     expect(emitted).toMatchObject({
-      amountDeposited: value,
-      destination: channelId,
-      destinationHoldings: value,
+      transactionHash: response.hash,
+      type: 'Deposited',
+      final: false,
+      channelId,
+      amount: value.toString(),
+      destinationHoldings: value.toString(),
     });
 
     // Check mock

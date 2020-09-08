@@ -93,12 +93,12 @@ export class OnchainService implements OnchainServiceInterface {
     this.provider =
       typeof provider === 'string' ? new providers.JsonRpcProvider(provider) : provider;
     this.storage = storage;
-    logger.log('OnchainService created');
+    logger.info('OnchainService created');
   }
 
   public attachChannelWallet(wallet: ChannelWallet): void {
     this.channelWallet = wallet;
-    logger.log('Attached ChannelWallet');
+    logger.info('Attached ChannelWallet');
   }
 
   /**
@@ -153,7 +153,7 @@ export class OnchainService implements OnchainServiceInterface {
     // Only detach handlers from one event if specified
     if (event) {
       record.evts[event].detach();
-      logger.log(`Detached ${event} handlers`, {
+      logger.info(`Detached ${event} handlers`, {
         assetHolderAddress: record.assetHolderAddress,
         tokenAddress: record.tokenAddress,
       });
@@ -164,7 +164,7 @@ export class OnchainService implements OnchainServiceInterface {
     Object.values(record.evts).map(evt => {
       evt.detach();
     });
-    logger.log(`Detached all handlers`, {
+    logger.info(`Detached all handlers`, {
       assetHolderAddress: record.assetHolderAddress,
       tokenAddress: record.tokenAddress,
     });
@@ -196,7 +196,7 @@ export class OnchainService implements OnchainServiceInterface {
         this._registerAssetHolderCallbacks(info);
       })
     );
-    logger.log(`Registered channel`, {
+    logger.info(`Registered channel`, {
       channelId,
       assetHolders,
     });

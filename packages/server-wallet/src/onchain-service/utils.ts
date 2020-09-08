@@ -3,6 +3,8 @@ import pino from 'pino';
 
 import {Values} from '../errors/wallet-error';
 
+import {FundingEvent} from './types';
+
 export abstract class BaseError extends Error {
   static readonly errors = {
     OnchainError: 'OnchainError',
@@ -35,12 +37,9 @@ export const addEvtHandler = (
   filter?: (event: any) => boolean,
   timeout?: number
 ): Evt<any> | Promise<any> => {
-  const attachArgs = [];
-  if (filter) attachArgs.push(filter);
-  if (timeout) attachArgs.push(timeout);
-  attachArgs.push(callback);
-
-  // @ts-expect-error
+  // NOTE: If this type is not an array with a length, then using
+  // the spread operator will cause errors on the evt package
+  const attachArgs = [filter, timeout, callback].filter(x => !!x) as [any, any, any];
   return evt.attach(...attachArgs);
 };
 
