@@ -1,7 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder} from 'ethers/utils';
+import {Contract, Wallet, ethers} from 'ethers';
+
+const {HashZero} = ethers.constants;
+
+const {defaultAbiCoder} = ethers.utils;
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';

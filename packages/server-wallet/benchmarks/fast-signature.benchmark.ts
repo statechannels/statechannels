@@ -1,5 +1,4 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from '@ethersproject/constants';
+import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
 import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
 
@@ -15,8 +14,8 @@ async function benchmark(): Promise<void> {
     outcome: simpleEthAllocation([]),
     turnNum: 1,
     isFinal: false,
-    appData: '0x0',
-    appDefinition: AddressZero,
+    appData: '0x00',
+    appDefinition: ethers.constants.AddressZero,
     challengeDuration: 0x5,
   };
 

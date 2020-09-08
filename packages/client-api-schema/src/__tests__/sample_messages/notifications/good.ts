@@ -26,7 +26,7 @@ const channelResult: ChannelResult = {
   ],
   allocations: [
     {
-      token: '0x0',
+      token: '0x00',
       allocationItems: [
         {
           destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
@@ -127,7 +127,7 @@ const messageQueued: MessageQueuedNotification = {
 };
 const budget: DomainBudget = {
   domain: 'www.somewhere.com',
-  hubAddress: '0x0',
+  hubAddress: '0x00',
   budgets: []
 };
 const budgetUpdated: BudgetUpdatedNotification = {

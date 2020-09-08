@@ -1,19 +1,8 @@
-import {Wallet, utils} from 'ethers';
+import {Wallet, utils, Signature} from 'ethers';
 
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
-
-// This is the same as the ethers Signature type
-// But we redefine it here to prevent the below issue
-// for consumers of this package:
-// https://github.com/ethers-io/ethers.js/issues/349
-export interface Signature {
-  r: string;
-  s: string;
-  recoveryParam?: number;
-  v?: number;
-}
 
 export interface SignedState {
   state: State;
@@ -58,16 +47,13 @@ export async function signStates(
   states: State[],
   wallets: Wallet[],
   whoSignedWhat: number[]
-): Promise<utils.Signature[]> {
+): Promise<Signature[]> {
   const stateHashes = states.map(s => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
 }
 
-export function signChallengeMessage(
-  signedStates: SignedState[],
-  privateKey: string
-): utils.Signature {
+export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
@@ -85,7 +71,7 @@ function hashMessage(hashedData: string): string {
   return utils.hashMessage(utils.arrayify(hashedData));
 }
 
-function signData(hashedData: string, privateKey: string): utils.Signature {
+function signData(hashedData: string, privateKey: string): Signature {
   const signingKey = new utils.SigningKey(privateKey);
 
   return utils.splitSignature(signingKey.signDigest(hashMessage(hashedData)));

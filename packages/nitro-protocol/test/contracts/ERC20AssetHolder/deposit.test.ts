@@ -1,11 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
-import {bigNumberify} from 'ethers/utils';
+import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
 
-// @ts-ignore
+const {AddressZero} = ethers.constants;
+
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-// @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
@@ -20,7 +18,7 @@ const participants = [];
 
 // Populate destinations array
 for (let i = 0; i < 3; i++) {
-  participants[i] = Wallet.createRandom().address;
+  participants[i] = Wallet.createRandom({extraEntropy: utils.id('erc20-deposit-test')}).address;
 }
 
 beforeAll(async () => {
@@ -33,23 +31,23 @@ beforeAll(async () => {
   signer0Address = await signer0.getAddress();
 });
 
-const description0 = 'Deposits Tokens  (expectedHeld = 0)';
+const description0 = 'Deposits Tokens (expectedHeld = 0)';
 const description1 = 'Reverts deposit of Tokens (expectedHeld > holdings)';
 const description2 = 'Reverts deposit of Tokens (expectedHeld + amount < holdings)';
 const description3 = 'Deposits Tokens (amount < holdings < amount + expectedHeld)';
 
 describe('deposit', () => {
   it.each`
-    description     | channelNonce | held   | expectedHeld | amount | heldAfter | reasonString
-    ${description0} | ${0}         | ${'0'} | ${'0'}       | ${'1'} | ${'1'}    | ${undefined}
-    ${description1} | ${1}         | ${'0'} | ${'1'}       | ${'2'} | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
-    ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
+    description     | channelNonce | held | expectedHeld | amount | heldAfter | reasonString
+    ${description0} | ${0}         | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
+    ${description1} | ${1}         | ${0} | ${1}         | ${2}   | ${0}      | ${'Deposit | holdings[destination] is less than expected'}
+    ${description2} | ${2}         | ${3} | ${1}         | ${1}   | ${3}      | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description3} | ${3}         | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
   `('$description', async ({channelNonce, held, expectedHeld, amount, reasonString, heldAfter}) => {
-    held = bigNumberify(held);
-    expectedHeld = bigNumberify(expectedHeld);
-    amount = bigNumberify(amount);
-    heldAfter = bigNumberify(heldAfter);
+    held = BigNumber.from(held);
+    expectedHeld = BigNumber.from(expectedHeld);
+    amount = BigNumber.from(amount);
+    heldAfter = BigNumber.from(heldAfter);
 
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);
@@ -62,7 +60,9 @@ describe('deposit', () => {
     await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
-    const allowance = await Token.allowance(signer0Address, ERC20AssetHolder.address);
+    const allowance = BigNumber.from(
+      await Token.allowance(signer0Address, ERC20AssetHolder.address)
+    );
     expect(
       allowance
         .sub(amount)
@@ -77,12 +77,13 @@ describe('deposit', () => {
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
+
+    const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
     const tx = ERC20AssetHolder.deposit(destination, expectedHeld, amount);
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
     } else {
-      const balanceBefore = await Token.balanceOf(signer0Address);
       const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
@@ -92,16 +93,15 @@ describe('deposit', () => {
         destinationHoldings: heldAfter,
       });
 
-      const {data: amountTransferred} = getTransferEvent(events);
+      const amountTransferred = BigNumber.from(getTransferEvent(events).data);
       expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
 
       const allocatedAmount = await ERC20AssetHolder.holdings(destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
-      // Check for any partial refund of tokens
-      await expect(await Token.balanceOf(signer0Address)).toEqual(
-        balanceBefore.sub(depositedEvent.amountDeposited)
-      );
+      // Check that the correct number of Tokens were deducted
+      const balanceAfter = BigNumber.from(await Token.balanceOf(signer0Address));
+      expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
 });

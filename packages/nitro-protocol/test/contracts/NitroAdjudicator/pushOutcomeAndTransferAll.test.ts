@@ -1,7 +1,6 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
 
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
@@ -134,8 +133,8 @@ describe('pushOutcomeAndTransferAll', () => {
         isFinal: false,
         channel,
         outcome,
-        appDefinition: AddressZero,
-        appData: '0x0',
+        appDefinition: ethers.constants.AddressZero,
+        appData: '0x00',
         challengeDuration: 0x1,
       };
 

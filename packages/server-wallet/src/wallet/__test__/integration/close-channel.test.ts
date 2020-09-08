@@ -16,7 +16,7 @@ beforeEach(async () => {
 beforeEach(async () => seedAlicesSigningWallet(knex));
 
 it("signs a final state when it's my turn", async () => {
-  const appData = '0xf00';
+  const appData = '0x0f00';
   const turnNum = 7;
   const runningState = {turnNum, appData};
   const closingState = {...runningState, isFinal: true, turnNum: turnNum + 1};
@@ -37,7 +37,7 @@ it("signs a final state when it's my turn", async () => {
 });
 
 it("reject when it's not my turn", async () => {
-  const appData = '0xf00';
+  const appData = '0x0f00';
   const turnNum = 8;
   const runningState = {turnNum, appData};
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())(runningState)]});

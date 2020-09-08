@@ -239,7 +239,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
   const initialOutcome = convertPendingBudgetToAllocation(context);
   const participants = [context.player, context.hub];
 
-  const stateVars = {outcome: initialOutcome, turnNum: 0, isFinal: false, appData: '0x0'};
+  const stateVars = {outcome: initialOutcome, turnNum: 0, isFinal: false, appData: '0x00'};
   const entry = await store.createChannel(participants, CHALLENGE_DURATION, stateVars);
   const ledgerId = entry.channelId;
   await store.setFunding(entry.channelId, {type: 'Direct'});

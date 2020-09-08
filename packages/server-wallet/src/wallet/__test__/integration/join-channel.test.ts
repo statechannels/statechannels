@@ -20,7 +20,7 @@ beforeEach(async () => seedAlicesSigningWallet(knex));
 
 describe('directly funded app', () => {
   it('signs the prefund setup ', async () => {
-    const appData = '0xf00';
+    const appData = '0x0f00';
     const preFS = {turnNum: 0, appData};
 
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});

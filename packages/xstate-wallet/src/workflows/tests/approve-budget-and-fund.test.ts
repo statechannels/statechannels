@@ -76,7 +76,7 @@ it('works end to end', async () => {
 
   const ledgerId = (runningWorkflow.state.context as any).ledgerId;
 
-  chain.depositSync(ledgerId, '0x0', '0x5');
+  chain.depositSync(ledgerId, '0x00', '0x5');
 
   // goes to submitTransaction
   // waitMining, which happens immediately
@@ -113,7 +113,7 @@ it('works when someone else deposits the full amount', async () => {
 
   const ledgerId = (runningWorkflow.state.context as any).ledgerId;
 
-  chain.depositSync(ledgerId, '0x0', '0x10');
+  chain.depositSync(ledgerId, '0x00', '0x10');
 
   // skip submitTransaction
   // skip waitMining

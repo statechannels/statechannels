@@ -5,10 +5,6 @@ import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
 import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
-const {Interface} = utils;
-
-// @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
 export function getVariablePart(consensusData: ConsensusData, outcome: Outcome): VariablePart {
   const appData = encodeConsensusData(consensusData);
@@ -30,8 +26,8 @@ export async function validTransition(
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
 
-  const contract = new Contract(contractAddress, ConsensusAppContractInterface.abi, signer);
-  return await contract.functions.validTransition(
+  const contract = new Contract(contractAddress, ConsensusAppArtifact.abi, signer);
+  return await contract.validTransition(
     fromVariablePart,
     toVariablePart,
     turnNumB,

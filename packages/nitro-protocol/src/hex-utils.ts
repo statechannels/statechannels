@@ -1,19 +1,18 @@
-import {utils} from 'ethers';
-const {bigNumberify} = utils;
+import {BigNumber} from 'ethers';
 
 export function addHex(a: string, b: string): string {
-  return bigNumberify(a)
-    .add(bigNumberify(b))
+  return BigNumber.from(a)
+    .add(BigNumber.from(b))
     .toHexString();
 }
 export function subHex(a: string, b: string): string {
-  return bigNumberify(a)
-    .sub(bigNumberify(b))
+  return BigNumber.from(a)
+    .sub(BigNumber.from(b))
     .toHexString();
 }
 
 export function eqHex(a: string, b: string) {
-  return bigNumberify(a).eq(b);
+  return BigNumber.from(a).eq(b);
 }
 
 export function eqHexArray(a: string[], b: string[]): boolean {
@@ -24,9 +23,9 @@ export function eqHexArray(a: string[], b: string[]): boolean {
 }
 
 export function toHex(a: number): string {
-  return bigNumberify(a).toHexString();
+  return BigNumber.from(a).toHexString();
 }
 
 export function fromHex(a: string): number {
-  return bigNumberify(a).toNumber();
+  return BigNumber.from(a).toNumber();
 }

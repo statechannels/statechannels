@@ -1,6 +1,4 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
-import {id} from 'ethers/utils';
+import {Wallet, constants, utils} from 'ethers';
 
 import {
   ConsensusData,
@@ -18,7 +16,7 @@ describe('consensus-data', () => {
 
     const numberOfParticipants = 3;
 
-    const destinations = [id('a'), id('b'), id('c')];
+    const destinations = [utils.id('a'), utils.id('b'), utils.id('c')];
 
     const proposedOutcome: Outcome = [
       {
@@ -30,7 +28,7 @@ describe('consensus-data', () => {
     const currentOutcome: Outcome = [
       {
         assetHolderAddress,
-        allocationItems: destinations.map((d, i) => ({amount: '0x0', destination: d})),
+        allocationItems: destinations.map((d, i) => ({amount: '0x00', destination: d})),
       },
     ];
 
@@ -55,7 +53,7 @@ describe('consensus-data', () => {
   describe('encoding and decoding', () => {
     const consensusData: ConsensusData = {
       furtherVotesRequired: 5,
-      proposedOutcome: [{assetHolderAddress: AddressZero, allocationItems: []}],
+      proposedOutcome: [{assetHolderAddress: constants.AddressZero, allocationItems: []}],
     };
     const emptyConsensusData = {furtherVotesRequired: 0, proposedOutcome: []};
 

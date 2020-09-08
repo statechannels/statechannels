@@ -1,8 +1,7 @@
 // @ts-ignore
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
 
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
@@ -116,8 +115,8 @@ describe('pushOutcome', () => {
         isFinal: false,
         channel,
         outcome,
-        appDefinition: AddressZero,
-        appData: '0x0',
+        appDefinition: ethers.constants.AddressZero,
+        appData: '0x00',
         challengeDuration: 0x1,
       };
 
@@ -154,7 +153,7 @@ describe('pushOutcome', () => {
       // Call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
+          '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
         );
         await expectRevert(
           () => sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest),

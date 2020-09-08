@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
+import {Contract, Wallet, BigNumber, ethers} from 'ethers';
+const {parseUnits} = ethers.utils;
 
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
@@ -62,7 +62,7 @@ describe('deposit', () => {
 
       if (held > 0) {
         // Set holdings by depositing in the 'safest' way
-        const tx0 = ETHAssetHolder.deposit(destination, '0x0', held, {
+        const tx0 = ETHAssetHolder.deposit(destination, '0x00', held, {
           value: held,
         });
         const {events} = await (await tx0).wait();
@@ -71,8 +71,8 @@ describe('deposit', () => {
         expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
         expect(depositedEvent).toMatchObject({
           destination,
-          amountDeposited: bigNumberify(held),
-          destinationHoldings: bigNumberify(held),
+          amountDeposited: BigNumber.from(held),
+          destinationHoldings: BigNumber.from(held),
         });
       }
       const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {

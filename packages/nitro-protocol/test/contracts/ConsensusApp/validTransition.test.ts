@@ -1,9 +1,7 @@
 // @ts-ignore
 
 import {expectRevert} from '@statechannels/devtools';
-import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {TransactionRequest} from 'ethers/providers';
+import {Contract, ethers} from 'ethers';
 
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {validTransition} from '../../../src/contract/consensus-app';
@@ -27,15 +25,15 @@ beforeAll(async () => {
 
 describe('validTransition', () => {
   it.each`
-    isValid  | votesReqd | outcomes          | proposedOutcomes  | description
-    ${true}  | ${[0, 2]} | ${['0x1', '0x1']} | ${['0x1', '0x2']} | ${'valid consensus -> propose'}
-    ${false} | ${[0, 1]} | ${['0x1', '0x1']} | ${['0x1', '0x2']} | ${'invalid consensus -> propose: votesReqd too low'}
-    ${true}  | ${[2, 1]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid vote'}
-    ${false} | ${[1, 1]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'invalid vote: votesReqd not decreased'}
-    ${true}  | ${[1, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x1']} | ${'valid veto'}
-    ${true}  | ${[2, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid pass'}
-    ${true}  | ${[1, 0]} | ${['0x1', '0x2']} | ${['0x2', '0x']}  | ${'valid finalVote'}
-    ${false} | ${[1, 0]} | ${['0x1', '0x3']} | ${['0x2', '0x']}  | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
+    isValid  | votesReqd | outcomes            | proposedOutcomes    | description
+    ${true}  | ${[0, 2]} | ${['0x01', '0x01']} | ${['0x01', '0x02']} | ${'valid consensus -> propose'}
+    ${false} | ${[0, 1]} | ${['0x01', '0x01']} | ${['0x01', '0x02']} | ${'invalid consensus -> propose: votesReqd too low'}
+    ${true}  | ${[2, 1]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'valid vote'}
+    ${false} | ${[1, 1]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'invalid vote: votesReqd not decreased'}
+    ${true}  | ${[1, 2]} | ${['0x01', '0x01']} | ${['0x02', '0x01']} | ${'valid veto'}
+    ${true}  | ${[2, 2]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'valid pass'}
+    ${true}  | ${[1, 0]} | ${['0x01', '0x02']} | ${['0x02', '0x00']} | ${'valid finalVote'}
+    ${false} | ${[1, 0]} | ${['0x01', '0x03']} | ${['0x02', '0x00']} | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
   `(
     '$description',
     async ({
@@ -90,7 +88,10 @@ describe('validTransition', () => {
   );
 });
 
-async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
+async function sendTransaction(
+  contractAddress: string,
+  transaction: ethers.providers.TransactionRequest
+) {
   // TODO import from test-helpers instead (does not yet exist pending rebase or merge)
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
@@ -100,8 +101,8 @@ async function sendTransaction(contractAddress: string, transaction: Transaction
 function createOutcome(amount: string): Outcome {
   return [
     {
-      assetHolderAddress: AddressZero,
-      allocationItems: [{destination: HashZero, amount}],
+      assetHolderAddress: ethers.constants.AddressZero,
+      allocationItems: [{destination: ethers.constants.HashZero, amount}],
     },
   ];
 }

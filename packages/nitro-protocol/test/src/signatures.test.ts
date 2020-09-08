@@ -1,6 +1,5 @@
-import {Wallet, utils} from 'ethers';
-import {AddressZero} from 'ethers/constants';
-import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
+import {ethers, Wallet} from 'ethers';
+const {arrayify, splitSignature, verifyMessage} = ethers.utils;
 
 import {hashChallengeMessage} from '../../src/contract/challenge';
 import {hashState, State} from '../../src/contract/state';
@@ -15,8 +14,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -44,8 +43,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -63,8 +62,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -88,8 +87,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
@@ -107,8 +106,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
@@ -128,8 +127,8 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
-        appDefinition: AddressZero,
+        appData: '0x00',
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);

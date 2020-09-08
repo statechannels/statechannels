@@ -1,7 +1,6 @@
 import {spawn} from 'child_process';
 
 import {ethers} from 'ethers';
-import {JsonRpcProvider} from 'ethers/providers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
@@ -122,7 +121,7 @@ function extractLogsFromVerboseGanacheOutput(buffer: string, newData = ''): stri
 }
 
 export class GanacheServer {
-  provider: JsonRpcProvider;
+  provider: ethers.providers.JsonRpcProvider;
   fundedPrivateKey: string;
   server: any;
   private buffer = '';
@@ -165,11 +164,11 @@ export class GanacheServer {
       throw new Error('Ganache server failed to start');
     });
 
-    this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
+    this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${this.port}`);
   }
 
   static async connect(port: number): Promise<GanacheServer> {
-    const provider = new JsonRpcProvider(`http://localhost:${port}`);
+    const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${port}`);
     try {
       await provider.getBlockNumber();
       return new GanacheServer(port);

@@ -9,8 +9,8 @@ import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {bob, alice} from '../../wallet/__test__/fixtures/signing-wallets';
 expect.extend(matchers);
 
-const prefundVars = {turnNum: 0, appData: '0xf00'};
-const runningVars = {turnNum: 7, appData: '0xf00'};
+const prefundVars = {turnNum: 0, appData: '0x0f00'};
+const runningVars = {turnNum: 7, appData: '0x0f00'};
 
 test.each`
   input                                                                        | result

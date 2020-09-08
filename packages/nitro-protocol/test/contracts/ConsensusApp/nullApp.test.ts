@@ -1,6 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
 
 import {getTestProvider, setupContracts} from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
@@ -31,8 +30,8 @@ describe('null app', () => {
       turnNum: 1,
       isFinal: false,
       challengeDuration: 0x0,
-      appDefinition: AddressZero,
-      appData: '0x0',
+      appDefinition: ethers.constants.AddressZero,
+      appData: '0x00',
     };
     const toState: State = {...fromState, turnNum: 2};
 
@@ -42,7 +41,7 @@ describe('null app', () => {
         [false, false],
         [getVariablePart(fromState), getVariablePart(toState)],
         5,
-        AddressZero
+        ethers.constants.AddressZero
       );
     }, 'VM Exception while processing transaction: revert');
   });

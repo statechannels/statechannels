@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
-import {Contract} from 'ethers';
-import {bigNumberify, id} from 'ethers/utils';
+import {Contract, BigNumber, utils} from 'ethers';
 
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
@@ -59,8 +58,8 @@ describe('transferAll', () => {
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
       // Compute channelId
-      const nonce = bigNumberify(id(name))
-        .maskn(30)
+      const nonce = BigNumber.from(utils.id(name))
+        .mask(30)
         .toNumber();
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;
@@ -75,7 +74,7 @@ describe('transferAll', () => {
       // Reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
         // Key must be either in heldBefore or heldAfter or both
-        const amount = heldBefore[key] ? heldBefore[key] : bigNumberify(0);
+        const amount = heldBefore[key] ? heldBefore[key] : BigNumber.from(0);
         await (await AssetHolder.setHoldings(key, amount)).wait();
         expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
       });

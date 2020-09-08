@@ -1,8 +1,8 @@
-import {ethers, utils} from 'ethers';
-const {Interface, bigNumberify, keccak256, defaultAbiCoder} = utils;
+import {ethers, BigNumber, utils, Signature} from 'ethers';
+const {Interface, keccak256, defaultAbiCoder} = utils;
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
-import {SignedState, Signature} from '../signatures';
+import {SignedState} from '../signatures';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
@@ -45,11 +45,11 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
   }: ChallengeRegisteredStruct = eventResult.slice(-1)[0].args;
 
   // Fixed part
-  const chainId = bigNumberify(fixedPart[0]).toHexString();
-  const participants = fixedPart[1].map(p => bigNumberify(p).toHexString());
+  const chainId = BigNumber.from(fixedPart[0]).toHexString();
+  const participants = fixedPart[1].map(p => BigNumber.from(p).toHexString());
   const channelNonce = fixedPart[2];
   const appDefinition = fixedPart[3];
-  const challengeDuration = bigNumberify(fixedPart[4]).toNumber();
+  const challengeDuration = BigNumber.from(fixedPart[4]).toNumber();
 
   // Variable part
   const variableParts: VariablePart[] = variablePartsUnstructured.map(v => {
@@ -92,7 +92,7 @@ export interface RespondTransactionArguments {
   sig: Signature;
 }
 export function getChallengeClearedEvent(
-  tx: ethers.utils.Transaction,
+  tx: ethers.Transaction,
   eventResult
 ): ChallengeClearedEvent {
   const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
@@ -108,7 +108,13 @@ export function getChallengeClearedEvent(
     const isFinal = args[1][1];
     const outcome = decodeOutcome(args[3][1][0]);
     const appData = args[3][1][1];
-    const signature = {v: args[4][0], r: args[4][1], s: args[4][2]};
+    const signature: Signature = {
+      v: args[4][0],
+      r: args[4][1],
+      s: args[4][2],
+      _vs: args[4][3],
+      recoveryParam: args[4][4],
+    };
 
     const signedState: SignedState = {
       signature,
@@ -118,8 +124,8 @@ export function getChallengeClearedEvent(
         isFinal,
         outcome,
         appData,
-        channel: {chainId: bigNumberify(chainId).toHexString(), channelNonce, participants},
-        turnNum: bigNumberify(newTurnNumRecord).toNumber(),
+        channel: {chainId: BigNumber.from(chainId).toHexString(), channelNonce, participants},
+        turnNum: BigNumber.from(newTurnNumRecord).toNumber(),
       },
     };
 

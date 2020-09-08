@@ -1,8 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {TransactionRequest} from 'ethers/providers';
+import {Contract, Wallet, ethers} from 'ethers';
+
+const {HashZero} = ethers.constants;
+const {defaultAbiCoder, hexlify} = ethers.utils;
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -42,7 +42,7 @@ const appDefinition = getPlaceHolderContractAddress();
 const keys = [
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29',
   '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
-  '1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
+  '0x1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
 ];
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -168,7 +168,7 @@ describe('forceMove', () => {
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
-        signature: {v: 0, r: '', s: ''},
+        signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
       };
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
@@ -248,7 +248,7 @@ describe('forceMove with transaction generator', () => {
     ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
     ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
   `('$description', async ({description, appData, turnNums, challenger}) => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: ethers.providers.TransactionRequest = createForceMoveTransaction(
       [
         await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
         await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),

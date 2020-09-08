@@ -1,11 +1,10 @@
 // @ts-ignore
-import {utils, providers} from 'ethers';
+import {utils, providers, Signature} from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
 import {encodeOutcome, Outcome} from '../outcome';
 import {getFixedPart, hashAppPart, hashState, State} from '../state';
-import {Signature} from '../../signatures';
 
 // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
@@ -22,7 +21,7 @@ export function createPushOutcomeTransaction(
   const challengerAddress = participants[state.turnNum % participants.length];
   const encodedOutcome = encodeOutcome(outcome);
 
-  const data = NitroAdjudicatorContractInterface.functions.pushOutcome.encode([
+  const data = NitroAdjudicatorContractInterface.encodeFunctionData('pushOutcome', [
     channelId,
     turnNumRecord,
     finalizesAt,
@@ -76,7 +75,8 @@ export function createConcludePushOutcomeAndTransferAllTransaction(
   whoSignedWhat: number[]
 ): providers.TransactionRequest {
   return {
-    data: NitroAdjudicatorContractInterface.functions.concludePushOutcomeAndTransferAll.encode(
+    data: NitroAdjudicatorContractInterface.encodeFunctionData(
+      'concludePushOutcomeAndTransferAll',
       concludePushOutcomeAndTransferAllArgs(states, signatures, whoSignedWhat)
     ),
   };
