@@ -37,7 +37,7 @@ describe('setOutcome', () => {
   it('Reverts when called directly from an EOA', async () => {
     const reasonString = 'Only the NitroAdjudicator is authorized';
     const regex = new RegExp(
-      '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
+      '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
     );
     await expect(
       AssetHolder.setAssetOutcomeHash(channelId, keccak256(outcomeContent))

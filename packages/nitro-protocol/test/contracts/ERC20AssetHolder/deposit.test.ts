@@ -1,10 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
 import {ethers, Contract, Wallet, BigNumber} from 'ethers';
 
-const {HashZero, AddressZero} = ethers.constants;
-// @ts-ignore
+const {AddressZero} = ethers.constants;
+
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-// @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
@@ -32,18 +31,18 @@ beforeAll(async () => {
   signer0Address = await signer0.getAddress();
 });
 
-const description0 = 'Deposits Tokens  (expectedHeld = 0)';
+const description0 = 'Deposits Tokens (expectedHeld = 0)';
 const description1 = 'Reverts deposit of Tokens (expectedHeld > holdings)';
 const description2 = 'Reverts deposit of Tokens (expectedHeld + amount < holdings)';
 const description3 = 'Deposits Tokens (amount < holdings < amount + expectedHeld)';
 
 describe('deposit', () => {
   it.each`
-    description     | channelNonce | held   | expectedHeld | amount | heldAfter | reasonString
-    ${description0} | ${0}         | ${'0'} | ${'0'}       | ${'1'} | ${'1'}    | ${undefined}
-    ${description1} | ${1}         | ${'0'} | ${'1'}       | ${'2'} | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
-    ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
+    description     | channelNonce | held | expectedHeld | amount | heldAfter | reasonString
+    ${description0} | ${0}         | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
+    ${description1} | ${1}         | ${0} | ${1}         | ${2}   | ${0}      | ${'Deposit | holdings[destination] is less than expected'}
+    ${description2} | ${2}         | ${3} | ${1}         | ${1}   | ${3}      | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description3} | ${3}         | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
   `('$description', async ({channelNonce, held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);
     expectedHeld = BigNumber.from(expectedHeld);
@@ -81,7 +80,7 @@ describe('deposit', () => {
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
     } else {
-      const balanceBefore = await Token.balanceOf(signer0Address);
+      const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
       const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
@@ -98,9 +97,11 @@ describe('deposit', () => {
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check for any partial refund of tokens
-      await expect(await Token.balanceOf(signer0Address)).toEqual(
-        balanceBefore.sub(depositedEvent.amountDeposited)
-      );
+      await expect(
+        BigNumber.from(await Token.balanceOf(signer0Address)).eq(
+          BigNumber.from(balanceBefore.sub(depositedEvent.amountDeposited))
+        )
+      ).toBe(true);
     }
   });
 });
