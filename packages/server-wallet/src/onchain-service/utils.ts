@@ -35,12 +35,12 @@ export const addEvtHandler = (
   filter?: (event: any) => boolean,
   timeout?: number
 ): Evt<any> | Promise<any> => {
-  if (filter && timeout) {
-    return evt.attach(filter, timeout, callback);
-  } else if (filter) {
-    return evt.attach(filter, callback);
-  }
-  return evt.attach(callback);
+  const attachArgs = [];
+  if (filter) attachArgs.push(filter);
+  if (timeout) attachArgs.push(timeout);
+  attachArgs.push(callback)
+  
+  return evt.attach(...attachArgs);
 };
 
 export const logger = pino();
