@@ -25,15 +25,15 @@ beforeAll(async () => {
 
 describe('validTransition', () => {
   it.each`
-    isValid  | votesReqd | outcomes          | proposedOutcomes  | description
-    ${true}  | ${[0, 2]} | ${['0x1', '0x1']} | ${['0x1', '0x2']} | ${'valid consensus -> propose'}
-    ${false} | ${[0, 1]} | ${['0x1', '0x1']} | ${['0x1', '0x2']} | ${'invalid consensus -> propose: votesReqd too low'}
-    ${true}  | ${[2, 1]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid vote'}
-    ${false} | ${[1, 1]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'invalid vote: votesReqd not decreased'}
-    ${true}  | ${[1, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x1']} | ${'valid veto'}
-    ${true}  | ${[2, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid pass'}
-    ${true}  | ${[1, 0]} | ${['0x1', '0x2']} | ${['0x2', '0x']}  | ${'valid finalVote'}
-    ${false} | ${[1, 0]} | ${['0x1', '0x3']} | ${['0x2', '0x']}  | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
+    isValid  | votesReqd | outcomes            | proposedOutcomes    | description
+    ${true}  | ${[0, 2]} | ${['0x01', '0x01']} | ${['0x01', '0x02']} | ${'valid consensus -> propose'}
+    ${false} | ${[0, 1]} | ${['0x01', '0x01']} | ${['0x01', '0x02']} | ${'invalid consensus -> propose: votesReqd too low'}
+    ${true}  | ${[2, 1]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'valid vote'}
+    ${false} | ${[1, 1]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'invalid vote: votesReqd not decreased'}
+    ${true}  | ${[1, 2]} | ${['0x01', '0x01']} | ${['0x02', '0x01']} | ${'valid veto'}
+    ${true}  | ${[2, 2]} | ${['0x01', '0x01']} | ${['0x02', '0x02']} | ${'valid pass'}
+    ${true}  | ${[1, 0]} | ${['0x01', '0x02']} | ${['0x02', '0x00']} | ${'valid finalVote'}
+    ${false} | ${[1, 0]} | ${['0x01', '0x03']} | ${['0x02', '0x00']} | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
   `(
     '$description',
     async ({

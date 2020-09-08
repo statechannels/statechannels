@@ -206,7 +206,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expectedEvents.push({
           contract: NitroAdjudicator.address,
           name: 'Concluded',
-          values: {channelId},
+          args: {channelId},
         });
 
         // Add AssetTransferred events to expectations
