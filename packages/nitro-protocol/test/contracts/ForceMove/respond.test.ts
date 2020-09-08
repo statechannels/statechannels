@@ -1,8 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import {defaultAbiCoder} from 'ethers/utils';
-
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -97,7 +95,7 @@ describe('respond', () => {
         isFinal: isFinalAB[0],
         channel,
         outcome,
-        appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
+        appData: ethers.utils.defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
         appDefinition,
         challengeDuration,
       };
@@ -107,7 +105,7 @@ describe('respond', () => {
         isFinal: isFinalAB[1],
         channel,
         outcome,
-        appData: defaultAbiCoder.encode(['uint256'], [appDatas[1]]),
+        appData: ethers.utils.defaultAbiCoder.encode(['uint256'], [appDatas[1]]),
         appDefinition,
         challengeDuration,
       };

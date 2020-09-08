@@ -1,7 +1,7 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {id, keccak256} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
+const {id, keccak256} = utils;
 
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';

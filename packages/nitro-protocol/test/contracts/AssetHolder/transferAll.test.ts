@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
-import {Contract} from 'ethers';
-import {BigNumber, id} from 'ethers/utils';
+import {Contract, BigNumber, utils} from 'ethers';
 
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
@@ -59,8 +58,8 @@ describe('transferAll', () => {
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
       // Compute channelId
-      const nonce = BigNumber.from(id(name))
-        .maskn(30)
+      const nonce = BigNumber.from(utils.id(name))
+        .mask(30)
         .toNumber();
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;

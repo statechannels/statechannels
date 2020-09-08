@@ -1,6 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract} from 'ethers';
-import {BigNumber, id} from 'ethers/utils';
+import {Contract, BigNumber, utils} from 'ethers';
 
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
@@ -82,11 +81,11 @@ describe('claimAll', () => {
       reason;
     }) => {
       // Compute channelIds
-      const tNonce = BigNumber.from(id(name))
-        .maskn(30)
+      const tNonce = BigNumber.from(utils.id(name))
+        .mask(30)
         .toNumber();
-      const gNonce = BigNumber.from(id(name + 'g'))
-        .maskn(30)
+      const gNonce = BigNumber.from(utils.id(name + 'g'))
+        .mask(30)
         .toNumber();
       const targetId = randomChannelId(tNonce);
       const guarantorId = randomChannelId(gNonce);

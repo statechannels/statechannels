@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, BigNumber} from 'ethers';
-import {parseUnits} from 'ethers/utils';
+import {Contract, Wallet, BigNumber, ethers} from 'ethers';
+const {parseUnits} = ethers.utils;
 
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';

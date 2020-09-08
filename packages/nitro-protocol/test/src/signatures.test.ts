@@ -1,5 +1,5 @@
-import {ethers, Wallet, utils} from 'ethers';
-import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
+import {ethers, Wallet} from 'ethers';
+const {arrayify, splitSignature, verifyMessage} = ethers.utils;
 
 import {hashChallengeMessage} from '../../src/contract/challenge';
 import {hashState, State} from '../../src/contract/state';

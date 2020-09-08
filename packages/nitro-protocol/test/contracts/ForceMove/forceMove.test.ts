@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
 const {HashZero} = ethers.constants;
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
+const {defaultAbiCoder, hexlify} = ethers.utils;
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';

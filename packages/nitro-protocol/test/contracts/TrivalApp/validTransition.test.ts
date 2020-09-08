@@ -1,7 +1,6 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
-import {solidityKeccak256} from 'ethers/utils';
+import {Contract, Wallet, ethers, utils} from 'ethers';
 
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
@@ -13,7 +12,7 @@ const provider = getTestProvider();
 let trivialApp: Contract;
 
 function computeSaltedHash(salt: string, num: number) {
-  return solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
+  return utils.solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
 }
 
 function getRandomVariablePart(): VariablePart {
