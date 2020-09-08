@@ -1,5 +1,5 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from '@ethersproject/constants';
+import {Wallet, ethers, constants} from 'ethers';
+const {AddressZero, HashZero} = constants;
 import {
   State,
   simpleEthAllocation,
