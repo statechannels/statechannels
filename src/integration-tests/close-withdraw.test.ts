@@ -43,7 +43,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
       outcome,
       turnNum: 20,
       isFinal: false,
-      appData: '0x0'
+      appData: '0x00'
     }
   );
 
@@ -58,7 +58,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     .toPromise();
   await hub.store.setLedger(ledgerChannel.channelId);
   await hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
-  await playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
+  await playerA.store.chain.deposit(ledgerChannel.channelId, '0x00', '0x10');
 
   hub.store.objectiveFeed.pipe(filter(o => isCloseLedger(o))).subscribe(async o => {
     hub.startCloseLedgerAndWithdraw({

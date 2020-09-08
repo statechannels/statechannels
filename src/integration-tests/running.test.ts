@@ -70,7 +70,7 @@ test('accepts states when running', async () => {
   const signedState = players.reduce((state, player) => player.signState(state), {
     outcome,
     turnNum,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     participants: [playerA.participant, playerB.participant],
     challengeDuration: 4,

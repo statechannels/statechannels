@@ -104,7 +104,7 @@ const initializeChannel = (
   store: Store
 ): WorkflowServices['initializeChannel'] => async context => {
   const {initialOutcome: outcome} = context;
-  const stateVars: StateVariables = {outcome, turnNum: 0, isFinal: false, appData: '0x0'};
+  const stateVars: StateVariables = {outcome, turnNum: 0, isFinal: false, appData: '0x00'};
   const entry = await store.createChannel(context.participants, CHALLENGE_DURATION, stateVars);
   await store.setFunding(entry.channelId, {type: 'Direct'});
   await store.setLedger(entry.channelId);

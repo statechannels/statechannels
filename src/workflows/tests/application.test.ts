@@ -24,8 +24,8 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
   test('with direct funding strategy', async () => {
     const context: Application.Init = {
       type: 'CREATE_CHANNEL',
-      chainId: '0x0',
-      appData: '0x0',
+      chainId: '0x00',
+      appData: '0x00',
       appDefinition: ethers.constants.AddressZero,
       participants,
       outcome: simpleEthAllocation([]),
@@ -161,7 +161,7 @@ it('raises an channel updated action when the channel is updated', async () => {
 
   service.send({
     type: 'CHANNEL_UPDATED',
-    channelId: '0x0'
+    channelId: '0x00'
   });
 
   await waitForExpect(async () => {
