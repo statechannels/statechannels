@@ -55,7 +55,7 @@ beforeEach(async () => {
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: AddressZero,
+    appDefinition: ethers.constants.AddressZero,
     participants: [playerA.participant, playerB.participant]
   };
 
