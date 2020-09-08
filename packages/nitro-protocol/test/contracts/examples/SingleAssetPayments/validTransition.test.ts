@@ -1,6 +1,7 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
+
 const {HashZero} = ethers.constants;
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';

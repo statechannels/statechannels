@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import {AddressZero} from '@ethersproject/constants';
 import {configureEnvVariables} from '@statechannels/devtools';
+import {ethers} from 'ethers';
 configureEnvVariables();
 
 import walletConfig from '../src/config';

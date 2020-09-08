@@ -1,5 +1,4 @@
-import {Wallet, ethers, constants} from 'ethers';
-const {AddressZero, HashZero} = constants;
+import {Wallet, ethers} from 'ethers';
 import {
   State,
   simpleEthAllocation,

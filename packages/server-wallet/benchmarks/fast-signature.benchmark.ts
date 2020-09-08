@@ -1,5 +1,4 @@
-import {Wallet} from 'ethers';
-import {AddressZero} from '@ethersproject/constants';
+import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
 import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
 

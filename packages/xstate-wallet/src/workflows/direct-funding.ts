@@ -1,7 +1,6 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
 import {ethers} from 'ethers';
-
 import {
   isSimpleEthAllocation,
   simpleEthAllocation,

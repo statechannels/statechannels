@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import chalk from 'chalk';
 import writeJsonFile = require('write-json-file');
+import {ethers} from 'ethers';
 
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account} from '../types';
@@ -10,7 +11,6 @@ import {Account} from '../types';
 import {GanacheDeployer} from './deployer';
 import {GanacheNCacheDeployer} from './deployer-with-cache';
 import {GanacheServer} from './server';
-import {ethers} from 'ethers';
 
 export const ganacheIsRunning = async (port: number): Promise<boolean> => {
   const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${port}`);

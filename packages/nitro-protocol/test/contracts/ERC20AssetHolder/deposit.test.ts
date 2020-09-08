@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {ethers, Contract, Wallet, BigNumber} from 'ethers';
+
 const {HashZero, AddressZero} = ethers.constants;
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
