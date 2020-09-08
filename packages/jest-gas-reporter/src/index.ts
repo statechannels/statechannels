@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-
-import {Interface, FunctionFragment, EventFragment} from 'ethers/utils';
-import {JsonRpcProvider} from 'ethers/providers';
+import {utils, providers} from 'ethers';
 import {Config} from '@jest/types';
 import {Reporter} from '@jest/reporters';
 import linker from 'solc/linker';
@@ -17,7 +15,7 @@ interface MethodCalls {
 
 interface ContractCalls {
   [contractName: string]: {
-    interface: Interface;
+    interface: utils.Interface;
     address?: string;
     code: string;
     methodCalls: MethodCalls;
@@ -33,7 +31,7 @@ interface Options {
 }
 
 interface ParsedArtifact {
-  abi: (string | FunctionFragment | EventFragment)[];
+  abi: (string | utils.FunctionFragment | utils.EventFragment)[];
   deployedBytecode: object;
   contractName: string;
   networks: {[networkName: string]: {address: string}};
@@ -62,14 +60,16 @@ const gasConsumed: GasConsumed = {};
 
 export class GasReporter implements Reporter {
   options: Options;
-  provider: JsonRpcProvider;
+  provider: providers.JsonRpcProvider;
   globalConfig: Config.GlobalConfig;
   startBlockNum = 0;
 
   constructor(globalConfig: Config.GlobalConfig, options: Options) {
     this.globalConfig = globalConfig;
     this.options = options;
-    this.provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+    this.provider = new providers.JsonRpcProvider(
+      `http://localhost:${process.env.GANACHE_PORT || 8545}`
+    );
   }
 
   onTestStart(): void {
@@ -165,7 +165,7 @@ export class GasReporter implements Reporter {
   ): void {
     // Only attempt to parse as a contract if we have a defined ABI and contractName
     if (parsedArtifact.abi && parsedArtifact.contractName) {
-      const contractInterface = new Interface(parsedArtifact.abi);
+      const contractInterface = new utils.Interface(parsedArtifact.abi);
 
       contractCalls[parsedArtifact.contractName] = {
         methodCalls: {},
