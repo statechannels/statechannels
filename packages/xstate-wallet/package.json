@@ -38,7 +38,7 @@
     "babel-preset-react-app": "9.1.0",
     "css-loader": "3.4.2",
     "dexie": "3.0.0",
-    "ethers": "5.0.7",
+    "ethers": "5.0.12",
     "eventemitter3": "4.0.0",
     "file-loader": "5.0.2",
     "filter-async-rxjs-pipe": "0.1.5",
