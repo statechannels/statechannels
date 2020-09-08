@@ -99,7 +99,7 @@ describe('deposit', () => {
       // Check for any partial refund of tokens
       await expect(
         BigNumber.from(await Token.balanceOf(signer0Address)).eq(
-          BigNumber.from(balanceBefore.sub(depositedEvent.amountDeposited))
+          BigNumber.from(balanceBefore.sub(amountTransferred))
         )
       ).toBe(true);
     }
