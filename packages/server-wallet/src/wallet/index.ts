@@ -37,6 +37,7 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
+import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
@@ -73,6 +74,9 @@ export type WalletInterface = {
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
+
+  // Register chain <-> Wallet communication
+  attachChainService(provider: OnchainServiceInterface): void;
 };
 
 export class Wallet implements WalletInterface {
@@ -239,6 +243,11 @@ export class Wallet implements WalletInterface {
 
   onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
+  }
+
+  // Should be called after wallet creation
+  attachChainService(provider: OnchainServiceInterface): void {
+    provider.attachChannelWallet(this);
   }
 }
 
