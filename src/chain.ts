@@ -494,7 +494,9 @@ export class ChainWatcher implements Chain {
 
 // Since nitro-protocol is still using v4 of ethers we need to convert any bignumbers the v5 version from ethers
 // TODO: Remove this when nitro protocol is using v5 ethers
-function convertNitroTransactionRequest(nitroTransactionRequest): TransactionRequest {
+function convertNitroTransactionRequest(
+  nitroTransactionRequest
+): ethers.providers.TransactionRequest {
   return {
     ...nitroTransactionRequest,
     gasLimit: nitroTransactionRequest.gasLimit
