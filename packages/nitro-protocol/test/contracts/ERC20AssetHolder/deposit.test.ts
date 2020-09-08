@@ -60,7 +60,9 @@ describe('deposit', () => {
     await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
-    const allowance = await Token.allowance(signer0Address, ERC20AssetHolder.address);
+    const allowance = BigNumber.from(
+      await Token.allowance(signer0Address, ERC20AssetHolder.address)
+    );
     expect(
       allowance
         .sub(amount)
@@ -75,12 +77,13 @@ describe('deposit', () => {
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
+
+    const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
     const tx = ERC20AssetHolder.deposit(destination, expectedHeld, amount);
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
     } else {
-      const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
       const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
@@ -90,18 +93,15 @@ describe('deposit', () => {
         destinationHoldings: heldAfter,
       });
 
-      const {data: amountTransferred} = getTransferEvent(events);
+      const amountTransferred = BigNumber.from(getTransferEvent(events).data);
       expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
 
       const allocatedAmount = await ERC20AssetHolder.holdings(destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
-      // Check for any partial refund of tokens
-      await expect(
-        BigNumber.from(await Token.balanceOf(signer0Address)).eq(
-          BigNumber.from(balanceBefore.sub(amountTransferred))
-        )
-      ).toBe(true);
+      // Check that the correct number of Tokens were deducted
+      const balanceAfter = BigNumber.from(await Token.balanceOf(signer0Address));
+      expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
 });
