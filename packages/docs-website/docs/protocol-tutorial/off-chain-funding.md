@@ -30,7 +30,7 @@ const participants = [me, hub];
 const chainId = '0x1234';
 const ledgerChannel: Channel = {
   chainId,
-  channelNonce: BigNumber.from(0).toHexString(),
+  channelNonce: bigNumberify(0).toHexString(),
   participants
 };
 const ledgerChannelId = getChannelId(ledgerChannel);
@@ -50,7 +50,7 @@ const sixEachStatePreFS: State = {
       ]
     }
   ],
-  appDefinition: ethers.constants.AddressZero,
+  appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 1
@@ -102,7 +102,7 @@ Let's create the application channel:
 // Construct an application channel with the hub
 const applicationChannel1: Channel = {
   chainId,
-  channelNonce: BigNumber.from(1).toHexString(),
+  channelNonce: bigNumberify(1).toHexString(),
   participants
 };
 const applicationChannel1Id = getChannelId(applicationChannel1);
@@ -181,7 +181,7 @@ const threeEachAndSixForTheApp: State = {
       ]
     }
   ],
-  appDefinition: ethers.constants.AddressZero,
+  appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 4
@@ -287,7 +287,7 @@ const nineForMeThreeForTheHub: State = {
       ]
     }
   ],
-  appDefinition: ethers.constants.AddressZero,
+  appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 5

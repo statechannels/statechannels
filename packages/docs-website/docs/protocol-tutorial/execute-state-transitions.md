@@ -16,7 +16,7 @@ A state channel can be thought of as an emergent property of data (which we call
 
 /* Import ethereum wallet utilities  */
 import {ethers} from 'ethers';
-const {BigNumber} = ethers.utils;
+const {bigNumberify} = ethers.utils;
 const {AddressZero, HashZero} = ethers.constants;
 
 /* Import statechannels wallet utilities  */
@@ -150,7 +150,7 @@ const fromState: State = {
   isFinal: false,
   challengeDuration: 0x0,
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
-  appData: '0x00'
+  appData: '0x0'
 };
 
 /* Construct another state */
@@ -285,8 +285,8 @@ const state: State = {
   outcome: [],
   turnNum: 1,
   isFinal: false,
-  appData: '0x00',
-  appDefinition: ethers.constants.AddressZero,
+  appData: '0x0',
+  appDefinition: AddressZero,
   challengeDuration: 0x5
 };
 
@@ -320,7 +320,7 @@ for (let i = 1; i <= numStates; i++) {
     isFinal: false,
     channel,
     outcome: [],
-    appDefinition: ethers.constants.AddressZero,
+    appDefinition: AddressZero,
     appData: HashZero,
     challengeDuration: 1,
     turnNum: largestTurnNum + i - numStates
