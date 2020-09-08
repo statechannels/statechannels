@@ -13,8 +13,8 @@ const wallet = ethers.Wallet.createRandom();
 const state = {
   isFinal: false,
   channel: {
-    chainId: '0x0',
-    channelNonce: '0x0',
+    chainId: '0x00',
+    channelNonce: '0x00',
     participants: [wallet.address]
   },
   outcome: [
@@ -33,7 +33,7 @@ window.createChannel = async function() {
   const participants = [ethers.Wallet.createRandom().address, ethers.Wallet.createRandom().address];
 
   const allocations = [];
-  const appDefinition = '0x0';
+  const appDefinition = '0x00';
   // TODO format this properly
   await channelClient.createChannel(
     participants,

@@ -181,10 +181,10 @@ export function generatePlayerUpdate(
     jsonrpc: '2.0',
     params: {
       channelId,
-      appData: '0x0',
+      appData: '0x00',
       allocations: [
         {
-          token: hexZeroPad('0x0', 32),
+          token: hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
@@ -217,7 +217,7 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: hexZeroPad('0x0', 32),
+          token: hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
@@ -231,7 +231,7 @@ export function generateCreateChannelRequest(
         }
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-      appData: '0x0',
+      appData: '0x00',
       fundingStrategy: 'Direct'
     }
   };

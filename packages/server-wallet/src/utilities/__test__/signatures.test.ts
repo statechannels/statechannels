@@ -24,7 +24,7 @@ it('sign vs fastSign', async () => {
       outcome: simpleEthAllocation([]),
       turnNum: 1,
       isFinal: false,
-      appData: '0x0',
+      appData: '0x00',
       appDefinition: ethers.constants.AddressZero,
       challengeDuration: 0x5,
     };
@@ -50,7 +50,7 @@ it('getSignerAddress vs fastRecover', async () => {
       outcome: simpleEthAllocation([]),
       turnNum: 1,
       isFinal: false,
-      appData: '0x0',
+      appData: '0x00',
       appDefinition: ethers.constants.AddressZero,
       challengeDuration: 0x5,
     };

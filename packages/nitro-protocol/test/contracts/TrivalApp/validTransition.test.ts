@@ -55,7 +55,7 @@ describe('validTransition', () => {
       isFinal: false,
       challengeDuration: 0x0,
       appDefinition: trivialApp.address,
-      appData: '0x0',
+      appData: '0x00',
     };
     const toState: State = {...fromState, turnNum: 2};
 

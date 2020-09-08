@@ -116,7 +116,7 @@ describe('pushOutcome', () => {
         channel,
         outcome,
         appDefinition: ethers.constants.AddressZero,
-        appData: '0x0',
+        appData: '0x00',
         challengeDuration: 0x1,
       };
 

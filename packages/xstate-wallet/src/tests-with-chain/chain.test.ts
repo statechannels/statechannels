@@ -91,7 +91,7 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
   const state: State = {
     outcome,
     turnNum: 5,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
@@ -136,7 +136,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
   const state5: State = {
     outcome,
     turnNum: 4,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
@@ -149,7 +149,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
   const state6: State = {
     outcome,
     turnNum: 5,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,

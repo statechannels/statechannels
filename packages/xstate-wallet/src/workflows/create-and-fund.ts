@@ -104,7 +104,7 @@ const reserveFunds = (
   const playerAddress = await store.getAddress();
   const playerDestination =
     channelEntry.supported.participants.find(p => p.signingAddress === playerAddress)
-      ?.destination || '0x0';
+      ?.destination || '0x00';
   const receive = allocationItems.find(a => a.destination !== playerDestination)?.amount || Zero;
   const send = allocationItems.find(a => a.destination === playerDestination)?.amount || Zero;
 

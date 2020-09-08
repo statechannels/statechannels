@@ -62,7 +62,7 @@ describe('deposit', () => {
 
       if (held > 0) {
         // Set holdings by depositing in the 'safest' way
-        const tx0 = ETHAssetHolder.deposit(destination, '0x0', held, {
+        const tx0 = ETHAssetHolder.deposit(destination, '0x00', held, {
           value: held,
         });
         const {events} = await (await tx0).wait();

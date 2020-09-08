@@ -23,8 +23,8 @@ const SAMPLES = 1000;
 const state = {
   isFinal: false,
   channel: {
-    chainId: '0x0',
-    channelNonce: '0x0',
+    chainId: '0x00',
+    channelNonce: '0x00',
     participants: [wallet.address]
   },
   outcome: [

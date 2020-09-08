@@ -41,7 +41,7 @@ export const validateTransitionWithEVM = async (
 
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),
-    Uint8Array.from(Buffer.from(data ? data.toString().substr(2) : '0x0', 'hex'))
+    Uint8Array.from(Buffer.from(data ? data.toString().substr(2) : '0x00', 'hex'))
   );
 
   // We need to ensure the result is the correct length otherwise we might be interpreting a failed assertion

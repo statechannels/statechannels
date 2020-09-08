@@ -34,7 +34,7 @@ export function getProvider(): providers.Web3Provider | providers.JsonRpcProvide
 export function getEthAssetHolderContract() {
   const provider = getProvider();
   return new Contract(
-    ETH_ASSET_HOLDER_ADDRESS || '0x0',
+    ETH_ASSET_HOLDER_ADDRESS || '0x00',
     ContractArtifacts.EthAssetHolderArtifact['abi'],
     provider
   );

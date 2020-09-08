@@ -50,7 +50,7 @@ beforeEach(async () => {
       }
     ]),
     turnNum: 5,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,

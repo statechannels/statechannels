@@ -9,7 +9,7 @@ const appDefinition = '0xfffffffffffffffffffffffffffffffffffffffff';
 
 const defaultValue: AppBytecode = AppBytecode.fromJson({
   appBytecode: countingAppBytcode,
-  chainId: '0x0',
+  chainId: '0x00',
   appDefinition,
 });
 

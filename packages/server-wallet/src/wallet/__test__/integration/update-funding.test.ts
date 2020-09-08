@@ -25,7 +25,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
   const {channelId} = c;
   const result = await w.updateChannelFunding({
     channelId: c.channelId,
-    token: '0x0',
+    token: '0x00',
     amount: BN.from(4),
   });
 

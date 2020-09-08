@@ -14,7 +14,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
@@ -43,7 +43,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
@@ -62,7 +62,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
@@ -87,7 +87,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
@@ -106,7 +106,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
@@ -127,7 +127,7 @@ describe('signatures', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        appData: '0x0',
+        appData: '0x00',
         appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };

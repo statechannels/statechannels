@@ -31,7 +31,7 @@ describe('null app', () => {
       isFinal: false,
       challengeDuration: 0x0,
       appDefinition: ethers.constants.AddressZero,
-      appData: '0x0',
+      appData: '0x00',
     };
     const toState: State = {...fromState, turnNum: 2};
 
