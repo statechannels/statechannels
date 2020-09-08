@@ -7,7 +7,7 @@ import {
   createSignatureEntry,
   BN
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
+import {ethers} from 'ethers';
 import {hexZeroPad} from '@ethersproject/bytes';
 
 import {FakeChain} from '../chain';

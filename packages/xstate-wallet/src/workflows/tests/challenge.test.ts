@@ -1,5 +1,5 @@
-import {AddressZero} from '@ethersproject/constants';
 import {interpret} from 'xstate';
+import {ethers} from 'ethers';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';

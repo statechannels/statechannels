@@ -1,6 +1,7 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import {ethers} from 'ethers';
+
 import {
   isSimpleEthAllocation,
   simpleEthAllocation,
@@ -185,7 +186,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           isFinal: false,
           turnNum: 0,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
-          appData: HashZero,
+          appData: ethers.constants.HashZero,
           appDefinition: ethers.constants.AddressZero
         }
       };
