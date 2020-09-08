@@ -1,4 +1,5 @@
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
+const {AddressZero, HashZero} = constants;
 
 import {outcomesEqual} from '../state-utils';
 import {SimpleAllocation, Destination} from '../types';
@@ -6,13 +7,13 @@ import {BN} from '../bignumber';
 
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: ethers.constants.AddressZero,
+  assetHolderAddress: AddressZero,
   allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x2')}]
 };
 
 const simpleAllocation2: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: ethers.constants.AddressZero,
+  assetHolderAddress: AddressZero,
   allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x02')}]
 };
 
