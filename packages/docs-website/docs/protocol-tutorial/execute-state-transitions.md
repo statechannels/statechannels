@@ -16,7 +16,7 @@ A state channel can be thought of as an emergent property of data (which we call
 
 /* Import ethereum wallet utilities  */
 import {ethers} from 'ethers';
-const {bigNumberify} = ethers.utils;
+const {BigNumber} = ethers.utils;
 const {AddressZero, HashZero} = ethers.constants;
 
 /* Import statechannels wallet utilities  */

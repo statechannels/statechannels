@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import {Contract, ethers, Wallet, constants, providers, utils} from 'ethers';
+import {Contract, ethers, BigNumberish, BigNumber, constants, providers, utils} from 'ethers';
 
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
@@ -18,7 +18,7 @@ import {
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: utils.BigNumberish;
+  [destination: string]: BigNumberish;
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
@@ -227,7 +227,7 @@ export function replaceAddressesAndBigNumberify(
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
     }
     if (typeof object[key] === 'number') {
-      newObject[addresses[key]] = utils.bigNumberify(object[key]);
+      newObject[addresses[key]] = BigNumber.from(object[key]);
     }
   });
   return newObject;
@@ -300,7 +300,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
-        amount: utils.bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
+        amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString(),
       })
     );
     const assetOutcome: AllocationAssetOutcome = {
@@ -319,10 +319,7 @@ export function assetTransferredEventsFromPayouts(
 ) {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
-    if (
-      singleAssetPayouts[destination] &&
-      utils.bigNumberify(singleAssetPayouts[destination]).gt(0)
-    ) {
+    if (singleAssetPayouts[destination] && BigNumber.from(singleAssetPayouts[destination]).gt(0)) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
@@ -348,7 +345,7 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
 export async function writeGasConsumption(
   filename: string,
   description: string,
-  gas: utils.BigNumberish
+  gas: BigNumberish
 ): Promise<void> {
   await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
     if (err) throw err;

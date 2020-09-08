@@ -30,7 +30,7 @@ const participants = [me, hub];
 const chainId = '0x1234';
 const ledgerChannel: Channel = {
   chainId,
-  channelNonce: bigNumberify(0).toHexString(),
+  channelNonce: BigNumber.from(0).toHexString(),
   participants
 };
 const ledgerChannelId = getChannelId(ledgerChannel);
@@ -102,7 +102,7 @@ Let's create the application channel:
 // Construct an application channel with the hub
 const applicationChannel1: Channel = {
   chainId,
-  channelNonce: bigNumberify(1).toHexString(),
+  channelNonce: BigNumber.from(1).toHexString(),
   participants
 };
 const applicationChannel1Id = getChannelId(applicationChannel1);

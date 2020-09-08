@@ -75,7 +75,7 @@ const destination = hexZeroPad(EOA, 32);
 
 const assetOutcome: AllocationAssetOutcome = {
   assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [{destination, amount}],
+  allocationItems: [{destination, amount}]
 };
 
 // Following earlier tutorials ...
@@ -96,12 +96,12 @@ expect(events).toMatchObject([
     args: {
       channelId,
       destination: destination.toLowerCase(),
-      amount: {_hex: amount},
-    },
-  },
+      amount: {_hex: amount}
+    }
+  }
 ]);
 
-expect(bigNumberify(await provider.getBalance(EOA)).eq(bigNumberify(amount)));
+expect(BigNumber.from(await provider.getBalance(EOA)).eq(BigNumber.from(amount)));
 ```
 
 :::tip
@@ -129,8 +129,8 @@ const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
   assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
   allocationItems: [
     {destination: destination1, amount},
-    {destination: destination2, amount},
-  ],
+    {destination: destination2, amount}
+  ]
 };
 
 const assetOutcomeForTheGuarantorChannel: GuaranteeAssetOutcome = {
@@ -139,9 +139,9 @@ const assetOutcomeForTheGuarantorChannel: GuaranteeAssetOutcome = {
     targetChannelId: targetChannelId,
     destinations: [
       destination2,
-      destination1, // Note reversed order
-    ],
-  },
+      destination1 // Note reversed order
+    ]
+  }
 };
 
 // Following earlier tutorials ...
@@ -168,7 +168,7 @@ await(await tx5).wait();
 /* 
   Check that the ethereum account balance was updated
 */
-expect(bigNumberify(await provider.getBalance(EOA2)).eq(bigNumberify(amount)));
+expect(BigNumber.from(await provider.getBalance(EOA2)).eq(BigNumber.from(amount)));
 ```
 
 If this process seems overly complicated to you: remember that guarantor channels are only required when virtually funding a channel. Also bear in mind that this process is unlinkely to actually play out on chain very often: it is in everyone's interest to administrate inter-channel funding off chain as much as possible, with the on chain administration such as this used as a last resort.

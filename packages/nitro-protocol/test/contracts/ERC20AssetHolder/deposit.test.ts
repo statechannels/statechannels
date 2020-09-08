@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
+import {Contract, Wallet, BigNumber} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import {bigNumberify} from 'ethers/utils';
 
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
@@ -46,10 +45,10 @@ describe('deposit', () => {
     ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
     ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
   `('$description', async ({channelNonce, held, expectedHeld, amount, reasonString, heldAfter}) => {
-    held = bigNumberify(held);
-    expectedHeld = bigNumberify(expectedHeld);
-    amount = bigNumberify(amount);
-    heldAfter = bigNumberify(heldAfter);
+    held = BigNumber.from(held);
+    expectedHeld = BigNumber.from(expectedHeld);
+    amount = BigNumber.from(amount);
+    heldAfter = BigNumber.from(heldAfter);
 
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);

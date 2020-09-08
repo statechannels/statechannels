@@ -30,7 +30,7 @@ For a simple game like Rock Paper Scissors, the advantages of virtual funding ma
 In order for your app to construct state updates of the right format, you'll need to write some Javascript or Typescript helper code. The purpose of this code is to translate between the general-purpose, [protocol-level concepts of `appData` and `outcome`](/app-devs/quick-start-contracts) and the specific data structures that your application needs to work with. Those structures should mirror those in the Solidity code you have already written. Here's an idea of what we did in Rock Paper Scissors (see the Solidity code [here](https://github.com/statechannels/apps/blob/master/packages/rps/contracts/RockPaperScissors.sol)):
 
 ```typescript
-import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
+import {defaultAbiCoder, BigNumber, keccak256} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 import {randomHex} from '../utils/randomHex';
 import {unreachable} from '../utils/unreachable';
@@ -103,7 +103,7 @@ function toRPSData(appData: AppData): RPSData {
   }
   const defaults: RPSData = {
     positionType,
-    stake: bigNumberify(0).toString(),
+    stake: BigNumber.from(0).toString(),
     preCommit: HashZero,
     playerAWeapon: Weapon.Rock,
     playerBWeapon: Weapon.Rock,
@@ -253,8 +253,8 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     bAddress: participants[1].destination,
     aOutcomeAddress: participants[0].destination,
     bOutcomeAddress: participants[1].destination,
-    aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    aBal: BigNumber.from(allocations[0].allocationItems[0].amount).toString(),
+    bBal: BigNumber.from(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
@@ -273,8 +273,8 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     {
       token: '0x0', // We are sticking to ETH here
       allocationItems: [
-        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-        {destination: bAddress, amount: bigNumberify(bBal).toHexString()}
+        {destination: aAddress, amount: BigNumber.from(aBal).toHexString()},
+        {destination: bAddress, amount: BigNumber.from(bBal).toHexString()}
       ]
     }
   ];

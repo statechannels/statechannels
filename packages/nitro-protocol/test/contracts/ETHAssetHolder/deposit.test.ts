@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
+import {Contract, Wallet, BigNumber} from 'ethers';
+import {parseUnits} from 'ethers/utils';
 
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
@@ -71,8 +71,8 @@ describe('deposit', () => {
         expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
         expect(depositedEvent).toMatchObject({
           destination,
-          amountDeposited: bigNumberify(held),
-          destinationHoldings: bigNumberify(held),
+          amountDeposited: BigNumber.from(held),
+          destinationHoldings: BigNumber.from(held),
         });
       }
       const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {

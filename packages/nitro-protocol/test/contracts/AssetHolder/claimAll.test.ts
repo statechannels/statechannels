@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
-import {bigNumberify, id} from 'ethers/utils';
+import {BigNumber, id} from 'ethers/utils';
 
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
@@ -82,10 +82,10 @@ describe('claimAll', () => {
       reason;
     }) => {
       // Compute channelIds
-      const tNonce = bigNumberify(id(name))
+      const tNonce = BigNumber.from(id(name))
         .maskn(30)
         .toNumber();
-      const gNonce = bigNumberify(id(name + 'g'))
+      const gNonce = BigNumber.from(id(name + 'g'))
         .maskn(30)
         .toNumber();
       const targetId = randomChannelId(tNonce);
@@ -93,7 +93,7 @@ describe('claimAll', () => {
       addresses.t = targetId;
       addresses.g = guarantorId;
 
-      // Transform input data (unpack addresses and BigNumberify amounts)
+      // Transform input data (unpack addresses and BigNumber amounts)
       [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
         heldBefore,
         tOutcomeBefore,
@@ -106,7 +106,7 @@ describe('claimAll', () => {
       // Set holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
         // Key must be either in heldBefore or heldAfter or both
-        const amount = heldBefore[key] ? heldBefore[key] : bigNumberify(0);
+        const amount = heldBefore[key] ? heldBefore[key] : BigNumber.from(0);
         await (await AssetHolder.setHoldings(key, amount)).wait();
         expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
       });
