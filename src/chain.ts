@@ -16,11 +16,10 @@ import {
   Zero,
   Uint256
 } from '@statechannels/wallet-core';
-import {Contract, Wallet, utils} from 'ethers';
+import {Contract, Wallet, utils, providers} from 'ethers';
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
 import {hexZeroPad} from '@ethersproject/bytes';
-import {TransactionRequest} from '@ethersproject/providers';
 import EventEmitter from 'eventemitter3';
 
 import {getProvider} from './utils/contract-utils';
@@ -494,9 +493,7 @@ export class ChainWatcher implements Chain {
 
 // Since nitro-protocol is still using v4 of ethers we need to convert any bignumbers the v5 version from ethers
 // TODO: Remove this when nitro protocol is using v5 ethers
-function convertNitroTransactionRequest(
-  nitroTransactionRequest
-): ethers.providers.TransactionRequest {
+function convertNitroTransactionRequest(nitroTransactionRequest): providers.TransactionRequest {
   return {
     ...nitroTransactionRequest,
     gasLimit: nitroTransactionRequest.gasLimit
