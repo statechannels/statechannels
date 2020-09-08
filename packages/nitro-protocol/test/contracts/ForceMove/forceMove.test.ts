@@ -42,7 +42,7 @@ const appDefinition = getPlaceHolderContractAddress();
 const keys = [
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29',
   '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
-  '1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
+  '0x1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
 ];
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
