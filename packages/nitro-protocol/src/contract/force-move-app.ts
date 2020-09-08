@@ -1,5 +1,4 @@
 import {utils, Contract} from 'ethers';
-import {TransactionRequest} from 'ethers/providers';
 
 import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
 import {State, getVariablePart} from '../contract/state';

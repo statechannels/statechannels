@@ -92,7 +92,7 @@ export interface RespondTransactionArguments {
   sig: Signature;
 }
 export function getChallengeClearedEvent(
-  tx: ethers.utils.Transaction,
+  tx: ethers.Transaction,
   eventResult
 ): ChallengeClearedEvent {
   const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;

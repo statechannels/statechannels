@@ -2,7 +2,6 @@
 
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
-import {TransactionRequest} from 'ethers/providers';
 
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {validTransition} from '../../../src/contract/consensus-app';
@@ -89,7 +88,10 @@ describe('validTransition', () => {
   );
 });
 
-async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
+async function sendTransaction(
+  contractAddress: string,
+  transaction: ethers.providers.TransactionRequest
+) {
   // TODO import from test-helpers instead (does not yet exist pending rebase or merge)
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});

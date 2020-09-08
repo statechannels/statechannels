@@ -1,9 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-const {HashZero, AddressZero} = ethers.constants;
+const {HashZero} = ethers.constants;
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {TransactionRequest} from 'ethers/providers';
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -249,7 +248,7 @@ describe('forceMove with transaction generator', () => {
     ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
     ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
   `('$description', async ({description, appData, turnNums, challenger}) => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: ethers.providers.TransactionRequest = createForceMoveTransaction(
       [
         await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
         await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),
