@@ -1,6 +1,5 @@
 import {TransactionRequest} from 'ethers/providers';
-import {Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {ethers, Wallet} from 'ethers';
 
 import {SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
@@ -25,7 +24,7 @@ const challengeState = {
   channel,
   turnNum: 0,
   isFinal: false,
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: '0x0',
   outcome: [],
   challengeDuration: 0x0,
@@ -34,7 +33,7 @@ const challengeState = {
 //   TurnNumRecord: 0,
 //   FinalizesAt: 1e12,
 //   StateHash: HashZero,
-//   ChallengerAddress: AddressZero,
+//   ChallengerAddress: ethers.constants.AddressZero,
 //   OutcomeHash: HashZero,
 // };
 
@@ -45,7 +44,7 @@ beforeAll(async () => {
     {
       turnNum: 0,
       isFinal: false,
-      appDefinition: AddressZero,
+      appDefinition: ethers.constants.AddressZero,
       appData: '0x0',
       outcome: [],
       channel,
@@ -92,7 +91,7 @@ describe('transaction-generators', () => {
           {
             turnNum: turnNum[0],
             isFinal: false,
-            appDefinition: AddressZero,
+            appDefinition: ethers.constants.AddressZero,
             appData: '0x0',
             outcome: [],
             channel: twoPlayerChannel,
@@ -104,7 +103,7 @@ describe('transaction-generators', () => {
           {
             turnNum: turnNum[1],
             isFinal: false,
-            appDefinition: AddressZero,
+            appDefinition: ethers.constants.AddressZero,
             appData: '0x0',
             outcome: [],
             channel: twoPlayerChannel,

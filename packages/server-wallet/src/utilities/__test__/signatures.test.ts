@@ -25,7 +25,7 @@ it('sign vs fastSign', async () => {
       turnNum: 1,
       isFinal: false,
       appData: '0x0',
-      appDefinition: AddressZero,
+      appDefinition: ethers.constants.AddressZero,
       challengeDuration: 0x5,
     };
 
@@ -51,7 +51,7 @@ it('getSignerAddress vs fastRecover', async () => {
       turnNum: 1,
       isFinal: false,
       appData: '0x0',
-      appDefinition: AddressZero,
+      appDefinition: ethers.constants.AddressZero,
       challengeDuration: 0x5,
     };
 

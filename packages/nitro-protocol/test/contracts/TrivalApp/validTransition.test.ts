@@ -1,7 +1,6 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {MaxUint256} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
 import {solidityKeccak256} from 'ethers/utils';
 
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
@@ -19,7 +18,7 @@ function computeSaltedHash(salt: string, num: number) {
 
 function getRandomVariablePart(): VariablePart {
   const randomNum = Math.floor(Math.random() * 100);
-  const salt = MaxUint256.toHexString();
+  const salt = ethers.constants.MaxUint256.toHexString();
   const hash = computeSaltedHash(salt, randomNum);
 
   const variablePart: VariablePart = {

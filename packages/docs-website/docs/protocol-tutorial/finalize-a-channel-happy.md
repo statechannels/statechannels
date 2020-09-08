@@ -52,7 +52,7 @@ const state: State = {
   isFinal: true,
   channel,
   outcome: [],
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: largestTurnNum

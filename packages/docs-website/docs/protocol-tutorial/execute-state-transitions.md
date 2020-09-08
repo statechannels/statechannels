@@ -286,7 +286,7 @@ const state: State = {
   turnNum: 1,
   isFinal: false,
   appData: '0x0',
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   challengeDuration: 0x5
 };
 
@@ -320,7 +320,7 @@ for (let i = 1; i <= numStates; i++) {
     isFinal: false,
     channel,
     outcome: [],
-    appDefinition: AddressZero,
+    appDefinition: ethers.constants.AddressZero,
     appData: HashZero,
     challengeDuration: 1,
     turnNum: largestTurnNum + i - numStates

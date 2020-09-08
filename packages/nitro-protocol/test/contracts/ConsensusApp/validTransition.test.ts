@@ -1,8 +1,7 @@
 // @ts-ignore
 
 import {expectRevert} from '@statechannels/devtools';
-import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {Contract, ethers} from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
@@ -100,8 +99,8 @@ async function sendTransaction(contractAddress: string, transaction: Transaction
 function createOutcome(amount: string): Outcome {
   return [
     {
-      assetHolderAddress: AddressZero,
-      allocationItems: [{destination: HashZero, amount}],
+      assetHolderAddress: ethers.constants.AddressZero,
+      allocationItems: [{destination: ethers.constants.HashZero, amount}],
     },
   ];
 }

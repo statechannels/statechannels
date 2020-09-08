@@ -57,12 +57,12 @@ export default class PayerClient {
       channelResult: {channelId},
     } = await this.wallet.createChannel({
       appData: '0x',
-      appDefinition: AddressZero,
+      appDefinition: ethers.constants.AddressZero,
       fundingStrategy: 'Direct',
       participants: [this.me, receiver],
       allocations: [
         {
-          token: AddressZero,
+          token: ethers.constants.AddressZero,
           allocationItems: [
             {
               amount: BN.from(0),

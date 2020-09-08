@@ -1,6 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {Contract, ethers} from 'ethers';
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
@@ -21,7 +20,11 @@ beforeAll(async () => {
   );
 });
 
-const zeroData = {stateHash: HashZero, outcomeHash: HashZero, challengerAddress: AddressZero};
+const zeroData = {
+  stateHash: ethers.constants.HashZero,
+  outcomeHash: ethers.constants.HashZero,
+  challengerAddress: ethers.constants.AddressZero,
+};
 describe('storage', () => {
   it.each`
     turnNumRecord | finalizesAt
@@ -41,9 +44,9 @@ describe('storage', () => {
     expect(parseChannelStorageHash(clientHash)).toMatchObject(expected);
 
     // Testing getData is a little more laborious
-    await (await ForceMove.setChannelStorage(HashZero, blockchainStorage)).wait();
+    await (await ForceMove.setChannelStorage(ethers.constants.HashZero, blockchainStorage)).wait();
     const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getChannelStorage(
-      HashZero
+      ethers.constants.HashZero
     );
     expect({turnNumRecord, finalizesAt, fingerprint: f._hex}).toMatchObject(expected);
   });
@@ -56,7 +59,7 @@ describe('_requireChannelOpen', () => {
   });
 
   it('works when the slot is empty', async () => {
-    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(HashZero);
+    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(ethers.constants.HashZero);
     await ForceMove.requireChannelOpen(channelId);
   });
 

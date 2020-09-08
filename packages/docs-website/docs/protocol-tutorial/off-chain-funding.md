@@ -50,7 +50,7 @@ const sixEachStatePreFS: State = {
       ]
     }
   ],
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 1
@@ -181,7 +181,7 @@ const threeEachAndSixForTheApp: State = {
       ]
     }
   ],
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 4
@@ -287,7 +287,7 @@ const nineForMeThreeForTheHub: State = {
       ]
     }
   ],
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 5

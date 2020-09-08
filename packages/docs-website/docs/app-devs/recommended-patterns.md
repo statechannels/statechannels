@@ -31,7 +31,7 @@ In order for your app to construct state updates of the right format, you'll nee
 
 ```typescript
 import {defaultAbiCoder, BigNumber, keccak256} from 'ethers/utils';
-import {HashZero} from 'ethers/constants';
+
 import {randomHex} from '../utils/randomHex';
 import {unreachable} from '../utils/unreachable';
 

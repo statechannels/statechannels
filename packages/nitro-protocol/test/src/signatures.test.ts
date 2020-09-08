@@ -1,5 +1,4 @@
-import {Wallet, utils} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {ethers, Wallet, utils} from 'ethers';
 import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
 
 import {hashChallengeMessage} from '../../src/contract/challenge';
@@ -16,7 +15,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -45,7 +44,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -64,7 +63,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
 
@@ -89,7 +88,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
@@ -108,7 +107,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
@@ -129,7 +128,7 @@ describe('signatures', () => {
         turnNum: 1,
         isFinal: false,
         appData: '0x0',
-        appDefinition: AddressZero,
+        appDefinition: ethers.constants.AddressZero,
         challengeDuration: 0x5,
       };
       const hashedState = hashState(state);

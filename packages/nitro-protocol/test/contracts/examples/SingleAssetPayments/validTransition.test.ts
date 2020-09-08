@@ -1,8 +1,7 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
-
+import {Contract, ethers} from 'ethers';
+const {HashZero} = ethers.constants;
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
@@ -71,11 +70,13 @@ describe('validTransition', () => {
       );
       let outcomeA;
       if (isAllocation[0]) {
-        outcomeA = [{assetHolderAddress: AddressZero, allocationItems: allocationA}];
+        outcomeA = [
+          {assetHolderAddress: ethers.constants.AddressZero, allocationItems: allocationA},
+        ];
       } else {
         outcomeA = [
           {
-            assetHolderAddress: AddressZero,
+            assetHolderAddress: ethers.constants.AddressZero,
             guarantee,
           },
         ];
@@ -98,9 +99,11 @@ describe('validTransition', () => {
 
       let outcomeB;
       if (isAllocation[1]) {
-        outcomeB = [{assetHolderAddress: AddressZero, allocationItems: allocationB}];
+        outcomeB = [
+          {assetHolderAddress: ethers.constants.AddressZero, allocationItems: allocationB},
+        ];
       } else {
-        outcomeB = [{assetHolderAddress: AddressZero, guarantee}];
+        outcomeB = [{assetHolderAddress: ethers.constants.AddressZero, guarantee}];
       }
       if (numAssets[1] === 2) {
         outcomeB.push(outcomeB[0]);

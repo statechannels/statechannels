@@ -1,6 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
+
 import {defaultAbiCoder} from 'ethers/utils';
 
 // @ts-ignore
@@ -114,7 +114,7 @@ describe('respond', () => {
       const responseStateHash = hashState(responseState);
 
       const challengeExistsHash = slotEmpty
-        ? HashZero
+        ? ethers.constants.HashZero
         : channelDataToChannelStorageHash({
             turnNumRecord,
             finalizesAt,

@@ -19,11 +19,11 @@ const state = {
   },
   outcome: [
     {
-      assetHolderAddress: AddressZero,
+      assetHolderAddress: ethers.constants.AddressZero,
       allocationItems: []
     }
   ],
-  appDefinition: AddressZero,
+  appDefinition: ethers.constants.AddressZero,
   appData: HashZero,
   challengeDuration: 1,
   turnNum: 1

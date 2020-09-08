@@ -186,7 +186,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           turnNum: 0,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: HashZero,
-          appDefinition: AddressZero
+          appDefinition: ethers.constants.AddressZero
         }
       };
     }

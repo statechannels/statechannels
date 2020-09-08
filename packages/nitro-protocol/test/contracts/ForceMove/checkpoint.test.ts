@@ -1,6 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
+import {Contract, Wallet, ethers} from 'ethers';
+
+const {HashZero} = ethers.constants;
 import {defaultAbiCoder} from 'ethers/utils';
 
 // @ts-ignore

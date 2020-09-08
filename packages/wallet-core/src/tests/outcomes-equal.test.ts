@@ -6,13 +6,13 @@ import {BN} from '../bignumber';
 
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: AddressZero,
+  assetHolderAddress: ethers.constants.AddressZero,
   allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x2')}]
 };
 
 const simpleAllocation2: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: AddressZero,
+  assetHolderAddress: ethers.constants.AddressZero,
   allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x02')}]
 };
 
