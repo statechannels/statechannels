@@ -1,4 +1,5 @@
-import {AddressZero, Zero, One} from 'ethers/constants';
+import {constants} from 'ethers';
+const {AddressZero, Zero, One} = constants;
 
 export const PARTICIPANT_A = '0xeF3c144c6F1B974AcDD5f7AF18057DEc22B2DCe5';
 export const PARTICIPANT_B = '0x56C6ded44Acd7c8643e1501b47285Ad5d722225B';
