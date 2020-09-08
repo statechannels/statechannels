@@ -1,9 +1,9 @@
-import {Contract, providers, utils} from 'ethers';
+import {Contract, providers, Signature} from 'ethers';
 
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
-import {getStateSignerAddress, SignedState, Signature} from './signatures';
+import {getStateSignerAddress, SignedState} from './signatures';
 
 export async function getChannelStorage(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
@@ -75,7 +75,7 @@ export function createConcludeTransaction(
 // So if multiple participants sign a state we expect a SignedState for each participant
 export function createSignatureArguments(
   signedStates: SignedState[]
-): {states: State[]; signatures: utils.Signature[]; whoSignedWhat: number[]} {
+): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
   const states = [];
   const whoSignedWhat = new Array<number>(participants.length);

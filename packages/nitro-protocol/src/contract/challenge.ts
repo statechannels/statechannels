@@ -1,8 +1,8 @@
-import {ethers, BigNumber, utils} from 'ethers';
+import {ethers, BigNumber, utils, Signature} from 'ethers';
 const {Interface, keccak256, defaultAbiCoder} = utils;
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
-import {SignedState, Signature} from '../signatures';
+import {SignedState} from '../signatures';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
@@ -108,7 +108,13 @@ export function getChallengeClearedEvent(
     const isFinal = args[1][1];
     const outcome = decodeOutcome(args[3][1][0]);
     const appData = args[3][1][1];
-    const signature = {v: args[4][0], r: args[4][1], s: args[4][2]};
+    const signature: Signature = {
+      v: args[4][0],
+      r: args[4][1],
+      s: args[4][2],
+      _vs: args[4][3],
+      recoveryParam: args[4][4],
+    };
 
     const signedState: SignedState = {
       signature,

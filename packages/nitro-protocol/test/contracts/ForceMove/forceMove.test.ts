@@ -168,7 +168,7 @@ describe('forceMove', () => {
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
-        signature: {v: 0, r: '', s: ''},
+        signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
       };
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
