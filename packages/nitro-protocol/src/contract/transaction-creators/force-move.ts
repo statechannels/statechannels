@@ -111,7 +111,7 @@ export function createConcludeTransaction(
   whoSignedWhat: number[]
 ): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.encodeFunctionData(
-    'checkpoint',
+    'conclude',
     concludeArgs(states, signatures, whoSignedWhat)
   );
   return {data};
