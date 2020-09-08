@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {ethers, Contract, Wallet, BigNumber} from 'ethers';
+import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
 
 const {AddressZero} = ethers.constants;
 
@@ -18,7 +18,7 @@ const participants = [];
 
 // Populate destinations array
 for (let i = 0; i < 3; i++) {
-  participants[i] = Wallet.createRandom().address;
+  participants[i] = Wallet.createRandom({extraEntropy: utils.id('erc20-deposit-test')}).address;
 }
 
 beforeAll(async () => {
