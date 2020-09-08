@@ -31,7 +31,7 @@ const outcome = simpleEthAllocation([
   {destination: bDestination, amount: BN.from(6)}
 ]);
 const turnNum = 4;
-const appData = '0xabc';
+const appData = '0x0abc';
 const isFinal = false;
 const chainId = CHAIN_NETWORK_ID;
 const participants = [

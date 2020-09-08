@@ -80,7 +80,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
 
 describe('Channel setup, JOIN_CHANNEL role', () => {
   test('with direct funding strategy', async () => {
-    const channelId = '0xabc';
+    const channelId = '0x0abc';
     const context: Application.Init = {
       fundingStrategy: 'Direct',
       channelId,
