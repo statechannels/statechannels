@@ -112,11 +112,11 @@ describe('channel results', () => {
 
     const signedStates = [
       stateSignedBy([alice(), bob()])({turnNum: five}),
-      stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0xf00'}),
+      stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0x0f00'}),
     ];
     const p = wallet.pushMessage(message({signedStates}));
 
-    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0xf00'}]);
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
     const channelsAfter = await Channel.query().select();
 
