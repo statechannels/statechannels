@@ -323,7 +323,7 @@ export function assetTransferredEventsFromPayouts(
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        values: {channelId, destination, amount: singleAssetPayouts[destination]},
+        args: {channelId, destination, amount: singleAssetPayouts[destination]},
       });
     }
   });
