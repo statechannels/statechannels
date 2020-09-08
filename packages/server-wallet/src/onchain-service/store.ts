@@ -1,18 +1,17 @@
 import {Bytes32} from '@statechannels/client-api-schema';
-import {providers} from 'ethers';
+import {providers, BigNumber} from 'ethers';
 
 import {
   ChannelEventRecord,
   OnchainServiceStoreInterface,
-  ContractEventName,
   ChannelEventRecordMap,
-  MinimalTransaction,
   TransactionStatus,
   TransactionStatusEventMap,
-  TransactionStatuses,
   NoncedMinimalTransaction,
   TransactionSubmissionStoreInterface,
+  ChainEventNames,
 } from './types';
+import {isFundingEvent} from './utils';
 
 // TODO: This will definitely change when we use to a more permanent store
 type TransactionModel<T extends TransactionStatus> = {
@@ -23,84 +22,73 @@ type TransactionModel<T extends TransactionStatus> = {
 export class TransactionSubmissionStore implements TransactionSubmissionStoreInterface {
   // NOTE: V0 has an in-memory store, which will eventually be
   // shifted to more permanent storage
-  private readonly transactions: Map<
-    string,
-    TransactionModel<keyof typeof TransactionStatuses>[]
-  > = new Map();
+  // private readonly transactions: Map<
+  //   string,
+  //   TransactionModel<keyof typeof TransactionStatuses>[]
+  // > = new Map();
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
+  // Stores transactions that are going to be sent to mempool
+  // NOTE: assumes only one per channel
+  private readonly requestedTransactions: Map<string, NoncedMinimalTransaction> = new Map();
+
+  // Stores transactions that have been mined
+  private readonly minedTransactions: Map<string, providers.TransactionResponse[]> = new Map();
 
   // Used to save a transaction *before* it is sent to mempool
   saveTransactionRequest(channelId: Bytes32, tx: NoncedMinimalTransaction): Promise<void> {
-    const existing = this.transactions.get(channelId) || [];
-    const idx = existing.findIndex(
-      e => e.status === 'pending' && (e.data as NoncedMinimalTransaction).nonce === tx.nonce
-    );
-    return Promise.resolve(this._updateTransactions(channelId, idx, {status: 'pending', data: tx}));
+    // TODO: should this be handled at the store level?
+    if (this.requestedTransactions.has(channelId)) {
+      throw new Error('Transaction in process');
+    }
+    // Add to pending transactions
+    this.requestedTransactions.set(channelId, tx);
+    return Promise.resolve();
   }
 
   // Used to save a transaction *after* it has been sent to mempool
-  saveTransactionResponse(channelId: Bytes32, tx: providers.TransactionResponse): Promise<void> {
-    // Find the pending transaction
-    const existing = this.transactions.get(channelId) || [];
-    const idx = existing.findIndex(
-      e => e.status === 'pending' && (e.data as NoncedMinimalTransaction).nonce === tx.nonce
-    );
-    return Promise.resolve(
-      this._updateTransactions(channelId, idx, {status: 'submitted', data: tx})
-    );
+  saveTransactionResponse(_channelId: Bytes32, _tx: providers.TransactionResponse): Promise<void> {
+    return Promise.resolve();
   }
 
   // Used to save a transaction *after* it is mined
   saveTransactionReceipt(channelId: Bytes32, receipt: providers.TransactionReceipt): Promise<void> {
-    // Find the submitted transaction
-    const existing = this.transactions.get(channelId) || [];
-    const idx = existing.findIndex(
-      e =>
-        e.status === 'submitted' &&
-        (e.data as providers.TransactionResponse).hash === receipt.transactionHash
-    );
-    return Promise.resolve(
-      this._updateTransactions(channelId, idx, {status: 'success', data: receipt})
-    );
+    // Remove from pending if exists
+    if (this.requestedTransactions.get(channelId)) {
+      this.requestedTransactions.delete(channelId);
+    }
+
+    // Remove from mined if exists
+    const existing = this.minedTransactions.get(channelId) || [];
+    const idx = existing.findIndex(e => e.hash === receipt.transactionHash);
+    const updated = [...existing];
+    if (idx > -1) {
+      updated.splice(idx, 1);
+    }
+    this.minedTransactions.set(channelId, updated);
+    return Promise.resolve();
   }
 
   // Used to save a transaction if it fails at any point
   saveFailedTransaction(
     channelId: Bytes32,
     tx: NoncedMinimalTransaction,
-    reason: string
+    _reason: string
   ): Promise<void> {
-    // Find the submitted transaction
-    const existing = this.transactions.get(channelId) || [];
-    // The transaction can fail at any time before it is sent or during
-    // mining, so look by nonce
-    const idx = existing.findIndex(
-      e => (e.data as providers.TransactionResponse | NoncedMinimalTransaction).nonce === tx.nonce
-    );
-    return Promise.resolve(
-      this._updateTransactions(channelId, idx, {status: 'failed', data: {...tx, reason}})
-    );
-  }
-
-  private _updateTransactions<T extends TransactionStatus>(
-    channelId: Bytes32,
-    previousRecordIndex: number,
-    data: TransactionModel<T>
-  ): void {
-    // Get existing channel transactions
-    const existing = this.transactions.get(channelId) || [];
-
-    // Update record
-    if (previousRecordIndex === -1) {
-      // No record of pending transaction found
-      existing.push(data);
-    } else {
-      // Update existing record
-      existing[previousRecordIndex] = data;
+    // Remove from pending if exists
+    const pending = this.requestedTransactions.get(channelId);
+    if (pending?.nonce === tx.nonce) {
+      this.requestedTransactions.delete(channelId);
     }
-    this.transactions.set(channelId, existing);
+
+    // Remove from mined if exists
+    const existing = this.minedTransactions.get(channelId) || [];
+    const idx = existing.findIndex(e => e.nonce === tx.nonce);
+    const updated = [...existing];
+    if (idx > -1) {
+      updated.splice(idx, 1);
+    }
+    this.minedTransactions.set(channelId, updated);
+    return Promise.resolve();
   }
 }
 
@@ -109,30 +97,18 @@ export class OnchainServiceStore implements OnchainServiceStoreInterface {
   // shifted to more permanent storage
   private readonly events: Map<string, ChannelEventRecord[]> = new Map();
 
-  // Stores transactions that are going to be sent to mempool
-  private readonly requestedTransactions: Map<
-    string,
-    MinimalTransaction & {nonce: number}
-  > = new Map();
-
-  // Stores transactions that are currently in the mempool
-  private readonly pendingTransactions: Map<string, providers.TransactionResponse> = new Map();
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
-
   public getEvents(channelId: Bytes32): Promise<ChannelEventRecord[]> {
     return Promise.resolve(this.events.get(channelId) || []);
   }
 
-  public getLatestEvent<T extends ContractEventName>(
+  public getLatestEvent<T extends ChainEventNames>(
     channelId: Bytes32,
-    event: T
+    _event: T
   ): ChannelEventRecordMap[T] {
     if (!this.hasChannel(channelId)) {
       throw new Error('Channel not found');
     }
-    const unsorted = (this.events.get(channelId) || []).filter(e => e.type === event);
+    const unsorted = (this.events.get(channelId) || []).filter(e => isFundingEvent(e));
     const [latest] = unsorted.sort((a, b) => {
       // TODO: Can I safely sort by block number here?
       // TODO: Is there another generic way (ie timestamp) to return the latest
@@ -142,7 +118,9 @@ export class OnchainServiceStore implements OnchainServiceStoreInterface {
       }
       switch (b.type) {
         case 'Deposited': {
-          return b.destinationHoldings.sub(a.destinationHoldings).toNumber();
+          return BigNumber.from(b.destinationHoldings)
+            .sub(a.destinationHoldings)
+            .toNumber();
         }
         default: {
           const e: never = b.type;
@@ -154,13 +132,13 @@ export class OnchainServiceStore implements OnchainServiceStoreInterface {
     return latest;
   }
 
-  public saveEvent<T extends ContractEventName>(
+  public saveEvent<T extends ChainEventNames>(
     channelId: Bytes32,
     data: ChannelEventRecordMap[T]
   ): Promise<void> {
     const existing = this.events.get(channelId) || [];
     const idx = existing.findIndex(e => {
-      return JSON.stringify(e) === JSON.stringify(data);
+      return e.transactionHash === data.transactionHash;
     });
     if (idx === -1) {
       const updated = [...existing, data];
@@ -169,7 +147,7 @@ export class OnchainServiceStore implements OnchainServiceStoreInterface {
     return Promise.resolve();
   }
 
-  public createChannel(channelId: Bytes32): Promise<void> {
+  public registerChannel(channelId: Bytes32): Promise<void> {
     if (!this.events.has(channelId)) {
       this.events.set(channelId, []);
     }

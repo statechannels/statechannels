@@ -38,9 +38,20 @@ export const addEvtHandler = (
   const attachArgs = [];
   if (filter) attachArgs.push(filter);
   if (timeout) attachArgs.push(timeout);
-  attachArgs.push(callback)
-  
+  attachArgs.push(callback);
+
+  // @ts-expect-error
   return evt.attach(...attachArgs);
 };
 
 export const logger = pino();
+
+export function isFundingEvent(e: any): e is FundingEvent {
+  if (!e?.transactionHash) return false;
+  if (!e?.blockNumber) return false;
+  if (!e?.channelId) return false;
+  if (!e?.amount) return false;
+  if (!e?.type) return false;
+  if (typeof e?.final !== 'boolean') return false;
+  return true;
+}

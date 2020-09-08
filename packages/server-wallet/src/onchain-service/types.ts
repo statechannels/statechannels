@@ -1,5 +1,5 @@
 import {Address, Bytes32} from '@statechannels/client-api-schema';
-import {providers, BigNumber} from 'ethers';
+import {providers} from 'ethers';
 import {Evt} from 'evt';
 
 // FIXME: replace with
@@ -31,13 +31,17 @@ export type NoncedMinimalTransaction = Pick<
 // FIXME: should import from the `nitro-protocol` package, but it is using
 // a different version of ethers so the bignumber types are all messed up
 export type ContractEventName = 'Deposited';
-export interface DepositedEvent {
-  destination: string;
-  amountDeposited: BigNumber;
-  destinationHoldings: BigNumber;
+
+export type ChainEventNames = 'Funding'; //| 'Adjudication';
+export interface FundingEvent {
+  transactionHash: string;
+  type: ContractEventName;
+  blockNumber: number;
+  final: boolean;
+  channelId: Bytes32;
+  amount: string;
+  destinationHoldings: string;
 }
-// TODO: make union type of all events
-export type ContractEvent = DepositedEvent;
 
 // Configuration for sending transactions, all values have defaults
 export type TransactionSubmissionOptions = Partial<{
@@ -45,13 +49,12 @@ export type TransactionSubmissionOptions = Partial<{
 }>;
 
 // Used by the chain service to gather all channel events
-export type ChannelDepositedEventRecord = DepositedEvent & {block: number; type: 'Deposited'};
 export interface ChannelEventRecordMap {
-  Deposited: ChannelDepositedEventRecord;
+  Funding: FundingEvent;
 }
 
 // TODO: make union type of all events
-export type ChannelEventRecord = ChannelDepositedEventRecord;
+export type ChannelEventRecord = FundingEvent;
 
 export type EvtContainer = {
   [K in keyof ChannelEventRecordMap]: Evt<ChannelEventRecordMap[K]>;
@@ -62,17 +65,10 @@ export type EvtContainer = {
 export interface OnchainServiceInterface {
   registerChannel(channelId: Bytes32, assetHolders: Address[]): Promise<void>;
 
-  // Sends a transaction to chain
-  submitTransaction(
-    channelId: Bytes32,
-    tx: MinimalTransaction,
-    options: TransactionSubmissionOptions
-  ): Promise<providers.TransactionResponse>;
-
   // TODO: remove in v1
   attachChannelWallet(wallet: ChannelWallet): void;
 
-  attachHandler<T extends ContractEventName>(
+  attachHandler<T extends ChainEventNames>(
     assetHolderAddr: Address,
     event: T,
     callback: (event: ChannelEventRecordMap[T]) => void | Promise<void>,
@@ -80,7 +76,7 @@ export interface OnchainServiceInterface {
     timeout?: number
   ): Evt<ChannelEventRecordMap[T]> | Promise<ChannelEventRecordMap[T]>;
 
-  detachAllHandlers(assetHolderAddr: Address, event?: ContractEventName): void;
+  detachAllHandlers(assetHolderAddr: Address, event?: ChainEventNames): void;
 }
 
 export const TransactionStatuses = {
@@ -116,19 +112,19 @@ export interface OnchainServiceStoreInterface {
 
   // Returns the latest emitted event from a channel
   // FIXME: should be async, evt pipe isnt async supported :(
-  getLatestEvent<T extends ContractEventName>(
+  getLatestEvent<T extends ChainEventNames>(
     channelId: Bytes32,
     event: T
   ): ChannelEventRecordMap[T] | undefined;
 
   // Saves the event to the channel
-  saveEvent<T extends ContractEventName>(
+  saveEvent<T extends ChainEventNames>(
     channelId: Bytes32,
     data: ChannelEventRecordMap[T]
   ): Promise<void>;
 
   // Sets the channel in the store
-  createChannel(channelId: Bytes32): Promise<void>;
+  registerChannel(channelId: Bytes32): Promise<void>;
 
   // Returns true if channel is registered in store
   // FIXME: should be async, evt pipe isnt async supported :(

@@ -37,7 +37,7 @@ describe('OnchainTransactionService', () => {
       new TransactionSubmissionStore()
     );
     channelWallet = new Wallet();
-    onchainService = new OnchainService(provider, transactionService, new OnchainServiceStore());
+    onchainService = new OnchainService(provider, new OnchainServiceStore());
     onchainService.attachChannelWallet(channelWallet);
     ethAssetHolder = new Contract(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -77,7 +77,7 @@ describe('OnchainTransactionService', () => {
       _e => true,
       15_000
     );
-    const response = await onchainService.submitTransaction(channelId, tx);
+    const response = await transactionService.submitTransaction(channelId, tx);
     expect(response.hash).toBeDefined();
     expect(response.data).toBe(data);
     expect(response.to).toBe(ethAssetHolder.address);
