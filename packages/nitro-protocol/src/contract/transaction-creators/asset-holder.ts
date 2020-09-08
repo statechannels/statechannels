@@ -14,7 +14,7 @@ export function createTransferAllTransaction(
   channelId: string,
   allocation: Allocation
 ): ethers.providers.TransactionRequest {
-  const data = assetHolderContractInterface.functions.transferAll.encode([
+  const data = assetHolderContractInterface.encodeFunctionData('transferAll', [
     channelId,
     encodeAllocation(allocation),
   ]);
@@ -35,7 +35,8 @@ export function createClaimAllTransaction(
   guarantee: Guarantee,
   allocation: Allocation
 ): ethers.providers.TransactionRequest {
-  const data = assetHolderContractInterface.functions.claimAll.encode(
+  const data = assetHolderContractInterface.encodeFunctionData(
+    'claimAll',
     claimAllArgs(channelId, guarantee, allocation)
   );
   return {data};
@@ -46,7 +47,7 @@ export function createSetOutcomeTransaction(
   channelId: string,
   outcome: Outcome
 ): ethers.providers.TransactionRequest {
-  const data = assetHolderContractInterface.functions.setOutcome.encode([
+  const data = assetHolderContractInterface.encodeFunctionData('setOutcome', [
     channelId,
     hashOutcome(outcome),
   ]);
