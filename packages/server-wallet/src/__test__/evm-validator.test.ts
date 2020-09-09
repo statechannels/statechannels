@@ -1,17 +1,15 @@
 import {utils} from 'ethers';
-import Knex from 'knex';
 
 import {appBytecode} from '../models/__test__/fixtures/app-bytecode';
 import {AppBytecode} from '../models/app-bytecode';
 import {createState} from '../wallet/__test__/fixtures/states';
 import {validateTransitionWithEVM} from '../evm-validator';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {defaultConfig} from '../config';
+import {testKnex as knex} from '../../jest/knex-setup-teardown';
 
 const COUNTING_APP_DEFINITION = '0xfffffffffffffffffffffffffffffffffffffffff';
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
 
-import {testKnex as knex} from '../../jest/knex-setup-teardown';
-\
 beforeEach(async () => {
   await knex('app_bytecode').truncate();
   await AppBytecode.query().insert([appBytecode()]);

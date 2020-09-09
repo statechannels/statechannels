@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {StateVariables} from '@statechannels/wallet-core';
-import Knex from 'knex';
 
 import {Channel, ChannelError} from '../../models/channel';
 import {withSupportedState} from '../../models/__test__/fixtures/channel';
