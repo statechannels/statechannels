@@ -3,6 +3,7 @@ import Objection from 'objection';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {addHash} from '../../state-utils';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 
 import {createState} from './fixtures/states';
 import {alice} from './fixtures/signing-wallets';
@@ -24,7 +25,7 @@ describe('addSignedState', () => {
       signatures: [{signer: alice().address, signature: BOB_SIGNATURE}],
     });
 
-    await expect(Store.addSignedState(undefined, signedState, tx)).rejects.toThrow(
+    await expect(Store.addSignedState(knex, undefined, signedState)).rejects.toThrow(
       'Invalid signature'
     );
   });

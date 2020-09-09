@@ -18,10 +18,10 @@ beforeEach(async () => await seedAlicesSigningWallet(knex));
 
 it('updates a channel', async () => {
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 5})]});
-  await Channel.query().insert(c);
+  await Channel.query(w.knex).insert(c);
 
   const channelId = c.channelId;
-  const current = await Channel.forId(channelId, undefined);
+  const current = await Channel.forId(knex, channelId);
   expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
 
   const appData = '0xa00f00';
@@ -38,14 +38,14 @@ it('updates a channel', async () => {
     channelResult: {channelId, turnNum: 6, appData},
   });
 
-  const updated = await Channel.forId(channelId, undefined);
+  const updated = await Channel.forId(knex, channelId);
   expect(updated.latest).toMatchObject({turnNum: 6, appData});
 });
 
 describe('error cases', () => {
   it('throws when it is not my turn', async () => {
     const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 4})]});
-    await Channel.query().insert(c);
+    await Channel.query(w.knex).insert(c);
 
     await expect(w.updateChannel(updateChannelArgs())).rejects.toMatchObject(
       Error('it is not my turn')

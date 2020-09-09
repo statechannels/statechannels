@@ -1,4 +1,5 @@
-import {Model, Transaction} from 'objection';
+import {Model} from 'objection';
+import Knex from 'knex';
 
 import {Address, Bytes32, Bytes} from '../type-aliases';
 
@@ -19,12 +20,12 @@ export class AppBytecode extends Model implements RequiredColumns {
   }
 
   static async getBytecode(
+    knex: Knex,
     chainId: Bytes32,
-    appDefinition: Address,
-    tx: Transaction | undefined
+    appDefinition: Address
   ): Promise<Bytes | undefined> {
     return (
-      await AppBytecode.query(tx)
+      await AppBytecode.query(knex)
         .where({chainId, appDefinition})
         .first()
     )?.appBytecode;

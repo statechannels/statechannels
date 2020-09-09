@@ -36,7 +36,7 @@ export class Nonce extends Model {
   static async next(knex: Knex, addresses: Address[]): Promise<number> {
     const insertQuery = knex('nonces').insert({addresses});
 
-    return Nonce.knex()
+    return Nonce.knex(knex)
       .raw(
         `
       ${insertQuery} ON CONFLICT (addresses)
@@ -46,8 +46,8 @@ export class Nonce extends Model {
       .then(res => res.rows[0].value);
   }
 
-  async use(): Promise<void> {
-    const {rows} = await Nonce.knex().raw(
+  async use(knex: Knex): Promise<void> {
+    const {rows} = await Nonce.knex(knex).raw(
       `
         ${Nonce.knexQuery().insert(this)}
         ON CONFLICT (addresses) DO UPDATE

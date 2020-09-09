@@ -1,7 +1,7 @@
 import {configureEnvVariables} from '@statechannels/devtools';
-configureEnvVariables();
-
 import Knex from 'knex';
+
+configureEnvVariables();
 
 import adminKnex from '../src/db-admin/db-admin-connection';
 import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';

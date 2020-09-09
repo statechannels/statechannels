@@ -24,10 +24,10 @@ describe('directly funded app', () => {
     const preFS = {turnNum: 0, appData};
 
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query().insert(c);
+    await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(channelId, undefined);
+    const current = await Channel.forId(w.knex, channelId);
     expect(current.protocolState).toMatchObject({latest: preFS, supported: undefined});
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
@@ -35,7 +35,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(w.knex, channelId);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 
@@ -44,10 +44,10 @@ describe('directly funded app', () => {
     const preFS = {turnNum: 0, outcome};
     const postFS = {turnNum: 3, outcome};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query().insert(c);
+    await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(channelId, undefined);
+    const current = await Channel.forId(w.knex, channelId);
     expect(current.latest).toMatchObject(preFS);
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
@@ -61,7 +61,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(w.knex, channelId);
     expect(updated.protocolState).toMatchObject({latest: postFS, supported: preFS});
   });
 
@@ -69,10 +69,10 @@ describe('directly funded app', () => {
     const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
     const preFS = {turnNum: 0, outcome};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query().insert(c);
+    await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(channelId, undefined);
+    const current = await Channel.forId(w.knex, channelId);
     expect(current.latest).toMatchObject(preFS);
 
     const data = {signedStates: [preFS]};
@@ -88,7 +88,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(w.knex, channelId);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });
@@ -98,10 +98,10 @@ describe('virtually funded app', () => {
     const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
     const preFS = {turnNum: 0, outcome};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query().insert(c);
+    await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(channelId, undefined);
+    const current = await Channel.forId(w.knex, channelId);
     expect(current.latest).toMatchObject(preFS);
 
     const data = {signedStates: [preFS]};
@@ -115,7 +115,7 @@ describe('virtually funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(w.knex, channelId);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });

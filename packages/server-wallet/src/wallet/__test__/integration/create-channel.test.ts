@@ -15,7 +15,7 @@ describe('happy path', () => {
   beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
   it('creates a channel', async () => {
-    expect(await Channel.query().resultSize()).toEqual(0);
+    expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
     const appData = '0xaf00';
     const createPromise = w.createChannel(createChannelArgs({appData}));
@@ -36,9 +36,9 @@ describe('happy path', () => {
       channelResult: {channelId: expect.any(String), turnNum: 0, appData},
     });
     const {channelId} = (await createPromise).channelResult;
-    expect(await Channel.query().resultSize()).toEqual(1);
+    expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 
-    const updated = await Channel.forId(channelId, undefined);
+    const updated = await Channel.forId(w.knex, channelId);
     const expectedState = {
       turnNum: 0,
       appData,
@@ -51,7 +51,7 @@ describe('happy path', () => {
   });
 
   it('creates many channels', async () => {
-    expect(await Channel.query().resultSize()).toEqual(0);
+    expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
     const createArgs = createChannelArgs({appData: '0xaf00'});
     const NUM_CHANNELS = 10;
@@ -60,7 +60,7 @@ describe('happy path', () => {
       .map(w.createChannel);
     await expect(Promise.all(createPromises)).resolves.not.toThrow();
 
-    expect(await Channel.query().resultSize()).toEqual(NUM_CHANNELS);
+    expect(await Channel.query(w.knex).resultSize()).toEqual(NUM_CHANNELS);
   }, 10_000);
 });
 

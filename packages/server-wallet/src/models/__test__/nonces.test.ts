@@ -1,13 +1,10 @@
-import Knex from 'knex';
 import _ from 'lodash';
 
 import {Nonce} from '../nonce';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 
 import {nonce} from './fixtures/nonces';
-
-const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 afterEach(async () => knex('nonces').truncate());
 
@@ -36,16 +33,16 @@ describe('asking for a new nonce', () => {
 });
 
 describe('using a given nonce', () => {
-  it('works when there is no existing nonce', () => expect(nonce().use()).resolves.toEqual(0));
+  it('works when there is no existing nonce', () => expect(nonce().use(knex)).resolves.toEqual(0));
 
   it('works the value exceeds the existing nonce', async () => {
-    await expect(nonce({value: 1}).use()).resolves.toEqual(1);
-    await expect(nonce({value: 3}).use()).resolves.toEqual(3);
+    await expect(nonce({value: 1}).use(knex)).resolves.toEqual(1);
+    await expect(nonce({value: 3}).use(knex)).resolves.toEqual(3);
   });
 
   it('rejects when the value does not exceed the existing nonce', async () => {
-    await expect(nonce({value: 3}).use()).resolves.toEqual(3);
-    await expect(nonce({value: 1}).use()).rejects.toThrow('Nonce too low');
-    await expect(nonce({value: 4}).use()).resolves.toEqual(4);
+    await expect(nonce({value: 3}).use(knex)).resolves.toEqual(3);
+    await expect(nonce({value: 1}).use(knex)).rejects.toThrow('Nonce too low');
+    await expect(nonce({value: 4}).use(knex)).resolves.toEqual(4);
   });
 });

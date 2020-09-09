@@ -24,14 +24,14 @@ describe('signState', () => {
   let c: Channel;
 
   beforeEach(async () => {
-    c = await Channel.query().insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
+    c = await Channel.query(knex).insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
   });
 
   it('signs the state, returning outgoing messages and a channelResult', async () => {
-    await expect(Channel.query().where({id: c.id})).resolves.toHaveLength(1);
+    await expect(Channel.query(knex).where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
     const signature = signState({...c.vars[0], ...c.channelConstants}, alice().privateKey);
-    const result = await Store.signState(c.channelId, c.vars[0], tx);
+    const result = await Store.signState(knex, c.channelId, c.vars[0]);
     expect(result).toMatchObject({
       outgoing: [
         {
@@ -51,14 +51,14 @@ describe('signState', () => {
   });
 
   it('uses a transaction', async () => {
-    const updatedC = await Store.signState(c.channelId, c.vars[0], tx);
+    const updatedC = await Store.signState(knex, c.channelId, c.vars[0]);
     expect(updatedC).toBeDefined();
 
     // Fetch the current channel outside the transaction context
-    const currentC = await Channel.forId(c.channelId, undefined);
+    const currentC = await Channel.forId(knex, c.channelId);
     expect(currentC.latestSignedByMe).toBeUndefined();
 
-    const pendingC = await Channel.forId(c.channelId, tx);
+    const pendingC = await Channel.forId(knex, c.channelId);
     expect(pendingC.latestSignedByMe).toBeDefined();
   });
 });

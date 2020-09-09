@@ -16,12 +16,12 @@ jest.setTimeout(10_000);
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
   const c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
-  await Channel.query().insert(c);
+  await Channel.query(knex).insert(c);
 
   const {channelId, latest} = c;
   await expect(
-    Store.lockApp(knex, channelId, async tx =>
-      Store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, tx)
+    Store.lockApp(knex, channelId, async () =>
+      Store.signState(knex, channelId, {...latest, turnNum: latest.turnNum + 1})
     )
   ).resolves.toMatchObject({channelResult: {turnNum: 6}});
 });
@@ -47,7 +47,7 @@ describe('concurrency', () => {
   beforeEach(async () => {
     await seedAlicesSigningWallet(knex);
     c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
-    await Channel.query().insert(c);
+    await Channel.query(knex).insert(c);
     channelId = c.channelId;
 
     numResolved = 0;
@@ -68,7 +68,7 @@ describe('concurrency', () => {
     const numAttempts = 4;
     await Promise.all(
       _.range(numAttempts).map(() =>
-        Store.lockApp(knex, channelId, async tx => Store.signState(channelId, next(c.latest), tx))
+        Store.lockApp(knex, channelId, async () => Store.signState(knex, channelId, next(c.latest)))
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
@@ -81,7 +81,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(numAttempts - 1);
     expect(numSettled).toEqual(numAttempts);
 
-    await expect(Store.getChannel(channelId, undefined)).resolves.toMatchObject({
+    await expect(Store.getChannel(knex, channelId)).resolves.toMatchObject({
       latest: {turnNum: 6},
     });
   });
@@ -100,7 +100,7 @@ describe('concurrency', () => {
       const channelIds = await Promise.all(
         _.range(NUM_ATTEMPTS).map(async channelNonce => {
           const c = withSupportedState()({vars: [stateVars({turnNum: 5})], channelNonce});
-          await Channel.query().insert(c);
+          await Channel.query(knex).insert(c);
           return c.channelId;
         })
       );
@@ -109,7 +109,7 @@ describe('concurrency', () => {
       await Promise.all(
         channelIds.map(channelId =>
           Store.lockApp(knex, channelId, async (tx, c) =>
-            Store.signState(channelId, next(c.latest), tx)
+            Store.signState(knex, channelId, next(c.latest))
           )
             .then(countResolvedPromise)
             .finally(countSettledPromise)
@@ -121,7 +121,7 @@ describe('concurrency', () => {
 
       expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
-      await expect(Store.getChannel(channelIds[1], undefined)).resolves.toMatchObject({
+      await expect(Store.getChannel(knex, channelIds[1])).resolves.toMatchObject({
         latest: {turnNum: 6},
       });
     },
@@ -131,7 +131,7 @@ describe('concurrency', () => {
   test('sign state does not block concurrent updates', async () => {
     await Promise.all(
       _.range(NUM_ATTEMPTS).map(() =>
-        Store.signState(channelId, next(c.latest), undefined as any)
+        Store.signState(knex, channelId, next(c.latest))
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
@@ -142,7 +142,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(0);
     expect(numSettled).toEqual(NUM_ATTEMPTS);
 
-    await expect(Store.getChannel(channelId, undefined)).resolves.toMatchObject({
+    await expect(Store.getChannel(knex, channelId)).resolves.toMatchObject({
       latest: next(c.latest),
     });
   });

@@ -25,10 +25,10 @@ it("signs a final state when it's my turn", async () => {
   const runningState = {turnNum, appData};
   const closingState = {...runningState, isFinal: true, turnNum: turnNum + 1};
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())(runningState)]});
-  await Channel.query().insert(c);
+  await Channel.query(knex).insert(c);
 
   const channelId = c.channelId;
-  const current = await Channel.forId(channelId, undefined);
+  const current = await Channel.forId(knex, channelId);
   expect(current.protocolState).toMatchObject({latest: runningState, supported: runningState});
 
   await expect(w.closeChannel({channelId})).resolves.toMatchObject({
@@ -36,7 +36,7 @@ it("signs a final state when it's my turn", async () => {
     channelResult: {channelId, status: 'closing', turnNum: turnNum + 1, appData},
   });
 
-  const updated = await Channel.forId(channelId, undefined);
+  const updated = await Channel.forId(knex, channelId);
   expect(updated.protocolState).toMatchObject({latest: closingState, supported: closingState});
 });
 
@@ -45,12 +45,12 @@ it("reject when it's not my turn", async () => {
   const turnNum = 8;
   const runningState = {turnNum, appData};
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())(runningState)]});
-  await Channel.query().insert(c);
+  await Channel.query(knex).insert(c);
 
   const channelId = c.channelId;
 
   await expect(w.closeChannel({channelId})).rejects.toMatchObject(new Error('not my turn'));
 
-  const updated = await Channel.forId(channelId, undefined);
+  const updated = await Channel.forId(knex, channelId);
   expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
 });
