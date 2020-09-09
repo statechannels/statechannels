@@ -24,6 +24,8 @@ import {
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
+import Knex, {Config} from 'knex';
+import {knexSnakeCaseMappers} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';
@@ -40,6 +42,7 @@ import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
+import {ServerWalletConfig} from '../config';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -85,6 +88,23 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
+  knex: Knex;
+  constructor(readonly walletConfig: ServerWalletConfig) {
+    const dbConfig: Config = {
+      client: 'postgres',
+      connection: walletConfig.postgresDatabaseUrl || {
+        host: walletConfig.postgresHost,
+        port: Number(walletConfig.postgresPort),
+        database: walletConfig.postgresDBName,
+        user: walletConfig.postgresDBUser,
+        password: walletConfig.postgresDBPassword,
+      },
+      ...knexSnakeCaseMappers(),
+    };
+
+    this.knex = Knex(dbConfig);
+  }
+
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
     const {states, channelState} = await Store.getStates(channelId, undefined);
 
@@ -155,7 +175,7 @@ export class Wallet implements WalletInterface {
 
     const vars: SignedStateVarsWithHash[] = [];
 
-    return Channel.transaction(async tx => {
+    return Channel.transaction(this.knex, async tx => {
       // TODO: How do we pick a signing address?
       const signingAddress = (await SigningWallet.query(tx).first())?.address;
 
@@ -284,7 +304,7 @@ export class Wallet implements WalletInterface {
       };
     }
 
-    const channelIds = await Channel.transaction(async tx => {
+    const channelIds = await Channel.transaction(this.knex, async tx => {
       return await Store.pushMessage(message, tx);
     });
 

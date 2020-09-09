@@ -2,7 +2,7 @@
  * This should be the only file that reads from the environment.
  */
 
-interface ServerWalletConfig {
+export interface ServerWalletConfig {
   nodeEnv?: 'test' | 'development' | 'production';
   postgresDatabaseUrl?: string;
   postgresHost?: string;

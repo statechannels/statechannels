@@ -9,6 +9,7 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
+import config from '../src/config';
 
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
@@ -22,7 +23,7 @@ async function benchmark(): Promise<void> {
 
   result.protocolState;
 
-  const wallet = new Wallet();
+  const wallet = new Wallet(config);
 
   const NUM_CALLS = 100;
   const iter = _.range(NUM_CALLS);
