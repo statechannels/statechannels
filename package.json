@@ -66,9 +66,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/ethers"
     ]
   }
 }
