@@ -1,5 +1,3 @@
-import Knex from 'knex';
-
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {updateChannelArgs} from '../fixtures/update-channel';
@@ -8,9 +6,8 @@ import {truncate} from '../../../db-admin/db-admin-connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../../config';
-
-const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+import {defaultConfig} from '../../../config';
+import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 let w: Wallet;
 beforeEach(async () => {
   await truncate(knex);

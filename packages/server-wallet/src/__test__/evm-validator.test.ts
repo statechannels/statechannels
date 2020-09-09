@@ -10,7 +10,8 @@ import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
 const COUNTING_APP_DEFINITION = '0xfffffffffffffffffffffffffffffffffffffffff';
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
 
-const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+import {testKnex as knex} from '../../jest/knex-setup-teardown';
+\
 beforeEach(async () => {
   await knex('app_bytecode').truncate();
   await AppBytecode.query().insert([appBytecode()]);
