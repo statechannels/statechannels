@@ -6,18 +6,17 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {Channel} from '../../../models/channel';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import {Wallet} from '../..';
-import knex from '../../../db/connection';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
-
+import {defaultConfig} from '../../../config';
 let w: Wallet;
 beforeEach(async () => {
-  await truncate(knex);
-  w = new Wallet();
+  w = new Wallet(defaultConfig);
+  await truncate(w.knex);
 });
 
-beforeEach(async () => await seedAlicesSigningWallet(knex));
+beforeEach(async () => await seedAlicesSigningWallet(w.knex));
 
 it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0})]});

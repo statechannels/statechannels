@@ -4,19 +4,19 @@ import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {alice} from '../fixtures/participants';
+import {defaultConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
-  await truncate(knex);
-  w = new Wallet();
+  w = new Wallet(defaultConfig);
+  await truncate(w.knex);
 });
 
-beforeEach(async () => seedAlicesSigningWallet(knex));
+beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
 describe('directly funded app', () => {
   it('signs the prefund setup ', async () => {

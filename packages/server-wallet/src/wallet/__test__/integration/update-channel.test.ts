@@ -1,17 +1,20 @@
+import Knex from 'knex';
+
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {updateChannelArgs} from '../fixtures/update-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../../config';
 
+const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 let w: Wallet;
 beforeEach(async () => {
   await truncate(knex);
-  w = new Wallet();
+  w = new Wallet(defaultConfig);
 });
 
 beforeEach(async () => await seedAlicesSigningWallet(knex));

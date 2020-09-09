@@ -1,8 +1,8 @@
+import Knex from 'knex';
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
 import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
-import knex from '../db/connection';
 import {WalletError, Values} from '../errors/wallet-error';
 
 export class Nonce extends Model {
@@ -33,7 +33,7 @@ export class Nonce extends Model {
     return json;
   }
 
-  static async next(addresses: Address[]): Promise<number> {
+  static async next(knex: Knex, addresses: Address[]): Promise<number> {
     const insertQuery = knex('nonces').insert({addresses});
 
     return Nonce.knex()

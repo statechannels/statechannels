@@ -23,12 +23,12 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
-import knex from '../db/connection';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
-import config from '../config';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
+import {defaultConfig} from '../config';
+import Knex from 'knex';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -81,6 +81,7 @@ export const Store = recordFunctionMetrics({
    * concurrently across all wallets.
    */
   lockApp: async function<T>(
+    knex: Knex,
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
@@ -196,7 +197,8 @@ export const Store = recordFunctionMetrics({
     const channel =
       maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
-    if (!config.skipEvmValidation && channel.supported) {
+    if (!defaultConfig.skipEvmValidation && channel.supported) {
+      // TODO be better to inspect Wallet.walletConfig in case the defaultConfig was not used or overridden
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>

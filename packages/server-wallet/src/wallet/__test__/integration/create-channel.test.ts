@@ -3,16 +3,16 @@ import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
+import {defaultConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
-  await truncate(knex);
-  w = new Wallet();
+  w = new Wallet(defaultConfig);
+  await truncate(w.knex);
 });
 
 describe('happy path', () => {
-  beforeEach(async () => seedAlicesSigningWallet(knex));
+  beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
   it('creates a channel', async () => {
     expect(await Channel.query().resultSize()).toEqual(0);

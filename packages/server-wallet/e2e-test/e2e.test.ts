@@ -6,7 +6,6 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
-import knexPayer from '../src/db/connection';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import PayerClient from './payer/client';
@@ -17,6 +16,7 @@ import {
   knexReceiver,
   startReceiverServer,
   triggerPayments,
+  knexPayer,
 } from './e2e-utils';
 
 jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds

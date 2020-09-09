@@ -2,6 +2,9 @@
  * This should be the only file that reads from the environment.
  */
 
+import {Config} from 'knex';
+import {knexSnakeCaseMappers} from 'objection';
+
 export interface ServerWalletConfig {
   nodeEnv?: 'test' | 'development' | 'production';
   postgresDatabaseUrl?: string;
@@ -24,7 +27,7 @@ export interface ServerWalletConfig {
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
-const defaultConfig: ServerWalletConfig = {
+export const defaultConfig: ServerWalletConfig = {
   nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
   postgresDatabaseUrl: process.env.SERVER_URL,
   postgresHost: process.env.SERVER_HOST,
@@ -49,4 +52,21 @@ const defaultConfig: ServerWalletConfig = {
   metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
 };
 
-export default defaultConfig;
+export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'payer'};
+export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
+
+export function extractDBConfigFromServerWalletConfig(
+  serverWalletConfig: ServerWalletConfig
+): Config {
+  return {
+    client: 'postgres',
+    connection: serverWalletConfig.postgresDatabaseUrl || {
+      host: serverWalletConfig.postgresHost,
+      port: Number(serverWalletConfig.postgresPort),
+      database: serverWalletConfig.postgresDBName,
+      user: serverWalletConfig.postgresDBUser,
+      password: serverWalletConfig.postgresDBPassword,
+    },
+    ...knexSnakeCaseMappers(),
+  };
+}

@@ -9,11 +9,11 @@ import {
   ReceiverServer,
   seedTestChannels,
   getParticipant,
+  knexPayer,
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
 import {truncate} from '../../src/db-admin/db-admin-connection';
-import knexPayer from '../../src/db/connection';
 
 import kill = require('tree-kill');
 

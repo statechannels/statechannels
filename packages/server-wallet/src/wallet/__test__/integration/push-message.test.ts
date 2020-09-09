@@ -10,11 +10,13 @@ import {message} from '../fixtures/messages';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
+import {defaultConfig} from '../../../config';
 
-beforeEach(async () => seedAlicesSigningWallet(knex));
+const wallet = new Wallet(defaultConfig);
+
+beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 
 it("doesn't throw on an empty message", () => {
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
@@ -24,8 +26,6 @@ const zero = 0;
 const four = 4;
 const five = 5;
 const six = 6;
-
-const wallet = new Wallet();
 
 it('stores states contained in the message, in a single channel model', async () => {
   const channelsBefore = await Channel.query().select();
@@ -159,7 +159,7 @@ it("Doesn't store stale states", async () => {
 });
 
 it("doesn't store states for unknown signing addresses", async () => {
-  await truncate(knex, ['signing_wallets']);
+  await truncate(wallet.knex, ['signing_wallets']);
 
   const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
   return expect(wallet.pushMessage(message({signedStates}))).rejects.toThrow(

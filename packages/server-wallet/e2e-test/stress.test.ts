@@ -1,6 +1,5 @@
 import {Channel} from '../src/models/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
-import knexPayer from '../src/db/connection';
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {truncate} from '../src/db-admin/db-admin-connection';
 
@@ -13,6 +12,7 @@ import {
   triggerPayments,
   seedTestChannels,
   getParticipant,
+  knexPayer,
 } from './e2e-utils';
 const expectSupportedState = async (
   channelId: string,

@@ -14,6 +14,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 
 import {PerformanceTimer} from './payer/timers';
+import {extractDBConfigFromServerWalletConfig, receiverConfig, payerConfig} from '../src/config';
 
 export type ReceiverServer = {
   url: string;
@@ -84,13 +85,8 @@ export const waitForServerToStart = (
     }, pingInterval);
   });
 
-export const knexReceiver: Knex = Knex({
-  ...dbConfig,
-  connection: {
-    ...(dbConfig.connection as Knex.StaticConnectionConfig),
-    database: 'receiver',
-  },
-});
+export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerConfig));
+export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
 export const killServer = async ({server}: ReceiverServer): Promise<void> => {
   kill(server.pid);
   await knexReceiver.destroy();

@@ -1,11 +1,11 @@
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {Contract, ContractFactory, ethers, providers} from 'ethers';
 
-import config from '../config';
+import {defaultConfig} from '../config';
 
-const rpcEndpoint = config.rpcEndpoint;
+const rpcEndpoint = defaultConfig.rpcEndpoint;
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
-const walletWithProvider = new ethers.Wallet(config.serverSignerPrivateKey, provider);
+const walletWithProvider = new ethers.Wallet(defaultConfig.serverSignerPrivateKey, provider);
 
 export async function ethAssetHolder(): Promise<Contract> {
   let ethAssetHolderFactory: ContractFactory;
@@ -16,17 +16,17 @@ export async function ethAssetHolder(): Promise<Contract> {
     );
   } catch (err) {
     if (err.message.match('bytecode must be a valid hex string')) {
-      throw new Error(`Contract not deployed on network ${config.chainNetworkID}`);
+      throw new Error(`Contract not deployed on network ${defaultConfig.chainNetworkID}`);
     }
 
     throw err;
   }
 
-  if (!config.ethAssetHolderAddress) {
+  if (!defaultConfig.ethAssetHolderAddress) {
     throw new Error('ETH_ASSET_HOLDER_ADDRESS not defined');
   }
 
-  const contract = await ethAssetHolderFactory.attach(config.ethAssetHolderAddress);
+  const contract = await ethAssetHolderFactory.attach(defaultConfig.ethAssetHolderAddress);
 
   return contract;
 }

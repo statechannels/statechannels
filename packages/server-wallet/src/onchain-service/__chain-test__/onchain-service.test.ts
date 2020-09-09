@@ -6,9 +6,9 @@ import {OnchainService} from '../onchain-service';
 // FIXME: replace with
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
 import {Wallet} from '../../../src';
-import config from '../../config';
 import {TransactionSubmissionStore, OnchainServiceStore} from '../store';
 import {FundingEvent} from '../types';
+import {defaultConfig} from '../../config';
 
 jest.mock('../../../src/wallet');
 
@@ -30,19 +30,19 @@ describe('OnchainTransactionService', () => {
   const channelId = randomChannelId(0);
 
   beforeEach(async () => {
-    provider = new providers.JsonRpcProvider(config.rpcEndpoint);
-    wallet = new EtherWallet(config.serverPrivateKey);
+    provider = new providers.JsonRpcProvider(defaultConfig.rpcEndpoint);
+    wallet = new EtherWallet(defaultConfig.serverPrivateKey);
     transactionService = new TransactionSubmissionService(
       provider,
       wallet,
       new TransactionSubmissionStore()
     );
-    channelWallet = new Wallet();
+    channelWallet = new Wallet(defaultConfig);
     onchainService = new OnchainService(provider, new OnchainServiceStore());
     onchainService.attachChannelWallet(channelWallet);
     ethAssetHolder = new Contract(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      config.ethAssetHolderAddress!,
+      defaultConfig.ethAssetHolderAddress!,
       ContractArtifacts.EthAssetHolderArtifact.abi,
       provider
     );

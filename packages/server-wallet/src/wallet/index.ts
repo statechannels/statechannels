@@ -42,7 +42,7 @@ import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
-import {ServerWalletConfig} from '../config';
+import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -90,19 +90,7 @@ export type WalletInterface = {
 export class Wallet implements WalletInterface {
   knex: Knex;
   constructor(readonly walletConfig: ServerWalletConfig) {
-    const dbConfig: Config = {
-      client: 'postgres',
-      connection: walletConfig.postgresDatabaseUrl || {
-        host: walletConfig.postgresHost,
-        port: Number(walletConfig.postgresPort),
-        database: walletConfig.postgresDBName,
-        user: walletConfig.postgresDBUser,
-        password: walletConfig.postgresDBPassword,
-      },
-      ...knexSnakeCaseMappers(),
-    };
-
-    this.knex = Knex(dbConfig);
+    this.knex = Knex(extractDBConfigFromServerWalletConfig(walletConfig));
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
@@ -151,7 +139,7 @@ export class Wallet implements WalletInterface {
 
     await Funding.updateFunding(channelId, BN.from(amount), assetHolder, undefined);
 
-    const {channelResults, outbox} = await takeActions([channelId]);
+    const {channelResults, outbox} = await this.takeActions([channelId]);
 
     return {outbox, channelResult: channelResults[0]};
   }
@@ -164,7 +152,10 @@ export class Wallet implements WalletInterface {
     const {participants, appDefinition, appData, allocations} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
 
-    const channelNonce = await Nonce.next(participants.map(p => p.signingAddress));
+    const channelNonce = await Nonce.next(
+      this.knex,
+      participants.map(p => p.signingAddress)
+    );
     const channelConstants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),
@@ -207,11 +198,12 @@ export class Wallet implements WalletInterface {
     };
 
     const {outbox, channelResult} = await Store.lockApp(
+      this.knex,
       channelId,
       criticalCode,
       handleMissingChannel
     );
-    const {outbox: nextOutbox, channelResults} = await takeActions([channelId]);
+    const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
     const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
     return {outbox: outbox.concat(nextOutbox), channelResult: nextChannelResult};
@@ -238,7 +230,7 @@ export class Wallet implements WalletInterface {
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
-    return Store.lockApp(channelId, criticalCode, handleMissingChannel);
+    return Store.lockApp(this.knex, channelId, criticalCode, handleMissingChannel);
   }
 
   async closeChannel({channelId}: CloseChannelParams): SingleChannelResult {
@@ -255,7 +247,7 @@ export class Wallet implements WalletInterface {
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
-    return Store.lockApp(channelId, criticalCode, handleMissingChannel);
+    return Store.lockApp(this.knex, channelId, criticalCode, handleMissingChannel);
   }
 
   async getChannels(): MultipleChannelResult {
@@ -308,7 +300,7 @@ export class Wallet implements WalletInterface {
       return await Store.pushMessage(message, tx);
     });
 
-    const {channelResults, outbox} = await takeActions(channelIds);
+    const {channelResults, outbox} = await this.takeActions(channelIds);
 
     if (message.requests && message.requests.length > 0)
       // Modifies outbox, may append new messages
@@ -325,69 +317,69 @@ export class Wallet implements WalletInterface {
   attachChainService(provider: OnchainServiceInterface): void {
     provider.attachChannelWallet(this);
   }
+
+  takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
+    const outbox: Outgoing[] = [];
+    const channelResults: ChannelResult[] = [];
+    let error: Error | undefined = undefined;
+    while (channels.length && !error) {
+      await Store.lockApp(this.knex, channels[0], async tx => {
+        // For the moment, we are only considering directly funded app channels.
+        // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+        // In the future, we can have an App model which collects all the relevant channels for an app channel,
+        // and a Ledger model which stores ledger-specific data (eg. queued requests)
+        const app = await Store.getChannel(channels[0], tx);
+
+        if (!app) {
+          throw new Error('Channel not found');
+        }
+
+        const setError = async (e: Error): Promise<void> => {
+          error = e;
+          await tx.rollback(error);
+        };
+        const markChannelAsDone = (): void => {
+          channels.shift();
+          channelResults.push(ChannelState.toChannelResult(app));
+        };
+
+        const doAction = async (action: ProtocolAction): Promise<any> => {
+          switch (action.type) {
+            case 'SignState': {
+              const {outgoing} = await Store.signState(action.channelId, action, tx);
+              outgoing.map(n => outbox.push(n.notice));
+              return;
+            }
+            default:
+              throw 'Unimplemented';
+          }
+        };
+
+        const nextAction = recordFunctionMetrics(Application.protocol({app}));
+
+        if (!nextAction) markChannelAsDone();
+        else if (isOutgoing(nextAction)) {
+          outbox.push(nextAction.notice);
+          markChannelAsDone();
+        } else {
+          try {
+            await doAction(nextAction);
+          } catch (err) {
+            logger.error({err}, 'Error handling action');
+            await setError(err);
+          }
+        }
+      });
+    }
+
+    return {outbox, error, channelResults};
+  };
 }
 
 type ExecutionResult = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   error?: any;
-};
-
-const takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
-  const outbox: Outgoing[] = [];
-  const channelResults: ChannelResult[] = [];
-  let error: Error | undefined = undefined;
-  while (channels.length && !error) {
-    await Store.lockApp(channels[0], async tx => {
-      // For the moment, we are only considering directly funded app channels.
-      // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-      // In the future, we can have an App model which collects all the relevant channels for an app channel,
-      // and a Ledger model which stores ledger-specific data (eg. queued requests)
-      const app = await Store.getChannel(channels[0], tx);
-
-      if (!app) {
-        throw new Error('Channel not found');
-      }
-
-      const setError = async (e: Error): Promise<void> => {
-        error = e;
-        await tx.rollback(error);
-      };
-      const markChannelAsDone = (): void => {
-        channels.shift();
-        channelResults.push(ChannelState.toChannelResult(app));
-      };
-
-      const doAction = async (action: ProtocolAction): Promise<any> => {
-        switch (action.type) {
-          case 'SignState': {
-            const {outgoing} = await Store.signState(action.channelId, action, tx);
-            outgoing.map(n => outbox.push(n.notice));
-            return;
-          }
-          default:
-            throw 'Unimplemented';
-        }
-      };
-
-      const nextAction = recordFunctionMetrics(Application.protocol({app}));
-
-      if (!nextAction) markChannelAsDone();
-      else if (isOutgoing(nextAction)) {
-        outbox.push(nextAction.notice);
-        markChannelAsDone();
-      } else {
-        try {
-          await doAction(nextAction);
-        } catch (err) {
-          logger.error({err}, 'Error handling action');
-          await setError(err);
-        }
-      }
-    });
-  }
-
-  return {outbox, error, channelResults};
 };
 
 // TODO: This should be removed, and not used externally.

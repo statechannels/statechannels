@@ -2,7 +2,7 @@ import {Wallet, providers, BigNumber} from 'ethers';
 import {randomChannelId} from '@statechannels/nitro-protocol';
 
 import {TransactionSubmissionService, TransactionSubmissionError} from '../transaction-submission';
-import config from '../../config';
+import {defaultConfig} from '../../config';
 import {TransactionSubmissionStore} from '../store';
 
 import {MinimalTransaction} from '..';
@@ -52,8 +52,8 @@ describe('TransactionSubmissionService.submitTransaction', () => {
   const channelId = randomChannelId();
 
   beforeEach(async () => {
-    provider = new providers.JsonRpcProvider(config.rpcEndpoint);
-    wallet = new Wallet(config.serverPrivateKey);
+    provider = new providers.JsonRpcProvider(defaultConfig.rpcEndpoint);
+    wallet = new Wallet(defaultConfig.serverPrivateKey);
     service = new TransactionSubmissionService(provider, wallet, new TransactionSubmissionStore());
   });
 

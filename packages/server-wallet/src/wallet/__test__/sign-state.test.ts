@@ -1,14 +1,17 @@
 import Objection from 'objection';
 import {signState} from '@statechannels/wallet-core';
+import Knex from 'knex';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import knex from '../../db/connection';
 import {Channel} from '../../models/channel';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob, alice} from './fixtures/signing-wallets';
+
+const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 let tx: Objection.Transaction;
 beforeEach(async () => {
