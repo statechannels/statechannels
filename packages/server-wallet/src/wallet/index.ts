@@ -24,8 +24,7 @@ import {
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
-import Knex, {Config} from 'knex';
-import {knexSnakeCaseMappers} from 'objection';
+import Knex from 'knex';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';

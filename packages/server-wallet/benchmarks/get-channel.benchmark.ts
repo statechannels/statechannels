@@ -1,15 +1,18 @@
 import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
+import Knex from 'knex';
+
 configureEnvVariables();
 
 import adminKnex from '../src/db-admin/db-admin-connection';
-import knex from '../src/db/connection';
 import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
-import config from '../src/config';
+import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';
+
+const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
@@ -23,7 +26,7 @@ async function benchmark(): Promise<void> {
 
   result.protocolState;
 
-  const wallet = new Wallet(config);
+  const wallet = new Wallet(defaultConfig);
 
   const NUM_CALLS = 100;
   const iter = _.range(NUM_CALLS);

@@ -17,6 +17,7 @@ import {HashZero} from '@ethersproject/constants';
 import {Either, right} from 'fp-ts/lib/Either';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
+import Knex from 'knex';
 
 import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -28,7 +29,6 @@ import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {defaultConfig} from '../config';
-import Knex from 'knex';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;

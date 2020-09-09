@@ -12,9 +12,9 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
+import {extractDBConfigFromServerWalletConfig, receiverConfig, payerConfig} from '../src/config';
 
 import {PerformanceTimer} from './payer/timers';
-import {extractDBConfigFromServerWalletConfig, receiverConfig, payerConfig} from '../src/config';
 
 export type ReceiverServer = {
   url: string;

@@ -8,9 +8,9 @@ configureEnvVariables();
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
+import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../../src/config';
 
 import {PerformanceTimer} from './timers';
-import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../../src/config';
 
 export default {
   command: 'start',
