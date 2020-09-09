@@ -2,14 +2,16 @@
  * This should be the only file that reads from the environment.
  */
 
-interface ServerWalletConfig {
+import Knex from 'knex';
+
+type DBConfig = {
+  client: 'postgres';
+  connection: string | Knex.PgConnectionConfig;
+  pool: Knex.Config['pool'];
+};
+
+type ServerWalletConfig = {
   nodeEnv?: 'test' | 'development' | 'production';
-  postgresDatabaseUrl?: string;
-  postgresHost?: string;
-  postgresPort?: string;
-  postgresDBName?: string;
-  postgresDBUser?: string;
-  postgresDBPassword?: string;
   serverSignerPrivateKey: string;
   serverPrivateKey: string;
   rpcEndpoint?: string;
@@ -19,17 +21,30 @@ interface ServerWalletConfig {
   skipEvmValidation: boolean;
   timingMetrics: boolean;
   metricsOutputFile?: string;
-}
+  dbConfig: DBConfig;
+};
 
-// TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
+const requiredString = (key: string): string => {
+  const value = optionalString(key);
+  if (typeof value === 'string') return value;
+  else throw new Error(`Expected process.env.${key} to be a string`);
+};
+
+// const requiredNumber = (key: string): number => {
+//   const value = optionalNumber(key);
+//   if (typeof value === 'number') return value;
+//   else throw new Error(`Expected process.env.${key} to be a number`);
+// };
+
+const optionalString = (key: string): string | undefined => process.env[key];
+const optionalNumber = (key: string): number | undefined => {
+  const value = Number(process.env[key]);
+  return Number.isFinite(value) ? value : undefined;
+};
+
+// TODO: Nest configuration options inside keys like server, wallet, debug, etc
 const config: ServerWalletConfig = {
   nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
-  postgresDatabaseUrl: process.env.SERVER_URL,
-  postgresHost: process.env.SERVER_HOST,
-  postgresPort: process.env.SERVER_PORT,
-  postgresDBName: process.env.SERVER_DB_NAME,
-  postgresDBUser: process.env.SERVER_DB_USER,
-  postgresDBPassword: process.env.SERVER_DB_PASSWORD,
   serverSignerPrivateKey:
     process.env.SERVER_SIGNER_PRIVATE_KEY ||
     '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
@@ -43,6 +58,20 @@ const config: ServerWalletConfig = {
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
   timingMetrics: process.env.TIMING_METRICS === 'ON',
   metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
+  dbConfig: {
+    client: 'postgres',
+    connection: optionalString('SERVER_URL') ?? {
+      host: optionalString('SERVER_HOST'),
+      port: optionalNumber('SERVER_PORT'),
+      database: requiredString('SERVER_DB_NAME'),
+      user: requiredString('SERVER_DB_USER'),
+      password: optionalString('SERVER_DB_PASSWORD') ?? '',
+    },
+    pool: {
+      min: optionalNumber('CONNECTION_POOL_MIN'),
+      max: optionalNumber('CONNECTION_POOL_MAX'),
+    },
+  },
 };
 
 export default config;

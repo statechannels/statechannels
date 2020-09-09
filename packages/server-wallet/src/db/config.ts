@@ -3,16 +3,4 @@ import {knexSnakeCaseMappers} from 'objection';
 
 import walletConfig from '../config';
 
-export const dbConfig: Config = {
-  client: 'postgres',
-
-  connection: walletConfig.postgresDatabaseUrl || {
-    host: walletConfig.postgresHost,
-    port: Number(walletConfig.postgresPort),
-    database: walletConfig.postgresDBName,
-    user: walletConfig.postgresDBUser,
-    password: walletConfig.postgresDBPassword,
-  },
-
-  ...knexSnakeCaseMappers(),
-};
+export const dbConfig: Config = {...walletConfig.dbConfig, ...knexSnakeCaseMappers()};
