@@ -8,9 +8,12 @@ import {Message as WireMessage} from '@statechannels/wire-format';
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
+import defaultConfig from '../../src/config';
 
 export default class PayerClient {
-  private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet());
+  private readonly wallet: ServerWallet = recordFunctionMetrics(
+    new ServerWallet({...defaultConfig, postgresDBName: 'payer'})
+  );
   private time = timerFactory('payerClient');
   constructor(private readonly pk: Bytes32, private readonly receiverHttpServerURL: string) {}
 

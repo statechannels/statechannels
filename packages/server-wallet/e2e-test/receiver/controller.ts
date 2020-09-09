@@ -5,9 +5,12 @@ import {Participant} from '@statechannels/client-api-schema';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
+import defaultConfig from '../../src/config';
 
 export default class ReceiverController {
-  private readonly wallet: Wallet = recordFunctionMetrics(new Wallet());
+  private readonly wallet: Wallet = recordFunctionMetrics(
+    new Wallet({...defaultConfig, postgresDBName: 'receiver'})
+  );
 
   private readonly myParticipantID: string = 'receiver';
   private time = timerFactory('controller');
