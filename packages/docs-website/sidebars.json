@@ -30,7 +30,7 @@
       "implementation-notes/asset-holder",
       "implementation-notes/force-move",
       "implementation-notes/nitro-adjudicator",
-      "implementation-notes/consensus-app",
+      "implementation-notes/null-app",
       "implementation-notes/single-asset-payments"
     ]
   },
