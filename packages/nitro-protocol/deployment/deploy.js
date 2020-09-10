@@ -1,4 +1,3 @@
-const consensusAppArtifact = require('../build/contracts/ConsensusApp.json');
 const countingAppArtifact = require('../build/contracts/CountingApp.json');
 const erc20AssetHolderArtifact = require('../build/contracts/TestErc20AssetHolder.json');
 const ethAssetHolderArtifact = require('../build/contracts/TestEthAssetHolder.json');
@@ -21,7 +20,6 @@ const deploy = async () => {
   const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact);
   const SINGLE_ASSET_PAYMENT_ADDRESS = await deployer.deploy(singleAssetPaymentsArtifact);
   const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact);
-  const CONSENSUS_APP_ADDRESS = await deployer.deploy(consensusAppArtifact);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact);
   const TEST_FORCE_MOVE_ADDRESS = await deployer.deploy(testForceMoveArtifact);
   const TEST_ASSET_HOLDER_ADDRESS = await deployer.deploy(
@@ -53,7 +51,6 @@ const deploy = async () => {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
     SINGLE_ASSET_PAYMENT_ADDRESS,
-    CONSENSUS_APP_ADDRESS,
     TRIVIAL_APP_ADDRESS,
     TEST_FORCE_MOVE_ADDRESS,
     TEST_NITRO_ADJUDICATOR_ADDRESS,
