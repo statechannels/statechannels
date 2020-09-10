@@ -1,6 +1,12 @@
 {
-  "compilerType": "solcjs",
+  "compilerType": "native",
   "compilerVersion": "0.6.2",
   "sourceDirectory": "./contracts",
-  "outputDirectory": "./build"
+  "outputDirectory": "./build/contracts",
+  "compilerOptions": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    }
+  }
 }

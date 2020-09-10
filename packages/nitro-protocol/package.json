@@ -69,7 +69,7 @@
     "build:ci": "yarn build",
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
-    "contract:compile": "node ./bin/compile.js",
+    "contract:compile": "waffle && node ./bin/strip-artifacts.js",
     "generate-api": "yarn docgen",
     "docgen": "solidoc",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
