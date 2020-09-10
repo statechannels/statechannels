@@ -1,3 +1,5 @@
+const {GanacheDeployer} = require('@statechannels/devtools');
+
 const countingAppArtifact = require('../build/contracts/CountingApp.json');
 const erc20AssetHolderArtifact = require('../build/contracts/TestErc20AssetHolder.json');
 const ethAssetHolderArtifact = require('../build/contracts/TestEthAssetHolder.json');
@@ -9,8 +11,6 @@ const testForceMoveArtifact = require('../build/contracts/TESTForceMove.json');
 const testNitroAdjudicatorArtifact = require('../build/contracts/TESTNitroAdjudicator.json');
 const tokenArtifact = require('../build/contracts/Token.json');
 const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
-
-const {GanacheDeployer} = require('@statechannels/devtools');
 
 const deploy = async () => {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
