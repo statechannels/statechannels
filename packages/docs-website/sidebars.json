@@ -46,7 +46,6 @@
     ],
     "Deployed Contracts": [
       "contract-api/natspec/NitroAdjudicator",
-      "contract-api/natspec/ConsensusApp",
       "contract-api/natspec/ERC20AssetHolder",
       "contract-api/natspec/ETHAssetHolder"
     ],
