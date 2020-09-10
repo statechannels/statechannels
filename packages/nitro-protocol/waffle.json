@@ -1,5 +1,5 @@
 {
-  "compilerType": "native",
+  "compilerType": "dockerized-solc",
   "compilerVersion": "0.6.2",
   "sourceDirectory": "./contracts",
   "outputDirectory": "./build/contracts",
@@ -7,6 +7,11 @@
     "optimizer": {
       "enabled": true,
       "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "": ["ast"]
+      }
     }
   }
 }
