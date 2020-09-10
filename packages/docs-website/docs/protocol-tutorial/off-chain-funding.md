@@ -11,7 +11,7 @@ This advanced section of the tutorial covers funding and defunding channels by r
 
 Let's introduce one level of indirection between the chain and the state channel we want to fund. We will first set up a ledger channel (L) with a counterparty (we'll call this counterparty "the hub"). We will fund the ledger channel "directly" -- in the same way as we have done [earlier in the tutorial](/protocol-tutorial/deposit-assets).
 
-A ledger channel is a special channel that runs the "null app" (meaning that all transitions are considered invalid, and the channel may only be updated by a state being supported by all participants signing it). The sole purpose of this ledger channel is to reallocate some or all of its funding to other channels and/or state channel participants.
+A ledger channel is a special channel that runs the [null app](/implementation-notes/null-app) (meaning that all transitions are considered invalid, and the channel may only be updated by a state being supported by all participants signing it). The sole purpose of this ledger channel is to reallocate some or all of its funding to other channels and/or state channel participants.
 
 Now imagine that we want to play Rock Paper Scissors (or run some other state channel application) with that same participant. We'll open a new channel (A1) for that.
 
