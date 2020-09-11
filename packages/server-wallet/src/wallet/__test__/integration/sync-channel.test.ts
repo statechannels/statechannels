@@ -3,7 +3,7 @@ import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import knex from '../../../db/connection';
-import {stateWithHashSignedBy, stateWithHashSignedBy2} from '../fixtures/states';
+import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
@@ -43,7 +43,7 @@ it('returns an outgoing message with the latest state', async () => {
 
   const channelId = c.channelId;
 
-  await expect(w.syncChannel({channelId, states: []})).resolves.toMatchObject({
+  await expect(w.syncChannel({channelId})).resolves.toMatchObject({
     outbox: [
       {
         method: 'MessageQueued',
@@ -51,7 +51,8 @@ it('returns an outgoing message with the latest state', async () => {
           recipient: 'bob',
           sender: 'alice',
           data: {
-            objectives: [{type: 'SyncChannel', states: [runningState, nextState]}],
+            signedStates: [runningState, nextState],
+            requests: [{type: 'GetChannel', channelId}],
           },
         },
       },
@@ -61,7 +62,8 @@ it('returns an outgoing message with the latest state', async () => {
           recipient: 'charlie',
           sender: 'alice',
           data: {
-            objectives: [{type: 'SyncChannel', states: [runningState, nextState]}],
+            signedStates: [runningState, nextState],
+            requests: [{type: 'GetChannel', channelId}],
           },
         },
       },
@@ -73,69 +75,8 @@ it('returns an outgoing message with the latest state', async () => {
   expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
 });
 
-it('pushes states included in the API call', async () => {
-  const appData = '0xf0';
-  const turnNum = 8;
-  const runningState = {
-    turnNum,
-    appData,
-  };
-  const nextState = {turnNum: turnNum + 1, appData};
-  const supportedState = stateWithHashSignedBy2([alice(), bob()])(runningState);
-  const nextSignedByAlice = stateWithHashSignedBy2([alice()])(nextState);
-  const nextSignedByBob = stateWithHashSignedBy2([bob()])(nextState);
-  const nextSignedByBoth = stateWithHashSignedBy2([bob(), alice()])(nextState);
-
-  const c = channel({vars: [supportedState, nextSignedByAlice]});
-
-  const inserted = await Channel.query().insert(c);
-  expect(inserted.vars).toMatchObject([runningState, nextSignedByAlice]);
-
-  const channelId = c.channelId;
-  await w.syncChannel({channelId, states: [nextSignedByBob]});
-
-  const after = await Channel.forId(channelId, undefined);
-
-  expect(after.protocolState.supported?.turnNum).toEqual(turnNum + 1);
-
-  await expect(w.syncChannel({channelId, states: [nextSignedByBob]})).resolves.toMatchObject({
-    outbox: [
-      {
-        method: 'MessageQueued',
-        params: {
-          recipient: 'bob',
-          sender: 'alice',
-          data: {
-            objectives: [
-              {
-                type: 'SyncChannel',
-                states: [
-                  {
-                    ...nextState,
-                    signatures: [
-                      {signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'},
-                      {signer: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'},
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      },
-    ],
-    channelResult: nextState,
-  });
-
-  const updated = await Channel.forId(channelId, undefined);
-  expect(updated.protocolState).toMatchObject({
-    latest: nextSignedByBoth,
-    supported: nextSignedByBoth,
-  });
-});
-
 it('reject when the channel is not known', async () => {
-  await expect(w.syncChannel({channelId: '0xf0', states: []})).rejects.toMatchObject(
+  await expect(w.syncChannel({channelId: '0xf0'})).rejects.toMatchObject(
     new Error('No channel found with id.')
   );
 });

@@ -13,6 +13,7 @@ import {
 import {
   ChannelConstants,
   Message,
+  ChannelRequest,
   Outcome,
   SignedStateVarsWithHash,
   convertToParticipant,
@@ -20,7 +21,6 @@ import {
   assetHolderAddress,
   BN,
   Zero,
-  SignedStateWithHash,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -57,7 +57,7 @@ export interface UpdateChannelFundingParams {
   amount: Uint256;
 }
 
-type SyncChannelParams = {channelId: ChannelId; states: SignedStateWithHash[]};
+type SyncChannelParams = {channelId: ChannelId};
 
 export type WalletInterface = {
   // App utilities
@@ -85,11 +85,10 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
-  public async syncChannel({channelId, states: incoming}: SyncChannelParams): SingleChannelResult {
+  public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
     return Store.lockApp(
       channelId,
       async (tx): SingleChannelResult => {
-        await Store.pushMessage({signedStates: incoming}, tx);
         const {states, channelState} = await Store.getStates(channelId, tx);
 
         const {participants, myIndex} = channelState;
@@ -103,7 +102,10 @@ export class Wallet implements WalletInterface {
             params: {
               recipient,
               sender,
-              data: {objectives: [{type: 'SyncChannel', channelId, states}]},
+              data: {
+                signedStates: states,
+                requests: [{type: 'GetChannel', channelId}],
+              },
             },
           })),
           channelResult: ChannelState.toChannelResult(channelState),
@@ -264,11 +266,38 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(message: Message): MultipleChannelResult {
+    // TODO: Move into utility somewhere?
+    function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
+      return async ({channelId}: ChannelRequest): Promise<void> => {
+        const {states: signedStates, channelState} = await Store.getStates(channelId, undefined);
+
+        const {participants, myIndex} = channelState;
+
+        const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
+        const {participantId: sender} = participants[myIndex];
+
+        peers.map(recipient => {
+          outbox.push({
+            method: 'MessageQueued',
+            params: {
+              recipient,
+              sender,
+              data: {signedStates},
+            },
+          });
+        });
+      };
+    }
+
     const channelIds = await Channel.transaction(async tx => {
       return await Store.pushMessage(message, tx);
     });
 
     const {channelResults, outbox} = await takeActions(channelIds);
+
+    if (message.requests && message.requests.length > 0)
+      // Modifies outbox, may append new messages
+      await Promise.all(message.requests.map(handleRequest(outbox)));
 
     return {outbox, channelResults};
   }
