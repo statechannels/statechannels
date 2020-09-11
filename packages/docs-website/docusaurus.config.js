@@ -82,7 +82,7 @@ module.exports = {
       }
     },
     algolia: {
-      apiKey: process.env.ALGOLIA_API_KEY,
+      apiKey: '1868e7d6465afaecbff245a9bd7627bb',
       indexName: 'statechannels'
     },
     prism: {
