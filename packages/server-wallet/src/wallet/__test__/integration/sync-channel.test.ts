@@ -77,6 +77,6 @@ it('returns an outgoing message with the latest state', async () => {
 
 it('reject when the channel is not known', async () => {
   await expect(w.syncChannel({channelId: '0xf0'})).rejects.toMatchObject(
-    new Error('No channel found with id.')
+    new Error('Channel not found')
   );
 });
