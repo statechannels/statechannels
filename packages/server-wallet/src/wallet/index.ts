@@ -166,6 +166,7 @@ export class Wallet implements WalletInterface {
 
     const vars: SignedStateVarsWithHash[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const callback = async (tx: Transaction) => {
       // TODO: How do we pick a signing address?
       const signingAddress = (await SigningWallet.query(tx).first())?.address;

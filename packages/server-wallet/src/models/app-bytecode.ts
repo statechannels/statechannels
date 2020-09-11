@@ -1,5 +1,4 @@
 import {Model, TransactionOrKnex} from 'objection';
-import Knex from 'knex';
 
 import {Address, Bytes32, Bytes} from '../type-aliases';
 
