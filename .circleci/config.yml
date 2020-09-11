@@ -6,7 +6,7 @@ orbs:
 
 defaults: &defaults
   environment:
-    USE_NATIVE_SOLC: false
+    USE_NATIVE_SOLC: true
     PSQL_ARGS: -p 5432 -h localhost
     NODE_ENV: test
   working_directory: /home/circleci/project
