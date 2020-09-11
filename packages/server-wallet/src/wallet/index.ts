@@ -91,6 +91,19 @@ export class Wallet implements WalletInterface {
   knex: Knex;
   constructor(readonly walletConfig: ServerWalletConfig) {
     this.knex = Knex(extractDBConfigFromServerWalletConfig(walletConfig));
+
+    // Bind methods to class instance
+    this.getParticipant = this.getParticipant.bind(this);
+    this.updateChannelFunding = this.updateChannelFunding.bind(this);
+    this.getSigningAddress = this.getSigningAddress.bind(this);
+    this.createChannel = this.createChannel.bind(this);
+    this.joinChannel = this.joinChannel.bind(this);
+    this.updateChannelFunding = this.updateChannelFunding.bind(this);
+    this.closeChannel = this.closeChannel.bind(this);
+    this.getChannels = this.getChannels.bind(this);
+    this.getState = this.getState.bind(this);
+    this.pushMessage = this.pushMessage.bind(this);
+    this.takeActions = this.takeActions.bind(this);
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {

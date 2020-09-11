@@ -57,7 +57,7 @@ describe('happy path', () => {
     const NUM_CHANNELS = 10;
     const createPromises = Array(NUM_CHANNELS)
       .fill(createArgs)
-      .map(w.createChannel.bind(w));
+      .map(w.createChannel);
     await expect(Promise.all(createPromises)).resolves.not.toThrow();
 
     expect(await Channel.query(w.knex).resultSize()).toEqual(NUM_CHANNELS);
