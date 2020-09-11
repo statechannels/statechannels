@@ -86,32 +86,27 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
-    return Store.lockApp(
-      channelId,
-      async (tx): SingleChannelResult => {
-        const {states, channelState} = await Store.getStates(channelId, tx);
+    const {states, channelState} = await Store.getStates(channelId, undefined);
 
-        const {participants, myIndex} = channelState;
+    const {participants, myIndex} = channelState;
 
-        const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
-        const sender = participants[myIndex].participantId;
+    const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
+    const sender = participants[myIndex].participantId;
 
-        return {
-          outbox: peers.map(recipient => ({
-            method: 'MessageQueued',
-            params: {
-              recipient,
-              sender,
-              data: {
-                signedStates: states,
-                requests: [{type: 'GetChannel', channelId}],
-              },
-            },
-          })),
-          channelResult: ChannelState.toChannelResult(channelState),
-        };
-      }
-    );
+    return {
+      outbox: peers.map(recipient => ({
+        method: 'MessageQueued',
+        params: {
+          recipient,
+          sender,
+          data: {
+            signedStates: states,
+            requests: [{type: 'GetChannel', channelId}],
+          },
+        },
+      })),
+      channelResult: ChannelState.toChannelResult(channelState),
+    };
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
