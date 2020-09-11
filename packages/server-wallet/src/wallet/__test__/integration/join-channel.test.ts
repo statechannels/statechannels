@@ -27,7 +27,7 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(w.knex, channelId);
+    const current = await Channel.forId(channelId, w.knex);
     expect(current.protocolState).toMatchObject({latest: preFS, supported: undefined});
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
@@ -35,7 +35,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(w.knex, channelId);
+    const updated = await Channel.forId(channelId, w.knex);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 
@@ -47,7 +47,7 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(w.knex, channelId);
+    const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
@@ -61,7 +61,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(w.knex, channelId);
+    const updated = await Channel.forId(channelId, w.knex);
     expect(updated.protocolState).toMatchObject({latest: postFS, supported: preFS});
   });
 
@@ -72,7 +72,7 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(w.knex, channelId);
+    const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
     const data = {signedStates: [preFS]};
@@ -88,7 +88,7 @@ describe('directly funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(w.knex, channelId);
+    const updated = await Channel.forId(channelId, w.knex);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });
@@ -101,7 +101,7 @@ describe('virtually funded app', () => {
     await Channel.query(w.knex).insert(c);
 
     const channelId = c.channelId;
-    const current = await Channel.forId(w.knex, channelId);
+    const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
     const data = {signedStates: [preFS]};
@@ -115,7 +115,7 @@ describe('virtually funded app', () => {
       // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
     });
 
-    const updated = await Channel.forId(w.knex, channelId);
+    const updated = await Channel.forId(channelId, w.knex);
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });

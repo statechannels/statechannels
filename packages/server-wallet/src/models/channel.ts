@@ -10,10 +10,9 @@ import {
   outcomesEqual,
   Zero,
 } from '@statechannels/wallet-core';
-import {JSONSchema, Model, Pojo, QueryContext, ModelOptions} from 'objection';
+import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import Knex from 'knex';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {ChannelState, toChannelResult} from '../protocols/state';
@@ -108,8 +107,8 @@ export class Channel extends Model implements RequiredColumns {
 
   static jsonAttributes = ['vars', 'participants'];
 
-  static async forId(knex: Knex, channelId: Bytes32): Promise<Channel> {
-    const result = Channel.query(knex)
+  static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
+    const result = Channel.query(txOrKnex)
       .where({channelId})
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')

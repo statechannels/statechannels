@@ -18,7 +18,7 @@ beforeEach(async () => {
 it('returns true for a valid transition', async () => {
   // Sanity check that we're validating with byte code
   expect(
-    await AppBytecode.getBytecode(knex, defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION)
+    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
   const fromState = createState({
     appDefinition: COUNTING_APP_DEFINITION,
@@ -28,13 +28,13 @@ it('returns true for a valid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
   });
-  expect(await validateTransitionWithEVM(knex, fromState, toState)).toBe(true);
+  expect(await validateTransitionWithEVM(fromState, toState, knex)).toBe(true);
 });
 
 it('returns false for an invalid transition', async () => {
   // Sanity check that we're validating with byte code
   expect(
-    await AppBytecode.getBytecode(knex, defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION)
+    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
   const fromState = createState({
     appDefinition: COUNTING_APP_DEFINITION,
@@ -44,16 +44,16 @@ it('returns false for an invalid transition', async () => {
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
   });
-  expect(await validateTransitionWithEVM(knex, fromState, toState)).toBe(false);
+  expect(await validateTransitionWithEVM(fromState, toState, knex)).toBe(false);
 });
 
 it('skips validating when no byte code exists for the app definition', async () => {
   // Sanity check that the bytecode doesn't exist
   expect(
-    await AppBytecode.getBytecode(knex, defaultConfig.chainNetworkID, UNDEFINED_APP_DEFINITION)
+    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, UNDEFINED_APP_DEFINITION, knex)
   ).toBeUndefined();
   const state = createState({
     appDefinition: UNDEFINED_APP_DEFINITION,
   });
-  expect(await validateTransitionWithEVM(knex, state, state)).toBe(true);
+  expect(await validateTransitionWithEVM(state, state, knex)).toBe(true);
 });

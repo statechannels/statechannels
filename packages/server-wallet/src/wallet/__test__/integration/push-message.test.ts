@@ -126,7 +126,7 @@ describe('channel results', () => {
     // The Channel model adds the state hash before persisting
 
     const stateVar = signedStates.map(addHash)[1];
-    const record = await Channel.forId(wallet.knex, calculateChannelId(stateVar));
+    const record = await Channel.forId(calculateChannelId(stateVar), wallet.knex);
 
     expect(stateVar).toMatchObject(record.vars[0]);
   });
@@ -184,7 +184,7 @@ describe('when the application protocol returns an action', () => {
       outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
     });
 
-    const updatedC = await Channel.forId(wallet.knex, channelId);
+    const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
       latestSignedByMe: {turnNum: 3},
       supported: {turnNum: 0},
@@ -212,7 +212,7 @@ describe('when the application protocol returns an action', () => {
       ],
     });
 
-    const updatedC = await Channel.forId(wallet.knex, channelId);
+    const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
       latestSignedByMe: {turnNum: turnNum + 1},
       supported: {turnNum: turnNum + 1},

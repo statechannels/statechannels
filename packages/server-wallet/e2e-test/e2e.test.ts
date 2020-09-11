@@ -77,7 +77,7 @@ describe('e2e', () => {
     expect(channel.status).toBe('opening');
     expect(channel.turnNum).toBe(0);
 
-    expect((await Channel.forId(knexPayer, channel.channelId)).protocolState).toMatchObject({
+    expect((await Channel.forId(channel.channelId, knexPayer)).protocolState).toMatchObject({
       supported: {turnNum: 0},
     });
   });
@@ -103,7 +103,7 @@ describe('payments', () => {
   });
 
   const expectSupportedState = async (C: typeof Channel, turnNum: number): Promise<any> =>
-    expect(C.forId(knexPayer, channelId).then(c => c.protocolState)).resolves.toMatchObject({
+    expect(C.forId(channelId, knexPayer).then(c => c.protocolState)).resolves.toMatchObject({
       latest: {turnNum},
     });
 

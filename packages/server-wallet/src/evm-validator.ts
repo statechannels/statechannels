@@ -2,7 +2,7 @@ import {State, toNitroState} from '@statechannels/wallet-core';
 import {createValidTransitionTransaction} from '@statechannels/nitro-protocol';
 import * as PureEVM from 'pure-evm';
 import {utils} from 'ethers';
-import Knex from 'knex';
+import {TransactionOrKnex} from 'objection';
 
 import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
@@ -16,9 +16,9 @@ const bytecodeCache: Record<string, string | undefined> = {};
  * Returns a promise that resolves to true if the validateTransition returns true false otherwise
  */
 export const validateTransitionWithEVM = async (
-  knex: Knex,
   from: State,
-  to: State
+  to: State,
+  txOrKnex: TransactionOrKnex
 ): Promise<boolean | undefined> => {
   if (from.appDefinition !== to.appDefinition) {
     logger.error('Invalid transition', {
@@ -29,7 +29,7 @@ export const validateTransitionWithEVM = async (
   const bytecode =
     bytecodeCache[from.appDefinition] ??
     (bytecodeCache[from.appDefinition] =
-      (await AppBytecode.getBytecode(knex, defaultConfig.chainNetworkID, from.appDefinition)) ||
+      (await AppBytecode.getBytecode(defaultConfig.chainNetworkID, from.appDefinition, txOrKnex)) ||
       MISSING);
   if (bytecode === MISSING) {
     // logger.warn(

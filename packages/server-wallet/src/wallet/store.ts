@@ -1,4 +1,4 @@
-import {Transaction} from 'objection';
+import {Transaction, TransactionOrKnex} from 'objection';
 import {
   Objective,
   SignedStateWithHash,
@@ -91,7 +91,7 @@ export const Store = recordFunctionMetrics({
       const channel = await timer(
         'getting channel',
         async () =>
-          await Channel.query(knex)
+          await Channel.query(tx)
             .where({channelId})
             .forUpdate()
             .first()
@@ -103,12 +103,12 @@ export const Store = recordFunctionMetrics({
   },
 
   signState: async function(
-    knex: Knex,
     channelId: Bytes32,
-    vars: StateVariables
+    vars: StateVariables,
+    txOrKnex: TransactionOrKnex
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(`signState ${channelId}`);
-    let channel = await timer('getting channel', async () => Channel.forId(knex, channelId));
+    let channel = await timer('getting channel', async () => Channel.forId(channelId, txOrKnex));
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
@@ -120,7 +120,7 @@ export const Store = recordFunctionMetrics({
     const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding state', async () =>
-      this.addSignedState(knex, channel, signedState)
+      this.addSignedState(channel, signedState, txOrKnex)
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
@@ -139,8 +139,11 @@ export const Store = recordFunctionMetrics({
 
     return {outgoing, channelResult};
   },
-  getChannel: async function(knex: Knex, channelId: Bytes32): Promise<ChannelState | undefined> {
-    return (await Channel.forId(knex, channelId))?.protocolState;
+  getChannel: async function(
+    channelId: Bytes32,
+    txOrKnex: Transaction | Knex
+  ): Promise<ChannelState | undefined> {
+    return (await Channel.forId(channelId, txOrKnex))?.protocolState;
   },
   getStates: async function(
     channelId: Bytes32,
@@ -154,13 +157,13 @@ export const Store = recordFunctionMetrics({
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   },
 
-  getChannels: async function(): Promise<ChannelState[]> {
-    return (await Channel.query()).map(channel => channel.protocolState);
+  getChannels: async function(knex: Knex): Promise<ChannelState[]> {
+    return (await Channel.query(knex)).map(channel => channel.protocolState);
   },
 
-  pushMessage: async function(knex: Knex, message: Message, tx: Transaction): Promise<Bytes32[]> {
+  pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(knex, undefined, addHash(ss));
+      await this.addSignedState(undefined, addHash(ss), tx);
     }
 
     for (const o of message.objectives || []) {
@@ -182,9 +185,9 @@ export const Store = recordFunctionMetrics({
   },
 
   addSignedState: async function(
-    knex: Knex,
     maybeChannel: Channel | undefined,
-    signedState: SignedStateWithHash
+    signedState: SignedStateWithHash,
+    txOrKnex: TransactionOrKnex
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
     const timer = timerFactory(`add signed state ${channelId}`);
@@ -193,14 +196,14 @@ export const Store = recordFunctionMetrics({
 
     const channel =
       maybeChannel ||
-      (await timer('get channel', async () => getOrCreateChannel(knex, signedState)));
+      (await timer('get channel', async () => getOrCreateChannel(signedState, txOrKnex)));
 
     if (!defaultConfig.skipEvmValidation && channel.supported) {
       // TODO be better to inspect Wallet.walletConfig in case the defaultConfig was not used or overridden
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>
-          validateTransitionWithEVM(knex, supported, signedState)
+          validateTransitionWithEVM(supported, signedState, txOrKnex)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
@@ -221,7 +224,7 @@ export const Store = recordFunctionMetrics({
     const cols = {...channel.channelConstants, vars: channel.vars};
 
     const result = await timer('updating', async () =>
-      Channel.query(knex)
+      Channel.query(txOrKnex)
         .where({channelId: channel.channelId})
         .update(cols)
         .returning('*')
@@ -251,25 +254,31 @@ class StoreError extends WalletError {
   }
 }
 
-async function getOrCreateChannel(knex: Knex, constants: ChannelConstants): Promise<Channel> {
+async function getOrCreateChannel(
+  constants: ChannelConstants,
+  txOrKnex: TransactionOrKnex
+): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  let channel = await Channel.query(knex)
+  let channel = await Channel.query(txOrKnex)
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
-    const {address: signingAddress} = await getSigningWallet(knex, constants);
+    const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
 
     const cols: RequiredColumns = {...constants, vars: [], signingAddress};
     channel = Channel.fromJson(cols);
-    await Channel.query(knex).insert(channel);
+    await Channel.query(txOrKnex).insert(channel);
   }
   return channel;
 }
 
-async function getSigningWallet(knex: Knex, channel: ChannelConstants): Promise<SigningWallet> {
+async function getSigningWallet(
+  channel: ChannelConstants,
+  txOrKnex: TransactionOrKnex
+): Promise<SigningWallet> {
   const addresses = channel.participants.map(p => p.signingAddress);
-  const signingWallet = await SigningWallet.query(knex)
+  const signingWallet = await SigningWallet.query(txOrKnex)
     .whereIn('address', addresses)
     .first();
 

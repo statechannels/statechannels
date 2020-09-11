@@ -22,7 +22,7 @@ const expectSupportedState = async (
   C: typeof Channel,
   turnNum: number
 ): Promise<any> =>
-  expect(C.forId(knex, channelId).then(c => c.protocolState)).resolves.toMatchObject({
+  expect(C.forId(channelId, knex).then(c => c.protocolState)).resolves.toMatchObject({
     latest: {turnNum},
   });
 

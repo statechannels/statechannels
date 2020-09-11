@@ -21,7 +21,7 @@ it('updates a channel', async () => {
   await Channel.query(w.knex).insert(c);
 
   const channelId = c.channelId;
-  const current = await Channel.forId(knex, channelId);
+  const current = await Channel.forId(channelId, knex);
   expect(current.latest).toMatchObject({turnNum: 5, appData: '0x'});
 
   const appData = '0xa00f00';
@@ -38,7 +38,7 @@ it('updates a channel', async () => {
     channelResult: {channelId, turnNum: 6, appData},
   });
 
-  const updated = await Channel.forId(knex, channelId);
+  const updated = await Channel.forId(channelId, knex);
   expect(updated.latest).toMatchObject({turnNum: 6, appData});
 });
 

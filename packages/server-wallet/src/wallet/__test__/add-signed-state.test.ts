@@ -25,7 +25,7 @@ describe('addSignedState', () => {
       signatures: [{signer: alice().address, signature: BOB_SIGNATURE}],
     });
 
-    await expect(Store.addSignedState(knex, undefined, signedState)).rejects.toThrow(
+    await expect(Store.addSignedState(undefined, signedState, knex)).rejects.toThrow(
       'Invalid signature'
     );
   });
