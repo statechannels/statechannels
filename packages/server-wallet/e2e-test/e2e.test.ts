@@ -39,14 +39,15 @@ beforeAll(async () => {
 beforeEach(async () => {
   await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
   // Adds Alice to Payer's Database
-  await SWPayer.query(knexPayer).insert(alice());
+  await SWPayer.query().insert(alice());
 
   // Adds Bob to Receiver's Database
-  await SWReceiver.query(knexReceiver).insert(bob());
+  await SWReceiver.query().insert(bob());
 });
 
 afterAll(async () => {
   await killServer(receiverServer);
+  await knexPayer.destroy();
 });
 
 describe('e2e', () => {
@@ -77,7 +78,9 @@ describe('e2e', () => {
     expect(channel.status).toBe('opening');
     expect(channel.turnNum).toBe(0);
 
-    expect((await Channel.forId(channel.channelId, knexPayer)).protocolState).toMatchObject({
+    expect(
+      (await ChannelPayer.forId(channel.channelId, ChannelPayer.knex())).protocolState
+    ).toMatchObject({
       supported: {turnNum: 0},
     });
   });
@@ -94,16 +97,14 @@ describe('payments', () => {
       vars: [stateVars({turnNum: 3})],
     });
 
-    await ChannelPayer.query(knexPayer).insert([seed]); // Fixture uses alice() default
-    await ChannelReceiver.query(knexReceiver).insert([
-      {...seed, signingAddress: receiver.signingAddress},
-    ]);
+    await ChannelPayer.query().insert([seed]); // Fixture uses alice() default
+    await ChannelReceiver.query().insert([{...seed, signingAddress: receiver.signingAddress}]);
 
     channelId = seed.channelId;
   });
 
   const expectSupportedState = async (C: typeof Channel, turnNum: number): Promise<any> =>
-    expect(C.forId(channelId, knexPayer).then(c => c.protocolState)).resolves.toMatchObject({
+    expect(C.forId(channelId, C.knex()).then(c => c.protocolState)).resolves.toMatchObject({
       latest: {turnNum},
     });
 
