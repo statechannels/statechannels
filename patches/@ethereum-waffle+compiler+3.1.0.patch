@@ -24,7 +24,7 @@ index 5c24e5e..12619d6 100644
          }
      });
 diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
-index 602f0ee..51959fc 100644
+index 602f0ee..6d53aad 100644
 --- a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
 +++ b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
 @@ -41,10 +41,10 @@ function getMinimalContent(contractJson, config) {
@@ -40,7 +40,7 @@ index 602f0ee..51959fc 100644
          }
      }
  }
-@@ -68,8 +68,12 @@ async function saveOutputCombined(output, config, filesystem = fsOps) {
+@@ -68,8 +68,13 @@ async function saveOutputCombined(output, config, filesystem = fsOps) {
      output.sourceList = allSources;
      filesystem.writeFile(path_1.join(config.outputDirectory, 'Combined-Json.json'), JSON.stringify(output, null, 2));
  }
@@ -51,6 +51,7 @@ index 602f0ee..51959fc 100644
 +    contractJson.ast = ast;
 +    contractJson.contractName = contractName;
 +    contractJson.compiler = {version: compilerVersion};
++    contractJson.networks = {};
      if (config.outputHumanReadableAbi) {
          contractJson.humanReadableAbi = getHumanReadableAbi_1.getHumanReadableAbi(contractJson.abi);
      }
