@@ -1,28 +1,3 @@
-diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/compileSolcjs.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/compileSolcjs.js
-index 5b6a2db..a210c9f 100644
---- a/node_modules/@ethereum-waffle/compiler/dist/cjs/compileSolcjs.js
-+++ b/node_modules/@ethereum-waffle/compiler/dist/cjs/compileSolcjs.js
-@@ -51,6 +51,7 @@ function compileSolcjs(config) {
-         const solc = await loadCompiler(config);
-         const input = compilerInput_1.getCompilerInput(sources, config.compilerOptions, 'Solidity');
-         const imports = findImports_1.findImports(sources);
-+        // console.log(input); // This shows that the "ast" option DOES make it to the CLI arguments for solcjs
-         const output = solc.compile(input, { imports });
-         return JSON.parse(output);
-     };
-diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/compilerInput.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/compilerInput.js
-index 5c24e5e..12619d6 100644
---- a/node_modules/@ethereum-waffle/compiler/dist/cjs/compilerInput.js
-+++ b/node_modules/@ethereum-waffle/compiler/dist/cjs/compilerInput.js
-@@ -9,7 +9,7 @@ function getCompilerInput(files, overrides = {}, language) {
-         language,
-         sources,
-         settings: {
--            outputSelection: { '*': { '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } },
-+            outputSelection: { '*': {"": ["legacyAST", "ast"],'*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } },
-             ...overrides
-         }
-     });
 diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
 index 602f0ee..6d53aad 100644
 --- a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
