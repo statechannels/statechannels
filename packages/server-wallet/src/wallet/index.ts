@@ -168,11 +168,11 @@ export class Wallet implements WalletInterface {
 
     const callback = async (tx: Transaction) => {
       // TODO: How do we pick a signing address?
-      const signingAddress = (await SigningWallet.query(this.knex).first())?.address;
+      const signingAddress = (await SigningWallet.query(tx).first())?.address;
 
       const cols = {...channelConstants, vars, signingAddress};
 
-      const {channelId} = await Channel.query(this.knex).insert(cols);
+      const {channelId} = await Channel.query(tx).insert(cols);
 
       const {outgoing, channelResult} = await Store.signState(
         channelId,
@@ -188,7 +188,7 @@ export class Wallet implements WalletInterface {
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
-    return Channel.transaction(this.knex, callback);
+    return this.knex.transaction(callback);
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
