@@ -349,6 +349,5 @@ export async function writeGasConsumption(
 ): Promise<void> {
   await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
     if (err) throw err;
-    console.log('Wrote gas info to ' + filename);
   });
 }
