@@ -17,7 +17,7 @@ beforeEach(async () => {
 beforeEach(async () => seedAlicesSigningWallet(knex));
 
 it('returns an outgoing message with the latest state', async () => {
-  const appData = '0xf00';
+  const appData = '0xf0';
   const turnNum = 7;
   const participants = [
     participantFixtures.alice(),
@@ -74,7 +74,7 @@ it('returns an outgoing message with the latest state', async () => {
 });
 
 it('pushes states included in the API call', async () => {
-  const appData = '0xf00';
+  const appData = '0xf0';
   const turnNum = 8;
   const runningState = {
     turnNum,
@@ -135,7 +135,7 @@ it('pushes states included in the API call', async () => {
 });
 
 it('reject when the channel is not known', async () => {
-  await expect(w.syncChannel({channelId: '0xf00', states: []})).rejects.toMatchObject(
+  await expect(w.syncChannel({channelId: '0xf0', states: []})).rejects.toMatchObject(
     new Error('No channel found with id.')
   );
 });
