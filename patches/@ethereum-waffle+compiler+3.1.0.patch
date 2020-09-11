@@ -24,10 +24,10 @@ index 5c24e5e..12619d6 100644
          }
      });
 diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
-index 602f0ee..aaa5f98 100644
+index 602f0ee..51959fc 100644
 --- a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
 +++ b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
-@@ -41,10 +41,11 @@ function getMinimalContent(contractJson, config) {
+@@ -41,10 +41,10 @@ function getMinimalContent(contractJson, config) {
      return JSON.stringify({ abi, bytecode }, null, 2);
  }
  async function saveOutputSingletons(output, config, filesystem = fsOps) {
@@ -36,21 +36,21 @@ index 602f0ee..aaa5f98 100644
          for (const [contractName, contractJson] of Object.entries(file)) {
              const filePath = path_1.join(config.outputDirectory, `${contractName}.json`);
 -            filesystem.writeFile(filePath, getContent(contractJson, config));
-+            console.log(output.sources[source_path]);
-+            filesystem.writeFile(filePath, getContent(contractJson, output.sources[source_path] ? output.sources[source_path].ast : undefined, source_path, config));
++            filesystem.writeFile(filePath, getContent(contractJson, output.sources[source_path] ? output.sources[source_path].ast : undefined, source_path, contractName, 'unknown', config));
          }
      }
  }
-@@ -68,8 +69,11 @@ async function saveOutputCombined(output, config, filesystem = fsOps) {
+@@ -68,8 +68,12 @@ async function saveOutputCombined(output, config, filesystem = fsOps) {
      output.sourceList = allSources;
      filesystem.writeFile(path_1.join(config.outputDirectory, 'Combined-Json.json'), JSON.stringify(output, null, 2));
  }
 -function getContent(contractJson, config) {
-+function getContent(contractJson, ast, sourcePath, config) {
++function getContent(contractJson, ast, sourcePath, contractName, compilerVersion, config) {
      contractJson.bytecode = contractJson.evm.bytecode.object;
 +    contractJson.sourcePath = sourcePath;
 +    contractJson.ast = ast;
-+    console.log('loading sources')
++    contractJson.contractName = contractName;
++    contractJson.compiler = {version: compilerVersion};
      if (config.outputHumanReadableAbi) {
          contractJson.humanReadableAbi = getHumanReadableAbi_1.getHumanReadableAbi(contractJson.abi);
      }
