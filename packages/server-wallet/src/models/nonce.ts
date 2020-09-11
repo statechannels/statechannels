@@ -36,7 +36,7 @@ export class Nonce extends Model {
   static async next(knex: Knex, addresses: Address[]): Promise<number> {
     const insertQuery = knex('nonces').insert({addresses});
 
-    return Nonce.knex(knex)
+    return knex
       .raw(
         `
       ${insertQuery} ON CONFLICT (addresses)
@@ -47,9 +47,9 @@ export class Nonce extends Model {
   }
 
   async use(knex: Knex): Promise<void> {
-    const {rows} = await Nonce.knex(knex).raw(
+    const {rows} = await knex.raw(
       `
-        ${Nonce.knexQuery().insert(this)}
+        ${knex('nonces').insert(this)}
         ON CONFLICT (addresses) DO UPDATE
         SET value = EXCLUDED.value WHERE EXCLUDED.value > NONCES.value
         RETURNING NONCES.value
