@@ -15,7 +15,7 @@ beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 
   // Start the transaction
-  tx = await Channel.startTransaction();
+  tx = await Channel.startTransaction(knex);
 });
 
 afterEach(async () => tx.rollback());

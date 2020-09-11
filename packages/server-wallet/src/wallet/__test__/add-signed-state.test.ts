@@ -14,7 +14,7 @@ describe('addSignedState', () => {
   afterEach(async () => tx.rollback());
 
   beforeEach(async () => {
-    tx = await Channel.startTransaction();
+    tx = await Channel.startTransaction(knex);
   });
 
   const BOB_SIGNATURE =

@@ -33,7 +33,7 @@ it('can insert multiple channels instances within a transaction', async () => {
   const c1 = channel({vars});
   const c2 = channel({channelNonce: 1234, vars});
 
-  await Channel.transaction(async tx => {
+  await Channel.transaction(knex, async tx => {
     await Channel.query(knex).insert(c1);
 
     expect(await Channel.query(knex).select()).toHaveLength(1);

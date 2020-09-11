@@ -120,7 +120,7 @@ export class Wallet implements WalletInterface {
     let participant: Participant | undefined = undefined;
 
     try {
-      participant = await Store.getFirstParticipant();
+      participant = await Store.getFirstParticipant(this.knex);
     } catch (e) {
       if (isWalletError(e)) logger.error('Wallet failed to get a participant', e);
       else throw e;
@@ -144,7 +144,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async getSigningAddress(): Promise<string> {
-    return await Store.getOrCreateSigningAddress();
+    return await Store.getOrCreateSigningAddress(this.knex);
   }
 
   async createChannel(args: CreateChannelParams): SingleChannelResult {
@@ -165,9 +165,9 @@ export class Wallet implements WalletInterface {
 
     const vars: SignedStateVarsWithHash[] = [];
 
-    return Channel.transaction(this.knex, async () => {
+    const callback = async () => {
       // TODO: How do we pick a signing address?
-      const signingAddress = (await SigningWallet.query().first())?.address;
+      const signingAddress = (await SigningWallet.query(this.knex).first())?.address;
 
       const cols = {...channelConstants, vars, signingAddress};
 
@@ -182,7 +182,8 @@ export class Wallet implements WalletInterface {
       });
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
-    });
+    };
+    return Channel.transaction(this.knex, callback.bind(this));
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {

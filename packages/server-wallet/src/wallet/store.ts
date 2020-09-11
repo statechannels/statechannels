@@ -45,18 +45,18 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export const Store = recordFunctionMetrics({
-  getFirstParticipant: async function(): Promise<Participant> {
-    const signingAddress = await Store.getOrCreateSigningAddress();
+  getFirstParticipant: async function(knex: Knex): Promise<Participant> {
+    const signingAddress = await Store.getOrCreateSigningAddress(knex);
     return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
   },
 
-  getOrCreateSigningAddress: async function(): Promise<string> {
+  getOrCreateSigningAddress: async function(knex: Knex): Promise<string> {
     const randomWallet = ethers.Wallet.createRandom();
     // signing_wallets table allows for only one row via database constraints
     try {
       // returning('*') only works with Postgres
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
-      const signingWallet = await SigningWallet.query()
+      const signingWallet = await SigningWallet.query(knex)
         .insert({
           privateKey: randomWallet.privateKey,
           address: randomWallet.address,
@@ -65,7 +65,7 @@ export const Store = recordFunctionMetrics({
       return signingWallet.address;
     } catch (error) {
       if (isUniqueViolationError(error)) {
-        return (await SigningWallet.query().first()).address;
+        return (await SigningWallet.query(knex).first()).address;
       }
       throw error;
     }
