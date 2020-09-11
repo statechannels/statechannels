@@ -98,7 +98,7 @@ export class Wallet implements WalletInterface {
     this.getSigningAddress = this.getSigningAddress.bind(this);
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
-    this.updateChannelFunding = this.updateChannelFunding.bind(this);
+    this.updateChannel = this.updateChannel.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
