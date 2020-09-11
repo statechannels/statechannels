@@ -147,7 +147,7 @@ export const Store = recordFunctionMetrics({
   getStates: async function(
     channelId: Bytes32,
     tx: Transaction | undefined
-  ): Promise<{states: SignedState[]; channelState: ChannelState}> {
+  ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
     const channel = await Channel.forId(channelId, tx);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
