@@ -10,7 +10,6 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {defaultConfig} from '../../../config';
-import {knexPayer} from '../../../../e2e-test/e2e-utils';
 let w: Wallet;
 beforeEach(async () => {
   w = new Wallet(defaultConfig);
@@ -30,7 +29,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
   });
 
   await expect(
-    Funding.getFundingAmount(knexPayer, channelId, ETH_ASSET_HOLDER_ADDRESS)
+    Funding.getFundingAmount(w.knex, channelId, ETH_ASSET_HOLDER_ADDRESS)
   ).resolves.toEqual('0x04');
 
   expect(result).toMatchObject({

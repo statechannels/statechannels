@@ -34,12 +34,12 @@ it('can insert multiple channels instances within a transaction', async () => {
   const c2 = channel({channelNonce: 1234, vars});
 
   await Channel.transaction(knex, async tx => {
-    await Channel.query(knex).insert(c1);
+    await Channel.query(tx).insert(c1);
 
-    expect(await Channel.query(knex).select()).toHaveLength(1);
+    expect(await Channel.query(tx).select()).toHaveLength(1);
 
-    await Channel.query(knex).insert(c2);
-    expect(await Channel.query(knex).select()).toHaveLength(2);
+    await Channel.query(tx).insert(c2);
+    expect(await Channel.query(tx).select()).toHaveLength(2);
 
     // You can query the DB outside of this transaction,
     // where the channels have not yet been committed

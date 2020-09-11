@@ -20,8 +20,8 @@ it('works', async () => {
 
   const {channelId, latest} = c;
   await expect(
-    Store.lockApp(knex, channelId, async () =>
-      Store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, knex)
+    Store.lockApp(knex, channelId, async tx =>
+      Store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, tx)
     )
   ).resolves.toMatchObject({channelResult: {turnNum: 6}});
 });
@@ -68,7 +68,7 @@ describe('concurrency', () => {
     const numAttempts = 4;
     await Promise.all(
       _.range(numAttempts).map(() =>
-        Store.lockApp(knex, channelId, async () => Store.signState(channelId, next(c.latest), knex))
+        Store.lockApp(knex, channelId, async tx => Store.signState(channelId, next(c.latest), tx))
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
@@ -109,7 +109,7 @@ describe('concurrency', () => {
       await Promise.all(
         channelIds.map(channelId =>
           Store.lockApp(knex, channelId, async (tx, c) =>
-            Store.signState(channelId, next(c.latest), knex)
+            Store.signState(channelId, next(c.latest), tx)
           )
             .then(countResolvedPromise)
             .finally(countSettledPromise)
