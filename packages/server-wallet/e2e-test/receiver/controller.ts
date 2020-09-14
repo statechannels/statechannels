@@ -5,10 +5,10 @@ import {Participant} from '@statechannels/client-api-schema';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
-import {payerConfig} from '../../src/config';
+import {receiverConfig} from '../../src/config';
 
 export default class ReceiverController {
-  private readonly wallet: Wallet = recordFunctionMetrics(new Wallet(payerConfig));
+  private readonly wallet: Wallet = recordFunctionMetrics(new Wallet(receiverConfig));
 
   private readonly myParticipantID: string = 'receiver';
   private time = timerFactory('controller');
