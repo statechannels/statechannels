@@ -136,9 +136,13 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
 export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 
+type GetChannel = {type: 'GetChannel'; channelId: string};
+export type ChannelRequest = GetChannel;
+
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
+  requests?: ChannelRequest[];
 }
 
 export type ChannelStoredData = {

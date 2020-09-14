@@ -12,7 +12,6 @@ graph LR
 linkStyle default interpolate basis
 AssetHolder
 Adjudicator
-ConsensusApp
 CountingApp
 ERC20
 ERC20AssetHolder
@@ -43,7 +42,6 @@ AssetHolder-->TESTAssetHolder
 ForceMoveApp-->CountingApp
 ForceMoveApp-->TrivialApp
 ForceMoveApp-->SingleAssetPayments
-ForceMoveApp-->ConsensusApp
 IERC20-->ERC20
 ERC20-->Token
 classDef Contract fill:#ffffff;
@@ -55,12 +53,11 @@ classDef Library fill:#bbbb;
 class Outcome,SafeMath Library;
 class IForceMove Abstract;
 class Adjudicator,IAssetHolder,ForceMoveApp,IERC20 Interface;
-class ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder,SingleAssetPayments,TrivialApp,CountingApp,ERC20,ConsensusApp Contract;
+class ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder,SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
 class TESTForceMove,TESTNitroAdjudicator,TESTAssetHolder,Token TestContract;
-class NitroAdjudicator,ETHAssetHolder,ERC20AssetHolder,ConsensusApp DeployedContract;
+class NitroAdjudicator,ETHAssetHolder,ERC20AssetHolder DeployedContract;
 click Adjudicator "./natspec/Adjudicator";
 click AssetHolder "./natspec/AssetHolder";
-click ConsensusApp "./natspec/ConsensusApp";
 click CountingApp "./natspec/CountingApp";
 click ERC20 "./natspec/ERC20";
 click ERC20AssetHolder "./natspec/ERC20AssetHolder";

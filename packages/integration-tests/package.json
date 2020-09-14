@@ -1,12 +1,12 @@
 {
   "name": "@statechannels/integration-tests",
   "description": "Tests that integrate various @statechannels/ pakages",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "author": "George Knee",
   "devDependencies": {
-    "@statechannels/channel-client": "^0.3.5",
-    "@statechannels/client-api-schema": "^0.3.5",
-    "@statechannels/iframe-channel-provider": "^0.3.5",
+    "@statechannels/channel-client": "^0.3.6",
+    "@statechannels/client-api-schema": "^0.3.6",
+    "@statechannels/iframe-channel-provider": "^0.3.6",
     "@types/node": "13.5.1",
     "@types/wait-on": "4.0.0",
     "canvas": "2.6.1",
