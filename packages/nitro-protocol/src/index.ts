@@ -1,9 +1,9 @@
 import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
 import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
 import TokenArtifact from '../build/contracts/Token.json';
+import AssetHolderArtifact from '../build/contracts/AssetHolder.json';
 import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
 import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
-import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 export const ContractArtifacts = {
   NitroAdjudicatorArtifact,
@@ -11,7 +11,7 @@ export const ContractArtifacts = {
   Erc20AssetHolderArtifact,
   EthAssetHolderArtifact,
   TokenArtifact,
-  ConsensusAppArtifact,
+  AssetHolderArtifact,
 };
 
 export {
@@ -24,6 +24,8 @@ export {
   setupContracts,
 } from '../test/test-helpers';
 export {
+  DepositedEvent,
+  AssetTransferredEvent,
   getAssetTransferredEvent,
   getDepositedEvent,
   convertBytes32ToAddress,
@@ -35,7 +37,6 @@ export {
   ChallengeRegisteredEvent,
 } from './contract/challenge';
 export {Channel, getChannelId} from './contract/channel';
-export {encodeConsensusData, decodeConsensusData, ConsensusData} from './contract/consensus-data';
 export {
   validTransition,
   ForceMoveAppContractInterface,

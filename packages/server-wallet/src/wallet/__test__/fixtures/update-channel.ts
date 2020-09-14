@@ -7,7 +7,7 @@ import {alice, bob} from './participants';
 import {fixture} from './utils';
 
 const defaultVars: UpdateChannelParams = {
-  appData: '0xabc',
+  appData: '0x0abc',
   channelId: channel().channelId,
   allocations: [
     {

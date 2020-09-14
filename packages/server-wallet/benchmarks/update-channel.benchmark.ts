@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import {AddressZero} from '@ethersproject/constants';
 import {configureEnvVariables} from '@statechannels/devtools';
+import {ethers} from 'ethers';
 configureEnvVariables();
 
 import walletConfig from '../src/config';
@@ -42,7 +42,7 @@ async function benchmark(): Promise<void> {
   for (const i of iter) {
     await wallet.updateChannel({
       channelId: channels[i].channelId,
-      allocations: [{token: AddressZero, allocationItems: []}],
+      allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
       appData: '0x',
     });
   }
@@ -55,7 +55,7 @@ async function benchmark(): Promise<void> {
     channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
-        allocations: [{token: AddressZero, allocationItems: []}],
+        allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
         appData: '0x',
       })
     )

@@ -1,8 +1,6 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {MaxUint256} from 'ethers/constants';
-import {solidityKeccak256} from 'ethers/utils';
+import {Contract, Wallet, ethers, utils} from 'ethers';
 
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
@@ -14,12 +12,12 @@ const provider = getTestProvider();
 let trivialApp: Contract;
 
 function computeSaltedHash(salt: string, num: number) {
-  return solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
+  return utils.solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
 }
 
 function getRandomVariablePart(): VariablePart {
   const randomNum = Math.floor(Math.random() * 100);
-  const salt = MaxUint256.toHexString();
+  const salt = ethers.constants.MaxUint256.toHexString();
   const hash = computeSaltedHash(salt, randomNum);
 
   const variablePart: VariablePart = {
@@ -57,7 +55,7 @@ describe('validTransition', () => {
       isFinal: false,
       challengeDuration: 0x0,
       appDefinition: trivialApp.address,
-      appData: '0x0',
+      appData: '0x00',
     };
     const toState: State = {...fromState, turnNum: 2};
 

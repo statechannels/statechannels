@@ -16,7 +16,7 @@ const mockDomainBudget = {
   domain: 'mock.web3torrent.com',
   budgets: [
     {
-      token: '0x0',
+      token: '0x00',
       availableReceiveCapacity: '0x5000000',
       availableSendCapacity: '0x3000000',
       channels: []
@@ -91,7 +91,7 @@ export class FakeBrowserChannelProvider extends FakeChannelProvider
       domain: 'localhost',
       budgets: [
         {
-          token: '0x0',
+          token: '0x00',
           availableReceiveCapacity: params.requestedReceiveCapacity,
           availableSendCapacity: params.requestedSendCapacity,
           channels: []

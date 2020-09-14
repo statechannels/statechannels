@@ -1,7 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {hexlify} from 'ethers/utils';
+import {Contract, Wallet, ethers} from 'ethers';
 
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
@@ -86,7 +84,7 @@ const accepts2 = '2 Asset Types';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
-  appData: [HashZero],
+  appData: [ethers.constants.HashZero],
 };
 const turnNumRecord = 5;
 let channelNonce = 400;
@@ -123,7 +121,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
-      const initialChannelStorageHash = HashZero;
+      const initialChannelStorageHash = ethers.constants.HashZero;
 
       // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
@@ -208,7 +206,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expectedEvents.push({
           contract: NitroAdjudicator.address,
           name: 'Concluded',
-          values: {channelId},
+          args: {channelId},
         });
 
         // Add AssetTransferred events to expectations

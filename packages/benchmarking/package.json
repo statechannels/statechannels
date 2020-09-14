@@ -1,15 +1,15 @@
 {
   "name": "benchmarking",
   "description": "Scripts used to time the xstate wallet",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "author": "George Knee",
   "devDependencies": {
-    "@statechannels/channel-client": "^0.3.4",
-    "@statechannels/iframe-channel-provider": "^0.3.4",
-    "@statechannels/nitro-protocol": "^0.3.4",
+    "@statechannels/channel-client": "^0.3.6",
+    "@statechannels/iframe-channel-provider": "^0.3.6",
+    "@statechannels/nitro-protocol": "^0.3.6",
     "@types/http-server": "0.10.0",
     "@types/webpack": "4.41.12",
-    "ethers": "4.0.48",
+    "ethers": "5.0.12",
     "http-server": "0.12.3",
     "webpack": "4.41.5"
   },

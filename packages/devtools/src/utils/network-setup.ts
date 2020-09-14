@@ -1,9 +1,11 @@
-import {JsonRpcProvider} from 'ethers/providers';
+import ethers from 'ethers';
 
 const privateKeyWithEth = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 
 export function getGanacheProvider() {
-  return new JsonRpcProvider(`http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`);
+  return new ethers.providers.JsonRpcProvider(
+    `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
+  );
 }
 
 export function getPrivateKeyWithEth() {
@@ -11,16 +13,12 @@ export function getPrivateKeyWithEth() {
   return privateKeyWithEth;
 }
 export function getWalletWithEthAndProvider() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const ethers = require('ethers');
   const ganacheProvider = new ethers.providers.JsonRpcProvider(
     `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
   );
   return new ethers.Wallet(privateKeyWithEth, ganacheProvider);
 }
 export async function getNetworkId() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const ethers = require('ethers');
   const ganacheProvider = new ethers.providers.JsonRpcProvider(
     `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
   );

@@ -29,8 +29,8 @@ const bob: Participant = {
 const testContext: WorkflowContext = {
   participants: [alice, bob],
   outcome: simpleEthAllocation([]),
-  appDefinition: '0x0',
-  appData: '0x0',
+  appDefinition: '0x00',
+  appData: '0x00',
   chainId: '0',
   challengeDuration: BN.from(1)
 };

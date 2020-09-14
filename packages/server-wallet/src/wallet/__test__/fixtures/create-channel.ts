@@ -7,7 +7,7 @@ import {alice, bob} from './participants';
 import {fixture} from './utils';
 
 const defaultVars: CreateChannelParams = {
-  appData: '0xabc',
+  appData: '0x0abc',
   participants: [alice(), bob()],
   appDefinition: constants.AddressZero,
   fundingStrategy: 'Direct',

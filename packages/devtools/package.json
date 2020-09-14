@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/devtools",
   "description": "Scripts used for our team development processes",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "author": "statechannels",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
@@ -13,7 +13,7 @@
     "dotenv-expand": "5.1.0",
     "etherlime": "2.3.3",
     "etherlime-lib": "1.1.5",
-    "ethers": "4.0.48",
+    "ethers": "5.0.12",
     "fs-extra": "8.1.0",
     "ganache-cli": "6.9.1",
     "jest": "25.1.0",
@@ -22,7 +22,7 @@
     "pino-pretty": "4.0.0",
     "solc": "0.6.1",
     "tcp-port-used": "1.0.1",
-    "tree-kill": "1.2.1",
+    "tree-kill": "1.2.2",
     "write-json-file": "4.2.0",
     "yargs": "15.4.1"
   },

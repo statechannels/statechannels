@@ -1,6 +1,4 @@
-import {TransactionRequest} from 'ethers/providers';
-import {Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import {ethers, Wallet} from 'ethers';
 
 import {SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
@@ -25,8 +23,8 @@ const challengeState = {
   channel,
   turnNum: 0,
   isFinal: false,
-  appDefinition: AddressZero,
-  appData: '0x0',
+  appDefinition: ethers.constants.AddressZero,
+  appData: '0x00',
   outcome: [],
   challengeDuration: 0x0,
 };
@@ -34,7 +32,7 @@ const challengeState = {
 //   TurnNumRecord: 0,
 //   FinalizesAt: 1e12,
 //   StateHash: HashZero,
-//   ChallengerAddress: AddressZero,
+//   ChallengerAddress: ethers.constants.AddressZero,
 //   OutcomeHash: HashZero,
 // };
 
@@ -45,8 +43,8 @@ beforeAll(async () => {
     {
       turnNum: 0,
       isFinal: false,
-      appDefinition: AddressZero,
-      appData: '0x0',
+      appDefinition: ethers.constants.AddressZero,
+      appData: '0x00',
       outcome: [],
       channel,
       challengeDuration: 0x0,
@@ -57,7 +55,7 @@ beforeAll(async () => {
 
 describe('transaction-generators', () => {
   it('creates a force move transaction', async () => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: ethers.providers.TransactionRequest = createForceMoveTransaction(
       [signedState],
       wallet.privateKey
     );
@@ -66,13 +64,17 @@ describe('transaction-generators', () => {
   });
 
   it('creates a conclude from open transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction([signedState]);
+    const transactionRequest: ethers.providers.TransactionRequest = createConcludeTransaction([
+      signedState,
+    ]);
 
     expect(transactionRequest.data).toBeDefined();
   });
 
   it('creates a conclude from challenged transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction([signedState]);
+    const transactionRequest: ethers.providers.TransactionRequest = createConcludeTransaction([
+      signedState,
+    ]);
 
     expect(transactionRequest.data).toBeDefined();
   });
@@ -92,8 +94,8 @@ describe('transaction-generators', () => {
           {
             turnNum: turnNum[0],
             isFinal: false,
-            appDefinition: AddressZero,
-            appData: '0x0',
+            appDefinition: ethers.constants.AddressZero,
+            appData: '0x00',
             outcome: [],
             channel: twoPlayerChannel,
             challengeDuration: 0x0,
@@ -104,8 +106,8 @@ describe('transaction-generators', () => {
           {
             turnNum: turnNum[1],
             isFinal: false,
-            appDefinition: AddressZero,
-            appData: '0x0',
+            appDefinition: ethers.constants.AddressZero,
+            appData: '0x00',
             outcome: [],
             channel: twoPlayerChannel,
             challengeDuration: 0x0,
@@ -123,7 +125,7 @@ describe('transaction-generators', () => {
 
   describe('respond transactions', () => {
     it('creates a transaction', async () => {
-      const transactionRequest: TransactionRequest = createRespondTransaction(
+      const transactionRequest: ethers.providers.TransactionRequest = createRespondTransaction(
         challengeState,
         signedState
       );
@@ -140,13 +142,17 @@ describe('transaction-generators', () => {
 
   describe('respond with checkpoint transactions', () => {
     it('creates a transaction when there is a challenge state', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction([signedState]);
+      const transactionRequest: ethers.providers.TransactionRequest = createCheckpointTransaction([
+        signedState,
+      ]);
 
       expect(transactionRequest.data).toBeDefined();
     });
 
     it('creates a transaction when the chabbnel is open', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction([signedState]);
+      const transactionRequest: ethers.providers.TransactionRequest = createCheckpointTransaction([
+        signedState,
+      ]);
 
       expect(transactionRequest.data).toBeDefined();
     });

@@ -1,5 +1,5 @@
-import {AddressZero} from '@ethersproject/constants';
 import {interpret} from 'xstate';
+import {ethers} from 'ethers';
 import {hexZeroPad} from '@ethersproject/bytes';
 import waitForExpect from 'wait-for-expect';
 import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';
@@ -50,12 +50,12 @@ beforeEach(async () => {
       }
     ]),
     turnNum: 5,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: AddressZero,
+    appDefinition: ethers.constants.AddressZero,
     participants: [playerA.participant, playerB.participant]
   };
 

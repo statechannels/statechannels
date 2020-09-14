@@ -1,14 +1,16 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder, hexlify, Signature} from 'ethers/utils';
+import {Contract, Wallet, ethers, Signature} from 'ethers';
+
+const {HashZero} = ethers.constants;
+
+const {defaultAbiCoder} = ethers.utils;
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
-import {State, getFixedPart, getVariablePart, VariablePart} from '../../../src/contract/state';
+import {State, getVariablePart, VariablePart} from '../../../src/contract/state';
 import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,

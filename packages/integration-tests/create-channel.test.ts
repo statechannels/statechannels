@@ -24,7 +24,7 @@ const participants = [
 ];
 const allocations = [
   {
-    token: '0x0',
+    token: '0x00',
     allocationItems: [
       {
         destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
@@ -101,7 +101,7 @@ describe('Client-Provider-Wallet', () => {
                       '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'
                   }
                 ],
-                assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'
+                assetHolderAddress: expect.stringMatching(/^0x([a-fA-F0-9]{40})|0$/) // Matches any ethereum address
               }
             ],
             participants: [

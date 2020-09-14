@@ -7,7 +7,7 @@ import {
   createSignatureEntry,
   BN
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
+import {ethers} from 'ethers';
 import {hexZeroPad} from '@ethersproject/bytes';
 
 import {FakeChain} from '../chain';
@@ -48,12 +48,12 @@ test('concludes on their turn', async () => {
   const state: State = {
     outcome,
     turnNum: 5,
-    appData: '0x0',
+    appData: '0x00',
     isFinal: false,
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: AddressZero,
+    appDefinition: ethers.constants.AddressZero,
     participants: [playerA.participant, playerB.participant]
   };
 

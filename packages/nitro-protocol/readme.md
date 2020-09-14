@@ -52,7 +52,6 @@ contract MyStateChannelApp is ForceMoveApp {
 ```typescript
 const {
   NitroAdjudicatorArtifact,
-  ConsensusAppArtifact,
   EthAssetHolderArtifact,
   Erc20AssetHolderArtifact,
   TrivialAppArtifact,

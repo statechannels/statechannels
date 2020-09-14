@@ -1,6 +1,6 @@
 // @ts-ignore
-import {Contract, Wallet} from 'ethers';
-import {arrayify, id} from 'ethers/utils';
+import {Contract, Wallet, ethers} from 'ethers';
+const {arrayify, id} = ethers.utils;
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';

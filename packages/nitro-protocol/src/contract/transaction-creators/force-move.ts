@@ -1,7 +1,7 @@
-import {ethers} from 'ethers';
+import {Signature, ethers} from 'ethers';
 
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
-import {signChallengeMessage, Signature} from '../../signatures';
+import {signChallengeMessage} from '../../signatures';
 import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
@@ -42,10 +42,13 @@ export function createForceMoveTransaction(
   // Argument rather than a SignedState[] argument?
   // A: Yes, because the signatures must be passed in participant order: [sig-from-p0, sig-from-p1, ...]
   // and SignedStates[] won't comply with that in general. This function accetps the re-ordered sigs.
-  const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
+  const signedStates = states.map(s => ({
+    state: s,
+    signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
+  }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
-  const data = ForceMoveContractInterface.functions.forceMove.encode([
+  const data = ForceMoveContractInterface.encodeFunctionData('forceMove', [
     fixedPart,
     largestTurnNum,
     variableParts,
@@ -76,7 +79,7 @@ export function respondArgs({
 }
 
 export function createRespondTransaction(args: RespondArgs): ethers.providers.TransactionRequest {
-  const data = ForceMoveContractInterface.functions.respond.encode(respondArgs(args));
+  const data = ForceMoveContractInterface.encodeFunctionData('respond', respondArgs(args));
   return {data};
 }
 
@@ -85,7 +88,8 @@ export function createCheckpointTransaction({
   signatures,
   whoSignedWhat,
 }: CheckpointData): ethers.providers.TransactionRequest {
-  const data = ForceMoveContractInterface.functions.checkpoint.encode(
+  const data = ForceMoveContractInterface.encodeFunctionData(
+    'checkpoint',
     checkpointArgs({states, signatures, whoSignedWhat})
   );
 
@@ -106,7 +110,8 @@ export function createConcludeTransaction(
   signatures: Signature[],
   whoSignedWhat: number[]
 ): ethers.providers.TransactionRequest {
-  const data = ForceMoveContractInterface.functions.conclude.encode(
+  const data = ForceMoveContractInterface.encodeFunctionData(
+    'conclude',
     concludeArgs(states, signatures, whoSignedWhat)
   );
   return {data};

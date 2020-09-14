@@ -112,11 +112,11 @@ describe('channel results', () => {
 
     const signedStates = [
       stateSignedBy([alice(), bob()])({turnNum: five}),
-      stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0xf00'}),
+      stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0x0f00'}),
     ];
     const p = wallet.pushMessage(message({signedStates}));
 
-    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0xf00'}]);
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
     const channelsAfter = await Channel.query().select();
 
@@ -216,6 +216,64 @@ describe('when the application protocol returns an action', () => {
     expect(updatedC.protocolState).toMatchObject({
       latestSignedByMe: {turnNum: turnNum + 1},
       supported: {turnNum: turnNum + 1},
+    });
+  });
+});
+
+describe('when there is a request provided', () => {
+  it('has nothing in the outbox if there is no request added', async () => {
+    await expect(wallet.pushMessage(message({requests: []}))).resolves.toMatchObject({
+      outbox: [],
+    });
+  });
+
+  it('appends message with single state to the outbox satisfying a GetChannel request', async () => {
+    // Set up test by adding a single state into the DB via pushMessage call
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+    const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
+    await wallet.pushMessage(message({signedStates}));
+
+    // Get the channelId of that which was added
+    const [{channelId}] = await Channel.query().select();
+
+    // Expect a GetChannel request to produce an outbound message with all states
+    await expect(
+      wallet.pushMessage(message({requests: [{type: 'GetChannel', channelId}]}))
+    ).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {data: {signedStates}},
+        },
+      ],
+    });
+  });
+
+  it('appends message with multiple states to the outbox satisfying a GetChannel request', async () => {
+    const channelsBefore = await Channel.query().select();
+    expect(channelsBefore).toHaveLength(0);
+
+    const signedStates = [
+      stateSignedBy([alice()])({turnNum: five}),
+      stateSignedBy([alice(), bob()])({turnNum: four}),
+    ];
+
+    await wallet.pushMessage(message({signedStates}));
+
+    // Get the channelId of that which was added
+    const [{channelId}] = await Channel.query().select();
+
+    // Expect a GetChannel request to produce an outbound message with all states
+    await expect(
+      wallet.pushMessage(message({requests: [{type: 'GetChannel', channelId}]}))
+    ).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {data: {signedStates}},
+        },
+      ],
     });
   });
 });

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
   NitroAdjudicatorArtifact,
-  ConsensusAppArtifact,
   EthAssetHolderArtifact,
   Erc20AssetHolderArtifact,
   TrivialAppArtifact,
@@ -13,7 +12,6 @@ const {GanacheDeployer} = require('@statechannels/devtools');
 const deploy = async deployer => {
   deployer = deployer || new GanacheDeployer(Number(process.env.GANACHE_PORT));
 
-  const CONSENSUS_APP_ADDRESS = await deployer.deploy(ConsensusAppArtifact);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(TrivialAppArtifact);
 
   const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
@@ -32,7 +30,6 @@ const deploy = async deployer => {
   );
 
   return {
-    CONSENSUS_APP_ADDRESS,
     TRIVIAL_APP_ADDRESS,
     NITRO_ADJUDICATOR_ADDRESS,
     ETH_ASSET_HOLDER_ADDRESS,

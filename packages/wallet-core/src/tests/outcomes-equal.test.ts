@@ -1,4 +1,5 @@
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
+const {AddressZero, HashZero} = constants;
 
 import {outcomesEqual} from '../state-utils';
 import {SimpleAllocation, Destination} from '../types';

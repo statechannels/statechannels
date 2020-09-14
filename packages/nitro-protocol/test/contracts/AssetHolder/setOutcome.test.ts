@@ -1,7 +1,7 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {id, keccak256} from 'ethers/utils';
+import {Contract, Wallet, utils} from 'ethers';
+const {id, keccak256} = utils;
 
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -37,7 +37,7 @@ describe('setOutcome', () => {
   it('Reverts when called directly from an EOA', async () => {
     const reasonString = 'Only the NitroAdjudicator is authorized';
     const regex = new RegExp(
-      '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
+      '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
     );
     await expect(
       AssetHolder.setAssetOutcomeHash(channelId, keccak256(outcomeContent))

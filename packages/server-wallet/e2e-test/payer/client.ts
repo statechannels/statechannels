@@ -1,7 +1,7 @@
-import {AddressZero} from '@ethersproject/constants';
 import axios from 'axios';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
-import {Wallet} from 'ethers';
+import {Wallet, constants} from 'ethers';
+const {AddressZero} = constants;
 import {makeDestination, BN, Message} from '@statechannels/wallet-core';
 import {Message as WireMessage} from '@statechannels/wire-format';
 
