@@ -1,0 +1,32 @@
+diff --git a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
+index 602f0ee..6d53aad 100644
+--- a/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
++++ b/node_modules/@ethereum-waffle/compiler/dist/cjs/saveOutput.js
+@@ -41,10 +41,10 @@ function getMinimalContent(contractJson, config) {
+     return JSON.stringify({ abi, bytecode }, null, 2);
+ }
+ async function saveOutputSingletons(output, config, filesystem = fsOps) {
+-    for (const [, file] of Object.entries(output.contracts)) {
++    for (const [source_path, file] of Object.entries(output.contracts)) {
+         for (const [contractName, contractJson] of Object.entries(file)) {
+             const filePath = path_1.join(config.outputDirectory, `${contractName}.json`);
+-            filesystem.writeFile(filePath, getContent(contractJson, config));
++            filesystem.writeFile(filePath, getContent(contractJson, output.sources[source_path] ? output.sources[source_path].ast : undefined, source_path, contractName, 'unknown', config));
+         }
+     }
+ }
+@@ -68,8 +68,13 @@ async function saveOutputCombined(output, config, filesystem = fsOps) {
+     output.sourceList = allSources;
+     filesystem.writeFile(path_1.join(config.outputDirectory, 'Combined-Json.json'), JSON.stringify(output, null, 2));
+ }
+-function getContent(contractJson, config) {
++function getContent(contractJson, ast, sourcePath, contractName, compilerVersion, config) {
+     contractJson.bytecode = contractJson.evm.bytecode.object;
++    contractJson.sourcePath = sourcePath;
++    contractJson.ast = ast;
++    contractJson.contractName = contractName;
++    contractJson.compiler = {version: compilerVersion};
++    contractJson.networks = {};
+     if (config.outputHumanReadableAbi) {
+         contractJson.humanReadableAbi = getHumanReadableAbi_1.getHumanReadableAbi(contractJson.abi);
+     }

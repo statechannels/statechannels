@@ -1,43 +1,50 @@
-fs = require('fs');
-path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+// Compilation with js config
+const {compileAndSave, compile} = require('@ethereum-waffle/compiler');
 
-if (process.env.NODE_ENV !== 'production') {
-  const {configureEnvVariables} = require('@statechannels/devtools');
-  configureEnvVariables();
-}
+async function main() {
+  let compilerType = 'solcjs';
+  if (process.env.USE_NATIVE_SOLC === 'true') {
+    console.log('Using native solc for compilation');
+    compilerType = 'native';
+  } else {
+    console.log('Using solcjs for compilation');
+  }
 
-const {spawn} = require('child_process');
+  const config = {
+    compilerType,
+    compilerVersion: '0.6.2',
+    sourceDirectory: './contracts',
+    outputDirectory: './build/contracts',
+    outputType: 'multiple',
+    compilerOptions: {
+      outputSelection: {
+        '*': {
+          '*': [
+            'evm.bytecode.object',
+            'evm.deployedBytecode.object',
+            'abi',
+            'evm.bytecode.sourceMap',
+            'evm.deployedBytecode.sourceMap',
+          ],
+          '': ['ast'],
+        },
+      },
+    },
+  };
 
-const cmd = 'yarn';
-const args = ['run', 'etherlime', 'compile', '--buildDirectory=./build/contracts', '--runs=200'];
-
-if (process.env.USE_NATIVE_SOLC === 'true') {
-  console.log('Using native solc version for compilation');
-  args.push('--solcVersion=native');
-}
-
-const compile = spawn(cmd, args);
-
-compile.stdout.on('data', data => {
-  console.log(data.toString());
-});
-
-compile.stderr.on('data', data => {
-  throw data.toString();
-});
-
-compile.on('close', code => {
+  // compile and save the output
+  await compileAndSave(config);
   stripArtifacts();
-  process.exit(code);
-});
+}
 
 // strip out uneeded entries from artifacts
 function stripArtifacts() {
   const files = fs.readdirSync(path.resolve(__dirname, '../build/contracts'));
   console.log('Stripping uneeded entries from the following artifacts: ', files);
-  for (file in files) {
+  for (let file in files) {
     let artifact = require(path.resolve(__dirname, '../build/contracts/' + files[file]));
     // delete artifact['ast']; // we need this to generate documentation
     delete artifact['legacyAst'];
@@ -48,3 +55,5 @@ function stripArtifacts() {
     );
   }
 }
+
+main();
