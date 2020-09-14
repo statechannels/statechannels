@@ -89,5 +89,7 @@ describe('Stress tests', () => {
 
   afterAll(async () => {
     await killServer(receiverServer);
+    await knexReceiver.destroy();
+    await knexPayer.destroy();
   });
 });
