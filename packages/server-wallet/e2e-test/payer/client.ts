@@ -12,6 +12,9 @@ import {payerConfig} from '../../src/config';
 
 export default class PayerClient {
   private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet(payerConfig));
+  public async destroy(): Promise<void> {
+    await this.wallet.destroy();
+  }
   private time = timerFactory('payerClient');
   constructor(private readonly pk: Bytes32, private readonly receiverHttpServerURL: string) {}
 

@@ -89,7 +89,6 @@ export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerC
 export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
 export const killServer = async ({server}: ReceiverServer): Promise<void> => {
   kill(server.pid);
-  await knexReceiver.destroy();
 };
 
 export async function seedTestChannels(

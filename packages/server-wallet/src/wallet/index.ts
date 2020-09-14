@@ -106,6 +106,10 @@ export class Wallet implements WalletInterface {
     this.takeActions = this.takeActions.bind(this);
   }
 
+  public async destroy(): Promise<void> {
+    await this.knex.destroy();
+  }
+
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
     const {states, channelState} = await Store.getStates(channelId, this.knex);
 

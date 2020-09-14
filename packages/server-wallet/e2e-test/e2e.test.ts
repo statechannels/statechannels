@@ -48,6 +48,7 @@ beforeEach(async () => {
 afterAll(async () => {
   await killServer(receiverServer);
   await knexPayer.destroy();
+  await knexReceiver.destroy();
 });
 
 describe('e2e', () => {
@@ -63,6 +64,10 @@ describe('e2e', () => {
     // Gets participant info for testing convenience
     payer = payerClient.me;
     receiver = await payerClient.getReceiversParticipantInfo();
+  });
+
+  afterAll(async () => {
+    await payerClient.destroy();
   });
 
   it('can do a simple end-to-end flow with no signed states', async () => {
