@@ -182,7 +182,7 @@ jobs:
       - log_stats:
           file: prepare-stats
       - <<: *restore_dep
-      - run: yarn --frozen-lockfile
+      - run: yarn --frozen-lockfile --cache-folder ~.cache/yarn
       - run: git diff --exit-code
       - <<: *save_dep
 
