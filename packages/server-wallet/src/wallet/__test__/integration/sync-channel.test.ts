@@ -2,16 +2,22 @@ import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
+import {defaultConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
   await truncate(knex);
-  w = new Wallet();
+  w = new Wallet(defaultConfig);
+});
+
+afterEach(async () => {
+  // tear down Wallet's db connection
+  w.knex.destroy();
 });
 
 beforeEach(async () => seedAlicesSigningWallet(knex));
@@ -38,7 +44,7 @@ it('returns an outgoing message with the latest state', async () => {
     ],
   });
 
-  const inserted = await Channel.query().insert(c);
+  const inserted = await Channel.query(w.knex).insert(c);
   expect(inserted.vars).toMatchObject([runningState, nextState]);
 
   const channelId = c.channelId;
@@ -71,7 +77,7 @@ it('returns an outgoing message with the latest state', async () => {
     channelResult: runningState,
   });
 
-  const updated = await Channel.forId(channelId, undefined);
+  const updated = await Channel.forId(channelId, w.knex);
   expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
 });
 

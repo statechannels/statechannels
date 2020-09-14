@@ -107,7 +107,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
-    const {states, channelState} = await Store.getStates(channelId, undefined);
+    const {states, channelState} = await Store.getStates(channelId, this.knex);
 
     const {participants, myIndex} = channelState;
 
@@ -294,10 +294,11 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(message: Message): MultipleChannelResult {
+    const knex = this.knex;
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
       return async ({channelId}: ChannelRequest): Promise<void> => {
-        const {states: signedStates, channelState} = await Store.getStates(channelId, undefined);
+        const {states: signedStates, channelState} = await Store.getStates(channelId, knex);
 
         const {participants, myIndex} = channelState;
 

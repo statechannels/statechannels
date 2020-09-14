@@ -15,7 +15,10 @@ import {stateVars} from '../fixtures/state-vars';
 import {defaultConfig} from '../../../config';
 
 const wallet = new Wallet(defaultConfig);
-
+afterAll(async () => {
+  // tear down Wallet's db connection
+  wallet.knex.destroy();
+});
 beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 
 it("doesn't throw on an empty message", () => {
@@ -229,13 +232,13 @@ describe('when there is a request provided', () => {
 
   it('appends message with single state to the outbox satisfying a GetChannel request', async () => {
     // Set up test by adding a single state into the DB via pushMessage call
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
     const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
     await wallet.pushMessage(message({signedStates}));
 
     // Get the channelId of that which was added
-    const [{channelId}] = await Channel.query().select();
+    const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
@@ -251,7 +254,7 @@ describe('when there is a request provided', () => {
   });
 
   it('appends message with multiple states to the outbox satisfying a GetChannel request', async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [
@@ -262,7 +265,7 @@ describe('when there is a request provided', () => {
     await wallet.pushMessage(message({signedStates}));
 
     // Get the channelId of that which was added
-    const [{channelId}] = await Channel.query().select();
+    const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(

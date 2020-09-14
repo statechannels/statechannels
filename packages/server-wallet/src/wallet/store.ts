@@ -141,15 +141,15 @@ export const Store = recordFunctionMetrics({
   },
   getChannel: async function(
     channelId: Bytes32,
-    txOrKnex: Transaction | Knex
+    txOrKnex: TransactionOrKnex
   ): Promise<ChannelState | undefined> {
     return (await Channel.forId(channelId, txOrKnex))?.protocolState;
   },
   getStates: async function(
     channelId: Bytes32,
-    tx: Transaction | undefined
+    txOrKnex: TransactionOrKnex
   ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
-    const channel = await Channel.forId(channelId, tx);
+    const channel = await Channel.forId(channelId, txOrKnex);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
 
