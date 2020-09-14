@@ -55,3 +55,5 @@ function stripArtifacts() {
     );
   }
 }
+
+main();
