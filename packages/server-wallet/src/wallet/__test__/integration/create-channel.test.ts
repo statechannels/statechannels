@@ -11,6 +11,10 @@ beforeEach(async () => {
   await truncate(w.knex);
 });
 
+afterEach(async () => {
+  await w.knex.destroy();
+});
+
 describe('happy path', () => {
   beforeEach(async () => seedAlicesSigningWallet(w.knex));
 

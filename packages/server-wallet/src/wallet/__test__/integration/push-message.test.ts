@@ -17,7 +17,7 @@ import {defaultConfig} from '../../../config';
 const wallet = new Wallet(defaultConfig);
 afterAll(async () => {
   // tear down Wallet's db connection
-  wallet.knex.destroy();
+  await wallet.knex.destroy();
 });
 beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 

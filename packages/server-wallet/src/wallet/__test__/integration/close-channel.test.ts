@@ -17,7 +17,15 @@ beforeEach(async () => {
   w = new Wallet(defaultConfig);
 });
 
+afterEach(async () => {
+  await w.knex.destroy();
+});
+
 beforeEach(async () => seedAlicesSigningWallet(knex));
+
+afterAll(async () => {
+  await knex.destroy();
+});
 
 it("signs a final state when it's my turn", async () => {
   const appData = '0x0f00';

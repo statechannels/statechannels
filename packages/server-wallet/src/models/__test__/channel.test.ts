@@ -10,6 +10,7 @@ import {channel} from './fixtures/channel';
 const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 beforeEach(async () => seedAlicesSigningWallet(knex));
+afterAll(async () => await knex.destroy());
 
 it('can insert Channel instances to, and fetch them from, the database', async () => {
   const vars = [stateWithHashSignedBy()()];

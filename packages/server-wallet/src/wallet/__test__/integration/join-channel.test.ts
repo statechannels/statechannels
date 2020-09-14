@@ -16,6 +16,10 @@ beforeEach(async () => {
   await truncate(w.knex);
 });
 
+afterEach(async () => {
+  await w.knex.destroy();
+});
+
 beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
 describe('directly funded app', () => {
