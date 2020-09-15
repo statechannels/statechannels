@@ -131,7 +131,7 @@ describe('concurrency', () => {
   test('sign state does not block concurrent updates', async () => {
     await Promise.all(
       _.range(NUM_ATTEMPTS).map(() =>
-        Store.signState(channelId, next(c.latest), knex)
+        Store.signState(channelId, next(c.latest), knex as any)
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
