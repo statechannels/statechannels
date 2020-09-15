@@ -1,7 +1,8 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
+import _ from 'lodash';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction} from './actions';
+import {signState, noAction, submitTransaction} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -28,6 +29,27 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   return funded;
 };
 
+const myTurnToFund = ({app}: ProtocolState): boolean => {
+  if (!app.supported) return false;
+  if (app.chainServiceRequests.get('fund')) return false;
+
+  const myDestination = app.participants[app.myIndex].destination;
+  const allocation = checkThat(app.supported?.outcome, isSimpleAllocation);
+  const currentFunding = app.funding(allocation.assetHolderAddress);
+  const allocationsBeforeMe = _.takeWhile(
+    allocation.allocationItems,
+    a => a.destination !== myDestination
+  );
+  const targetFunding = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+  return BN.gte(currentFunding, targetFunding);
+};
+
+const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
+  isPrefundSetup(ps.app.supported) &&
+  isPrefundSetup(ps.app.latestSignedByMe) &&
+  myTurnToFund(ps) &&
+  submitTransaction({transactionRequest: {}, transactionId: ''});
+
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
@@ -40,4 +62,4 @@ const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   signState({channelId: ps.app.channelId, ...ps.app.supported});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  signPostFundSetup(ps) || signFinalState(ps) || noAction;
+  signPostFundSetup(ps) || fundChannel(ps) || signFinalState(ps) || noAction;

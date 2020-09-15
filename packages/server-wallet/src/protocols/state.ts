@@ -12,6 +12,15 @@ import {Address, Uint256} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
 
+type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
+/**
+ * todo: the values of this dictionary should represent the parameter with which the api is called.
+ * - fund: the value is the asset holder address
+ * - withdraw: might not need a value?
+ * - challenge: the value is the state with which challenge is called.
+ */
+type ChainServiceRequests = Map<ChainServiceApi, boolean>;
+
 /*
 The ChannelState type is the data that protocols need about a given channel to decide what to do next.
 */
@@ -24,6 +33,7 @@ export type ChannelState = {
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => Uint256;
+  chainServiceRequests: ChainServiceRequests;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
