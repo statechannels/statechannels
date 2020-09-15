@@ -201,6 +201,7 @@ export class Wallet implements WalletInterface {
           appData,
           outcome,
         },
+        this.walletConfig.skipEvmValidation,
         tx
       );
 
@@ -212,7 +213,12 @@ export class Wallet implements WalletInterface {
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      const {outgoing, channelResult} = await Store.signState(
+        channelId,
+        nextState,
+        this.walletConfig.skipEvmValidation,
+        tx
+      );
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
@@ -249,7 +255,7 @@ export class Wallet implements WalletInterface {
         recordFunctionMetrics(UpdateChannel.updateChannel({channelId, appData, outcome}, channel))
       );
       const {outgoing, channelResult} = await timer('signing state', async () =>
-        Store.signState(channelId, nextState, tx)
+        Store.signState(channelId, nextState, this.walletConfig.skipEvmValidation, tx)
       );
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
@@ -267,7 +273,12 @@ export class Wallet implements WalletInterface {
     };
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(CloseChannel.closeChannel(channel));
-      const {outgoing, channelResult} = await Store.signState(channelId, nextState, tx);
+      const {outgoing, channelResult} = await Store.signState(
+        channelId,
+        nextState,
+        this.walletConfig.skipEvmValidation,
+        tx
+      );
 
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
@@ -323,7 +334,7 @@ export class Wallet implements WalletInterface {
     }
 
     const channelIds = await Channel.transaction(this.knex, async tx => {
-      return await Store.pushMessage(message, tx);
+      return await Store.pushMessage(message, this.walletConfig.skipEvmValidation, tx);
     });
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
@@ -372,7 +383,12 @@ export class Wallet implements WalletInterface {
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
             case 'SignState': {
-              const {outgoing} = await Store.signState(action.channelId, action, tx);
+              const {outgoing} = await Store.signState(
+                action.channelId,
+                action,
+                this.walletConfig.skipEvmValidation,
+                tx
+              );
               outgoing.map(n => outbox.push(n.notice));
               return;
             }

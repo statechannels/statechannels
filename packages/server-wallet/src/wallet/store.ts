@@ -28,7 +28,6 @@ import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
-import {defaultConfig} from '../config';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -105,6 +104,7 @@ export const Store = recordFunctionMetrics({
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
+    skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction since assSignedState requires it
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(`signState ${channelId}`);
@@ -120,7 +120,7 @@ export const Store = recordFunctionMetrics({
     const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding state', async () =>
-      this.addSignedState(channel, signedState, tx)
+      this.addSignedState(channel, signedState, skipEvmValidation, tx)
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
@@ -161,9 +161,13 @@ export const Store = recordFunctionMetrics({
     return (await Channel.query(knex)).map(channel => channel.protocolState);
   },
 
-  pushMessage: async function(message: Message, tx: Transaction): Promise<Bytes32[]> {
+  pushMessage: async function(
+    message: Message,
+    skipEvmValidation: boolean,
+    tx: Transaction
+  ): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, addHash(ss), tx);
+      await this.addSignedState(undefined, addHash(ss), skipEvmValidation, tx);
     }
 
     for (const o of message.objectives || []) {
@@ -187,6 +191,7 @@ export const Store = recordFunctionMetrics({
   addSignedState: async function(
     maybeChannel: Channel | undefined,
     signedState: SignedStateWithHash,
+    skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction because validateTransitionWIthEVM requires it
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
@@ -197,8 +202,7 @@ export const Store = recordFunctionMetrics({
     const channel =
       maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
-    if (!defaultConfig.skipEvmValidation && channel.supported) {
-      // TODO be better to inspect Wallet.walletConfig in case the defaultConfig was not used or overridden
+    if (!skipEvmValidation && channel.supported) {
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>
