@@ -10,11 +10,16 @@ import {message} from '../fixtures/messages';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
-import knex from '../../../db/connection';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
+import {defaultConfig} from '../../../config';
 
-beforeEach(async () => seedAlicesSigningWallet(knex));
+const wallet = new Wallet(defaultConfig);
+afterAll(async () => {
+  // tear down Wallet's db connection
+  await wallet.knex.destroy();
+});
+beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 
 it("doesn't throw on an empty message", () => {
   return expect(wallet.pushMessage(message())).resolves.not.toThrow();
@@ -25,10 +30,8 @@ const four = 4;
 const five = 5;
 const six = 6;
 
-const wallet = new Wallet();
-
 it('stores states contained in the message, in a single channel model', async () => {
-  const channelsBefore = await Channel.query().select();
+  const channelsBefore = await Channel.query(wallet.knex).select();
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [
@@ -38,7 +41,7 @@ it('stores states contained in the message, in a single channel model', async ()
 
   await wallet.pushMessage(message({signedStates}));
 
-  const channelsAfter = await Channel.query().select();
+  const channelsAfter = await Channel.query(wallet.knex).select();
 
   expect(channelsAfter).toHaveLength(1);
   expect(channelsAfter[0].vars).toHaveLength(2);
@@ -57,7 +60,7 @@ const expectResults = async (
 
 describe('channel results', () => {
   it("returns a 'proposed' channel result when receiving the first state from a peer", async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
@@ -68,9 +71,9 @@ describe('channel results', () => {
   });
 
   it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
-    const {channelId} = await Channel.query().insert(
+    const {channelId} = await Channel.query(wallet.knex).insert(
       withSupportedState()({vars: [stateVars({turnNum: 8})]})
     );
 
@@ -81,13 +84,13 @@ describe('channel results', () => {
   });
 
   it("returns a 'closing' channel result when receiving a state in a channel that is now closing", async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const participants = [aliceP(), bobP(), charlieP()];
     const vars = [stateVars({turnNum: 9})];
     const channel = withSupportedState([alice(), bob(), charlie()])({vars, participants});
-    const {channelId} = await Channel.query().insert(channel);
+    const {channelId} = await Channel.query(wallet.knex).insert(channel);
 
     const signedStates = [stateSignedBy([bob()])({turnNum: 10, isFinal: true, participants})];
     return expectResults(wallet.pushMessage(message({signedStates})), [
@@ -96,7 +99,7 @@ describe('channel results', () => {
   });
 
   it("returns a 'closed' channel result when receiving a state in a channel that is now closed", async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [stateSignedBy([alice(), bob()])({turnNum: 9, isFinal: true})];
@@ -107,7 +110,7 @@ describe('channel results', () => {
   });
 
   it('stores states for multiple channels', async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [
@@ -118,7 +121,7 @@ describe('channel results', () => {
 
     await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
-    const channelsAfter = await Channel.query().select();
+    const channelsAfter = await Channel.query(wallet.knex).select();
 
     expect(channelsAfter).toHaveLength(2);
     expect(channelsAfter[0].vars).toHaveLength(1);
@@ -126,20 +129,20 @@ describe('channel results', () => {
     // The Channel model adds the state hash before persisting
 
     const stateVar = signedStates.map(addHash)[1];
-    const record = await Channel.forId(calculateChannelId(stateVar), undefined);
+    const record = await Channel.forId(calculateChannelId(stateVar), wallet.knex);
 
     expect(stateVar).toMatchObject(record.vars[0]);
   });
 });
 
 it("Doesn't store stale states", async () => {
-  const channelsBefore = await Channel.query().select();
+  const channelsBefore = await Channel.query(wallet.knex).select();
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
   await wallet.pushMessage(message({signedStates}));
 
-  const afterFirst = await Channel.query().select();
+  const afterFirst = await Channel.query(wallet.knex).select();
 
   expect(afterFirst).toHaveLength(1);
   expect(afterFirst[0].vars).toHaveLength(1);
@@ -148,18 +151,18 @@ it("Doesn't store stale states", async () => {
 
   await wallet.pushMessage(message({signedStates: [stateSignedBy()({turnNum: four})]}));
 
-  const afterSecond = await Channel.query().select();
+  const afterSecond = await Channel.query(wallet.knex).select();
   expect(afterSecond[0].vars).toHaveLength(1);
   expect(afterSecond).toMatchObject(afterFirst);
 
   await wallet.pushMessage(message({signedStates: [stateSignedBy()({turnNum: six})]}));
 
-  const afterThird = await Channel.query().select();
+  const afterThird = await Channel.query(wallet.knex).select();
   expect(afterThird[0].vars).toHaveLength(2);
 });
 
 it("doesn't store states for unknown signing addresses", async () => {
-  await truncate(knex, ['signing_wallets']);
+  await truncate(wallet.knex, ['signing_wallets']);
 
   const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
   return expect(wallet.pushMessage(message({signedStates}))).rejects.toThrow(
@@ -172,7 +175,7 @@ describe('when the application protocol returns an action', () => {
     const state = stateSignedBy()({outcome: simpleEthAllocation([])});
 
     const c = channel({vars: [addHash(state)]});
-    await Channel.query().insert(c);
+    await Channel.query(wallet.knex).insert(c);
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
     expect(c.supported).toBeUndefined();
@@ -184,7 +187,7 @@ describe('when the application protocol returns an action', () => {
       outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
     });
 
-    const updatedC = await Channel.forId(channelId, undefined);
+    const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
       latestSignedByMe: {turnNum: 3},
       supported: {turnNum: 0},
@@ -196,7 +199,7 @@ describe('when the application protocol returns an action', () => {
     const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
 
     const c = channel({vars: [addHash(state)]});
-    await Channel.query().insert(c);
+    await Channel.query(wallet.knex).insert(c);
 
     const {channelId} = c;
 
@@ -212,7 +215,7 @@ describe('when the application protocol returns an action', () => {
       ],
     });
 
-    const updatedC = await Channel.forId(channelId, undefined);
+    const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
       latestSignedByMe: {turnNum: turnNum + 1},
       supported: {turnNum: turnNum + 1},
@@ -229,13 +232,13 @@ describe('when there is a request provided', () => {
 
   it('appends message with single state to the outbox satisfying a GetChannel request', async () => {
     // Set up test by adding a single state into the DB via pushMessage call
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
     const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
     await wallet.pushMessage(message({signedStates}));
 
     // Get the channelId of that which was added
-    const [{channelId}] = await Channel.query().select();
+    const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
@@ -251,7 +254,7 @@ describe('when there is a request provided', () => {
   });
 
   it('appends message with multiple states to the outbox satisfying a GetChannel request', async () => {
-    const channelsBefore = await Channel.query().select();
+    const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [
@@ -262,7 +265,7 @@ describe('when there is a request provided', () => {
     await wallet.pushMessage(message({signedStates}));
 
     // Get the channelId of that which was added
-    const [{channelId}] = await Channel.query().select();
+    const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(

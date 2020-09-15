@@ -1,18 +1,21 @@
 import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
 import {ethers} from 'ethers';
+import Knex from 'knex';
+
 configureEnvVariables();
 
-import walletConfig from '../src/config';
 import adminKnex from '../src/db-admin/db-admin-connection';
-import knex from '../src/db/connection';
 import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/config';
 
-const NUM_UPDATES = walletConfig.timingMetrics ? 10 : 100;
+const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+
+const NUM_UPDATES = defaultConfig.timingMetrics ? 10 : 100;
 const iter = _.range(NUM_UPDATES);
 
 async function setup(): Promise<Channel[]> {
@@ -35,7 +38,7 @@ async function benchmark(): Promise<void> {
 
   let channels = await setup();
 
-  const wallet = new Wallet();
+  const wallet = new Wallet(defaultConfig);
 
   let key: string;
   console.time((key = `serial x ${NUM_UPDATES}`));

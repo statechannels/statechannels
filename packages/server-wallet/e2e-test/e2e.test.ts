@@ -6,7 +6,6 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {truncate} from '../src/db-admin/db-admin-connection';
-import knexPayer from '../src/db/connection';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 
 import PayerClient from './payer/client';
@@ -17,6 +16,7 @@ import {
   knexReceiver,
   startReceiverServer,
   triggerPayments,
+  knexPayer,
 } from './e2e-utils';
 
 jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds
@@ -47,6 +47,8 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await killServer(receiverServer);
+  await knexPayer.destroy();
+  await knexReceiver.destroy();
 });
 
 describe('e2e', () => {
@@ -64,6 +66,10 @@ describe('e2e', () => {
     receiver = await payerClient.getReceiversParticipantInfo();
   });
 
+  afterAll(async () => {
+    await payerClient.destroy();
+  });
+
   it('can do a simple end-to-end flow with no signed states', async () => {
     const {signedStates, objectives} = await payerClient.emptyMessage();
     expect(signedStates?.length).toBe(0);
@@ -77,7 +83,9 @@ describe('e2e', () => {
     expect(channel.status).toBe('opening');
     expect(channel.turnNum).toBe(0);
 
-    expect((await Channel.forId(channel.channelId, undefined)).protocolState).toMatchObject({
+    expect(
+      (await ChannelPayer.forId(channel.channelId, ChannelPayer.knex())).protocolState
+    ).toMatchObject({
       supported: {turnNum: 0},
     });
   });
@@ -101,7 +109,7 @@ describe('payments', () => {
   });
 
   const expectSupportedState = async (C: typeof Channel, turnNum: number): Promise<any> =>
-    expect(C.forId(channelId, undefined).then(c => c.protocolState)).resolves.toMatchObject({
+    expect(C.forId(channelId, C.knex()).then(c => c.protocolState)).resolves.toMatchObject({
       latest: {turnNum},
     });
 

@@ -1,6 +1,7 @@
+import Knex from 'knex';
+
 import {Channel} from '../src/models/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
-import knexPayer from '../src/db/connection';
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {truncate} from '../src/db-admin/db-admin-connection';
 
@@ -13,13 +14,15 @@ import {
   triggerPayments,
   seedTestChannels,
   getParticipant,
+  knexPayer,
 } from './e2e-utils';
 const expectSupportedState = async (
+  knex: Knex,
   channelId: string,
   C: typeof Channel,
   turnNum: number
 ): Promise<any> =>
-  expect(C.forId(channelId, undefined).then(c => c.protocolState)).resolves.toMatchObject({
+  expect(C.forId(channelId, knex).then(c => c.protocolState)).resolves.toMatchObject({
     latest: {turnNum},
   });
 
@@ -42,10 +45,10 @@ describe('Stress tests', () => {
   beforeEach(async () => {
     await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
     // Adds Alice to Payer's Database
-    await SWPayer.query().insert(alice());
+    await SWPayer.query(knexPayer).insert(alice());
 
     // Adds Bob to Receiver's Database
-    await SWReceiver.query().insert(bob());
+    await SWReceiver.query(knexReceiver).insert(bob());
   });
 
   it('runs the stress test with 100 channels and 1 payment call', async () => {
@@ -61,8 +64,8 @@ describe('Stress tests', () => {
     await triggerPayments(channelIds);
 
     for (const channelId of channelIds) {
-      await await expectSupportedState(channelId, ChannelPayer, 5);
-      await expectSupportedState(channelId, ChannelReceiver, 5);
+      await await expectSupportedState(knexPayer, channelId, ChannelPayer, 5);
+      await expectSupportedState(knexReceiver, channelId, ChannelReceiver, 5);
     }
   });
 
@@ -79,12 +82,14 @@ describe('Stress tests', () => {
     await triggerPayments(channelIds, numPayments);
 
     for (const channelId of channelIds) {
-      await await expectSupportedState(channelId, ChannelPayer, 3 + 2 * numPayments);
-      await expectSupportedState(channelId, ChannelReceiver, 3 + 2 * numPayments);
+      await await expectSupportedState(knexPayer, channelId, ChannelPayer, 3 + 2 * numPayments);
+      await expectSupportedState(knexReceiver, channelId, ChannelReceiver, 3 + 2 * numPayments);
     }
   });
 
   afterAll(async () => {
     await killServer(receiverServer);
+    await knexReceiver.destroy();
+    await knexPayer.destroy();
   });
 });

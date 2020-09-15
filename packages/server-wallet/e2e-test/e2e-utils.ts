@@ -8,11 +8,18 @@ import {Participant, makeDestination} from '@statechannels/wallet-core';
 import {Wallet} from 'ethers';
 import axios from 'axios';
 
-import {dbConfig} from '../src/db/config';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
+import {
+  extractDBConfigFromServerWalletConfig,
+  defaultConfig,
+  ServerWalletConfig,
+} from '../src/config';
+
+export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'payer'};
+export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
 
 import {PerformanceTimer} from './payer/timers';
 
@@ -51,7 +58,6 @@ export const startReceiverServer = (): ReceiverServer => {
     env: {
       // eslint-disable-next-line
       ...process.env,
-      SERVER_DB_NAME: 'receiver',
     },
   });
 
@@ -86,18 +92,10 @@ export const waitForServerToStart = (
     }, pingInterval);
   });
 
-export const knexReceiver: Knex = Knex({
-  ...dbConfig,
-  connection: {
-    ...(dbConfig.connection as Knex.StaticConnectionConfig),
-    database: 'receiver',
-  },
-});
-
+export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerConfig));
+export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
 export const killServer = async ({server}: ReceiverServer): Promise<void> => {
   kill(server.pid);
-
-  await knexReceiver.destroy();
 };
 
 export async function seedTestChannels(
