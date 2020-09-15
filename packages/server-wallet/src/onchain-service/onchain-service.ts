@@ -266,6 +266,7 @@ export class OnchainService implements OnchainServiceInterface {
           final: false,
           type: 'Deposited',
           destinationHoldings: destinationHoldings.toString(),
+          assetHolderAddress: event.address,
         });
       }
     );
