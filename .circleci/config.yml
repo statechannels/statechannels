@@ -29,7 +29,7 @@ integration_test_settings: &integration_test_settings
 
 save_dep: &save_dep
   save_cache:
-    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v7-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - ~/.cache/yarn
       - node_modules
@@ -49,7 +49,7 @@ save_dep: &save_dep
 
 restore_dep: &restore_dep
   restore_cache:
-    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v7-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_built_artifacts: &save_built_artifacts
   save_cache:
