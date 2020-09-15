@@ -285,7 +285,12 @@ async function getOrCreateChannel(
   if (!channel) {
     const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
 
-    const cols: RequiredColumns = {...constants, vars: [], signingAddress};
+    const cols: RequiredColumns = {
+      ...constants,
+      vars: [],
+      chainServiceRequests: [],
+      signingAddress,
+    };
     channel = Channel.fromJson(cols);
     await Channel.query(txOrKnex).insert(channel);
   }

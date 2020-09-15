@@ -31,7 +31,7 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
 
 const myTurnToFund = ({app}: ProtocolState): boolean => {
   if (!app.supported) return false;
-  if (app.chainServiceRequests.get('fund')) return false;
+  if (_.find(app.chainServiceRequests, 'fund')) return false;
 
   const myDestination = app.participants[app.myIndex].destination;
   const allocation = checkThat(app.supported?.outcome, isSimpleAllocation);

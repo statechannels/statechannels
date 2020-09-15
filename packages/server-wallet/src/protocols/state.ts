@@ -14,12 +14,13 @@ import {ProtocolAction} from './actions';
 
 type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 /**
- * todo: the values of this dictionary should represent the parameter with which the api is called.
+ * todo: This should be a dictionary instead of a list.
+ * The values of this dictionary should represent the parameter with which the api is called.
  * - fund: the value is the asset holder address
  * - withdraw: might not need a value?
  * - challenge: the value is the state with which challenge is called.
  */
-type ChainServiceRequests = Map<ChainServiceApi, boolean>;
+export type ChainServiceRequests = ChainServiceApi[];
 
 /*
 The ChannelState type is the data that protocols need about a given channel to decide what to do next.

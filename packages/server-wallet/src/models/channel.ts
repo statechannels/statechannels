@@ -15,7 +15,7 @@ import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
-import {ChannelState, toChannelResult} from '../protocols/state';
+import {ChannelState, toChannelResult, ChainServiceRequests} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
 
@@ -45,6 +45,7 @@ export interface RequiredColumns {
   readonly participants: Participant[];
   readonly vars: SignedStateVarsWithHash[];
   readonly signingAddress: Address;
+  readonly chainServiceRequests: ChainServiceRequests;
 }
 
 export type ComputedColumns = {
@@ -71,6 +72,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
+  readonly chainServiceRequests!: ChainServiceRequests;
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -105,7 +107,7 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = ['vars', 'participants'];
+  static jsonAttributes = ['vars', 'participants', 'chain_service_requests'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     const result = Channel.query(txOrKnex)
@@ -156,7 +158,16 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get protocolState(): ChannelState {
-    const {channelId, myIndex, supported, latest, latestSignedByMe, support, participants} = this;
+    const {
+      channelId,
+      myIndex,
+      supported,
+      latest,
+      latestSignedByMe,
+      support,
+      participants,
+      chainServiceRequests,
+    } = this;
     const funding = (assetHolder: Address): string => {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? result.amount : Zero;
@@ -170,6 +181,7 @@ export class Channel extends Model implements RequiredColumns {
       latest,
       latestSignedByMe,
       funding,
+      chainServiceRequests,
     };
   }
 
