@@ -45,7 +45,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  constructor(readonly timingMetrics: boolean) {
+  constructor(readonly timingMetrics: boolean, readonly skipEvmValidation: boolean) {
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
@@ -124,7 +124,6 @@ export class Store {
   async signState(
     channelId: Bytes32,
     vars: StateVariables,
-    skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction since assSignedState requires it
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
@@ -140,7 +139,7 @@ export class Store {
     const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding state', async () =>
-      this.addSignedState(channel, signedState, skipEvmValidation, tx)
+      this.addSignedState(channel, signedState, tx)
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
@@ -183,13 +182,9 @@ export class Store {
     return (await Channel.query(knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(
-    message: Message,
-    skipEvmValidation: boolean,
-    tx: Transaction
-  ): Promise<Bytes32[]> {
+  async pushMessage(message: Message, tx: Transaction): Promise<Bytes32[]> {
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, addHash(ss), skipEvmValidation, tx);
+      await this.addSignedState(undefined, addHash(ss), tx);
     }
 
     for (const o of message.objectives || []) {
@@ -213,7 +208,6 @@ export class Store {
   async addSignedState(
     maybeChannel: Channel | undefined,
     signedState: SignedStateWithHash,
-    skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction because validateTransitionWIthEVM requires it
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
@@ -224,7 +218,7 @@ export class Store {
     const channel =
       maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
-    if (!skipEvmValidation && channel.supported) {
+    if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>

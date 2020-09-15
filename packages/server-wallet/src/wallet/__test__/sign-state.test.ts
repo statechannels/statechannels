@@ -6,11 +6,15 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {defaultConfig} from '../../config';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob, alice} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
+
+const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+
 beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 
@@ -31,7 +35,7 @@ describe('signState', () => {
     await expect(Channel.query(knex).where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
     const signature = signState({...c.vars[0], ...c.channelConstants}, alice().privateKey);
-    const result = await Store.signState(c.channelId, c.vars[0], false, tx);
+    const result = await store.signState(c.channelId, c.vars[0], tx);
     expect(result).toMatchObject({
       outgoing: [
         {
@@ -51,7 +55,7 @@ describe('signState', () => {
   });
 
   it('uses a transaction', async () => {
-    const updatedC = await Store.signState(c.channelId, c.vars[0], false, tx);
+    const updatedC = await store.signState(c.channelId, c.vars[0], tx);
     expect(updatedC).toBeDefined();
 
     // Fetch the current channel outside the transaction context

@@ -6,12 +6,13 @@ import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
+import {defaultConfig} from '../../src/config';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(new Wallet(receiverConfig));
 
   private readonly myParticipantID: string = 'receiver';
-  private time = timerFactory('controller');
+  private time = timerFactory(defaultConfig.timingMetrics, 'controller');
   public get participantInfo(): Participant {
     return {
       participantId: this.myParticipantID,
