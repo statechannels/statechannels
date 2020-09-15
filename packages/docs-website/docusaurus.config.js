@@ -1,7 +1,7 @@
 module.exports = {
   title: 'statechannels docs',
   tagline: 'A tech stack for state channel applications and networks',
-  url: 'https://protocol.statechannels.org',
+  url: 'https://docs.statechannels.org',
   baseUrl: '/',
   organizationName: 'statechannels',
   projectName: 'docs-website',
