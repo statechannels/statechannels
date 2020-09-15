@@ -9,7 +9,10 @@ import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
 
 export default class ReceiverController {
-  private readonly wallet: Wallet = recordFunctionMetrics(new Wallet(receiverConfig));
+  private readonly wallet: Wallet = recordFunctionMetrics(
+    new Wallet(receiverConfig),
+    defaultConfig.timingMetrics
+  );
 
   private readonly myParticipantID: string = 'receiver';
   private time = timerFactory(defaultConfig.timingMetrics, 'controller');

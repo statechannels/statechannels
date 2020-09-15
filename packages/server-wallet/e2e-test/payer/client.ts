@@ -12,7 +12,10 @@ import {payerConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
 
 export default class PayerClient {
-  private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet(payerConfig));
+  private readonly wallet: ServerWallet = recordFunctionMetrics(
+    new ServerWallet(payerConfig),
+    payerConfig.timingMetrics
+  );
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
   }
