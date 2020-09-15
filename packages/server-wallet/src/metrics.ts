@@ -1,15 +1,15 @@
 import {performance, PerformanceObserver, PerformanceEntry} from 'perf_hooks';
 import fs from 'fs';
 
-import {defaultConfig} from './config';
+import Knex from 'knex';
 
-if (defaultConfig.timingMetrics) {
-  if (defaultConfig.metricsOutputFile) {
-    fs.writeFileSync(defaultConfig.metricsOutputFile, '', {flag: 'w'});
+export function setupMetrics(knex: Knex, metricsOutputFile: string): void {
+  if (metricsOutputFile) {
+    fs.writeFileSync(metricsOutputFile, '', {flag: 'w'});
   }
   const log = (entry: PerformanceEntry): void => {
-    if (defaultConfig.metricsOutputFile) {
-      fs.appendFileSync(defaultConfig.metricsOutputFile, JSON.stringify(entry) + '\n');
+    if (metricsOutputFile) {
+      fs.appendFileSync(metricsOutputFile, JSON.stringify(entry) + '\n');
     } else {
       console.log(JSON.stringify(entry));
     }
@@ -25,16 +25,29 @@ if (defaultConfig.timingMetrics) {
     entryTypes: ['node', 'measure', 'gc', 'function', 'http2', 'http'],
     buffered: false,
   });
+
+  // Add DB query metrics
+
+  knex
+    .on('query', query => {
+      const uid = query.__knexQueryUid;
+      performance.mark(`${uid}-start`);
+    })
+    .on('query-response', (response, query) => {
+      const uid = query.__knexQueryUid;
+      performance.mark(`${uid}-end`);
+      performance.measure(`query-${query.sql}`, `${uid}-start`, `${uid}-end`);
+    });
 }
 
 // TODO: We should return a sync and an async timer
-export const timerFactory = (prefix: string) => async <T>(
+export const timerFactory = (timingMetrics: boolean, prefix: string) => async <T>(
   label: string,
   cb: () => Promise<T>
-): Promise<T> => time(`${prefix}: ${label}`, cb);
+): Promise<T> => time(timingMetrics, `${prefix}: ${label}`, cb);
 
-async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
-  if (defaultConfig.timingMetrics) {
+async function time<T>(timingMetrics: boolean, label: string, cb: () => Promise<T>): Promise<T> {
+  if (timingMetrics) {
     performance.mark(`${label}-start`);
     const result = await cb();
     performance.mark(`${label}-end`);
@@ -46,27 +59,12 @@ async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
   }
 }
 
-// GK TODO: unbreak this
-// Add DB query metrics
-// if (defaultConfig.timingMetrics) {
-//   knex
-//     .on('query', query => {
-//       const uid = query.__knexQueryUid;
-//       performance.mark(`${uid}-start`);
-//     })
-//     .on('query-response', (response, query) => {
-//       const uid = query.__knexQueryUid;
-//       performance.mark(`${uid}-end`);
-//       performance.measure(`query-${query.sql}`, `${uid}-start`, `${uid}-end`);
-//     });
-// }
-
 /**
  * If timing metrics are turned this will wrap every function in a timerify which results in performance entries being logged
  * @param objectOrFunction The object with functions to wrap
  */
-export function recordFunctionMetrics<T>(objectOrFunction: T): T {
-  if (defaultConfig.timingMetrics) {
+export function recordFunctionMetrics<T>(objectOrFunction: T, timingMetrics = true): T {
+  if (timingMetrics) {
     if (typeof objectOrFunction === 'object') {
       const functionKeys: string[] = Object.keys(objectOrFunction)
         .concat(Object.getOwnPropertyNames(Object.getPrototypeOf(objectOrFunction)))

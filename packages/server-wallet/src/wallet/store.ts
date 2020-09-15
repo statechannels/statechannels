@@ -43,13 +43,33 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
-export const Store = recordFunctionMetrics({
-  getFirstParticipant: async function(knex: Knex): Promise<Participant> {
-    const signingAddress = await Store.getOrCreateSigningAddress(knex);
-    return {participantId: signingAddress, signingAddress, destination: makeDestination(HashZero)};
-  },
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export class Store {
+  constructor(readonly timingMetrics: boolean) {
+    if (timingMetrics) {
+      this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
+      this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
+      this.lockApp = recordFunctionMetrics(this.lockApp);
+      this.signState = recordFunctionMetrics(this.signState);
+      this.getChannel = recordFunctionMetrics(this.getChannel);
+      this.getStates = recordFunctionMetrics(this.getStates);
+      this.getChannels = recordFunctionMetrics(this.getChannels);
+      this.addObjective = recordFunctionMetrics(this.addObjective);
+      this.pushMessage = recordFunctionMetrics(this.pushMessage);
+      this.addSignedState = recordFunctionMetrics(this.addSignedState);
+    }
+  }
 
-  getOrCreateSigningAddress: async function(knex: Knex): Promise<string> {
+  async getFirstParticipant(knex: Knex): Promise<Participant> {
+    const signingAddress = await this.getOrCreateSigningAddress(knex);
+    return {
+      participantId: signingAddress,
+      signingAddress,
+      destination: makeDestination(HashZero),
+    };
+  }
+
+  async getOrCreateSigningAddress(knex: Knex): Promise<string> {
     const randomWallet = ethers.Wallet.createRandom();
     // signing_wallets table allows for only one row via database constraints
     try {
@@ -68,7 +88,7 @@ export const Store = recordFunctionMetrics({
       }
       throw error;
     }
-  },
+  }
 
   /**
    *
@@ -79,14 +99,14 @@ export const Store = recordFunctionMetrics({
    * on a single row in the Channels table. This guarantees that at most one `cb` can be executing
    * concurrently across all wallets.
    */
-  lockApp: async function<T>(
+  async lockApp<T>(
     knex: Knex,
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
     return knex.transaction(async tx => {
-      const timer = timerFactory(`lock app ${channelId}`);
+      const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer(
         'getting channel',
         async () =>
@@ -99,15 +119,15 @@ export const Store = recordFunctionMetrics({
       if (!channel) return onChannelMissing(channelId);
       return timer('critical code', async () => criticalCode(tx, channel.protocolState));
     });
-  },
+  }
 
-  signState: async function(
+  async signState(
     channelId: Bytes32,
     vars: StateVariables,
     skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction since assSignedState requires it
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const timer = timerFactory(`signState ${channelId}`);
+    const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
@@ -138,14 +158,16 @@ export const Store = recordFunctionMetrics({
     const {channelResult} = channel;
 
     return {outgoing, channelResult};
-  },
-  getChannel: async function(
+  }
+
+  async getChannel(
     channelId: Bytes32,
     txOrKnex: TransactionOrKnex
   ): Promise<ChannelState | undefined> {
     return (await Channel.forId(channelId, txOrKnex))?.protocolState;
-  },
-  getStates: async function(
+  }
+
+  async getStates(
     channelId: Bytes32,
     txOrKnex: TransactionOrKnex
   ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
@@ -155,13 +177,13 @@ export const Store = recordFunctionMetrics({
 
     const {vars, channelConstants, protocolState: channelState} = channel;
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
-  },
+  }
 
-  getChannels: async function(knex: Knex): Promise<ChannelState[]> {
+  async getChannels(knex: Knex): Promise<ChannelState[]> {
     return (await Channel.query(knex)).map(channel => channel.protocolState);
-  },
+  }
 
-  pushMessage: async function(
+  async pushMessage(
     message: Message,
     skipEvmValidation: boolean,
     tx: Transaction
@@ -178,24 +200,24 @@ export const Store = recordFunctionMetrics({
     // TODO: generate channelIds from objectives
     const objectiveChannelIds: Bytes32[] = [];
     return stateChannelIds.concat(objectiveChannelIds);
-  },
+  }
 
-  addObjective: async function(
+  async addObjective(
     _objective: Objective,
     _tx: Transaction
   ): Promise<Either<StoreError, undefined>> {
     // TODO: Implement this
     return Promise.resolve(right(undefined));
-  },
+  }
 
-  addSignedState: async function(
+  async addSignedState(
     maybeChannel: Channel | undefined,
     signedState: SignedStateWithHash,
     skipEvmValidation: boolean,
     tx: Transaction // Insist on a transaction because validateTransitionWIthEVM requires it
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
-    const timer = timerFactory(`add signed state ${channelId}`);
+    const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
     await timer('validating signatures', async () => validateSignatures(signedState));
 
@@ -235,8 +257,8 @@ export const Store = recordFunctionMetrics({
     );
 
     return result;
-  },
-});
+  }
+}
 
 class StoreError extends WalletError {
   readonly type = WalletError.errors.StoreError;
