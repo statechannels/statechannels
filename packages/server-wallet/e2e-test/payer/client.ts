@@ -8,7 +8,7 @@ import {Message as WireMessage} from '@statechannels/wire-format';
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
-import {payerConfig} from '../../src/config';
+import {payerConfig} from '../e2e-utils';
 
 export default class PayerClient {
   private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet(payerConfig));

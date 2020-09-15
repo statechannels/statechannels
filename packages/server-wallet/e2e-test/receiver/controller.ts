@@ -5,7 +5,7 @@ import {Participant} from '@statechannels/client-api-schema';
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet} from '../../src/wallet';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
-import {receiverConfig} from '../../src/config';
+import {receiverConfig} from '../e2e-utils';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(new Wallet(receiverConfig));

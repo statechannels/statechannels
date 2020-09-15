@@ -52,9 +52,6 @@ export const defaultConfig: ServerWalletConfig = {
   metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
 };
 
-export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'payer'};
-export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
-
 export function extractDBConfigFromServerWalletConfig(
   serverWalletConfig: ServerWalletConfig
 ): Config {

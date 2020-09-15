@@ -12,7 +12,14 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
-import {extractDBConfigFromServerWalletConfig, receiverConfig, payerConfig} from '../src/config';
+import {
+  extractDBConfigFromServerWalletConfig,
+  defaultConfig,
+  ServerWalletConfig,
+} from '../src/config';
+
+export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'payer'};
+export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
 
 import {PerformanceTimer} from './payer/timers';
 
