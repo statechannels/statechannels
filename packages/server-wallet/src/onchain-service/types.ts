@@ -41,6 +41,7 @@ export interface FundingEvent {
   channelId: Bytes32;
   amount: string;
   destinationHoldings: string;
+  assetHolderAddress: Address;
 }
 
 // Configuration for sending transactions, all values have defaults
