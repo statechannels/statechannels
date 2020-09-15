@@ -1,10 +1,16 @@
 import {configureEnvVariables} from '@statechannels/devtools';
+import Knex from 'knex';
+
 configureEnvVariables();
 
 import adminKnex from '../src/db-admin/db-admin-connection';
-import knex from '../src/db/connection';
+import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';
+
+export let testKnex: Knex;
 
 beforeAll(async () => {
+  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();
 });
@@ -17,5 +23,5 @@ afterAll(async () => {
   // Otherwise, jest will not exit within the required one second after the test
   // suite has finished
   await adminKnex.destroy();
-  await knex.destroy();
+  await testKnex.destroy();
 });

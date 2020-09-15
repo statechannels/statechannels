@@ -5,10 +5,10 @@ import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
 configureEnvVariables();
 
-import {dbConfig} from '../../src/db/config';
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
+import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../../src/config';
 
 import {PerformanceTimer} from './timers';
 
@@ -42,7 +42,9 @@ export default {
   handler: async (argv: {[key: string]: any} & Argv['argv']): Promise<void> => {
     const {database, numPayments, channels} = argv;
 
-    const knex = Knex(_.merge(dbConfig, {connection: {database}}));
+    const knex = Knex(
+      _.merge(extractDBConfigFromServerWalletConfig(defaultConfig), {connection: {database}})
+    );
     Model.knex(knex);
 
     const payerClient = recordFunctionMetrics(

@@ -3,9 +3,13 @@ import Objection from 'objection';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {addHash} from '../../state-utils';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {defaultConfig} from '../../config';
 
 import {createState} from './fixtures/states';
 import {alice} from './fixtures/signing-wallets';
+
+const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
 
 describe('addSignedState', () => {
   let tx: Objection.Transaction;
@@ -13,7 +17,7 @@ describe('addSignedState', () => {
   afterEach(async () => tx.rollback());
 
   beforeEach(async () => {
-    tx = await Channel.startTransaction();
+    tx = await Channel.startTransaction(knex);
   });
 
   const BOB_SIGNATURE =
@@ -24,7 +28,7 @@ describe('addSignedState', () => {
       signatures: [{signer: alice().address, signature: BOB_SIGNATURE}],
     });
 
-    await expect(Store.addSignedState(undefined, signedState, tx)).rejects.toThrow(
+    await expect(store.addSignedState(undefined, signedState, knex as any)).rejects.toThrow(
       'Invalid signature'
     );
   });

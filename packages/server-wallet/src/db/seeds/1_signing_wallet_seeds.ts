@@ -8,7 +8,7 @@ const seeds = [alice()];
 
 export async function seedAlicesSigningWallet(knex: Knex): Promise<void> {
   await truncate(knex);
-  await SigningWallet.query().insert(seeds);
+  await SigningWallet.query(knex).insert(seeds);
 }
 
 // This is the function that `yarn knex seed` executes

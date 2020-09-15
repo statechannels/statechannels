@@ -1,8 +1,8 @@
+import Knex from 'knex';
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
 import {ethers} from 'ethers';
 
 import {Address, Uint48} from '../type-aliases';
-import knex from '../db/connection';
 import {WalletError, Values} from '../errors/wallet-error';
 
 export class Nonce extends Model {
@@ -33,10 +33,10 @@ export class Nonce extends Model {
     return json;
   }
 
-  static async next(addresses: Address[]): Promise<number> {
+  static async next(knex: Knex, addresses: Address[]): Promise<number> {
     const insertQuery = knex('nonces').insert({addresses});
 
-    return Nonce.knex()
+    return knex
       .raw(
         `
       ${insertQuery} ON CONFLICT (addresses)
@@ -46,10 +46,10 @@ export class Nonce extends Model {
       .then(res => res.rows[0].value);
   }
 
-  async use(): Promise<void> {
-    const {rows} = await Nonce.knex().raw(
+  async use(knex: Knex): Promise<void> {
+    const {rows} = await knex.raw(
       `
-        ${Nonce.knexQuery().insert(this)}
+        ${knex('nonces').insert(this)}
         ON CONFLICT (addresses) DO UPDATE
         SET value = EXCLUDED.value WHERE EXCLUDED.value > NONCES.value
         RETURNING NONCES.value

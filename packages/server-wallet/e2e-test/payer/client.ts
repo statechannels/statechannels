@@ -8,10 +8,18 @@ import {Message as WireMessage} from '@statechannels/wire-format';
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
+import {payerConfig} from '../e2e-utils';
+import {defaultConfig} from '../../src/config';
 
 export default class PayerClient {
-  private readonly wallet: ServerWallet = recordFunctionMetrics(new ServerWallet());
-  private time = timerFactory('payerClient');
+  private readonly wallet: ServerWallet = recordFunctionMetrics(
+    new ServerWallet(payerConfig),
+    payerConfig.timingMetrics
+  );
+  public async destroy(): Promise<void> {
+    await this.wallet.destroy();
+  }
+  private time = timerFactory(defaultConfig.timingMetrics, 'payerClient');
   constructor(private readonly pk: Bytes32, private readonly receiverHttpServerURL: string) {}
 
   public readonly participantId = 'payer';

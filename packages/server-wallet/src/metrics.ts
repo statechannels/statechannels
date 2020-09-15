@@ -1,16 +1,15 @@
 import {performance, PerformanceObserver, PerformanceEntry} from 'perf_hooks';
 import fs from 'fs';
 
-import walletConfig from './config';
-import knex from './db/connection';
+import Knex from 'knex';
 
-if (walletConfig.timingMetrics) {
-  if (walletConfig.metricsOutputFile) {
-    fs.writeFileSync(walletConfig.metricsOutputFile, '', {flag: 'w'});
+export function setupMetrics(knex: Knex, metricsOutputFile: string): void {
+  if (metricsOutputFile) {
+    fs.writeFileSync(metricsOutputFile, '', {flag: 'w'});
   }
   const log = (entry: PerformanceEntry): void => {
-    if (walletConfig.metricsOutputFile) {
-      fs.appendFileSync(walletConfig.metricsOutputFile, JSON.stringify(entry) + '\n');
+    if (metricsOutputFile) {
+      fs.appendFileSync(metricsOutputFile, JSON.stringify(entry) + '\n');
     } else {
       console.log(JSON.stringify(entry));
     }
@@ -26,29 +25,9 @@ if (walletConfig.timingMetrics) {
     entryTypes: ['node', 'measure', 'gc', 'function', 'http2', 'http'],
     buffered: false,
   });
-}
 
-// TODO: We should return a sync and an async timer
-export const timerFactory = (prefix: string) => async <T>(
-  label: string,
-  cb: () => Promise<T>
-): Promise<T> => time(`${prefix}: ${label}`, cb);
+  // Add DB query metrics
 
-async function time<T>(label: string, cb: () => Promise<T>): Promise<T> {
-  if (walletConfig.timingMetrics) {
-    performance.mark(`${label}-start`);
-    const result = await cb();
-    performance.mark(`${label}-end`);
-    performance.measure(label, `${label}-start`, `${label}-end`);
-
-    return result;
-  } else {
-    return await cb();
-  }
-}
-
-// Add DB query metrics
-if (walletConfig.timingMetrics) {
   knex
     .on('query', query => {
       const uid = query.__knexQueryUid;
@@ -61,12 +40,31 @@ if (walletConfig.timingMetrics) {
     });
 }
 
+// TODO: We should return a sync and an async timer
+export const timerFactory = (timingMetrics: boolean, prefix: string) => async <T>(
+  label: string,
+  cb: () => Promise<T>
+): Promise<T> => time(timingMetrics, `${prefix}: ${label}`, cb);
+
+async function time<T>(timingMetrics: boolean, label: string, cb: () => Promise<T>): Promise<T> {
+  if (timingMetrics) {
+    performance.mark(`${label}-start`);
+    const result = await cb();
+    performance.mark(`${label}-end`);
+    performance.measure(label, `${label}-start`, `${label}-end`);
+
+    return result;
+  } else {
+    return await cb();
+  }
+}
+
 /**
  * If timing metrics are turned this will wrap every function in a timerify which results in performance entries being logged
  * @param objectOrFunction The object with functions to wrap
  */
-export function recordFunctionMetrics<T>(objectOrFunction: T): T {
-  if (walletConfig.timingMetrics) {
+export function recordFunctionMetrics<T>(objectOrFunction: T, timingMetrics = true): T {
+  if (timingMetrics) {
     if (typeof objectOrFunction === 'object') {
       const functionKeys: string[] = Object.keys(objectOrFunction)
         .concat(Object.getOwnPropertyNames(Object.getPrototypeOf(objectOrFunction)))

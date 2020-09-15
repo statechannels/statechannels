@@ -1,5 +1,6 @@
-import {Model, Transaction} from 'objection';
+import {Model} from 'objection';
 import {Zero} from '@statechannels/wallet-core';
+import Knex from 'knex';
 
 import {Uint256, Bytes32, Address} from '../type-aliases';
 
@@ -24,11 +25,11 @@ export class Funding extends Model implements RequiredColumns {
   readonly assetHolder!: Address;
 
   static async getFundingAmount(
+    knex: Knex,
     channelId: Bytes32,
-    assetHolder: Address,
-    tx: Transaction | undefined
+    assetHolder: Address
   ): Promise<Uint256> {
-    const result = await Funding.query(tx)
+    const result = await Funding.query(knex)
       .where({channelId, assetHolder})
       .first();
 
@@ -36,19 +37,19 @@ export class Funding extends Model implements RequiredColumns {
   }
 
   static async updateFunding(
+    knex: Knex,
     channelId: Bytes32,
     amount: Uint256,
-    assetHolder: Address,
-    tx: Transaction | undefined
+    assetHolder: Address
   ): Promise<Funding> {
-    const existing = await Funding.query(tx)
+    const existing = await Funding.query(knex)
       .where({channelId, assetHolder})
       .first();
 
     if (!existing) {
-      return await Funding.query(tx).insert({channelId, amount, assetHolder});
+      return await Funding.query(knex).insert({channelId, amount, assetHolder});
     } else {
-      return await Funding.query(tx)
+      return await Funding.query(knex)
         .update({channelId, amount, assetHolder})
         .where({channelId, assetHolder})
         .returning('*')
