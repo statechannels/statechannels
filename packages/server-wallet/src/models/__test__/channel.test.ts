@@ -1,13 +1,9 @@
-import Knex from 'knex';
-
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../../config';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 
 import {channel} from './fixtures/channel';
-
-const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 beforeEach(async () => seedAlicesSigningWallet(knex));
 afterAll(async () => await knex.destroy());
