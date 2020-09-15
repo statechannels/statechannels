@@ -105,10 +105,10 @@ export const Store = recordFunctionMetrics({
   signState: async function(
     channelId: Bytes32,
     vars: StateVariables,
-    txOrKnex: TransactionOrKnex
+    tx: Transaction // Insist on a transaction since assSignedState requires it
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(`signState ${channelId}`);
-    let channel = await timer('getting channel', async () => Channel.forId(channelId, txOrKnex));
+    let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
@@ -120,7 +120,7 @@ export const Store = recordFunctionMetrics({
     const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding state', async () =>
-      this.addSignedState(channel, signedState, txOrKnex)
+      this.addSignedState(channel, signedState, tx)
     );
 
     const sender = channel.participants[channel.myIndex].participantId;
@@ -187,7 +187,7 @@ export const Store = recordFunctionMetrics({
   addSignedState: async function(
     maybeChannel: Channel | undefined,
     signedState: SignedStateWithHash,
-    txOrKnex: TransactionOrKnex
+    tx: Transaction // Insist on a transaction because validateTransitionWIthEVM requires it
   ): Promise<Channel> {
     const channelId = calculateChannelId(signedState);
     const timer = timerFactory(`add signed state ${channelId}`);
@@ -195,15 +195,14 @@ export const Store = recordFunctionMetrics({
     await timer('validating signatures', async () => validateSignatures(signedState));
 
     const channel =
-      maybeChannel ||
-      (await timer('get channel', async () => getOrCreateChannel(signedState, txOrKnex)));
+      maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
 
     if (!defaultConfig.skipEvmValidation && channel.supported) {
       // TODO be better to inspect Wallet.walletConfig in case the defaultConfig was not used or overridden
       const {supported} = channel;
       if (
         !(await timer('validating transition', async () =>
-          validateTransitionWithEVM(supported, signedState, txOrKnex)
+          validateTransitionWithEVM(supported, signedState, tx)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
@@ -224,7 +223,7 @@ export const Store = recordFunctionMetrics({
     const cols = {...channel.channelConstants, vars: channel.vars};
 
     const result = await timer('updating', async () =>
-      Channel.query(txOrKnex)
+      Channel.query(tx)
         .where({channelId: channel.channelId})
         .update(cols)
         .returning('*')
