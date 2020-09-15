@@ -31,6 +31,7 @@ save_dep: &save_dep
   save_cache:
     key: v6-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
+      - ~/.cache/yarn
       - node_modules
       - packages/benchmarking/node_modules
       - packages/channel-client/node_modules
