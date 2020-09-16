@@ -19,6 +19,7 @@ import {channel, withSupportedState} from '../../../models/__test__/fixtures/cha
 import {stateVars} from '../fixtures/state-vars';
 import {defaultConfig} from '../../../config';
 
+jest.setTimeout(10_000);
 const wallet = new Wallet(defaultConfig);
 
 function createChannelFromState(signedState: SignedState): CreateChannelWire {
