@@ -36,7 +36,7 @@
     "clsx": "^1.1.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
-    "mermaid": "^8.7.0",
+    "mermaid": "^8.8.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "remarkable-admonitions": "0.2.1"
