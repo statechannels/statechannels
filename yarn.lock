@@ -25689,9 +25689,9 @@ solidity-parser-diligence@^0.4.16:
   resolved "https://registry.npmjs.org/solidity-parser-diligence/-/solidity-parser-diligence-0.4.18.tgz#1ec8c29d320afe048db941828f142dec3e97f657"
   integrity sha512-mauO/qG2v59W9sOn5TYV2dS7+fvFKqIHwiku+TH82e1Yca4H8s6EDG12ZpXO2cmgLlCKX3FOqqC73aYLB8WwNg==
 
-"solidoc@https://github.com/statechannels/solidoc.git#1cba9fb16e66caa1b91e2322b3b80456a5bd9f78":
+"solidoc@https://github.com/statechannels/solidoc.git#a4d4d244e367c6cf654079d1f157d5eb5903b9af":
   version "1.0.4"
-  resolved "https://github.com/statechannels/solidoc.git#1cba9fb16e66caa1b91e2322b3b80456a5bd9f78"
+  resolved "https://github.com/statechannels/solidoc.git#a4d4d244e367c6cf654079d1f157d5eb5903b9af"
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"
