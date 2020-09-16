@@ -5,7 +5,7 @@ const chainServiceRequests = 'chain_service_requests';
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table =>
-    table.specificType(chainServiceRequests, 'text[]')
+    table.specificType(chainServiceRequests, 'text[]').notNullable()
   );
 }
 
