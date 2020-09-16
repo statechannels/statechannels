@@ -2,15 +2,17 @@ import {utils, BigNumber} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
 
+import {Destination} from './types';
+
 export interface DepositedEvent {
-  destination: string;
+  destination: Destination;
   amountDeposited: BigNumber;
   destinationHoldings: BigNumber;
 }
 
 export interface AssetTransferredEvent {
   channelId: string;
-  destination: string;
+  destination: Destination;
   amount: BigNumber;
 }
 

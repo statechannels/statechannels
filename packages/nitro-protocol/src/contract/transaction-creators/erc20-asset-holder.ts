@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
+import {Destination} from '../types';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -42,7 +43,7 @@ export function createSetOutcomeTransaction(
   );
 }
 export function createDepositTransaction(
-  destination: string,
+  destination: Destination,
   expectedHeld: string,
   amount: string
 ): ethers.providers.TransactionRequest {

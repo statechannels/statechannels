@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
+import {Destination} from '../types';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -43,7 +44,7 @@ export function createSetOutcomeTransaction(
 }
 
 export function createDepositTransaction(
-  destination: string,
+  destination: Destination,
   expectedHeld: string,
   amount: string
 ): ethers.providers.TransactionRequest {

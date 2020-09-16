@@ -1,6 +1,6 @@
 import {utils} from 'ethers';
 
-import {Address, Bytes, Bytes32, Uint256} from './types';
+import {Address, Bytes, Bytes32, Destination, Uint256} from './types';
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
@@ -10,7 +10,7 @@ export enum AssetOutcomeType {
 // Guarantee and functions
 export interface Guarantee {
   targetChannelId: Bytes32;
-  destinations: Bytes32[];
+  destinations: Destination[];
 }
 
 export function encodeGuarantee(guarantee: Guarantee): Bytes32 {

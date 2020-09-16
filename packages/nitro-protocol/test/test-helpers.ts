@@ -13,12 +13,13 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
+import {Destination} from '../src';
 
 // Interfaces
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: BigNumberish;
+  [destination: string]: BigNumberish; // TODO I don't think we can use the Destination type here?
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
@@ -136,7 +137,7 @@ export const newConcludedEvent = (contract: ethers.Contract, channelId: string) 
   });
 };
 
-export const newDepositedEvent = (contract: ethers.Contract, destination: string) => {
+export const newDepositedEvent = (contract: ethers.Contract, destination: Destination) => {
   const filter = contract.filters.Deposited(destination);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventDestination, amountDeposited, amountHeld, event) => {
@@ -158,7 +159,7 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   });
 };
 
-export const newAssetTransferredEvent = (destination: string, payout: number) => ({
+export const newAssetTransferredEvent = (destination: Destination, payout: number) => ({
   destination: destination.toLowerCase(),
   amount: payout,
 });
@@ -180,11 +181,11 @@ export function randomChannelId(channelNonce = 0) {
 }
 
 export const randomExternalDestination = () =>
-  '0x' +
-  ethers.Wallet.createRandom()
-    .address.slice(2, 42)
-    .padStart(64, '0')
-    .toLowerCase();
+  ('0x' +
+    ethers.Wallet.createRandom()
+      .address.slice(2, 42)
+      .padStart(64, '0')
+      .toLowerCase()) as Destination;
 
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
