@@ -19,7 +19,7 @@ import {Destination, Uint256} from '../src';
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: Uint256; // TODO I don't think we can use the Destination type here?
+  [destination: string]: BigNumberish;
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
@@ -300,7 +300,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     const allocation: Allocation = [];
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
-        destination,
+        destination: destination as Destination,
         amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString() as Uint256,
       })
     );
