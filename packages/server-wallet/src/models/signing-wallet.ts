@@ -4,13 +4,13 @@ import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
-import {fastSignState} from '../utilities/signatures';
+import {WorkerManager} from '../utilities/workers/manager';
 
 export class SigningWallet extends Model {
   readonly id!: number;
   readonly privateKey!: Bytes32;
   readonly address!: Address;
-
+  static manager = new WorkerManager();
   static tableName = 'signing_wallets';
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
@@ -48,7 +48,8 @@ export class SigningWallet extends Model {
   async signState(state: StateWithHash): Promise<SignatureEntry> {
     return {
       signer: this.address,
-      signature: (await fastSignState(state, this.privateKey)).signature,
+      signature: (await SigningWallet.manager.concurrentSignState(state, this.privateKey))
+        .signature,
     };
   }
 }
