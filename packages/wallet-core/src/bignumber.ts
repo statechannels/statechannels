@@ -1,6 +1,5 @@
 import {BigNumber as EthersBigNumber, BigNumberish} from 'ethers';
-
-import {Uint256} from './types';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 type T = BigNumberish;
 

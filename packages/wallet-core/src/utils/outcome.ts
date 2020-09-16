@@ -1,18 +1,12 @@
 import * as _ from 'lodash';
 import {ethers} from 'ethers';
 
-import {
-  AllocationItem,
-  SimpleAllocation,
-  SimpleGuarantee,
-  Outcome,
-  Allocation,
-  Destination
-} from '../types';
+import {AllocationItem, SimpleAllocation, SimpleGuarantee, Outcome, Allocation} from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BN, Zero} from '../bignumber';
 
 import {checkThat} from './helpers';
+import {Destination} from '@statechannels/nitro-protocol';
 
 export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return outcome.type === 'SimpleAllocation';
@@ -36,7 +30,7 @@ export const simpleEthAllocation = (allocationItems: AllocationItem[]): SimpleAl
 
 export const simpleEthGuarantee = (
   targetChannelId: string,
-  ...destinations: string[]
+  ...destinations: Destination[]
 ): SimpleGuarantee => ({
   type: 'SimpleGuarantee',
   destinations,

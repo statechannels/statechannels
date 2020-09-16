@@ -2,7 +2,7 @@ import {utils, BigNumber} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
 
-import {Destination} from './types';
+import {Address, Destination} from './types';
 
 export interface DepositedEvent {
   destination: Destination;
@@ -42,7 +42,7 @@ export function convertBytes32ToAddress(bytes32: string): string {
 // e.g.,
 // 0x9546E319878D2ca7a21b481F873681DF344E0Df8 becomes
 // 0x0000000000000000000000009546E319878D2ca7a21b481F873681DF344E0Df8
-export function convertAddressToBytes32(address: string): string {
+export function convertAddressToBytes32(address: Address): Destination {
   const normalizedAddress = BigNumber.from(address).toHexString();
   if (normalizedAddress.length !== 42) {
     throw new Error(
@@ -51,5 +51,5 @@ export function convertAddressToBytes32(address: string): string {
   }
 
   // We pad to 66 = (32*2) + 2('0x')
-  return utils.hexZeroPad(normalizedAddress, 32);
+  return utils.hexZeroPad(normalizedAddress, 32) as Destination;
 }

@@ -19,7 +19,7 @@ import {Destination, Uint256} from '../src';
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: BigNumberish; // TODO I don't think we can use the Destination type here?
+  [destination: string]: Uint256; // TODO I don't think we can use the Destination type here?
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}

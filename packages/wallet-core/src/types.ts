@@ -44,7 +44,7 @@ export interface SimpleGuarantee {
   type: 'SimpleGuarantee';
   targetChannelId: string;
   assetHolderAddress: string;
-  destinations: string[];
+  destinations: Destination[];
 }
 export interface MixedAllocation {
   type: 'MixedAllocation';
@@ -60,7 +60,7 @@ export function isAllocation(outcome: Outcome): outcome is Allocation {
 }
 
 export interface ChannelConstants {
-  chainId: string;
+  chainId: Uint256;
   participants: Participant[];
   channelNonce: number;
   appDefinition: string;

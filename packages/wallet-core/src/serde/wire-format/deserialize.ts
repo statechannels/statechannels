@@ -20,6 +20,7 @@ import {
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
 import {getSignerAddress} from '../../state-utils';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 export function convertToInternalParticipant(participant: {
   destination: string;
@@ -40,12 +41,12 @@ export function deserializeMessage(message: WireMessage): Message {
 }
 
 export function deserializeState(state: SignedStateWire): SignedState {
-  const stateWithoutChannelId = {...state};
-  delete stateWithoutChannelId.channelId;
   const deserializedState = {
-    ...stateWithoutChannelId,
+    ...state,
     outcome: deserializeOutcome(state.outcome),
-    participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
+    participants: state.participants.map(convertToInternalParticipant),
+    channelId: undefined,
+    chainId: state.chainId as Uint256 // TODO Remove this
   };
 
   return {

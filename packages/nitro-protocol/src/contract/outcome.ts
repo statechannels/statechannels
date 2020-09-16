@@ -38,7 +38,7 @@ export function isGuarantee(
 // Allocation and functions
 export type Allocation = AllocationItem[];
 export interface AllocationItem {
-  destination: Bytes32;
+  destination: Destination;
   amount: Uint256;
 }
 

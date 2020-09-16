@@ -8,7 +8,10 @@ import {
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
   convertAddressToBytes32,
-  convertBytes32ToAddress
+  convertBytes32ToAddress,
+  Destination,
+  Channel,
+  Uint256
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
@@ -20,7 +23,6 @@ import {
   Outcome,
   AllocationItem,
   SignedState,
-  Destination,
   SimpleAllocation,
   SignatureEntry
 } from './types';
@@ -28,7 +30,11 @@ import {BN} from './bignumber';
 
 export function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
-  const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
+  const channel: Channel = {
+    channelNonce,
+    chainId,
+    participants: participants.map(x => x.signingAddress)
+  };
 
   return {
     ..._.pick(state, 'appData', 'isFinal', 'challengeDuration', 'appDefinition', 'turnNum'),
@@ -137,7 +143,7 @@ export const firstState = (
   appData: appData || '0x',
   isFinal: false,
   turnNum: 0,
-  chainId: chainId || '0x01',
+  chainId: chainId || ('0x01' as Uint256),
   channelNonce,
   challengeDuration,
   appDefinition,

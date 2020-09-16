@@ -1,6 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-
-import {Destination} from './types';
+import {Destination} from '@statechannels/nitro-protocol';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {

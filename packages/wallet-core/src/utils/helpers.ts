@@ -1,7 +1,7 @@
 import {hexZeroPad} from '@ethersproject/bytes';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {BN} from '../bignumber';
-import {Uint256} from '../types';
 export function unreachable(x: never) {
   return x;
 }

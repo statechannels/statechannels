@@ -1,3 +1,4 @@
+import {Destination} from '@statechannels/nitro-protocol';
 /**
  * Ethereum Address
  * @pattern  ^0x([a-fA-F0-9]{40})|0$
@@ -45,7 +46,7 @@ export type Allocations = Allocation[]; // included for backwards compatibility
 export interface Guarantee {
   assetHolderAddress: Address;
   targetChannelId: Bytes32;
-  destinations: Bytes32[];
+  destinations: Destination[];
 }
 
 export type Guarantees = Guarantee[];
@@ -62,7 +63,7 @@ export function isAllocations(outcome: Outcome): outcome is Allocations {
 }
 
 export interface SignedState {
-  chainId: string;
+  chainId: Uint256;
   participants: Participant[];
   channelNonce: Uint48;
   appDefinition: Address;

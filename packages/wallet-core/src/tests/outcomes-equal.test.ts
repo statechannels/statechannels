@@ -1,8 +1,9 @@
 import {constants} from 'ethers';
 const {AddressZero, HashZero} = constants;
+import {Destination} from '@statechannels/nitro-protocol';
 
 import {outcomesEqual} from '../state-utils';
-import {SimpleAllocation, Destination} from '../types';
+import {SimpleAllocation} from '../types';
 import {BN} from '../bignumber';
 
 const simpleAllocation1: SimpleAllocation = {
