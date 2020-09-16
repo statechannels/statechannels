@@ -1,6 +1,5 @@
 import {State, simpleEthAllocation} from '@statechannels/wallet-core';
-import {Wallet, ethers, logger} from 'ethers';
-import _ from 'lodash';
+import {Wallet, ethers} from 'ethers';
 
 import {addHash} from '../../../state-utils';
 import {participant} from '../../../wallet/__test__/fixtures/participants';
