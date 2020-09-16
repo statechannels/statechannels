@@ -11,25 +11,28 @@ The following diagram shows how the contracts inherit from one another. Click on
 
 <Mermaid
   chart='
-flowchart TD
+graph TD
 linkStyle default interpolate basis
-SafeMath
+SafeMath([SafeMath])
+Outcome([Outcome])
 IAssetHolder
 AssetHolder
 ERC20AssetHolder
 ETHAssetHolder
 TESTAssetHolder
 IAssetHolder--> AssetHolder
+SafeMath-.-> AssetHolder
+Outcome-.-> AssetHolder
 AssetHolder-->ETHAssetHolder
 AssetHolder-->ERC20AssetHolder
 AssetHolder-->TESTAssetHolder
-classDef Contract fill:#ffffff;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
-classDef Abstract fill:#afe523;
-classDef Interface fill:#bfa129;
-classDef TestContract fill:#fafe4f;
-classDef Library fill:#bbbb;
-class Outcome,SafeMath Library;
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
+classDef TestContract fill:#fafe4f,stroke-width:0px
+class SafeMath,Outcome Library;
 class IAssetHolder Interface;
 class AssetHolder,ETHAssetHolder,ERC20AssetHolder Contract;
 class TESTAssetHolder TestContract;
@@ -46,29 +49,31 @@ click TESTAssetHolder "/contract-api/natspec/TESTAssetHolder";
 
 <Mermaid
   chart='
-flowchart TD
+graph TD
 linkStyle default interpolate basis
-Outcome
+Outcome([Outcome])
 Adjudicator
 IForceMove
 ForceMove
 NitroAdjudicator
 TESTForceMove
 TESTNitroAdjudicator
+ForceMoveApp-.-> ForceMove
 IForceMove--> ForceMove
+Outcome--> NitroAdjudicator
 Adjudicator--> NitroAdjudicator
 ForceMove--> NitroAdjudicator
 ForceMove-->TESTForceMove
 NitroAdjudicator--> TESTNitroAdjudicator
-classDef Contract fill:#ffffff;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
-classDef Abstract fill:#afe523;
-classDef Interface fill:#bfa129;
-classDef TestContract fill:#fafe4f;
-classDef Library fill:#bbbb;
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class IForceMove Abstract;
-class Adjudicator Interface;
+class IForceMove Abstraction;
+class Adjudicator,ForceMoveApp Interface;
 class ForceMove Contract;
 class TESTForceMove,TESTNitroAdjudicator TestContract;
 class NitroAdjudicator DeployedContract;
@@ -87,7 +92,7 @@ click TESTNitroAdjudicator "/contract-api/natspec/TESTNitroAdjudicator";
 
 <Mermaid
   chart='
-flowchart TD
+graph TD
 linkStyle default interpolate basis
 ERC20
 IERC20
@@ -101,14 +106,14 @@ ForceMoveApp-->TrivialApp
 ForceMoveApp-->SingleAssetPayments
 IERC20-->ERC20
 ERC20-->Token
-classDef Contract fill:#ffffff;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
-classDef Abstract fill:#afe523;
-classDef Interface fill:#bfa129;
-classDef TestContract fill:#fafe4f;
-classDef Library fill:#bbbb;
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class ForceMoveApp Interface;
+class ForceMoveApp,IERC20 Interface;
 class SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
 class Token TestContract;
 click CountingApp "/contract-api/natspec/CountingApp";
@@ -129,19 +134,19 @@ click TrivialApp "/contract-api/natspec/TrivialApp";
 
 <Mermaid
   chart="
-graph LR
+graph TD
 linkStyle default interpolate basis
 Abstraction-->|Inherited by| Contract
 Contract-->|Inherited by| TestContract
 Interface-->|Inherited by| Contract
-Library
+Library([Library])-.->|Imported by| Contract
 DeployedContract
-classDef Contract fill:#ffffff;
-classDef Abstraction fill:#afe523;
-classDef TestContract fill:#fafe4f;
-classDef Interface fill:#bfa129;
-classDef Library fill:#bbbb;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 class Library Library;
 class Abstraction Abstraction;
 class Contract Contract;
