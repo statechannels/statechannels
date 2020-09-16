@@ -22,6 +22,10 @@ async function benchmark(): Promise<void> {
   const stateWithHash = addHash(state);
   const iter = _.range(1_000);
   const manager = new WorkerManager();
+  // warm up the threads
+  await Promise.all(
+    _.range(5).map(() => manager.concurrentSignState(stateWithHash, wallet.privateKey))
+  );
   console.time('fastSignState');
   const result = iter.map(async () => fastSignState(stateWithHash, wallet.privateKey));
   await Promise.all(result);

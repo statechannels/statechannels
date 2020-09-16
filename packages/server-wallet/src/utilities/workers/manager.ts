@@ -12,6 +12,7 @@ export class WorkerManager {
     destroy: (worker: Worker): Promise<number> => worker.terminate(),
     min: 1,
     max: 5,
+    reapIntervalMillis: 2147483647,
   });
 
   public async concurrentSignState(
