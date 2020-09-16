@@ -197,7 +197,7 @@ export class Wallet implements WalletInterface {
       // TODO: How do we pick a signing address?
       const signingAddress = (await SigningWallet.query(tx).first())?.address;
 
-      const cols = {...channelConstants, vars, signingAddress};
+      const cols = {...channelConstants, vars, signingAddress, chainServiceRequests: []};
 
       const {channelId} = await Channel.query(tx).insert(cols);
 
