@@ -1,5 +1,6 @@
 import {utils, Wallet} from 'ethers';
 
+import {Destination} from '../../../src';
 import {
   decodeAllocation,
   decodeGuarantee,
@@ -11,7 +12,7 @@ import {
   AllocationItem,
 } from '../../../src/contract/outcome';
 
-const destination = utils.id('d');
+const destination = utils.id('d') as Destination;
 const targetChannelId = utils.id('t');
 const destinations = [destination];
 const assetHolderAddress = Wallet.createRandom().address;
