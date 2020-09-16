@@ -137,7 +137,7 @@ click TrivialApp "/contract-api/natspec/TrivialApp";
 graph TD
 linkStyle default interpolate basis
 Abstraction-->|Inherited by| Contract
-Contract-->|Inherited by| TestContract
+Contract-->|Inherited by| TESTContract
 Interface-->|Inherited by| Contract
 Library([Library])-.->|Imported by| Contract
 DeployedContract
@@ -150,8 +150,10 @@ classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 class Library Library;
 class Abstraction Abstraction;
 class Contract Contract;
-class TestContract TestContract;
+class TESTContract TestContract;
 class Interface Interface;
 class DeployedContract DeployedContract
 "
 />
+
+`TESTContracts` are only used in development.
