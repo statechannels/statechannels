@@ -1,5 +1,8 @@
+//https: medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d
+type Brand<T, B> = T & {_brand: B};
+
 export type Address = string;
-export type Destination = Bytes32 & {_isDestination: void};
+export type Destination = Brand<Bytes32, 'Destination'>;
 
 export type Byte = string; // 0x + val(length 4)
 export type Bytes32 = string; // 0x + val(length 64)
