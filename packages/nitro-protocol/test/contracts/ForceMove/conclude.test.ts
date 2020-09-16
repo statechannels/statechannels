@@ -21,11 +21,11 @@ import {
   ongoingChallengeHash,
   setupContracts,
 } from '../../test-helpers';
-import {signStates} from '../../../src';
+import {signStates, Uint256} from '../../../src';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-const chainId = '0x1234';
+const chainId = '0x1234' as Uint256;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;

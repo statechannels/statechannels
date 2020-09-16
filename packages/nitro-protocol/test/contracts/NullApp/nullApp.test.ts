@@ -3,7 +3,7 @@ import {Contract, Wallet, ethers} from 'ethers';
 
 import {getTestProvider, setupContracts} from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
-import {getVariablePart, State, Channel} from '../../../src';
+import {getVariablePart, State, Channel, Uint256} from '../../../src';
 
 const provider = getTestProvider();
 
@@ -21,7 +21,7 @@ describe('null app', () => {
   it('should revert when validTransition is called', async () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
-      chainId: '0x1',
+      chainId: '0x1' as Uint256,
       channelNonce: 0x1,
     };
     const fromState: State = {

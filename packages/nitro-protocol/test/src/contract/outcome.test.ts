@@ -1,6 +1,6 @@
 import {utils, Wallet} from 'ethers';
 
-import {Destination} from '../../../src';
+import {Destination, Uint256} from '../../../src';
 import {
   decodeAllocation,
   decodeGuarantee,
@@ -21,7 +21,7 @@ const guarantee: Guarantee = {
   targetChannelId,
   destinations,
 };
-const allocationItems: AllocationItem[] = [{destination, amount: '0x05'}];
+const allocationItems: AllocationItem[] = [{destination, amount: '0x05' as Uint256}];
 
 const outcome = [
   {assetHolderAddress, allocationItems},

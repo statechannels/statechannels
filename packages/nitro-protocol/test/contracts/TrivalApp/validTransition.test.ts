@@ -3,6 +3,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, utils} from 'ethers';
 
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
+import {Uint256} from '../../../src';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
 import {State, VariablePart} from '../../../src/contract/state';
@@ -45,7 +46,7 @@ describe('validTransition', () => {
   it('Transitions between States with mocked-up data are valid', async () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
-      chainId: '0x1',
+      chainId: '0x1' as Uint256,
       channelNonce: 0x01,
     };
     const fromState: State = {

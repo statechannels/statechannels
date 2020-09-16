@@ -14,7 +14,7 @@ import {
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {SignedState} from '../../../src/index';
+import {SignedState, Uint256} from '../../../src/index';
 import {signChallengeMessage, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
@@ -32,7 +32,7 @@ const provider = getTestProvider();
 
 let ForceMove: Contract;
 
-const chainId = '0x1234';
+const chainId = '0x1234' as Uint256;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1;
@@ -51,7 +51,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 const twoPartyChannel: Channel = {
-  chainId: '0x1',
+  chainId: '0x1' as Uint256,
   channelNonce: 0x1,
   participants: [wallets[0].address, wallets[1].address],
 };

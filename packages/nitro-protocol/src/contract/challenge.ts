@@ -6,7 +6,7 @@ import {SignedState} from '../signatures';
 
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
-import {Address, Bytes32, Uint8, Uint48} from './types';
+import {Address, Bytes32, Uint8, Uint48, Uint256} from './types';
 
 import {Channel} from '..';
 
@@ -45,7 +45,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
   }: ChallengeRegisteredStruct = eventResult.slice(-1)[0].args;
 
   // Fixed part
-  const chainId = BigNumber.from(fixedPart[0]).toHexString();
+  const chainId = BigNumber.from(fixedPart[0]).toHexString() as Uint256;
   const participants = fixedPart[1].map(p => BigNumber.from(p).toHexString());
   const channelNonce = fixedPart[2];
   const appDefinition = fixedPart[3];
@@ -124,7 +124,11 @@ export function getChallengeClearedEvent(
         isFinal,
         outcome,
         appData,
-        channel: {chainId: BigNumber.from(chainId).toHexString(), channelNonce, participants},
+        channel: {
+          chainId: BigNumber.from(chainId).toHexString() as Uint256,
+          channelNonce,
+          participants,
+        },
         turnNum: BigNumber.from(newTurnNumRecord).toNumber(),
       },
     };

@@ -8,6 +8,7 @@ import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json'
 import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json';
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
@@ -46,7 +47,7 @@ const addresses = {
 
 // Constants for this test suite
 
-const chainId = '0x1234';
+const chainId = '0x1234' as Uint256;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 

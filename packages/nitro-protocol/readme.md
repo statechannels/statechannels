@@ -65,7 +65,7 @@ const {
 import {Channel} from '@statechannels/nitro-protocol';
 
 const channel: Channel = {
-  chainId: '0x1',
+  chainId: '0x1' as Uint256,
   channelNonce: 0,
   participants: ['0xalice...', '0xbob...'],
 };

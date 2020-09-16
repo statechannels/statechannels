@@ -1,6 +1,6 @@
 import {ethers, Wallet} from 'ethers';
 
-import {SignedState} from '../../src';
+import {SignedState, Uint256} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {signState} from '../../src/signatures';
 import {
@@ -14,7 +14,7 @@ import {
 const wallet = Wallet.createRandom();
 
 const channel: Channel = {
-  chainId: '0x1',
+  chainId: '0x1' as Uint256,
   channelNonce: 0x1,
   participants: [wallet.address],
 };

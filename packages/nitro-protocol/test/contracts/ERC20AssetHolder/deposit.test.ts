@@ -5,6 +5,7 @@ const {AddressZero} = ethers.constants;
 
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../build/contracts/Token.json';
+import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -13,7 +14,7 @@ const signer0 = provider.getSigner(0); // Convention matches setupContracts func
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
-const chainId = '0x1234';
+const chainId = '0x1234' as Uint256;
 const participants = [];
 
 // Populate destinations array

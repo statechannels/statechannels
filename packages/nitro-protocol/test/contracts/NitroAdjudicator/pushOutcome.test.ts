@@ -7,6 +7,7 @@ import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHol
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
@@ -30,7 +31,7 @@ let ERC20AssetHolder: Contract;
 
 // Constants for this test suite
 
-const chainId = '0x1234';
+const chainId = '0x1234' as Uint256;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
@@ -96,15 +97,15 @@ describe('pushOutcome', () => {
         {
           assetHolderAddress: ETHAssetHolder.address,
           allocationItems: [
-            {destination: A, amount: '1'},
-            {destination: B, amount: '2'},
+            {destination: A, amount: '1' as Uint256},
+            {destination: B, amount: '2' as Uint256},
           ],
         },
         {
           assetHolderAddress: ERC20AssetHolder.address,
           allocationItems: [
-            {destination: C, amount: '3'},
-            {destination: D, amount: '4'},
+            {destination: C, amount: '3' as Uint256},
+            {destination: D, amount: '4' as Uint256},
           ],
         },
       ];
