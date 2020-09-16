@@ -17,7 +17,10 @@ export type Uint32 = number;
 export type Uint40 = number;
 export type Uint48 = number;
 // These can only be safely stored as a hex string, which is the type that ethers returns
-export type Uint56 = string;
-export type Uint64 = string;
-export type Uint128 = string;
-export type Uint256 = string;
+// const a: Uint256 = '0xa' as Uint256;
+// const b: Uint256 = '0xb' as Uint256;
+// const s: Uint256 = a + b; // Type error: Type 'string' is not assignable to type 'Uint256'
+export type Uint56 = Brand<string, 'Uint56'>;
+export type Uint64 = Brand<string, 'Uint64'>;
+export type Uint128 = Brand<string, 'Uint128'>;
+export type Uint256 = Brand<string, 'Uint256'>;

@@ -1,11 +1,5 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
-import {Destination} from '@statechannels/nitro-protocol';
-
-export type Uint256 = string & {_isUint256: void};
-// These "integers" have "type-safe" addition:
-// const a: Uint256 = '0xa' as Uint256;
-// const b: Uint256 = '0xb' as Uint256;
-// const s: Uint256 = a + b; // Type error: Type 'string' is not assignable to type 'Uint256'
+import {Destination, Uint256} from '@statechannels/nitro-protocol';
 
 export interface DomainBudget {
   domain: string;
