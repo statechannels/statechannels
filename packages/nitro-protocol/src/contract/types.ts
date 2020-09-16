@@ -17,7 +17,7 @@ export type Uint32 = number;
 export type Uint40 = number;
 export type Uint48 = number;
 // These can only be safely stored as a hex string, which is the type that ethers returns
-export type Uint56 = number;
+export type Uint56 = string;
 export type Uint64 = string;
 export type Uint128 = string;
 export type Uint256 = string;
