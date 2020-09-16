@@ -7,102 +7,158 @@ import Mermaid from '@theme/Mermaid';
 
 The following diagram shows how the contracts inherit from one another. Click on a node to see the corresponding API.
 
+## Assets
+
 <Mermaid
   chart='
-graph LR
+graph TD
 linkStyle default interpolate basis
+SafeMath([SafeMath])
+Outcome([Outcome])
+IAssetHolder
 AssetHolder
-Adjudicator
-CountingApp
-ERC20
 ERC20AssetHolder
 ETHAssetHolder
-ForceMove
-ForceMoveApp
-IAssetHolder
-IERC20
-IForceMove
-NitroAdjudicator
-Outcome
-SafeMath
-SingleAssetPayments
 TESTAssetHolder
-TESTForceMove
-TESTNitroAdjudicator
-Token
-TrivialApp
-IForceMove--> ForceMove
-Adjudicator--> NitroAdjudicator
-ForceMove--> NitroAdjudicator
 IAssetHolder--> AssetHolder
+SafeMath-.-> AssetHolder
+Outcome-.-> AssetHolder
 AssetHolder-->ETHAssetHolder
 AssetHolder-->ERC20AssetHolder
+AssetHolder-->TESTAssetHolder
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
+classDef TestContract fill:#fafe4f,stroke-width:0px
+class SafeMath,Outcome Library;
+class IAssetHolder Interface;
+class AssetHolder,ETHAssetHolder,ERC20AssetHolder Contract;
+class TESTAssetHolder TestContract;
+class ETHAssetHolder,ERC20AssetHolder DeployedContract;
+click SafeMath "/contract-api/natspec/SafeMath";
+click Outcome "/contract-api/natspec/Outcome";
+click AssetHolder "/contract-api/natspec/AssetHolder";
+click ERC20AssetHolder "/contract-api/natspec/ERC20AssetHolder";
+click ETHAssetHolder "/contract-api/natspec/ETHAssetHolder";
+click IAssetHolder "/contract-api/natspec/IAssetHolder";
+click TESTAssetHolder "/contract-api/natspec/TESTAssetHolder";
+'
+/>
+
+## Adjudication
+
+<Mermaid
+  chart='
+graph TD
+linkStyle default interpolate basis
+Outcome([Outcome])
+Adjudicator
+IForceMove
+ForceMove
+NitroAdjudicator
+TESTForceMove
+TESTNitroAdjudicator
+ForceMoveApp-.-> ForceMove
+IForceMove--> ForceMove
+Outcome--> NitroAdjudicator
+Adjudicator--> NitroAdjudicator
+ForceMove--> NitroAdjudicator
 ForceMove-->TESTForceMove
 NitroAdjudicator--> TESTNitroAdjudicator
-AssetHolder-->TESTAssetHolder
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+class Outcome,SafeMath Library;
+class IForceMove Abstraction;
+class Adjudicator,ForceMoveApp Interface;
+class ForceMove Contract;
+class TESTForceMove,TESTNitroAdjudicator TestContract;
+class NitroAdjudicator DeployedContract;
+click ForceMoveApp "/contract-api/natspec/ForceMoveApp";
+click SafeMath "/contract-api/natspec/SafeMath";
+click Outcome "/contract-api/natspec/Outcome";
+click Adjudicator "/contract-api/natspec/Adjudicator";
+click ForceMove "/contract-api/natspec/ForceMove";
+click IForceMove "/contract-api/natspec/IForceMove";
+click NitroAdjudicator "/contract-api/natspec/NitroAdjudicator";
+click Outcome "/contract-api/natspec/Outcome";
+click SafeMath "/contract-api/natspec/SafeMath";
+click TESTForceMove "/contract-api/natspec/TESTForceMove";
+click TESTNitroAdjudicator "/contract-api/natspec/TESTNitroAdjudicator";
+'
+/>
+
+## 3rd Party
+
+<Mermaid
+  chart='
+graph TD
+linkStyle default interpolate basis
+ERC20
+IERC20
+Token
+CountingApp
+ForceMoveApp
+SingleAssetPayments
+TrivialApp
 ForceMoveApp-->CountingApp
 ForceMoveApp-->TrivialApp
 ForceMoveApp-->SingleAssetPayments
 IERC20-->ERC20
 ERC20-->Token
-classDef Contract fill:#ffffff;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
-classDef Abstract fill:#afe523;
-classDef Interface fill:#bfa129;
-classDef TestContract fill:#fafe4f;
-classDef Library fill:#bbbb;
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class IForceMove Abstract;
-class Adjudicator,IAssetHolder,ForceMoveApp,IERC20 Interface;
-class ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder,SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
-class TESTForceMove,TESTNitroAdjudicator,TESTAssetHolder,Token TestContract;
-class NitroAdjudicator,ETHAssetHolder,ERC20AssetHolder DeployedContract;
-click Adjudicator "/contract-api/natspec/Adjudicator";
-click AssetHolder "/contract-api/natspec/AssetHolder";
+class ForceMoveApp,IERC20 Interface;
+class SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
+class Token TestContract;
 click CountingApp "/contract-api/natspec/CountingApp";
 click ERC20 "/contract-api/natspec/ERC20";
-click ERC20AssetHolder "/contract-api/natspec/ERC20AssetHolder";
-click ETHAssetHolder "/contract-api/natspec/ETHAssetHolder";
-click ForceMove "/contract-api/natspec/ForceMove";
 click ForceMoveApp "/contract-api/natspec/ForceMoveApp";
-click IAssetHolder "/contract-api/natspec/IAssetHolder";
 click IERC20 "/contract-api/natspec/IERC20";
-click IForceMove "/contract-api/natspec/IForceMove";
-click NitroAdjudicator "/contract-api/natspec/NitroAdjudicator";
 click Outcome "/contract-api/natspec/Outcome";
 click SafeMath "/contract-api/natspec/SafeMath";
 click SingleAssetPayments "/contract-api/natspec/SingleAssetPayments";
-click TESTAssetHolder "/contract-api/natspec/TESTAssetHolder";
-click TESTForceMove "/contract-api/natspec/TESTForceMove";
-click TESTNitroAdjudicator "/contract-api/natspec/TESTNitroAdjudicator";
 click Token "/contract-api/natspec/Token";
 click TrivialApp "/contract-api/natspec/TrivialApp";
 '
 />
+
 ---
 
-Key:
+## Key
 
 <Mermaid
   chart="
-graph LR
+graph TD
 linkStyle default interpolate basis
 Abstraction-->|Inherited by| Contract
-Contract-->|Inherited by| TestContract
+Contract-->|Inherited by| TESTContract
 Interface-->|Inherited by| Contract
-Library
+Library([Library])-.->|Imported by| Contract
 DeployedContract
-classDef Contract fill:#ffffff;
-classDef Abstraction fill:#afe523;
-classDef TestContract fill:#fafe4f;
-classDef Interface fill:#bfa129;
-classDef Library fill:#bbbb;
-classDef DeployedContract fill:#ffffff,stroke:#000000,stroke-width:4px;
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 class Library Library;
 class Abstraction Abstraction;
 class Contract Contract;
-class TestContract TestContract;
+class TESTContract TestContract;
 class Interface Interface;
 class DeployedContract DeployedContract
 "
 />
+
+`TESTContracts` are only used in development.
