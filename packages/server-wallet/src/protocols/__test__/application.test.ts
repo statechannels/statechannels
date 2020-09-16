@@ -1,5 +1,6 @@
-import {simpleEthAllocation, BN, Uint256, State} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {protocol} from '../application';
 import {alice} from '../../wallet/__test__/fixtures/participants';

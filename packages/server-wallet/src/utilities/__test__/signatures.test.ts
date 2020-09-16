@@ -7,6 +7,7 @@ import {
   hashState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
 import {fastSignState, fastRecoverAddress} from '../signatures';
@@ -17,7 +18,7 @@ it('sign vs fastSign', async () => {
   _.range(5).map(async channelNonce => {
     const {address, privateKey} = Wallet.createRandom();
     const state: State = {
-      chainId: '0x1',
+      chainId: '0x1' as Uint256,
       channelNonce,
       participants: [participant({signingAddress: address})],
       outcome: simpleEthAllocation([]),
@@ -43,7 +44,7 @@ it('getSignerAddress vs fastRecover', async () => {
   _.range(5).map(async channelNonce => {
     const {address, privateKey} = Wallet.createRandom();
     const state: State = {
-      chainId: '0x1',
+      chainId: '0x1' as Uint256,
       channelNonce,
       participants: [participant({signingAddress: address})],
       outcome: simpleEthAllocation([]),

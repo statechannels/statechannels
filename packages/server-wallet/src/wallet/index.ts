@@ -26,8 +26,9 @@ import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Knex from 'knex';
 import {Transaction} from 'objection';
+import {Uint256} from '@statechannels/nitro-protocol';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
@@ -185,7 +186,7 @@ export class Wallet implements WalletInterface {
     const channelConstants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),
-      chainId: '0x01',
+      chainId: '0x01' as Uint256,
       challengeDuration: 9001,
       appDefinition,
     };

@@ -16,6 +16,7 @@ import {addHash} from '../../../state-utils';
 import {Fixture, fixture, overwriteOutcome} from './utils';
 import {alice, bob} from './participants';
 import {alice as aliceWallet} from './signing-wallets';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 const defaultState: State = {
   appData: '0x',
@@ -28,7 +29,7 @@ const defaultState: State = {
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,
-  chainId: '0x01',
+  chainId: '0x01' as Uint256,
   challengeDuration: 9001,
 };
 

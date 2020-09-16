@@ -1,0 +1,450 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Address": {
+      "description": "Ethereum Address",
+      "pattern": "^0x([a-fA-F0-9]{40})|0$",
+      "type": "string"
+    },
+    "Allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocationItems": {
+          "items": {
+            "$ref": "#/definitions/AllocationItem"
+          },
+          "type": "array"
+        },
+        "assetHolderAddress": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "assetHolderAddress",
+        "allocationItems"
+      ],
+      "type": "object"
+    },
+    "AllocationItem": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "destination": {
+          "$ref": "#/definitions/Bytes32"
+        }
+      },
+      "required": [
+        "destination",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "Allocations": {
+      "items": {
+        "$ref": "#/definitions/Allocation"
+      },
+      "type": "array"
+    },
+    "Bytes": {
+      "description": "Bytes",
+      "pattern": "^0x([a-fA-F0-9]*)$",
+      "type": "string"
+    },
+    "Bytes32": {
+      "description": "Bytes32",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
+    "CloseLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "CloseLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Destination": {
+      "properties": {
+        "_brand": {
+          "enum": [
+            "Destination"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "_brand"
+      ],
+      "type": "object"
+    },
+    "FundGuarantor": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "guarantorId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "jointChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "jointChannelId",
+            "ledgerId",
+            "guarantorId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundGuarantor"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "FundLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Guarantee": {
+      "additionalProperties": false,
+      "properties": {
+        "assetHolderAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "destinations": {
+          "items": {
+            "$ref": "#/definitions/Destination"
+          },
+          "type": "array"
+        },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        }
+      },
+      "required": [
+        "assetHolderAddress",
+        "targetChannelId",
+        "destinations"
+      ],
+      "type": "object"
+    },
+    "Guarantees": {
+      "items": {
+        "$ref": "#/definitions/Guarantee"
+      },
+      "type": "array"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "objectives": {
+              "items": {
+                "$ref": "#/definitions/Objective"
+              },
+              "type": "array"
+            },
+            "signedStates": {
+              "items": {
+                "$ref": "#/definitions/SignedState"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "sender": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "recipient",
+        "sender",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Objective": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/OpenChannel"
+        },
+        {
+          "$ref": "#/definitions/VirtuallyFund"
+        },
+        {
+          "$ref": "#/definitions/FundGuarantor"
+        },
+        {
+          "$ref": "#/definitions/FundLedger"
+        },
+        {
+          "$ref": "#/definitions/CloseLedger"
+        }
+      ]
+    },
+    "OpenChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "fundingStrategy": {
+              "enum": [
+                "Direct",
+                "Ledger",
+                "Virtual"
+              ],
+              "type": "string"
+            },
+            "targetChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "targetChannelId",
+            "fundingStrategy"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "OpenChannel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Guarantees"
+        },
+        {
+          "$ref": "#/definitions/Allocations"
+        }
+      ]
+    },
+    "Participant": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/definitions/Address"
+        },
+        "participantId": {
+          "type": "string"
+        },
+        "signingAddress": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "participantId",
+        "signingAddress",
+        "destination"
+      ],
+      "type": "object"
+    },
+    "SignedState": {
+      "additionalProperties": false,
+      "properties": {
+        "appData": {
+          "$ref": "#/definitions/Bytes"
+        },
+        "appDefinition": {
+          "$ref": "#/definitions/Address"
+        },
+        "chainId": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "challengeDuration": {
+          "$ref": "#/definitions/Uint48"
+        },
+        "channelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
+        "channelNonce": {
+          "$ref": "#/definitions/Uint48"
+        },
+        "isFinal": {
+          "type": "boolean"
+        },
+        "outcome": {
+          "$ref": "#/definitions/Outcome"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "turnNum": {
+          "$ref": "#/definitions/Uint48"
+        }
+      },
+      "required": [
+        "chainId",
+        "participants",
+        "channelNonce",
+        "appDefinition",
+        "challengeDuration",
+        "outcome",
+        "turnNum",
+        "appData",
+        "isFinal",
+        "channelId",
+        "signatures"
+      ],
+      "type": "object"
+    },
+    "Uint256": {
+      "description": "Uint256",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
+    "Uint48": {
+      "type": "number"
+    },
+    "VirtuallyFund": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "jointChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "targetChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "targetChannelId",
+            "jointChannelId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "VirtuallyFund"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    }
+  }
+}

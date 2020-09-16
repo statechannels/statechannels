@@ -13,6 +13,7 @@ import {
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {ChannelState, toChannelResult} from '../protocols/state';
@@ -38,7 +39,7 @@ export const COMPUTED_COLUMNS = {
   signingAddress: 'signingAddress',
 };
 export interface RequiredColumns {
-  readonly chainId: Bytes32;
+  readonly chainId: Uint256;
   readonly appDefinition: Address;
   readonly channelNonce: Uint48;
   readonly challengeDuration: Uint48;
@@ -62,7 +63,7 @@ export class Channel extends Model implements RequiredColumns {
   channelId!: Bytes32;
   vars!: SignedStateVarsWithHash[];
 
-  readonly chainId!: Bytes32;
+  readonly chainId!: Uint256;
   readonly appDefinition!: Address;
   readonly channelNonce!: Uint48;
   readonly challengeDuration!: Uint48;
