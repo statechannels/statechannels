@@ -6,6 +6,7 @@ import {participant} from '../src/wallet/__test__/fixtures/participants';
 import {fastSignState} from '../src/utilities/signatures';
 import {WorkerManager} from '../src/utilities/workers/manager';
 import {addHash} from '../src/state-utils';
+
 async function benchmark(): Promise<void> {
   const wallet = Wallet.createRandom();
   const state: State = {
@@ -20,7 +21,7 @@ async function benchmark(): Promise<void> {
     challengeDuration: 0x5,
   };
   const stateWithHash = addHash(state);
-  const iter = _.range(1_000);
+  const iter = _.range(10_000);
   const manager = new WorkerManager();
   // warm up the threads
   await Promise.all(
