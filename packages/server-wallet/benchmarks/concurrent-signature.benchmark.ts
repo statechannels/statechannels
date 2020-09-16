@@ -1,11 +1,11 @@
 import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
-import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
+import {State, simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {participant} from '../src/wallet/__test__/fixtures/participants';
 import {fastSignState} from '../src/utilities/signatures';
+import {WorkerManager} from '../src/utilities/workers/manager';
 import {addHash} from '../src/state-utils';
-
 async function benchmark(): Promise<void> {
   const wallet = Wallet.createRandom();
   const state: State = {
@@ -20,16 +20,21 @@ async function benchmark(): Promise<void> {
     challengeDuration: 0x5,
   };
   const stateWithHash = addHash(state);
-
   const iter = _.range(1_000);
-  console.time('signState');
-  iter.map(() => signState(state, wallet.privateKey));
-  console.timeEnd('signState');
-
+  const manager = new WorkerManager();
   console.time('fastSignState');
   const result = iter.map(async () => fastSignState(stateWithHash, wallet.privateKey));
   await Promise.all(result);
   console.timeEnd('fastSignState');
+
+  console.time('concurrentSignState');
+  const result2 = iter.map(async () =>
+    manager.concurrentSignState(stateWithHash, wallet.privateKey)
+  );
+  await Promise.all(result2);
+  console.timeEnd('concurrentSignState');
+
+  manager.destroy();
 }
 
 benchmark();
