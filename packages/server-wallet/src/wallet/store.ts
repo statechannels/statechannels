@@ -162,7 +162,7 @@ export class Store {
   async addChainServiceRequest(
     channelId: Bytes32,
     type: ChainServiceApi,
-    tx: Transaction // Insist on a transaction since assSignedState requires it
+    tx: Transaction
   ): Promise<void> {
     const channel = await Channel.query(tx)
       .where('channelId', channelId)
