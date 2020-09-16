@@ -36,6 +36,7 @@
   },
   "Contract API": {
     "Overview": ["contract-api/contract-inheritance"],
+    "Libraries": ["contract-api/natspec/SafeMath", "contract-api/natspec/Outcome"],
     "Base Contracts": [
       "contract-api/natspec/IForceMove",
       "contract-api/natspec/ForceMove",
