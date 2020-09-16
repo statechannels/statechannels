@@ -393,6 +393,9 @@ export class Wallet implements WalletInterface {
               outgoing.map(n => outbox.push(n.notice));
               return;
             }
+            case 'SubmitTransaction':
+              await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+              return;
             default:
               throw 'Unimplemented';
           }

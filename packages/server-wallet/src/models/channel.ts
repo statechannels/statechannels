@@ -31,6 +31,7 @@ export const REQUIRED_COLUMNS = {
   challengeDuration: 'challengeDuration',
   participants: 'participants',
   vars: 'vars',
+  chainServiceRequests: 'chainServiceRequests',
 };
 
 export const COMPUTED_COLUMNS = {
@@ -107,7 +108,7 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = ['vars', 'participants', 'chain_service_requests'];
+  static jsonAttributes = ['vars', 'participants'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     const result = Channel.query(txOrKnex)

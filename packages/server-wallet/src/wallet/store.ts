@@ -22,7 +22,7 @@ import Knex from 'knex';
 import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
-import {ChannelState} from '../protocols/state';
+import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -159,6 +159,21 @@ export class Store {
     return {outgoing, channelResult};
   }
 
+  async addChainServiceRequest(
+    channelId: Bytes32,
+    type: ChainServiceApi,
+    tx: Transaction // Insist on a transaction since assSignedState requires it
+  ): Promise<void> {
+    const channel = await Channel.query(tx)
+      .where('channelId', channelId)
+      .first();
+    const cols = {...channel, chainServiceRequests: [...channel.chainServiceRequests, type]};
+
+    await Channel.query(tx)
+      .where({channelId: channel.channelId})
+      .update(cols);
+  }
+
   async getChannel(
     channelId: Bytes32,
     txOrKnex: TransactionOrKnex
@@ -240,7 +255,11 @@ export class Store {
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols = {...channel.channelConstants, vars: channel.vars};
+    const cols = {
+      ...channel.channelConstants,
+      vars: channel.vars,
+      chainServiceRequests: channel.chainServiceRequests,
+    };
 
     const result = await timer('updating', async () =>
       Channel.query(tx)

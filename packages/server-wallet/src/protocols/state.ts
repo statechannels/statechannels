@@ -12,7 +12,7 @@ import {Address, Uint256} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
 
-type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
+export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 /**
  * todo: This should be a dictionary instead of a list.
  * The values of this dictionary should represent the parameter with which the api is called.

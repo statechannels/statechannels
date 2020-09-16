@@ -31,7 +31,7 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
 
 const myTurnToFund = ({app}: ProtocolState): boolean => {
   if (!app.supported) return false;
-  if (_.find(app.chainServiceRequests, 'fund')) return false;
+  if (app.chainServiceRequests.indexOf('fund') > -1) return false;
 
   const myDestination = app.participants[app.myIndex].destination;
   const allocation = checkThat(app.supported?.outcome, isSimpleAllocation);
@@ -48,7 +48,7 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
   myTurnToFund(ps) &&
-  submitTransaction({transactionRequest: {}, transactionId: ''});
+  submitTransaction({channelId: ps.app.channelId, transactionRequest: {}, transactionId: ''});
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
