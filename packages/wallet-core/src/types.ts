@@ -1,4 +1,5 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
+import {Destination} from '@statechannels/nitro-protocol';
 
 export type Uint256 = string & {_isUint256: void};
 // These "integers" have "type-safe" addition:
@@ -35,7 +36,7 @@ export interface StateVariables {
   isFinal: boolean;
 }
 export type StateVariablesWithHash = StateVariables & Hashed;
-export type Destination = string & {_isDestination: void};
+
 export interface AllocationItem {
   destination: Destination;
   amount: Uint256;

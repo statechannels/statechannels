@@ -87,4 +87,4 @@ import * as Transactions from './transactions';
 export {Signatures, Transactions};
 
 // types
-export {Uint256, Bytes32} from './contract/types';
+export {Uint256, Bytes32, Destination} from './contract/types';
