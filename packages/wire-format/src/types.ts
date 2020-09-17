@@ -80,7 +80,7 @@ type _Objective<Name, Data> = {
   type: Name;
   data: Data;
 };
-type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded';
+type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export type OpenChannel = _Objective<
   'OpenChannel',
   {

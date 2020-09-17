@@ -22,6 +22,7 @@ import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 
 export type SyncState = NotifyApp[];
+export type ServerWalletFundingStrategy = FundingStrategy | 'Unfunded';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -67,7 +68,7 @@ export class Channel extends Model implements RequiredColumns {
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
   readonly chainServiceRequests!: ChainServiceRequests;
-  readonly fundingStrategy!: FundingStrategy;
+  readonly fundingStrategy!: ServerWalletFundingStrategy;
 
   static get jsonSchema(): JSONSchema {
     return {

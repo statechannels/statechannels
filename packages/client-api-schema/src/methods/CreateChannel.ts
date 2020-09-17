@@ -2,7 +2,7 @@ import {Participant, Allocation, Address, ChannelResult} from '../data-types';
 import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
 import {ErrorCodes as AllErrors} from '../error-codes';
 
-export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded';
+export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];

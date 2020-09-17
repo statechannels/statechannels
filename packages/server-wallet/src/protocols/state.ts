@@ -6,9 +6,10 @@ import {
   State,
   Participant,
 } from '@statechannels/wallet-core';
-import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
+import {ChannelResult, ChannelStatus} from '@statechannels/client-api-schema';
 
 import {Address, Uint256} from '../type-aliases';
+import {ServerWalletFundingStrategy} from '../models/channel';
 
 import {ProtocolAction} from './actions';
 
@@ -35,7 +36,7 @@ export type ChannelState = {
   latestSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => Uint256;
   chainServiceRequests: ChainServiceRequests;
-  fundingStrategy: FundingStrategy;
+  fundingStrategy: ServerWalletFundingStrategy;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
