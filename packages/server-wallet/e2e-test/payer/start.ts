@@ -1,6 +1,4 @@
 import {Argv} from 'yargs';
-import {Model} from 'objection';
-import Knex from 'knex';
 import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
 configureEnvVariables();
@@ -8,7 +6,7 @@ configureEnvVariables();
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
-import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../../src/config';
+import {defaultConfig} from '../../src/config';
 
 import {PerformanceTimer} from './timers';
 
@@ -42,13 +40,11 @@ export default {
   handler: async (argv: {[key: string]: any} & Argv['argv']): Promise<void> => {
     const {database, numPayments, channels} = argv;
 
-    const knex = Knex(
-      _.merge(extractDBConfigFromServerWalletConfig(defaultConfig), {connection: {database}})
-    );
-    Model.knex(knex);
-
     const payerClient = recordFunctionMetrics(
-      new PayerClient(alice().privateKey, `http://127.0.0.1:65535`)
+      new PayerClient(alice().privateKey, `http://127.0.0.1:65535`, {
+        ...defaultConfig,
+        postgresDBName: database,
+      })
     );
 
     const performanceTimer = new PerformanceTimer(channels || [], numPayments);
