@@ -44,10 +44,14 @@ const myTurnToFund = ({app}: ProtocolState): boolean => {
   return BN.gte(currentFunding, targetFunding);
 };
 
+const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
+
+// todo: the only cases considered so far are directly funded and unfunded channels
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
   myTurnToFund(ps) &&
+  isDirectlyFunded(ps.app) &&
   submitTransaction({channelId: ps.app.channelId, transactionRequest: {}, transactionId: ''});
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>

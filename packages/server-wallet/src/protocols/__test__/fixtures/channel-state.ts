@@ -13,6 +13,7 @@ const defaultChannelState: ChannelStateWithSupported = {
   latestSignedByMe: stateWithHashSignedBy()({turnNum: 3}),
   funding: (): Uint256 => '0x00',
   chainServiceRequests: [],
+  fundingStrategy: 'Direct',
 };
 
 export const channelStateFixture = fixture(defaultChannelState);

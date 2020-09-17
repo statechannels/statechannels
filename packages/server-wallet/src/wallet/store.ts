@@ -19,7 +19,13 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
 
-import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
+import {
+  Channel,
+  SyncState,
+  RequiredColumns,
+  ChannelError,
+  CHANNEL_COLUMNS,
+} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
@@ -28,6 +34,7 @@ import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
+import {pick} from '../utilities/helpers';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -317,12 +324,17 @@ async function getOrCreateChannel(
   if (!channel) {
     const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
 
-    const cols: RequiredColumns = {
-      ...constants,
-      vars: [],
-      chainServiceRequests: [],
-      signingAddress,
-    };
+    const tempcols = pick(
+      {
+        ...constants,
+        channelId,
+        vars: [],
+        chainServiceRequests: [],
+        signingAddress,
+      },
+      ...CHANNEL_COLUMNS
+    );
+    const cols: RequiredColumns = tempcols;
     channel = Channel.fromJson(cols);
     await Channel.query(txOrKnex).insert(channel);
   }
