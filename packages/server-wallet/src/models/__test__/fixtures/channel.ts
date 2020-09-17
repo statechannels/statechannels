@@ -21,6 +21,7 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
     signingAddress: alice().address,
     vars: [],
     chainServiceRequests: [],
+    fundingStrategy: 'Direct',
   };
 
   const columns: RequiredColumns = _.merge(defaults, props);

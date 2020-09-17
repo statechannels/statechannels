@@ -32,6 +32,7 @@ export const REQUIRED_COLUMNS = [
   'participants',
   'vars',
   'chainServiceRequests',
+  'fundingStrategy',
 ] as const;
 
 export const COMPUTED_COLUMNS = ['channelId', 'signingAddress'] as const;
@@ -46,6 +47,7 @@ export interface RequiredColumns {
   readonly vars: SignedStateVarsWithHash[];
   readonly signingAddress: Address;
   readonly chainServiceRequests: ChainServiceRequests;
+  readonly fundingStrategy: FundingStrategy;
 }
 
 export type ComputedColumns = {

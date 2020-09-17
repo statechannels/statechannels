@@ -7,7 +7,7 @@ const fundingStrategy = 'funding_strategy';
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => {
     table.specificType(chainServiceRequests, 'text[]').notNullable();
-    table.string(fundingStrategy);
+    table.string(fundingStrategy).notNullable();
   });
 }
 
