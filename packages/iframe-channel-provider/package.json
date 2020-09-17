@@ -15,6 +15,7 @@
     ]
   },
   "dependencies": {
+    "compare-urls": "^2.0.0",
     "eventemitter3": "4.0.0",
     "guid-typescript": "1.0.9",
     "pino": "6.2.0"
