@@ -12,7 +12,7 @@ import {
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {ChannelState, toChannelResult, ChainServiceRequests} from '../protocols/state';
@@ -74,6 +74,7 @@ export class Channel extends Model implements RequiredColumns {
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
   readonly chainServiceRequests!: ChainServiceRequests;
+  readonly fundingStrategy!: FundingStrategy;
 
   static get jsonSchema(): JSONSchema {
     return {

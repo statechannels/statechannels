@@ -11,10 +11,10 @@ import {
   Participant,
   makeDestination,
   StateWithHash,
+  isFundLedger,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
-import {Either, right} from 'fp-ts/lib/Either';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
@@ -212,12 +212,24 @@ export class Store {
     return stateChannelIds.concat(objectiveChannelIds);
   }
 
-  async addObjective(
-    _objective: Objective,
-    _tx: Transaction
-  ): Promise<Either<StoreError, undefined>> {
-    // TODO: Implement this
-    return Promise.resolve(right(undefined));
+  async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
+    // todo: this might not be the correct objective to use
+    if (isFundLedger(objective)) {
+      const channel = await Channel.query(tx)
+        .where({channelId: objective.data.ledgerId})
+        .first();
+      if (!channel) {
+        throw new StoreError(StoreError.reasons.channelMissing);
+      }
+      const cols = {...channel, fundingStrategy: 'Direct' as 'Direct'};
+      return await Channel.query(tx)
+        .where({channelId: channel.channelId})
+        .update(cols)
+        .returning('*')
+        .first();
+    } else {
+      throw new StoreError(StoreError.reasons.unimplementedObjective);
+    }
   }
 
   async addSignedState(
@@ -286,6 +298,7 @@ class StoreError extends WalletError {
     missingSigningKey: 'Missing a signing key',
     invalidTransition: 'Invalid state transition',
     channelMissing: 'Channel not found',
+    unimplementedObjective: 'Unimplemented objective',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
