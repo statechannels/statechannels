@@ -73,7 +73,11 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promi
 
   await waitForServerToStart(receiverServer);
 
-  await triggerPayments(channelIds, NUM_PAYMENTS);
+  try {
+    await triggerPayments(channelIds, NUM_PAYMENTS);
+  } catch (error) {
+    process.exit(1);
+  }
 
   kill(receiverServer.server.pid, 'SIGINT');
 
