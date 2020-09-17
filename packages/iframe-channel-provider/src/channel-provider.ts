@@ -10,7 +10,6 @@ import {
   isJsonRpcErrorResponse,
   parseErrorResponse
 } from '@statechannels/client-api-schema';
-import {compareUrls} from 'compare-urls';
 
 import {IFrameChannelProviderInterface} from './types';
 import {WalletJsonRpcAPI} from './types/wallet-api';
@@ -18,6 +17,9 @@ import {logger} from './logger';
 import {PostMessageService} from './postmessage-service';
 import {IFrameService} from './iframe-service';
 import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const compareUrls = require('compare-urls');
 
 /**
  * Class for interacting with a statechannels wallet
