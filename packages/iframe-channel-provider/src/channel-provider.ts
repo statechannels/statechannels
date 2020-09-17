@@ -10,6 +10,7 @@ import {
   isJsonRpcErrorResponse,
   parseErrorResponse
 } from '@statechannels/client-api-schema';
+import {compareUrls} from 'compare-urls';
 
 import {IFrameChannelProviderInterface} from './types';
 import {WalletJsonRpcAPI} from './types/wallet-api';
@@ -90,7 +91,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   walletReady = (url: string) => {
     return new Promise(resolve => {
       const listener = (event: MessageEvent) => {
-        if (event.origin == url && event.data.method === 'WalletReady') {
+        if (compareUrls(event.origin, url) && event.data.method === 'WalletReady') {
           window.removeEventListener('message', listener);
           resolve();
         }
