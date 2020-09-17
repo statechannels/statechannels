@@ -84,6 +84,7 @@ type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
 export type CreateChannel = _Objective<
   'CreateChannel',
   {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     signedState: any;
     fundingStrategy: FundingStrategy;
   }
