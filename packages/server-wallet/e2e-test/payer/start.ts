@@ -33,7 +33,7 @@ export default {
         channels.map(channel => channel.toString(16))
       )
       .example(
-        'payer --database payer --channels 0xf00 0x123 0xabc',
+        'start --database payer --channels 0xf00 0x123 0xabc',
         'Makes payments with three channels'
       ),
 
