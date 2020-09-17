@@ -209,17 +209,25 @@ export class Store {
   }
 
   async pushMessage(message: Message, tx: Transaction): Promise<Bytes32[]> {
-    for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, addHash(ss), tx);
-    }
-
     for (const o of message.objectives || []) {
       await this.addObjective(o, tx);
     }
 
+    for (const ss of message.signedStates || []) {
+      await this.addSignedState(undefined, addHash(ss), tx);
+    }
+
     const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
-    // TODO: generate channelIds from objectives
-    const objectiveChannelIds: Bytes32[] = [];
+    function isDefined(s: string | undefined): s is string {
+      return s !== undefined;
+    }
+    const objectiveChannelIds =
+      message.objectives
+        ?.map(objective =>
+          isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
+        )
+        .filter(isDefined) || [];
+
     return stateChannelIds.concat(objectiveChannelIds);
   }
 
@@ -231,11 +239,11 @@ export class Store {
       const channelId = calculateChannelId(signedState);
       const singedStateWithHash = {...signedState, stateHash: hashState(signedState)};
       validateSignatures(singedStateWithHash);
-      if (await Channel.forId(channelId, tx))
+      if (await Channel.forId(channelId, tx)) {
         throw new StoreError(StoreError.reasons.duplicateChannel);
+      }
 
       const channel = await createChannel(signedState, fundingStrategy, tx);
-
       channel.vars = await addState(channel.vars, singedStateWithHash);
       validateInvariants(channel.vars, channel.myAddress);
 
@@ -351,9 +359,10 @@ async function createChannel(
     ...CHANNEL_COLUMNS
   );
   const channel = Channel.fromJson(cols);
-  await Channel.query(txOrKnex).insert(channel);
-
-  return channel;
+  return await Channel.query(txOrKnex)
+    .insert(channel)
+    .returning('*')
+    .first();
 }
 async function getChannel(
   constants: ChannelConstants,
