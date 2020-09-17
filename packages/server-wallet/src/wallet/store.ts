@@ -11,11 +11,11 @@ import {
   Participant,
   makeDestination,
   StateWithHash,
-  isFundLedger,
+  isCreateChannel,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
 
@@ -220,20 +220,33 @@ export class Store {
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
-    // todo: this might not be the correct objective to use
-    if (isFundLedger(objective)) {
-      const channel = await Channel.query(tx)
-        .where({channelId: objective.data.ledgerId})
-        .first();
-      if (!channel) {
-        throw new StoreError(StoreError.reasons.channelMissing);
-      }
-      const cols = {...channel, fundingStrategy: 'Direct' as 'Direct'};
-      return await Channel.query(tx)
+    if (isCreateChannel(objective)) {
+      const {
+        data: {signedState, fundingStrategy},
+      } = objective;
+      const channelId = calculateChannelId(signedState);
+      validateSignatures(signedState);
+      if (await Channel.forId(channelId, tx))
+        throw new StoreError(StoreError.reasons.duplicateChannel);
+
+      const channel = await createChannel(signedState, fundingStrategy, tx);
+
+      channel.vars = await addState(channel.vars, signedState);
+      validateInvariants(channel.vars, channel.myAddress);
+
+      const cols = {
+        ...channel.channelConstants,
+        vars: channel.vars,
+        chainServiceRequests: channel.chainServiceRequests,
+      };
+
+      const result = await Channel.query(tx)
         .where({channelId: channel.channelId})
         .update(cols)
         .returning('*')
         .first();
+
+      return result;
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -250,7 +263,7 @@ export class Store {
     await timer('validating signatures', async () => validateSignatures(signedState));
 
     const channel =
-      maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
+      maybeChannel || (await timer('get channel', async () => getChannel(signedState, tx)));
 
     if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
@@ -296,6 +309,7 @@ class StoreError extends WalletError {
   readonly type = WalletError.errors.StoreError;
 
   static readonly reasons = {
+    duplicateChannel: 'Expected the channel to NOT exist in the database',
     duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
@@ -312,30 +326,42 @@ class StoreError extends WalletError {
   }
 }
 
-async function getOrCreateChannel(
+async function createChannel(
+  constants: ChannelConstants,
+  fundingStrategy: FundingStrategy,
+  txOrKnex: TransactionOrKnex
+): Promise<Channel> {
+  const channelId = calculateChannelId(constants);
+
+  const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
+
+  const cols: RequiredColumns = pick(
+    {
+      ...constants,
+      channelId,
+      vars: [],
+      chainServiceRequests: [],
+      signingAddress,
+      fundingStrategy,
+    },
+    ...CHANNEL_COLUMNS
+  );
+  const channel = Channel.fromJson(cols);
+  await Channel.query(txOrKnex).insert(channel);
+
+  return channel;
+}
+async function getChannel(
   constants: ChannelConstants,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  let channel = await Channel.query(txOrKnex)
+  const channel = await Channel.query(txOrKnex)
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
-    const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
-
-    const cols: RequiredColumns = pick(
-      {
-        ...constants,
-        channelId,
-        vars: [],
-        chainServiceRequests: [],
-        signingAddress,
-      },
-      ...CHANNEL_COLUMNS
-    );
-    channel = Channel.fromJson(cols);
-    await Channel.query(txOrKnex).insert(channel);
+    throw new StoreError(StoreError.reasons.channelMissing);
   }
   return channel;
 }
