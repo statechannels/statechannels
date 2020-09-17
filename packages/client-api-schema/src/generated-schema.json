@@ -342,8 +342,7 @@
       "enum": [
         "Direct",
         "Ledger",
-        "Virtual",
-        "Unfunded"
+        "Virtual"
       ],
       "type": "string"
     },
