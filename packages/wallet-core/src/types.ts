@@ -95,7 +95,7 @@ type _Objective<Name, Data> = {
 export type CreateChannel = _Objective<
   'CreateChannel',
   {
-    signedState: SignedStateWithHash;
+    signedState: SignedState;
     fundingStrategy: FundingStrategy;
   }
 >;

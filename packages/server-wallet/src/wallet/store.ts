@@ -12,6 +12,7 @@ import {
   makeDestination,
   StateWithHash,
   isCreateChannel,
+  hashState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
@@ -174,7 +175,10 @@ export class Store {
     const channel = await Channel.query(tx)
       .where('channelId', channelId)
       .first();
-    const cols = {...channel, chainServiceRequests: [...channel.chainServiceRequests, type]};
+    const cols: RequiredColumns = {
+      ...channel,
+      chainServiceRequests: [...channel.chainServiceRequests, type],
+    };
 
     await Channel.query(tx)
       .where({channelId: channel.channelId})
@@ -225,19 +229,20 @@ export class Store {
         data: {signedState, fundingStrategy},
       } = objective;
       const channelId = calculateChannelId(signedState);
-      validateSignatures(signedState);
+      const singedStateWithHash = {...signedState, stateHash: hashState(signedState)};
+      validateSignatures(singedStateWithHash);
       if (await Channel.forId(channelId, tx))
         throw new StoreError(StoreError.reasons.duplicateChannel);
 
       const channel = await createChannel(signedState, fundingStrategy, tx);
 
-      channel.vars = await addState(channel.vars, signedState);
+      channel.vars = await addState(channel.vars, singedStateWithHash);
       validateInvariants(channel.vars, channel.myAddress);
 
-      const cols = {
-        ...channel.channelConstants,
+      const cols: RequiredColumns = {
+        ...channel,
         vars: channel.vars,
-        chainServiceRequests: channel.chainServiceRequests,
+        fundingStrategy,
       };
 
       const result = await Channel.query(tx)
@@ -287,10 +292,9 @@ export class Store {
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols = {
-      ...channel.channelConstants,
+    const cols: RequiredColumns = {
+      ...channel,
       vars: channel.vars,
-      chainServiceRequests: channel.chainServiceRequests,
     };
 
     const result = await timer('updating', async () =>
