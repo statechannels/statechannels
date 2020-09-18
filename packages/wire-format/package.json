@@ -5,6 +5,7 @@
   "author": "Tom Close",
   "contributors": [],
   "dependencies": {
+    "@statechannels/nitro-protocol": "0.3.6",
     "ajv": "6.11.0"
   },
   "devDependencies": {
