@@ -6,11 +6,12 @@ import {
   ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
 import {AddressZero} from '@ethersproject/constants';
+import {makeDestination} from '@statechannels/nitro-protocol';
 
 import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {BN} from '../../bignumber';
-import {makeDestination, assetHolderAddress} from '../../utils';
+import {assetHolderAddress} from '../../utils';
 
 export function deserializeBudgetRequest(
   budgetRequest: AppBudgetRequest,

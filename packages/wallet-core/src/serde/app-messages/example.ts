@@ -1,9 +1,9 @@
 import {Allocations} from '@statechannels/client-api-schema';
 import {hexZeroPad} from '@ethersproject/bytes';
+import {makeDestination} from '@statechannels/nitro-protocol';
 
 import {SimpleAllocation, MixedAllocation} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {makeDestination} from '../../utils';
 import {ETH_TOKEN} from '../../constants';
 import {BN} from '../../bignumber';
 

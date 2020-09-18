@@ -1,6 +1,6 @@
 import {utils} from 'ethers';
 
-import {Address, Uint256, Uint48} from './types';
+import {Address, Destination, Uint256, Uint48} from './types';
 
 export interface Channel {
   channelNonce: Uint48;
@@ -15,5 +15,5 @@ export function getChannelId(channel: Channel): Destination {
       ['uint256', 'address[]', 'uint256'],
       [chainId, participants, channelNonce]
     )
-  );
+  ) as Destination;
 }

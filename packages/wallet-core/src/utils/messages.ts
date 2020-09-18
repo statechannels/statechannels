@@ -1,6 +1,6 @@
-import {Participant} from '../types';
+import {makeDestination} from '@statechannels/nitro-protocol';
 
-import {makeDestination} from '.';
+import {Participant} from '../types';
 
 export function convertToParticipant(participant: {
   destination: string;

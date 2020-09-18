@@ -1,13 +1,9 @@
+import {makeDestination} from '@statechannels/nitro-protocol';
+
 import {BN} from '../bignumber';
 import {AllocationItem} from '../types';
 
-import {
-  Errors,
-  allocateToTarget,
-  simpleEthAllocation,
-  simpleTokenAllocation,
-  makeDestination
-} from '.';
+import {Errors, allocateToTarget, simpleEthAllocation, simpleTokenAllocation} from '.';
 
 const one = BN.from(1);
 const two = BN.from(2);

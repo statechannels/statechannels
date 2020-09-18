@@ -7,6 +7,7 @@ import {
   Message as WireMessage,
   isAllocations
 } from '@statechannels/wire-format';
+import {makeDestination, Uint256} from '@statechannels/nitro-protocol';
 
 import {
   SignedState,
@@ -18,9 +19,7 @@ import {
   Participant
 } from '../../types';
 import {BN} from '../../bignumber';
-import {makeDestination} from '../../utils';
 import {getSignerAddress} from '../../state-utils';
-import {Uint256} from '@statechannels/nitro-protocol';
 
 export function convertToInternalParticipant(participant: {
   destination: string;
