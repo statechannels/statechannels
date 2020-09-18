@@ -27,12 +27,13 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {createForceMoveTransaction} from '../../../src/transactions';
+import {toUint256} from '../../../src/contract/types';
 
 const provider = getTestProvider();
 
 let ForceMove: Contract;
 
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1;

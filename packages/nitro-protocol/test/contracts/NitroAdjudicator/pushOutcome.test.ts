@@ -16,6 +16,7 @@ import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
+import {toUint256} from '../../../src/contract/types';
 import {
   finalizedOutcomeHash,
   getTestProvider,
@@ -31,7 +32,7 @@ let ERC20AssetHolder: Contract;
 
 // Constants for this test suite
 
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const participants = ['', '', ''];
 const wallets = new Array(3);
 

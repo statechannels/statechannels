@@ -4,13 +4,13 @@ const {parseUnits} = ethers.utils;
 
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
-import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
+import {toUint256} from '../../../src/contract/types';
 import {getTestProvider, setupContracts, writeGasConsumption} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const participants = [];
 
 // Populate destinations array

@@ -6,6 +6,7 @@ const {id, keccak256} = utils;
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
+import {toUint256} from '../../../src/contract/types';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -14,7 +15,7 @@ let channelId;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const channelNonce = 0x9999;
 const outcomeContent = id('some outcome data');
 

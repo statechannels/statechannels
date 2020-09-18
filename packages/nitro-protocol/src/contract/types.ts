@@ -1,3 +1,5 @@
+import {BigNumber, BigNumberish, utils} from 'ethers';
+
 //https: medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d
 type Brand<T, B> = T & {_brand: B};
 
@@ -24,3 +26,7 @@ export type Uint56 = Brand<string, 'Uint56'>;
 export type Uint64 = Brand<string, 'Uint64'>;
 export type Uint128 = Brand<string, 'Uint128'>;
 export type Uint256 = Brand<string, 'Uint256'>;
+
+export function toUint256(bigNumberish: BigNumberish): Uint256 {
+  return utils.hexZeroPad(BigNumber.from(bigNumberish).toHexString(), 32) as Uint256;
+}

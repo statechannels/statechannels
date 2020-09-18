@@ -12,6 +12,7 @@ import {Uint256} from '../../../src';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
+import {toUint256} from '../../../src/contract/types';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
@@ -47,7 +48,7 @@ const addresses = {
 
 // Constants for this test suite
 
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const participants = ['', '', ''];
 const wallets = new Array(3);
 

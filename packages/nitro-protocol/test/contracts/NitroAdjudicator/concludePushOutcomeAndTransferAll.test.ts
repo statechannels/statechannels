@@ -28,13 +28,14 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {signStates, Uint256} from '../../../src';
+import {signStates} from '../../../src';
+import {toUint256} from '../../../src/contract/types';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
 let AssetHolder1: Contract;
 let AssetHolder2: Contract;
-const chainId = '0x1234' as Uint256;
+const chainId = toUint256('0x1234');
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
