@@ -5,6 +5,7 @@ import {ethers} from 'ethers';
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
 import {WorkerManager} from '../utilities/workers/manager';
+import {fastSignState} from '../utilities/signatures';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -48,8 +49,7 @@ export class SigningWallet extends Model {
   async signState(state: StateWithHash): Promise<SignatureEntry> {
     return {
       signer: this.address,
-      signature: (await SigningWallet.manager.concurrentSignState(state, this.privateKey))
-        .signature,
+      signature: (await fastSignState(state, this.privateKey)).signature,
     };
   }
 }
