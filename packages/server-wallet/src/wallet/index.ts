@@ -81,6 +81,9 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
+import {WorkerManager} from '../utilities/workers/manager';
+const manager = new WorkerManager();
+
 export class Wallet implements WalletInterface {
   store: Store;
 
@@ -97,7 +100,7 @@ export class Wallet implements WalletInterface {
     this.getSigningAddress = this.getSigningAddress.bind(this);
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
-    this.updateChannel = this.updateChannel.bind(this);
+    this._updateChannel = this._updateChannel.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
@@ -251,7 +254,15 @@ export class Wallet implements WalletInterface {
     return {outbox: outbox.concat(nextOutbox), channelResult: nextChannelResult};
   }
 
-  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
+  async updateChannel(args: UpdateChannelParams): SingleChannelResult {
+    return manager.updateChannel(args);
+  }
+
+  async _updateChannel({
+    channelId,
+    allocations,
+    appData,
+  }: UpdateChannelParams): SingleChannelResult {
     const timer = timerFactory(this.walletConfig.timingMetrics, `updateChannel ${channelId}`);
     const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
       throw new UpdateChannel.UpdateChannelError(
