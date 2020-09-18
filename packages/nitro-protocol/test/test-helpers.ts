@@ -14,7 +14,7 @@ import {
   AllocationItem,
 } from '../src/contract/outcome';
 import {Destination, Uint256} from '../src';
-import {toUint256} from '../src/contract/types';
+import {makeDestination, toUint256} from '../src/contract/types';
 
 // Interfaces
 
@@ -301,7 +301,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     const allocation: Allocation = [];
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
-        destination: destination as Destination,
+        destination: makeDestination(destination),
         amount: toUint256(outcomeShortHand[assetHolder][destination]),
       })
     );

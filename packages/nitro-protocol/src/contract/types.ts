@@ -31,7 +31,7 @@ export function toUint256(bigNumberish: BigNumberish): Uint256 {
   return utils.hexZeroPad(BigNumber.from(bigNumberish).toHexString(), 32) as Uint256;
 }
 
-export function makeDestination(addressOrDestination: string): Destination {
+export function makeDestination(addressOrDestination?: string): Destination {
   if (addressOrDestination.length === 42) {
     return utils.hexZeroPad(utils.getAddress(addressOrDestination), 32) as Destination;
   } else if (addressOrDestination.length === 66) {

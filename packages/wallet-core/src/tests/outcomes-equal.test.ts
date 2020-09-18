@@ -1,6 +1,6 @@
 import {constants} from 'ethers';
 const {AddressZero, HashZero} = constants;
-import {Destination} from '@statechannels/nitro-protocol';
+import {Destination, makeDestination} from '@statechannels/nitro-protocol';
 
 import {outcomesEqual} from '../state-utils';
 import {SimpleAllocation} from '../types';
@@ -9,13 +9,13 @@ import {BN} from '../bignumber';
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x2')}]
+  allocationItems: [{destination: makeDestination(HashZero), amount: BN.from('0x2')}]
 };
 
 const simpleAllocation2: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x02')}]
+  allocationItems: [{destination: makeDestination(HashZero), amount: BN.from('0x02')}]
 };
 
 describe('outcomesEqual', () => {

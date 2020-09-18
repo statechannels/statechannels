@@ -1,5 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-import {Destination} from '@statechannels/wallet-core';
+import {makeDestination} from '@statechannels/nitro-protocol';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -36,7 +36,7 @@ export const HUB_ADDRESS: string =
 if (!process.env.HUB_DESTINATION) {
   throw new Error('HUB_DESTINATION environment variable must be defined');
 }
-export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
+export const HUB_DESTINATION = makeDestination(process.env.HUB_DESTINATION);
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
   ? process.env.LOG_DESTINATION === 'console'

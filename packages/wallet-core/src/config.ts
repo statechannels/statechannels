@@ -1,5 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-import {Destination} from '@statechannels/nitro-protocol';
+import {Destination, makeDestination} from '@statechannels/nitro-protocol';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -32,7 +32,7 @@ export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
 export const HUB_ADDRESS: string =
   process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 
-export const HUB_DESTINATION = process.env.HUB_DESTINATION as Destination;
+export const HUB_DESTINATION = makeDestination(process.env.HUB_DESTINATION);
 
 export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
   ? process.env.LOG_DESTINATION === 'console'

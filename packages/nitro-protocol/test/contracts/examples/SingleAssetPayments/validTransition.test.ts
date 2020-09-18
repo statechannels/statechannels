@@ -4,7 +4,7 @@ import {Contract, ethers} from 'ethers';
 
 const {HashZero} = ethers.constants;
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
-import {Destination} from '../../../../src';
+import {Destination, makeDestination} from '../../../../src';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {
@@ -68,7 +68,7 @@ describe('validTransition', () => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
       const allocationA: Allocation = [];
       Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key as Destination, amount: balancesA[key]})
+        allocationA.push({destination: makeDestination(key), amount: balancesA[key]})
       );
       let outcomeA;
       if (isAllocation[0]) {
@@ -96,7 +96,7 @@ describe('validTransition', () => {
       const allocationB: Allocation = [];
 
       Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key as Destination, amount: balancesB[key]})
+        allocationB.push({destination: makeDestination(key), amount: balancesB[key]})
       );
 
       let outcomeB;

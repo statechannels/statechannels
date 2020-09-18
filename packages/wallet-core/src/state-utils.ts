@@ -8,10 +8,9 @@ import {
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
   convertAddressToDestination,
-  convertDestinationToAddress,
-  Destination,
   Channel,
-  Uint256
+  Uint256,
+  makeDestination
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
@@ -59,7 +58,7 @@ export function fromNitroState(state: NitroState): State {
       signingAddress: x,
       // FIXME: Get real values
       participantId: x,
-      destination: x.padStart(64, '0') as Destination
+      destination: makeDestination(x)
     }))
   };
 }
@@ -162,10 +161,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
     amount: BN.from(a.amount),
-    destination:
-      a.destination.substr(2, 22) === '00000000000000000000'
-        ? (convertDestinationToAddress(a.destination) as Destination)
-        : (a.destination as Destination)
+    destination: a.destination
   }));
 }
 

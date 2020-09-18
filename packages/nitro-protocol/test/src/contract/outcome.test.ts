@@ -1,6 +1,6 @@
 import {utils, Wallet} from 'ethers';
 
-import {Destination, Uint256} from '../../../src';
+import {Destination, makeDestination, Uint256} from '../../../src';
 import {
   decodeAllocation,
   decodeGuarantee,
@@ -12,7 +12,7 @@ import {
   AllocationItem,
 } from '../../../src/contract/outcome';
 
-const destination = utils.id('d') as Destination;
+const destination = makeDestination(utils.id('d'));
 const targetChannelId = utils.id('t');
 const destinations = [destination];
 const assetHolderAddress = Wallet.createRandom().address;

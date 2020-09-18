@@ -1,9 +1,8 @@
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
-import {Destination, Uint256} from '@statechannels/nitro-protocol';
+import {makeDestination, Uint256} from '@statechannels/nitro-protocol';
 
 import {BN} from '../../bignumber';
 import {Message, SignedState} from '../../types';
-import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
 export const wireStateFormat: WireState = {
@@ -56,7 +55,7 @@ const wireStateFormat2: WireState = {
     {
       assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
       destinations: [
-        '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7' as Destination
+        makeDestination('0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7')
       ],
       targetChannelId: '0xb08bc94ebfbe1b23c419bec2d57993d33c41b112fbbca5d51f0f18194baadcf1'
     }
