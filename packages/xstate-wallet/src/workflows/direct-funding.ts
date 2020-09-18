@@ -8,7 +8,6 @@ import {
   Outcome,
   SimpleAllocation,
   AllocationItem,
-  Destination,
   BN,
   Zero
 } from '@statechannels/wallet-core';
@@ -18,6 +17,7 @@ import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
 
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
+import {Destination} from '@statechannels/nitro-protocol';
 const {add, sub: subtract} = BN;
 
 const WORKFLOW = 'direct-funding';

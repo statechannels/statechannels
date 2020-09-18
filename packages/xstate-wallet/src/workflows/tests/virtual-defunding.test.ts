@@ -10,10 +10,10 @@ import {
   DomainBudget,
   simpleEthAllocation,
   simpleEthGuarantee,
-  makeDestination,
   BN
 } from '@statechannels/wallet-core';
 import {AddressZero, HashZero} from '@ethersproject/constants';
+import {makeDestination, toUint256} from '@statechannels/nitro-protocol';
 
 import {TestStore} from '../../test-store';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
@@ -35,7 +35,7 @@ import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 jest.setTimeout(20000);
 const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
-const chainId = '0x01';
+const chainId = toUint256('0x01');
 const challengeDuration = 10;
 const appDefinition = AddressZero;
 const alice = participants[ParticipantIdx.A];

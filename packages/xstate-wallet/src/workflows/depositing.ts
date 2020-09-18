@@ -1,6 +1,7 @@
 import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {map, filter} from 'rxjs/operators';
-import {exists, BN, Uint256} from '@statechannels/wallet-core';
+import {exists, BN} from '@statechannels/wallet-core';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';

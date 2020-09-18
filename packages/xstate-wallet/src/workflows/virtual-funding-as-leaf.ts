@@ -14,11 +14,11 @@ import {
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination,
   FundGuarantor,
   AllocationItem,
   BN
 } from '@statechannels/wallet-core';
+import {Destination, makeDestination} from '@statechannels/nitro-protocol';
 
 import {Store, supportedStateFeed} from '../store';
 import {getDataAndInvoke} from '../utils/helpers';
@@ -40,8 +40,8 @@ export const enum ParticipantIdx {
 }
 
 export type Init = {
-  targetChannelId: string;
-  jointChannelId: string;
+  targetChannelId: Destination;
+  jointChannelId: Destination;
 };
 
 type Deductions = {deductions: AllocationItem[]};

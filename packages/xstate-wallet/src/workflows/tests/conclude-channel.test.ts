@@ -9,6 +9,7 @@ import {
   BN
 } from '@statechannels/wallet-core';
 import {AddressZero} from '@ethersproject/constants';
+import {toUint256} from '@statechannels/nitro-protocol';
 
 import {Store} from '../../store';
 import {FakeChain} from '../../chain';
@@ -36,7 +37,7 @@ import {
 jest.setTimeout(20000);
 
 const {add} = BN;
-const chainId = '0x01';
+const chainId = toUint256('0x01');
 const challengeDuration = 10;
 const appDefinition = AddressZero;
 

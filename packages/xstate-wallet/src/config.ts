@@ -1,5 +1,5 @@
 import {AddressZero} from '@ethersproject/constants';
-import {makeDestination} from '@statechannels/nitro-protocol';
+import {makeDestination, toUint256, Uint256} from '@statechannels/nitro-protocol';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -20,7 +20,7 @@ export const GIT_VERSION = process.env.GIT_VERSION;
 
 export const NODE_ENV: string = process.env.NODE_ENV as string;
 
-export const CHAIN_NETWORK_ID: string = process.env.CHAIN_NETWORK_ID || '0';
+export const CHAIN_NETWORK_ID: Uint256 = toUint256(process.env.CHAIN_NETWORK_ID || '0');
 
 export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 

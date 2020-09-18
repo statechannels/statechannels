@@ -14,6 +14,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {AddressZero} from '@ethersproject/constants';
+import {toUint256} from '@statechannels/nitro-protocol';
 
 import {FakeChain, Chain} from '../../chain';
 import {TestStore} from '../../test-store';
@@ -27,7 +28,7 @@ jest.setTimeout(10000);
 const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
-const chainId = '0x01';
+const chainId = toUint256('0x01');
 const challengeDuration = 10;
 const appDefinition = AddressZero;
 

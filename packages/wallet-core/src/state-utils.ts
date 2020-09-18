@@ -10,7 +10,8 @@ import {
   convertAddressToDestination,
   Channel,
   Uint256,
-  makeDestination
+  makeDestination,
+  Destination
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
@@ -71,7 +72,7 @@ export function toNitroSignedState(signedState: SignedState): NitroSignedState[]
   return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
 }
 
-export function calculateChannelId(channelConstants: ChannelConstants): string {
+export function calculateChannelId(channelConstants: ChannelConstants): Destination {
   const {chainId, channelNonce, participants} = channelConstants;
   const addresses = participants.map(p => p.signingAddress);
   return getChannelId({chainId, channelNonce, participants: addresses});

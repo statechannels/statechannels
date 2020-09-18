@@ -1,9 +1,9 @@
+import {makeDestination, toUint256} from '@statechannels/nitro-protocol';
 import {
   Participant,
   State,
   DomainBudget,
   simpleEthAllocation,
-  makeDestination,
   BN
 } from '@statechannels/wallet-core';
 import {ethers, BigNumberish} from 'ethers';
@@ -51,7 +51,7 @@ export const appState = (turnNum: number, isFinal = false): State => ({
   ]),
   participants,
   channelNonce: 1,
-  chainId: '0x01',
+  chainId: toUint256('0x01'),
   challengeDuration: CHALLENGE_DURATION
 });
 
@@ -69,7 +69,7 @@ export const ledgerState = (
   ),
   participants,
   channelNonce: 0x02,
-  chainId: '0x01',
+  chainId: toUint256('0x01'),
   isFinal: false,
   challengeDuration: CHALLENGE_DURATION,
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',

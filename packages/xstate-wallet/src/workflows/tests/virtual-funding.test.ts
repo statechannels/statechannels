@@ -8,11 +8,11 @@ import {
   Outcome,
   State,
   simpleEthAllocation,
-  makeDestination,
   simpleEthGuarantee,
   BN
 } from '@statechannels/wallet-core';
 import {AddressZero} from '@ethersproject/constants';
+import {makeDestination, toUint256} from '@statechannels/nitro-protocol';
 
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
@@ -38,7 +38,7 @@ const {add, sub: subtract} = BN;
 jest.setTimeout(20000);
 
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
-const chainId = '0x01';
+const chainId = toUint256('0x01');
 const challengeDuration = 10;
 const appDefinition = AddressZero;
 

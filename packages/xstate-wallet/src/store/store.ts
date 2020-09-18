@@ -20,9 +20,10 @@ import {
   StateVariables,
   SimpleAllocation,
   Funding,
-  BN,
-  Uint256
+  BN
 } from '@statechannels/wallet-core';
+import {Uint256, Destination} from '@statechannels/nitro-protocol';
+import {Address} from '@statechannels/client-api-schema';
 
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB} from '../config';
@@ -478,8 +479,8 @@ export class Store {
     );
 
   public reserveFunds = (
-    assetHolderAddress: string,
-    channelId: string,
+    assetHolderAddress: Address,
+    channelId: Destination,
     amount: {send: Uint256; receive: Uint256}
   ) =>
     this.backend.transaction(

@@ -1,5 +1,6 @@
-import {DomainBudget, unreachable, Uint256} from '@statechannels/wallet-core';
+import {DomainBudget, unreachable} from '@statechannels/wallet-core';
 import {Interpreter} from 'xstate';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';

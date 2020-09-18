@@ -4,7 +4,9 @@ import {
   Transactions,
   getChallengeRegisteredEvent,
   ChallengeRegisteredEvent,
-  SignedState as NitroSignedState
+  SignedState as NitroSignedState,
+  Uint256,
+  Destination
 } from '@statechannels/nitro-protocol';
 import {
   BN,
@@ -13,8 +15,7 @@ import {
   fromNitroState,
   toNitroSignedState,
   calculateChannelId,
-  Zero,
-  Uint256
+  Zero
 } from '@statechannels/wallet-core';
 import {Contract, Wallet, utils, providers} from 'ethers';
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
@@ -375,7 +376,7 @@ export class ChainWatcher implements Chain {
   }
 
   public async deposit(
-    channelId: string,
+    channelId: Destination,
     expectedHeld: string,
     amount: string
   ): Promise<string | undefined> {

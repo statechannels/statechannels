@@ -19,10 +19,10 @@ import {
   exists,
   simpleEthAllocation,
   BN,
-  Uint256,
   serializeDomainBudget
 } from '@statechannels/wallet-core';
 import {filter, map, first} from 'rxjs/operators';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {ChannelChainInfo} from '../chain';
 import {Store} from '../store';
