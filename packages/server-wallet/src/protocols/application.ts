@@ -46,7 +46,7 @@ const myTurnToFund = ({app}: ProtocolState): boolean => {
 
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 
-// todo: the only cases considered so far are directly funded and unfunded channels
+// todo: the only cases considered so far are directly funded
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
