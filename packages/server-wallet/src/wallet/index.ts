@@ -39,8 +39,9 @@ import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {ServerWalletConfig, defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
 import {OnchainService} from '../mock-chain-service';
+import {WorkerManager} from '../utilities/workers/manager';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -81,19 +82,19 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
-import {WorkerManager} from '../utilities/workers/manager';
 const manager = new WorkerManager();
 
 export class Wallet implements WalletInterface {
   store: Store;
+  readonly walletConfig: ServerWalletConfig;
+  constructor(walletConfig: ServerWalletConfig) {
+    this.walletConfig = walletConfig || defaultConfig;
 
-  constructor(readonly walletConfig: ServerWalletConfig) {
     this.store = new Store(
       Knex(extractDBConfigFromServerWalletConfig(walletConfig)),
       walletConfig.timingMetrics,
       walletConfig.skipEvmValidation
     );
-
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
@@ -108,11 +109,11 @@ export class Wallet implements WalletInterface {
     this.takeActions = this.takeActions.bind(this);
 
     // set up timing metrics
-    if (walletConfig.timingMetrics) {
-      if (!walletConfig.metricsOutputFile) {
+    if (this.walletConfig.timingMetrics) {
+      if (!this.walletConfig.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(walletConfig.metricsOutputFile);
+      setupMetrics(this.walletConfig.metricsOutputFile);
     }
   }
 
