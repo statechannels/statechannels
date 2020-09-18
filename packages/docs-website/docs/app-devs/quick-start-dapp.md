@@ -30,7 +30,7 @@ The channel provider needs to be pointed at our hosted wallet:
 
 ```typescript
 await window.channelProvider.mountWalletComponent(
-  'https://xstate-wallet-v-0-3-0.statechannels.org/'
+  'https://xstate-wallet-v-0-3-0.statechannels.org'
 );
 ```
 
