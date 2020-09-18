@@ -45,8 +45,9 @@ import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {ServerWalletConfig, defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
 import {OnchainService} from '../mock-chain-service';
+import {WorkerManager} from '../utilities/workers/manager';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -87,15 +88,16 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
-import {WorkerManager} from '../utilities/workers/manager';
 const manager = new WorkerManager();
 
 export class Wallet implements WalletInterface {
   knex: Knex;
   store: Store;
-  constructor(readonly walletConfig: ServerWalletConfig) {
-    this.knex = Knex(extractDBConfigFromServerWalletConfig(walletConfig));
-    this.store = new Store(walletConfig.timingMetrics, walletConfig.skipEvmValidation);
+  readonly walletConfig: ServerWalletConfig;
+  constructor(walletConfig: ServerWalletConfig) {
+    this.walletConfig = walletConfig || defaultConfig;
+    this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
+    this.store = new Store(this.walletConfig.timingMetrics, this.walletConfig.skipEvmValidation);
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
@@ -110,11 +112,11 @@ export class Wallet implements WalletInterface {
     this.takeActions = this.takeActions.bind(this);
 
     // set up timing metrics
-    if (walletConfig.timingMetrics) {
-      if (!walletConfig.metricsOutputFile) {
+    if (this.walletConfig.timingMetrics) {
+      if (!this.walletConfig.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(this.knex, walletConfig.metricsOutputFile);
+      setupMetrics(this.knex, this.walletConfig.metricsOutputFile);
     }
   }
 
