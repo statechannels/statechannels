@@ -28,8 +28,8 @@ export {
   AssetTransferredEvent,
   getAssetTransferredEvent,
   getDepositedEvent,
-  convertBytes32ToAddress,
-  convertAddressToBytes32,
+  convertDestinationToAddress,
+  convertAddressToDestination,
 } from './contract/asset-holder';
 export {
   getChallengeRegisteredEvent,

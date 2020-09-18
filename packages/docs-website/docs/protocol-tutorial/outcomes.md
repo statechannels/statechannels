@@ -19,7 +19,7 @@ An Allocation outcome specifies
 - at least one asset holder (which in turn is tied to a specific asset type such as ETH or an ERC20 token)
 - for each asset holder, an array of (destination, amount) pairs known as an `Allocation`, and indicating a payout of amount tokens to destination.
 
-The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToBytes32` to convert an ethereum address to an external destination.
+The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToDestination` to convert an ethereum address to an external destination.
 
 :::tip
 In nitro protocol, channels can allocate funds to other channels!
@@ -35,10 +35,10 @@ import {
   Outcome,
   encodeOutcome,
   decodeOutcome,
-  convertAddressToBytes32
+  convertAddressToDestination
   } from '@statechannels/nitro-protocol';
 
-const externalDestination(convertAddressToBytes32(AddressZero));
+const externalDestination(convertAddressToDestination(AddressZero));
 
 const assetOutcome: AllocationAssetOutcome = {
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
@@ -80,9 +80,9 @@ const assetOutcome: GuaranteeAssetOutcome = {
     targetChannelId: HashZero,
     destinations: [
       '0x000000000000000000000000000000000000000000000000000000000000000b',
-      '0x000000000000000000000000000000000000000000000000000000000000000a',
-    ],
-  },
+      '0x000000000000000000000000000000000000000000000000000000000000000a'
+    ]
+  }
 };
 ```
 

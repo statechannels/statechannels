@@ -34,7 +34,7 @@ export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEv
   };
 }
 
-export function convertBytes32ToAddress(bytes32: string): string {
+export function convertDestinationToAddress(bytes32: string): string {
   const normalized = BigNumber.from(bytes32).toHexString();
   return utils.getAddress(`0x${normalized.slice(-40)}`);
 }
@@ -42,7 +42,7 @@ export function convertBytes32ToAddress(bytes32: string): string {
 // e.g.,
 // 0x9546E319878D2ca7a21b481F873681DF344E0Df8 becomes
 // 0x0000000000000000000000009546E319878D2ca7a21b481F873681DF344E0Df8
-export function convertAddressToBytes32(address: Address): Destination {
+export function convertAddressToDestination(address: Address): Destination {
   const normalizedAddress = BigNumber.from(address).toHexString();
   if (normalizedAddress.length !== 42) {
     throw new Error(

@@ -7,8 +7,8 @@ import {
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
-  convertAddressToBytes32,
-  convertBytes32ToAddress,
+  convertAddressToDestination,
+  convertDestinationToAddress,
   Destination,
   Channel,
   Uint256
@@ -155,7 +155,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
   return allocationItems.map(a => ({
     amount: a.amount,
     destination:
-      a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
+      a.destination.length === 42 ? convertAddressToDestination(a.destination) : a.destination
   }));
 }
 
@@ -164,7 +164,7 @@ function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[])
     amount: BN.from(a.amount),
     destination:
       a.destination.substr(2, 22) === '00000000000000000000'
-        ? (convertBytes32ToAddress(a.destination) as Destination)
+        ? (convertDestinationToAddress(a.destination) as Destination)
         : (a.destination as Destination)
   }));
 }
