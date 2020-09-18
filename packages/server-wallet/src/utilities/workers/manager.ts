@@ -3,6 +3,7 @@ import path from 'path';
 
 import {Pool} from 'tarn';
 import {State, StateWithHash} from '@statechannels/wallet-core';
+import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
 import {StateChannelWorkerData} from './worker-message';
 
@@ -10,7 +11,7 @@ export class WorkerManager {
   pool = new Pool({
     create: (): Worker => new Worker(path.resolve(__dirname, './loader.js')),
     destroy: (worker: Worker): Promise<number> => worker.terminate(),
-    min: 1,
+    min: 5,
     max: 5,
     reapIntervalMillis: 2147483647,
   });
@@ -22,6 +23,20 @@ export class WorkerManager {
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'SignState', state, privateKey};
     const resultPromise = new Promise<{state: State; signature: string}>(resolve =>
+      worker.once('message', (response: {state: State; signature: string}) => {
+        this.pool.release(worker);
+        resolve(response);
+      })
+    );
+
+    worker.postMessage(data);
+    return resultPromise;
+  }
+
+  public async updateChannel(args: UpdateChannelParams) {
+    const worker = await this.pool.acquire().promise;
+    const data: StateChannelWorkerData = {operation: 'UpdateChannel ', args};
+    const resultPromise = new Promise<any>(resolve =>
       worker.once('message', (response: {state: State; signature: string}) => {
         this.pool.release(worker);
         resolve(response);

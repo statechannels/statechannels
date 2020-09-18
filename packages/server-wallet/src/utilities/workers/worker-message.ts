@@ -1,3 +1,4 @@
+import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {State, StateWithHash} from '@statechannels/wallet-core';
 
 type SignStateRequest = {
@@ -16,24 +17,34 @@ type HashStateRequest = {
   operation: 'HashState ';
   state: State;
 };
-export type StateChannelWorkerData = SignStateRequest | RecoverAddressRequest | HashStateRequest;
+
+type UpdateChannelRequest = {
+  operation: 'UpdateChannel ';
+  args: UpdateChannelParams;
+};
+
+export type StateChannelWorkerData =
+  | SignStateRequest
+  | RecoverAddressRequest
+  | HashStateRequest
+  | UpdateChannelRequest;
 
 export function isStateChannelWorkerData(data: any): data is StateChannelWorkerData {
+  return true;
   return (
     'operation' in data &&
     (data.operation === 'SignState' ||
       data.operation === 'RecoverAddress' ||
-      data.operation === 'HashState')
+      data.operation === 'HashState' ||
+      data.operation === 'UpdateChannel')
   );
 }
 
-export function isSignStateRequest(data: any): data is SignStateRequest {
-  return isStateChannelWorkerData(data) && data.operation === 'SignState';
-}
+const guard = <T extends StateChannelWorkerData>(operation: T['operation']) => (
+  data: any
+): data is T => isStateChannelWorkerData(data) && data.operation === operation;
 
-export function isRecoverAddressRequest(data: any): data is RecoverAddressRequest {
-  return isStateChannelWorkerData(data) && data.operation === 'RecoverAddress';
-}
-export function isHashStateRequest(data: any): data is HashStateRequest {
-  return isStateChannelWorkerData(data) && data.operation === 'HashState ';
-}
+export const isSignStateRequest = guard<SignStateRequest>('SignState');
+export const isRecoverAddressRequest = guard<RecoverAddressRequest>('RecoverAddress');
+export const isHashStateRequest = guard<HashStateRequest>('HashState ');
+export const isUpdateChannelRequest = guard<UpdateChannelRequest>('UpdateChannel ');
