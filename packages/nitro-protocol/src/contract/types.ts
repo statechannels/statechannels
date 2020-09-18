@@ -30,3 +30,13 @@ export type Uint256 = Brand<string, 'Uint256'>;
 export function toUint256(bigNumberish: BigNumberish): Uint256 {
   return utils.hexZeroPad(BigNumber.from(bigNumberish).toHexString(), 32) as Uint256;
 }
+
+export function makeDestination(addressOrDestination: string): Destination {
+  if (addressOrDestination.length === 42) {
+    return utils.hexZeroPad(utils.getAddress(addressOrDestination), 32) as Destination;
+  } else if (addressOrDestination.length === 66) {
+    return addressOrDestination as Destination;
+  } else {
+    throw new Error('Invalid input');
+  }
+}

@@ -1,12 +1,12 @@
 import * as _ from 'lodash';
-import {ethers} from 'ethers';
+import {Destination} from '@statechannels/nitro-protocol';
+import {makeDestination} from '@statechannels/nitro-protocol';
 
 import {AllocationItem, SimpleAllocation, SimpleGuarantee, Outcome, Allocation} from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BN, Zero} from '../bignumber';
 
 import {checkThat} from './helpers';
-import {Destination} from '@statechannels/nitro-protocol';
 
 export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return outcome.type === 'SimpleAllocation';
@@ -84,17 +84,4 @@ export function allocateToTarget(
 
   currentOutcome.allocationItems = currentItems;
   return currentOutcome;
-}
-
-export function makeDestination(addressOrDestination: string): Destination {
-  if (addressOrDestination.length === 42) {
-    return ethers.utils.hexZeroPad(
-      ethers.utils.getAddress(addressOrDestination),
-      32
-    ) as Destination;
-  } else if (addressOrDestination.length === 66) {
-    return addressOrDestination as Destination;
-  } else {
-    throw new Error('Invalid input');
-  }
 }
