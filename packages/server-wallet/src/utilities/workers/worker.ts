@@ -1,10 +1,15 @@
-import {parentPort, isMainThread} from 'worker_threads';
+import {parentPort, isMainThread, threadId} from 'worker_threads';
 
 import {hashState} from '@statechannels/wallet-core';
 
 import {fastRecoverAddress, fastSignState} from '../signatures';
+import {Wallet} from '../..';
+import {defaultConfig} from '../../config';
+import {logger} from '../../logger';
 
 import {isStateChannelWorkerData} from './worker-message';
+
+const wallet = new Wallet(defaultConfig);
 
 parentPort?.on('message', async (message: any) => {
   if (isMainThread) {
@@ -12,18 +17,20 @@ parentPort?.on('message', async (message: any) => {
   }
 
   if (!isStateChannelWorkerData(message)) {
+    logger.error({message}, 'Incorrect worker data');
     throw new Error('Incorrect worker data');
   }
   switch (message.operation) {
     case 'HashState ':
-      parentPort?.postMessage(await hashState(message.state));
-      break;
+      return parentPort?.postMessage(await hashState(message.state));
+
     case 'RecoverAddress':
-      parentPort?.postMessage(
+      return parentPort?.postMessage(
         await fastRecoverAddress(message.state, message.signature, message.state.stateHash)
       );
-      break;
     case 'SignState':
-      parentPort?.postMessage(await fastSignState(message.state, message.privateKey));
+      return parentPort?.postMessage(await fastSignState(message.state, message.privateKey));
+    case 'UpdateChannel ':
+      return parentPort?.postMessage(await wallet._updateChannel(message.args));
   }
 });

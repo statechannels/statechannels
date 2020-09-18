@@ -16,15 +16,15 @@ import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/confi
 const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 const NUM_UPDATES = defaultConfig.timingMetrics ? 10 : 100;
-const iter = _.range(NUM_UPDATES);
 
-async function setup(): Promise<Channel[]> {
+async function setup(n = NUM_UPDATES): Promise<Channel[]> {
+  const iter = _.range(n);
   await seedAlicesSigningWallet(knex);
 
   const channels = [];
   for (const channelNonce of iter) {
     const c = withSupportedState()({channelNonce, vars: [stateVars({turnNum: 3})]});
-    await Channel.query().insert(c);
+    await Channel.query(knex).insert(c);
 
     channels.push(c);
   }
@@ -35,16 +35,26 @@ async function setup(): Promise<Channel[]> {
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();
-
-  let channels = await setup();
-
   const wallet = new Wallet(defaultConfig);
+
+  let channels = await setup(5);
+  await Promise.all(
+    channels.map(async channel =>
+      wallet.updateChannel({
+        channelId: channel.channelId,
+        allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
+        appData: '0x',
+      })
+    )
+  );
+
+  channels = await setup();
 
   let key: string;
   console.time((key = `serial x ${NUM_UPDATES}`));
-  for (const i of iter) {
+  for (const channel of channels) {
     await wallet.updateChannel({
-      channelId: channels[i].channelId,
+      channelId: channel.channelId,
       allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
       appData: '0x',
     });
