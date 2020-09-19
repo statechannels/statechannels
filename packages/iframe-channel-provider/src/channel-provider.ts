@@ -18,6 +18,9 @@ import {PostMessageService} from './postmessage-service';
 import {IFrameService} from './iframe-service';
 import {OnType, OffType, EventType, SubscribeType, UnsubscribeType} from './types/events';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const normalizeUrl = require('normalize-url');
+
 /**
  * Class for interacting with a statechannels wallet
  *
@@ -90,7 +93,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
   walletReady = (url: string) => {
     return new Promise(resolve => {
       const listener = (event: MessageEvent) => {
-        if (event.origin == url && event.data.method === 'WalletReady') {
+        if (event.origin === url && event.data.method === 'WalletReady') {
           window.removeEventListener('message', listener);
           resolve();
         }
@@ -112,7 +115,7 @@ export class IFrameChannelProvider implements IFrameChannelProviderInterface {
 
     this.mounted = true;
 
-    this.url = url;
+    this.url = normalizeUrl(url);
     window.addEventListener('message', this.onMessage.bind(this));
 
     this.iframe.setUrl(this.url);
