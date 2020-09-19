@@ -25,13 +25,13 @@ export default class ReceiverController {
   }
 
   public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {
-    const {signedStates} = message;
+    const {signedStates, objectives} = message;
 
     const {
       channelResults: [channelResult],
     } = await this.time('push message', async () => this.wallet.pushMessage(message));
 
-    if (!signedStates || signedStates?.length === 0) {
+    if (!signedStates?.length && !objectives?.length) {
       return {
         signedStates: [],
         objectives: [],

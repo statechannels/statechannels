@@ -21,6 +21,7 @@ import {
   assetHolderAddress,
   BN,
   Zero,
+  SignedState,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -197,12 +198,20 @@ export class Wallet implements WalletInterface {
       // TODO: How do we pick a signing address?
       const signingAddress = (await SigningWallet.query(tx).first())?.address;
 
-      const cols = {...channelConstants, vars, signingAddress};
+      const cols = {
+        ...channelConstants,
+        vars,
+        signingAddress,
+        chainServiceRequests: [],
+        fundingStrategy: args.fundingStrategy,
+      };
 
-      const {channelId} = await Channel.query(tx).insert(cols);
+      const channel = await Channel.query(tx)
+        .insert(cols)
+        .returning('*');
 
       const {outgoing, channelResult} = await this.store.signState(
-        channelId,
+        channel.channelId,
         {
           ...channelConstants,
           turnNum: 0,
@@ -213,7 +222,35 @@ export class Wallet implements WalletInterface {
         tx
       );
 
-      return {outbox: outgoing.map(n => n.notice), channelResult};
+      // todo: clean up the construction of the Objective
+      // todo: do not assume Direct funding
+      const outbox: Outgoing[] = outgoing.map(n => {
+        const params = n.notice.params as {
+          sender: string;
+          recipient: string;
+          data: {signedStates: SignedState[]};
+        };
+        return {
+          method: 'MessageQueued' as const,
+          params: {
+            ...n.notice.params,
+            data: {
+              objectives: [
+                {
+                  participants: [params.sender, params.recipient],
+                  type: 'CreateChannel',
+                  data: {
+                    signedState: params.data.signedStates[0],
+                    fundingStrategy: 'Direct',
+                  },
+                },
+              ],
+            },
+          },
+        };
+      });
+
+      return {outbox, channelResult};
     };
     return this.knex.transaction(callback);
   }
@@ -393,6 +430,9 @@ export class Wallet implements WalletInterface {
               outgoing.map(n => outbox.push(n.notice));
               return;
             }
+            case 'SubmitTransaction':
+              await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+              return;
             default:
               throw 'Unimplemented';
           }

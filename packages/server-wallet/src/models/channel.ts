@@ -11,11 +11,10 @@ import {
   Zero,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
-import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
-import {ChannelState, toChannelResult} from '../protocols/state';
+import {ChannelState, toChannelResult, ChainServiceRequests} from '../protocols/state';
 import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
 
@@ -24,19 +23,20 @@ import {Funding} from './funding';
 
 export type SyncState = NotifyApp[];
 
-export const REQUIRED_COLUMNS = {
-  chainId: 'chainId',
-  appDefinition: 'appDefinition',
-  channelNonce: 'channelNonce',
-  challengeDuration: 'challengeDuration',
-  participants: 'participants',
-  vars: 'vars',
-};
+export const REQUIRED_COLUMNS = [
+  'chainId',
+  'appDefinition',
+  'channelNonce',
+  'challengeDuration',
+  'participants',
+  'vars',
+  'chainServiceRequests',
+  'fundingStrategy',
+] as const;
 
-export const COMPUTED_COLUMNS = {
-  channelId: 'channelId',
-  signingAddress: 'signingAddress',
-};
+export const COMPUTED_COLUMNS = ['channelId', 'signingAddress'] as const;
+export const CHANNEL_COLUMNS = [...REQUIRED_COLUMNS, ...COMPUTED_COLUMNS];
+
 export interface RequiredColumns {
   readonly chainId: Bytes32;
   readonly appDefinition: Address;
@@ -45,15 +45,12 @@ export interface RequiredColumns {
   readonly participants: Participant[];
   readonly vars: SignedStateVarsWithHash[];
   readonly signingAddress: Address;
+  readonly chainServiceRequests: ChainServiceRequests;
+  readonly fundingStrategy: FundingStrategy;
 }
 
 export type ComputedColumns = {
   readonly channelId: Bytes32;
-};
-
-export const CHANNEL_COLUMNS = {
-  ...REQUIRED_COLUMNS,
-  ...COMPUTED_COLUMNS,
 };
 
 export class Channel extends Model implements RequiredColumns {
@@ -71,11 +68,13 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
+  readonly chainServiceRequests!: ChainServiceRequests;
+  readonly fundingStrategy!: FundingStrategy;
 
   static get jsonSchema(): JSONSchema {
     return {
       type: 'object',
-      required: Object.keys(REQUIRED_COLUMNS),
+      required: [...REQUIRED_COLUMNS],
       properties: {
         chainId: {
           type: 'string',
@@ -119,11 +118,6 @@ export class Channel extends Model implements RequiredColumns {
     return result;
   }
 
-  $toDatabaseJson(): Pojo {
-    // TODO: This seems unnecessary
-    return _.pick(super.$toDatabaseJson(), Object.keys(CHANNEL_COLUMNS));
-  }
-
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
@@ -156,7 +150,17 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   get protocolState(): ChannelState {
-    const {channelId, myIndex, supported, latest, latestSignedByMe, support, participants} = this;
+    const {
+      channelId,
+      myIndex,
+      supported,
+      latest,
+      latestSignedByMe,
+      support,
+      participants,
+      chainServiceRequests,
+      fundingStrategy,
+    } = this;
     const funding = (assetHolder: Address): string => {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? result.amount : Zero;
@@ -170,6 +174,8 @@ export class Channel extends Model implements RequiredColumns {
       latest,
       latestSignedByMe,
       funding,
+      chainServiceRequests,
+      fundingStrategy,
     };
   }
 

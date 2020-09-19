@@ -6,11 +6,21 @@ import {
   State,
   Participant,
 } from '@statechannels/wallet-core';
-import {ChannelResult, ChannelStatus} from '@statechannels/client-api-schema';
+import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Address, Uint256} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
+
+export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
+/**
+ * todo: This should be a dictionary instead of a list.
+ * The values of this dictionary should represent the parameter with which the api is called.
+ * - fund: the value is the asset holder address
+ * - withdraw: might not need a value?
+ * - challenge: the value is the state with which challenge is called.
+ */
+export type ChainServiceRequests = ChainServiceApi[];
 
 /*
 The ChannelState type is the data that protocols need about a given channel to decide what to do next.
@@ -24,6 +34,8 @@ export type ChannelState = {
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => Uint256;
+  chainServiceRequests: ChainServiceRequests;
+  fundingStrategy: FundingStrategy;
 };
 
 type WithSupported = {supported: SignedStateWithHash};

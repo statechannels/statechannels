@@ -13,6 +13,7 @@ export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables
 export type NotifyApp = {type: 'NotifyApp'; notice: Notice};
 export type SubmitTransaction = {
   type: 'SubmitTransaction';
+  channelId: Bytes32;
   transactionRequest: providers.TransactionRequest;
   transactionId: string;
 };

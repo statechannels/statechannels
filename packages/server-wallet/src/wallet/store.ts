@@ -11,23 +11,31 @@ import {
   Participant,
   makeDestination,
   StateWithHash,
+  isCreateChannel,
+  hashState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
-import {Either, right} from 'fp-ts/lib/Either';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
 
-import {Channel, SyncState, RequiredColumns, ChannelError} from '../models/channel';
+import {
+  Channel,
+  SyncState,
+  RequiredColumns,
+  ChannelError,
+  CHANNEL_COLUMNS,
+} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
-import {ChannelState} from '../protocols/state';
+import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
+import {pick} from '../utilities/helpers';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -159,6 +167,24 @@ export class Store {
     return {outgoing, channelResult};
   }
 
+  async addChainServiceRequest(
+    channelId: Bytes32,
+    type: ChainServiceApi,
+    tx: Transaction
+  ): Promise<void> {
+    const channel = await Channel.query(tx)
+      .where('channelId', channelId)
+      .first();
+    const cols: RequiredColumns = {
+      ...channel,
+      chainServiceRequests: [...channel.chainServiceRequests, type],
+    };
+
+    await Channel.query(tx)
+      .where({channelId: channel.channelId})
+      .update(cols);
+  }
+
   async getChannel(
     channelId: Bytes32,
     txOrKnex: TransactionOrKnex
@@ -183,26 +209,60 @@ export class Store {
   }
 
   async pushMessage(message: Message, tx: Transaction): Promise<Bytes32[]> {
-    for (const ss of message.signedStates || []) {
-      await this.addSignedState(undefined, addHash(ss), tx);
-    }
-
     for (const o of message.objectives || []) {
       await this.addObjective(o, tx);
     }
 
+    for (const ss of message.signedStates || []) {
+      await this.addSignedState(undefined, addHash(ss), tx);
+    }
+
     const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
-    // TODO: generate channelIds from objectives
-    const objectiveChannelIds: Bytes32[] = [];
+    function isDefined(s: string | undefined): s is string {
+      return s !== undefined;
+    }
+    const objectiveChannelIds =
+      message.objectives
+        ?.map(objective =>
+          isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
+        )
+        .filter(isDefined) || [];
+
     return stateChannelIds.concat(objectiveChannelIds);
   }
 
-  async addObjective(
-    _objective: Objective,
-    _tx: Transaction
-  ): Promise<Either<StoreError, undefined>> {
-    // TODO: Implement this
-    return Promise.resolve(right(undefined));
+  async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
+    if (isCreateChannel(objective)) {
+      const {
+        data: {signedState, fundingStrategy},
+      } = objective;
+      const channelId = calculateChannelId(signedState);
+      const singedStateWithHash = {...signedState, stateHash: hashState(signedState)};
+      validateSignatures(singedStateWithHash);
+      if (await Channel.forId(channelId, tx)) {
+        throw new StoreError(StoreError.reasons.duplicateChannel);
+      }
+
+      const channel = await createChannel(signedState, fundingStrategy, tx);
+      channel.vars = await addState(channel.vars, singedStateWithHash);
+      validateInvariants(channel.vars, channel.myAddress);
+
+      const cols: RequiredColumns = {
+        ...channel,
+        vars: channel.vars,
+        fundingStrategy,
+      };
+
+      const result = await Channel.query(tx)
+        .where({channelId: channel.channelId})
+        .update(cols)
+        .returning('*')
+        .first();
+
+      return result;
+    } else {
+      throw new StoreError(StoreError.reasons.unimplementedObjective);
+    }
   }
 
   async addSignedState(
@@ -216,7 +276,7 @@ export class Store {
     await timer('validating signatures', async () => validateSignatures(signedState));
 
     const channel =
-      maybeChannel || (await timer('get channel', async () => getOrCreateChannel(signedState, tx)));
+      maybeChannel || (await timer('get channel', async () => getChannel(signedState, tx)));
 
     if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
@@ -240,7 +300,10 @@ export class Store {
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols = {...channel.channelConstants, vars: channel.vars};
+    const cols: RequiredColumns = {
+      ...channel,
+      vars: channel.vars,
+    };
 
     const result = await timer('updating', async () =>
       Channel.query(tx)
@@ -258,6 +321,7 @@ class StoreError extends WalletError {
   readonly type = WalletError.errors.StoreError;
 
   static readonly reasons = {
+    duplicateChannel: 'Expected the channel to NOT exist in the database',
     duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
@@ -267,27 +331,50 @@ class StoreError extends WalletError {
     missingSigningKey: 'Missing a signing key',
     invalidTransition: 'Invalid state transition',
     channelMissing: 'Channel not found',
+    unimplementedObjective: 'Unimplemented objective',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
   }
 }
 
-async function getOrCreateChannel(
+async function createChannel(
+  constants: ChannelConstants,
+  fundingStrategy: FundingStrategy,
+  txOrKnex: TransactionOrKnex
+): Promise<Channel> {
+  const channelId = calculateChannelId(constants);
+
+  const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
+
+  const cols: RequiredColumns = pick(
+    {
+      ...constants,
+      channelId,
+      vars: [],
+      chainServiceRequests: [],
+      signingAddress,
+      fundingStrategy,
+    },
+    ...CHANNEL_COLUMNS
+  );
+  const channel = Channel.fromJson(cols);
+  return await Channel.query(txOrKnex)
+    .insert(channel)
+    .returning('*')
+    .first();
+}
+async function getChannel(
   constants: ChannelConstants,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  let channel = await Channel.query(txOrKnex)
+  const channel = await Channel.query(txOrKnex)
     .where('channelId', channelId)
     .first();
 
   if (!channel) {
-    const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
-
-    const cols: RequiredColumns = {...constants, vars: [], signingAddress};
-    channel = Channel.fromJson(cols);
-    await Channel.query(txOrKnex).insert(channel);
+    throw new StoreError(StoreError.reasons.channelMissing);
   }
   return channel;
 }

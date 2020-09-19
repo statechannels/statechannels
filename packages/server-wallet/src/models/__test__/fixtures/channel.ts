@@ -20,13 +20,15 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
     participants,
     signingAddress: alice().address,
     vars: [],
+    chainServiceRequests: [],
+    fundingStrategy: 'Direct',
   };
 
   const columns: RequiredColumns = _.merge(defaults, props);
 
   columns.vars.map(s => (s = dropNonVariables(addHash({...columns, ...s}))));
   (columns as any).channelId = calculateChannelId(columns);
-  const channel = Channel.fromJson(columns);
+  const channel = Channel.fromJson({...columns, fundingStrategy: 'Direct'});
 
   return channel;
 };
