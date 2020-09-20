@@ -5,7 +5,8 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Message as WireMessage,
-  isAllocations
+  isAllocations,
+  validateMessage
 } from '@statechannels/wire-format';
 
 import {
@@ -29,13 +30,20 @@ export function convertToInternalParticipant(participant: {
   return {...participant, destination: makeDestination(participant.destination)};
 }
 
+export function validatePayload(rawPayload: unknown): Payload {
+  // todo: wire-format should export a validator specially for the payload
+  return deserializeMessage(validateMessage({recipient: '', sender: '', data: rawPayload}));
+}
+
 export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
+  const requests = message?.data?.requests;
 
   return {
     signedStates,
-    objectives
+    objectives,
+    requests
   };
 }
 

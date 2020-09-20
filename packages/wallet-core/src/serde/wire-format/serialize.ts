@@ -20,11 +20,11 @@ import {formatAmount} from '../../utils';
 
 export function serializeMessage(message: Payload, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
-  const {objectives} = message;
+  const {objectives, requests} = message;
   return {
     recipient,
     sender,
-    data: {signedStates, objectives}
+    data: {signedStates, objectives, requests}
   };
 }
 
@@ -55,7 +55,7 @@ export function serializeState(state: SignedState): SignedStateWire {
   };
 }
 
-function serializeOutcome(outcome: Outcome): OutcomeWire {
+export function serializeOutcome(outcome: Outcome): OutcomeWire {
   switch (outcome.type) {
     case 'SimpleAllocation':
       return [serializeSimpleAllocation(outcome)];
