@@ -3,7 +3,7 @@ import {
   Objective,
   SignedStateWithHash,
   SignedStateVarsWithHash,
-  Message,
+  Payload,
   State,
   calculateChannelId,
   StateVariables,
@@ -208,7 +208,7 @@ export class Store {
     return (await Channel.query(knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(message: Message, tx: Transaction): Promise<Bytes32[]> {
+  async pushMessage(message: Payload, tx: Transaction): Promise<Bytes32[]> {
     for (const o of message.objectives || []) {
       await this.addObjective(o, tx);
     }

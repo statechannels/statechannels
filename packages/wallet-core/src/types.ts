@@ -155,7 +155,7 @@ export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 type GetChannel = {type: 'GetChannel'; channelId: string};
 export type ChannelRequest = GetChannel;
 
-export interface Message {
+export interface Payload {
   signedStates?: SignedState[];
   objectives?: Objective[];
   requests?: ChannelRequest[];

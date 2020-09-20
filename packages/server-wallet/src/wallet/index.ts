@@ -12,7 +12,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
-  Message,
+  Payload,
   ChannelRequest,
   Outcome,
   SignedStateVarsWithHash,
@@ -79,7 +79,7 @@ export type WalletInterface = {
   updateChannelFunding(args: UpdateChannelFundingParams): void;
 
   // Wallet <-> Wallet communication
-  pushMessage(m: Message): MultipleChannelResult;
+  pushMessage(m: Payload): MultipleChannelResult;
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
@@ -349,7 +349,7 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  async pushMessage(message: Message): MultipleChannelResult {
+  async pushMessage(payload: Payload): MultipleChannelResult {
     const knex = this.knex;
     const store = this.store;
 
@@ -377,14 +377,14 @@ export class Wallet implements WalletInterface {
     }
 
     const channelIds = await Channel.transaction(this.knex, async tx => {
-      return await this.store.pushMessage(message, tx);
+      return await this.store.pushMessage(payload, tx);
     });
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
-    if (message.requests && message.requests.length > 0)
+    if (payload.requests && payload.requests.length > 0)
       // Modifies outbox, may append new messages
-      await Promise.all(message.requests.map(handleRequest(outbox)));
+      await Promise.all(payload.requests.map(handleRequest(outbox)));
 
     return {outbox, channelResults};
   }

@@ -1,7 +1,7 @@
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
 import {BN} from '../../bignumber';
-import {Message, SignedState} from '../../types';
+import {Payload, SignedState} from '../../types';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
@@ -150,7 +150,7 @@ export const wireMessageFormat: WireMessage = {
   }
 };
 
-export const internalMessageFormat: Message = {
+export const internalMessageFormat: Payload = {
   signedStates: [internalStateFormat, internalStateFormat2],
   objectives: [
     {
