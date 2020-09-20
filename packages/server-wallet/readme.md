@@ -29,6 +29,7 @@ SERVER_DB_PORT=5432
 For any environment variables specific to local setup, such as postgres host or port, do not modify `.env` files checked into the repository. Instead, add the variables to `.env.test.local` (or to other local `.env` files). Specifically, you might want to override `SERVER_DB_USER`, `SERVER_DB_HOST` and `SERVER_DB_PORT`.
 
 ```
+echo "SERVER_DB_USER=postgres" > .env.test.local # you probably need to do at least this
 yarn install
 NODE_ENV=test yarn db:create
 NODE_ENV=test yarn db:migrate

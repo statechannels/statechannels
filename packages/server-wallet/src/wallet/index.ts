@@ -13,6 +13,7 @@ import {
 import {
   ChannelConstants,
   Payload,
+  validatePayload,
   ChannelRequest,
   Outcome,
   SignedStateVarsWithHash,
@@ -349,9 +350,11 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  async pushMessage(message: Payload): MultipleChannelResult {
+  async pushMessage(rawPayload: unknown): MultipleChannelResult {
     const knex = this.knex;
     const store = this.store;
+
+    const message = validatePayload(rawPayload);
 
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {

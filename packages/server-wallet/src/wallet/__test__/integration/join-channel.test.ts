@@ -1,4 +1,4 @@
-import {simpleEthAllocation, BN} from '@statechannels/wallet-core';
+import {simpleEthAllocation, serializeOutcome, BN} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -50,6 +50,10 @@ describe('directly funded app', () => {
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
     await Channel.query(w.knex).insert(c);
 
+    const outcomeWire = serializeOutcome(outcome);
+    const preFSWire = {turnNum: 0, outcome: outcomeWire};
+    const postFSWire = {turnNum: 3, outcome: outcomeWire};
+
     const channelId = c.channelId;
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
@@ -57,8 +61,8 @@ describe('directly funded app', () => {
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       // TODO: These outbox items should probably be merged into one outgoing message
       outbox: [
-        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}},
-        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [postFS]}}},
+        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFSWire]}}},
+        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [postFSWire]}}},
       ],
       // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
       // implementation

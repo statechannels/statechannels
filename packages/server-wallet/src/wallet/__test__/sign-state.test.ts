@@ -1,5 +1,5 @@
 import Objection from 'objection';
-import {signState} from '@statechannels/wallet-core';
+import {signState, serializeState} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -34,7 +34,8 @@ describe('signState', () => {
   it('signs the state, returning outgoing messages and a channelResult', async () => {
     await expect(Channel.query(knex).where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
-    const signature = signState({...c.vars[0], ...c.channelConstants}, alice().privateKey);
+    const state = {...c.vars[0], ...c.channelConstants};
+    const signature = signState(state, alice().privateKey);
     const result = await store.signState(c.channelId, c.vars[0], tx);
     expect(result).toMatchObject({
       outgoing: [
@@ -44,7 +45,7 @@ describe('signState', () => {
             method: 'MessageQueued',
             params: {
               data: {
-                signedStates: [{...c.vars[0], signatures: [{signature, signer: alice().address}]}],
+                signedStates: [{...serializeState(state), signatures: [signature]}],
               },
             },
           },
