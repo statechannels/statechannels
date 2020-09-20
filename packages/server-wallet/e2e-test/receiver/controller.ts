@@ -1,5 +1,5 @@
 import {Message as WireMessage} from '@statechannels/wire-format';
-import {Message, makeDestination} from '@statechannels/wallet-core';
+import {Payload, makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
@@ -24,7 +24,7 @@ export default class ReceiverController {
     };
   }
 
-  public async acceptMessageAndReturnReplies(message: Message): Promise<Message> {
+  public async acceptMessageAndReturnReplies(message: Payload): Promise<Payload> {
     const {signedStates, objectives} = message;
 
     const {
@@ -45,7 +45,7 @@ export default class ReceiverController {
         )
       );
 
-      return (messageToSendToPayer.params as WireMessage).data as Message;
+      return (messageToSendToPayer.params as WireMessage).data as Payload;
     }
   }
 }

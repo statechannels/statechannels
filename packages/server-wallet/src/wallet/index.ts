@@ -12,7 +12,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
-  Message,
+  Payload,
   ChannelRequest,
   Outcome,
   SignedStateVarsWithHash,
@@ -79,7 +79,7 @@ export type WalletInterface = {
   updateChannelFunding(args: UpdateChannelFundingParams): void;
 
   // Wallet <-> Wallet communication
-  pushMessage(m: Message): MultipleChannelResult;
+  pushMessage(m: Payload): MultipleChannelResult;
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
@@ -349,7 +349,7 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  async pushMessage(message: Message): MultipleChannelResult {
+  async pushMessage(message: Payload): MultipleChannelResult {
     const knex = this.knex;
     const store = this.store;
 

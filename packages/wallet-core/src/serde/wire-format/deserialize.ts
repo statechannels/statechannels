@@ -13,7 +13,7 @@ import {
   Outcome,
   AllocationItem,
   SimpleAllocation,
-  Message,
+  Payload,
   Objective,
   Participant
 } from '../../types';
@@ -29,7 +29,7 @@ export function convertToInternalParticipant(participant: {
   return {...participant, destination: makeDestination(participant.destination)};
 }
 
-export function deserializeMessage(message: WireMessage): Message {
+export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
 

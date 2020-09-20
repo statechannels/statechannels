@@ -20,7 +20,7 @@ import {
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
 import {
-  Message,
+  Payload,
   DomainBudget,
   Participant,
   unreachable,
@@ -83,7 +83,7 @@ export interface MessagingServiceInterface {
     method: ChannelProposedNotification['method'],
     notificationData: ChannelResult
   );
-  sendMessageNotification(message: Message): Promise<void>;
+  sendMessageNotification(message: Payload): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
   sendResponse(id: number, result: StateChannelsResponse['result']): Promise<void>;
   sendError(id: number, error: StateChannelsErrorResponse['error']): Promise<void>;
@@ -142,7 +142,7 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
-  public async sendMessageNotification(message: Message) {
+  public async sendMessageNotification(message: Payload) {
     // TODO: It is awkward to have to generate sender/recipient
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
