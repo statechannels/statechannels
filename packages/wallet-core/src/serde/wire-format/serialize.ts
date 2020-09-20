@@ -22,7 +22,7 @@ import {formatAmount} from '../../utils';
 
 export function serializeMessage(message: Payload, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(serializeState);
-  const objectives = (message.objectives || []).map(serializeObjective);
+  const objectives = message.objectives?.map(serializeObjective);
   const {requests} = message;
   return {
     recipient,
