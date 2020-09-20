@@ -1,11 +1,11 @@
 import {
   calculateChannelId,
   simpleEthAllocation,
-  CreateChannel,
   SignedState,
   serializeState,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {CreateChannel as CreateChannelWire} from '@statechannels/wire-format';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -21,12 +21,12 @@ import {defaultConfig} from '../../../config';
 
 const wallet = new Wallet(defaultConfig);
 
-function createChannelFromState(signedState: SignedState): CreateChannel {
+function createChannelFromState(signedState: SignedState): CreateChannelWire {
   return {
     participants: [],
     type: 'CreateChannel',
     data: {
-      signedState,
+      signedState: serializeState(signedState),
       fundingStrategy: 'Direct',
     },
   };
@@ -55,7 +55,7 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy([alice()])({turnNum: five}),
     stateSignedBy([alice(), bob()])({turnNum: four}),
   ];
-  const createChannel: CreateChannel = createChannelFromState(signedStates[0]);
+  const createChannel = createChannelFromState(signedStates[0]);
   await wallet.pushMessage({
     objectives: [createChannel],
     signedStates: [serializeState(signedStates[1])],
@@ -84,7 +84,7 @@ describe('channel results', () => {
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
-    const createChannel: CreateChannel = createChannelFromState(signedStates[0]);
+    const createChannel = createChannelFromState(signedStates[0]);
     await wallet.pushMessage({objectives: [createChannel]});
 
     await expectResults(wallet.pushMessage({signedStates: signedStates.map(serializeState)}), [
@@ -125,7 +125,7 @@ describe('channel results', () => {
     expect(channelsBefore).toHaveLength(0);
 
     const signedStates = [stateSignedBy([alice(), bob()])({turnNum: 9, isFinal: true})];
-    const createChannel: CreateChannel = createChannelFromState(signedStates[0]);
+    const createChannel = createChannelFromState(signedStates[0]);
     const result = wallet.pushMessage({objectives: [createChannel]});
 
     return expectResults(result, [{turnNum: 9, status: 'closed'}]);
@@ -164,7 +164,7 @@ it("Doesn't store stale states", async () => {
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
-  const createChannel: CreateChannel = createChannelFromState(signedStates[0]);
+  const createChannel = createChannelFromState(signedStates[0]);
   await wallet.pushMessage({objectives: [createChannel]});
 
   const afterFirst = await Channel.query(wallet.knex).select();
@@ -273,7 +273,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates}},
+          params: {data: {signedStates: signedStates.map(serializeState)}},
         },
       ],
     });
@@ -288,7 +288,7 @@ describe('when there is a request provided', () => {
       stateSignedBy([alice(), bob()])({turnNum: four}),
     ];
 
-    const createChannel: CreateChannel = createChannelFromState(signedStates[0]);
+    const createChannel = createChannelFromState(signedStates[0]);
     await wallet.pushMessage({
       objectives: [createChannel],
       signedStates: [serializeState(signedStates[1])],
@@ -304,7 +304,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates}},
+          params: {data: {signedStates: signedStates.map(serializeState)}},
         },
       ],
     });
