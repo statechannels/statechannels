@@ -57,6 +57,25 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "ChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
+        "type": {
+          "enum": [
+            "GetChannel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "channelId"
+      ],
+      "type": "object"
+    },
     "CloseLedger": {
       "additionalProperties": false,
       "properties": {
@@ -251,6 +270,12 @@
             "objectives": {
               "items": {
                 "$ref": "#/definitions/Objective"
+              },
+              "type": "array"
+            },
+            "requests": {
+              "items": {
+                "$ref": "#/definitions/ChannelRequest"
               },
               "type": "array"
             },
