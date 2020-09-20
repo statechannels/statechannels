@@ -126,6 +126,7 @@
               "type": "string"
             },
             "signedState": {
+              "$ref": "#/definitions/SignedState"
             }
           },
           "required": [

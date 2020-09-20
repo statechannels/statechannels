@@ -23,6 +23,7 @@ import {
   BN,
   Zero,
   SignedState,
+  serializeMessage,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -132,14 +133,14 @@ export class Wallet implements WalletInterface {
     return {
       outbox: peers.map(recipient => ({
         method: 'MessageQueued',
-        params: {
-          recipient,
-          sender,
-          data: {
+        params: serializeMessage(
+          {
             signedStates: states,
             requests: [{type: 'GetChannel', channelId}],
           },
-        },
+          recipient,
+          sender
+        ),
       })),
       channelResult: ChannelState.toChannelResult(channelState),
     };
@@ -238,7 +239,7 @@ export class Wallet implements WalletInterface {
             data: {
               objectives: [
                 {
-                  participants: [params.sender, params.recipient],
+                  participants,
                   type: 'CreateChannel',
                   data: {
                     signedState: params.data.signedStates[0],
@@ -369,11 +370,7 @@ export class Wallet implements WalletInterface {
         peers.map(recipient => {
           outbox.push({
             method: 'MessageQueued',
-            params: {
-              recipient,
-              sender,
-              data: {signedStates},
-            },
+            params: serializeMessage({signedStates}, recipient, sender),
           });
         });
       };

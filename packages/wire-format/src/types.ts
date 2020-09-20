@@ -85,7 +85,7 @@ export type CreateChannel = _Objective<
   'CreateChannel',
   {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    signedState: any;
+    signedState: SignedState;
     fundingStrategy: FundingStrategy;
   }
 >;
