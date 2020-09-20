@@ -12,13 +12,13 @@ import {
   Outcome,
   AllocationItem,
   SimpleAllocation,
-  Message,
+  Payload,
   SimpleGuarantee
 } from '../../types';
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
 
-export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
+export function serializeMessage(message: Payload, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
   const {objectives} = message;
   return {

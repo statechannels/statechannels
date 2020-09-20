@@ -9,7 +9,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
 import {
-  Message,
+  Payload,
   isOpenChannel,
   OpenChannel,
   serializeChannelEntry
@@ -40,7 +40,7 @@ export class ChannelWallet {
     this.workflows = [];
 
     // Whenever the store wants to send something call sendMessage
-    store.outboxFeed.subscribe(async (m: Message) => {
+    store.outboxFeed.subscribe(async (m: Payload) => {
       this.messagingService.sendMessageNotification(m);
     });
     // Whenever an OpenChannel objective is received

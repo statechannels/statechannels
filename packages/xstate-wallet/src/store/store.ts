@@ -11,7 +11,7 @@ import {
   hashState,
   Outcome,
   ChannelStoredData,
-  Message,
+  Payload,
   Objective,
   Participant,
   SignedState,
@@ -38,7 +38,7 @@ import {Errors, DBBackend, ObjectStores} from '.';
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
-  addToOutbox: [Message];
+  addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
 }
 export type ChannelLock = {
@@ -129,7 +129,7 @@ export class Store {
     return merge(newObjectives, currentObjectives);
   }
 
-  get outboxFeed(): Observable<Message> {
+  get outboxFeed(): Observable<Payload> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
@@ -406,7 +406,7 @@ export class Store {
     return Object.keys(privateKeys)[0];
   }
 
-  async pushMessage(message: Message) {
+  async pushMessage(message: Payload) {
     await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
     message.objectives?.map(o => this.addObjective(o, false));
   }

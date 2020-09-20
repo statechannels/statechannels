@@ -2,7 +2,7 @@ import axios from 'axios';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
-import {makeDestination, BN, Message} from '@statechannels/wallet-core';
+import {makeDestination, BN, Payload} from '@statechannels/wallet-core';
 import {Message as WireMessage} from '@statechannels/wire-format';
 
 import {Wallet as ServerWallet} from '../../src';
@@ -82,7 +82,7 @@ export default class PayerClient {
       ],
     });
 
-    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Message);
+    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Payload);
 
     await this.wallet.pushMessage(reply);
 
@@ -102,20 +102,20 @@ export default class PayerClient {
     } = await this.time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
 
     const reply = await this.time(`send message ${channelId}`, async () =>
-      this.messageReceiverAndExpectReply((params as WireMessage).data as Message)
+      this.messageReceiverAndExpectReply((params as WireMessage).data as Payload)
     );
 
     await this.time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
   }
 
-  public emptyMessage(): Promise<Message> {
+  public emptyMessage(): Promise<Payload> {
     return this.messageReceiverAndExpectReply({
       signedStates: [],
       objectives: [],
     });
   }
 
-  private async messageReceiverAndExpectReply(message: Message): Promise<Message> {
+  private async messageReceiverAndExpectReply(message: Payload): Promise<Payload> {
     const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
     return reply;
   }

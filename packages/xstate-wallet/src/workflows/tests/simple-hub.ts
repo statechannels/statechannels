@@ -1,4 +1,4 @@
-import {Message, createSignatureEntry} from '@statechannels/wallet-core';
+import {Payload, createSignatureEntry} from '@statechannels/wallet-core';
 import {Observable, fromEvent} from 'rxjs';
 import {EventEmitter} from 'eventemitter3';
 import {ethers} from 'ethers';
@@ -9,11 +9,11 @@ export class SimpleHub {
     private readonly _eventEmitter = new EventEmitter()
   ) {}
 
-  public get outboxFeed(): Observable<Message> {
+  public get outboxFeed(): Observable<Payload> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  public async pushMessage({signedStates}: Message) {
+  public async pushMessage({signedStates}: Payload) {
     const address = await this.getAddress();
     signedStates?.map(signedState => {
       const {signatures, participants} = signedState;
