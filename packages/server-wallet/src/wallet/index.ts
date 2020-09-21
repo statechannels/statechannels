@@ -42,7 +42,6 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
-import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
@@ -125,7 +124,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async destroy(): Promise<void> {
-    await this.knex.destroy();
+    await this.store.knex.destroy();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
@@ -172,7 +171,7 @@ export class Wallet implements WalletInterface {
   }: UpdateChannelFundingParams): SingleChannelResult {
     const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
 
-    await Funding.updateFunding(this.knex, channelId, BN.from(amount), assetHolder);
+    await this.store.updateFunding(channelId, BN.from(amount), assetHolder);
 
     const {channelResults, outbox} = await this.takeActions([channelId]);
 

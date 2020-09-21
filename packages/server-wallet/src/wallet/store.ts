@@ -40,11 +40,12 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
-import {Bytes32} from '../type-aliases';
+import {Bytes32, Address, Uint256} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
+import {Funding} from '../models/funding';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -412,6 +413,14 @@ export class Store {
     );
 
     return result;
+  }
+
+  async updateFunding(
+    channelId: string,
+    fromAmount: Uint256,
+    assetHolderAddress: Address
+  ): Promise<void> {
+    await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
 }
 
