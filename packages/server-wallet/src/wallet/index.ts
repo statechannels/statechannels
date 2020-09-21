@@ -354,7 +354,7 @@ export class Wallet implements WalletInterface {
     const knex = this.knex;
     const store = this.store;
 
-    const message = validatePayload(rawPayload);
+    const wirePayload = validatePayload(rawPayload);
 
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
@@ -376,14 +376,14 @@ export class Wallet implements WalletInterface {
     }
 
     const channelIds = await Channel.transaction(this.knex, async tx => {
-      return await this.store.pushMessage(message, tx);
+      return await this.store.pushMessage(wirePayload, tx);
     });
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
-    if (message.requests && message.requests.length > 0)
+    if (wirePayload.requests && wirePayload.requests.length > 0)
       // Modifies outbox, may append new messages
-      await Promise.all(message.requests.map(handleRequest(outbox)));
+      await Promise.all(wirePayload.requests.map(handleRequest(outbox)));
 
     return {outbox, channelResults};
   }

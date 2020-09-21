@@ -144,12 +144,14 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 type GetChannel = {type: 'GetChannel'; channelId: Bytes32};
 export type ChannelRequest = GetChannel;
 
+export interface Payload {
+  signedStates?: SignedState[];
+  objectives?: Objective[];
+  requests?: ChannelRequest[];
+}
+
 export interface Message {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
-  data: {
-    signedStates?: SignedState[];
-    objectives?: Objective[];
-    requests?: ChannelRequest[];
-  };
+  data: Payload;
 }
