@@ -87,7 +87,7 @@ const manager = new WorkerManager();
 export class Wallet implements WalletInterface {
   store: Store;
   readonly walletConfig: ServerWalletConfig;
-  constructor(walletConfig: ServerWalletConfig) {
+  constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
 
     this.store = new Store(
