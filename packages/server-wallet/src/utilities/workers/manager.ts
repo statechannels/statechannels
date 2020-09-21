@@ -6,14 +6,15 @@ import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
 import {StateChannelWorkerData} from './worker-message';
-
+const ONE_DAY = 86400000;
 export class WorkerManager {
   pool = new Pool({
     create: (): Worker => new Worker(path.resolve(__dirname, './loader.js')),
     destroy: (worker: Worker): Promise<number> => worker.terminate(),
-    min: 5,
-    max: 5,
-    reapIntervalMillis: 2147483647,
+    min: 16,
+    max: 16,
+    reapIntervalMillis: ONE_DAY,
+    idleTimeoutMillis: ONE_DAY,
   });
 
   public async concurrentSignState(
