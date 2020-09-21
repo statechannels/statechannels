@@ -175,14 +175,9 @@ export class Store {
   ): Promise<void> {
     const channel = await Channel.forId(channelId, tx);
 
-    const cols: RequiredColumns = {
-      ...channel,
-      chainServiceRequests: [...channel.chainServiceRequests, type],
-    };
-
     await Channel.query(tx)
       .where({channelId: channel.channelId})
-      .update(cols);
+      .update({chainServiceRequests: [...channel.chainServiceRequests, type]});
   }
 
   async getChannel(
@@ -247,15 +242,9 @@ export class Store {
       channel.vars = await addState(channel.vars, singedStateWithHash);
       validateInvariants(channel.vars, channel.myAddress);
 
-      const cols: RequiredColumns = {
-        ...channel,
-        vars: channel.vars,
-        fundingStrategy,
-      };
-
       const result = await Channel.query(tx)
         .where({channelId: channel.channelId})
-        .update(cols)
+        .update({vars: channel.vars, fundingStrategy})
         .returning('*')
         .first();
 
@@ -300,15 +289,10 @@ export class Store {
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols: RequiredColumns = {
-      ...channel,
-      vars: channel.vars,
-    };
-
     const result = await timer('updating', async () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
-        .update(cols)
+        .update({vars: channel.vars})
         .returning('*')
         .first()
     );
