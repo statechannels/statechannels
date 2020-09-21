@@ -46,6 +46,7 @@ import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {OnchainService} from '../mock-chain-service';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -426,8 +427,9 @@ export class Wallet implements WalletInterface {
               outgoing.map(n => outbox.push(n.notice));
               return;
             }
-            case 'SubmitTransaction':
+            case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+              await OnchainService.fundChannel(action);
               return;
             default:
               throw 'Unimplemented';

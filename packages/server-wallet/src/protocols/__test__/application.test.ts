@@ -1,9 +1,10 @@
 import {simpleEthAllocation, BN, Uint256, State} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
+import {ethers} from 'ethers';
 
 import {protocol} from '../application';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {SignState, submitTransaction} from '../actions';
+import {SignState, fundChannel} from '../actions';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {applicationProtocolState} from './fixtures/application-protocol-state';
@@ -27,14 +28,22 @@ const funded = (): Uint256 => BN.from(5);
 const notFunded = (): Uint256 => BN.from(0);
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
+const fundChannelAction1 = fundChannel({
+  channelId: channel().channelId,
+  assetHolderAddress: ethers.constants.AddressZero,
+  expectedHeld: BN.from(0),
+  amount: BN.from(5),
+});
+
+const fundChannelAction2 = {...fundChannelAction1, expectedHeld: BN.from(5)};
 
 test.each`
-  supported        | latestSignedByMe | latest           | funding      | action                                                                                            | cond                                                                     | result
-  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${funded}    | ${signState(postFundState)}                                                                       | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
-  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${notFunded} | ${submitTransaction({channelId: channel().channelId, transactionRequest: {}, transactionId: ''})} | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
-  ${prefundState2} | ${prefundState2} | ${prefundState2} | ${funded}    | ${submitTransaction({channelId: channel().channelId, transactionRequest: {}, transactionId: ''})} | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
-  ${closingState}  | ${postFundState} | ${closingState}  | ${funded}    | ${signState(closingState)}                                                                        | ${'when the postfund state is supported, and the channel is closing'}    | ${'signs the final state'}
-  ${closingState2} | ${runningState}  | ${closingState2} | ${funded}    | ${signState(closingState2)}                                                                       | ${'when the postfund state is supported, and the channel is closing'}    | ${'signs the final state'}
+  supported        | latestSignedByMe | latest           | funding      | action                      | cond                                                                     | result
+  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${funded}    | ${signState(postFundState)} | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
+  ${prefundState}  | ${prefundState}  | ${prefundState}  | ${notFunded} | ${fundChannelAction1}       | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
+  ${prefundState2} | ${prefundState2} | ${prefundState2} | ${funded}    | ${fundChannelAction2}       | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
+  ${closingState}  | ${postFundState} | ${closingState}  | ${funded}    | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'}    | ${'signs the final state'}
+  ${closingState2} | ${runningState}  | ${closingState2} | ${funded}    | ${signState(closingState2)} | ${'when the postfund state is supported, and the channel is closing'}    | ${'signs the final state'}
 `('$result $cond', ({supported, latest, latestSignedByMe, funding, action}) => {
   const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
   expect(protocol(ps)).toMatchObject(action);
