@@ -39,7 +39,7 @@ export type ErrorCodes = {
   };
   SyncChannel: {
     ChannelNotFound: 1400;
-  }
+  };
   PushMessage: {
     WrongParticipant: 900;
   };

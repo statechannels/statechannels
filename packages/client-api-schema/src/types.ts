@@ -60,7 +60,7 @@ export type StateChannelsRequest =
 
 export type StateChannelsResponse =
   | CreateChannelResponse
-  |  SyncChannelResponse
+  | SyncChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
   | GetWalletInformationResponse
