@@ -121,7 +121,9 @@
               "enum": [
                 "Direct",
                 "Ledger",
-                "Virtual"
+                "Virtual",
+                "Unfunded",
+                "Unknown"
               ],
               "type": "string"
             },
@@ -335,7 +337,9 @@
               "enum": [
                 "Direct",
                 "Ledger",
-                "Virtual"
+                "Virtual",
+                "Unfunded",
+                "Unknown"
               ],
               "type": "string"
             },
