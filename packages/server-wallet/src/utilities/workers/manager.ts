@@ -5,7 +5,7 @@ import {Pool} from 'tarn';
 import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
-import {SingleChannelResult} from '../../wallet';
+import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
 
 import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
@@ -27,6 +27,20 @@ export class WorkerManager {
     const data: StateChannelWorkerData = {operation: 'SignState', state, privateKey};
     const resultPromise = new Promise<{state: State; signature: string}>(resolve =>
       worker.once('message', (response: {state: State; signature: string}) => {
+        this.pool.release(worker);
+        resolve(response);
+      })
+    );
+
+    worker.postMessage(data);
+    return resultPromise;
+  }
+
+  public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
+    const worker = await this.pool.acquire().promise;
+    const data: StateChannelWorkerData = {operation: 'PushMessage', args};
+    const resultPromise = new Promise<any>(resolve =>
+      worker.once('message', (response: MultipleChannelResult) => {
         this.pool.release(worker);
         resolve(response);
       })

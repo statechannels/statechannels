@@ -105,6 +105,7 @@ export class Wallet implements WalletInterface {
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
     this._updateChannel = this._updateChannel.bind(this);
+    this._pushMessage = this._pushMessage.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
@@ -362,6 +363,10 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
+    return manager.pushMessage(rawPayload);
+  }
+
+  async _pushMessage(rawPayload: unknown): MultipleChannelResult {
     const knex = this.knex;
     const store = this.store;
 

@@ -32,5 +32,7 @@ parentPort?.on('message', async (message: any) => {
       return parentPort?.postMessage(await fastSignState(message.state, message.privateKey));
     case 'UpdateChannel':
       return parentPort?.postMessage(await wallet._updateChannel(message.args));
+    case 'PushMessage':
+      return parentPort?.postMessage(await wallet._pushMessage(message.args));
   }
 });
