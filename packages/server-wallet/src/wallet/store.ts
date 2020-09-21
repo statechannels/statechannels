@@ -264,9 +264,9 @@ export class Store {
 
   async getStates(
     channelId: Bytes32,
-    txOrKnex: TransactionOrKnex
+    tx?: Transaction
   ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
-    const channel = await Channel.forId(channelId, txOrKnex);
+    const channel = await Channel.forId(channelId, tx || this.knex);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
 

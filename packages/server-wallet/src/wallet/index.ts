@@ -129,7 +129,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
-    const {states, channelState} = await this.store.getStates(channelId, this.knex);
+    const {states, channelState} = await this.store.getStates(channelId);
 
     const {participants, myIndex} = channelState;
 
@@ -358,7 +358,6 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
-    const knex = this.knex;
     const store = this.store;
 
     const wirePayload = validatePayload(rawPayload);
@@ -366,7 +365,7 @@ export class Wallet implements WalletInterface {
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
       return async ({channelId}: ChannelRequest): Promise<void> => {
-        const {states: signedStates, channelState} = await store.getStates(channelId, knex);
+        const {states: signedStates, channelState} = await store.getStates(channelId);
 
         const {participants, myIndex} = channelState;
 
