@@ -42,7 +42,7 @@ import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
-import {timerFactory, recordFunctionMetrics} from '../metrics';
+import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
 
@@ -82,6 +82,8 @@ export class Store {
       this.addObjective = recordFunctionMetrics(this.addObjective);
       this.pushMessage = recordFunctionMetrics(this.pushMessage);
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
+
+      setupDBMetrics(this.knex);
     }
   }
 

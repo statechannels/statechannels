@@ -115,7 +115,7 @@ export class Wallet implements WalletInterface {
       if (!walletConfig.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(this.knex, walletConfig.metricsOutputFile);
+      setupMetrics(walletConfig.metricsOutputFile);
     }
   }
 
