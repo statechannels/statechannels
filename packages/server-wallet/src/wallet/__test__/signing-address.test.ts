@@ -4,7 +4,7 @@ import {truncate} from '../../db-admin/db-admin-connection';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
 
 import {alice} from './fixtures/participants';
 
@@ -12,7 +12,11 @@ beforeEach(async () => {
   await truncate(knex);
 });
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+const store = new Store(
+  extractDBConfigFromServerWalletConfig(defaultConfig),
+  defaultConfig.timingMetrics,
+  defaultConfig.skipEvmValidation
+);
 
 describe('signingAddress', () => {
   it('generate address then get address', async () => {

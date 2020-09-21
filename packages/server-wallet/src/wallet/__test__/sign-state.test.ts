@@ -6,14 +6,18 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob, alice} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+const store = new Store(
+  extractDBConfigFromServerWalletConfig(defaultConfig),
+  defaultConfig.timingMetrics,
+  defaultConfig.skipEvmValidation
+);
 
 beforeEach(async () => {
   await seedAlicesSigningWallet(knex);

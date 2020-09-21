@@ -8,13 +8,17 @@ import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import adminKnex from '../../db-admin/db-admin-connection';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
 
 import {stateVars} from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+const store = new Store(
+  extractDBConfigFromServerWalletConfig(defaultConfig),
+  defaultConfig.timingMetrics,
+  defaultConfig.skipEvmValidation
+);
 
 it('works', async () => {
   await seedAlicesSigningWallet(knex);

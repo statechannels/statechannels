@@ -4,9 +4,13 @@ import {SignedState as WireSignedState} from '@statechannels/wire-format';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+const store = new Store(
+  extractDBConfigFromServerWalletConfig(defaultConfig),
+  defaultConfig.timingMetrics,
+  defaultConfig.skipEvmValidation
+);
 
 describe('addSignedState', () => {
   let tx: Objection.Transaction;
