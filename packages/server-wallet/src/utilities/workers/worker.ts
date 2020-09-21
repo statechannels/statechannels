@@ -1,4 +1,4 @@
-import {parentPort, isMainThread, threadId} from 'worker_threads';
+import {parentPort, isMainThread} from 'worker_threads';
 
 import {hashState} from '@statechannels/wallet-core';
 
@@ -7,7 +7,7 @@ import {Wallet} from '../..';
 import {defaultConfig} from '../../config';
 import {logger} from '../../logger';
 
-import {isStateChannelWorkerData} from './worker-message';
+import {isStateChannelWorkerData} from './worker-data';
 
 const wallet = new Wallet(defaultConfig);
 
@@ -21,7 +21,7 @@ parentPort?.on('message', async (message: any) => {
     throw new Error('Incorrect worker data');
   }
   switch (message.operation) {
-    case 'HashState ':
+    case 'HashState':
       return parentPort?.postMessage(await hashState(message.state));
 
     case 'RecoverAddress':
@@ -30,7 +30,7 @@ parentPort?.on('message', async (message: any) => {
       );
     case 'SignState':
       return parentPort?.postMessage(await fastSignState(message.state, message.privateKey));
-    case 'UpdateChannel ':
+    case 'UpdateChannel':
       return parentPort?.postMessage(await wallet._updateChannel(message.args));
   }
 });

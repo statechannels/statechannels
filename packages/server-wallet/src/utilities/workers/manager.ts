@@ -5,7 +5,9 @@ import {Pool} from 'tarn';
 import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
-import {StateChannelWorkerData} from './worker-message';
+import {SingleChannelResult} from '../../wallet';
+
+import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
 export class WorkerManager {
   pool = new Pool({
@@ -34,11 +36,11 @@ export class WorkerManager {
     return resultPromise;
   }
 
-  public async updateChannel(args: UpdateChannelParams) {
+  public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
     const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'UpdateChannel ', args};
+    const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
     const resultPromise = new Promise<any>(resolve =>
-      worker.once('message', (response: {state: State; signature: string}) => {
+      worker.once('message', (response: SingleChannelResult) => {
         this.pool.release(worker);
         resolve(response);
       })
