@@ -50,7 +50,7 @@ export class Funding extends Model implements RequiredColumns {
       return await Funding.query(knex).insert({channelId, amount, assetHolder});
     } else {
       return await Funding.query(knex)
-        .update({channelId, amount, assetHolder})
+        .patch({channelId, amount, assetHolder})
         .where({channelId, assetHolder})
         .returning('*')
         .first();

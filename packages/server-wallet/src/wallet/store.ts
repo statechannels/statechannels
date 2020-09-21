@@ -177,7 +177,7 @@ export class Store {
 
     await Channel.query(tx)
       .where({channelId: channel.channelId})
-      .update({chainServiceRequests: [...channel.chainServiceRequests, type]});
+      .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
   }
 
   async getChannel(
@@ -244,7 +244,7 @@ export class Store {
 
       const result = await Channel.query(tx)
         .where({channelId: channel.channelId})
-        .update({vars: channel.vars, fundingStrategy})
+        .patch({vars: channel.vars, fundingStrategy})
         .returning('*')
         .first();
 
@@ -292,7 +292,7 @@ export class Store {
     const result = await timer('updating', async () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
-        .update({vars: channel.vars})
+        .patch({vars: channel.vars})
         .returning('*')
         .first()
     );
