@@ -277,7 +277,6 @@ export class Wallet implements WalletInterface {
     };
 
     const {outbox, channelResult} = await this.store.lockApp(
-      this.knex,
       channelId,
       criticalCode,
       handleMissingChannel
@@ -315,7 +314,7 @@ export class Wallet implements WalletInterface {
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
-    return this.store.lockApp(this.knex, channelId, criticalCode, handleMissingChannel);
+    return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
   async closeChannel({channelId}: CloseChannelParams): SingleChannelResult {
@@ -332,7 +331,7 @@ export class Wallet implements WalletInterface {
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
-    return this.store.lockApp(this.knex, channelId, criticalCode, handleMissingChannel);
+    return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
   async getChannels(): MultipleChannelResult {
@@ -408,7 +407,7 @@ export class Wallet implements WalletInterface {
     const channelResults: ChannelResult[] = [];
     let error: Error | undefined = undefined;
     while (channels.length && !error) {
-      await this.store.lockApp(this.knex, channels[0], async tx => {
+      await this.store.lockApp(channels[0], async tx => {
         // For the moment, we are only considering directly funded app channels.
         // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
         // In the future, we can have an App model which collects all the relevant channels for an app channel,
