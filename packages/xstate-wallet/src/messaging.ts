@@ -233,6 +233,7 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, DomainBudget ? serializeDomainBudget(DomainBudget) : {});
         break;
       case 'GetState':
+      case 'SyncChannel':
         // TODO: handle these requests
         break;
 

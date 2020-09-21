@@ -3,6 +3,7 @@ export * from './ChallengeChannel';
 export * from './CloseAndWithdraw';
 export * from './CloseChannel';
 export * from './CreateChannel';
+export * from './SyncChannel';
 export * from './EnableEthereum';
 export * from './GetBudget';
 export * from './GetChannels';

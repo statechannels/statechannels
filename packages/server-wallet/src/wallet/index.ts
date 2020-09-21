@@ -2,6 +2,7 @@ import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/a
 import {
   UpdateChannelParams,
   CreateChannelParams,
+  SyncChannelParams,
   StateChannelsNotification,
   JoinChannelParams,
   CloseChannelParams,
@@ -59,8 +60,6 @@ export interface UpdateChannelFundingParams {
   token?: Address;
   amount: Uint256;
 }
-
-type SyncChannelParams = {channelId: ChannelId};
 
 export type WalletInterface = {
   // App utilities

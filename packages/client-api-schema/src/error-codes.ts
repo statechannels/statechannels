@@ -37,6 +37,9 @@ export type ErrorCodes = {
     NotYourTurn: 403;
     ChannelClosed: 404;
   };
+  SyncChannel: {
+    ChannelNotFound: 1400;
+  };
   PushMessage: {
     WrongParticipant: 900;
   };
