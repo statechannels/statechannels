@@ -29,7 +29,9 @@ require('@statechannels/iframe-channel-provider');
 The channel provider needs to be pointed at our hosted wallet:
 
 ```typescript
-await window.channelProvider.mountWalletComponent('https://xstate-wallet.statechannels.org');
+await window.channelProvider.mountWalletComponent(
+  'https://xstate-wallet-v-0-3-0.statechannels.org'
+);
 ```
 
 This step mounts the wallet iFrame in your Dapp, configures communication and performs an initial handshake with the wallet.
