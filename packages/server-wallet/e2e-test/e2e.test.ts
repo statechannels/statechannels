@@ -32,12 +32,16 @@ beforeAll(async () => {
   receiverServer = startReceiverServer();
   await waitForServerToStart(receiverServer);
 
+  await knexPayer.migrate.latest({directory: './src/db/migrations'});
+  await knexReceiver.migrate.latest({directory: './src/db/migrations'});
+
   [ChannelPayer, ChannelReceiver] = [knexPayer, knexReceiver].map(knex => Channel.bindKnex(knex));
   [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
 });
 
 beforeEach(async () => {
   await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
+
   // Adds Alice to Payer's Database
   await SWPayer.query().insert(alice());
 
