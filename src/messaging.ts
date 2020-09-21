@@ -15,7 +15,8 @@ import {
   CloseAndWithdrawRequest,
   StateChannelsErrorResponse,
   ChallengeChannelRequest,
-  parseResponse
+  parseResponse,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 import {fromEvent, Observable} from 'rxjs';
 import {validateMessage} from '@statechannels/wire-format';
@@ -318,10 +319,7 @@ async function convertToInternalEvent(
       if (!isSimpleEthAllocation(outcome)) {
         throw new Error('Currently only a simple ETH allocation is supported');
       }
-      const fundingStrategy = request.params.fundingStrategy;
-      if (fundingStrategy == 'Unfunded' || fundingStrategy == 'Unknown') {
-        throw new Error(`Unsupported funding strategy ${fundingStrategy}`);
-      }
+      const fundingStrategy = supportedFundingStrategyOrThrow(request.params.fundingStrategy);
       return {
         type: 'CREATE_CHANNEL',
         ...request.params,
@@ -356,4 +354,15 @@ async function convertToInternalEvent(
         appData: request.params.appData
       };
   }
+}
+
+export type SupportedFundingStrategy = Exclude<FundingStrategy, 'Unknown' | 'Unfunded'>;
+function isSupportedFundingStrategy(fs: FundingStrategy): fs is SupportedFundingStrategy {
+  return fs !== 'Unfunded' && fs !== 'Unknown';
+}
+export function supportedFundingStrategyOrThrow(fs: FundingStrategy): SupportedFundingStrategy {
+  if (!isSupportedFundingStrategy(fs)) {
+    throw new Error(`Unsupported funding strategy ${fs}`);
+  }
+  return fs;
 }
