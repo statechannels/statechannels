@@ -14,6 +14,14 @@ export async function up(knex: Knex): Promise<any> {
       .notNullable()
       .defaultTo(defaultFundingStrategy);
   });
+
+  await knex.raw(`\
+    ALTER TABLE ${channels}
+    ADD CONSTRAINT valid_chain_service_requests
+    CHECK (
+      ${chainServiceRequests} <@ ARRAY['fund']
+    )
+  `);
 }
 
 export async function down(knex: Knex): Promise<any> {
