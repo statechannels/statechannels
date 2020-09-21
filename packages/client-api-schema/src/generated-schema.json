@@ -1666,6 +1666,41 @@
       ],
       "type": "object"
     },
+    "JsonRpcRequest<\"SyncChannel\",SyncChannelParams>": {
+      "additionalProperties": false,
+      "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "id": {
+          "description": "Identifier for the resquest",
+          "type": "number"
+        },
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "description": "Generic type of the request method",
+          "enum": [
+            "SyncChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/SyncChannelParams",
+          "description": "Request parameters"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
     "JsonRpcRequest<\"UpdateChannel\",UpdateChannelParams>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
@@ -1838,6 +1873,34 @@
             "$ref": "#/definitions/ChannelResult"
           },
           "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<structure-160360211-381-383-160360211-364-384-160360211-330-385-160360211-0-570>": {
+      "additionalProperties": false,
+      "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "id": {
+          "description": "Identifier for the response",
+          "type": "number"
+        },
+        "jsonrpc": {
+          "description": "Spec version",
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "additionalProperties": false,
+          "description": "The generic type of the response",
+          "type": "object"
         }
       },
       "required": [
@@ -2128,6 +2191,9 @@
           "$ref": "#/definitions/CreateChannelRequest"
         },
         {
+          "$ref": "#/definitions/SyncChannelRequest"
+        },
+        {
           "$ref": "#/definitions/JoinChannelRequest"
         },
         {
@@ -2171,6 +2237,9 @@
           "$ref": "#/definitions/CreateChannelResponse"
         },
         {
+          "$ref": "#/definitions/SyncChannelResponse"
+        },
+        {
           "$ref": "#/definitions/JoinChannelResponse"
         },
         {
@@ -2207,6 +2276,24 @@
           "$ref": "#/definitions/GetChannelsResponse"
         }
       ]
+    },
+    "SyncChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "SyncChannelRequest": {
+      "$ref": "#/definitions/JsonRpcRequest%3C%22SyncChannel%22%2CSyncChannelParams%3E"
+    },
+    "SyncChannelResponse": {
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-160360211-381-383-160360211-364-384-160360211-330-385-160360211-0-570%3E"
     },
     "TokenBudget": {
       "additionalProperties": false,
