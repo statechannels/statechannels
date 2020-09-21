@@ -339,10 +339,10 @@ export class Wallet implements WalletInterface {
 
   async getState({channelId}: GetStateParams): SingleChannelResult {
     try {
-      const {channelResult} = await Channel.forId(channelId, this.knex);
+      const channel = await this.store.getChannel(channelId);
 
       return {
-        channelResult,
+        channelResult: ChannelState.toChannelResult(channel),
         outbox: [],
       };
     } catch (err) {

@@ -258,11 +258,8 @@ export class Store {
       .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
   }
 
-  async getChannel(
-    channelId: Bytes32,
-    txOrKnex: TransactionOrKnex
-  ): Promise<ChannelState | undefined> {
-    return (await Channel.forId(channelId, txOrKnex))?.protocolState;
+  async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
+    return (await Channel.forId(channelId, tx || this.knex))?.protocolState;
   }
 
   async getStates(
