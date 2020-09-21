@@ -1,6 +1,7 @@
 import {State, simpleEthAllocation} from '@statechannels/wallet-core';
 import {Wallet, ethers} from 'ethers';
 
+import {defaultConfig} from '../../../config';
 import {addHash} from '../../../state-utils';
 import {participant} from '../../../wallet/__test__/fixtures/participants';
 import {fastSignState} from '../../signatures';
@@ -9,7 +10,7 @@ import {WorkerManager} from '../manager';
 describe('worker threads', () => {
   let manager: WorkerManager;
   beforeAll(async () => {
-    manager = new WorkerManager();
+    manager = new WorkerManager(defaultConfig);
   });
   afterAll(async () => {
     await manager.destroy();
