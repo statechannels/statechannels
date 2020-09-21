@@ -318,9 +318,14 @@ async function convertToInternalEvent(
       if (!isSimpleEthAllocation(outcome)) {
         throw new Error('Currently only a simple ETH allocation is supported');
       }
+      const fundingStrategy = request.params.fundingStrategy;
+      if (fundingStrategy == 'Unfunded' || fundingStrategy == 'Unknown') {
+        throw new Error(`Unsupported funding strategy ${fundingStrategy}`);
+      }
       return {
         type: 'CREATE_CHANNEL',
         ...request.params,
+        fundingStrategy,
         participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
         challengeDuration: CHALLENGE_DURATION,
