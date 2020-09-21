@@ -12,7 +12,6 @@ import {
 } from '@statechannels/client-api-schema';
 import {
   ChannelConstants,
-  Payload,
   validatePayload,
   ChannelRequest,
   Outcome,
@@ -81,7 +80,7 @@ export type WalletInterface = {
   updateChannelFunding(args: UpdateChannelFundingParams): void;
 
   // Wallet <-> Wallet communication
-  pushMessage(m: Payload): MultipleChannelResult;
+  pushMessage(m: unknown): MultipleChannelResult;
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
