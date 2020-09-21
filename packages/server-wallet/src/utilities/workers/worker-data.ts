@@ -23,11 +23,17 @@ type UpdateChannelRequest = {
   args: UpdateChannelParams;
 };
 
+type PushMessageRequest = {
+  operation: 'PushMessage';
+  args: unknown;
+};
+
 export type StateChannelWorkerData =
   | SignStateRequest
   | RecoverAddressRequest
   | HashStateRequest
-  | UpdateChannelRequest;
+  | UpdateChannelRequest
+  | PushMessageRequest;
 
 export function isStateChannelWorkerData(data: any): data is StateChannelWorkerData {
   return (
@@ -35,7 +41,8 @@ export function isStateChannelWorkerData(data: any): data is StateChannelWorkerD
     (data.operation === 'SignState' ||
       data.operation === 'RecoverAddress' ||
       data.operation === 'HashState' ||
-      data.operation === 'UpdateChannel')
+      data.operation === 'UpdateChannel' ||
+      data.operation === 'PushMessage')
   );
 }
 
@@ -47,3 +54,4 @@ export const isSignStateRequest = guard<SignStateRequest>('SignState');
 export const isRecoverAddressRequest = guard<RecoverAddressRequest>('RecoverAddress');
 export const isHashStateRequest = guard<HashStateRequest>('HashState');
 export const isUpdateChannelRequest = guard<UpdateChannelRequest>('UpdateChannel');
+export const isPushMessageRequest = guard<PushMessageRequest>('PushMessage');

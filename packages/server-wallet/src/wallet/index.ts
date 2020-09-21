@@ -91,9 +91,9 @@ export class Wallet implements WalletInterface {
     this.walletConfig = walletConfig || defaultConfig;
 
     this.store = new Store(
-      Knex(extractDBConfigFromServerWalletConfig(walletConfig)),
-      walletConfig.timingMetrics,
-      walletConfig.skipEvmValidation
+      Knex(extractDBConfigFromServerWalletConfig(this.walletConfig)),
+      this.walletConfig.timingMetrics,
+      this.walletConfig.skipEvmValidation
     );
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
@@ -102,6 +102,7 @@ export class Wallet implements WalletInterface {
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
     this._updateChannel = this._updateChannel.bind(this);
+    this._pushMessage = this._pushMessage.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
@@ -333,6 +334,10 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
+    return manager.pushMessage(rawPayload);
+  }
+
+  async _pushMessage(rawPayload: unknown): MultipleChannelResult {
     const store = this.store;
 
     const wirePayload = validatePayload(rawPayload);
