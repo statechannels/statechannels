@@ -1,7 +1,6 @@
+import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
-
-import {CreateChannelParams} from '../..';
 
 import {alice, bob} from './participants';
 import {fixture} from './utils';

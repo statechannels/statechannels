@@ -48,8 +48,6 @@ import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../conf
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
-export {CreateChannelParams};
-
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
