@@ -16,7 +16,7 @@ import {
   knexReceiver,
   startReceiverServer,
   triggerPayments,
-  knexPayer
+  knexPayer,
 } from './e2e-utils';
 
 jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds
@@ -131,46 +131,46 @@ describe('payments', () => {
     let payerClient: PayerClient;
 
     beforeAll(() => {
-      payerClient= new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
-    })
+      payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
+    });
 
     afterAll(async () => {
-      await payerClient.destroy()
-    })
+      await payerClient.destroy();
+    });
 
     it('can update pre-existing channel, send state, but ignore reply, and sync later', async () => {
       await expectSupportedState(ChannelPayer, 3);
-      
-      const payload = await payerClient.createPayment(channelId)
-      
+
+      const payload = await payerClient.createPayment(channelId);
+
       await expectSupportedState(ChannelPayer, 4);
       await expectSupportedState(ChannelReceiver, 3);
 
-      await payerClient.messageReceiverAndExpectReply(payload) // Ignore reply
+      await payerClient.messageReceiverAndExpectReply(payload); // Ignore reply
 
       await expectSupportedState(ChannelPayer, 4);
       await expectSupportedState(ChannelReceiver, 5);
 
-      await payerClient.syncChannel(channelId)
-      
+      await payerClient.syncChannel(channelId);
+
       await expectSupportedState(ChannelPayer, 5);
       await expectSupportedState(ChannelReceiver, 5);
-    })
+    });
 
     it('can update pre-existing channel, not send state, and sync later', async () => {
       await expectSupportedState(ChannelPayer, 3);
 
-      await payerClient.createPayment(channelId) // Forget to send
-      
+      await payerClient.createPayment(channelId); // Forget to send
+
       await expectSupportedState(ChannelPayer, 4);
       await expectSupportedState(ChannelReceiver, 3);
 
-      await payerClient.syncChannel(channelId)
-      
+      await payerClient.syncChannel(channelId);
+
       await expectSupportedState(ChannelPayer, 5);
       await expectSupportedState(ChannelReceiver, 5);
-    })
-  })
+    });
+  });
 
   it('can update pre-existing channels multiple times', async () => {
     await expectSupportedState(ChannelPayer, 3);

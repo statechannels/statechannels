@@ -105,7 +105,7 @@ export default class PayerClient {
   }
 
   public async makePayment(channelId: string): Promise<void> {
-    const payload = await this.createPayment(channelId)
+    const payload = await this.createPayment(channelId);
 
     const reply = await this.time(`send message ${channelId}`, async () =>
       this.messageReceiverAndExpectReply(payload)
@@ -115,9 +115,11 @@ export default class PayerClient {
   }
 
   public async syncChannel(channelId: string): Promise<void> {
-    const { outbox: [{params}] } = await this.wallet.syncChannel({channelId});
+    const {
+      outbox: [{params}],
+    } = await this.wallet.syncChannel({channelId});
     const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Payload);
-    await this.wallet.pushMessage(reply)
+    await this.wallet.pushMessage(reply);
   }
 
   public emptyMessage(): Promise<Payload> {

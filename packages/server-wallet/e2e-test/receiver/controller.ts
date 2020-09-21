@@ -7,7 +7,6 @@ import {Wallet} from '../../src/wallet';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
-import { channel } from '../../src/models/__test__/fixtures/channel';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
@@ -26,7 +25,7 @@ export default class ReceiverController {
   }
 
   public async acceptMessageAndReturnReplies(message: Payload): Promise<Payload> {
-    let reply: Payload = {
+    const reply: Payload = {
       signedStates: [],
       objectives: [],
     };
@@ -37,7 +36,7 @@ export default class ReceiverController {
     } = await this.time('push message', async () => this.wallet.pushMessage(message));
 
     if (maybeSyncStateResponse) {
-      const syncResponse = ((maybeSyncStateResponse.params as WireMessage).data as Payload)
+      const syncResponse = (maybeSyncStateResponse.params as WireMessage).data as Payload;
       reply.signedStates = reply.signedStates?.concat(syncResponse.signedStates || []);
       reply.objectives = reply.objectives?.concat(syncResponse.objectives || []);
     }
@@ -57,6 +56,6 @@ export default class ReceiverController {
       reply.objectives = reply.objectives?.concat(walletResponse.objectives || []);
     }
 
-    return reply
+    return reply;
   }
 }
