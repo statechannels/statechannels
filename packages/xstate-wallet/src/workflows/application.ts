@@ -13,7 +13,7 @@ import {
 } from 'xstate';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
 import {StateVariables, serializeChannelEntry} from '@statechannels/wallet-core';
-import {FundingStrategy, StateChannelsError} from '@statechannels/client-api-schema';
+import {StateChannelsError} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {
@@ -30,13 +30,13 @@ import {unreachable} from '../utils';
 import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import {createMockGuard} from '../utils/workflow-utils';
-import {MessagingServiceInterface} from '../messaging';
+import {MessagingServiceInterface, SupportedFundingStrategy} from '../messaging';
 
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 
 export interface WorkflowContext {
   applicationDomain: string;
-  fundingStrategy: FundingStrategy;
+  fundingStrategy: SupportedFundingStrategy;
   channelId?: string;
   requestObserver?: any;
   updateObserver?: any;

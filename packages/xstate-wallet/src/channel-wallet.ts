@@ -20,7 +20,7 @@ import {Store} from './store';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {Wallet as WalletUi} from './ui/wallet';
-import {MessagingServiceInterface} from './messaging';
+import {MessagingServiceInterface, supportedFundingStrategyOrThrow} from './messaging';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
 
@@ -60,12 +60,13 @@ export class ChannelWallet {
           )}, no new workflow will be spawned`
         );
       } else {
+        const fundingStrategy = supportedFundingStrategyOrThrow(objective.data.fundingStrategy);
         // Note that it's important to start the workflow first, before sending ChannelProposed.
         // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
         this.startWorkflow(
           Application.workflow(this.store, this.messagingService, {
             type: 'JOIN_CHANNEL',
-            fundingStrategy: objective.data.fundingStrategy,
+            fundingStrategy,
             channelId: objective.data.targetChannelId,
             applicationDomain: 'TODO' // FIXME
           }),
