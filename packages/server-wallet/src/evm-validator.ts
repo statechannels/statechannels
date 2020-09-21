@@ -27,16 +27,16 @@ export const validateTransitionWithEVM = async (
     });
     return false;
   }
+
   const bytecode =
     bytecodeCache[from.appDefinition] ??
     (bytecodeCache[from.appDefinition] =
       (await AppBytecode.getBytecode(defaultConfig.chainNetworkID, from.appDefinition, tx)) ||
       MISSING);
+
   if (bytecode === MISSING) {
-    // logger.warn(
-    //   `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
-    // );
-    return true;
+    logger.warn(`No bytecode found for appDefinition ${from.appDefinition}.`);
+    return false;
   }
 
   const {data} = createValidTransitionTransaction(toNitroState(from), toNitroState(to));
