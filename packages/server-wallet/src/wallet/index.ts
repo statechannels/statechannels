@@ -114,7 +114,6 @@ export class Wallet implements WalletInterface {
   }
 
   public get knex(): Knex {
-    // FIXME: Knex should be an implementation detail of a Store
     return this.store.knex;
   }
 
