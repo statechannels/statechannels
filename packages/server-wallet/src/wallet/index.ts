@@ -12,11 +12,9 @@ import {
   ChannelId,
 } from '@statechannels/client-api-schema';
 import {
-  ChannelConstants,
   validatePayload,
   ChannelRequest,
   Outcome,
-  SignedStateVarsWithHash,
   convertToParticipant,
   Participant,
   assetHolderAddress,
@@ -24,16 +22,14 @@ import {
   Zero,
   SignedState,
   serializeMessage,
+  ChannelConstants,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Knex from 'knex';
-import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
-import {Channel} from '../models/channel';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
-import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import * as UpdateChannel from '../handlers/update-channel';
@@ -182,11 +178,11 @@ export class Wallet implements WalletInterface {
   }
 
   async createChannel(args: CreateChannelParams): SingleChannelResult {
-    const {participants, appDefinition, appData, allocations} = args;
+    const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
 
     const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
-    const channelConstants: ChannelConstants = {
+    const constants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),
       chainId: '0x01',
@@ -194,68 +190,42 @@ export class Wallet implements WalletInterface {
       appDefinition,
     };
 
-    const vars: SignedStateVarsWithHash[] = [];
+    const {outgoing, channelResult} = await this.store.createChannel(
+      constants,
+      appData,
+      outcome,
+      fundingStrategy
+    );
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    const callback = async (tx: Transaction) => {
-      // TODO: How do we pick a signing address?
-      const signingAddress = (await SigningWallet.query(tx).first())?.address;
-
-      const cols = {
-        ...channelConstants,
-        vars,
-        signingAddress,
-        chainServiceRequests: [],
-        fundingStrategy: args.fundingStrategy,
+    // todo: clean up the construction of the Objective
+    // todo: do not assume Direct funding
+    const outbox: Outgoing[] = outgoing.map(n => {
+      const params = n.notice.params as {
+        sender: string;
+        recipient: string;
+        data: {signedStates: SignedState[]};
       };
-
-      const channel = await Channel.query(tx)
-        .insert(cols)
-        .returning('*');
-
-      const {outgoing, channelResult} = await this.store.signState(
-        channel.channelId,
-        {
-          ...channelConstants,
-          turnNum: 0,
-          isFinal: false,
-          appData,
-          outcome,
-        },
-        tx
-      );
-
-      // todo: clean up the construction of the Objective
-      // todo: do not assume Direct funding
-      const outbox: Outgoing[] = outgoing.map(n => {
-        const params = n.notice.params as {
-          sender: string;
-          recipient: string;
-          data: {signedStates: SignedState[]};
-        };
-        return {
-          method: 'MessageQueued' as const,
-          params: {
-            ...n.notice.params,
-            data: {
-              objectives: [
-                {
-                  participants,
-                  type: 'CreateChannel',
-                  data: {
-                    signedState: params.data.signedStates[0],
-                    fundingStrategy: 'Direct',
-                  },
+      return {
+        method: 'MessageQueued' as const,
+        params: {
+          ...n.notice.params,
+          data: {
+            objectives: [
+              {
+                participants,
+                type: 'CreateChannel',
+                data: {
+                  signedState: params.data.signedStates[0],
+                  fundingStrategy: 'Direct',
                 },
-              ],
-            },
+              },
+            ],
           },
-        };
-      });
+        },
+      };
+    });
 
-      return {outbox, channelResult};
-    };
-    return this.knex.transaction(callback);
+    return {outbox, channelResult};
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
@@ -375,9 +345,7 @@ export class Wallet implements WalletInterface {
       };
     }
 
-    const channelIds = await Channel.transaction(this.knex, async tx => {
-      return await this.store.pushMessage(wirePayload, tx);
-    });
+    const channelIds = await this.store.pushMessage(wirePayload);
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 

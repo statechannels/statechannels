@@ -1,6 +1,7 @@
 import {Transaction, TransactionOrKnex} from 'objection';
 import {
   Objective,
+  Outcome,
   SignedStateWithHash,
   SignedStateVarsWithHash,
   State,
@@ -40,7 +41,7 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
-import {Bytes32, Address, Uint256} from '../type-aliases';
+import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
@@ -278,30 +279,32 @@ export class Store {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(message: WirePayload, tx: Transaction): Promise<Bytes32[]> {
-    const objectives = message.objectives?.map(deserializeObjective) || [];
+  async pushMessage(message: WirePayload): Promise<Bytes32[]> {
+    return this.knex.transaction(async tx => {
+      const objectives = message.objectives?.map(deserializeObjective) || [];
 
-    for (const o of objectives) {
-      await this.addObjective(o, tx);
-    }
+      for (const o of objectives) {
+        await this.addObjective(o, tx);
+      }
 
-    const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
+      const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
 
-    for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss.channelId, undefined, ss, tx);
-    }
+      for (const ss of message.signedStates || []) {
+        await this.addSignedState(ss.channelId, undefined, ss, tx);
+      }
 
-    function isDefined(s: string | undefined): s is string {
-      return s !== undefined;
-    }
-    const objectiveChannelIds =
-      objectives
-        .map(objective =>
-          isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
-        )
-        .filter(isDefined) || [];
+      function isDefined(s: string | undefined): s is string {
+        return s !== undefined;
+      }
+      const objectiveChannelIds =
+        objectives
+          .map(objective =>
+            isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
+          )
+          .filter(isDefined) || [];
 
-    return stateChannelIds.concat(objectiveChannelIds);
+      return stateChannelIds.concat(objectiveChannelIds);
+    });
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
@@ -411,6 +414,28 @@ export class Store {
     );
 
     return result;
+  }
+
+  async createChannel(
+    constants: ChannelConstants,
+    appData: Bytes,
+    outcome: Outcome,
+    fundingStrategy: FundingStrategy
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+    return await this.knex.transaction(async tx => {
+      const {channelId} = await createChannel(constants, fundingStrategy, tx);
+      return await this.signState(
+        channelId,
+        {
+          ...constants,
+          turnNum: 0,
+          isFinal: false,
+          appData,
+          outcome,
+        },
+        tx
+      );
+    });
   }
 
   async updateFunding(
