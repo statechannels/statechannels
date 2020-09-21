@@ -85,8 +85,8 @@ export class Store {
     }
   }
 
-  async getFirstParticipant(knex: Knex): Promise<Participant> {
-    const signingAddress = await this.getOrCreateSigningAddress(knex);
+  async getFirstParticipant(): Promise<Participant> {
+    const signingAddress = await this.getOrCreateSigningAddress(this.knex);
     return {
       participantId: signingAddress,
       signingAddress,

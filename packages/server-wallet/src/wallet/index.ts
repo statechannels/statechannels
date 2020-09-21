@@ -156,7 +156,7 @@ export class Wallet implements WalletInterface {
     let participant: Participant | undefined = undefined;
 
     try {
-      participant = await this.store.getFirstParticipant(this.knex);
+      participant = await this.store.getFirstParticipant();
     } catch (e) {
       if (isWalletError(e)) logger.error('Wallet failed to get a participant', e);
       else throw e;
