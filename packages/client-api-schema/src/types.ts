@@ -7,6 +7,7 @@ import {
   GetWalletInformationRequest,
   EnableEthereumRequest,
   GetStateRequest,
+  SyncChannelRequest,
   PushMessageRequest,
   ChallengeChannelRequest,
   GetBudgetRequest,
@@ -20,6 +21,7 @@ import {
   EnableEthereumResponse,
   GetWalletInformationResponse,
   GetStateResponse,
+  SyncChannelResponse,
   PushMessageResponse,
   ChallengeChannelResponse,
   GetBudgetResponse,
@@ -42,6 +44,7 @@ type GenericError = JsonRpcError<500, 'Wallet error'>;
 
 export type StateChannelsRequest =
   | CreateChannelRequest
+  | SyncChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
   | GetWalletInformationRequest
@@ -57,6 +60,7 @@ export type StateChannelsRequest =
 
 export type StateChannelsResponse =
   | CreateChannelResponse
+  |  SyncChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
   | GetWalletInformationResponse
