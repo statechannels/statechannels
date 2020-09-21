@@ -4,6 +4,7 @@ import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import {defaultConfig} from '../../../config';
+import {alice, bob} from '../fixtures/participants';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -36,7 +37,7 @@ describe('happy path', () => {
             data: {
               objectives: [
                 {
-                  participants: ['alice', 'bob'],
+                  participants: [alice(), bob()],
                   data: {
                     signedState: {turnNum: 0, appData},
                     fundingStrategy: 'Direct',

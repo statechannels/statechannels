@@ -146,6 +146,12 @@ export const wireMessageFormat: WireMessage = {
           }
         ]
       }
+    ],
+    requests: [
+      {
+        type: 'GetChannel',
+        channelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
+      }
     ]
   }
 };
@@ -171,6 +177,12 @@ export const internalMessageFormat: Payload = {
           signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
         }
       ]
+    }
+  ],
+  requests: [
+    {
+      type: 'GetChannel',
+      channelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
     }
   ]
 };

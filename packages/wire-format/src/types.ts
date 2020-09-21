@@ -85,7 +85,7 @@ export type CreateChannel = _Objective<
   'CreateChannel',
   {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    signedState: any;
+    signedState: SignedState;
     fundingStrategy: FundingStrategy;
   }
 >;
@@ -140,11 +140,16 @@ export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 
+// channel requests
+type GetChannel = {type: 'GetChannel'; channelId: Bytes32};
+export type ChannelRequest = GetChannel;
+
 export interface Message {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
   data: {
     signedStates?: SignedState[];
     objectives?: Objective[];
+    requests?: ChannelRequest[];
   };
 }

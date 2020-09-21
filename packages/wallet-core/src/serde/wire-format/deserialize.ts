@@ -5,7 +5,8 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Message as WireMessage,
-  isAllocations
+  isAllocations,
+  validateMessage
 } from '@statechannels/wire-format';
 
 import {
@@ -29,13 +30,20 @@ export function convertToInternalParticipant(participant: {
   return {...participant, destination: makeDestination(participant.destination)};
 }
 
+export function validatePayload(rawPayload: unknown): Payload {
+  // todo: wire-format should export a validator specially for the payload
+  return deserializeMessage(validateMessage({recipient: '', sender: '', data: rawPayload}));
+}
+
 export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
+  const requests = message?.data?.requests;
 
   return {
     signedStates,
-    objectives
+    objectives,
+    requests
   };
 }
 
@@ -58,13 +66,19 @@ export function deserializeState(state: SignedStateWire): SignedState {
 }
 
 export function deserializeObjective(objective: ObjectiveWire): Objective {
-  return {
-    ...objective,
-    participants: objective.participants.map(p => ({
-      ...p,
-      destination: makeDestination(p.destination)
-    }))
-  };
+  const participants = objective.participants.map(p => ({
+    ...p,
+    destination: makeDestination(p.destination)
+  }));
+
+  switch (objective.type) {
+    case 'CreateChannel': {
+      const signedState = deserializeState(objective.data.signedState);
+      return {...objective, participants, data: {...objective.data, signedState}};
+    }
+    default:
+      return {...objective, participants};
+  }
 }
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity

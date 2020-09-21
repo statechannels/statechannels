@@ -10,6 +10,7 @@ import {
   ChannelConstants,
   Participant,
   makeDestination,
+  serializeMessage,
   StateWithHash,
   isCreateChannel,
   hashState,
@@ -158,7 +159,7 @@ export class Store {
       type: 'NotifyApp' as 'NotifyApp',
       notice: {
         method: 'MessageQueued' as 'MessageQueued',
-        params: {sender, recipient, data},
+        params: serializeMessage(data, recipient, sender),
       },
     }));
 
