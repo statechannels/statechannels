@@ -88,11 +88,15 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
-  knex: Knex;
   store: Store;
+
   constructor(readonly walletConfig: ServerWalletConfig) {
-    this.knex = Knex(extractDBConfigFromServerWalletConfig(walletConfig));
-    this.store = new Store(walletConfig.timingMetrics, walletConfig.skipEvmValidation);
+    this.store = new Store(
+      extractDBConfigFromServerWalletConfig(walletConfig),
+      walletConfig.timingMetrics,
+      walletConfig.skipEvmValidation
+    );
+
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
@@ -113,6 +117,11 @@ export class Wallet implements WalletInterface {
       }
       setupMetrics(this.knex, walletConfig.metricsOutputFile);
     }
+  }
+
+  public get knex(): Knex {
+    // FIXME: Knex should be an implementation detail of a Store
+    return this.store.knex;
   }
 
   public async destroy(): Promise<void> {

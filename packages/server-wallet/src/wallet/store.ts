@@ -62,7 +62,15 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  constructor(readonly timingMetrics: boolean, readonly skipEvmValidation: boolean) {
+  knex: Knex;
+
+  constructor(
+    readonly knexConfig: Knex.Config,
+    readonly timingMetrics: boolean,
+    readonly skipEvmValidation: boolean
+  ) {
+    this.knex = Knex(knexConfig);
+
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
