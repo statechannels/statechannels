@@ -14,12 +14,12 @@ type RecoverAddressRequest = {
 };
 
 type HashStateRequest = {
-  operation: 'HashState ';
+  operation: 'HashState';
   state: State;
 };
 
 type UpdateChannelRequest = {
-  operation: 'UpdateChannel ';
+  operation: 'UpdateChannel';
   args: UpdateChannelParams;
 };
 
@@ -30,7 +30,6 @@ export type StateChannelWorkerData =
   | UpdateChannelRequest;
 
 export function isStateChannelWorkerData(data: any): data is StateChannelWorkerData {
-  return true;
   return (
     'operation' in data &&
     (data.operation === 'SignState' ||
@@ -46,5 +45,5 @@ const guard = <T extends StateChannelWorkerData>(operation: T['operation']) => (
 
 export const isSignStateRequest = guard<SignStateRequest>('SignState');
 export const isRecoverAddressRequest = guard<RecoverAddressRequest>('RecoverAddress');
-export const isHashStateRequest = guard<HashStateRequest>('HashState ');
-export const isUpdateChannelRequest = guard<UpdateChannelRequest>('UpdateChannel ');
+export const isHashStateRequest = guard<HashStateRequest>('HashState');
+export const isUpdateChannelRequest = guard<UpdateChannelRequest>('UpdateChannel');

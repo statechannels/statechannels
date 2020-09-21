@@ -45,7 +45,7 @@ import {isWalletError} from '../errors/wallet-error';
 import {Funding} from '../models/funding';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {ServerWalletConfig, defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
 import {OnchainService} from '../mock-chain-service';
 import {WorkerManager} from '../utilities/workers/manager';
 
@@ -54,8 +54,8 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
-type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+export type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
+export type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
