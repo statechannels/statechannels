@@ -86,7 +86,7 @@ export class Store {
   }
 
   async getFirstParticipant(): Promise<Participant> {
-    const signingAddress = await this.getOrCreateSigningAddress(this.knex);
+    const signingAddress = await this.getOrCreateSigningAddress();
     return {
       participantId: signingAddress,
       signingAddress,
@@ -94,13 +94,13 @@ export class Store {
     };
   }
 
-  async getOrCreateSigningAddress(knex: Knex): Promise<string> {
+  async getOrCreateSigningAddress(): Promise<string> {
     const randomWallet = ethers.Wallet.createRandom();
     // signing_wallets table allows for only one row via database constraints
     try {
       // returning('*') only works with Postgres
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
-      const signingWallet = await SigningWallet.query(knex)
+      const signingWallet = await SigningWallet.query(this.knex)
         .insert({
           privateKey: randomWallet.privateKey,
           address: randomWallet.address,
@@ -109,7 +109,7 @@ export class Store {
       return signingWallet.address;
     } catch (error) {
       if (isUniqueViolationError(error)) {
-        return (await SigningWallet.query(knex).first()).address;
+        return (await SigningWallet.query(this.knex).first()).address;
       }
       throw error;
     }
@@ -125,12 +125,11 @@ export class Store {
    * concurrently across all wallets.
    */
   async lockApp<T>(
-    knex: Knex,
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
-    return knex.transaction(async tx => {
+    return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer(
         'getting channel',
@@ -274,8 +273,8 @@ export class Store {
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   }
 
-  async getChannels(knex: Knex): Promise<ChannelState[]> {
-    return (await Channel.query(knex)).map(channel => channel.protocolState);
+  async getChannels(): Promise<ChannelState[]> {
+    return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
   async pushMessage(message: WirePayload, tx: Transaction): Promise<Bytes32[]> {
