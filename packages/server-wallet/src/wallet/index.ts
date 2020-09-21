@@ -94,7 +94,7 @@ export class Wallet implements WalletInterface {
   knex: Knex;
   store: Store;
   readonly walletConfig: ServerWalletConfig;
-  constructor(walletConfig: ServerWalletConfig) {
+  constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.store = new Store(this.walletConfig.timingMetrics, this.walletConfig.skipEvmValidation);
