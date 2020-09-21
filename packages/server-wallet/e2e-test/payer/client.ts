@@ -91,7 +91,7 @@ export default class PayerClient {
     return channelResult;
   }
 
-  public async makePayment(channelId: string): Promise<void> {
+  public async createPayment(channelId: string): Promise<Payload> {
     const channel = await this.time(`get channel ${channelId}`, async () =>
       this.getChannel(channelId)
     );
@@ -101,11 +101,23 @@ export default class PayerClient {
       outbox: [{params}],
     } = await this.time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
 
+    return (params as WireMessage).data as Payload;
+  }
+
+  public async makePayment(channelId: string): Promise<void> {
+    const payload = await this.createPayment(channelId)
+
     const reply = await this.time(`send message ${channelId}`, async () =>
-      this.messageReceiverAndExpectReply((params as WireMessage).data as Payload)
+      this.messageReceiverAndExpectReply(payload)
     );
 
     await this.time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
+  }
+
+  public async syncChannel(channelId: string): Promise<void> {
+    const { outbox: [{params}] } = await this.wallet.syncChannel({channelId});
+    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Payload);
+    await this.wallet.pushMessage(reply)
   }
 
   public emptyMessage(): Promise<Payload> {
@@ -115,7 +127,7 @@ export default class PayerClient {
     });
   }
 
-  private async messageReceiverAndExpectReply(message: Payload): Promise<Payload> {
+  public async messageReceiverAndExpectReply(message: Payload): Promise<Payload> {
     const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
     return reply;
   }
