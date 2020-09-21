@@ -173,9 +173,8 @@ export class Store {
     type: ChainServiceApi,
     tx: Transaction
   ): Promise<void> {
-    const channel = await Channel.query(tx)
-      .where('channelId', channelId)
-      .first();
+    const channel = await Channel.forId(channelId, tx);
+
     const cols: RequiredColumns = {
       ...channel,
       chainServiceRequests: [...channel.chainServiceRequests, type],
@@ -370,9 +369,7 @@ async function getChannel(
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
-  const channel = await Channel.query(txOrKnex)
-    .where('channelId', channelId)
-    .first();
+  const channel = await Channel.forId(channelId, txOrKnex);
 
   if (!channel) {
     throw new StoreError(StoreError.reasons.channelMissing);
