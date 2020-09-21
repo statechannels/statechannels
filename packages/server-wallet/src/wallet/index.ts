@@ -32,7 +32,6 @@ import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';
-import {Nonce} from '../models/nonce';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
 import {SigningWallet} from '../models/signing-wallet';
 import {logger} from '../logger';
@@ -186,10 +185,7 @@ export class Wallet implements WalletInterface {
     const {participants, appDefinition, appData, allocations} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
 
-    const channelNonce = await Nonce.next(
-      this.knex,
-      participants.map(p => p.signingAddress)
-    );
+    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
     const channelConstants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),

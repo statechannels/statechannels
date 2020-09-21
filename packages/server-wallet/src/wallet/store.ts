@@ -46,6 +46,7 @@ import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
+import {Nonce} from '../models/nonce';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -421,6 +422,10 @@ export class Store {
     assetHolderAddress: Address
   ): Promise<void> {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
+  }
+
+  async nextNonce(signingAddresses: Address[]): Promise<number> {
+    return await Nonce.next(this.knex, signingAddresses);
   }
 }
 
