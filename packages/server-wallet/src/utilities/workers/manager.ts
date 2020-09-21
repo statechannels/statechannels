@@ -6,19 +6,24 @@ import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
 import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
+import {ServerWalletConfig} from '../../config';
 
 import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
 export class WorkerManager {
-  pool = new Pool({
-    create: (): Worker => new Worker(path.resolve(__dirname, './loader.js')),
-    destroy: (worker: Worker): Promise<number> => worker.terminate(),
-    min: 16,
-    max: 16,
-    reapIntervalMillis: ONE_DAY,
-    idleTimeoutMillis: ONE_DAY,
-  });
+  private pool: Pool<Worker>;
 
+  constructor(walletConfig: ServerWalletConfig) {
+    this.pool = new Pool({
+      create: (): Worker =>
+        new Worker(path.resolve(__dirname, './loader.js'), {workerData: walletConfig}),
+      destroy: (worker: Worker): Promise<number> => worker.terminate(),
+      min: 16,
+      max: 16,
+      reapIntervalMillis: ONE_DAY,
+      idleTimeoutMillis: ONE_DAY,
+    });
+  }
   public async concurrentSignState(
     state: StateWithHash,
     privateKey: string

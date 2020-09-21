@@ -82,14 +82,14 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
-const manager = new WorkerManager();
-
 export class Wallet implements WalletInterface {
+  manager: WorkerManager;
+
   store: Store;
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
-
+    this.manager = new WorkerManager(this.walletConfig);
     this.store = new Store(
       Knex(extractDBConfigFromServerWalletConfig(this.walletConfig)),
       this.walletConfig.timingMetrics,
@@ -257,7 +257,7 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel(args: UpdateChannelParams): SingleChannelResult {
-    return manager.updateChannel(args);
+    return this.manager.updateChannel(args);
   }
 
   async _updateChannel({
@@ -334,7 +334,7 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
-    return manager.pushMessage(rawPayload);
+    return this.manager.pushMessage(rawPayload);
   }
 
   async _pushMessage(rawPayload: unknown): MultipleChannelResult {

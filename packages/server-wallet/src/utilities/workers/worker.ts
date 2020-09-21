@@ -1,15 +1,15 @@
-import {parentPort, isMainThread} from 'worker_threads';
+import {parentPort, isMainThread, workerData} from 'worker_threads';
 
 import {hashState} from '@statechannels/wallet-core';
 
 import {fastRecoverAddress, fastSignState} from '../signatures';
 import {Wallet} from '../..';
-import {defaultConfig} from '../../config';
+import {ServerWalletConfig} from '../../config';
 import {logger} from '../../logger';
 
 import {isStateChannelWorkerData} from './worker-data';
 
-const wallet = new Wallet(defaultConfig);
+const wallet = new Wallet(workerData as ServerWalletConfig);
 
 parentPort?.on('message', async (message: any) => {
   if (isMainThread) {
