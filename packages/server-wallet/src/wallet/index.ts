@@ -180,7 +180,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async getSigningAddress(): Promise<string> {
-    return await this.store.getOrCreateSigningAddress(this.knex);
+    return await this.store.getOrCreateSigningAddress();
   }
 
   async createChannel(args: CreateChannelParams): SingleChannelResult {
