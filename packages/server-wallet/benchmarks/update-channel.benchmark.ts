@@ -24,7 +24,7 @@ async function setup(): Promise<Channel[]> {
   const channels = [];
   for (const channelNonce of iter) {
     const c = withSupportedState()({channelNonce, vars: [stateVars({turnNum: 3})]});
-    await Channel.query().insert(c);
+    await Channel.query(knex).insert(c);
 
     channels.push(c);
   }
