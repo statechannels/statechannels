@@ -3,7 +3,6 @@ import {
   Objective,
   SignedStateWithHash,
   SignedStateVarsWithHash,
-  Payload,
   State,
   calculateChannelId,
   StateVariables,
@@ -14,7 +13,9 @@ import {
   StateWithHash,
   isCreateChannel,
   hashState,
+  deserializeObjective,
 } from '@statechannels/wallet-core';
+import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -203,8 +204,10 @@ export class Store {
     return (await Channel.query(knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(message: Payload, tx: Transaction): Promise<Bytes32[]> {
-    for (const o of message.objectives || []) {
+  async pushMessage(message: WirePayload, tx: Transaction): Promise<Bytes32[]> {
+    const objectives = message.objectives?.map(deserializeObjective) || [];
+
+    for (const o of objectives) {
       await this.addObjective(o, tx);
     }
 
@@ -217,8 +220,8 @@ export class Store {
       return s !== undefined;
     }
     const objectiveChannelIds =
-      message.objectives
-        ?.map(objective =>
+      objectives
+        .map(objective =>
           isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
         )
         .filter(isDefined) || [];

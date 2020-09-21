@@ -30,9 +30,11 @@ export function convertToInternalParticipant(participant: {
   return {...participant, destination: makeDestination(participant.destination)};
 }
 
-export function validatePayload(rawPayload: unknown): Payload {
+type WirePayload = WireMessage['data'];
+
+export function validatePayload(rawPayload: unknown): WirePayload {
   // todo: wire-format should export a validator specially for the payload
-  return deserializeMessage(validateMessage({recipient: '', sender: '', data: rawPayload}));
+  return validateMessage({recipient: '', sender: '', data: rawPayload}).data;
 }
 
 export function deserializeMessage(message: WireMessage): Payload {
