@@ -18,45 +18,56 @@ const isFinal = stageGuard('Final');
 
 const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   if (!supported) return false;
-
-  const allocation = checkThat(supported?.outcome, isSimpleAllocation);
-
-  const currentFunding = funding(allocation.assetHolderAddress);
-
-  const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-  const funded = BN.gte(currentFunding, targetFunding) ? true : false;
-
-  return funded;
+  const {allocationItems, assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
+  const currentFunding = funding(assetHolderAddress);
+  const targetFunding = allocationItems.map(({amount}) => amount).reduce(BN.add, BN.from(0));
+  return BN.gte(currentFunding, targetFunding);
 };
 
-const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false => {
-  if (!app.supported) return false;
-  if (app.chainServiceRequests.indexOf('fund') > -1) return false;
+/**
+ * The below logic assumes:
+ *  1. Each destination occurs at most once.
+ *  2. We only care about a single destination.
+ * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
+ */
+const requestFundChannelIfMyTurn = ({
+  app: {supported, chainServiceRequests, channelId, myIndex, participants, funding},
+}: ProtocolState): FundChannel | false => {
+  // Sanity-check (should have been checked by prior application protocol guard)
+  if (!supported) return false;
 
-  const myDestination = app.participants[app.myIndex].destination;
-  const {allocationItems, assetHolderAddress} = checkThat(
-    app.supported?.outcome,
-    isSimpleAllocation
+  // Don't submit another chain service request if one already exists
+  if (chainServiceRequests.indexOf('fund') > -1) return false;
+
+  // Wallet only supports single-asset (i.e., "simple") allocations
+  const {allocationItems, assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
+
+  // Some accessors for use with later guards
+  const currentFunding = funding(assetHolderAddress);
+  const myDestination = participants[myIndex].destination;
+  const allocationsBeforeMe = _.takeWhile(
+    allocationItems,
+    ({destination}) => destination !== myDestination
+  );
+  const myAllocationItem = _.find(
+    allocationItems,
+    ({destination}) => destination === myDestination
   );
 
-  /**
-   * The below logic assumes:
-   *  1. Each destination occurs at most once.
-   *  2. We only care about a single destination.
-   * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
-   */
-  const currentFunding = app.funding(assetHolderAddress);
-  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
-  const targetFunding = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-  if (BN.lt(currentFunding, targetFunding)) return false;
-
-  const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
-  if (!myAllocationItem) {
+  // Sanity-check (should never happen if wallet code is correct; does not join unrelated channels)
+  if (!myAllocationItem)
     throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
-  }
+
+  const targetFundingBeforeDeposit = allocationsBeforeMe
+    .map(({amount}) => amount)
+    .reduce(BN.add, BN.from(0));
+
+  // Don't continue if counterparty hasn't fully funded their part yet
+  if (BN.lt(currentFunding, targetFundingBeforeDeposit)) return false;
+
   return requestFundChannel({
-    channelId: app.channelId,
-    assetHolderAddress: assetHolderAddress,
+    channelId,
+    assetHolderAddress,
     expectedHeld: currentFunding,
     amount: myAllocationItem.amount,
   });
