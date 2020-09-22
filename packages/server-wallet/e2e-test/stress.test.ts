@@ -31,7 +31,7 @@ let ChannelReceiver: typeof Channel;
 let SWPayer: typeof SigningWallet;
 let SWReceiver: typeof SigningWallet;
 
-jest.setTimeout(300_000); // 5 min  since stress tests take a long time
+jest.setTimeout(600_000); // 10 min  since stress tests take a long time
 
 describe('Stress tests', () => {
   let receiverServer: ReceiverServer;
