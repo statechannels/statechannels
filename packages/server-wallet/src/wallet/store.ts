@@ -478,9 +478,9 @@ function recoverParticipantSigners(
   channelId: string,
   stateHash: string
 ): SignatureEntry[] {
+  const signingAddresses = wireSignedState.participants.map(p => p.signingAddress);
   return wireSignedState.signatures.map(sig => {
     const recoveredAddress = fastRecoverAddress(sig, stateHash);
-    const signingAddresses = wireSignedState.participants.map(p => p.signingAddress);
 
     if (signingAddresses.indexOf(recoveredAddress) < 0) {
       throw new Error(
