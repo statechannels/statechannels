@@ -4,6 +4,8 @@ import path from 'path';
 import {Pool} from 'tarn';
 import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
+import {Either} from 'fp-ts/lib/Either';
+import {isLeft} from 'fp-ts/lib/These';
 
 import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
@@ -30,10 +32,14 @@ export class WorkerManager {
   ): Promise<{state: State; signature: string}> {
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'SignState', state, privateKey};
-    const resultPromise = new Promise<{state: State; signature: string}>(resolve =>
-      worker.once('message', (response: {state: State; signature: string}) => {
+    const resultPromise = new Promise<{state: State; signature: string}>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, {state: State; signature: string}>) => {
         this.pool.release(worker);
-        resolve(response);
+        if (isLeft(response)) {
+          reject(response.left);
+        } else {
+          resolve(response.right);
+        }
       })
     );
 
@@ -44,10 +50,14 @@ export class WorkerManager {
   public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'PushMessage', args};
-    const resultPromise = new Promise<any>(resolve =>
-      worker.once('message', (response: MultipleChannelResult) => {
+    const resultPromise = new Promise<any>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, MultipleChannelResult>) => {
         this.pool.release(worker);
-        resolve(response);
+        if (isLeft(response)) {
+          reject(response.left);
+        } else {
+          resolve(response.right);
+        }
       })
     );
 
@@ -58,10 +68,14 @@ export class WorkerManager {
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
-    const resultPromise = new Promise<any>(resolve =>
-      worker.once('message', (response: SingleChannelResult) => {
+    const resultPromise = new Promise<any>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, SingleChannelResult>) => {
         this.pool.release(worker);
-        resolve(response);
+        if (isLeft(response)) {
+          reject(response.left);
+        } else {
+          resolve(response.right);
+        }
       })
     );
 
