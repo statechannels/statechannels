@@ -24,6 +24,7 @@ import {
   Zero,
   SignedState,
   serializeMessage,
+  serializeObjective,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -235,14 +236,14 @@ export class Wallet implements WalletInterface {
             ...n.notice.params,
             data: {
               objectives: [
-                {
-                  participants,
+                serializeObjective({
+                  participants: participants.map(convertToParticipant),
                   type: 'CreateChannel',
                   data: {
                     signedState: params.data.signedStates[0],
                     fundingStrategy: 'Direct',
                   },
-                },
+                }),
               ],
             },
           },
