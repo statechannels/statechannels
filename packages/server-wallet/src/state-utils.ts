@@ -5,6 +5,7 @@ import {
   State,
   hashState,
   calculateChannelId,
+  SignedState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 

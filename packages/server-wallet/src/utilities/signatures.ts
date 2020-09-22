@@ -24,7 +24,7 @@ export async function fastSignState(
   return {state, signature};
 }
 
-export function fastRecoverAddress(state: State, signature: string, stateHash: string): string {
+export function fastRecoverAddress(signature: string, stateHash: string): string {
   const recover = Number.parseInt('0x' + signature.slice(-2)) - 27;
 
   const digest = Buffer.from(hashMessage(stateHash).substr(2), 'hex');
@@ -36,17 +36,6 @@ export function fastRecoverAddress(state: State, signature: string, stateHash: s
     )
   );
 
-  const {participants} = state;
-
-  const signingAddresses = participants.map(p => p.signingAddress);
-
-  if (signingAddresses.indexOf(recoveredAddress) < 0) {
-    throw new Error(
-      `Recovered address ${recoveredAddress} is not a participant in channel ${calculateChannelId(
-        state
-      )}`
-    );
-  }
   return recoveredAddress;
 }
 

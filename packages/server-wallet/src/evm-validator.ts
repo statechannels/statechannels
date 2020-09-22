@@ -1,5 +1,5 @@
 import {State, toNitroState} from '@statechannels/wallet-core';
-import {createValidTransitionTransaction} from '@statechannels/nitro-protocol';
+import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
 import * as PureEVM from 'pure-evm';
 import {utils} from 'ethers';
 import {Transaction} from 'objection';
@@ -16,8 +16,8 @@ const bytecodeCache: Record<string, string | undefined> = {};
  * Returns a promise that resolves to true if the validateTransition returns true false otherwise
  */
 export const validateTransitionWithEVM = async (
-  from: State,
-  to: State,
+  from: NitroState,
+  to: NitroState,
   tx: Transaction // Insist on running inside a transaction
   // Tests may pass "knex as any" or ("undefined as any" if knex is globally bound) to sidestep the TS error
 ): Promise<boolean | undefined> => {
@@ -39,7 +39,7 @@ export const validateTransitionWithEVM = async (
     return true;
   }
 
-  const {data} = createValidTransitionTransaction(toNitroState(from), toNitroState(to));
+  const {data} = createValidTransitionTransaction(from, to);
 
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),

@@ -20,7 +20,8 @@ import {
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
-import {getSignerAddress} from '../../state-utils';
+import {convertToNitroOutcome, getSignerAddress} from '../../state-utils';
+import {State as NitroState, hashState} from '@statechannels/nitro-protocol';
 
 export function convertToInternalParticipant(participant: {
   destination: string;
@@ -47,6 +48,25 @@ export function deserializeMessage(message: WireMessage): Payload {
     objectives,
     requests
   };
+}
+
+export function wireStateToNitroState(state: SignedStateWire): NitroState {
+  return {
+    turnNum: state.turnNum,
+    isFinal: state.isFinal,
+    channel: {
+      channelNonce: state.channelNonce,
+      participants: state.participants.map(s => s.signingAddress),
+      chainId: state.chainId
+    },
+    challengeDuration: state.challengeDuration,
+    outcome: convertToNitroOutcome(deserializeOutcome(state.outcome)),
+    appDefinition: state.appDefinition,
+    appData: state.appData
+  };
+}
+export function hashWireState(state: SignedStateWire) {
+  return hashState(wireStateToNitroState(state));
 }
 
 export function deserializeState(state: SignedStateWire): SignedState {
