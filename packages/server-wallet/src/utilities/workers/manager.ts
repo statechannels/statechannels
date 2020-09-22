@@ -20,8 +20,8 @@ export class WorkerManager {
       create: (): Worker =>
         new Worker(path.resolve(__dirname, './loader.js'), {workerData: walletConfig}),
       destroy: (worker: Worker): Promise<number> => worker.terminate(),
-      min: 16,
-      max: 16,
+      min: walletConfig.workerThreadAmount,
+      max: walletConfig.workerThreadAmount,
       reapIntervalMillis: ONE_DAY,
       idleTimeoutMillis: ONE_DAY,
     });
