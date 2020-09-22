@@ -3,12 +3,8 @@ import {SignedState as WireSignedState} from '@statechannels/wire-format';
 
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
-import {addHash} from '../../state-utils';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultConfig} from '../../config';
-
-import {createState} from './fixtures/states';
-import {alice, bob} from './fixtures/signing-wallets';
 
 const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
 
@@ -31,7 +27,14 @@ describe('addSignedState', () => {
       appDefinition: '0x0000000000000000000000000000000000000000',
       isFinal: false,
       turnNum: 0,
-      outcome: [],
+      outcome: [
+        {
+          assetHolderAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+          allocationItems: [
+            {destination: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9', amount: '0x00'},
+          ],
+        },
+      ],
       participants: [],
       channelNonce: 1,
       channelId: '0x00',
@@ -42,6 +45,6 @@ describe('addSignedState', () => {
 
     await expect(
       store.addSignedState(channelId, undefined, signedState, knex as any)
-    ).rejects.toThrow(`The state must be signed with a participant's private key`);
+    ).rejects.toThrow(/is not a participant/);
   });
 });
