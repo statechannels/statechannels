@@ -18,6 +18,8 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
+afterAll(async () => store.knex.destroy());
+
 describe('signingAddress', () => {
   it('generate address then get address', async () => {
     const signingAddress = await store.getOrCreateSigningAddress();

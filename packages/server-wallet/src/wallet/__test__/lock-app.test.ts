@@ -20,6 +20,8 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
+afterAll(async () => store.knex.destroy());
+
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
   const c = withSupportedState()({vars: [stateVars({turnNum: 5})]});

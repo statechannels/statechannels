@@ -19,6 +19,8 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
+afterAll(async () => store.knex.destroy());
+
 describe('getFirstParticipant', () => {
   it('works', async () => {
     await expect(SigningWallet.query(knex)).resolves.toHaveLength(0);

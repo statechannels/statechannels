@@ -19,6 +19,8 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
+afterAll(async () => store.knex.destroy());
+
 beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 

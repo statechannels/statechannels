@@ -12,6 +12,8 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
+afterAll(async () => store.knex.destroy());
+
 describe('addSignedState', () => {
   let tx: Objection.Transaction;
 
