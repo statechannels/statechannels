@@ -70,6 +70,7 @@ export default {
     const timingResults = performanceTimer.calculateResults();
     console.log(PerformanceTimer.formatResults(timingResults));
     process.send && process.send(JSON.stringify(timingResults));
+    await payerClient.destroy();
 
     process.exit(0);
   },

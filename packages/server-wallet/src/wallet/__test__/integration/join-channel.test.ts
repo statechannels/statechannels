@@ -18,6 +18,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await w.knex.destroy();
+  await w.manager.destroy();
 });
 
 beforeEach(async () => seedAlicesSigningWallet(w.knex));

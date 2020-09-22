@@ -14,6 +14,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await w.knex.destroy();
+  await w.manager.destroy();
 });
 
 describe('happy path', () => {

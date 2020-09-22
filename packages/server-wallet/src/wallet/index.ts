@@ -123,6 +123,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async destroy(): Promise<void> {
+    await this.manager.destroy();
     await this.store.destroy();
   }
 
