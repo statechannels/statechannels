@@ -106,7 +106,7 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // I have to have asset holder between the wallets, otherwise there is ambiguity
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
 
-function deserializeOutcome(outcome: OutcomeWire): Outcome {
+export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {
     switch (outcome.length) {
       case 0:

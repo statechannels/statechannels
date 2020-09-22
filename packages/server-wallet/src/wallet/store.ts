@@ -17,6 +17,10 @@ import {
   hashWireState,
   wireStateToNitroState,
   convertToNitroOutcome,
+  toNitroState,
+  deserializeOutcome,
+  convertToInternalParticipant,
+  SignatureEntry,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -137,13 +141,41 @@ export class Store {
   async signState(
     channelId: Bytes32,
     vars: StateVariables,
-    tx: Transaction // Insist on a transaction since assSignedState requires it
+    tx: Transaction // Insist on a transaction since addSignedState requires it
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
 
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
+
+    const {supported} = channel;
+    if (supported) {
+      const supportedNitroState = {
+        turnNum: supported.turnNum,
+        isFinal: supported.isFinal,
+        channel: {
+          channelNonce: supported.channelNonce,
+          participants: supported.participants.map(s => s.signingAddress),
+          chainId: supported.chainId,
+        },
+        challengeDuration: supported.challengeDuration,
+        outcome: convertToNitroOutcome(supported.outcome),
+        appDefinition: supported.appDefinition,
+        appData: supported.appData,
+      };
+
+      if (
+        !(await timer('validating transition', async () =>
+          validateTransitionWithEVM(supportedNitroState, toNitroState(state), tx)
+        ))
+      ) {
+        throw new StoreError('Invalid state transition', {
+          from: channel.supported,
+          to: state,
+        });
+      }
+    }
 
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
@@ -152,9 +184,7 @@ export class Store {
     );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await timer('adding state', async () =>
-      this.addSignedState(channelId, channel, signedState, tx)
-    );
+    channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
     const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
@@ -171,6 +201,36 @@ export class Store {
     const {channelResult} = channel;
 
     return {outgoing, channelResult};
+  }
+
+  async addMyState(
+    channel: Channel,
+    signedState: SignedStateWithHash,
+    tx: Transaction
+  ): Promise<Channel> {
+    const timer = timerFactory(this.timingMetrics, `addMyState ${channel.channelId}`);
+
+    channel.vars = await timer('adding state', async () => addState(channel.vars, signedState));
+    channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
+
+    await timer('validating invariants', async () =>
+      validateInvariants(channel.vars, channel.myAddress)
+    );
+
+    const cols: RequiredColumns = {
+      ...channel,
+      vars: channel.vars,
+    };
+
+    const result = await timer('updating', async () =>
+      Channel.query(tx)
+        .where({channelId: channel.channelId})
+        .update(cols)
+        .returning('*')
+        .first()
+    );
+
+    return result;
   }
 
   async addChainServiceRequest(
@@ -215,11 +275,12 @@ export class Store {
       await this.addObjective(o, tx);
     }
 
+    const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
+
     for (const ss of message.signedStates || []) {
-      await this.addSignedState(channelId, undefined, addHash(ss), tx);
+      await this.addSignedState(ss.channelId, undefined, ss, tx);
     }
 
-    const stateChannelIds = message.signedStates?.map(ss => calculateChannelId(ss)) || [];
     function isDefined(s: string | undefined): s is string {
       return s !== undefined;
     }
@@ -269,8 +330,10 @@ export class Store {
   ): Promise<Channel> {
     const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
-    await timer('validating signatures', async () =>
-      recoverParticipantSigners(wireSignedState, channelId)
+    const stateHash = hashWireState(wireSignedState);
+
+    const signatures = await timer('validating signatures', async () =>
+      recoverParticipantSigners(wireSignedState, channelId, stateHash)
     );
 
     const channel =
@@ -303,7 +366,14 @@ export class Store {
       }
     }
 
-    channel.vars = await timer('adding state', async () => addState(channel.vars, signedState));
+    const sswh: SignedStateWithHash = {
+      ...wireSignedState,
+      outcome: deserializeOutcome(wireSignedState.outcome),
+      participants: wireSignedState.participants.map(convertToInternalParticipant),
+      signatures,
+      stateHash,
+    };
+    channel.vars = await timer('adding state', async () => addState(channel.vars, sswh));
 
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
 
@@ -397,9 +467,13 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function recoverParticipantSigners(wireSignedState: WireSignedState, channelId: string): string[] {
+function recoverParticipantSigners(
+  wireSignedState: WireSignedState,
+  channelId: string,
+  stateHash: string
+): SignatureEntry[] {
   return wireSignedState.signatures.map(sig => {
-    const recoveredAddress = fastRecoverAddress(sig, hashWireState(wireSignedState));
+    const recoveredAddress = fastRecoverAddress(sig, stateHash);
     const signingAddresses = wireSignedState.participants.map(p => p.signingAddress);
 
     if (signingAddresses.indexOf(recoveredAddress) < 0) {
@@ -407,7 +481,7 @@ function recoverParticipantSigners(wireSignedState: WireSignedState, channelId: 
         `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
       );
     }
-    return recoveredAddress;
+    return {signature: sig, signer: recoveredAddress};
   });
 }
 

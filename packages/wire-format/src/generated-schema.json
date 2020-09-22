@@ -268,28 +268,7 @@
       "additionalProperties": false,
       "properties": {
         "data": {
-          "additionalProperties": false,
-          "properties": {
-            "objectives": {
-              "items": {
-                "$ref": "#/definitions/Objective"
-              },
-              "type": "array"
-            },
-            "requests": {
-              "items": {
-                "$ref": "#/definitions/ChannelRequest"
-              },
-              "type": "array"
-            },
-            "signedStates": {
-              "items": {
-                "$ref": "#/definitions/SignedState"
-              },
-              "type": "array"
-            }
-          },
-          "type": "object"
+          "$ref": "#/definitions/Payload"
         },
         "recipient": {
           "type": "string"
@@ -401,6 +380,30 @@
         "signingAddress",
         "destination"
       ],
+      "type": "object"
+    },
+    "Payload": {
+      "additionalProperties": false,
+      "properties": {
+        "objectives": {
+          "items": {
+            "$ref": "#/definitions/Objective"
+          },
+          "type": "array"
+        },
+        "requests": {
+          "items": {
+            "$ref": "#/definitions/ChannelRequest"
+          },
+          "type": "array"
+        },
+        "signedStates": {
+          "items": {
+            "$ref": "#/definitions/SignedState"
+          },
+          "type": "array"
+        }
+      },
       "type": "object"
     },
     "SignedState": {

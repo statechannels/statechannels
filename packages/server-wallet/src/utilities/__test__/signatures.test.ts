@@ -58,7 +58,7 @@ it('getSignerAddress vs fastRecover', async () => {
     try {
       const recovered = getSignerAddress(signedState.state, signedState.signature);
       const stateHash = hashState(signedState.state);
-      const fastRecovered = fastRecoverAddress(signedState.state, signedState.signature, stateHash);
+      const fastRecovered = fastRecoverAddress(signedState.signature, stateHash);
       expect(recovered).toEqual(fastRecovered);
     } catch (error) {
       logger.info({error, state, privateKey});
