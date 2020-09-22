@@ -18,10 +18,10 @@ describe('addSignedState', () => {
   });
 
   const BOB_SIGNATURE =
-    '0x26a5fd36a1c9a85afdeee3f9471579656eefceb08bc0ff53d194a67d6433c6385cc8c9aa049306fc7cce901f7b3345bccde311cceadc74a40a89a9d74d86d9b91b';
+    '0x36a5fd36a1c9a85afdeee3f9471579656eefceb08bc0ff53d194a67d6433c6385cc8c9aa049306fc7cce901f7b3345bccde311cceadc74a40a89a9d74d86d9b91b';
 
   const channelId = '0x00';
-  it('throws on an invalid signature', async () => {
+  it('throws when the signer is not a participant', async () => {
     const signedState: WireSignedState = {
       appData: '0x',
       appDefinition: '0x0000000000000000000000000000000000000000',
@@ -37,7 +37,7 @@ describe('addSignedState', () => {
       ],
       participants: [],
       channelNonce: 1,
-      channelId: '0x00',
+      channelId,
       chainId: '0x01',
       challengeDuration: 9001,
       signatures: [BOB_SIGNATURE],
