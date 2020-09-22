@@ -235,7 +235,6 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
-    console.log(this.manager);
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
       const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
@@ -260,7 +259,6 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel(args: UpdateChannelParams): SingleChannelResult {
-    console.log(this.manager);
     return this.manager.updateChannel(args);
   }
 
