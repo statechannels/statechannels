@@ -104,6 +104,7 @@ export class Wallet implements WalletInterface {
     this.getSigningAddress = this.getSigningAddress.bind(this);
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
+    this.updateChannel = this.updateChannel.bind(this);
     this._updateChannel = this._updateChannel.bind(this);
     this._pushMessage = this._pushMessage.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
@@ -262,6 +263,7 @@ export class Wallet implements WalletInterface {
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
+    console.log(this.manager);
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
       const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
@@ -287,6 +289,7 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel(args: UpdateChannelParams): SingleChannelResult {
+    console.log(this.manager);
     return this.manager.updateChannel(args);
   }
 
