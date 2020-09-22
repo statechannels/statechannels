@@ -9,6 +9,7 @@ import {isLeft} from 'fp-ts/lib/These';
 
 import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
+import {logger} from '../../logger';
 
 import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
@@ -18,8 +19,18 @@ export class WorkerManager {
   constructor(walletConfig: ServerWalletConfig) {
     if (walletConfig.workerThreadAmount > 0) {
       this.pool = new Pool({
-        create: (): Worker =>
-          new Worker(path.resolve(__dirname, './loader.js'), {workerData: walletConfig}),
+        create: (): Worker => {
+          const worker = new Worker(path.resolve(__dirname, './loader.js'), {
+            workerData: walletConfig,
+          });
+
+          worker.stdout.on('data', data => logger.info(data.toString()));
+          worker.stderr.on('data', data => logger.error(data.toString()));
+          worker.on('error', err => {
+            throw err;
+          });
+          return worker;
+        },
         destroy: (worker: Worker): Promise<number> => worker.terminate(),
         min: walletConfig.workerThreadAmount,
         max: walletConfig.workerThreadAmount,
@@ -77,6 +88,7 @@ export class WorkerManager {
       worker.once('message', (response: Either<Error, SingleChannelResult>) => {
         this.pool?.release(worker);
         if (isLeft(response)) {
+          logger.error(response);
           reject(response.left);
         } else {
           resolve(response.right);
