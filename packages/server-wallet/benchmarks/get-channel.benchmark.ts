@@ -39,7 +39,8 @@ async function benchmark(): Promise<void> {
   console.timeEnd(key);
 
   await adminKnex.destroy();
-  await knex.destroy();
+
+  await wallet.destroy();
 }
 
 benchmark();
