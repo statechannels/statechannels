@@ -13,28 +13,31 @@ import {ServerWalletConfig} from '../../config';
 import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
 export class WorkerManager {
-  private pool: Pool<Worker>;
+  private pool?: Pool<Worker>;
 
   constructor(walletConfig: ServerWalletConfig) {
-    this.pool = new Pool({
-      create: (): Worker =>
-        new Worker(path.resolve(__dirname, './loader.js'), {workerData: walletConfig}),
-      destroy: (worker: Worker): Promise<number> => worker.terminate(),
-      min: walletConfig.workerThreadAmount,
-      max: walletConfig.workerThreadAmount,
-      reapIntervalMillis: ONE_DAY,
-      idleTimeoutMillis: ONE_DAY,
-    });
+    if (walletConfig.workerThreadAmount > 0) {
+      this.pool = new Pool({
+        create: (): Worker =>
+          new Worker(path.resolve(__dirname, './loader.js'), {workerData: walletConfig}),
+        destroy: (worker: Worker): Promise<number> => worker.terminate(),
+        min: walletConfig.workerThreadAmount,
+        max: walletConfig.workerThreadAmount,
+        reapIntervalMillis: ONE_DAY,
+        idleTimeoutMillis: ONE_DAY,
+      });
+    }
   }
   public async concurrentSignState(
     state: StateWithHash,
     privateKey: string
   ): Promise<{state: State; signature: string}> {
+    if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'SignState', state, privateKey};
     const resultPromise = new Promise<{state: State; signature: string}>((resolve, reject) =>
       worker.once('message', (response: Either<Error, {state: State; signature: string}>) => {
-        this.pool.release(worker);
+        this.pool?.release(worker);
         if (isLeft(response)) {
           reject(response.left);
         } else {
@@ -48,11 +51,12 @@ export class WorkerManager {
   }
 
   public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
+    if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'PushMessage', args};
     const resultPromise = new Promise<any>((resolve, reject) =>
       worker.once('message', (response: Either<Error, MultipleChannelResult>) => {
-        this.pool.release(worker);
+        this.pool?.release(worker);
         if (isLeft(response)) {
           reject(response.left);
         } else {
@@ -66,11 +70,12 @@ export class WorkerManager {
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
+    if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
     const resultPromise = new Promise<any>((resolve, reject) =>
       worker.once('message', (response: Either<Error, SingleChannelResult>) => {
-        this.pool.release(worker);
+        this.pool?.release(worker);
         if (isLeft(response)) {
           reject(response.left);
         } else {
@@ -84,6 +89,6 @@ export class WorkerManager {
   }
 
   public async destroy(): Promise<void> {
-    await this.pool.destroy();
+    await this.pool?.destroy();
   }
 }
