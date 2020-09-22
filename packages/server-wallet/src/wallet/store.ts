@@ -45,7 +45,6 @@ import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
-import {participant} from './__test__/fixtures/participants';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;

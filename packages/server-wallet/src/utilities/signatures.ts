@@ -1,6 +1,6 @@
 import {instantiateSecp256k1, Secp256k1, RecoveryId} from '@bitauth/libauth';
 import {utils, Wallet} from 'ethers';
-import {State, calculateChannelId, StateWithHash} from '@statechannels/wallet-core';
+import {State, StateWithHash} from '@statechannels/wallet-core';
 
 let secp256k1: Secp256k1;
 export const initialized: Promise<any> = instantiateSecp256k1().then(m => (secp256k1 = m));

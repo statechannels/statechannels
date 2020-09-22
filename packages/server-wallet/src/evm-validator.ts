@@ -1,4 +1,3 @@
-import {State, toNitroState} from '@statechannels/wallet-core';
 import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
 import * as PureEVM from 'pure-evm';
 import {utils} from 'ethers';
