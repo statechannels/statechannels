@@ -45,6 +45,7 @@ import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
+import {participant} from './__test__/fixtures/participants';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -300,14 +301,26 @@ export class Store {
         data: {signedState, fundingStrategy},
       } = objective;
       const channelId = calculateChannelId(signedState);
-      const singedStateWithHash = {...signedState, stateHash: hashState(signedState)};
-      // validateSignatures(singedStateWithHash); // TODO do we need this?
+      const stateHash = hashState(signedState);
+      const signedStateWithHash = {...signedState, stateHash};
+      // ensure signatures are
+      const participantSignatures = recoverParticipantSignatures(
+        signedState.signatures.map(sig => sig.signature),
+        signedState.participants.map(participant => participant.signingAddress),
+        channelId,
+        stateHash
+      );
+
+      if (JSON.stringify(participantSignatures) != JSON.stringify(signedStateWithHash.signatures)) {
+        throw new StoreError(StoreError.reasons.invalidSignature);
+      }
+
       if (await Channel.forId(channelId, tx)) {
         throw new StoreError(StoreError.reasons.duplicateChannel);
       }
 
       const channel = await createChannel(signedState, fundingStrategy, tx);
-      channel.vars = await addState(channel.vars, singedStateWithHash);
+      channel.vars = await addState(channel.vars, signedStateWithHash);
       validateInvariants(channel.vars, channel.myAddress);
 
       const result = await Channel.query(tx)
@@ -333,7 +346,12 @@ export class Store {
     const stateHash = hashWireState(wireSignedState);
 
     const signatures = await timer('validating signatures', async () =>
-      recoverParticipantSigners(wireSignedState, channelId, stateHash)
+      recoverParticipantSignatures(
+        wireSignedState.signatures,
+        wireSignedState.participants.map(p => p.signingAddress),
+        channelId,
+        stateHash
+      )
     );
 
     const channel =
@@ -473,16 +491,16 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function recoverParticipantSigners(
-  wireSignedState: WireSignedState,
+function recoverParticipantSignatures(
+  signatures: string[],
+  participants: string[],
   channelId: string,
   stateHash: string
 ): SignatureEntry[] {
-  const signingAddresses = wireSignedState.participants.map(p => p.signingAddress);
-  return wireSignedState.signatures.map(sig => {
+  return signatures.map(sig => {
     const recoveredAddress = fastRecoverAddress(sig, stateHash);
 
-    if (signingAddresses.indexOf(recoveredAddress) < 0) {
+    if (participants.indexOf(recoveredAddress) < 0) {
       throw new Error(
         `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
       );
