@@ -38,9 +38,9 @@ import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
-import {OnchainService} from '../mock-chain-service';
 import {WorkerManager} from '../utilities/workers/manager';
+import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
+import {ChainEventListener, OnchainService, SetFundingArg} from '../mock-chain-service';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -81,10 +81,11 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
-export class Wallet implements WalletInterface {
+export class Wallet implements WalletInterface, ChainEventListener {
   manager: WorkerManager;
   knex: Knex;
   store: Store;
+  chainService: OnchainService;
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
@@ -95,6 +96,7 @@ export class Wallet implements WalletInterface {
       this.walletConfig.timingMetrics,
       this.walletConfig.skipEvmValidation
     );
+    this.chainService = new OnchainService();
 
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
@@ -426,6 +428,16 @@ export class Wallet implements WalletInterface {
 
     return {outbox, error, channelResults};
   };
+
+  // ChainListener implementation
+  setFunding(arg: SetFundingArg): void {
+    // note: updateChannelFunding is an async function.
+    // todo: this returns a Promise<SingleChannelResult>. How should the SingleChannelResult get relayed to the application?
+    this.updateChannelFunding({
+      ...arg,
+      token: arg.assetHolderAddress,
+    });
+  }
 }
 
 type ExecutionResult = {
