@@ -367,7 +367,13 @@ export class Store {
     }
 
     const sswh: SignedStateWithHash = {
-      ...wireSignedState,
+      chainId: wireSignedState.chainId,
+      channelNonce: wireSignedState.channelNonce,
+      appDefinition: wireSignedState.appDefinition,
+      appData: wireSignedState.appData,
+      turnNum: wireSignedState.turnNum,
+      isFinal: wireSignedState.isFinal,
+      challengeDuration: wireSignedState.challengeDuration,
       outcome: deserializeOutcome(wireSignedState.outcome),
       participants: wireSignedState.participants.map(convertToInternalParticipant),
       signatures,
