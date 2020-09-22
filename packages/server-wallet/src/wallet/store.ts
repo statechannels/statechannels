@@ -36,7 +36,6 @@ import {Bytes32} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
-import {pick} from '../utilities/helpers';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -331,7 +330,7 @@ async function createChannel(
 
   const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
 
-  const cols: RequiredColumns = pick(
+  const cols: RequiredColumns = _.pick(
     {
       ...constants,
       channelId,
