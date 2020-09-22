@@ -2,7 +2,7 @@ import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-co
 import _ from 'lodash';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, submitTransaction} from './actions';
+import {signState, noAction, fundChannel as requestFundChannel, FundChannel} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -29,16 +29,14 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   return funded;
 };
 
-const myTurnToFund = ({app}: ProtocolState): boolean => {
+const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false => {
   if (!app.supported) return false;
   if (app.chainServiceRequests.indexOf('fund') > -1) return false;
 
   const myDestination = app.participants[app.myIndex].destination;
-  const allocation = checkThat(app.supported?.outcome, isSimpleAllocation);
-  const currentFunding = app.funding(allocation.assetHolderAddress);
-  const allocationsBeforeMe = _.takeWhile(
-    allocation.allocationItems,
-    a => a.destination !== myDestination
+  const {allocationItems, assetHolderAddress} = checkThat(
+    app.supported?.outcome,
+    isSimpleAllocation
   );
 
   /**
@@ -47,8 +45,21 @@ const myTurnToFund = ({app}: ProtocolState): boolean => {
    *  2. We only care about a single destination.
    * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
    */
+  const currentFunding = app.funding(assetHolderAddress);
+  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
   const targetFunding = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-  return BN.gte(currentFunding, targetFunding);
+  if (BN.lt(currentFunding, targetFunding)) return false;
+
+  const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
+  if (!myAllocationItem) {
+    throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
+  }
+  return requestFundChannel({
+    channelId: app.channelId,
+    assetHolderAddress: assetHolderAddress,
+    expectedHeld: currentFunding,
+    amount: myAllocationItem.amount,
+  });
 };
 
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
@@ -57,9 +68,8 @@ const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingSt
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
-  myTurnToFund(ps) &&
   isDirectlyFunded(ps.app) &&
-  submitTransaction({channelId: ps.app.channelId, transactionRequest: {}, transactionId: ''});
+  requestFundChannelIfMyTurn(ps);
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
