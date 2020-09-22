@@ -4299,6 +4299,22 @@
     "@storybook/components" "6.0.16"
     "@storybook/core-events" "6.0.16"
     "@storybook/theming" "6.0.16"
+"@statechannels/wasm-utils@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.4.tgz#7ee4e28e953407ab2d17a6651ad92ed2c9bbca47"
+  integrity sha512-7Lk/xYsrLHng5JFJs3FyuaaVvT8fSJfP+oNmanf3vQZbnRMWRVFdJjb+JYPuChXs2k9bpAn17M8xiuhITpvKdw==
+
+"@storybook/addon-actions@6.0.20", "@storybook/addon-actions@^6.0.16":
+  version "6.0.20"
+  resolved "https://registry.npmjs.org/@storybook/addon-actions/-/addon-actions-6.0.20.tgz#4fcf83ec7f961a90a0836633cdf18ecf37d9ed51"
+  integrity sha512-zO0iol1FQya3cPuVjkq5/YWmmmgXuElIcVQpxndACHGIF6ktwmMJSLToLjfz9Gi5l9LA9/m8j/7FUZrORFtWQQ==
+  dependencies:
+    "@storybook/addons" "6.0.20"
+    "@storybook/api" "6.0.20"
+    "@storybook/client-api" "6.0.20"
+    "@storybook/components" "6.0.20"
+    "@storybook/core-events" "6.0.20"
+    "@storybook/theming" "6.0.20"
     core-js "^3.0.1"
     fast-deep-equal "^3.1.1"
     global "^4.3.2"
