@@ -68,11 +68,15 @@ export class Store {
   knex: Knex;
 
   constructor(
-    readonly knexConfig: Knex.Config,
+    readonly knexOrConfig: Knex | Knex.Config,
     readonly timingMetrics: boolean,
     readonly skipEvmValidation: boolean
   ) {
-    this.knex = Knex(knexConfig);
+    if (knexOrConfig instanceof Knex) {
+      this.knex = knexOrConfig as Knex;
+    } else {
+      this.knex = Knex(knexOrConfig);
+    }
 
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
