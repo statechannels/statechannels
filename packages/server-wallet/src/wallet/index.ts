@@ -288,7 +288,11 @@ export class Wallet implements WalletInterface {
   }
 
   async updateChannel(args: UpdateChannelParams): SingleChannelResult {
-    return this.manager.updateChannel(args);
+    if (this.walletConfig.workerThreadAmount > 0) {
+      return this.manager.updateChannel(args);
+    } else {
+      return this._updateChannel(args);
+    }
   }
 
   async _updateChannel({
@@ -365,7 +369,11 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
-    return this.manager.pushMessage(rawPayload);
+    if (this.walletConfig.workerThreadAmount > 0) {
+      return this.manager.pushMessage(rawPayload);
+    } else {
+      return this._pushMessage(rawPayload);
+    }
   }
 
   async _pushMessage(rawPayload: unknown): MultipleChannelResult {
