@@ -302,7 +302,6 @@ export class Store {
       const channelId = calculateChannelId(signedState);
       const stateHash = hashState(signedState);
       const signedStateWithHash = {...signedState, stateHash};
-      // ensure signatures are
       const participantSignatures = recoverParticipantSignatures(
         signedState.signatures.map(sig => sig.signature),
         signedState.participants.map(participant => participant.signingAddress),
