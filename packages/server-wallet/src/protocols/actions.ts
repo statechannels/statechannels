@@ -1,5 +1,5 @@
 import {MessageQueuedNotification, Address} from '@statechannels/client-api-schema';
-import {StateVariables} from '@statechannels/wallet-core';
+import {AllocationItem, StateVariables} from '@statechannels/wallet-core';
 
 import {Bytes32, Uint256} from '../type-aliases';
 
@@ -17,6 +17,12 @@ export type FundChannel = {
   expectedHeld: Uint256;
   amount: Uint256;
 };
+export type RequestLedgerFunding = {
+  type: 'RequestLedgerFunding';
+  channelId: Bytes32;
+  assetHolderAddress: Address;
+  deductions: AllocationItem[];
+};
 
 /*
 Action creators
@@ -27,6 +33,7 @@ export const noAction = undefined;
 const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
   props: Omit<A, 'type'>
 ): A => ({...props, type} as A);
+export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
 export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const notifyApp = actionConstructor<NotifyApp>('NotifyApp');
 export const signState = actionConstructor<SignState>('SignState');
@@ -38,8 +45,9 @@ const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
 export const isSignState = guard<SignState>('SignState');
 export const isNotifyApp = guard<NotifyApp>('NotifyApp');
 export const isFundChannel = guard<FundChannel>('FundChannel');
+export const isLedgerFundChannel = guard<FundChannel>('RequestLedgerFunding');
 
 export type Outgoing = Notice;
 export const isOutgoing = isNotifyApp;
 
-export type ProtocolAction = SignState | NotifyApp | FundChannel;
+export type ProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;

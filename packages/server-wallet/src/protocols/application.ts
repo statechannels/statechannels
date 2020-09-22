@@ -1,10 +1,21 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
+import {logger as parentLogger} from '../logger';
+
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, fundChannel as requestFundChannel, FundChannel} from './actions';
+import {
+  signState,
+  noAction,
+  fundChannel as requestFundChannel,
+  FundChannel,
+  RequestLedgerFunding,
+  requestLedgerFunding,
+} from './actions';
 
 export type ProtocolState = {app: ChannelState};
+
+const logger = parentLogger.child({module: 'Application'});
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
@@ -73,14 +84,47 @@ const requestFundChannelIfMyTurn = ({
   });
 };
 
-const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
+const requestLedgerChannelDeduction = ({
+  channelId,
+  supported,
+}: ChannelState): RequestLedgerFunding | false => {
+  if (!supported) return false;
 
-// todo: the only cases considered so far are directly funded
+  const {outcome} = supported;
+
+  if (outcome.type !== 'SimpleAllocation') {
+    logger.debug('Will not request ledger funding for unsupported outcome type', {
+      channelId,
+      type: outcome.type,
+    });
+    return false;
+  }
+
+  const {assetHolderAddress, allocationItems: deductions} = outcome;
+
+  return requestLedgerFunding({
+    channelId,
+    assetHolderAddress,
+    deductions,
+  });
+};
+
+const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
+const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
+
+const directlyFund = (ps: ProtocolState): ProtocolResult | false =>
+  isDirectlyFunded(ps.app) && requestFundChannelIfMyTurn(ps);
+
+const ledgerFund = (ps: ProtocolState): ProtocolResult | false =>
+  isLedgerFunded(ps.app) && requestLedgerChannelDeduction(ps.app);
+
+const fundChannelInner = (ps: ProtocolState): ProtocolResult | false =>
+  directlyFund(ps) || ledgerFund(ps);
+
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
-  isDirectlyFunded(ps.app) &&
-  requestFundChannelIfMyTurn(ps);
+  fundChannelInner(ps);
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
