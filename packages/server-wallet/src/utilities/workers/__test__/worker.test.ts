@@ -10,7 +10,7 @@ import {WorkerManager} from '../manager';
 describe('worker threads', () => {
   let manager: WorkerManager;
   beforeAll(async () => {
-    manager = new WorkerManager(defaultConfig);
+    manager = new WorkerManager({...defaultConfig, workerThreadAmount: 1});
   });
   afterAll(async () => {
     await manager.destroy();
