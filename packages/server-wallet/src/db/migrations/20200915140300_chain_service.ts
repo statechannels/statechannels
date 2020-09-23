@@ -8,7 +8,10 @@ const defaultFundingStrategy: FundingStrategy = 'Unknown';
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => {
-    table.specificType(chainServiceRequests, 'text[]').notNullable();
+    table
+      .specificType(chainServiceRequests, 'text[]')
+      .notNullable()
+      .defaultTo('{}');
     table
       .string(fundingStrategy)
       .notNullable()
