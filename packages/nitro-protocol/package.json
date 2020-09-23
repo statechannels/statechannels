@@ -10,8 +10,8 @@
     "ethers": "5.0.12"
   },
   "devDependencies": {
-    "@ethereum-waffle/compiler": "^3.1.0",
-    "@statechannels/devtools": "^0.3.6",
+    "@ethereum-waffle/compiler": "3.1.0",
+    "@statechannels/devtools": "0.3.6",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
@@ -70,8 +70,8 @@
     "build:typescript": "tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "node ./bin/compile.js",
-    "generate-api": "yarn docgen",
     "docgen": "solidoc",
+    "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",

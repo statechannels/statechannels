@@ -5,9 +5,9 @@
   "author": "",
   "dependencies": {
     "@bitauth/libauth": "1.17.1",
-    "@statechannels/client-api-schema": "^0.3.6",
-    "@statechannels/nitro-protocol": "^0.3.6",
-    "@statechannels/wallet-core": "^0.3.6",
+    "@statechannels/client-api-schema": "0.3.6",
+    "@statechannels/nitro-protocol": "0.3.6",
+    "@statechannels/wallet-core": "0.3.6",
     "ethers": "5.0.12",
     "fp-ts": "2.7.0",
     "knex": "0.20.9",
@@ -19,18 +19,18 @@
   },
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
-    "@statechannels/devtools": "^0.3.6",
-    "@types/body-parser": "^1.19.0",
+    "@statechannels/devtools": "0.3.6",
+    "@types/body-parser": "1.19.0",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
-    "@types/express-pino-logger": "^4.0.2",
+    "@types/express-pino-logger": "4.0.2",
     "@types/jest": "25.1.0",
     "@types/lodash": "4.14.149",
     "@types/nodemon": "1.19.0",
     "@types/pg": "7.14.0",
     "@types/pino": "6.0.0",
     "@types/prettier": "1.19.0",
-    "@types/yargs": "^15.0.5",
+    "@types/yargs": "15.0.5",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "body-parser": "1.19.0",
@@ -43,7 +43,7 @@
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-unicorn": "21.0.0",
     "evt": "1.8.8",
-    "express-pino-logger": "^5.0.0",
+    "express-pino-logger": "5.0.0",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "nodemon": "1.19.4",
@@ -54,8 +54,9 @@
     "ts-node": "8.9.1",
     "typescript": "3.7.5",
     "unitimer": "3.13.0",
-    "yargs": "^15.4.1"
+    "yargs": "15.4.1"
   },
+  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226",
   "license": "MIT",
   "lint-staged": {
     "src/**/*.ts": "eslint --max-warnings=0"
@@ -84,15 +85,14 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
+    "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
+    "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
     "test:ci": "yarn test --bail",
     "test:e2e": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
-    "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand",
-    "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
-    "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh"
+    "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
   },
-  "types": "lib/src/index.d.ts",
-  "gitHead": "89b158871f78cb256501a593c8ea36b24ad64226"
+  "types": "lib/src/index.d.ts"
 }

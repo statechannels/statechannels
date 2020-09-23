@@ -4,14 +4,14 @@
   "version": "0.3.6",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
-    "@statechannels/client-api-schema": "^0.3.6",
-    "@statechannels/iframe-channel-provider": "^0.3.6",
+    "@statechannels/client-api-schema": "0.3.6",
+    "@statechannels/iframe-channel-provider": "0.3.6",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.0",
     "loglevel": "1.6.8"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.9.2",
+    "@microsoft/api-extractor": "7.9.2",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/node": "13.5.1",
@@ -22,7 +22,7 @@
     "eslint-plugin-import": "2.20.0",
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
-    "eslint-plugin-tsdoc": "^0.2.6",
+    "eslint-plugin-tsdoc": "0.2.6",
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "prettier": "1.19.1",
