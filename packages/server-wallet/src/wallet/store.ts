@@ -94,7 +94,7 @@ export class Store {
     }
   }
 
-  async closeDatabaseConnection(): Promise<void> {
+  async destroy(): Promise<void> {
     await this.knex.destroy();
   }
 
