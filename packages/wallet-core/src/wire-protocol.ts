@@ -6,14 +6,10 @@ type _Objective<Name, Data> = {
   participants: Participant[];
   type: Name;
 } & Data;
-export type CreateChannel = _Objective<
-  'CreateChannel',
-  {
-    signedState: SignedState;
-    fundingStrategy: FundingStrategy;
-  }
+export type OpenChannel = _Objective<
+  'OpenChannel',
+  {targetChannelId: string; fundingStrategy: FundingStrategy}
 >;
-export type OpenChannel = _Objective<'OpenChannel', {targetChannelId: string}>;
 export type VirtuallyFund = _Objective<
   'VirtuallyFund',
   {targetChannelId: string; jointChannelId: string}
@@ -23,7 +19,7 @@ export type FundGuarantor = _Objective<
   {jointChannelId: string; ledgerChannelId: string; guarantorId: string}
 >;
 
-export type Objective = CreateChannel | OpenChannel | VirtuallyFund | FundGuarantor;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;

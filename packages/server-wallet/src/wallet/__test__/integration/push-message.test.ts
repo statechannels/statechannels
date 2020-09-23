@@ -1,11 +1,5 @@
-import {
-  calculateChannelId,
-  simpleEthAllocation,
-  SignedState,
-  serializeState,
-} from '@statechannels/wallet-core';
+import {calculateChannelId, simpleEthAllocation, serializeState} from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {CreateChannel as CreateChannelWire} from '@statechannels/wire-format';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -21,17 +15,6 @@ import {defaultConfig} from '../../../config';
 
 jest.setTimeout(20_000);
 const wallet = new Wallet(defaultConfig);
-
-function createChannelFromState(signedState: SignedState): CreateChannelWire {
-  return {
-    participants: [],
-    type: 'CreateChannel',
-    data: {
-      signedState: serializeState(signedState),
-      fundingStrategy: 'Direct',
-    },
-  };
-}
 
 afterAll(async () => {
   await wallet.destroy();
@@ -55,10 +38,8 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy([alice()])({turnNum: five}),
     stateSignedBy([alice(), bob()])({turnNum: four}),
   ];
-  const createChannel = createChannelFromState(signedStates[0]);
   await wallet.pushMessage({
-    objectives: [createChannel],
-    signedStates: signedStates.map(serializeState),
+    signedStates: signedStates.map(s => serializeState(s)),
   });
 
   const channelsAfter = await Channel.query(wallet.knex).select();
@@ -138,7 +119,7 @@ describe('channel results', () => {
       stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0x0f00'}),
     ];
 
-    const p = wallet.pushMessage({signedStates: signedStates.map(serializeState)});
+    const p = wallet.pushMessage({signedStates: signedStates.map(s => serializeState(s))});
 
     await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
@@ -267,11 +248,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-<<<<<<< HEAD
-          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
-=======
           params: {data: {signedStates}},
->>>>>>> test: fix push-message test
         },
       ],
     });
@@ -284,7 +261,7 @@ describe('when there is a request provided', () => {
     const signedStates = [
       stateSignedBy([alice()])({turnNum: five}),
       stateSignedBy([alice(), bob()])({turnNum: four}),
-    ].map(serializeState);
+    ].map(s => serializeState(s));
 
     await wallet.pushMessage({
       signedStates,
@@ -300,11 +277,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-<<<<<<< HEAD
-          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
-=======
           params: {data: {signedStates}},
->>>>>>> test: fix push-message test
         },
       ],
     });

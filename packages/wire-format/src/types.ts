@@ -81,14 +81,6 @@ type _Objective<Name, Data> = {
   data: Data;
 };
 type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded' | 'Unknown';
-export type CreateChannel = _Objective<
-  'CreateChannel',
-  {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    signedState: SignedState;
-    fundingStrategy: FundingStrategy;
-  }
->;
 export type OpenChannel = _Objective<
   'OpenChannel',
   {
@@ -126,13 +118,7 @@ export type CloseLedger = _Objective<
   }
 >;
 
-export type Objective =
-  | CreateChannel
-  | OpenChannel
-  | VirtuallyFund
-  | FundGuarantor
-  | FundLedger
-  | CloseLedger;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;

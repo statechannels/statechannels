@@ -4,8 +4,7 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Guarantee as GuaranteeWire,
-  Message as WireMessage,
-  Objective as ObjectiveWire
+  Message as WireMessage
 } from '@statechannels/wire-format';
 
 import {
@@ -14,7 +13,6 @@ import {
   AllocationItem,
   SimpleAllocation,
   Payload,
-  Objective,
   SimpleGuarantee
 } from '../../types';
 import {calculateChannelId} from '../../state-utils';
@@ -26,8 +24,8 @@ export function serializeMessage(
   sender: string,
   channelId?: string
 ): WireMessage {
-  const signedStates = (message.signedStates || []).map(ss => serializeState(ss, channelId));
-  const objectives = message.objectives?.map(serializeObjective);
+  const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
+  const objectives = message.objectives;
   const {requests} = message;
   return {
     recipient,
@@ -61,18 +59,6 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
     channelId: channelId || calculateChannelId(state),
     signatures: state.signatures.map(s => s.signature)
   };
-}
-
-export function serializeObjective(objective: Objective): ObjectiveWire {
-  switch (objective.type) {
-    case 'CreateChannel':
-      return {
-        ...objective,
-        data: {...objective.data, signedState: serializeState(objective.data.signedState)}
-      };
-    default:
-      return objective;
-  }
 }
 
 export function serializeOutcome(outcome: Outcome): OutcomeWire {

@@ -12,8 +12,6 @@ import {
   makeDestination,
   serializeMessage,
   StateWithHash,
-  isCreateChannel,
-  hashState,
   deserializeObjective,
   hashWireState,
   wireStateToNitroState,
@@ -24,6 +22,7 @@ import {
   SignatureEntry,
   convertToParticipant,
   Payload,
+  isOpenChannel,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -322,9 +321,7 @@ export class Store {
       }
       const objectiveChannelIds =
         objectives
-          .map(objective =>
-            isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
-          )
+          .map(objective => (isOpenChannel(objective) ? objective.data.targetChannelId : undefined))
           .filter(isDefined) || [];
 
       return stateChannelIds.concat(objectiveChannelIds);
@@ -332,23 +329,10 @@ export class Store {
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
-    if (isCreateChannel(objective)) {
+    if (isOpenChannel(objective)) {
       const {
-        data: {signedState, fundingStrategy},
+        data: {targetChannelId: channelId, fundingStrategy},
       } = objective;
-      const channelId = calculateChannelId(signedState);
-      const stateHash = hashState(signedState);
-      const signedStateWithHash = {...signedState, stateHash};
-      const participantSignatures = await recoverParticipantSignatures(
-        signedState.signatures.map(sig => sig.signature),
-        signedState.participants.map(participant => participant.signingAddress),
-        channelId,
-        stateHash
-      );
-
-      if (JSON.stringify(participantSignatures) != JSON.stringify(signedStateWithHash.signatures)) {
-        throw new StoreError(StoreError.reasons.invalidSignature);
-      }
 
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(channelId, tx);

@@ -111,52 +111,6 @@
       ],
       "type": "object"
     },
-    "CreateChannel": {
-      "additionalProperties": false,
-      "properties": {
-        "data": {
-          "additionalProperties": false,
-          "properties": {
-            "fundingStrategy": {
-              "enum": [
-                "Direct",
-                "Ledger",
-                "Virtual",
-                "Unfunded",
-                "Unknown"
-              ],
-              "type": "string"
-            },
-            "signedState": {
-              "$ref": "#/definitions/SignedState"
-            }
-          },
-          "required": [
-            "signedState",
-            "fundingStrategy"
-          ],
-          "type": "object"
-        },
-        "participants": {
-          "items": {
-            "$ref": "#/definitions/Participant"
-          },
-          "type": "array"
-        },
-        "type": {
-          "enum": [
-            "CreateChannel"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
-      "type": "object"
-    },
     "FundGuarantor": {
       "additionalProperties": false,
       "properties": {
@@ -286,9 +240,6 @@
     },
     "Objective": {
       "anyOf": [
-        {
-          "$ref": "#/definitions/CreateChannel"
-        },
         {
           "$ref": "#/definitions/OpenChannel"
         },

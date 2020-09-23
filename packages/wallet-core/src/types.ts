@@ -92,13 +92,6 @@ type _Objective<Name, Data> = {
   type: Name;
   data: Data;
 };
-export type CreateChannel = _Objective<
-  'CreateChannel',
-  {
-    signedState: SignedState;
-    fundingStrategy: FundingStrategy;
-  }
->;
 export type OpenChannel = _Objective<
   'OpenChannel',
   {
@@ -134,18 +127,10 @@ export type CloseLedger = _Objective<
   }
 >;
 
-// todo: CreateChannel and OpenChannel should be collapsed into one objective
-export type Objective =
-  | CreateChannel
-  | OpenChannel
-  | VirtuallyFund
-  | FundGuarantor
-  | FundLedger
-  | CloseLedger;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
-export const isCreateChannel = guard<CreateChannel>('CreateChannel');
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
