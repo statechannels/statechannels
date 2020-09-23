@@ -1,10 +1,10 @@
 import axios from 'axios';
-import {ChannelResult, Participant, Message as WireMessage} from '@statechannels/client-api-schema';
+import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN} from '@statechannels/wallet-core';
 
-import {Wallet as ServerWallet, Message as Payload} from '../../src';
+import {Wallet as ServerWallet} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
@@ -81,7 +81,7 @@ export default class PayerClient {
       ],
     });
 
-    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Payload);
+    const reply = await this.messageReceiverAndExpectReply(params.data);
 
     await this.wallet.pushMessage(reply);
 
@@ -90,17 +90,17 @@ export default class PayerClient {
     return channelResult;
   }
 
-  public async createPayment(channelId: string): Promise<Payload> {
+  public async createPayment(channelId: string): Promise<unknown> {
     const channel = await this.time(`get channel ${channelId}`, async () =>
       this.getChannel(channelId)
     );
 
     // Assuming MessageQueued inside the outbox
     const {
-      outbox: [{params}],
+      outbox: [msgQueued],
     } = await this.time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
 
-    return (params as WireMessage).data as Payload;
+    return msgQueued.params.data;
   }
 
   public async makePayment(channelId: string): Promise<void> {
@@ -117,18 +117,18 @@ export default class PayerClient {
     const {
       outbox: [{params}],
     } = await this.wallet.syncChannel({channelId});
-    const reply = await this.messageReceiverAndExpectReply((params as WireMessage).data as Payload);
+    const reply = await this.messageReceiverAndExpectReply(params.data);
     await this.wallet.pushMessage(reply);
   }
 
-  public emptyMessage(): Promise<Payload> {
+  public emptyMessage(): Promise<unknown> {
     return this.messageReceiverAndExpectReply({
       signedStates: [],
       objectives: [],
     });
   }
 
-  public async messageReceiverAndExpectReply(message: Payload): Promise<Payload> {
+  public async messageReceiverAndExpectReply(message: unknown): Promise<unknown> {
     const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
     return reply;
   }

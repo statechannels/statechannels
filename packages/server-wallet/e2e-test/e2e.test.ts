@@ -1,4 +1,5 @@
 import {Participant} from '@statechannels/client-api-schema';
+import {validatePayload} from '@statechannels/wallet-core';
 
 import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
@@ -75,7 +76,8 @@ describe('e2e', () => {
   });
 
   it('can do a simple end-to-end flow with no signed states', async () => {
-    const {signedStates, objectives} = await payerClient.emptyMessage();
+    const response = await payerClient.emptyMessage();
+    const {signedStates, objectives} = validatePayload(response);
     expect(signedStates?.length).toBe(0);
     expect(objectives?.length).toBe(0);
   });
