@@ -328,6 +328,10 @@ export class Store {
 
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(channelId, tx);
+      if (!channel) {
+        throw new StoreError(StoreError.reasons.channelMissing, {channelId});
+      }
+
       return await Channel.query(tx)
         .where({channelId: channel.channelId})
         .patch({fundingStrategy})

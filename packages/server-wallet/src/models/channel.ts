@@ -107,15 +107,11 @@ export class Channel extends Model implements RequiredColumns {
   static jsonAttributes = ['vars', 'participants'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
-    const result = Channel.query(txOrKnex)
+    return Channel.query(txOrKnex)
       .where({channelId})
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .first();
-
-    if (!result) throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
-
-    return result;
   }
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
