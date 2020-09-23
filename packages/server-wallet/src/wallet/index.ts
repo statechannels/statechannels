@@ -136,7 +136,8 @@ export class Wallet implements WalletInterface {
             requests: [{type: 'GetChannel', channelId}],
           },
           recipient,
-          sender
+          sender,
+          channelId
         ),
       })),
       channelResult: ChannelState.toChannelResult(channelState),
@@ -367,7 +368,7 @@ export class Wallet implements WalletInterface {
         peers.map(recipient => {
           outbox.push({
             method: 'MessageQueued',
-            params: serializeMessage({signedStates}, recipient, sender),
+            params: serializeMessage({signedStates}, recipient, sender, channelId),
           });
         });
       };
