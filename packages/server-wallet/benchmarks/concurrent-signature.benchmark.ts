@@ -6,6 +6,7 @@ import {participant} from '../src/wallet/__test__/fixtures/participants';
 import {fastSignState} from '../src/utilities/signatures';
 import {WorkerManager} from '../src/utilities/workers/manager';
 import {addHash} from '../src/state-utils';
+import {defaultConfig} from '../src/config';
 
 async function benchmark(): Promise<void> {
   const wallet = Wallet.createRandom();
@@ -22,7 +23,7 @@ async function benchmark(): Promise<void> {
   };
   const stateWithHash = addHash(state);
   const iter = _.range(10_000);
-  const manager = new WorkerManager();
+  const manager = new WorkerManager({...defaultConfig, workerThreadAmount: 2});
   // warm up the threads
   await Promise.all(
     _.range(5).map(() => manager.concurrentSignState(stateWithHash, wallet.privateKey))
