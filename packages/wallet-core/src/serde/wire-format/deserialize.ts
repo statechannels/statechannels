@@ -8,6 +8,7 @@ import {
   isAllocations,
   validateMessage
 } from '@statechannels/wire-format';
+import {State as NitroState, hashState} from '@statechannels/nitro-protocol';
 
 import {
   SignedState,
@@ -20,7 +21,7 @@ import {
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
-import {getSignerAddress} from '../../state-utils';
+import {convertToNitroOutcome, getSignerAddress} from '../../state-utils';
 
 export function convertToInternalParticipant(participant: {
   destination: string;
@@ -30,9 +31,11 @@ export function convertToInternalParticipant(participant: {
   return {...participant, destination: makeDestination(participant.destination)};
 }
 
-export function validatePayload(rawPayload: unknown): Payload {
+type WirePayload = WireMessage['data'];
+
+export function validatePayload(rawPayload: unknown): WirePayload {
   // todo: wire-format should export a validator specially for the payload
-  return deserializeMessage(validateMessage({recipient: '', sender: '', data: rawPayload}));
+  return validateMessage({recipient: '', sender: '', data: rawPayload}).data;
 }
 
 export function deserializeMessage(message: WireMessage): Payload {
@@ -45,6 +48,25 @@ export function deserializeMessage(message: WireMessage): Payload {
     objectives,
     requests
   };
+}
+
+export function wireStateToNitroState(state: SignedStateWire): NitroState {
+  return {
+    turnNum: state.turnNum,
+    isFinal: state.isFinal,
+    channel: {
+      channelNonce: state.channelNonce,
+      participants: state.participants.map(s => s.signingAddress),
+      chainId: state.chainId
+    },
+    challengeDuration: state.challengeDuration,
+    outcome: convertToNitroOutcome(deserializeOutcome(state.outcome)),
+    appDefinition: state.appDefinition,
+    appData: state.appData
+  };
+}
+export function hashWireState(state: SignedStateWire) {
+  return hashState(wireStateToNitroState(state));
 }
 
 export function deserializeState(state: SignedStateWire): SignedState {
@@ -84,7 +106,7 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // I have to have asset holder between the wallets, otherwise there is ambiguity
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
 
-function deserializeOutcome(outcome: OutcomeWire): Outcome {
+export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {
     switch (outcome.length) {
       case 0:

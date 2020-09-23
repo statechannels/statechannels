@@ -1,4 +1,5 @@
 import {utils} from 'ethers';
+import {toNitroState} from '@statechannels/wallet-core';
 
 import {appBytecode} from '../models/__test__/fixtures/app-bytecode';
 import {AppBytecode} from '../models/app-bytecode';
@@ -20,14 +21,18 @@ it('returns true for a valid transition', async () => {
   expect(
     await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
-  const fromState = createState({
-    appDefinition: COUNTING_APP_DEFINITION,
-    appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
-  });
-  const toState = createState({
-    appDefinition: COUNTING_APP_DEFINITION,
-    appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
-  });
+  const fromState = toNitroState(
+    createState({
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
+    })
+  );
+  const toState = toNitroState(
+    createState({
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
+    })
+  );
   expect(await validateTransitionWithEVM(fromState, toState, knex as any)).toBe(true);
 });
 
@@ -36,14 +41,18 @@ it('returns false for an invalid transition', async () => {
   expect(
     await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
-  const fromState = createState({
-    appDefinition: COUNTING_APP_DEFINITION,
-    appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
-  });
-  const toState = createState({
-    appDefinition: COUNTING_APP_DEFINITION,
-    appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
-  });
+  const fromState = toNitroState(
+    createState({
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
+    })
+  );
+  const toState = toNitroState(
+    createState({
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
+    })
+  );
   expect(await validateTransitionWithEVM(fromState, toState, knex as any)).toBe(false);
 });
 
@@ -52,8 +61,10 @@ it('skips validating when no byte code exists for the app definition', async () 
   expect(
     await AppBytecode.getBytecode(defaultConfig.chainNetworkID, UNDEFINED_APP_DEFINITION, knex)
   ).toBeUndefined();
-  const state = createState({
-    appDefinition: UNDEFINED_APP_DEFINITION,
-  });
+  const state = toNitroState(
+    createState({
+      appDefinition: UNDEFINED_APP_DEFINITION,
+    })
+  );
   expect(await validateTransitionWithEVM(state, state, knex as any)).toBe(true);
 });
