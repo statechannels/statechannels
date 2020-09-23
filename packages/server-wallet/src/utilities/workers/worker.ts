@@ -38,6 +38,9 @@ parentPort?.on('message', async (message: any) => {
         return parentPort?.postMessage(right(await wallet._updateChannel(message.args)));
       case 'PushMessage':
         return parentPort?.postMessage(right(await wallet._pushMessage(message.args)));
+      default:
+        // TODO: Ensure that Error class is serialized properly
+        return parentPort?.postMessage(left(new Error('Unknown message type')));
     }
   } catch (error) {
     return parentPort?.postMessage(left(error));
