@@ -127,6 +127,51 @@ describe('payments', () => {
     await expectSupportedState(ChannelReceiver, 5);
   });
 
+  describe('syncing', () => {
+    let payerClient: PayerClient;
+
+    beforeAll(() => {
+      payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
+    });
+
+    afterAll(async () => {
+      await payerClient.destroy();
+    });
+
+    it('can update pre-existing channel, send state, but ignore reply, and sync later', async () => {
+      await expectSupportedState(ChannelPayer, 3);
+
+      const payload = await payerClient.createPayment(channelId);
+
+      await expectSupportedState(ChannelPayer, 4);
+      await expectSupportedState(ChannelReceiver, 3);
+
+      await payerClient.messageReceiverAndExpectReply(payload); // Ignore reply
+
+      await expectSupportedState(ChannelPayer, 4);
+      await expectSupportedState(ChannelReceiver, 5);
+
+      await payerClient.syncChannel(channelId);
+
+      await expectSupportedState(ChannelPayer, 5);
+      await expectSupportedState(ChannelReceiver, 5);
+    });
+
+    it('can update pre-existing channel, not send state, and sync later', async () => {
+      await expectSupportedState(ChannelPayer, 3);
+
+      await payerClient.createPayment(channelId); // Forget to send
+
+      await expectSupportedState(ChannelPayer, 4);
+      await expectSupportedState(ChannelReceiver, 3);
+
+      await payerClient.syncChannel(channelId);
+
+      await expectSupportedState(ChannelPayer, 5);
+      await expectSupportedState(ChannelReceiver, 5);
+    });
+  });
+
   it('can update pre-existing channels multiple times', async () => {
     await expectSupportedState(ChannelPayer, 3);
     await expectSupportedState(ChannelReceiver, 3);
