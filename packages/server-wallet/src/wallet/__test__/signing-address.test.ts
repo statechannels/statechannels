@@ -8,11 +8,15 @@ import {defaultConfig} from '../../config';
 
 import {alice} from './fixtures/participants';
 
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
+
 beforeEach(async () => {
   await truncate(knex);
 });
-
-const store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
 
 describe('signingAddress', () => {
   it('generate address then get address', async () => {

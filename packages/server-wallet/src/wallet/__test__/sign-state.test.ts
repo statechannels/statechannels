@@ -13,7 +13,11 @@ import {bob, alice} from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 
-const store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
 
 beforeEach(async () => {
   await seedAlicesSigningWallet(knex);

@@ -14,7 +14,11 @@ import {stateVars} from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
 
-const store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
 
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
