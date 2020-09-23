@@ -12,7 +12,7 @@ const store = new Store(
   defaultConfig.skipEvmValidation
 );
 
-afterAll(async () => store.knex.destroy());
+afterAll(async () => store.closeDatabaseConnection());
 
 describe('addSignedState', () => {
   let tx: Objection.Transaction;

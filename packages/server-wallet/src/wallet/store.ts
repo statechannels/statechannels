@@ -94,6 +94,10 @@ export class Store {
     }
   }
 
+  async closeDatabaseConnection(): Promise<void> {
+    await this.knex.destroy();
+  }
+
   async getFirstParticipant(): Promise<Participant> {
     const signingAddress = await this.getOrCreateSigningAddress();
     return {

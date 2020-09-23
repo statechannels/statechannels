@@ -118,7 +118,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async destroy(): Promise<void> {
-    await this.store.knex.destroy();
+    await this.store.closeDatabaseConnection();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
