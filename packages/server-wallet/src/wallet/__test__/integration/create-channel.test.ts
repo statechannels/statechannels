@@ -35,13 +35,14 @@ describe('happy path', () => {
             recipient: 'bob',
             sender: 'alice',
             data: {
+              signedStates: [{turnNum: 0, appData}],
               objectives: [
                 {
                   participants: [alice(), bob()],
                   data: {
-                    signedState: {turnNum: 0, appData},
                     fundingStrategy: 'Direct',
                   },
+                  type: 'OpenChannel',
                 },
               ],
             },
