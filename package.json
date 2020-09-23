@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/xstate-wallet",
   "description": "State channel wallet using xstate.",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "author": "Alex Gap",
   "babel": {
     "presets": [
@@ -25,10 +25,10 @@
     "@rimble/connection-banner": "1.2.3",
     "@rimble/utils": "1.2.3",
     "@sentry/browser": "5.15.5",
-    "@statechannels/client-api-schema": "0.3.6",
-    "@statechannels/nitro-protocol": "0.3.6",
-    "@statechannels/wallet-core": "0.3.6",
-    "@statechannels/wire-format": "0.3.6",
+    "@statechannels/client-api-schema": "^0.3.7",
+    "@statechannels/nitro-protocol": "^0.3.7",
+    "@statechannels/wallet-core": "^0.3.7",
+    "@statechannels/wire-format": "^0.3.7",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
     "awesome-typescript-loader": "5.2.1",
@@ -82,7 +82,7 @@
   "devDependencies": {
     "@babel/core": "7.11.4",
     "@babel/preset-env": "7.11.0",
-    "@statechannels/devtools": "0.3.6",
+    "@statechannels/devtools": "^0.3.7",
     "@storybook/addon-actions": "6.0.16",
     "@storybook/addon-essentials": "6.0.16",
     "@storybook/addon-info": "5.3.19",
