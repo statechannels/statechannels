@@ -71,6 +71,9 @@ export function serializeObjective(objective: Objective): ObjectiveWire {
 }
 
 export function serializeOutcome(outcome: Outcome): OutcomeWire {
+  if (outcome instanceof Array)
+    throw new Error('Cannot serialize array-ified outcome. Did you call serialize twice?');
+
   switch (outcome.type) {
     case 'SimpleAllocation':
       return [serializeSimpleAllocation(outcome)];
