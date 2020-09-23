@@ -352,19 +352,8 @@ export class Store {
 
     if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
-      const supportedNitroState = {
-        turnNum: supported.turnNum,
-        isFinal: supported.isFinal,
-        channel: {
-          channelNonce: supported.channelNonce,
-          participants: supported.participants.map(s => s.signingAddress),
-          chainId: supported.chainId,
-        },
-        challengeDuration: supported.challengeDuration,
-        outcome: convertToNitroOutcome(supported.outcome),
-        appDefinition: supported.appDefinition,
-        appData: supported.appData,
-      };
+
+      const supportedNitroState = toNitroState(supported);
       if (
         !(await timer('validating transition', async () =>
           validateTransitionWithEVM(supportedNitroState, wireStateToNitroState(wireSignedState), tx)
