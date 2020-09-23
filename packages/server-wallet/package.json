@@ -8,6 +8,7 @@
     "@statechannels/client-api-schema": "^0.3.7",
     "@statechannels/nitro-protocol": "^0.3.7",
     "@statechannels/wallet-core": "^0.3.7",
+    "@statechannels/native-utils": "^0.1.4",
     "ethers": "5.0.12",
     "fp-ts": "2.7.0",
     "knex": "0.20.9",
