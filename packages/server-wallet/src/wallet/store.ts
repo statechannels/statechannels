@@ -72,7 +72,7 @@ export class Store {
     readonly timingMetrics: boolean,
     readonly skipEvmValidation: boolean
   ) {
-    if (knexOrConfig instanceof Knex) {
+    if (knexOrConfig.client instanceof Knex.Client) {
       this.knex = knexOrConfig as Knex;
     } else {
       this.knex = Knex(knexOrConfig);
