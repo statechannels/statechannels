@@ -67,3 +67,52 @@ This ephemeral key is only used for creating signatures that will be recovered i
 :::
 
 Our wallet uses the concept of a "Domain Budget" to further reduce the amount of user interaction that is required. The budget can be [approved](typescript-api/channel-client.channelclient.approvebudgetandfund) on the user's first visit to an application, and specifies a maximum send and maximum receive amount for each asset type (e.g. ETH). It then only needs to be administered or "topped-up" when the maximum amounts are reached. Otherwise, the wallet will not prompt the user at all when creating and closing channels, but will silently perform the necessary steps to do so. You can see budgets in action by trying out our [Web3Torrent](https://web3torrent.statechannels.org/) app.
+
+## Advanced: hosting a wallet locally
+
+There are some downsides to using the _hosted_ wallet with your app, particularly during development. It is possible to develop your Dapp against historical or future versions of our browser wallet, which also gives the flexibility to target a different Ethereum testnet or even a local blockchain.
+
+First, install the wallet as a devDependency in your project. You can even pin to a specific version.
+
+```shell
+yarn add --dev @statechannels/xstate-wallet
+```
+
+Next, run
+
+```shell
+cd node_modules/@statechannels/xstate-wallet && HUB_DESTINATION='0x0' yarn start
+```
+
+This will spin up a (i) local instance of ganache, and (ii) a webpack dev server for the wallet.
+
+You can then use
+
+```typescript
+await window.channelProvider.mountWalletComponent('localhost:3055');
+```
+
+instead of the above.
+
+To configure these servers, you can set the following environment variables:
+
+```
+# For multiple
+NODE_ENV = 'development'
+PROJECT_ROOT='.'
+LOG_DESTINATION = '${PROJECT_ROOT}/logs/'
+LOG_LEVEL= 'trace'
+
+# For ganache
+CHAIN_NETWORK_ID = '9001'
+GANACHE_LOG_DESTINATION = '${PROJECT_ROOT}/logs/ganache.log'
+GANACHE_HOST = '0.0.0.0'
+GANACHE_PORT = '8545'
+SHOW_VERBOSE_GANACHE_OUTPUT = 'true'
+
+# for xstate-wallet
+HUB_DESTINATION = '0x0000000000000000000000008199de05654e9afa5C081BcE38F140082C9a7733'
+XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX = '3'
+USE_INDEXED_DB = 'true'
+CLEAR_STORAGE_ON_START = 'true'
+```
