@@ -29,6 +29,7 @@ import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Knex from 'knex';
 import {Transaction} from 'objection';
+import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Channel} from '../models/channel';
@@ -88,6 +89,10 @@ export type WalletInterface = {
   attachChainService(provider: OnchainServiceInterface): void;
 };
 
+const MockManager = ({
+  destroy: _.noop as any,
+} as unknown) as WorkerManager;
+
 export class Wallet implements WalletInterface {
   manager: WorkerManager;
   knex: Knex;
@@ -95,7 +100,11 @@ export class Wallet implements WalletInterface {
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
-    this.manager = new WorkerManager(this.walletConfig);
+    this.manager =
+      this.walletConfig.workerThreadAmount === 0
+        ? MockManager
+        : new WorkerManager(this.walletConfig);
+
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.store = new Store(this.walletConfig.timingMetrics, this.walletConfig.skipEvmValidation);
     // Bind methods to class instance
@@ -246,10 +255,7 @@ export class Wallet implements WalletInterface {
                 {
                   participants,
                   type: 'CreateChannel',
-                  data: {
-                    signedState: params.data.signedStates[0],
-                    fundingStrategy: 'Direct',
-                  },
+                  data: {signedState: params.data.signedStates[0], fundingStrategy: 'Direct'},
                 },
               ],
             },
