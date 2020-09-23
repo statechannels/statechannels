@@ -1,5 +1,5 @@
 import {makeDestination} from '@statechannels/wallet-core';
-import {Participant, Message as WireMessage} from '@statechannels/client-api-schema';
+import {Participant} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet, Message as Payload} from '../../src';
@@ -23,7 +23,7 @@ export default class ReceiverController {
     };
   }
 
-  public async acceptMessageAndReturnReplies(message: Payload): Promise<Payload> {
+  public async acceptMessageAndReturnReplies(message: unknown): Promise<unknown> {
     const reply: Payload = {
       signedStates: [],
       objectives: [],
@@ -35,7 +35,7 @@ export default class ReceiverController {
     } = await this.time('push message', async () => this.wallet.pushMessage(message));
 
     if (maybeSyncStateResponse) {
-      const syncResponse = (maybeSyncStateResponse.params as WireMessage).data as Payload;
+      const syncResponse = maybeSyncStateResponse.params.data as Payload;
       reply.signedStates = reply.signedStates?.concat(syncResponse.signedStates || []);
       reply.objectives = reply.objectives?.concat(syncResponse.objectives || []);
     }
@@ -49,7 +49,7 @@ export default class ReceiverController {
         )
       );
 
-      const walletResponse = (messageToSendToPayer.params as WireMessage).data as Payload;
+      const walletResponse = messageToSendToPayer.params.data as Payload;
 
       reply.signedStates = reply.signedStates?.concat(walletResponse.signedStates || []);
       reply.objectives = reply.objectives?.concat(walletResponse.objectives || []);

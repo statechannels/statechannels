@@ -1,4 +1,4 @@
-import {StateChannelsNotification, Address} from '@statechannels/client-api-schema';
+import {MessageQueuedNotification, Address} from '@statechannels/client-api-schema';
 import {StateVariables} from '@statechannels/wallet-core';
 
 import {Bytes32, Uint256} from '../type-aliases';
@@ -7,7 +7,7 @@ import {Bytes32, Uint256} from '../type-aliases';
 Actions that protocols can declare.
 */
 
-export type Notice = Omit<StateChannelsNotification, 'jsonrpc'>;
+export type Notice = Omit<MessageQueuedNotification, 'jsonrpc'>;
 export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
 export type NotifyApp = {type: 'NotifyApp'; notice: Notice};
 export type FundChannel = {
