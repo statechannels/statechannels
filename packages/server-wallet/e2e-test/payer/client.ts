@@ -1,11 +1,10 @@
 import axios from 'axios';
-import {ChannelResult, Participant} from '@statechannels/client-api-schema';
+import {ChannelResult, Participant, Message as WireMessage} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
-import {makeDestination, BN, Payload} from '@statechannels/wallet-core';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {makeDestination, BN} from '@statechannels/wallet-core';
 
-import {Wallet as ServerWallet} from '../../src';
+import {Wallet as ServerWallet, Message as Payload} from '../../src';
 import {Bytes32, Address} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';

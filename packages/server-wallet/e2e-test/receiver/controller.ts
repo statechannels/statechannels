@@ -1,9 +1,8 @@
-import {Message as WireMessage} from '@statechannels/wire-format';
-import {Payload, makeDestination} from '@statechannels/wallet-core';
-import {Participant} from '@statechannels/client-api-schema';
+import {makeDestination} from '@statechannels/wallet-core';
+import {Participant, Message as WireMessage} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {Wallet} from '../../src/wallet';
+import {Wallet, Message as Payload} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
