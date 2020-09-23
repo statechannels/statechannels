@@ -440,9 +440,10 @@ workflows:
           requires:
             - prepare
 
-      - server-wallet-profiling:
-          requires:
-            - prepare
+      # TODO: enable server-wallet-profiling
+      # - server-wallet-profiling:
+      #     requires:
+      #       - prepare
       - server-wallet-stress-test:
           requires:
             - prepare
