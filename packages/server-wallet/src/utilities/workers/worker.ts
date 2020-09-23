@@ -28,7 +28,7 @@ parentPort?.on('message', async (message: any) => {
 
       case 'RecoverAddress':
         return parentPort?.postMessage(
-          await fastRecoverAddress(message.state, message.signature, message.state.stateHash)
+          await fastRecoverAddress(message.signature, message.state.stateHash)
         );
       case 'SignState':
         return parentPort?.postMessage(
