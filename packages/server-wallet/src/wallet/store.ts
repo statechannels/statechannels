@@ -379,11 +379,15 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function validateSignatures(signedState: SignedStateWithHash): void {
+async function validateSignatures(signedState: SignedStateWithHash): Promise<void> {
   const {participants} = signedState;
 
-  signedState.signatures.map(sig => {
-    const signerAddress = fastRecoverAddress(signedState, sig.signature, signedState.stateHash);
+  signedState.signatures.map(async sig => {
+    const signerAddress = await fastRecoverAddress(
+      signedState,
+      sig.signature,
+      signedState.stateHash
+    );
 
     // We ensure that the signature is valid and verify that the signing address provided on the signature object is correct as well
     const validSignature =
