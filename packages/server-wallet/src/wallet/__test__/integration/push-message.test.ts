@@ -58,7 +58,7 @@ it('stores states contained in the message, in a single channel model', async ()
   const createChannel = createChannelFromState(signedStates[0]);
   await wallet.pushMessage({
     objectives: [createChannel],
-    signedStates: [serializeState(signedStates[1])],
+    signedStates: signedStates.map(serializeState),
   });
 
   const channelsAfter = await Channel.query(wallet.knex).select();

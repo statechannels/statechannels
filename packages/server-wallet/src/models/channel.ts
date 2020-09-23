@@ -323,6 +323,18 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
+export function isChannelError(err: any): err is ChannelError {
+  if (err.type === WalletError.errors.ChannelError) return true;
+  return false;
+}
+
+export function isChannelMissingError(err: any): err is ChannelError {
+  if (isChannelError(err) && err.reason === ChannelError.reasons.channelMissing) {
+    return true;
+  }
+  return false;
+}
+
 export class ChannelError extends WalletError {
   readonly type = WalletError.errors.ChannelError;
 

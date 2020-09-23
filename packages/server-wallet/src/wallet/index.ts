@@ -216,6 +216,7 @@ export class Wallet implements WalletInterface {
         params: {
           ...n.notice.params,
           data: {
+            signedStates: params.data.signedStates,
             objectives: [
               {
                 participants,

@@ -22,6 +22,7 @@ import {
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
+  convertToParticipant,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -36,6 +37,7 @@ import {
   RequiredColumns,
   ChannelError,
   CHANNEL_COLUMNS,
+  isChannelMissingError,
 } from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
@@ -281,16 +283,14 @@ export class Store {
 
   async pushMessage(message: WirePayload): Promise<Bytes32[]> {
     return this.knex.transaction(async tx => {
-      const objectives = message.objectives?.map(deserializeObjective) || [];
-
-      for (const o of objectives) {
-        await this.addObjective(o, tx);
-      }
-
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
-
       for (const ss of message.signedStates || []) {
         await this.addSignedState(ss.channelId, undefined, ss, tx);
+      }
+
+      const objectives = message.objectives?.map(deserializeObjective) || [];
+      for (const o of objectives) {
+        await this.addObjective(o, tx);
       }
 
       function isDefined(s: string | undefined): s is string {
@@ -326,21 +326,13 @@ export class Store {
         throw new StoreError(StoreError.reasons.invalidSignature);
       }
 
-      if (await Channel.forId(channelId, tx)) {
-        throw new StoreError(StoreError.reasons.duplicateChannel);
-      }
-
-      const channel = await createChannel(signedState, fundingStrategy, tx);
-      channel.vars = await addState(channel.vars, signedStateWithHash);
-      validateInvariants(channel.vars, channel.myAddress);
-
-      const result = await Channel.query(tx)
+      // fetch the channel to make sure the channel exists
+      const channel = await Channel.forId(channelId, tx);
+      return await Channel.query(tx)
         .where({channelId: channel.channelId})
-        .patch({vars: channel.vars, fundingStrategy})
+        .patch({fundingStrategy})
         .returning('*')
         .first();
-
-      return result;
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -368,7 +360,13 @@ export class Store {
     );
 
     const channel =
-      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+      maybeChannel ||
+      (await timer('get channel', async () => getChannel(channelId, tx))) ||
+      (await createChannel(
+        {...wireSignedState, participants: wireSignedState.participants.map(convertToParticipant)},
+        'Unknown',
+        tx
+      ));
 
     if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
@@ -500,13 +498,16 @@ async function createChannel(
     .returning('*')
     .first();
 }
-async function getChannel(channelId: string, txOrKnex: TransactionOrKnex): Promise<Channel> {
-  const channel = await Channel.forId(channelId, txOrKnex);
-
-  if (!channel) {
-    throw new StoreError(StoreError.reasons.channelMissing);
+async function getChannel(
+  channelId: string,
+  txOrKnex: TransactionOrKnex
+): Promise<Channel | undefined> {
+  try {
+    return await Channel.forId(channelId, txOrKnex);
+  } catch (err) {
+    if (!isChannelMissingError) throw err;
+    return undefined;
   }
-  return channel;
 }
 
 async function getSigningWallet(
