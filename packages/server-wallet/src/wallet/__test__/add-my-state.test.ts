@@ -28,6 +28,15 @@ describe('addSignedState', () => {
     ).rejects.toThrow(/This state not exclusively signed by me/);
   });
 
+  it('throws when there are multiple signers (me and someone else)', async () => {
+    // This is bad since the other person's signature will not be validated
+    const stateSignedByBob = stateWithHashSignedBy2([bob(), alice()])();
+    const channelWithAliceAsSigner = channel();
+    await expect(
+      store.addMyState(channelWithAliceAsSigner, stateSignedByBob, knex as any)
+    ).rejects.toThrow(/This state not exclusively signed by me/);
+  });
+
   it('does not throw when the signer is me', async () => {
     const stateSignedByAlice = stateWithHashSignedBy2([alice()])();
     const channelWithAliceAsSigner = channel();
