@@ -30,6 +30,7 @@ import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
+import {recoverAddress} from '@statechannels/wasm-utils';
 
 import {
   Channel,
@@ -46,7 +47,6 @@ import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
-import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
@@ -548,7 +548,7 @@ async function recoverParticipantSignatures(
 ): Promise<SignatureEntry[]> {
   return Promise.all(
     signatures.map(async sig => {
-      const recoveredAddress = await fastRecoverAddress(sig, stateHash);
+      const recoveredAddress = await recoverAddress(sig, stateHash);
 
       if (participants.indexOf(recoveredAddress) < 0) {
         throw new Error(
