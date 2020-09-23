@@ -6,7 +6,11 @@ import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultConfig} from '../../config';
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
 
 describe('addSignedState', () => {
   let tx: Objection.Transaction;

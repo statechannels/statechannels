@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import Knex from 'knex';
 
-export function setupMetrics(knex: Knex, metricsOutputFile: string): void {
+export function setupMetrics(metricsOutputFile: string): void {
   if (metricsOutputFile) {
     fs.writeFileSync(metricsOutputFile, '', {flag: 'w'});
   }
@@ -20,14 +20,15 @@ export function setupMetrics(knex: Knex, metricsOutputFile: string): void {
       log(entry);
     }
   });
+
   obs.observe({
     // Record multiple
     entryTypes: ['node', 'measure', 'gc', 'function', 'http2', 'http'],
     buffered: false,
   });
+}
 
-  // Add DB query metrics
-
+export function setupDBMetrics(knex: Knex): void {
   knex
     .on('query', query => {
       const uid = query.__knexQueryUid;

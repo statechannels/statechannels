@@ -14,7 +14,11 @@ import {stateVars} from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
 
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
@@ -23,7 +27,7 @@ it('works', async () => {
 
   const {channelId, latest} = c;
   await expect(
-    store.lockApp(knex, channelId, async tx =>
+    store.lockApp(channelId, async tx =>
       store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, tx)
     )
   ).resolves.toMatchObject({channelResult: {turnNum: 6}});
@@ -72,7 +76,7 @@ describe('concurrency', () => {
     await Promise.all(
       _.range(numAttempts).map(() =>
         store
-          .lockApp(knex, channelId, async tx => store.signState(channelId, next(c.latest), tx))
+          .lockApp(channelId, async tx => store.signState(channelId, next(c.latest), tx))
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
@@ -85,7 +89,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(numAttempts - 1);
     expect(numSettled).toEqual(numAttempts);
 
-    await expect(store.getChannel(channelId, knex)).resolves.toMatchObject({
+    await expect(store.getChannel(channelId)).resolves.toMatchObject({
       latest: {turnNum: 6},
     });
   });
@@ -113,9 +117,7 @@ describe('concurrency', () => {
       await Promise.all(
         channelIds.map(channelId =>
           store
-            .lockApp(knex, channelId, async (tx, c) =>
-              store.signState(channelId, next(c.latest), tx)
-            )
+            .lockApp(channelId, async (tx, c) => store.signState(channelId, next(c.latest), tx))
             .then(countResolvedPromise)
             .finally(countSettledPromise)
         )
@@ -126,7 +128,7 @@ describe('concurrency', () => {
 
       expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
-      await expect(store.getChannel(channelIds[1], knex)).resolves.toMatchObject({
+      await expect(store.getChannel(channelIds[1])).resolves.toMatchObject({
         latest: {turnNum: 6},
       });
     },
@@ -148,7 +150,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(0);
     expect(numSettled).toEqual(NUM_ATTEMPTS);
 
-    await expect(store.getChannel(channelId, knex)).resolves.toMatchObject({
+    await expect(store.getChannel(channelId)).resolves.toMatchObject({
       latest: next(c.latest),
     });
   });
@@ -156,13 +158,13 @@ describe('concurrency', () => {
 
 describe('Missing channels', () => {
   it('throws a ChannelError by default', () =>
-    expect(store.lockApp(knex, 'foo', _.noop)).rejects.toThrow(
+    expect(store.lockApp('foo', _.noop)).rejects.toThrow(
       new ChannelError(ChannelError.reasons.channelMissing, {channelId: 'foo'})
     ));
 
   it('calls the onChannelMissing handler when given', () =>
-    expect(store.lockApp(knex, 'foo', _.noop, _.noop)).resolves.not.toThrow());
+    expect(store.lockApp('foo', _.noop, _.noop)).resolves.not.toThrow());
 
   it('calls the onChannelMissing handler with the channel Id when given', () =>
-    expect(store.lockApp(knex, 'foo', _.noop, _.identity)).resolves.toEqual('foo'));
+    expect(store.lockApp('foo', _.noop, _.identity)).resolves.toEqual('foo'));
 });

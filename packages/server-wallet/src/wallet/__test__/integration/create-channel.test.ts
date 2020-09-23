@@ -80,6 +80,4 @@ describe('happy path', () => {
 });
 
 it("doesn't create a channel if it doesn't have a signing wallet", () =>
-  expect(w.createChannel(createChannelArgs())).rejects.toThrow(
-    'null value in column "signing_address"'
-  ));
+  expect(w.createChannel(createChannelArgs())).rejects.toThrow('Not in channel'));

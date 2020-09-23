@@ -1,6 +1,7 @@
 import {Transaction, TransactionOrKnex} from 'objection';
 import {
   Objective,
+  Outcome,
   SignedStateWithHash,
   SignedStateVarsWithHash,
   State,
@@ -40,11 +41,13 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
-import {Bytes32} from '../type-aliases';
+import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
-import {timerFactory, recordFunctionMetrics} from '../metrics';
+import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
+import {Funding} from '../models/funding';
+import {Nonce} from '../models/nonce';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -62,7 +65,19 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  constructor(readonly timingMetrics: boolean, readonly skipEvmValidation: boolean) {
+  knex: Knex;
+
+  constructor(
+    readonly knexOrConfig: Knex | Knex.Config,
+    readonly timingMetrics: boolean,
+    readonly skipEvmValidation: boolean
+  ) {
+    if (knexOrConfig.client instanceof Knex.Client) {
+      this.knex = knexOrConfig as Knex;
+    } else {
+      this.knex = Knex(knexOrConfig);
+    }
+
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
@@ -74,11 +89,17 @@ export class Store {
       this.addObjective = recordFunctionMetrics(this.addObjective);
       this.pushMessage = recordFunctionMetrics(this.pushMessage);
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
+
+      setupDBMetrics(this.knex);
     }
   }
 
-  async getFirstParticipant(knex: Knex): Promise<Participant> {
-    const signingAddress = await this.getOrCreateSigningAddress(knex);
+  async closeDatabaseConnection(): Promise<void> {
+    await this.knex.destroy();
+  }
+
+  async getFirstParticipant(): Promise<Participant> {
+    const signingAddress = await this.getOrCreateSigningAddress();
     return {
       participantId: signingAddress,
       signingAddress,
@@ -86,13 +107,13 @@ export class Store {
     };
   }
 
-  async getOrCreateSigningAddress(knex: Knex): Promise<string> {
+  async getOrCreateSigningAddress(): Promise<string> {
     const randomWallet = ethers.Wallet.createRandom();
     // signing_wallets table allows for only one row via database constraints
     try {
       // returning('*') only works with Postgres
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
-      const signingWallet = await SigningWallet.query(knex)
+      const signingWallet = await SigningWallet.query(this.knex)
         .insert({
           privateKey: randomWallet.privateKey,
           address: randomWallet.address,
@@ -101,7 +122,7 @@ export class Store {
       return signingWallet.address;
     } catch (error) {
       if (isUniqueViolationError(error)) {
-        return (await SigningWallet.query(knex).first()).address;
+        return (await SigningWallet.query(this.knex).first()).address;
       }
       throw error;
     }
@@ -117,12 +138,11 @@ export class Store {
    * concurrently across all wallets.
    */
   async lockApp<T>(
-    knex: Knex,
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel
   ): Promise<T> {
-    return knex.transaction(async tx => {
+    return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer(
         'getting channel',
@@ -247,18 +267,15 @@ export class Store {
       .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
   }
 
-  async getChannel(
-    channelId: Bytes32,
-    txOrKnex: TransactionOrKnex
-  ): Promise<ChannelState | undefined> {
-    return (await Channel.forId(channelId, txOrKnex))?.protocolState;
+  async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
+    return (await Channel.forId(channelId, tx || this.knex))?.protocolState;
   }
 
   async getStates(
     channelId: Bytes32,
-    txOrKnex: TransactionOrKnex
+    tx?: Transaction
   ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
-    const channel = await Channel.forId(channelId, txOrKnex);
+    const channel = await Channel.forId(channelId, tx || this.knex);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
 
@@ -266,34 +283,36 @@ export class Store {
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   }
 
-  async getChannels(knex: Knex): Promise<ChannelState[]> {
-    return (await Channel.query(knex)).map(channel => channel.protocolState);
+  async getChannels(): Promise<ChannelState[]> {
+    return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(message: WirePayload, tx: Transaction): Promise<Bytes32[]> {
-    const objectives = message.objectives?.map(deserializeObjective) || [];
+  async pushMessage(message: WirePayload): Promise<Bytes32[]> {
+    return this.knex.transaction(async tx => {
+      const objectives = message.objectives?.map(deserializeObjective) || [];
 
-    for (const o of objectives) {
-      await this.addObjective(o, tx);
-    }
+      for (const o of objectives) {
+        await this.addObjective(o, tx);
+      }
 
-    const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
+      const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
 
-    for (const ss of message.signedStates || []) {
-      await this.addSignedState(ss.channelId, undefined, ss, tx);
-    }
+      for (const ss of message.signedStates || []) {
+        await this.addSignedState(ss.channelId, undefined, ss, tx);
+      }
 
-    function isDefined(s: string | undefined): s is string {
-      return s !== undefined;
-    }
-    const objectiveChannelIds =
-      objectives
-        .map(objective =>
-          isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
-        )
-        .filter(isDefined) || [];
+      function isDefined(s: string | undefined): s is string {
+        return s !== undefined;
+      }
+      const objectiveChannelIds =
+        objectives
+          .map(objective =>
+            isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
+          )
+          .filter(isDefined) || [];
 
-    return stateChannelIds.concat(objectiveChannelIds);
+      return stateChannelIds.concat(objectiveChannelIds);
+    });
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
@@ -403,6 +422,40 @@ export class Store {
     );
 
     return result;
+  }
+
+  async createChannel(
+    constants: ChannelConstants,
+    appData: Bytes,
+    outcome: Outcome,
+    fundingStrategy: FundingStrategy
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+    return await this.knex.transaction(async tx => {
+      const {channelId} = await createChannel(constants, fundingStrategy, tx);
+      return await this.signState(
+        channelId,
+        {
+          ...constants,
+          turnNum: 0,
+          isFinal: false,
+          appData,
+          outcome,
+        },
+        tx
+      );
+    });
+  }
+
+  async updateFunding(
+    channelId: string,
+    fromAmount: Uint256,
+    assetHolderAddress: Address
+  ): Promise<void> {
+    await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
+  }
+
+  async nextNonce(signingAddresses: Address[]): Promise<number> {
+    return await Nonce.next(this.knex, signingAddresses);
   }
 }
 

@@ -9,7 +9,11 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {stateWithHashSignedBy2} from './fixtures/states';
 import {alice, bob} from './fixtures/signing-wallets';
 
-const store = new Store(defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+let store: Store;
+
+beforeAll(async () => {
+  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+});
 
 describe('addSignedState', () => {
   let tx: Objection.Transaction;
