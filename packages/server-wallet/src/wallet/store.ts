@@ -65,19 +65,11 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  knex: Knex;
-
   constructor(
-    readonly knexOrConfig: Knex | Knex.Config,
+    public readonly knex: Knex,
     readonly timingMetrics: boolean,
     readonly skipEvmValidation: boolean
   ) {
-    if (knexOrConfig.client instanceof Knex.Client) {
-      this.knex = knexOrConfig as Knex;
-    } else {
-      this.knex = Knex(knexOrConfig);
-    }
-
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
@@ -94,7 +86,7 @@ export class Store {
     }
   }
 
-  async closeDatabaseConnection(): Promise<void> {
+  async destroy(): Promise<void> {
     await this.knex.destroy();
   }
 

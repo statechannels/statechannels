@@ -86,7 +86,7 @@ export class Wallet implements WalletInterface {
 
   constructor(readonly walletConfig: ServerWalletConfig) {
     this.store = new Store(
-      extractDBConfigFromServerWalletConfig(walletConfig),
+      Knex(extractDBConfigFromServerWalletConfig(walletConfig)),
       walletConfig.timingMetrics,
       walletConfig.skipEvmValidation
     );
@@ -118,7 +118,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async destroy(): Promise<void> {
-    await this.store.closeDatabaseConnection();
+    await this.store.destroy();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
