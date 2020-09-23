@@ -19,6 +19,6 @@
   "license": "MIT",
   "repository": "statechannels/monorepo/blob/master/packages/integration-tests",
   "scripts": {
-    "integration-tests": "jest"
+    "integration-tests": "jest --runInBand"
   }
 }
