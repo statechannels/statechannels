@@ -37,7 +37,10 @@ async function benchmark(): Promise<void> {
   await adminKnex.migrate.latest();
   const wallet = new Wallet(defaultConfig);
 
-  let channels = await setup(5);
+  // Warm up each worker thread.
+  // eslint-disable-next-line no-process-env
+  let channels = await setup(Number(process.env.AMOUNT_OF_WORKER_THREADS ?? 0));
+
   await Promise.all(
     channels.map(async channel =>
       wallet.updateChannel({
