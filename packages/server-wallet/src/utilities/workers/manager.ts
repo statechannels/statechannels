@@ -2,7 +2,6 @@ import {Worker} from 'worker_threads';
 import path from 'path';
 
 import {Pool} from 'tarn';
-import {State, StateWithHash} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Either} from 'fp-ts/lib/Either';
 import {isLeft} from 'fp-ts/lib/These';
@@ -38,27 +37,6 @@ export class WorkerManager {
         idleTimeoutMillis: ONE_DAY,
       });
     }
-  }
-  public async concurrentSignState(
-    state: StateWithHash,
-    privateKey: string
-  ): Promise<{state: State; signature: string}> {
-    if (!this.pool) throw new Error(`Worker threads are disabled`);
-    const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'SignState', state, privateKey};
-    const resultPromise = new Promise<{state: State; signature: string}>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, {state: State; signature: string}>) => {
-        this.pool?.release(worker);
-        if (isLeft(response)) {
-          reject(response.left);
-        } else {
-          resolve(response.right);
-        }
-      })
-    );
-
-    worker.postMessage(data);
-    return resultPromise;
   }
 
   public async pushMessage(args: unknown): Promise<MultipleChannelResult> {

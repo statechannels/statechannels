@@ -1,9 +1,7 @@
 import {parentPort, isMainThread, workerData} from 'worker_threads';
 
-import {hashState} from '@statechannels/wallet-core';
 import {left, right} from 'fp-ts/lib/Either';
 
-import {fastRecoverAddress, fastSignState} from '../signatures';
 import {Wallet} from '../..';
 import {ServerWalletConfig} from '../../config';
 
@@ -23,17 +21,6 @@ parentPort?.on('message', async (message: any) => {
   }
   try {
     switch (message.operation) {
-      case 'HashState':
-        return parentPort?.postMessage(right(await hashState(message.state)));
-
-      case 'RecoverAddress':
-        return parentPort?.postMessage(
-          await fastRecoverAddress(message.signature, message.state.stateHash)
-        );
-      case 'SignState':
-        return parentPort?.postMessage(
-          right(await fastSignState(message.state, message.privateKey))
-        );
       case 'UpdateChannel':
         return parentPort?.postMessage(right(await wallet._updateChannel(message.args)));
       case 'PushMessage':
