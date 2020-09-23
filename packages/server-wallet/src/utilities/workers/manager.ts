@@ -17,18 +17,20 @@ export class WorkerManager {
   private pool: Pool<Worker>;
 
   constructor(walletConfig: ServerWalletConfig) {
-    if (walletConfig.workerThreadAmount > 0) {
+    if (walletConfig.workerThreadAmount === 0) {
       throw new Error('Worker threads disabled');
     }
 
     this.pool = new Pool({
       create: (): Worker => {
+        logger.info('Creating worker');
         const worker = new Worker(path.resolve(__dirname, './loader.js'), {
           workerData: walletConfig,
         });
+        logger.info({worker: worker.threadId}, 'Worker created');
 
-        worker.stdout.on('data', data => logger.info(data.toString()));
-        worker.stderr.on('data', data => logger.error(data.toString()));
+        worker.stdout.on('data', data => console.log(data.toString()));
+        worker.stderr.on('data', data => console.error(data.toString()));
         worker.on('error', err => {
           throw err;
         });
@@ -40,7 +42,13 @@ export class WorkerManager {
       reapIntervalMillis: ONE_DAY,
       idleTimeoutMillis: ONE_DAY,
     });
+
+    this.pool.on('acquireSuccess', (eventId, resource) => {
+      const {threadId} = resource;
+      logger.info({threadId}, `Acquired worker ${resource.threadId}`);
+    });
   }
+
   public async concurrentSignState(
     state: StateWithHash,
     privateKey: string
@@ -82,7 +90,7 @@ export class WorkerManager {
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
-    if (!this.pool) throw new Error(`Worker threads are disabled`);
+    logger.info(`Pending acquires: ${this.pool.numPendingAcquires()}`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
     const resultPromise = new Promise<any>((resolve, reject) =>
@@ -92,6 +100,7 @@ export class WorkerManager {
           logger.error(response);
           reject(response.left);
         } else {
+          logger.info(response);
           resolve(response.right);
         }
       })

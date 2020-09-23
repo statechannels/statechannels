@@ -51,34 +51,16 @@ describe('Stress tests', () => {
     await SWReceiver.query(knexReceiver).insert(bob());
   });
 
-  it('runs the stress test with 100 channels and 1 payment call', async () => {
-    const channelIds = await seedTestChannels(
-      getParticipant('payer', alice().privateKey),
-      alice().privateKey,
-      getParticipant('receiver', bob().privateKey),
-      bob().privateKey,
-      100,
-      knexPayer
-    );
-
-    await triggerPayments(channelIds);
-
-    for (const channelId of channelIds) {
-      await await expectSupportedState(knexPayer, channelId, ChannelPayer, 5);
-      await expectSupportedState(knexReceiver, channelId, ChannelReceiver, 5);
-    }
-  });
-
   it('runs the stress test with 100 channels and 25 payment call', async () => {
     const channelIds = await seedTestChannels(
       getParticipant('payer', alice().privateKey),
       alice().privateKey,
       getParticipant('receiver', bob().privateKey),
       bob().privateKey,
-      100,
+      25,
       knexPayer
     );
-    const numPayments = 25;
+    const numPayments = 100;
     await triggerPayments(channelIds, numPayments);
 
     for (const channelId of channelIds) {

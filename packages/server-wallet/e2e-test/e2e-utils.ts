@@ -36,9 +36,7 @@ export const triggerPayments = async (
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const payerScript = fork(join(__dirname, './payer/index.ts'), args, {
-    execArgv: ['-r', 'ts-node/register'],
-  });
+  const payerScript = fork(join(__dirname, './payer/index.js'), args, {});
   payerScript.on('message', message =>
     console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
   );
@@ -53,7 +51,7 @@ export const triggerPayments = async (
  * conveniently re-using the same PostgreSQL instance.
  */
 export const startReceiverServer = (): ReceiverServer => {
-  const server = spawn('yarn', ['ts-node', './e2e-test/receiver/server'], {
+  const server = spawn('yarn', ['node', './lib/e2e-test/receiver/server'], {
     stdio: 'inherit',
     env: {
       AMOUNT_OF_WORKER_THREADS: '2',

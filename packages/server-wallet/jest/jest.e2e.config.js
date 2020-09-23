@@ -1,3 +1,3 @@
 const config = require('./jest.config');
-config.testMatch = ['<rootDir>/e2e-test/e2e.test.ts?(x)'];
+config.testMatch = ['<rootDir>/lib/e2e-test/e2e.test.js'];
 module.exports = config;
