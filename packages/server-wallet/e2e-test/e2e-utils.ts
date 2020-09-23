@@ -108,6 +108,10 @@ export async function seedTestChannels(
   knexPayer: Knex
 ): Promise<string[]> {
   const channelIds: string[] = [];
+
+  const payerSeeds = [];
+  const receiverSeeds = [];
+
   for (let i = 0; i < numOfChannels; i++) {
     const seed = withSupportedState([
       SigningWallet.fromJson({privateKey: payerPrivateKey}),
@@ -117,14 +121,16 @@ export async function seedTestChannels(
       channelNonce: i,
       participants: [payer, receiver],
     });
-    await Channel.bindKnex(knexPayer)
-      .query()
-      .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default
-    await Channel.bindKnex(knexReceiver)
-      .query()
-      .insert([{...seed, signingAddress: receiver.signingAddress}]);
+
+    payerSeeds.push({...seed, signingAddress: payer.signingAddress});
+    receiverSeeds.push({...seed, signingAddress: receiver.signingAddress});
     channelIds.push(seed.channelId);
   }
+
+  await Promise.all([
+    Channel.query(knexPayer).insert(payerSeeds),
+    Channel.query(knexReceiver).insert(receiverSeeds),
+  ]);
   return channelIds;
 }
 
