@@ -54,7 +54,7 @@ export const startReceiverServer = (): ReceiverServer => {
   const server = spawn('yarn', ['node', './lib/e2e-test/receiver/server'], {
     stdio: 'inherit',
     env: {
-      AMOUNT_OF_WORKER_THREADS: '2',
+      AMOUNT_OF_WORKER_THREADS: '8',
       // eslint-disable-next-line
       ...process.env,
     },
