@@ -208,6 +208,13 @@ export class Store {
     signedState: SignedStateWithHash,
     tx: Transaction
   ): Promise<Channel> {
+    if (
+      signedState.signatures.length > 1 ||
+      signedState.signatures[0].signer !== channel.myAddress
+    ) {
+      throw new Error('This state not exclusively signed by me');
+    }
+
     const timer = timerFactory(this.timingMetrics, `addMyState ${channel.channelId}`);
 
     channel.vars = await timer('adding state', async () => addState(channel.vars, signedState));
