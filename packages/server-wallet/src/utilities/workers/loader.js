@@ -7,7 +7,8 @@ const BUILT_JS_WORKER_PATH = path.resolve(
   __dirname,
   '../../../lib/src/utilities/workers/worker.js'
 );
-
+// Responsible for loading the code for the worker thread
+// We always try to load a js file as loading ts-node is slow and negates the performance improvements
 if (fs.existsSync(JS_WORKER_PATH)) {
   require(JS_WORKER_PATH);
 } else if (fs.existsSync(BUILT_JS_WORKER_PATH)) {
