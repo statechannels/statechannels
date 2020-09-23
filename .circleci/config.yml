@@ -279,11 +279,12 @@ jobs:
 
   server-wallet-stress-test:
     <<: *defaults
+    resource_class: 2xlarge+
     environment:
       USE_NATIVE_SOLC: true
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
-      AMOUNT_OF_WORKER_THREADS: 2
+      AMOUNT_OF_WORKER_THREADS: 8
     steps:
       - checkout
       - attach_workspace:
