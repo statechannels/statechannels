@@ -217,15 +217,10 @@ export class Store {
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const cols: RequiredColumns = {
-      ...channel,
-      vars: channel.vars,
-    };
-
     const result = await timer('updating', async () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
-        .update(cols)
+        .patch({vars: channel.vars})
         .returning('*')
         .first()
     );
