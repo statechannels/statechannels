@@ -87,9 +87,10 @@ describe('channel results', () => {
     const createChannel = createChannelFromState(signedStates[0]);
     await wallet.pushMessage({objectives: [createChannel]});
 
-    await expectResults(wallet.pushMessage({signedStates: signedStates.map(serializeState)}), [
-      {turnNum: zero, status: 'proposed'},
-    ]);
+    await expectResults(
+      wallet.pushMessage({signedStates: signedStates.map(ss => serializeState(ss))}),
+      [{turnNum: zero, status: 'proposed'}]
+    );
   });
 
   it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
@@ -115,9 +116,10 @@ describe('channel results', () => {
     const {channelId} = await Channel.query(wallet.knex).insert(channel);
 
     const signedStates = [stateSignedBy([bob()])({turnNum: 10, isFinal: true, participants})];
-    return expectResults(wallet.pushMessage({signedStates: signedStates.map(serializeState)}), [
-      {channelId, turnNum: 10, status: 'closing'},
-    ]);
+    return expectResults(
+      wallet.pushMessage({signedStates: signedStates.map(ss => serializeState(ss))}),
+      [{channelId, turnNum: 10, status: 'closing'}]
+    );
   });
 
   it("returns a 'closed' channel result when receiving a state in a channel that is now closed", async () => {
@@ -273,7 +275,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates: signedStates.map(serializeState)}},
+          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
         },
       ],
     });
@@ -304,7 +306,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates: signedStates.map(serializeState)}},
+          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
         },
       ],
     });
