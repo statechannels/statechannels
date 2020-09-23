@@ -102,8 +102,8 @@ export class Wallet implements WalletInterface {
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
-    this._updateChannel = this._updateChannel.bind(this);
-    this._pushMessage = this._pushMessage.bind(this);
+    this.updateChannelInternal = this.updateChannelInternal.bind(this);
+    this.pushMessageInternal = this.pushMessageInternal.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
@@ -262,11 +262,12 @@ export class Wallet implements WalletInterface {
     if (this.walletConfig.workerThreadAmount > 0) {
       return this.manager.updateChannel(args);
     } else {
-      return this._updateChannel(args);
+      return this.updateChannelInternal(args);
     }
   }
 
-  async _updateChannel({
+  // The internal implementation of updateChannel responsible for actually updating the channel
+  async updateChannelInternal({
     channelId,
     allocations,
     appData,
@@ -343,11 +344,12 @@ export class Wallet implements WalletInterface {
     if (this.walletConfig.workerThreadAmount > 0) {
       return this.manager.pushMessage(rawPayload);
     } else {
-      return this._pushMessage(rawPayload);
+      return this.pushMessageInternal(rawPayload);
     }
   }
 
-  async _pushMessage(rawPayload: unknown): MultipleChannelResult {
+  // The internal implementation of pushMessage responsible for actually pushing the message into the wallet
+  async pushMessageInternal(rawPayload: unknown): MultipleChannelResult {
     const store = this.store;
 
     const wirePayload = validatePayload(rawPayload);
