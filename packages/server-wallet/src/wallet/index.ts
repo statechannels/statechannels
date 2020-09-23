@@ -20,7 +20,6 @@ import {
   assetHolderAddress,
   BN,
   Zero,
-  SignedState,
   serializeMessage,
   ChannelConstants,
 } from '@statechannels/wallet-core';
@@ -202,37 +201,7 @@ export class Wallet implements WalletInterface {
       outcome,
       fundingStrategy
     );
-
-    // todo: clean up the construction of the Objective
-    // todo: do not assume Direct funding
-    const outbox: Outgoing[] = outgoing.map(n => {
-      const params = n.notice.params as {
-        sender: string;
-        recipient: string;
-        data: {signedStates: SignedState[]};
-      };
-      return {
-        method: 'MessageQueued' as const,
-        params: {
-          ...n.notice.params,
-          data: {
-            signedStates: params.data.signedStates,
-            objectives: [
-              {
-                participants,
-                type: 'CreateChannel',
-                data: {
-                  signedState: params.data.signedStates[0],
-                  fundingStrategy: 'Direct',
-                },
-              },
-            ],
-          },
-        },
-      };
-    });
-
-    return {outbox, channelResult};
+    return {outbox: outgoing.map(n => n.notice), channelResult};
   }
 
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {

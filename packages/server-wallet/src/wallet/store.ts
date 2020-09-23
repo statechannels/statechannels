@@ -23,6 +23,7 @@ import {
   convertToInternalParticipant,
   SignatureEntry,
   convertToParticipant,
+  Payload,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -201,7 +202,30 @@ export class Store {
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
+    let data: Payload = await timer('adding hash', async () => ({
+      signedStates: [signedState],
+      objectives: [],
+    }));
+    /** todo:
+     * What happens if Bob is adding his signature to prefund0 from Alice?
+     * In this case Bob will send an objective to Alice
+     */
+
+    if (signedState.turnNum === 0) {
+      data = {
+        ...data,
+        objectives: [
+          {
+            participants: channel.participants,
+            type: 'OpenChannel',
+            data: {
+              targetChannelId: channel.channelId,
+              fundingStrategy: 'Direct',
+            },
+          },
+        ],
+      };
+    }
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
