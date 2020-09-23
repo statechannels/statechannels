@@ -5,7 +5,7 @@ import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {SigningWallet} from '../../models/signing-wallet';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
+import {defaultConfig} from '../../config';
 
 import {alice} from './fixtures/participants';
 
@@ -13,13 +13,7 @@ beforeEach(async () => {
   await truncate(knex);
 });
 
-const store = new Store(
-  extractDBConfigFromServerWalletConfig(defaultConfig),
-  defaultConfig.timingMetrics,
-  defaultConfig.skipEvmValidation
-);
-
-afterAll(async () => store.closeDatabaseConnection());
+const store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
 
 describe('getFirstParticipant', () => {
   it('works', async () => {

@@ -3,17 +3,13 @@ import Objection from 'objection';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../../config';
+import {defaultConfig} from '../../config';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {stateWithHashSignedBy2} from './fixtures/states';
 import {alice, bob} from './fixtures/signing-wallets';
 
-const store = new Store(
-  extractDBConfigFromServerWalletConfig(defaultConfig),
-  defaultConfig.timingMetrics,
-  defaultConfig.skipEvmValidation
-);
+const store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
 
 afterAll(async () => store.closeDatabaseConnection());
 
