@@ -42,11 +42,6 @@ export class WorkerManager {
       reapIntervalMillis: ONE_DAY,
       idleTimeoutMillis: ONE_DAY,
     });
-
-    this.pool.on('acquireSuccess', (eventId, resource) => {
-      const {threadId} = resource;
-      logger.info({threadId}, `Acquired worker ${resource.threadId}`);
-    });
   }
 
   public async concurrentSignState(
@@ -90,7 +85,6 @@ export class WorkerManager {
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
-    logger.info(`Pending acquires: ${this.pool.numPendingAcquires()}`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
     const resultPromise = new Promise<any>((resolve, reject) =>
@@ -100,7 +94,6 @@ export class WorkerManager {
           logger.error(response);
           reject(response.left);
         } else {
-          logger.info(response);
           resolve(response.right);
         }
       })
