@@ -1,8 +1,7 @@
-import {parentPort, isMainThread, workerData, threadId} from 'worker_threads';
+import {parentPort, isMainThread, workerData} from 'worker_threads';
 
 import {hashState} from '@statechannels/wallet-core';
 import {left, right} from 'fp-ts/lib/Either';
-import pino from 'pino';
 
 import {fastRecoverAddress, fastSignState} from '../signatures';
 import {Wallet} from '../..';
@@ -10,15 +9,9 @@ import {ServerWalletConfig} from '../../config';
 
 import {isStateChannelWorkerData} from './worker-data';
 
-const logger = pino(pino.destination(`/tmp/worker-${threadId}.log`));
-
-logger.info('Started');
-
 const wallet = new Wallet(workerData as ServerWalletConfig);
 
 parentPort?.on('message', async (message: any) => {
-  logger.info({message}, 'Received message from master');
-
   if (isMainThread) {
     parentPort?.postMessage(
       left(new Error('Attempting to execute worker thread script on the main thread'))
