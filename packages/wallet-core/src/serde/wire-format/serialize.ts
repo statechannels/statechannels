@@ -20,8 +20,13 @@ import {
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
 
-export function serializeMessage(message: Payload, recipient: string, sender: string): WireMessage {
-  const signedStates = (message.signedStates || []).map(serializeState);
+export function serializeMessage(
+  message: Payload,
+  recipient: string,
+  sender: string,
+  channelId?: string
+): WireMessage {
+  const signedStates = (message.signedStates || []).map(ss => serializeState(ss, channelId));
   const objectives = message.objectives?.map(serializeObjective);
   const {requests} = message;
   return {
@@ -31,7 +36,7 @@ export function serializeMessage(message: Payload, recipient: string, sender: st
   };
 }
 
-export function serializeState(state: SignedState): SignedStateWire {
+export function serializeState(state: SignedState, channelId?: string): SignedStateWire {
   const {
     chainId,
     participants,
@@ -53,7 +58,7 @@ export function serializeState(state: SignedState): SignedStateWire {
     appData,
     isFinal,
     outcome: serializeOutcome(state.outcome),
-    channelId: calculateChannelId(state),
+    channelId: channelId || calculateChannelId(state),
     signatures: state.signatures.map(s => s.signature)
   };
 }
