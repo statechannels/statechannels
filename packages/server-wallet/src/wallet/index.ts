@@ -96,7 +96,6 @@ export class Wallet implements WalletInterface, ChainEventListener {
       this.walletConfig.timingMetrics,
       this.walletConfig.skipEvmValidation
     );
-    this.chainService = new OnchainService();
 
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
@@ -121,6 +120,9 @@ export class Wallet implements WalletInterface, ChainEventListener {
       }
       setupMetrics(this.walletConfig.metricsOutputFile);
     }
+
+    this.chainService = new OnchainService();
+    this.attachChainService(this.chainService);
   }
 
   public async destroy(): Promise<void> {
