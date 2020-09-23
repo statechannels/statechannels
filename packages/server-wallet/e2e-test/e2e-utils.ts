@@ -52,11 +52,6 @@ export const triggerPayments = async (
 export const startReceiverServer = (): ReceiverServer => {
   const server = spawn('yarn', ['node', './lib/e2e-test/receiver/server'], {
     stdio: 'inherit',
-    env: {
-      AMOUNT_OF_WORKER_THREADS: '2',
-      // eslint-disable-next-line
-      ...process.env,
-    },
   });
 
   server.on('error', data => console.error(data.toString()));
