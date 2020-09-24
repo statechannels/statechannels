@@ -1,12 +1,17 @@
 import {Wallet, ethers} from 'ethers';
-import {State, simpleEthAllocation, signState, getSignerAddress} from '@statechannels/wallet-core';
+import {
+  State,
+  simpleEthAllocation,
+  signState,
+  getSignerAddress,
+  toNitroState,
+} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
 import {recoverAddress, signState as wasmSignState} from '../signatures';
 import {logger} from '../../logger';
 import {addHash} from '../../state-utils';
-import {toNitroState} from '@statechannels/wallet-core';
 
 it('sign vs wasmSign', async () => {
   _.range(5).map(async channelNonce => {

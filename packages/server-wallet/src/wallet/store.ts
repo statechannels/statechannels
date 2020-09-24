@@ -19,13 +19,9 @@ import {
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
-  convertToParticipant,
   Payload,
   isOpenChannel,
 } from '@statechannels/wallet-core';
-import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
-import {State as NitroState} from '@statechannels/nitro-protocol';
-import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
@@ -50,7 +46,6 @@ import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
-import {hashWireState} from '@statechannels/wallet-core';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;

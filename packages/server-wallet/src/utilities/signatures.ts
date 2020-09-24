@@ -1,7 +1,6 @@
 import {Wallet} from 'ethers';
-import {State} from '@statechannels/wallet-core';
+import {State, toNitroState} from '@statechannels/wallet-core';
 import * as wasmUtils from '@statechannels/wasm-utils';
-import {toNitroState} from '@statechannels/wallet-core';
 import {State as NitroState} from '@statechannels/nitro-protocol';
 
 const knownWallets: Record<string, string> = {};
