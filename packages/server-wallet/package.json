@@ -15,7 +15,8 @@
     "p-queue": "6.6.0",
     "pg": "7.17.1",
     "pino": "6.2.0",
-    "pure-evm": "0.1.3"
+    "pure-evm": "0.1.3",
+    "tarn": "^3.0.0"
   },
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
@@ -91,8 +92,8 @@
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
     "test:ci": "yarn test --bail",
-    "test:e2e": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
-    "test:stress": "SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
+    "test:e2e": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
+    "test:stress": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
   },
   "types": "lib/src/index.d.ts"
 }

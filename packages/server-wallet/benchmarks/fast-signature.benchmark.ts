@@ -4,6 +4,7 @@ import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core'
 
 import {participant} from '../src/wallet/__test__/fixtures/participants';
 import {fastSignState} from '../src/utilities/signatures';
+import {addHash} from '../src/state-utils';
 
 async function benchmark(): Promise<void> {
   const wallet = Wallet.createRandom();
@@ -18,6 +19,7 @@ async function benchmark(): Promise<void> {
     appDefinition: ethers.constants.AddressZero,
     challengeDuration: 0x5,
   };
+  const stateWithHash = addHash(state);
 
   const iter = _.range(1_000);
   console.time('signState');
@@ -25,7 +27,7 @@ async function benchmark(): Promise<void> {
   console.timeEnd('signState');
 
   console.time('fastSignState');
-  const result = iter.map(async () => fastSignState(state, wallet.privateKey));
+  const result = iter.map(async () => fastSignState(stateWithHash, wallet.privateKey));
   await Promise.all(result);
   console.timeEnd('fastSignState');
 }

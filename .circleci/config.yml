@@ -277,8 +277,14 @@ jobs:
           no_output_timeout: 30m
       - upload_artifacts
 
-  server-wallet-stress-test:
+  server-wallet-stress-test-threaded:
     <<: *defaults
+    resource_class: xlarge
+    environment:
+      USE_NATIVE_SOLC: true
+      PSQL_ARGS: -p 5432 -h localhost
+      NODE_ENV: test
+      AMOUNT_OF_WORKER_THREADS: 6
     steps:
       - checkout
       - attach_workspace:
@@ -298,7 +304,33 @@ jobs:
           command: yarn test:stress
           no_output_timeout: 10m
       - upload_artifacts
-
+  server-wallet-stress-test:
+    <<: *defaults
+    resource_class: xlarge
+    environment:
+      USE_NATIVE_SOLC: true
+      PSQL_ARGS: -p 5432 -h localhost
+      NODE_ENV: test
+      AMOUNT_OF_WORKER_THREADS: 0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
+      - run:
+          name: server-wallet-stress-test
+          working_directory: packages/server-wallet
+          command: yarn test:stress
+          no_output_timeout: 10m
+      - upload_artifacts
   server-wallet-profiling:
     <<: *defaults
     steps:
@@ -445,6 +477,9 @@ workflows:
       #     requires:
       #       - prepare
       - server-wallet-stress-test:
+          requires:
+            - prepare
+      - server-wallet-stress-test-threaded:
           requires:
             - prepare
 

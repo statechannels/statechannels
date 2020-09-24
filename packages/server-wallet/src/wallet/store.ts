@@ -315,7 +315,7 @@ export class Store {
       const channelId = calculateChannelId(signedState);
       const stateHash = hashState(signedState);
       const signedStateWithHash = {...signedState, stateHash};
-      const participantSignatures = recoverParticipantSignatures(
+      const participantSignatures = await recoverParticipantSignatures(
         signedState.signatures.map(sig => sig.signature),
         signedState.participants.map(participant => participant.signingAddress),
         channelId,
@@ -356,13 +356,15 @@ export class Store {
 
     const stateHash = hashWireState(wireSignedState);
 
-    const signatures = await timer('validating signatures', async () =>
-      recoverParticipantSignatures(
-        wireSignedState.signatures,
-        wireSignedState.participants.map(p => p.signingAddress),
-        channelId,
-        stateHash
-      )
+    const signatures = await timer(
+      'validating signatures',
+      async () =>
+        await recoverParticipantSignatures(
+          wireSignedState.signatures,
+          wireSignedState.participants.map(p => p.signingAddress),
+          channelId,
+          stateHash
+        )
     );
 
     const channel =
@@ -525,22 +527,24 @@ async function getSigningWallet(
  * Validator functions
  */
 
-function recoverParticipantSignatures(
+async function recoverParticipantSignatures(
   signatures: string[],
   participants: string[],
   channelId: string,
   stateHash: string
-): SignatureEntry[] {
-  return signatures.map(sig => {
-    const recoveredAddress = fastRecoverAddress(sig, stateHash);
+): Promise<SignatureEntry[]> {
+  return Promise.all(
+    signatures.map(async sig => {
+      const recoveredAddress = await fastRecoverAddress(sig, stateHash);
 
-    if (participants.indexOf(recoveredAddress) < 0) {
-      throw new Error(
-        `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
-      );
-    }
-    return {signature: sig, signer: recoveredAddress};
-  });
+      if (participants.indexOf(recoveredAddress) < 0) {
+        throw new Error(
+          `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
+        );
+      }
+      return {signature: sig, signer: recoveredAddress};
+    })
+  );
 }
 
 function validateStateFreshness(signedState: State, channel: Channel): void {

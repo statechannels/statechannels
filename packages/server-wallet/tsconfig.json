@@ -3,18 +3,38 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     // ["es2017", "esnext.bigint", "dom"] needed for https://github.com/bitauth/libauth#typescript-types
-    "lib": ["es5", "es6", "ES2017", "esnext.bigint", "dom"],
+    "lib": [
+      "es5",
+      "es6",
+      "ES2017",
+      "esnext.bigint",
+      "dom"
+    ],
     "target": "es2019",
     "module": "commonjs",
     "outDir": "lib",
     "esModuleInterop": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "allowJs": true // We want to include loader.js to load worker threads
   },
   "references": [
-    {"path": "../devtools"},
-    {"path": "../client-api-schema"},
-    {"path": "../nitro-protocol"},
-    {"path": "../wallet-core"}
+    {
+      "path": "../devtools"
+    },
+    {
+      "path": "../client-api-schema"
+    },
+    {
+      "path": "../nitro-protocol"
+    },
+    {
+      "path": "../wallet-core"
+    }
   ],
-  "include": ["src", "e2e-test", "deployment", "jest"]
+  "include": [
+    "src",
+    "e2e-test",
+    "deployment",
+    "jest"
+  ]
 }

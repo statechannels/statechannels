@@ -50,7 +50,7 @@ describe('OnchainTransactionService', () => {
 
   afterEach(async () => {
     onchainService.detachAllHandlers(ethAssetHolder.address);
-    await channelWallet.knex.destroy();
+    await channelWallet.destroy();
   });
 
   it('should call channel callback when event is emitted for a registered channel', async () => {

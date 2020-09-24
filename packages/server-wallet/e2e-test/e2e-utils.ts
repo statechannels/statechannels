@@ -1,5 +1,4 @@
 import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_process';
-import {join} from 'path';
 
 import kill = require('tree-kill');
 
@@ -36,9 +35,7 @@ export const triggerPayments = async (
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 
-  const payerScript = fork(join(__dirname, './payer/index.ts'), args, {
-    execArgv: ['-r', 'ts-node/register'],
-  });
+  const payerScript = fork('./lib/e2e-test/payer/index.js', args, {});
   payerScript.on('message', message =>
     console.log(PerformanceTimer.formatResults(JSON.parse(message as any)))
   );
@@ -53,17 +50,13 @@ export const triggerPayments = async (
  * conveniently re-using the same PostgreSQL instance.
  */
 export const startReceiverServer = (): ReceiverServer => {
-  const server = spawn('yarn', ['ts-node', './e2e-test/receiver/server'], {
-    stdio: 'pipe',
-    env: {
-      // eslint-disable-next-line
-      ...process.env,
-    },
+  const server = spawn('yarn', ['node', './lib/e2e-test/receiver/server'], {
+    stdio: 'inherit',
   });
 
   server.on('error', data => console.error(data.toString()));
-  server.stdout.on('data', data => console.log(data.toString()));
-  server.stderr.on('data', data => console.error(data.toString()));
+  server.stdout?.on('data', data => console.log(data.toString()));
+  server.stderr?.on('data', data => console.error(data.toString()));
 
   return {
     server,
@@ -107,6 +100,8 @@ export async function seedTestChannels(
   knexPayer: Knex
 ): Promise<string[]> {
   const channelIds: string[] = [];
+  const payerSeeds = [];
+  const receiverSeeds = [];
   for (let i = 0; i < numOfChannels; i++) {
     const seed = withSupportedState([
       SigningWallet.fromJson({privateKey: payerPrivateKey}),
@@ -116,14 +111,14 @@ export async function seedTestChannels(
       channelNonce: i,
       participants: [payer, receiver],
     });
-    await Channel.bindKnex(knexPayer)
-      .query()
-      .insert([{...seed, signingAddress: payer.signingAddress}]); // Fixture uses alice() default
-    await Channel.bindKnex(knexReceiver)
-      .query()
-      .insert([{...seed, signingAddress: receiver.signingAddress}]);
+    payerSeeds.push({...seed, signingAddress: payer.signingAddress});
+    receiverSeeds.push({...seed, signingAddress: receiver.signingAddress});
     channelIds.push(seed.channelId);
   }
+  await Promise.all([
+    Channel.query(knexPayer).insert(payerSeeds),
+    Channel.query(knexReceiver).insert(receiverSeeds),
+  ]);
   return channelIds;
 }
 

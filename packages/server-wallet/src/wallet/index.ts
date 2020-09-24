@@ -39,16 +39,17 @@ import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {OnchainServiceInterface} from '../onchain-service';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
 import {OnchainService} from '../mock-chain-service';
+import {WorkerManager} from '../utilities/workers/manager';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
-type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+export type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
+export type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
@@ -82,15 +83,18 @@ export type WalletInterface = {
 };
 
 export class Wallet implements WalletInterface {
+  manager: WorkerManager;
+
   store: Store;
-
-  constructor(readonly walletConfig: ServerWalletConfig) {
+  readonly walletConfig: ServerWalletConfig;
+  constructor(walletConfig?: ServerWalletConfig) {
+    this.walletConfig = walletConfig || defaultConfig;
+    this.manager = new WorkerManager(this.walletConfig);
     this.store = new Store(
-      Knex(extractDBConfigFromServerWalletConfig(walletConfig)),
-      walletConfig.timingMetrics,
-      walletConfig.skipEvmValidation
+      Knex(extractDBConfigFromServerWalletConfig(this.walletConfig)),
+      this.walletConfig.timingMetrics,
+      this.walletConfig.skipEvmValidation
     );
-
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
@@ -98,6 +102,8 @@ export class Wallet implements WalletInterface {
     this.createChannel = this.createChannel.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
+    this.updateChannelInternal = this.updateChannelInternal.bind(this);
+    this.pushMessageInternal = this.pushMessageInternal.bind(this);
     this.closeChannel = this.closeChannel.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.getState = this.getState.bind(this);
@@ -105,11 +111,11 @@ export class Wallet implements WalletInterface {
     this.takeActions = this.takeActions.bind(this);
 
     // set up timing metrics
-    if (walletConfig.timingMetrics) {
-      if (!walletConfig.metricsOutputFile) {
+    if (this.walletConfig.timingMetrics) {
+      if (!this.walletConfig.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(walletConfig.metricsOutputFile);
+      setupMetrics(this.walletConfig.metricsOutputFile);
     }
   }
 
@@ -118,6 +124,7 @@ export class Wallet implements WalletInterface {
   }
 
   public async destroy(): Promise<void> {
+    await this.manager.destroy();
     await this.store.destroy();
   }
 
@@ -251,7 +258,20 @@ export class Wallet implements WalletInterface {
     return {outbox: outbox.concat(nextOutbox), channelResult: nextChannelResult};
   }
 
-  async updateChannel({channelId, allocations, appData}: UpdateChannelParams): SingleChannelResult {
+  async updateChannel(args: UpdateChannelParams): SingleChannelResult {
+    if (this.walletConfig.workerThreadAmount > 0) {
+      return this.manager.updateChannel(args);
+    } else {
+      return this.updateChannelInternal(args);
+    }
+  }
+
+  // The internal implementation of updateChannel responsible for actually updating the channel
+  async updateChannelInternal({
+    channelId,
+    allocations,
+    appData,
+  }: UpdateChannelParams): SingleChannelResult {
     const timer = timerFactory(this.walletConfig.timingMetrics, `updateChannel ${channelId}`);
     const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
       throw new UpdateChannel.UpdateChannelError(
@@ -321,6 +341,15 @@ export class Wallet implements WalletInterface {
   }
 
   async pushMessage(rawPayload: unknown): MultipleChannelResult {
+    if (this.walletConfig.workerThreadAmount > 0) {
+      return this.manager.pushMessage(rawPayload);
+    } else {
+      return this.pushMessageInternal(rawPayload);
+    }
+  }
+
+  // The internal implementation of pushMessage responsible for actually pushing the message into the wallet
+  async pushMessageInternal(rawPayload: unknown): MultipleChannelResult {
     const store = this.store;
 
     const wirePayload = validatePayload(rawPayload);

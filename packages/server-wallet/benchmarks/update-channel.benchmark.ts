@@ -16,9 +16,9 @@ import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/confi
 const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
 const NUM_UPDATES = defaultConfig.timingMetrics ? 10 : 100;
-const iter = _.range(NUM_UPDATES);
 
-async function setup(): Promise<Channel[]> {
+async function setup(n = NUM_UPDATES): Promise<Channel[]> {
+  const iter = _.range(n);
   await seedAlicesSigningWallet(knex);
 
   const channels = [];
@@ -35,16 +35,29 @@ async function setup(): Promise<Channel[]> {
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();
-
-  let channels = await setup();
-
   const wallet = new Wallet(defaultConfig);
+
+  // Warm up each worker thread.
+  // eslint-disable-next-line no-process-env
+  let channels = await setup(Number(process.env.AMOUNT_OF_WORKER_THREADS ?? 0));
+
+  await Promise.all(
+    channels.map(async channel =>
+      wallet.updateChannel({
+        channelId: channel.channelId,
+        allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
+        appData: '0x',
+      })
+    )
+  );
+
+  channels = await setup();
 
   let key: string;
   console.time((key = `serial x ${NUM_UPDATES}`));
-  for (const i of iter) {
+  for (const channel of channels) {
     await wallet.updateChannel({
-      channelId: channels[i].channelId,
+      channelId: channel.channelId,
       allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
       appData: '0x',
     });
@@ -67,7 +80,7 @@ async function benchmark(): Promise<void> {
   console.timeEnd(key);
 
   await adminKnex.destroy();
-  await knex.destroy();
+  await wallet.destroy();
 }
 
 benchmark();

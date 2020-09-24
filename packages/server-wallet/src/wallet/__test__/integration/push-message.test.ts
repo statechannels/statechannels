@@ -19,6 +19,7 @@ import {channel, withSupportedState} from '../../../models/__test__/fixtures/cha
 import {stateVars} from '../fixtures/state-vars';
 import {defaultConfig} from '../../../config';
 
+jest.setTimeout(20_000);
 const wallet = new Wallet(defaultConfig);
 
 function createChannelFromState(signedState: SignedState): CreateChannelWire {
@@ -33,8 +34,7 @@ function createChannelFromState(signedState: SignedState): CreateChannelWire {
 }
 
 afterAll(async () => {
-  // tear down Wallet's db connection
-  await wallet.knex.destroy();
+  await wallet.destroy();
 });
 beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 

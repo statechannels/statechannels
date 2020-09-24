@@ -24,6 +24,7 @@ export interface ServerWalletConfig {
   skipEvmValidation: boolean;
   timingMetrics: boolean;
   metricsOutputFile?: string;
+  workerThreadAmount: number;
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -50,6 +51,7 @@ export const defaultConfig: ServerWalletConfig = {
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
   timingMetrics: process.env.TIMING_METRICS === 'ON',
   metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
+  workerThreadAmount: Number.parseInt(process.env.AMOUNT_OF_WORKER_THREADS || '0', 10),
 };
 
 export function extractDBConfigFromServerWalletConfig(

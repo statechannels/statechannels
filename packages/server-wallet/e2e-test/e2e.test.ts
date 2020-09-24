@@ -20,7 +20,7 @@ import {
   knexPayer,
 } from './e2e-utils';
 
-jest.setTimeout(20_000); // Starting up Receiver's server can take ~5 seconds
+jest.setTimeout(100_000); // Starting up Receiver's server can take ~5 seconds
 
 let ChannelPayer: typeof Channel;
 let ChannelReceiver: typeof Channel;
@@ -31,12 +31,14 @@ let receiverServer: ReceiverServer;
 
 beforeAll(async () => {
   receiverServer = startReceiverServer();
+
   await waitForServerToStart(receiverServer);
 
   await knexPayer.migrate.latest({directory: './src/db/migrations'});
   await knexReceiver.migrate.latest({directory: './src/db/migrations'});
 
   [ChannelPayer, ChannelReceiver] = [knexPayer, knexReceiver].map(knex => Channel.bindKnex(knex));
+
   [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
 });
 
