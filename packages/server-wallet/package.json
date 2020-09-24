@@ -1,13 +1,13 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "0.3.7",
+  "version": "0.3.8-alpha.0",
   "author": "",
   "dependencies": {
     "@bitauth/libauth": "1.17.1",
-    "@statechannels/client-api-schema": "^0.3.7",
+    "@statechannels/client-api-schema": "^0.3.8-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.7",
-    "@statechannels/wallet-core": "^0.3.7",
+    "@statechannels/wallet-core": "^0.3.8-alpha.0",
     "ethers": "5.0.12",
     "fp-ts": "2.7.0",
     "knex": "0.20.9",

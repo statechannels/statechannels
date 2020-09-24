@@ -1,15 +1,15 @@
 {
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
-  "version": "0.3.7",
+  "version": "0.3.8-alpha.0",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
     "@docusaurus/core": "2.0.0-alpha.59",
     "@docusaurus/preset-classic": "2.0.0-alpha.59",
     "@microsoft/api-documenter": "7.8.21",
-    "@statechannels/channel-client": "^0.3.7",
-    "@statechannels/iframe-channel-provider": "^0.3.7",
+    "@statechannels/channel-client": "^0.3.8-alpha.0",
+    "@statechannels/iframe-channel-provider": "^0.3.8-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.7",
     "clsx": "1.1.1",
     "highlight.js": "10.0.2",
