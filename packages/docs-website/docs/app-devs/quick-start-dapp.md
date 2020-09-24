@@ -84,7 +84,7 @@ Next, run
 cd node_modules/@statechannels/xstate-wallet && HUB_DESTINATION='0x0' yarn start
 ```
 
-This will spin up a (i) local instance of ganache, and (ii) a webpack dev server for the wallet.
+This will spin up a (i) (optionally) a local instance of [ganache](https://www.trufflesuite.com/docs/ganache/overview) which the [Nitro contracts](contract-api/contract-inheritance) are deployed to, and (ii) a webpack dev server for the wallet.
 
 You can then use
 
@@ -97,14 +97,15 @@ instead of the above.
 To configure these servers, you can set the following environment variables:
 
 ```
-# For multiple
 NODE_ENV = 'development'
 PROJECT_ROOT='.'
 LOG_DESTINATION = '${PROJECT_ROOT}/logs/'
 LOG_LEVEL= 'trace'
 
-# For ganache
 CHAIN_NETWORK_ID = '9001'
+# ^^^ if anything other than mainnet (1) or a public testnet (3,4,52)
+# enables ganache and contract deployment
+# and the following options apply:
 GANACHE_LOG_DESTINATION = '${PROJECT_ROOT}/logs/ganache.log'
 GANACHE_HOST = '0.0.0.0'
 GANACHE_PORT = '8545'
