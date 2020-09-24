@@ -1,7 +1,9 @@
 import {createETHDepositTransaction} from '@statechannels/nitro-protocol';
-import {providers, Wallet} from 'ethers';
+import {providers, utils, Wallet} from 'ethers';
 
 import {Address, Bytes32, Uint256} from '../type-aliases';
+
+const GAS_PRICE = utils.parseUnits('15', 'gwei');
 
 export type SetFundingArg = {
   channelId: Bytes32;
@@ -16,8 +18,6 @@ type FundChannelArg = {
   amount: Uint256;
 };
 
-type SubmissionStatus = 'Success' | 'Fail';
-
 export interface ChainEventListener {
   setFunding(arg: SetFundingArg): void;
 }
@@ -28,7 +28,7 @@ interface ChainEventEmitterInterface {
 }
 
 interface ChainMofifierInterface {
-  fundChannel(arg: FundChannelArg): SubmissionStatus;
+  fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
 }
 
 //todo: implement ChainEventEmitter
@@ -40,10 +40,16 @@ export class ChainService implements ChainMofifierInterface {
 
   // todo: only works with eth-asset-holder
   // todo: should this function be async?
-  fundChannel(arg: FundChannelArg): SubmissionStatus {
-    const transaction = createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount);
+  fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     //todo: add retries
-    this.ethWallet.sendTransaction(transaction);
-    return 'Success';
+    const transactionRequest = {
+      ...createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
+      to: arg.assetHolderAddress,
+      value: arg.amount,
+    };
+    return this.ethWallet.sendTransaction({
+      ...transactionRequest,
+      gasPrice: GAS_PRICE,
+    });
   }
 }
