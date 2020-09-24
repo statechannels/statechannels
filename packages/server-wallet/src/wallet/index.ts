@@ -124,8 +124,7 @@ export class Wallet implements WalletInterface {
 
   public async destroy(): Promise<void> {
     await this.manager.destroy();
-    await this.store.destroy();
-    await this.knex.destroy();
+    await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
