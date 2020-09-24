@@ -201,10 +201,10 @@ export class Store {
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
-    let data: Payload = await timer('adding hash', async () => ({
+    let data: Payload = {
       signedStates: [signedState],
       objectives: [],
-    }));
+    };
     /** todo:
      * What happens if Bob is adding his signature to prefund0 from Alice?
      * In this case Bob will send an objective to Alice
