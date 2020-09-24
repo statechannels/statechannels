@@ -1,12 +1,12 @@
 import {Wallet, ethers} from 'ethers';
 import {State, simpleEthAllocation, signState, getSignerAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
-import {recoverAddress} from '@statechannels/wasm-utils';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
-import {signState as wasmSignState} from '../signatures';
+import {recoverAddress, signState as wasmSignState} from '../signatures';
 import {logger} from '../../logger';
 import {addHash} from '../../state-utils';
+import {toNitroState} from '@statechannels/wallet-core';
 
 it('sign vs wasmSign', async () => {
   _.range(5).map(async channelNonce => {
@@ -52,7 +52,7 @@ it('getSignerAddress vs fastRecover', async () => {
     const signedState = await wasmSignState(addHash(state), privateKey);
     try {
       const recovered = getSignerAddress(signedState.state, signedState.signature);
-      const wasmRecovered = recoverAddress(signedState.state, signedState.signature);
+      const wasmRecovered = recoverAddress(signedState.signature, toNitroState(signedState.state));
       expect(recovered).toEqual(wasmRecovered);
     } catch (error) {
       logger.info({error, state, privateKey});
