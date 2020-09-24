@@ -22,7 +22,6 @@ import {
   Payload,
   isOpenChannel,
   convertToParticipant,
-  hashWireState,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -395,9 +394,7 @@ export class Store {
       }
     }
 
-    const stateHash = hashWireState(wireSignedState);
-
-    const sswh: SignedStateWithHash = {
+    const sswh: SignedStateWithHash = addHash({
       chainId: wireSignedState.chainId,
       channelNonce: wireSignedState.channelNonce,
       appDefinition: wireSignedState.appDefinition,
@@ -408,8 +405,7 @@ export class Store {
       outcome: deserializeOutcome(wireSignedState.outcome),
       participants: wireSignedState.participants.map(convertToInternalParticipant),
       signatures,
-      stateHash,
-    };
+    });
     channel.vars = await timer('adding state', async () => addState(channel.vars, sswh));
 
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);

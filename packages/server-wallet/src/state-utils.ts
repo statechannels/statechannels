@@ -3,9 +3,10 @@ import {
   Hashed,
   SignedStateVarsWithHash,
   State,
-  hashState,
   calculateChannelId,
+  toNitroState,
 } from '@statechannels/wallet-core';
+import {hashState} from '@statechannels/wasm-utils';
 import _ from 'lodash';
 
 import {Bytes32} from './type-aliases';
@@ -20,7 +21,7 @@ export const dropNonConstants = (s: State): ChannelConstants =>
 
 export const addHash = <T extends State = State>(s: T): T & Hashed => ({
   ...s,
-  stateHash: recordFunctionMetrics(hashState(s)),
+  stateHash: recordFunctionMetrics(hashState(toNitroState(s))),
 });
 export const addHashes = (c: Channel): Channel =>
   _.assign(c, {vars: c.vars.map(v => addHash({...c.channelConstants, ...v})) as any});
