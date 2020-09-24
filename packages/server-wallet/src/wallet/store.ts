@@ -12,8 +12,6 @@ import {
   makeDestination,
   serializeMessage,
   StateWithHash,
-  isCreateChannel,
-  hashState,
   deserializeObjective,
   hashWireState,
   wireStateToNitroState,
@@ -22,6 +20,9 @@ import {
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
+  convertToParticipant,
+  Payload,
+  isOpenChannel,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -36,6 +37,7 @@ import {
   RequiredColumns,
   ChannelError,
   CHANNEL_COLUMNS,
+  isChannelMissingError,
 } from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
@@ -199,7 +201,30 @@ export class Store {
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
-    const data = await timer('adding hash', async () => ({signedStates: [signedState]}));
+    let data: Payload = await timer('adding hash', async () => ({
+      signedStates: [signedState],
+      objectives: [],
+    }));
+    /** todo:
+     * What happens if Bob is adding his signature to prefund0 from Alice?
+     * In this case Bob will send an objective to Alice
+     */
+
+    if (signedState.turnNum === 0) {
+      data = {
+        ...data,
+        objectives: [
+          {
+            participants: channel.participants,
+            type: 'OpenChannel',
+            data: {
+              targetChannelId: channel.channelId,
+              fundingStrategy: 'Direct',
+            },
+          },
+        ],
+      };
+    }
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -281,16 +306,14 @@ export class Store {
 
   async pushMessage(message: WirePayload): Promise<Bytes32[]> {
     return this.knex.transaction(async tx => {
-      const objectives = message.objectives?.map(deserializeObjective) || [];
-
-      for (const o of objectives) {
-        await this.addObjective(o, tx);
-      }
-
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
-
       for (const ss of message.signedStates || []) {
         await this.addSignedState(ss.channelId, undefined, ss, tx);
+      }
+
+      const objectives = message.objectives?.map(deserializeObjective) || [];
+      for (const o of objectives) {
+        await this.addObjective(o, tx);
       }
 
       function isDefined(s: string | undefined): s is string {
@@ -298,9 +321,7 @@ export class Store {
       }
       const objectiveChannelIds =
         objectives
-          .map(objective =>
-            isCreateChannel(objective) ? calculateChannelId(objective.data.signedState) : undefined
-          )
+          .map(objective => (isOpenChannel(objective) ? objective.data.targetChannelId : undefined))
           .filter(isDefined) || [];
 
       return stateChannelIds.concat(objectiveChannelIds);
@@ -308,39 +329,22 @@ export class Store {
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
-    if (isCreateChannel(objective)) {
+    if (isOpenChannel(objective)) {
       const {
-        data: {signedState, fundingStrategy},
+        data: {targetChannelId: channelId, fundingStrategy},
       } = objective;
-      const channelId = calculateChannelId(signedState);
-      const stateHash = hashState(signedState);
-      const signedStateWithHash = {...signedState, stateHash};
-      const participantSignatures = await recoverParticipantSignatures(
-        signedState.signatures.map(sig => sig.signature),
-        signedState.participants.map(participant => participant.signingAddress),
-        channelId,
-        stateHash
-      );
 
-      if (JSON.stringify(participantSignatures) != JSON.stringify(signedStateWithHash.signatures)) {
-        throw new StoreError(StoreError.reasons.invalidSignature);
+      // fetch the channel to make sure the channel exists
+      const channel = await Channel.forId(channelId, tx);
+      if (!channel) {
+        throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
-      if (await Channel.forId(channelId, tx)) {
-        throw new StoreError(StoreError.reasons.duplicateChannel);
-      }
-
-      const channel = await createChannel(signedState, fundingStrategy, tx);
-      channel.vars = await addState(channel.vars, signedStateWithHash);
-      validateInvariants(channel.vars, channel.myAddress);
-
-      const result = await Channel.query(tx)
+      return await Channel.query(tx)
         .where({channelId: channel.channelId})
-        .patch({vars: channel.vars, fundingStrategy})
+        .patch({fundingStrategy})
         .returning('*')
         .first();
-
-      return result;
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -368,7 +372,13 @@ export class Store {
     );
 
     const channel =
-      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+      maybeChannel ||
+      (await timer('get channel', async () => getChannel(channelId, tx))) ||
+      (await createChannel(
+        {...wireSignedState, participants: wireSignedState.participants.map(convertToParticipant)},
+        'Unknown',
+        tx
+      ));
 
     if (!this.skipEvmValidation && channel.supported) {
       const {supported} = channel;
@@ -500,13 +510,16 @@ async function createChannel(
     .returning('*')
     .first();
 }
-async function getChannel(channelId: string, txOrKnex: TransactionOrKnex): Promise<Channel> {
-  const channel = await Channel.forId(channelId, txOrKnex);
-
-  if (!channel) {
-    throw new StoreError(StoreError.reasons.channelMissing);
+async function getChannel(
+  channelId: string,
+  txOrKnex: TransactionOrKnex
+): Promise<Channel | undefined> {
+  try {
+    return await Channel.forId(channelId, txOrKnex);
+  } catch (err) {
+    if (!isChannelMissingError) throw err;
+    return undefined;
   }
-  return channel;
 }
 
 async function getSigningWallet(

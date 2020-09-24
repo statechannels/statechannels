@@ -259,6 +259,9 @@ export type ErrorCodes = {
         NotYourTurn: 403;
         ChannelClosed: 404;
     };
+    SyncChannel: {
+        ChannelNotFound: 1400;
+    };
     PushMessage: {
         WrongParticipant: 900;
     };
@@ -283,7 +286,7 @@ export type ErrorCodes = {
 export type ExternalDestination = string;
 
 // @public (undocumented)
-export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual';
+export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded' | 'Unknown';
 
 // @public (undocumented)
 export interface Funds {
@@ -542,10 +545,31 @@ export type StateChannelsNotificationType = {
 };
 
 // @public (undocumented)
-export type StateChannelsRequest = CreateChannelRequest | JoinChannelRequest | UpdateChannelRequest | GetWalletInformationRequest | EnableEthereumRequest | GetStateRequest | PushMessageRequest | ChallengeChannelRequest | GetBudgetRequest | ApproveBudgetAndFundRequest | CloseChannelRequest | CloseAndWithdrawRequest | GetChannelsRequest;
+export type StateChannelsRequest = CreateChannelRequest | SyncChannelRequest | JoinChannelRequest | UpdateChannelRequest | GetWalletInformationRequest | EnableEthereumRequest | GetStateRequest | PushMessageRequest | ChallengeChannelRequest | GetBudgetRequest | ApproveBudgetAndFundRequest | CloseChannelRequest | CloseAndWithdrawRequest | GetChannelsRequest;
 
 // @public (undocumented)
-export type StateChannelsResponse = CreateChannelResponse | JoinChannelResponse | UpdateChannelResponse | GetWalletInformationResponse | EnableEthereumResponse | GetStateResponse | PushMessageResponse | ChallengeChannelResponse | GetBudgetResponse | CloseChannelResponse | ApproveBudgetAndFundResponse | CloseAndWithdrawResponse | GetChannelsResponse;
+export type StateChannelsResponse = CreateChannelResponse | SyncChannelResponse | JoinChannelResponse | UpdateChannelResponse | GetWalletInformationResponse | EnableEthereumResponse | GetStateResponse | PushMessageResponse | ChallengeChannelResponse | GetBudgetResponse | CloseChannelResponse | ApproveBudgetAndFundResponse | CloseAndWithdrawResponse | GetChannelsResponse;
+
+// Warning: (ae-forgotten-export) The symbol "ChannelNotFound" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type SyncChannelError = ChannelNotFound_6;
+
+// @public (undocumented)
+export interface SyncChannelParams {
+    // (undocumented)
+    channelId: ChannelId;
+}
+
+// Warning: (ae-incompatible-release-tags) The symbol "SyncChannelRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
+//
+// @public (undocumented)
+export type SyncChannelRequest = JsonRpcRequest<'SyncChannel', SyncChannelParams>;
+
+// Warning: (ae-incompatible-release-tags) The symbol "SyncChannelResponse" is marked as @public, but its signature references "JsonRpcResponse" which is marked as @beta
+//
+// @public (undocumented)
+export type SyncChannelResponse = JsonRpcResponse<{}>;
 
 // @public (undocumented)
 export interface TokenBudget {

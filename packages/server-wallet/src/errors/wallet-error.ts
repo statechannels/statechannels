@@ -12,7 +12,10 @@ export abstract class WalletError extends Error {
 
   abstract readonly type: Values<typeof WalletError.errors>;
   static readonly reasons: {[key: string]: string};
-  constructor(reason: Values<typeof WalletError.reasons>, public readonly data: any = undefined) {
+  constructor(
+    public readonly reason: Values<typeof WalletError.reasons>,
+    public readonly data: any = undefined
+  ) {
     super(reason);
   }
 }

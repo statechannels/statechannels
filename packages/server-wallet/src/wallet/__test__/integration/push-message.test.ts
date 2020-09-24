@@ -1,11 +1,5 @@
-import {
-  calculateChannelId,
-  simpleEthAllocation,
-  SignedState,
-  serializeState,
-} from '@statechannels/wallet-core';
+import {calculateChannelId, simpleEthAllocation, serializeState} from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {CreateChannel as CreateChannelWire} from '@statechannels/wire-format';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -21,17 +15,6 @@ import {defaultConfig} from '../../../config';
 
 jest.setTimeout(20_000);
 const wallet = new Wallet(defaultConfig);
-
-function createChannelFromState(signedState: SignedState): CreateChannelWire {
-  return {
-    participants: [],
-    type: 'CreateChannel',
-    data: {
-      signedState: serializeState(signedState),
-      fundingStrategy: 'Direct',
-    },
-  };
-}
 
 afterAll(async () => {
   await wallet.destroy();
@@ -55,10 +38,8 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy([alice()])({turnNum: five}),
     stateSignedBy([alice(), bob()])({turnNum: four}),
   ];
-  const createChannel = createChannelFromState(signedStates[0]);
   await wallet.pushMessage({
-    objectives: [createChannel],
-    signedStates: [serializeState(signedStates[1])],
+    signedStates: signedStates.map(s => serializeState(s)),
   });
 
   const channelsAfter = await Channel.query(wallet.knex).select();
@@ -83,14 +64,9 @@ describe('channel results', () => {
     const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
-    const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
-    const createChannel = createChannelFromState(signedStates[0]);
-    await wallet.pushMessage({objectives: [createChannel]});
+    const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
 
-    await expectResults(
-      wallet.pushMessage({signedStates: signedStates.map(ss => serializeState(ss))}),
-      [{turnNum: zero, status: 'proposed'}]
-    );
+    await expectResults(wallet.pushMessage({signedStates}), [{turnNum: zero, status: 'proposed'}]);
   });
 
   it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
@@ -126,9 +102,10 @@ describe('channel results', () => {
     const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
 
-    const signedStates = [stateSignedBy([alice(), bob()])({turnNum: 9, isFinal: true})];
-    const createChannel = createChannelFromState(signedStates[0]);
-    const result = wallet.pushMessage({objectives: [createChannel]});
+    const signedStates = [
+      serializeState(stateSignedBy([alice(), bob()])({turnNum: 9, isFinal: true})),
+    ];
+    const result = wallet.pushMessage({signedStates});
 
     return expectResults(result, [{turnNum: 9, status: 'closed'}]);
   });
@@ -142,8 +119,7 @@ describe('channel results', () => {
       stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0x0f00'}),
     ];
 
-    const createChannelObjectives = signedStates.map(createChannelFromState);
-    const p = wallet.pushMessage({objectives: createChannelObjectives});
+    const p = wallet.pushMessage({signedStates: signedStates.map(s => serializeState(s))});
 
     await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
@@ -165,9 +141,8 @@ it("Doesn't store stale states", async () => {
   const channelsBefore = await Channel.query(wallet.knex).select();
   expect(channelsBefore).toHaveLength(0);
 
-  const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
-  const createChannel = createChannelFromState(signedStates[0]);
-  await wallet.pushMessage({objectives: [createChannel]});
+  const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
+  await wallet.pushMessage({signedStates});
 
   const afterFirst = await Channel.query(wallet.knex).select();
 
@@ -190,9 +165,8 @@ it("Doesn't store stale states", async () => {
 it("doesn't store states for unknown signing addresses", async () => {
   await truncate(wallet.knex, ['signing_wallets']);
 
-  const signedStates = [stateSignedBy([alice(), bob()])({turnNum: five})];
-  const objectives = signedStates.map(createChannelFromState);
-  return expect(wallet.pushMessage({objectives})).rejects.toThrow(Error('Not in channel'));
+  const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
+  return expect(wallet.pushMessage({signedStates})).rejects.toThrow(Error('Not in channel'));
 });
 
 describe('when the application protocol returns an action', () => {
@@ -261,9 +235,8 @@ describe('when there is a request provided', () => {
     // Set up test by adding a single state into the DB via pushMessage call
     const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
-    const signedStates = [stateSignedBy([bob()])({turnNum: zero})];
-    const objectives = signedStates.map(createChannelFromState);
-    await wallet.pushMessage({objectives});
+    const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
+    await wallet.pushMessage({signedStates});
 
     // Get the channelId of that which was added
     const [{channelId}] = await Channel.query(wallet.knex).select();
@@ -275,7 +248,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
+          params: {data: {signedStates}},
         },
       ],
     });
@@ -288,12 +261,10 @@ describe('when there is a request provided', () => {
     const signedStates = [
       stateSignedBy([alice()])({turnNum: five}),
       stateSignedBy([alice(), bob()])({turnNum: four}),
-    ];
+    ].map(s => serializeState(s));
 
-    const createChannel = createChannelFromState(signedStates[0]);
     await wallet.pushMessage({
-      objectives: [createChannel],
-      signedStates: [serializeState(signedStates[1])],
+      signedStates,
     });
 
     // Get the channelId of that which was added
@@ -306,7 +277,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates: signedStates.map(ss => serializeState(ss))}},
+          params: {data: {signedStates}},
         },
       ],
     });
