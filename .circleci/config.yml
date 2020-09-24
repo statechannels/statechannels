@@ -184,7 +184,7 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - run: yarn --frozen-lockfile --cache-folder ~.cache/yarn
-      - run: git diff --exit-code
+      - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation artifacts (e.g. yarn.lock)
       - <<: *save_dep
 
       - persist_to_workspace:
@@ -219,6 +219,7 @@ jobs:
             else
                 yarn build:ci:incremental
             fi
+      - run: git diff --exit-code # Fails the job if you forgot to check in tracked build artifacts (e.g. api reports)
       - upload_logs:
           file: build-stats
       - notify_slack
