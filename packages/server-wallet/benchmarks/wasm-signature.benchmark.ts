@@ -1,10 +1,9 @@
 import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
-import {signState, State, simpleEthAllocation} from '@statechannels/wallet-core';
+import {signState, State, simpleEthAllocation, toNitroState} from '@statechannels/wallet-core';
+import {signState as wasmSignState} from '@statechannels/wasm-utils';
 
 import {participant} from '../src/wallet/__test__/fixtures/participants';
-import {signState as wasmSignState} from '../src/utilities/signatures';
-import {addHash} from '../src/state-utils';
 
 async function benchmark(): Promise<void> {
   const wallet = Wallet.createRandom();
@@ -26,9 +25,7 @@ async function benchmark(): Promise<void> {
   console.timeEnd('signState');
 
   console.time('wasmSignState');
-  const stateWithHash = addHash(state);
-  const result = iter.map(async () => wasmSignState(stateWithHash, wallet.privateKey));
-  await Promise.all(result);
+  iter.map(() => wasmSignState(toNitroState(state), wallet.privateKey));
   console.timeEnd('wasmSignState');
 }
 
