@@ -84,17 +84,19 @@ export type WalletInterface = {
 
 export class Wallet implements WalletInterface {
   manager: WorkerManager;
-
+  knex: Knex;
   store: Store;
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
     this.manager = new WorkerManager(this.walletConfig);
+    this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.store = new Store(
-      Knex(extractDBConfigFromServerWalletConfig(this.walletConfig)),
+      this.knex,
       this.walletConfig.timingMetrics,
       this.walletConfig.skipEvmValidation
     );
+
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
@@ -119,13 +121,10 @@ export class Wallet implements WalletInterface {
     }
   }
 
-  public get knex(): Knex {
-    return this.store.knex;
-  }
-
   public async destroy(): Promise<void> {
     await this.manager.destroy();
     await this.store.destroy();
+    await this.knex.destroy();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
