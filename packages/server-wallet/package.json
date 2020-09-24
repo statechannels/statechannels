@@ -96,7 +96,7 @@
     "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
     "test:ci": "yarn test --bail",
     "test:e2e": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
-    "test:stress": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
+    "test:stress": "yarn tsc;NODE_ENV=development npx ts-node ./e2e-test/scripts/stress-test.ts"
   },
   "types": "lib/src/index.d.ts"
 }
