@@ -21,7 +21,12 @@ import {
   SignatureEntry,
   Payload,
   isOpenChannel,
+  convertToParticipant,
+  hashWireState,
 } from '@statechannels/wallet-core';
+import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
+import {State as NitroState} from '@statechannels/nitro-protocol';
+import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
