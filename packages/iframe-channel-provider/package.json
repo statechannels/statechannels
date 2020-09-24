@@ -67,7 +67,7 @@
   "license": "MIT",
   "main": "dist/iframe-channel-provider.js",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && yarn generate-api",
     "build:typescript": "tsc -b .",
     "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"*/**/*.ts\" --cache",

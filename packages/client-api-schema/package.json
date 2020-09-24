@@ -38,7 +38,7 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/client-api-schema",
   "scripts": {
-    "build": "yarn build:generate-schema && yarn build:typescript",
+    "build": "yarn build:generate-schema && yarn build:typescript && yarn generate-api",
     "build:ci": "yarn build",
     "build:generate-schema": "yarn --silent ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
     "build:typescript": "tsc -b",

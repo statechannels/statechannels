@@ -42,7 +42,7 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
-    "build": "yarn build:typescript",
+    "build": "yarn build:typescript && yarn generate-api",
     "build:typescript": "tsc -b .",
     "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
