@@ -41,7 +41,7 @@ export const triggerPayments = async (
   );
 
   return new Promise((resolve, reject) => {
-    payerScript.on('exit', (code, signal) => {
+    payerScript.on('exit', (code, _signal) => {
       if (code === 0) {
         resolve();
       } else {
