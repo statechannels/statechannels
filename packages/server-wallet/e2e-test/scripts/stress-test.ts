@@ -1,11 +1,11 @@
 import autocannon from 'autocannon';
+import yargs from 'yargs';
 
 import {
   waitForServerToStart,
   startReceiverServer,
   knexReceiver,
   killServer,
-  // triggerPayments,
   seedTestChannels,
   getParticipant,
   knexPayer,
@@ -16,10 +16,20 @@ import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {truncate} from '../../src/db-admin/db-admin-connection';
 import {SigningWallet} from '../../src/models/signing-wallet';
 
-(async function(): Promise<void> {
-  const duration = 60;
-  const numChannels = 25;
+const {argv} = yargs
+  .option('duration', {
+    type: 'number',
+    default: 60,
+    description: 'The duration to run the stress test in seconds',
+  })
+  .option('connections', {
+    type: 'number',
+    demandOption: true,
+    default: 25,
+    description: 'The amount of connections (and channels) to use in the stress test.',
+  });
 
+(async function(): Promise<void> {
   const receiverServer = startReceiverServer();
   const payerServer = startPayerServer();
   await waitForServerToStart(receiverServer);
@@ -32,18 +42,20 @@ import {SigningWallet} from '../../src/models/signing-wallet';
 
   // Adds Bob to Receiver's Database
   await SWReceiver.query(knexReceiver).insert(bob());
-
+  const {connections, duration} = argv;
   const channelIds = await seedTestChannels(
     getParticipant('payer', alice().privateKey),
     alice().privateKey,
     getParticipant('receiver', bob().privateKey),
     bob().privateKey,
-    numChannels,
+    connections,
     knexPayer
   );
 
   const urls = channelIds.map(c => `http://localhost:${PAYER_PORT}/makePayment?channelId=${c}`);
-  const results = await autocannon({url: urls as any, connections: numChannels, duration});
+  // TODO: The autocannon types incorrectly type url as string. It actually can be a string or an array of strings
+  const results = await autocannon({url: urls as any, connections, duration});
+
   console.log(results);
   await killServer(receiverServer);
   await killServer(payerServer);
