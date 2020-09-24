@@ -13539,11 +13539,6 @@ exec-sh@^0.3.2:
   resolved "https://registry.npmjs.org/exec-sh/-/exec-sh-0.3.4.tgz#3a018ceb526cc6f6df2bb504b2bfe8e3a4934ec5"
   integrity sha512-sEFIkc61v75sWeOe72qyrqg2Qg0OuLESziUDk/O/z2qgS15y2gWVFrI6f2Qn/qw/0/NCfCEsmNA4zOjkwEZT1A==
 
-exec@^0.2.0:
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/exec/-/exec-0.2.1.tgz#2661f0bfc5532918629117cb9f80c7564af2c51f"
-  integrity sha1-JmHwv8VTKRhikRfLn4DHVkryxR8=
-
 execa@^0.7.0:
   version "0.7.0"
   resolved "https://registry.npmjs.org/execa/-/execa-0.7.0.tgz#944becd34cc41ee32a63a9faf27ad5a65fc59777"
@@ -20410,13 +20405,6 @@ node-source-walk@^4.0.0, node-source-walk@^4.2.0:
   integrity sha512-hPs/QMe6zS94f5+jG3kk9E7TNm4P2SulrKiLWMzKszBfNZvL/V6wseHlTd7IvfW0NZWqPtK3+9yYNr+3USGteA==
   dependencies:
     "@babel/parser" "^7.0.0"
-
-node-wrk@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.npmjs.org/node-wrk/-/node-wrk-0.0.1.tgz#3f17c2e858267ecb75e153d185daa622e74d11d2"
-  integrity sha1-PxfC6Fgmfst14VPRhdqmIudNEdI=
-  dependencies:
-    exec "^0.2.0"
 
 nodeify-ts@1.0.6:
   version "1.0.6"
