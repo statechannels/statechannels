@@ -10,7 +10,10 @@ export default async function setup(): Promise<void> {
     privateKey: defaultConfig.serverPrivateKey,
     amount: utils.parseEther('100').toString(),
   };
-  const ganacheServer = new GanacheServer(8545, 1337, [account]);
+  if (!process.env.GANACHE_PORT) {
+    throw new Error('process.env.GANACHE_PORT must be defined');
+  }
+  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), 1337, [account]);
   await ganacheServer.ready();
 
   const deployedArtifacts = await deploy();
