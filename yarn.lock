@@ -152,6 +152,11 @@
   dependencies:
     "@analytics/cookie-utils" "^0.2.3"
 
+"@assemblyscript/loader@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.npmjs.org/@assemblyscript/loader/-/loader-0.10.1.tgz#70e45678f06c72fa2e350e8553ec4a4d72b92e06"
+  integrity sha512-H71nDOOL8Y7kWRLqf6Sums+01Q5msqBW2KhDUTemh1tvY04eSkSXrK0uj/4mmY0Xr16/3zyZmsrxN7CKuRbNRg==
+
 "@babel/code-frame@7.5.5":
   version "7.5.5"
   resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.5.5.tgz#bc0782f6d69f7b7d49531219699b988f669a8f9d"
@@ -5713,6 +5718,13 @@
   resolved "https://registry.npmjs.org/@types/async-lock/-/async-lock-1.1.1.tgz#81f218213bebcc5f740efe9648272c774a2e4b4b"
   integrity sha512-TU1X8jmAU2BjwKryBFV/GDezz7Ge0xu9ZuYC7dy6wKj4hnL0JcxeseCOr/G2JkGylff6hdUBrR+Ee5ApAQeU5g==
 
+"@types/autocannon@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/@types/autocannon/-/autocannon-4.1.0.tgz#be11908d3455c01a8603f86500090564332c099d"
+  integrity sha512-SrG28f0RENabY2jCrz/xfkKqpaxorBSi8EcVxiFrGtvzlWNqOFAw35ASqEclLqkQXwyldmJLXqxebeFa1479vA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/babel__core@7.1.7":
   version "7.1.7"
   resolved "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.1.7.tgz#1dacad8840364a57c98d0dd4855c6dd3752c6b89"
@@ -7882,6 +7894,31 @@ autocannon@^4.0.0:
     retimer "^2.0.0"
     timestring "^6.0.0"
 
+autocannon@^6.4.0:
+  version "6.4.0"
+  resolved "https://registry.npmjs.org/autocannon/-/autocannon-6.4.0.tgz#a3691befb4fe10cc3e881d234ffd568f57407350"
+  integrity sha512-kxwJWc0/HrvXWMRjFu/lYsp0PJRcKycWS8myWgqZPTKYkkYUeEfULBfjH2Pe1P+GVqu7AV6tkkpiTRUG31Q5zw==
+  dependencies:
+    chalk "^4.1.0"
+    cli-table3 "^0.6.0"
+    clone "^2.1.2"
+    color-support "^1.1.1"
+    cross-argv "^1.0.0"
+    form-data "^3.0.0"
+    has-async-hooks "^1.0.0"
+    hdr-histogram-js "^2.0.1"
+    hdr-histogram-percentiles-obj "^3.0.0"
+    http-parser-js "^0.5.2"
+    hyperid "^2.0.3"
+    manage-path "^2.0.0"
+    minimist "^1.2.0"
+    on-net-listen "^1.1.1"
+    pretty-bytes "^5.4.1"
+    progress "^2.0.3"
+    reinterval "^1.1.0"
+    retimer "^2.0.0"
+    timestring "^6.0.0"
+
 autoprefixer@^9.6.1, autoprefixer@^9.7.2:
   version "9.8.6"
   resolved "https://registry.npmjs.org/autoprefixer/-/autoprefixer-9.8.6.tgz#3b73594ca1bf9266320c5acf1588d74dea74210f"
@@ -9755,7 +9792,7 @@ cli-table3@0.5.1, cli-table3@^0.5.1:
   optionalDependencies:
     colors "^1.1.2"
 
-cli-table3@0.6.0:
+cli-table3@0.6.0, cli-table3@^0.6.0:
   version "0.6.0"
   resolved "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.0.tgz#b7b1bc65ca8e7b5cef9124e13dc2b21e2ce4faee"
   integrity sha512-gnB85c3MGC7Nm9I/FkiasNBOKjOiO1RNuXXarQms37q4QMpWdlbBgD/VnOStA2faG1dpXMv31RFApjX1/QdgWQ==
@@ -13502,6 +13539,11 @@ exec-sh@^0.3.2:
   resolved "https://registry.npmjs.org/exec-sh/-/exec-sh-0.3.4.tgz#3a018ceb526cc6f6df2bb504b2bfe8e3a4934ec5"
   integrity sha512-sEFIkc61v75sWeOe72qyrqg2Qg0OuLESziUDk/O/z2qgS15y2gWVFrI6f2Qn/qw/0/NCfCEsmNA4zOjkwEZT1A==
 
+exec@^0.2.0:
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/exec/-/exec-0.2.1.tgz#2661f0bfc5532918629117cb9f80c7564af2c51f"
+  integrity sha1-JmHwv8VTKRhikRfLn4DHVkryxR8=
+
 execa@^0.7.0:
   version "0.7.0"
   resolved "https://registry.npmjs.org/execa/-/execa-0.7.0.tgz#944becd34cc41ee32a63a9faf27ad5a65fc59777"
@@ -15525,12 +15567,26 @@ hdr-histogram-js@^1.0.0, hdr-histogram-js@^1.1.4:
     base64-js "^1.2.0"
     pako "^1.0.3"
 
+hdr-histogram-js@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/hdr-histogram-js/-/hdr-histogram-js-2.0.1.tgz#ecb1ff2bcb6181c3e93ff4af9472c28c7e97284e"
+  integrity sha512-uPZxl1dAFnjUFHWLZmt93vUUvtHeaBay9nVNHu38SdOjMSF/4KqJUqa1Seuj08ptU1rEb6AHvB41X8n/zFZ74Q==
+  dependencies:
+    "@assemblyscript/loader" "^0.10.1"
+    base64-js "^1.2.0"
+    pako "^1.0.3"
+
 hdr-histogram-percentiles-obj@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/hdr-histogram-percentiles-obj/-/hdr-histogram-percentiles-obj-2.0.1.tgz#7a4d52fa02087118c66469e6b66b74f9fbb44d82"
   integrity sha512-QBvbTxPlGwHj36IRF16XLoYEbUv5YEyO385kiS0IS3831fcSTNXTR785VtFFZ2ahY733z0ky8Jv4d6In+Ss+wQ==
   dependencies:
     hdr-histogram-js "^1.0.0"
+
+hdr-histogram-percentiles-obj@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/hdr-histogram-percentiles-obj/-/hdr-histogram-percentiles-obj-3.0.0.tgz#9409f4de0c2dda78e61de2d9d78b1e9f3cba283c"
+  integrity sha512-7kIufnBqdsBGcSZLPJwqHT3yhk1QTsSlFsVD3kx5ixH/AlgBs9yM1q6DPhXZ8f8gtdqgh7N7/5btRLpQsS2gHw==
 
 he@1.1.1:
   version "1.1.1"
@@ -20355,6 +20411,13 @@ node-source-walk@^4.0.0, node-source-walk@^4.2.0:
   dependencies:
     "@babel/parser" "^7.0.0"
 
+node-wrk@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/node-wrk/-/node-wrk-0.0.1.tgz#3f17c2e858267ecb75e153d185daa622e74d11d2"
+  integrity sha1-PxfC6Fgmfst14VPRhdqmIudNEdI=
+  dependencies:
+    exec "^0.2.0"
+
 nodeify-ts@1.0.6:
   version "1.0.6"
   resolved "https://registry.npmjs.org/nodeify-ts/-/nodeify-ts-1.0.6.tgz#ceef172c4fad1a45a1ae60a31c7e295150b5e221"
@@ -22686,6 +22749,11 @@ pretty-bytes@^5.3.0:
   version "5.3.0"
   resolved "https://registry.npmjs.org/pretty-bytes/-/pretty-bytes-5.3.0.tgz#f2849e27db79fb4d6cfe24764fc4134f165989f2"
   integrity sha512-hjGrh+P926p4R4WbaB6OckyRtO0F0/lQBiT+0gnxjV+5kjPBrfVBFCsCLbMqVQeydvIoouYTCmmEURiH3R1Bdg==
+
+pretty-bytes@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.npmjs.org/pretty-bytes/-/pretty-bytes-5.4.1.tgz#cd89f79bbcef21e3d21eb0da68ffe93f803e884b"
+  integrity sha512-s1Iam6Gwz3JI5Hweaz4GoCD1WUNUIyzePFy5+Js2hjwGVt2Z79wNN+ZKOZ2vB6C+Xs6njyB84Z1IthQg8d9LxA==
 
 pretty-error@^2.1.1:
   version "2.1.1"
@@ -29634,6 +29702,11 @@ write@1.0.3:
   integrity sha512-/lg70HAjtkUgWPVZhZcm+T4hkL8Zbtp1nFNOn3lRrxnlv50SRBv7cR7RqR+GMsd3hUXy9hWBo4CHTbFTcOYwig==
   dependencies:
     mkdirp "^0.5.1"
+
+wrk@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/wrk/-/wrk-1.2.1.tgz#64c1a4a42a301963a6a84deeaba005233369a42a"
+  integrity sha512-uJ93Je3il1dY9rBP05OHr91lwdHd5oNoX82oyHhuAfe69mdbEb0fxeufbaLChA9vBfDNj581OrbH/CbaM0az1g==
 
 ws@7.2.3:
   version "7.2.3"
