@@ -102,7 +102,8 @@ PROJECT_ROOT='.'
 LOG_DESTINATION = '${PROJECT_ROOT}/logs/'
 LOG_LEVEL= 'trace'
 
-CHAIN_NETWORK_ID = '9001'
+TARGET_NETWORK = 'development' | 'goerli' | 'ropsten'
+CHAIN_NETWORK_ID = '9001' | '5' | '3'
 # ^^^ if anything other than mainnet (1) or a public testnet (3,4,5,42)
 # enables ganache and contract deployment
 # and the following options apply:
