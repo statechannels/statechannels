@@ -103,7 +103,7 @@ LOG_DESTINATION = '${PROJECT_ROOT}/logs/'
 LOG_LEVEL= 'trace'
 
 CHAIN_NETWORK_ID = '9001'
-# ^^^ if anything other than mainnet (1) or a public testnet (3,4,52)
+# ^^^ if anything other than mainnet (1) or a public testnet (3,4,5,42)
 # enables ganache and contract deployment
 # and the following options apply:
 GANACHE_LOG_DESTINATION = '${PROJECT_ROOT}/logs/ganache.log'
