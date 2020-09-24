@@ -111,6 +111,7 @@ export class Wallet implements WalletInterface {
     this.getState = this.getState.bind(this);
     this.pushMessage = this.pushMessage.bind(this);
     this.takeActions = this.takeActions.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     // set up timing metrics
     if (this.walletConfig.timingMetrics) {
