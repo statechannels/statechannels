@@ -4,7 +4,6 @@
   "version": "0.3.8-alpha.0",
   "author": "",
   "dependencies": {
-    "@bitauth/libauth": "1.17.1",
     "@statechannels/client-api-schema": "^0.3.8-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.7",
     "@statechannels/wallet-core": "^0.3.8-alpha.0",
