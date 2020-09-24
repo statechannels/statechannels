@@ -206,7 +206,7 @@ export class Store {
       type: 'NotifyApp' as 'NotifyApp',
       notice: {
         method: 'MessageQueued' as 'MessageQueued',
-        params: serializeMessage(data, recipient, sender),
+        params: serializeMessage(data, recipient, sender, channelId),
       },
     }));
 
