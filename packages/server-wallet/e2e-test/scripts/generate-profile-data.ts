@@ -38,7 +38,6 @@ const startReceiver = async (
   server.stdout?.on('data', data => console.log(data.toString()));
   server.stderr?.on('data', data => {
     console.error(data.toString());
-    process.exit(1);
   });
 
   return {
