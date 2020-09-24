@@ -84,7 +84,7 @@ Next, run
 cd node_modules/@statechannels/xstate-wallet && HUB_DESTINATION='0x0' yarn start
 ```
 
-This will spin up a (i) (optionally) a local instance of [ganache](https://www.trufflesuite.com/docs/ganache/overview) which the [Nitro contracts](contract-api/contract-inheritance) are deployed to, and (ii) a webpack dev server for the wallet.
+This will spin up (i) (optionally) a local instance of [ganache](https://www.trufflesuite.com/docs/ganache/overview) which the [Nitro contracts](contract-api/contract-inheritance) are deployed to, and (ii) a webpack dev server for the wallet.
 
 You can then use
 
