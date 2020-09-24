@@ -3,11 +3,11 @@ import pino from 'express-pino-logger';
 
 import {logger} from '../logger';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {RECEIVER_PORT} from '../e2e-utils';
 
 import PayerClient from './client';
-import {PAYER_PORT} from './server';
 
-const client = new PayerClient(alice().privateKey, `http://127.0.0.1:${PAYER_PORT}`);
+const client = new PayerClient(alice().privateKey, `http://127.0.0.1:${RECEIVER_PORT}`);
 
 const app = express();
 

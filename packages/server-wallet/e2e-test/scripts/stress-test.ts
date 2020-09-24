@@ -10,11 +10,11 @@ import {
   getParticipant,
   knexPayer,
   startPayerServer,
+  PAYER_PORT,
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {truncate} from '../../src/db-admin/db-admin-connection';
 import {SigningWallet} from '../../src/models/signing-wallet';
-import {PAYER_PORT} from '../payer/server';
 
 (async function(): Promise<void> {
   const duration = 60;

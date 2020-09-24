@@ -1,5 +1,7 @@
 import {configureEnvVariables} from '@statechannels/devtools';
-export const PAYER_PORT = 65534;
+
+import {PAYER_PORT} from '../e2e-utils';
+
 process.on('SIGINT', () => {
   server.close();
   process.exit(0);

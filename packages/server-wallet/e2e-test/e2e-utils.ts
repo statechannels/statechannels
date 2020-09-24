@@ -21,8 +21,6 @@ export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName
 export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
 
 import {PerformanceTimer} from './payer/timers';
-import {RECEIVER_PORT} from './receiver/server';
-import {PAYER_PORT} from './payer/server';
 
 export type E2EServer = {
   url: string;
@@ -53,7 +51,8 @@ export const triggerPayments = async (
     payerScript.on('error', reject);
   });
 };
-
+export const PAYER_PORT = 65534;
+export const RECEIVER_PORT = 65535;
 /**
  * Starts the Receiver Express server in a separate process. Needs to be
  * a separate process because it relies on process.env variables which

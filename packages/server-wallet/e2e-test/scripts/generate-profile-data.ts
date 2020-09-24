@@ -10,12 +10,12 @@ import {
   seedTestChannels,
   getParticipant,
   knexPayer,
+  RECEIVER_PORT,
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
 import {truncate} from '../../src/db-admin/db-admin-connection';
 import kill = require('tree-kill');
-import {RECEIVER_PORT} from '../receiver/server';
 
 const startReceiver = async (
   profiling: 'FlameGraph' | 'BubbleProf' | 'Doctor'

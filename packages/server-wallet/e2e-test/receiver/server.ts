@@ -1,6 +1,7 @@
 import {configureEnvVariables} from '@statechannels/devtools';
 
-export const RECEIVER_PORT = 65535;
+import {RECEIVER_PORT} from '../e2e-utils';
+
 process.on('SIGINT', () => {
   server.close();
   process.exit(0);
