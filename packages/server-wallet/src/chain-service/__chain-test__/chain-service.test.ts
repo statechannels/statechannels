@@ -62,6 +62,7 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
+    await new Promise(resolve => setTimeout(resolve, 4_000));
     expect(mock).toHaveBeenCalled();
   });
 });
