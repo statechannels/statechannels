@@ -81,7 +81,7 @@ restore_built_artifacts: &restore_built_artifacts
 
 commands:
   log_stats:
-    description: 'Log stats '
+    description: "Log stats "
     parameters:
       file:
         type: string
@@ -92,7 +92,7 @@ commands:
           background: true
 
   upload_logs:
-    description: 'Upload logs '
+    description: "Upload logs "
     parameters:
       file:
         type: string
@@ -103,7 +103,7 @@ commands:
           destination: << parameters.file >>
 
   upload_gas_report:
-    description: 'Upload gas report '
+    description: "Upload gas report "
     parameters:
       package:
         type: string
@@ -116,35 +116,35 @@ commands:
           destination: << parameters.package >>-gas.md
 
   upload_artifacts:
-    description: 'Upload generic artifacts'
+    description: "Upload generic artifacts"
     steps:
       - store_artifacts:
           path: /home/circleci/project/artifacts
 
   notify_slack:
-    description: 'Notify slack '
+    description: "Notify slack "
     steps:
       - slack/status:
-          failure_message: 'A $CIRCLE_JOB job has failed on $CIRCLE_BRANCH!'
+          failure_message: "A $CIRCLE_JOB job has failed on $CIRCLE_BRANCH!"
           fail_only: true
-          mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
-          only_for_branches: 'master,deploy'
+          mentions: "SRHGGRGS0" # Group ID for ActiveDevs
+          only_for_branches: "master,deploy"
 
   install_xvfb:
-    description: 'Install display server' # See https://crbug.com/795759
+    description: "Install display server" # See https://crbug.com/795759
     steps:
       - run:
           command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
 
   run_xvfb:
-    description: 'Run display server'
+    description: "Run display server"
     steps:
       - run:
           command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
           background: true
 
   build_push_release:
-    description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
+    description: "Build a docker image, push it to the heroku registry, and make a release in heroku"
     parameters:
       dockerfile_path:
         type: string
@@ -167,7 +167,7 @@ commands:
       - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
 
   install_postgresql_client:
-    description: 'Install postgresql client'
+    description: "Install postgresql client"
     steps:
       - run:
           command: |
@@ -286,6 +286,7 @@ jobs:
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 6
+      POSTGRES_USER: root
     steps:
       - checkout
       - attach_workspace:
@@ -313,6 +314,7 @@ jobs:
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 0
+      POSTGRES_USER: root
     steps:
       - checkout
       - attach_workspace:
@@ -424,8 +426,8 @@ jobs:
       - slack/status:
           # notify-deployments
           channel: C0125NB072B
-          failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
-          success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
+          failure_message: ":red_circle: Failed to release simple-hub at $CIRCLE_SHA1!"
+          success_message: ":tada: Released simple-hub at $CIRCLE_SHA1 "
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
@@ -445,7 +447,7 @@ jobs:
 
   integration-tests:
     <<: *defaults
-    description: 'Running integration tests'
+    description: "Running integration tests"
     steps:
       - checkout
       - attach_workspace:
