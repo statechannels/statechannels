@@ -4283,10 +4283,10 @@
   dependencies:
     type-detect "4.0.8"
 
-"@statechannels/wasm-utils@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.4.tgz#7ee4e28e953407ab2d17a6651ad92ed2c9bbca47"
-  integrity sha512-7Lk/xYsrLHng5JFJs3FyuaaVvT8fSJfP+oNmanf3vQZbnRMWRVFdJjb+JYPuChXs2k9bpAn17M8xiuhITpvKdw==
+"@statechannels/wasm-utils@0.1.5":
+  version "0.1.5"
+  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.5.tgz#0d4b2def2a910a188ae3bb3f7482268b85c5097d"
+  integrity sha512-lFilI8dOcLDCYOEmIXEK3rZJLY9xwnIezchqP5KbECU8+brHedWRTMQyuAoPH6jV+UWHz1zD73jLMxlyOG7yog==
 
 "@storybook/addon-actions@6.0.16":
   version "6.0.16"
