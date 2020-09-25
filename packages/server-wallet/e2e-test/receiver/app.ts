@@ -6,27 +6,27 @@ import pino from 'express-pino-logger';
 import {logger} from '../logger';
 
 import ReceiverController from './controller';
+export async function startApp(): Promise<express.Application> {
+  const controller = new ReceiverController();
+  await controller.warmup();
+  const app = express();
 
-const controller = new ReceiverController();
+  app.use(pino({logger: logger as any}));
 
-const app = express();
+  app.post('/status', (_req, res) => res.status(200).send('OK'));
 
-app.use(pino({logger: logger as any}));
+  app.get('/participant', (_req, res) =>
+    res
+      .status(200)
+      .contentType('application/json')
+      .send(controller.participantInfo)
+  );
 
-app.post('/status', (_req, res) => res.status(200).send('OK'));
-
-app.get('/participant', (_req, res) =>
-  res
-    .status(200)
-    .contentType('application/json')
-    .send(controller.participantInfo)
-);
-
-app.post('/inbox', bodyParser.json(), async (req, res) =>
-  res
-    .status(200)
-    .contentType('application/json')
-    .send(await controller.acceptMessageAndReturnReplies(req.body.message as Payload))
-);
-
-export default app;
+  app.post('/inbox', bodyParser.json(), async (req, res) =>
+    res
+      .status(200)
+      .contentType('application/json')
+      .send(await controller.acceptMessageAndReturnReplies(req.body.message as Payload))
+  );
+  return app;
+}

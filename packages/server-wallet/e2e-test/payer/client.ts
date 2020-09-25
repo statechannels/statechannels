@@ -22,7 +22,9 @@ export default class PayerClient {
       payerConfig.timingMetrics
     );
   }
-
+  public async warmup(): Promise<void> {
+    await this.wallet.manager.warmUpThreads();
+  }
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
   }

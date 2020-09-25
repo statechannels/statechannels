@@ -5,6 +5,7 @@ import {Pool} from 'tarn';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Either} from 'fp-ts/lib/Either';
 import {isLeft} from 'fp-ts/lib/These';
+import _ from 'lodash';
 
 import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
@@ -14,9 +15,10 @@ import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
 export class WorkerManager {
   private pool?: Pool<Worker>;
-
+  private threadAmount: number;
   constructor(walletConfig: ServerWalletConfig) {
-    if (walletConfig.workerThreadAmount > 0) {
+    this.threadAmount = walletConfig.workerThreadAmount;
+    if (this.threadAmount > 0) {
       this.pool = new Pool({
         create: (): Worker => {
           const worker = new Worker(path.resolve(__dirname, './loader.js'), {
@@ -31,14 +33,21 @@ export class WorkerManager {
           return worker;
         },
         destroy: (worker: Worker): Promise<number> => worker.terminate(),
-        min: walletConfig.workerThreadAmount,
-        max: walletConfig.workerThreadAmount,
+        min: this.threadAmount,
+        max: this.threadAmount,
         reapIntervalMillis: ONE_DAY,
         idleTimeoutMillis: ONE_DAY,
       });
     }
   }
-
+  public async warmUpThreads(): Promise<void> {
+    const acquire = _.range(this.threadAmount).map(() => this.pool?.acquire().promise);
+    const workers = await Promise.all(acquire);
+    workers.forEach(w => {
+      if (w) this.pool?.release(w);
+      else throw Error('No worker acquired');
+    });
+  }
   public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
