@@ -13,18 +13,18 @@ import {
   serializeMessage,
   StateWithHash,
   deserializeObjective,
-  hashWireState,
   wireStateToNitroState,
   convertToNitroOutcome,
   toNitroState,
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
-  convertToParticipant,
   Payload,
   isOpenChannel,
+  convertToParticipant,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
+import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -46,10 +46,10 @@ import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
-import {fastRecoverAddress} from '../utilities/signatures';
 import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
+import {recoverAddress} from '../utilities/signatures';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -358,8 +358,6 @@ export class Store {
   ): Promise<Channel> {
     const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
-    const stateHash = hashWireState(wireSignedState);
-
     const signatures = await timer(
       'validating signatures',
       async () =>
@@ -367,7 +365,7 @@ export class Store {
           wireSignedState.signatures,
           wireSignedState.participants.map(p => p.signingAddress),
           channelId,
-          stateHash
+          wireStateToNitroState(wireSignedState)
         )
     );
 
@@ -396,7 +394,7 @@ export class Store {
       }
     }
 
-    const sswh: SignedStateWithHash = {
+    const sswh: SignedStateWithHash = addHash({
       chainId: wireSignedState.chainId,
       channelNonce: wireSignedState.channelNonce,
       appDefinition: wireSignedState.appDefinition,
@@ -407,8 +405,7 @@ export class Store {
       outcome: deserializeOutcome(wireSignedState.outcome),
       participants: wireSignedState.participants.map(convertToInternalParticipant),
       signatures,
-      stateHash,
-    };
+    });
     channel.vars = await timer('adding state', async () => addState(channel.vars, sswh));
 
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
@@ -544,11 +541,11 @@ async function recoverParticipantSignatures(
   signatures: string[],
   participants: string[],
   channelId: string,
-  stateHash: string
+  nitroState: NitroState
 ): Promise<SignatureEntry[]> {
   return Promise.all(
     signatures.map(async sig => {
-      const recoveredAddress = await fastRecoverAddress(sig, stateHash);
+      const recoveredAddress = await recoverAddress(sig, nitroState);
 
       if (participants.indexOf(recoveredAddress) < 0) {
         throw new Error(

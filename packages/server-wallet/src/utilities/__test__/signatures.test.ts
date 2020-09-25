@@ -4,16 +4,16 @@ import {
   simpleEthAllocation,
   signState,
   getSignerAddress,
-  hashState,
+  toNitroState,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {participant} from '../../wallet/__test__/fixtures/participants';
-import {fastSignState, fastRecoverAddress} from '../signatures';
+import {recoverAddress, signState as wasmSignState} from '../signatures';
 import {logger} from '../../logger';
 import {addHash} from '../../state-utils';
 
-it('sign vs fastSign', async () => {
+it('sign vs wasmSign', async () => {
   _.range(5).map(async channelNonce => {
     const {address, privateKey} = Wallet.createRandom();
     const state: State = {
@@ -29,9 +29,9 @@ it('sign vs fastSign', async () => {
     };
 
     const signedState = signState(state, privateKey);
-    const fastSignedState = fastSignState(addHash(state), privateKey);
+    const wasmSignedState = wasmSignState(addHash(state), privateKey);
     try {
-      expect(signedState).toEqual((await fastSignedState).signature);
+      expect(signedState).toEqual((await wasmSignedState).signature);
     } catch (error) {
       logger.info({error, state, privateKey});
       throw error;
@@ -54,12 +54,11 @@ it('getSignerAddress vs fastRecover', async () => {
       challengeDuration: 0x5,
     };
 
-    const signedState = await fastSignState(addHash(state), privateKey);
+    const signedState = await wasmSignState(addHash(state), privateKey);
     try {
       const recovered = getSignerAddress(signedState.state, signedState.signature);
-      const stateHash = hashState(signedState.state);
-      const fastRecovered = await fastRecoverAddress(signedState.signature, stateHash);
-      expect(recovered).toEqual(fastRecovered);
+      const wasmRecovered = recoverAddress(signedState.signature, toNitroState(signedState.state));
+      expect(recovered).toEqual(wasmRecovered);
     } catch (error) {
       logger.info({error, state, privateKey});
       throw error;
