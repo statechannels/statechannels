@@ -57,8 +57,9 @@ const {argv} = yargs
   // TODO: The autocannon types incorrectly type url as string. It actually can be a string or an array of strings
   const instance = autocannon({url: urls as any, connections, duration}, stopServer);
   // Tracking outputs things in a decent format so we use that
-  // TODO: We should only avoid rendering the progress bar for the CI
-  autocannon.track(instance, {renderLatencyTable: true, renderProgressBar: false});
+
+  // eslint-disable-next-line no-process-env
+  autocannon.track(instance, {renderLatencyTable: true, renderProgressBar: !process.env.CI});
 
   async function stopServer(): Promise<void> {
     await killServer(receiverServer);
