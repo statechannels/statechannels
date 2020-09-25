@@ -1,4 +1,4 @@
-import {exec} from 'child_process';
+import {exec, ChildProcess} from 'child_process';
 
 import {configureEnvVariables} from '@statechannels/devtools';
 
@@ -20,54 +20,30 @@ import kill = require('tree-kill');
 const startReceiver = async (
   profiling: 'FlameGraph' | 'BubbleProf' | 'Doctor'
 ): Promise<ReceiverServer> => {
+  let server: ChildProcess;
   if (profiling === 'FlameGraph') {
-    const server = exec(
-      `npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`,
-      {
-        env: {
-          // eslint-disable-next-line
-          ...process.env,
-          SERVER_DB_NAME: 'receiver',
-        },
-      }
-    );
-    return {
-      server: server,
-      url: `http://127.0.0.1:65535`,
-    };
+    server = exec(`npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`);
   } else if (profiling == 'Doctor') {
-    const server = exec(
-      `npx clinic doctor --collect-only -- node  ./lib/e2e-test/receiver/server.js`,
-      {
-        env: {
-          // eslint-disable-next-line
-          ...process.env,
-          SERVER_DB_NAME: 'receiver',
-        },
-      }
-    );
-
-    return {
-      server: server,
-      url: `http://127.0.0.1:65535`,
-    };
+    server = exec(`npx clinic doctor --collect-only -- node  ./lib/e2e-test/receiver/server.js`);
   } else {
-    const server = exec(
-      `npx clinic bubbleprof --collect-only -- node  ./lib/e2e-test/receiver/server.js`,
-      {
-        env: {
-          // eslint-disable-next-line
-          ...process.env,
-          SERVER_DB_NAME: 'receiver',
-        },
-      }
+    server = exec(
+      `npx clinic bubbleprof --collect-only -- node  ./lib/e2e-test/receiver/server.js`
     );
-
-    return {
-      server: server,
-      url: `http://127.0.0.1:65535`,
-    };
   }
+
+  server.on('error', data => {
+    console.error(data.toString());
+    process.exit(1);
+  });
+  server.stdout?.on('data', data => console.log(data.toString()));
+  server.stderr?.on('data', data => {
+    console.error(data.toString());
+  });
+
+  return {
+    server: server,
+    url: `http://127.0.0.1:65535`,
+  };
 };
 
 const NUM_CHANNELS = 20;
@@ -96,7 +72,11 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promi
 
   await waitForServerToStart(receiverServer);
 
-  await triggerPayments(channelIds, NUM_PAYMENTS);
+  try {
+    await triggerPayments(channelIds, NUM_PAYMENTS);
+  } catch (error) {
+    process.exit(1);
+  }
 
   kill(receiverServer.server.pid, 'SIGINT');
 

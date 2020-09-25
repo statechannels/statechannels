@@ -110,6 +110,7 @@ export class Wallet implements WalletInterface {
     this.getState = this.getState.bind(this);
     this.pushMessage = this.pushMessage.bind(this);
     this.takeActions = this.takeActions.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     // set up timing metrics
     if (this.walletConfig.timingMetrics) {
@@ -122,8 +123,7 @@ export class Wallet implements WalletInterface {
 
   public async destroy(): Promise<void> {
     await this.manager.destroy();
-    await this.store.destroy();
-    await this.knex.destroy();
+    await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
   }
 
   public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
