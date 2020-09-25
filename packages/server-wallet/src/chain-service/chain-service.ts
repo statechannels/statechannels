@@ -1,9 +1,7 @@
 import {createETHDepositTransaction} from '@statechannels/nitro-protocol';
-import {providers, utils, Wallet} from 'ethers';
+import {providers, Wallet} from 'ethers';
 
 import {Address, Bytes32, Uint256} from '../type-aliases';
-
-const GAS_PRICE = utils.parseUnits('15', 'gwei');
 
 export type SetFundingArg = {
   channelId: Bytes32;
@@ -49,7 +47,6 @@ export class ChainService implements ChainMofifierInterface {
     };
     return this.ethWallet.sendTransaction({
       ...transactionRequest,
-      gasPrice: GAS_PRICE,
     });
   }
 }
