@@ -31,6 +31,11 @@ module.exports = {
       rules: {'no-process-env': 'off'},
     },
     {
+      // process.env allowed in some files
+      files: ['src/utilities/workers/loader.js'],
+      rules: {'@typescript-eslint/no-var-requires': 'off'},
+    },
+    {
       files: ['**/*.ts'],
       extends: ['plugin:import/typescript'],
       rules: {
