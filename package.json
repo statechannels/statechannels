@@ -31,7 +31,7 @@
   "resolutions": {
     "**/react": "16.12.0",
     "**/react-dom": "16.12.0",
-    "@babel/core": "7.8.3",
+    "@babel/core": "7.11.4",
     "@types/react": "16.9.48",
     "@types/webgl2": "0.0.5",
     "broccoli": "3.3.3",
