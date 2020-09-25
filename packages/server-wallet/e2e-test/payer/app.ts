@@ -16,8 +16,12 @@ app.use(pino({logger: logger as any}));
 app.post('/status', (_req, res) => res.status(200).send('OK'));
 
 app.get('/makePayment', async (req, res) => {
-  const result = await client.makePayment(req.query.channelId?.toString() || '');
-  res.status(200).send(result);
+  try {
+    const result = await client.makePayment(req.query.channelId?.toString() || '');
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 export default app;
