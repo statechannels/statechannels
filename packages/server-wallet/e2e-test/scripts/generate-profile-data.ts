@@ -6,20 +6,20 @@ import {
   waitForServerToStart,
   triggerPayments,
   knexReceiver,
-  ReceiverServer,
+  E2EServer,
   seedTestChannels,
   getParticipant,
   knexPayer,
+  RECEIVER_PORT,
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
 import {truncate} from '../../src/db-admin/db-admin-connection';
-
 import kill = require('tree-kill');
 
 const startReceiver = async (
   profiling: 'FlameGraph' | 'BubbleProf' | 'Doctor'
-): Promise<ReceiverServer> => {
+): Promise<E2EServer> => {
   let server: ChildProcess;
   if (profiling === 'FlameGraph') {
     server = exec(`npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`);
@@ -42,7 +42,7 @@ const startReceiver = async (
 
   return {
     server: server,
-    url: `http://127.0.0.1:65535`,
+    url: `http://127.0.0.1:${RECEIVER_PORT}`,
   };
 };
 

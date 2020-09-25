@@ -21,6 +21,7 @@
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "^0.3.7",
+    "@types/autocannon": "^4.1.0",
     "@types/body-parser": "1.19.0",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -34,6 +35,7 @@
     "@types/yargs": "15.0.5",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
+    "autocannon": "^6.4.0",
     "body-parser": "1.19.0",
     "cli-table3": "0.6.0",
     "clinic": "7.0.0",
@@ -93,7 +95,7 @@
     "test:chain": "RPC_ENDPOINT='http://localhost:8545' jest --runInBand -c ./jest/jest.chain.config.js",
     "test:ci": "yarn test --bail",
     "test:e2e": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
-    "test:stress": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.stress.config.js --runInBand"
+    "test:stress": "yarn tsc;NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts"
   },
   "types": "lib/src/index.d.ts"
 }

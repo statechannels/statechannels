@@ -13,6 +13,10 @@ export default class ReceiverController {
     defaultConfig.timingMetrics
   );
 
+  public async warmup(): Promise<void> {
+    this.wallet.manager.warmUpThreads();
+  }
+
   private readonly myParticipantID: string = 'receiver';
   private time = timerFactory(defaultConfig.timingMetrics, 'controller');
   public get participantInfo(): Participant {

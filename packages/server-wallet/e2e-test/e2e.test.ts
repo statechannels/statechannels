@@ -13,7 +13,7 @@ import PayerClient from './payer/client';
 import {
   killServer,
   waitForServerToStart,
-  ReceiverServer,
+  E2EServer,
   knexReceiver,
   startReceiverServer,
   triggerPayments,
@@ -27,7 +27,7 @@ let ChannelReceiver: typeof Channel;
 let SWPayer: typeof SigningWallet;
 let SWReceiver: typeof SigningWallet;
 
-let receiverServer: ReceiverServer;
+let receiverServer: E2EServer;
 
 beforeAll(async () => {
   receiverServer = startReceiverServer();

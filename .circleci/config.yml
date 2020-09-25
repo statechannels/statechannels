@@ -286,6 +286,7 @@ jobs:
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 6
+      SERVER_DB_USER: root
     steps:
       - checkout
       - attach_workspace:
@@ -313,6 +314,7 @@ jobs:
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 0
+      SERVER_DB_USER: root
     steps:
       - checkout
       - attach_workspace:

@@ -22,7 +22,7 @@ export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBN
 
 import {PerformanceTimer} from './payer/timers';
 
-export type ReceiverServer = {
+export type E2EServer = {
   url: string;
   server: ChildProcessWithoutNullStreams | ChildProcess;
 };
@@ -51,7 +51,8 @@ export const triggerPayments = async (
     payerScript.on('error', reject);
   });
 };
-
+export const PAYER_PORT = 65534;
+export const RECEIVER_PORT = 65535;
 /**
  * Starts the Receiver Express server in a separate process. Needs to be
  * a separate process because it relies on process.env variables which
@@ -59,8 +60,14 @@ export const triggerPayments = async (
  * which indicates that Payer and Receiver use separate databases, despite
  * conveniently re-using the same PostgreSQL instance.
  */
-export const startReceiverServer = (): ReceiverServer => {
-  const server = spawn('yarn', ['node', './lib/e2e-test/receiver/server'], {
+
+export const startPayerServer = (): E2EServer =>
+  startServer('./lib/e2e-test/payer/server', PAYER_PORT);
+export const startReceiverServer = (): E2EServer =>
+  startServer('./lib/e2e-test/receiver/server', RECEIVER_PORT);
+
+const startServer = (command: string, port: number): E2EServer => {
+  const server = spawn('yarn', ['node', command], {
     stdio: 'inherit',
   });
 
@@ -70,7 +77,7 @@ export const startReceiverServer = (): ReceiverServer => {
 
   return {
     server,
-    url: `http://127.0.0.1:65535`,
+    url: `http://127.0.0.1:${port}`,
   };
 };
 
@@ -80,7 +87,7 @@ export const startReceiverServer = (): ReceiverServer => {
  * the database of any stale data from previous test runs.
  */
 export const waitForServerToStart = (
-  receiverServer: ReceiverServer,
+  receiverServer: E2EServer,
   pingInterval = 1500
 ): Promise<void> =>
   new Promise(resolve => {
@@ -97,7 +104,7 @@ export const waitForServerToStart = (
 
 export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerConfig));
 export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
-export const killServer = async ({server}: ReceiverServer): Promise<void> => {
+export const killServer = async ({server}: E2EServer): Promise<void> => {
   kill(server.pid);
 };
 
