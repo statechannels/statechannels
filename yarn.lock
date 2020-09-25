@@ -29691,11 +29691,6 @@ write@1.0.3:
   dependencies:
     mkdirp "^0.5.1"
 
-wrk@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/wrk/-/wrk-1.2.1.tgz#64c1a4a42a301963a6a84deeaba005233369a42a"
-  integrity sha512-uJ93Je3il1dY9rBP05OHr91lwdHd5oNoX82oyHhuAfe69mdbEb0fxeufbaLChA9vBfDNj581OrbH/CbaM0az1g==
-
 ws@7.2.3:
   version "7.2.3"
   resolved "https://registry.npmjs.org/ws/-/ws-7.2.3.tgz#a5411e1fb04d5ed0efee76d26d5c46d830c39b46"
