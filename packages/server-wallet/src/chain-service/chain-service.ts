@@ -85,7 +85,8 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
           ContractArtifacts.EthAssetHolderArtifact.abi
         ).connect(this.provider);
         obs = new Observable<DepositedEvent>(subscriber => {
-          contract.on('Deposited', subscriber.next);
+          // without bind, we see "TypeError: this._next is not a function"
+          contract.on('Deposited', subscriber.next.bind(subscriber));
         }).pipe(
           map(event => ({
             channelId: event.destination,
