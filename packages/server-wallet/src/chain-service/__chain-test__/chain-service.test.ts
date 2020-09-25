@@ -43,3 +43,25 @@ describe('fundChannel', () => {
     await expect(fundChannelPromise).rejects.toThrow();
   });
 });
+
+describe('registerChannel', () => {
+  it('successfully registers channel', async () => {
+    const chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
+    const channelId = randomChannelId();
+    /* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
+    const assetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
+    const mock = jest.fn();
+    const subscriber = {setFunding: mock};
+    chainService.registerChannel(channelId, [assetHolderAddress], subscriber);
+
+    await (
+      await chainService.fundChannel({
+        channelId,
+        assetHolderAddress,
+        expectedHeld: BN.from(0),
+        amount: BN.from(5),
+      })
+    ).wait();
+    expect(mock).toHaveBeenCalled();
+  });
+});
