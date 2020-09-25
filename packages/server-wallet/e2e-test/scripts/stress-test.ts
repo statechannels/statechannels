@@ -57,7 +57,7 @@ const {argv} = yargs
   // TODO: The autocannon types incorrectly type url as string. It actually can be a string or an array of strings
   const instance = autocannon({url: urls as any, connections, duration}, stopServer);
   // Tracking outputs things in a decent format so we use that
-  autocannon.track(instance, {});
+  autocannon.track(instance, {renderLatencyTable: true});
 
   async function stopServer(): Promise<void> {
     await killServer(receiverServer);
