@@ -175,6 +175,13 @@ commands:
             sudo apt install -y postgresql-client || true
 
 jobs:
+  validate-commits:
+    docker:
+      - image: aevea/commitsar
+    steps:
+      - checkout
+      - run: commitsar
+
   prepare:
     <<: *defaults
     resource_class: large
@@ -460,7 +467,11 @@ jobs:
 workflows:
   statechannels:
     jobs:
-      - prepare
+      - validate-commits
+
+      - prepare:
+          requires:
+            - validate-commits
 
       - build:
           requires:
