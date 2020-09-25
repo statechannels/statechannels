@@ -41,9 +41,7 @@ const signVars = (signingWallets: SigningWallet[]) => (channel: Channel): Channe
   const {channelConstants, vars} = channel;
   vars.map(
     state =>
-      (state.signatures = signingWallets.map(sw =>
-        sw.syncSignState({...channelConstants, ...state})
-      ))
+      (state.signatures = signingWallets.map(sw => sw.signState({...channelConstants, ...state})))
   );
 
   return channel;
