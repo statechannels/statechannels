@@ -150,7 +150,7 @@ export class GanacheServer {
 
     const cmd = `ganache-cli ${opts}`;
 
-    this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
+    this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe', shell: true});
     this.server.stdout.on('data', data => {
       if (SHOW_VERBOSE_GANACHE_OUTPUT) {
         extractLogsFromVerboseGanacheOutput(this.buffer, data.toString());
