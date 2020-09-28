@@ -4,7 +4,7 @@
   "version": "0.3.7",
   "author": "Alex Gap <alex@magmo.com>",
   "dependencies": {
-    "@jest/reporters": "^26.4.1",
+    "@jest/reporters": "^25.5.1",
     "easy-table": "1.1.1",
     "eslint-plugin-import": "^2.22.1",
     "ethers": "5.0.12",
