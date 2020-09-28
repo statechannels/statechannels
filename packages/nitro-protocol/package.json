@@ -74,7 +74,7 @@
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",
     "precommit": "lint-staged --quiet",
-    "prepare": "run-s patch-package contract-compile build:typescript docgen",
+    "prepare": "run-s patch-package contract:compile build:typescript docgen",
     "prettier:check": "prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "test": "run-s test:contracts 'test:app --all'",
