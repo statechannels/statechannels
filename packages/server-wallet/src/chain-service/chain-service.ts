@@ -1,11 +1,6 @@
-import {
-  ContractArtifacts,
-  createETHDepositTransaction,
-  DepositedEvent,
-} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {BigNumber, Contract, providers, Wallet} from 'ethers';
 import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 
 import {Address, Bytes32, Uint256} from '../type-aliases';
 
@@ -31,7 +26,7 @@ interface ChainEventEmitterInterface {
     channelId: Bytes32,
     assetHolders: Address[],
     listener: ChainEventSubscriber
-  ): Promise<void>;
+  ): void;
 }
 
 interface ChainMofifierInterface {
@@ -51,7 +46,7 @@ interface FundingEvent {
 export class ChainService implements ChainMofifierInterface, ChainEventEmitterInterface {
   private readonly ethWallet: Wallet;
   private provider: providers.JsonRpcProvider;
-  private addressToObservables: Map<string, Observable<SetFundingArg>> = new Map();
+  private addressToObservable: Map<string, Observable<SetFundingArg>> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -80,31 +75,30 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
   }
 
   //todo: add channelId filtering
-  async registerChannel(
+  registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
     subscriber: ChainEventSubscriber
-  ): Promise<void> {
+  ): void {
     assetHolders.map(assetHolder => {
-      let obs = this.addressToObservables.get(assetHolder);
+      let obs = this.addressToObservable.get(assetHolder);
       if (!obs) {
         const contract: Contract = new Contract(
           assetHolder,
           ContractArtifacts.EthAssetHolderArtifact.abi
         ).connect(this.provider);
-        obs = new Observable<DepositedEvent>(subscriber => {
-          // without bind, we see "TypeError: this._next is not a function"
-          contract.on('Deposited', subscriber.next.bind(subscriber));
-        }).pipe(
-          map(event => ({
-            channelId: event.destination,
-            assetHolderAddress: assetHolder,
-            amount: event.destinationHoldings,
-          }))
-        );
+        obs = new Observable<SetFundingArg>(subscriber => {
+          contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
+            subscriber.next({
+              channelId: destination,
+              assetHolderAddress: assetHolder,
+              amount: destinationHoldings,
+            })
+          );
+        });
       }
       obs.subscribe({next: subscriber.setFunding});
-      this.addressToObservables.set(assetHolder, obs);
+      this.addressToObservable.set(assetHolder, obs);
     });
   }
 }
