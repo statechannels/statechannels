@@ -53,13 +53,15 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
   private provider: providers.JsonRpcProvider;
   private addressToObservables: Map<string, Observable<SetFundingArg>> = new Map();
 
-  constructor(provider: string, pk: string) {
+  constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
+    if (pollingInterval) this.provider.pollingInterval = pollingInterval;
     this.ethWallet = new Wallet(pk, new providers.JsonRpcProvider(provider));
   }
 
   // todo: not sure that this is needed
   destructor(): void {
+    this.provider.polling = false;
     this.provider.removeAllListeners();
   }
 
