@@ -15,9 +15,7 @@ beforeEach(() => {
   chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
 });
 
-afterEach(() => {
-  chainService.destructor();
-});
+afterEach(() => chainService.destructor());
 
 describe('fundChannel', () => {
   it('Successfully funds channel with 2 participants, rejects invalid 3rd', async () => {

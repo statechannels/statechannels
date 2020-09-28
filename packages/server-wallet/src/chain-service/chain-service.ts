@@ -60,9 +60,9 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
   }
 
   // todo: not sure that this is needed
-  destructor(): void {
-    this.provider.polling = false;
+  async destructor(): Promise<void> {
     this.provider.removeAllListeners();
+    this.provider.polling = false;
   }
 
   // todo: only works with eth-asset-holder
