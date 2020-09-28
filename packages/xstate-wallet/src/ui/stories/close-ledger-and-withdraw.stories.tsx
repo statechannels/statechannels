@@ -3,7 +3,7 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import React from 'react';
 import {Participant, DomainBudget, ethBudget, BN} from '@statechannels/wallet-core';
-import {parseEther} from '@ethersproject/units';
+import {parseEther} from '/units';
 
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';

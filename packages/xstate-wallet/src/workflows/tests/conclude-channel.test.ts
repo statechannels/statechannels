@@ -1,4 +1,5 @@
 import {interpret} from 'xstate';
+import {constants} from 'ethers';
 import {
   firstState,
   calculateChannelId,
@@ -8,7 +9,6 @@ import {
   State,
   BN
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
 
 import {Store} from '../../store';
 import {FakeChain} from '../../chain';
@@ -38,7 +38,7 @@ jest.setTimeout(20000);
 const {add} = BN;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = constants.AddressZero;
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,

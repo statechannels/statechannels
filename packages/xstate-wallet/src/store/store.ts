@@ -1,8 +1,7 @@
-import {AddressZero} from '@ethersproject/constants';
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
 import {Observable, fromEvent, merge, from, of} from 'rxjs';
-import {Wallet} from 'ethers';
+import {Wallet, constants} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 import {
@@ -233,7 +232,7 @@ export class Store {
     participants: Participant[],
     challengeDuration: number,
     stateVars: StateVariables,
-    appDefinition = AddressZero,
+    appDefinition = constants.AddressZero,
     applicationDomain?: string
   ) =>
     this.backend

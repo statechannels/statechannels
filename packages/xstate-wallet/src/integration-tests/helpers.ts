@@ -18,7 +18,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {hexZeroPad} from '@ethersproject/bytes';
+import {utils} from 'ethers';
 import _ from 'lodash';
 
 import {DBBackend} from '../store';
@@ -184,15 +184,15 @@ export function generatePlayerUpdate(
       appData: '0x00',
       allocations: [
         {
-          token: hexZeroPad('0x00', 32),
+          token: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
@@ -217,15 +217,15 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: hexZeroPad('0x00', 32),
+          token: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
@@ -249,8 +249,8 @@ export function generateApproveBudgetAndFundRequest(
       token: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
-      requestedSendCapacity: hexZeroPad('0x5', 32),
-      requestedReceiveCapacity: hexZeroPad('0x5', 32)
+      requestedSendCapacity: utils.hexZeroPad('0x5', 32),
+      requestedReceiveCapacity: utils.hexZeroPad('0x5', 32)
     }
   };
 }

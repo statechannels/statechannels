@@ -1,6 +1,6 @@
 import {filter, map, first} from 'rxjs/operators';
 import {FundLedger, assertSimpleEthAllocation, BN} from '@statechannels/wallet-core';
-import {hexZeroPad} from '@ethersproject/bytes';
+import [utils} from 'ethers';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 
 import {FakeChain} from '../chain';
@@ -69,11 +69,11 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   const allocation = assertSimpleEthAllocation(ledgerEntry.supported.outcome);
   expect(allocation.allocationItems).toContainEqual({
     destination: hub.destination,
-    amount: BN.from(hexZeroPad('0x5', 32))
+    amount: BN.from(utils.hexZeroPad('0x5', 32))
   });
   expect(allocation.allocationItems).toContainEqual({
     destination: playerA.destination,
-    amount: BN.from(hexZeroPad('0x5', 32))
+    amount: BN.from(utils.hexZeroPad('0x5', 32))
   });
   // Check that the funds are reflected on chain
   const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);

@@ -7,8 +7,7 @@ import {
   createSignatureEntry,
   BN
 } from '@statechannels/wallet-core';
-import {ethers} from 'ethers';
-import {hexZeroPad} from '@ethersproject/bytes';
+import {ethers, utils} from 'ethers';
 
 import {FakeChain} from '../chain';
 import {Backend} from '../store/dexie-backend';
@@ -36,11 +35,11 @@ test('concludes on their turn', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.exZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
