@@ -4,10 +4,8 @@
   "version": "0.3.7",
   "author": "Alex Gap <alex@magmo.com>",
   "dependencies": {
-    "@statechannels/devtools": "^0.3.7",
     "easy-table": "1.1.1",
     "ethers": "5.0.12",
-    "path": "0.12.7",
     "solc": "0.6.1",
     "typescript": "3.7.5"
   },
