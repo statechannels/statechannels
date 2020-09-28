@@ -5,13 +5,23 @@ import {defaultConfig} from '../../config';
 import {ChainService} from '../chain-service';
 
 let rpcEndpoint: string;
+let chainService: ChainService;
 beforeAll(() => {
   if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
   rpcEndpoint = defaultConfig.rpcEndpoint;
 });
+
+beforeEach(() => {
+  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
+});
+
+afterEach(() => {
+  chainService.destructor();
+});
+
 describe('fundChannel', () => {
   it('Successfully funds channel with 2 participants, rejects invalid 3rd', async () => {
-    const chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
+    chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
     const channelId = randomChannelId();
     /* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
     const assetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -46,7 +56,7 @@ describe('fundChannel', () => {
 
 describe('registerChannel', () => {
   it('successfully registers channel', async () => {
-    const chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
+    chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
     const channelId = randomChannelId();
     /* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
     const assetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -62,7 +72,9 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
+    // todo: it's surprising that we have to wait for 4 seconds for the event to arrive
     await new Promise(resolve => setTimeout(resolve, 4_000));
+    // todo: check event shape
     expect(mock).toHaveBeenCalled();
     chainService.destructor();
   });

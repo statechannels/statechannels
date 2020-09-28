@@ -4,7 +4,7 @@ import {
   DepositedEvent,
 } from '@statechannels/nitro-protocol';
 import {BigNumber, Contract, providers, Wallet} from 'ethers';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {Address, Bytes32, Uint256} from '../type-aliases';
@@ -52,8 +52,7 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
   private readonly ethWallet: Wallet;
   private provider: providers.JsonRpcProvider;
   private addressToObservables: Map<string, Observable<SetFundingArg>> = new Map();
-  private subscriptions: Subscription[] = [];
-  private contracts: Contract[] = [];
+
   constructor(provider: string, pk: string) {
     this.provider = new providers.JsonRpcProvider(provider);
     this.ethWallet = new Wallet(pk, new providers.JsonRpcProvider(provider));
@@ -61,8 +60,6 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
 
   // todo: not sure that this is needed
   destructor(): void {
-    this.subscriptions.map(sub => sub.unsubscribe());
-    this.contracts.map(contract => contract.removeAllListeners);
     this.provider.removeAllListeners();
   }
 
@@ -93,7 +90,6 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
           assetHolder,
           ContractArtifacts.EthAssetHolderArtifact.abi
         ).connect(this.provider);
-        this.contracts.push(contract);
         obs = new Observable<DepositedEvent>(subscriber => {
           // without bind, we see "TypeError: this._next is not a function"
           contract.on('Deposited', subscriber.next.bind(subscriber));
@@ -105,7 +101,7 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
           }))
         );
       }
-      this.subscriptions.push(obs.subscribe({next: subscriber.setFunding}));
+      obs.subscribe({next: subscriber.setFunding});
       this.addressToObservables.set(assetHolder, obs);
     });
   }
