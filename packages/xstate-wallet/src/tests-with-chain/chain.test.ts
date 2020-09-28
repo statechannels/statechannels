@@ -1,7 +1,7 @@
-import {Contract} from 'ethers';
+import {Contract, utils} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {first} from 'rxjs/operators';
-import {parseUnits} from '@ethersproject/units';
+
 import {JsonRpcProvider} from '@ethersproject/providers';
 import {
   simpleEthAllocation,
@@ -52,9 +52,9 @@ it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and se
 
   ETHAssetHolder.deposit(
     channelId, // destination
-    parseUnits('0', 'wei'), // expectedHeld
-    parseUnits('1', 'wei'), // amount
-    {value: parseUnits('1', 'wei')} // msgValue
+    utils.parseUnits('0', 'wei'), // expectedHeld
+    utils.parseUnits('1', 'wei'), // amount
+    {value: utils.parseUnits('1', 'wei')} // msgValue
   );
 
   expect(await updateEvent).toMatchObject({

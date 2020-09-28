@@ -1,6 +1,5 @@
 import {interpret} from 'xstate';
-import {ethers} from 'ethers';
-import {hexZeroPad} from '@ethersproject/bytes';
+import {ethers, utils} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';
 
@@ -42,11 +41,11 @@ beforeEach(async () => {
     outcome: simpleEthAllocation([
       {
         destination: playerA.destination,
-        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+        amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
       },
       {
         destination: playerA.destination,
-        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+        amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
       }
     ]),
     turnNum: 5,
