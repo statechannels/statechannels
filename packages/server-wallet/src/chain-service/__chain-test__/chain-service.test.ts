@@ -19,7 +19,6 @@ afterEach(() => chainService.destructor());
 
 describe('fundChannel', () => {
   it('Successfully funds channel with 2 participants, rejects invalid 3rd', async () => {
-    chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
     const channelId = randomChannelId();
     /* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
     const assetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -54,7 +53,6 @@ describe('fundChannel', () => {
 
 describe('registerChannel', () => {
   it('successfully registers channel', async () => {
-    chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
     const channelId = randomChannelId();
     /* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
     const assetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -71,6 +69,10 @@ describe('registerChannel', () => {
       })
     ).wait();
     // todo: check event shape
-    expect(mock).toHaveBeenCalled();
+    expect(mock).toHaveBeenCalledWith({
+      channelId,
+      assetHolderAddress,
+      amount: BN.from(5),
+    });
   });
 });
