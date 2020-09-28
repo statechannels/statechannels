@@ -19,7 +19,6 @@ import {
 import {Contract, Wallet, utils, providers} from 'ethers';
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
-import {hexZeroPad} from '@ethersproject/bytes';
 import EventEmitter from 'eventemitter3';
 
 import {getProvider} from './utils/contract-utils';
@@ -226,7 +225,7 @@ export class FakeChain implements Chain {
   }
 
   public ethereumEnable() {
-    this.fakeSelectedAddress = hexZeroPad('0x123', 32);
+    this.fakeSelectedAddress = utils.hexZeroPad('0x123', 32);
     return Promise.resolve(this.selectedAddress);
   }
 
