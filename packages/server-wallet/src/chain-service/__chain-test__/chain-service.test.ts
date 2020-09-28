@@ -12,7 +12,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey);
+  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
 });
 
 afterEach(() => {
@@ -72,10 +72,7 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
-    // todo: it's surprising that we have to wait for 4 seconds for the event to arrive
-    await new Promise(resolve => setTimeout(resolve, 4_000));
     // todo: check event shape
     expect(mock).toHaveBeenCalled();
-    chainService.destructor();
   });
 });
