@@ -19,7 +19,7 @@ type FundChannelArg = {
   amount: Uint256;
 };
 
-export interface ChainEventSubscriber {
+export interface ChainEventSubscriberInterface {
   setFunding(arg: SetFundingArg): void;
 }
 
@@ -27,18 +27,18 @@ interface ChainEventEmitterInterface {
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
-    listener: ChainEventSubscriber
+    listener: ChainEventSubscriberInterface
   ): void;
 }
 
-interface ChainMofifierInterface {
+interface ChainModifierInterface {
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
 }
 
-export class ChainService implements ChainMofifierInterface, ChainEventEmitterInterface {
+export class ChainService implements ChainModifierInterface, ChainEventEmitterInterface {
   private readonly ethWallet: Wallet;
   private provider: providers.JsonRpcProvider;
-  private addressToObservable: Map<string, Observable<SetFundingArg>> = new Map();
+  private addressToObservable: Map<Address, Observable<SetFundingArg>> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -68,30 +68,36 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
-    subscriber: ChainEventSubscriber
+    subscriber: ChainEventSubscriberInterface
   ): void {
     assetHolders.map(assetHolder => {
       let obs = this.addressToObservable.get(assetHolder);
       if (!obs) {
-        const contract: Contract = new Contract(
-          assetHolder,
-          ContractArtifacts.EthAssetHolderArtifact.abi
-        ).connect(this.provider);
-        obs = new Observable<SetFundingArg>(subscriber => {
-          // todo: add other event types
-          contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
-            subscriber.next({
-              channelId: destination,
-              assetHolderAddress: assetHolder,
-              amount: BN.from(destinationHoldings),
-            })
-          );
-        });
+        obs = this.createContractObservable(assetHolder);
         this.addressToObservable.set(assetHolder, obs);
       }
       obs
         .pipe(filter(event => event.channelId === channelId))
+        // todo: subscriber method should be based on event type
         .subscribe({next: subscriber.setFunding});
+    });
+  }
+
+  private createContractObservable(contractAddress: Address): Observable<SetFundingArg> {
+    const contract: Contract = new Contract(
+      contractAddress,
+      ContractArtifacts.EthAssetHolderArtifact.abi
+    ).connect(this.provider);
+
+    return new Observable<SetFundingArg>(subscriber => {
+      // todo: add other event types
+      contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
+        subscriber.next({
+          channelId: destination,
+          assetHolderAddress: contractAddress,
+          amount: BN.from(destinationHoldings),
+        })
+      );
     });
   }
 }
