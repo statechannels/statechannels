@@ -136,13 +136,13 @@
     "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
   },
   "scripts": {
-    "build": "node scripts/build.js",
     "build-storybook": "build-storybook",
     "build:ci": "yarn build && yarn build-storybook",
     "build:netlify:production": "yarn build && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
+    "prepare": "node scripts/build.js && yarn build-storybook",
     "release:netlify:production": "netlify deploy --site $XSTATE_WALLET_NETLIFY_ID --dir=build",
     "start": "node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
