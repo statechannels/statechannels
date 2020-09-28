@@ -137,8 +137,7 @@
   },
   "scripts": {
     "build-storybook": "build-storybook --quiet",
-    "build:ci": "yarn build && yarn build-storybook",
-    "build:netlify:production": "yarn build && cp _redirects build/_redirects",
+    "build:netlify:production": "yarn prepare && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
