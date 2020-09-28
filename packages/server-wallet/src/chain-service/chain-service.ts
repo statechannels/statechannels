@@ -86,10 +86,12 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
               amount: BN.from(destinationHoldings),
             })
           );
-        }).pipe(filter(event => event.channelId === channelId));
+        });
+        this.addressToObservable.set(assetHolder, obs);
       }
-      obs.subscribe({next: subscriber.setFunding});
-      this.addressToObservable.set(assetHolder, obs);
+      obs
+        .pipe(filter(event => event.channelId === channelId))
+        .subscribe({next: subscriber.setFunding});
     });
   }
 }
