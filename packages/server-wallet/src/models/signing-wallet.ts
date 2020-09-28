@@ -1,10 +1,11 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, State, signState, StateWithHash} from '@statechannels/wallet-core';
+import {SignatureEntry, StateWithHash, State} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
 import {signState as wasmSignState} from '../utilities/signatures';
+import {addHash} from '../state-utils';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -38,17 +39,17 @@ export class SigningWallet extends Model {
     return json;
   }
 
-  syncSignState(state: State): SignatureEntry {
+  signState(state: State | StateWithHash): SignatureEntry {
+    let signature: string;
+    if ('stateHash' in state) {
+      signature = wasmSignState(state, this.privateKey).signature;
+    } else {
+      const stateWithHash: StateWithHash = addHash(state);
+      signature = wasmSignState(stateWithHash, this.privateKey).signature;
+    }
     return {
       signer: this.address,
-      signature: signState(state, this.privateKey),
-    };
-  }
-
-  async signState(state: StateWithHash): Promise<SignatureEntry> {
-    return {
-      signer: this.address,
-      signature: (await wasmSignState(state, this.privateKey)).signature,
+      signature,
     };
   }
 }
