@@ -55,9 +55,21 @@ describe('fundChannel', () => {
 describe('registerChannel', () => {
   it('Successfully registers channel and receives funding event', async () => {
     const channelId = randomChannelId();
+    const wrongChannelId = randomChannelId();
+
     const mock = jest.fn();
     const subscriber = {setFunding: mock};
     chainService.registerChannel(channelId, [ethAssetHolderAddress], subscriber);
+
+    // First, fund a different channel id to see if our listener picks up the event for this channelId
+    await (
+      await chainService.fundChannel({
+        channelId: wrongChannelId,
+        assetHolderAddress: ethAssetHolderAddress,
+        expectedHeld: BN.from(0),
+        amount: BN.from(5),
+      })
+    ).wait();
 
     await (
       await chainService.fundChannel({
@@ -67,7 +79,7 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     expect(mock).toHaveBeenCalledWith({
       channelId,
       assetHolderAddress: ethAssetHolderAddress,
