@@ -72,8 +72,6 @@
     "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
   },
   "scripts": {
-    "build": "rm -r lib; tsc -b .",
-    "build:typescript": "tsc -b .",
     "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "db:create": "createdb server_wallet_${NODE_ENV}",
     "db:drop": "dropdb server_wallet_${NODE_ENV}",
@@ -84,8 +82,8 @@
     "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts}\" --fix",
     "precommit": "lint-staged --quiet",
-    "prepare": "yarn build",
-    "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
+    "prepare": "rm -rf lib; tsc -b .",
+    "prestart": "yarn prepare && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh",
