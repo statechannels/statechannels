@@ -1,8 +1,7 @@
-import {Contract, utils} from 'ethers';
+import {Contract, utils, providers, utils} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {first} from 'rxjs/operators';
 
-import {JsonRpcProvider} from '@ethersproject/providers';
 import {
   simpleEthAllocation,
   createSignatureEntry,
@@ -10,7 +9,6 @@ import {
   State,
   BN
 } from '@statechannels/wallet-core';
-import {hexZeroPad} from '@ethersproject/bytes';
 
 import {Store} from '../store';
 import {ChainWatcher, FakeChain} from '../chain';
@@ -27,7 +25,7 @@ jest.setTimeout(10_000);
 const chain = new ChainWatcher();
 const store = new Store(chain);
 
-const provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+const provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 
 let ETHAssetHolder: Contract;
 
@@ -80,11 +78,11 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
@@ -125,11 +123,11 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
