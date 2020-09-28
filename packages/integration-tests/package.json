@@ -17,6 +17,7 @@
     "wait-on": "4.0.0"
   },
   "license": "MIT",
+  "private": true,
   "repository": "statechannels/monorepo/blob/master/packages/integration-tests",
   "scripts": {
     "integration-tests": "jest"
