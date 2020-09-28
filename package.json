@@ -30,6 +30,7 @@
     "@statechannels/wire-format": "^0.3.8-alpha.0",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
+    "babel-plugin-const-enum": "1.0.1",
     "babel-loader": "8.1.0",
     "babel-plugin-named-asset-import": "0.3.6",
     "babel-preset-react-app": "9.1.0",
