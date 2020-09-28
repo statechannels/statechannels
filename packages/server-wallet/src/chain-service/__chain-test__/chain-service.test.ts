@@ -68,7 +68,7 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
-    // todo: check event shape
+    await new Promise(resolve => setTimeout(resolve, 100));
     expect(mock).toHaveBeenCalledWith({
       channelId,
       assetHolderAddress,

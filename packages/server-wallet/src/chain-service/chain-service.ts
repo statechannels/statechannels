@@ -1,13 +1,15 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
-import {BigNumber, Contract, providers, Wallet} from 'ethers';
+import {BN, Uint256} from '@statechannels/wallet-core';
+import {Contract, providers, Wallet} from 'ethers';
 import {Observable} from 'rxjs';
+import {filter} from 'rxjs/operators';
 
-import {Address, Bytes32, Uint256} from '../type-aliases';
+import {Address, Bytes32} from '../type-aliases';
 
 export type SetFundingArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
-  amount: BigNumber;
+  amount: Uint256;
 };
 
 type FundChannelArg = {
@@ -33,16 +35,6 @@ interface ChainMofifierInterface {
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
 }
 
-interface FundingEvent {
-  transactionHash: string;
-  type: 'Deposited';
-  blockNumber: number;
-  final: boolean;
-  channelId: Bytes32;
-  amount: string;
-  destinationHoldings: string;
-}
-
 export class ChainService implements ChainMofifierInterface, ChainEventEmitterInterface {
   private readonly ethWallet: Wallet;
   private provider: providers.JsonRpcProvider;
@@ -54,14 +46,13 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
     this.ethWallet = new Wallet(pk, new providers.JsonRpcProvider(provider));
   }
 
-  // todo: not sure that this is needed
+  // Only used for unit tests
   async destructor(): Promise<void> {
     this.provider.removeAllListeners();
     this.provider.polling = false;
   }
 
   // todo: only works with eth-asset-holder
-  // todo: should this function be async?
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     //todo: add retries
     const transactionRequest = {
@@ -74,7 +65,6 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
     });
   }
 
-  //todo: add channelId filtering
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
@@ -92,10 +82,10 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
             subscriber.next({
               channelId: destination,
               assetHolderAddress: assetHolder,
-              amount: destinationHoldings,
+              amount: BN.from(destinationHoldings),
             })
           );
-        });
+        }).pipe(filter(event => event.channelId === channelId));
       }
       obs.subscribe({next: subscriber.setFunding});
       this.addressToObservable.set(assetHolder, obs);
