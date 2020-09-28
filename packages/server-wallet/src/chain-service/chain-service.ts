@@ -78,6 +78,7 @@ export class ChainService implements ChainMofifierInterface, ChainEventEmitterIn
           ContractArtifacts.EthAssetHolderArtifact.abi
         ).connect(this.provider);
         obs = new Observable<SetFundingArg>(subscriber => {
+          // todo: add other event types
           contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
             subscriber.next({
               channelId: destination,
