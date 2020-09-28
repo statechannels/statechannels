@@ -64,5 +64,6 @@ describe('registerChannel', () => {
     ).wait();
     await new Promise(resolve => setTimeout(resolve, 4_000));
     expect(mock).toHaveBeenCalled();
+    chainService.destructor();
   });
 });
