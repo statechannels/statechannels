@@ -3,13 +3,14 @@ import {AllocationItem, StateVariables} from '@statechannels/wallet-core';
 
 import {Bytes32, Uint256} from '../type-aliases';
 
+export type Outgoing = Omit<MessageQueuedNotification, 'jsonrpc'>;
+
 /*
 Actions that protocols can declare.
 */
 
-export type Notice = Omit<MessageQueuedNotification, 'jsonrpc'>;
 export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
-export type NotifyApp = {type: 'NotifyApp'; notice: Notice};
+export type NotifyApp = {type: 'NotifyApp'; notice: Outgoing};
 export type FundChannel = {
   type: 'FundChannel';
   channelId: Bytes32;
@@ -23,31 +24,53 @@ export type RequestLedgerFunding = {
   assetHolderAddress: Address;
   deductions: AllocationItem[];
 };
+export type LedgerFundChannel = {
+  type: 'LedgerFundChannel';
+  fundingChannelid: Bytes32;
+};
 
 /*
 Action creators
 */
 
-export const noAction = undefined;
-
-const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
+const actionConstructor = <A extends {type: string} = {type: string}>(type: A['type']) => (
   props: Omit<A, 'type'>
 ): A => ({...props, type} as A);
-export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
-export const fundChannel = actionConstructor<FundChannel>('FundChannel');
-export const notifyApp = actionConstructor<NotifyApp>('NotifyApp');
-export const signState = actionConstructor<SignState>('SignState');
 
-const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
-  a: ProtocolAction
-): a is T => a.type === type;
+const appAction = <A extends ApplicationProtocolAction>(t: A['type']) => actionConstructor<A>(t);
+const ledgerAction = <A extends LedgerProtocolAction>(t: A['type']) => actionConstructor<A>(t);
 
-export const isSignState = guard<SignState>('SignState');
-export const isNotifyApp = guard<NotifyApp>('NotifyApp');
-export const isFundChannel = guard<FundChannel>('FundChannel');
-export const isLedgerFundChannel = guard<FundChannel>('RequestLedgerFunding');
+export const noAction = undefined;
 
-export type Outgoing = Notice;
+export const requestLedgerFunding = appAction<RequestLedgerFunding>('RequestLedgerFunding');
+export const fundChannel = appAction<FundChannel>('FundChannel');
+export const notifyApp = appAction<NotifyApp>('NotifyApp');
+export const signState = appAction<SignState>('SignState');
+
+export const ledgerFundChannel = ledgerAction<LedgerFundChannel>('LedgerFundChannel');
+
+/*
+Guards
+*/
+
+const guard = <T extends {type: string}>(type: T['type']) => (a: T): a is T => a.type === type;
+
+const appGuard = <A extends ApplicationProtocolAction>(t: A['type']) => guard<A>(t);
+const ledgerGuard = <A extends LedgerProtocolAction>(t: A['type']) => guard<A>(t);
+
+export const isSignState = appGuard<SignState>('SignState');
+export const isNotifyApp = appGuard<NotifyApp>('NotifyApp');
+export const isFundChannel = appGuard<FundChannel>('FundChannel');
+export const isRequestLedgerFunding = appGuard<RequestLedgerFunding>('RequestLedgerFunding');
 export const isOutgoing = isNotifyApp;
 
-export type ProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;
+export const isLedgerFundChannel = ledgerGuard<LedgerFundChannel>('LedgerFundChannel');
+
+/*
+Types
+*/
+
+export type ApplicationProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;
+export type LedgerProtocolAction = LedgerFundChannel;
+
+export type ProtocolAction = ApplicationProtocolAction | LedgerProtocolAction;

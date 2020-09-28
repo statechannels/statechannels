@@ -22,6 +22,9 @@ import {
   Payload,
   isOpenChannel,
   convertToParticipant,
+  isSimpleAllocation,
+  checkThat,
+  allocateToTarget,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -432,6 +435,140 @@ export class Store {
 
     return result;
   }
+
+  /**
+   * Below is an in-memory protototype of ledger funding data structured and store methods
+   */
+
+  private pending_updates: {
+    // Store requests for the ledger's funds
+    [fundingChannelId: string]: {
+      newOutcome?: Outcome;
+      ledgerChannelId: Bytes32;
+      fundingChannelId: Bytes32;
+      status:
+        | 'pending' // Request added to DB
+        | 'queued' // Request approved, next step is to sign and send
+        | 'inflight' // Signed and sent ledger update
+        | 'done' // Counterparty signed back and update was applied; ready for garbage collect ?
+        | 'fail'; // Rejected for some reason (e.g., no funds, counterparty rejected)
+    };
+  } = {};
+
+  private ledgers: {
+    // Store information about asset holder of ledger
+    [ledgerChannelId: string]: {
+      ledgerChannelId: Bytes32;
+      assetHolderAddress: Address;
+    };
+  } = {};
+
+  async requestLedgerFunding(
+    {channelId, supported}: ChannelState,
+    // eslint-disable-next-line
+    tx: Transaction
+  ): Promise<Bytes32> {
+    if (!supported) throw new Error('cannot fund unsupported channel');
+
+    const {assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const ledgerRecord = _.find(
+      Object.values(this.ledgers),
+      v => v.assetHolderAddress === assetHolderAddress
+    );
+
+    if (!ledgerRecord) throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
+
+    // TODO: Turn into a DB query
+    {
+      if (this.pending_updates[channelId])
+        throw new Error('app already has a pending funding request. abort');
+
+      this.pending_updates[channelId] = {
+        ledgerChannelId: ledgerRecord.ledgerChannelId,
+        status: 'pending',
+        fundingChannelId: channelId,
+      };
+    }
+
+    return ledgerRecord.ledgerChannelId;
+  }
+
+  // Assume that ledger channel has a lock on it ?
+  async queueNextChannelFunding(tx?: Transaction): Promise<void> {
+    const queuedUpdate = _.find(Object.values(this.pending_updates), v => v.status === 'queued');
+
+    if (queuedUpdate) throw new Error('cannot queue anymore updates, previous one not executed');
+
+    const firstPendingUpdate = _.find(
+      Object.values(this.pending_updates),
+      v => v.status === 'pending'
+    );
+
+    if (!firstPendingUpdate) throw new Error('no pending updates to handle');
+
+    const ledger = await this.getChannelV2(firstPendingUpdate.ledgerChannelId, tx);
+    const toFund = await this.getChannelV2(firstPendingUpdate.fundingChannelId, tx);
+
+    let newOutcome: Outcome;
+
+    try {
+      newOutcome = allocateToTarget(
+        ledger.supported!.outcome,
+        checkThat(toFund.supported!.outcome, isSimpleAllocation).allocationItems,
+        firstPendingUpdate.fundingChannelId
+      );
+    } catch (e) {
+      if (e.toString() === 'Insufficient funds in ledger channel') throw e;
+      throw e;
+    }
+
+    this.pending_updates[firstPendingUpdate.fundingChannelId] = {
+      ...this.pending_updates[firstPendingUpdate.fundingChannelId],
+      newOutcome,
+      status: 'queued',
+    };
+  }
+
+  // Assume that ledger channel has a lock on it ?
+  async ledgerFundChannel(
+    fundingChannelId: Bytes32,
+    tx: Transaction
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+    const {ledgerChannelId, newOutcome} = this.pending_updates[fundingChannelId];
+    const ledger = await this.getChannelV2(ledgerChannelId);
+    this.pending_updates[fundingChannelId].status = 'inflight';
+    return await this.signState(
+      ledger.channelId,
+      {
+        ...ledger.supported!,
+        turnNum: ledger.supported!.turnNum + 2,
+        outcome: newOutcome!,
+      },
+      tx
+    );
+  }
+
+  async isLedger(channelId: Bytes32): Promise<boolean> {
+    return !!this.ledgers[channelId];
+  }
+
+  async getChannelV2(
+    channelId: Bytes32,
+    tx?: Transaction
+  ): Promise<
+    ChannelState & {
+      type: 'Ledger' | 'App';
+    }
+  > {
+    const channelState = await this.getChannel(channelId, tx);
+    return {
+      ...channelState,
+      type: (await this.isLedger(channelId)) ? 'Ledger' : 'App',
+    };
+  }
+
+  /** End of prototype */
 
   async createChannel(
     constants: ChannelConstants,

@@ -36,6 +36,10 @@ export type ChannelState = {
   funding: (address: Address) => Uint256;
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
+
+  // undefined if not ledger funding, defined if so
+  ledgerFundingRequested?: boolean;
+  ledgerfundingChannel?: ChannelState;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -62,6 +66,9 @@ export const stage = (state: State | undefined): Stage =>
     : state.turnNum === 3
     ? 'PostfundSetup'
     : 'Running';
+
+export const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
+  !!s && stage(s) === guardStage;
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
   const {channelId, supported, latest, latestSignedByMe, support} = channelState;

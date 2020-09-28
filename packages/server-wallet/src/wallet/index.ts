@@ -32,6 +32,7 @@ import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
+import * as Ledger from '../protocols/ledger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
@@ -279,12 +280,20 @@ export class Wallet implements WalletInterface {
     appData,
   }: UpdateChannelParams): SingleChannelResult {
     const timer = timerFactory(this.walletConfig.timingMetrics, `updateChannel ${channelId}`);
+
+    if (await this.store.isLedger(channelId))
+      throw new UpdateChannel.UpdateChannelError(
+        UpdateChannel.UpdateChannelError.reasons.internalChannel,
+        {channelId}
+      );
+
     const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
         {channelId}
       );
     };
+
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
@@ -379,9 +388,9 @@ export class Wallet implements WalletInterface {
       };
     }
 
-    const channelIds = await this.store.pushMessage(wirePayload);
+    const channels = await this.store.pushMessage(wirePayload);
 
-    const {channelResults, outbox} = await this.takeActions(channelIds);
+    const {channelResults, outbox} = await this.takeActions(channels);
 
     if (wirePayload.requests && wirePayload.requests.length > 0)
       // Modifies outbox, may append new messages
@@ -402,16 +411,16 @@ export class Wallet implements WalletInterface {
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
-    let error: Error | undefined = undefined;
-    while (channels.length && !error) {
-      await this.store.lockApp(channels[0], async tx => {
-        // For the moment, we are only considering directly funded app channels.
-        // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-        // In the future, we can have an App model which collects all the relevant channels for an app channel,
-        // and a Ledger model which stores ledger-specific data (eg. queued requests)
-        const app = await this.store.getChannel(channels[0], tx);
 
-        if (!app) {
+    let error: Error | undefined = undefined;
+
+    while (channels.length && !error) {
+      const nextChannelId = channels[0];
+
+      await this.store.lockApp(nextChannelId, async tx => {
+        const channel = await this.store.getChannelV2(nextChannelId, tx);
+
+        if (!channel) {
           throw new Error('Channel not found');
         }
 
@@ -419,29 +428,46 @@ export class Wallet implements WalletInterface {
           error = e;
           await tx.rollback(error);
         };
+
         const markChannelAsDone = (): void => {
           channels.shift();
-          channelResults.push(ChannelState.toChannelResult(app));
+          channelResults.push(ChannelState.toChannelResult(channel));
         };
 
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
-            case 'SignState': {
+            case 'SignState':
               const {outgoing} = await this.store.signState(action.channelId, action, tx);
               outgoing.map(n => outbox.push(n.notice));
               return;
-            }
+
             case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
               await OnchainService.fundChannel(action);
               return;
+
+            case 'RequestLedgerFunding':
+              const ledgerChannelId = await this.store.requestLedgerFunding(channel, tx);
+              channels.push(ledgerChannelId);
+              return;
+
+            case 'LedgerFundChannel':
+              await this.store.ledgerFundChannel(action.fundingChannelid, tx);
+              return;
+
+            case 'QueueNextFunding':
+              await this.store.queueNextChannelFunding(tx);
+              return;
+
             default:
               throw 'Unimplemented';
           }
         };
 
         const nextAction = recordFunctionMetrics(
-          Application.protocol({app}),
+          channel.type === 'App'
+            ? Application.protocol({app: channel})
+            : Ledger.protocol({ledger: channel}),
           this.walletConfig.timingMetrics
         );
 

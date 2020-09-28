@@ -1,38 +1,56 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {logger as parentLogger} from '../logger';
-
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {Protocol, ProtocolResult, ChannelState, stage, Stage, stageGuard} from './state';
 import {
   signState,
   noAction,
   fundChannel as requestFundChannel,
   FundChannel,
   RequestLedgerFunding,
-  requestLedgerFunding,
+  requestLedgerFunding as requestLedgerFundingAction,
+  SignState,
 } from './actions';
 
-export type ProtocolState = {app: ChannelState};
-
-const logger = parentLogger.child({module: 'Application'});
-
-const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
-  !!s && stage(s) === guardStage;
+export type ProtocolState = {
+  app: ChannelState;
+  fundingChannel?: ChannelState;
+};
 
 const isPrefundSetup = stageGuard('PrefundSetup');
+
 // These are currently unused, but will be used
 // const isPostfundSetup = stageGuard('PostfundSetup');
 // const isRunning = stageGuard('Running');
+
 const isFinal = stageGuard('Final');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
-const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
+const isFunded = ({
+  app: {channelId, funding, supported, fundingStrategy},
+  fundingChannel,
+}: ProtocolState): boolean => {
   if (!supported) return false;
-  const {allocationItems, assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
-  const currentFunding = funding(assetHolderAddress);
-  const targetFunding = allocationItems.map(({amount}) => amount).reduce(BN.add, BN.from(0));
-  return BN.gte(currentFunding, targetFunding);
+  switch (fundingStrategy) {
+    case 'Direct': {
+      const {allocationItems, assetHolderAddress} = checkThat(
+        supported.outcome,
+        isSimpleAllocation
+      );
+      const currentFunding = funding(assetHolderAddress);
+      const targetFunding = allocationItems.map(({amount}) => amount).reduce(BN.add, BN.from(0));
+      return BN.gte(currentFunding, targetFunding);
+    }
+    case 'Ledger': {
+      if (!fundingChannel) return false;
+      if (!fundingChannel.supported) return false;
+      if (!isFunded({app: fundingChannel})) return false; // TODO: Should we check this?
+      const {allocationItems} = checkThat(fundingChannel.supported.outcome, isSimpleAllocation);
+      return _.find(allocationItems, ({destination}) => destination === channelId) !== undefined;
+    }
+    default:
+      throw new Error('Unimplemented');
+  }
 };
 
 /**
@@ -42,8 +60,13 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
  * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
  */
 const requestFundChannelIfMyTurn = ({
-  app: {supported, chainServiceRequests, channelId, myIndex, participants, funding},
-}: ProtocolState): FundChannel | false => {
+  supported,
+  chainServiceRequests,
+  channelId,
+  myIndex,
+  participants,
+  funding,
+}: ChannelState): FundChannel | false => {
   // Sanity-check (should have been checked by prior application protocol guard)
   if (!supported) return false;
 
@@ -84,25 +107,22 @@ const requestFundChannelIfMyTurn = ({
   });
 };
 
-const requestLedgerChannelDeduction = ({
+const requestLedgerFunding = ({
   channelId,
   supported,
+  ledgerFundingRequested,
 }: ChannelState): RequestLedgerFunding | false => {
   if (!supported) return false;
 
-  const {outcome} = supported;
+  // Don't submit another ledger funding request if one already exists
+  if (ledgerFundingRequested) return false;
 
-  if (outcome.type !== 'SimpleAllocation') {
-    logger.debug('Will not request ledger funding for unsupported outcome type', {
-      channelId,
-      type: outcome.type,
-    });
-    return false;
-  }
+  const {assetHolderAddress, allocationItems: deductions} = checkThat(
+    supported.outcome,
+    isSimpleAllocation
+  );
 
-  const {assetHolderAddress, allocationItems: deductions} = outcome;
-
-  return requestLedgerFunding({
+  return requestLedgerFundingAction({
     channelId,
     assetHolderAddress,
     deductions,
@@ -112,27 +132,21 @@ const requestLedgerChannelDeduction = ({
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
-const directlyFund = (ps: ProtocolState): ProtocolResult | false =>
-  isDirectlyFunded(ps.app) && requestFundChannelIfMyTurn(ps);
+const fundChannel = ({
+  app,
+}: ProtocolState): SignState | FundChannel | RequestLedgerFunding | false =>
+  isPrefundSetup(app.supported) &&
+  isPrefundSetup(app.latestSignedByMe) &&
+  ((isDirectlyFunded(app) && requestFundChannelIfMyTurn(app)) ||
+    (isLedgerFunded(app) && requestLedgerFunding(app)));
 
-const ledgerFund = (ps: ProtocolState): ProtocolResult | false =>
-  isLedgerFunded(ps.app) && requestLedgerChannelDeduction(ps.app);
-
-const fundChannelInner = (ps: ProtocolState): ProtocolResult | false =>
-  directlyFund(ps) || ledgerFund(ps);
-
-const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
-  isPrefundSetup(ps.app.supported) &&
-  isPrefundSetup(ps.app.latestSignedByMe) &&
-  fundChannelInner(ps);
-
-const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
+const signPostFundSetup = (ps: ProtocolState): SignState | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
   isFunded(ps) &&
   signState({channelId: ps.app.channelId, ...ps.app.latestSignedByMe, turnNum: 3});
 
-const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
+const signFinalState = (ps: ProtocolState): SignState | false =>
   isFinal(ps.app.supported) &&
   !isFinal(ps.app.latestSignedByMe) &&
   signState({channelId: ps.app.channelId, ...ps.app.supported});

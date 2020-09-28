@@ -22,6 +22,7 @@ export class UpdateChannelError extends WalletError {
   readonly type = WalletError.errors.UpdateChannelError;
 
   static readonly reasons = {
+    internalChannel: 'channel is managed by wallet and cannot be modified by API',
     channelNotFound: 'channel not found',
     invalidLatestState: 'must have latest state',
     notInRunningStage: 'channel must be in running state',
