@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "patch-package": "6.2.0"
-  },
   "devDependencies": {
     "@types/prettier": "1.19.0",
     "eslint-plugin-import": "2.20.0",
@@ -48,7 +45,6 @@
     "clean:dry": "git clean -Xdn --exclude=\"!.env.*\"",
     "lint:check": "lerna run lint:check --no-sort --no-bail -- --max-warnings=0",
     "lint:write": "lerna run lint:write --no-sort --no-bail",
-    "postinstall": "patch-package",
     "preinstall": "npx typesync",
     "prepare": "lerna run --concurrency 8 --stream prepare",
     "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",

@@ -108,7 +108,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lerna", "npm:3.16.4"],
             ["netlify-cli", "npm:2.30.0"],
             ["npm-normalize-package-bin", "npm:1.0.1"],
-            ["patch-package", "npm:6.2.0"],
             ["postinstall-postinstall", "npm:2.0.0"],
             ["prettier", "npm:1.19.1"],
             ["typescript", "patch:typescript@npm%3A3.7.5#builtin<compat/typescript>::version=3.7.5&hash=5b02a2"],
@@ -14528,15 +14527,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["@yarnpkg/lockfile", [
-        ["npm:1.1.0", {
-          "packageLocation": "./.yarn/cache/@yarnpkg-lockfile-npm-1.1.0-6e0da4acd2-76f3f26253.zip/node_modules/@yarnpkg/lockfile/",
-          "packageDependencies": [
-            ["@yarnpkg/lockfile", "npm:1.1.0"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["@zkochan/cmd-shim", [
         ["npm:3.1.0", {
           "packageLocation": "./.yarn/cache/@zkochan-cmd-shim-npm-3.1.0-51875ade63-79337e5aaf.zip/node_modules/@zkochan/cmd-shim/",
@@ -24308,17 +24298,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["find-yarn-workspace-root", [
-        ["npm:1.2.1", {
-          "packageLocation": "./.yarn/cache/find-yarn-workspace-root-npm-1.2.1-91f28f6b79-df97013b72.zip/node_modules/find-yarn-workspace-root/",
-          "packageDependencies": [
-            ["find-yarn-workspace-root", "npm:1.2.1"],
-            ["fs-extra", "npm:4.0.3"],
-            ["micromatch", "npm:3.1.10"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["findup-sync", [
         ["npm:3.0.0", {
           "packageLocation": "./.yarn/cache/findup-sync-npm-3.0.0-aed78587f5-be03bd98fc.zip/node_modules/findup-sync/",
@@ -24686,16 +24665,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["klaw", "npm:1.3.1"],
             ["path-is-absolute", "npm:1.0.1"],
             ["rimraf", "npm:2.7.1"]
-          ],
-          "linkType": "HARD",
-        }],
-        ["npm:4.0.3", {
-          "packageLocation": "./.yarn/cache/fs-extra-npm-4.0.3-2a1f6bc181-ad42def194.zip/node_modules/fs-extra/",
-          "packageDependencies": [
-            ["fs-extra", "npm:4.0.3"],
-            ["graceful-fs", "npm:4.2.4"],
-            ["jsonfile", "npm:4.0.0"],
-            ["universalify", "npm:0.1.2"]
           ],
           "linkType": "HARD",
         }],
@@ -29545,16 +29514,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["klaw-sync", [
-        ["npm:6.0.0", {
-          "packageLocation": "./.yarn/cache/klaw-sync-npm-6.0.0-251c1a2fa5-40112f582d.zip/node_modules/klaw-sync/",
-          "packageDependencies": [
-            ["klaw-sync", "npm:6.0.0"],
-            ["graceful-fs", "npm:4.2.4"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["kleur", [
         ["npm:3.0.3", {
           "packageLocation": "./.yarn/cache/kleur-npm-3.0.3-f6f53649a4-20ef0e37fb.zip/node_modules/kleur/",
@@ -34304,28 +34263,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["password-prompt", "npm:1.1.2"],
             ["ansi-escapes", "npm:3.2.0"],
             ["cross-spawn", "npm:6.0.5"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["patch-package", [
-        ["npm:6.2.0", {
-          "packageLocation": "./.yarn/cache/patch-package-npm-6.2.0-1f3709263e-812df2a428.zip/node_modules/patch-package/",
-          "packageDependencies": [
-            ["patch-package", "npm:6.2.0"],
-            ["@yarnpkg/lockfile", "npm:1.1.0"],
-            ["chalk", "npm:2.4.2"],
-            ["cross-spawn", "npm:6.0.5"],
-            ["find-yarn-workspace-root", "npm:1.2.1"],
-            ["fs-extra", "npm:7.0.1"],
-            ["is-ci", "npm:2.0.0"],
-            ["klaw-sync", "npm:6.0.0"],
-            ["minimist", "npm:1.2.5"],
-            ["rimraf", "npm:2.7.1"],
-            ["semver", "npm:5.7.1"],
-            ["slash", "npm:2.0.0"],
-            ["tmp", "npm:0.0.33"],
-            ["update-notifier", "npm:2.5.0"]
           ],
           "linkType": "HARD",
         }]
@@ -39400,7 +39337,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lerna", "npm:3.16.4"],
             ["netlify-cli", "npm:2.30.0"],
             ["npm-normalize-package-bin", "npm:1.0.1"],
-            ["patch-package", "npm:6.2.0"],
             ["postinstall-postinstall", "npm:2.0.0"],
             ["prettier", "npm:1.19.1"],
             ["typescript", "patch:typescript@npm%3A3.7.5#builtin<compat/typescript>::version=3.7.5&hash=5b02a2"],
