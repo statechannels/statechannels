@@ -59,10 +59,14 @@ describe('directly funded app', () => {
     expect(current.latest).toMatchObject(preFS);
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
-      // TODO: These outbox items should probably be merged into one outgoing message
       outbox: [
-        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFSWire]}}},
-        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [postFSWire]}}},
+        {
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [preFSWire, postFSWire]},
+          },
+        },
       ],
       // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
       // implementation

@@ -74,7 +74,7 @@ describe('happy path', () => {
 
     const result = await w.createChannels(createArgs, NUM_CHANNELS);
     expect(result.channelResults).toHaveLength(NUM_CHANNELS);
-    expect(result.outbox).toHaveLength(NUM_CHANNELS);
+    expect(result.outbox).toHaveLength(1);
 
     expect(await Channel.query(w.knex).resultSize()).toEqual(NUM_CHANNELS);
   }, 10_000);
