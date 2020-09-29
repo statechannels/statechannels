@@ -2,8 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import {utils, providers} from 'ethers';
-import {Config} from '@jest/types';
-import {Reporter} from '@jest/reporters';
+import {Config, Reporter} from '@jest/reporters';
 import linker from 'solc/linker';
 import easyTable from 'easy-table';
 
