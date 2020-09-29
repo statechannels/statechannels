@@ -58,8 +58,20 @@ describe('registerChannel', () => {
     const wrongChannelId = randomChannelId();
 
     const mock = jest.fn();
-    const subscriber = {setFunding: mock};
-    chainService.registerChannel(channelId, [ethAssetHolderAddress], subscriber);
+    const p = new Promise(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        setFunding: arg => {
+          mock(arg);
+          resolve();
+        },
+      })
+    );
+    await p;
+    expect(mock).toHaveBeenCalledWith({
+      channelId,
+      assetHolderAddress: ethAssetHolderAddress,
+      amount: BN.from(0),
+    });
 
     // First, fund a different channel id to see if our listener picks up the event for this channelId
     await (
@@ -79,11 +91,26 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     expect(mock).toHaveBeenCalledWith({
       channelId,
       assetHolderAddress: ethAssetHolderAddress,
       amount: BN.from(5),
+    });
+  });
+
+  it('Successfully receives initial value', async () => {
+    const channelId = randomChannelId();
+
+    const mock = jest.fn();
+    const subscriber = {setFunding: mock};
+    chainService.registerChannel(channelId, [ethAssetHolderAddress], subscriber);
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+    expect(mock).toHaveBeenCalledWith({
+      channelId,
+      assetHolderAddress: ethAssetHolderAddress,
+      amount: BN.from(0),
     });
   });
 });

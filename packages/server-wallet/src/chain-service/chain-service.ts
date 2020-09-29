@@ -1,8 +1,8 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {BN, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
-import {Observable} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {Observable, ReplaySubject} from 'rxjs';
+import {filter, multicast, refCount} from 'rxjs/operators';
 
 import {Address, Bytes32} from '../type-aliases';
 
@@ -70,10 +70,10 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
     assetHolders: Address[],
     subscriber: ChainEventSubscriberInterface
   ): void {
-    assetHolders.map(assetHolder => {
+    assetHolders.map(async assetHolder => {
       let obs = this.addressToObservable.get(assetHolder);
       if (!obs) {
-        obs = this.createContractObservable(assetHolder);
+        obs = await this.createContractObservable(assetHolder, channelId);
         this.addressToObservable.set(assetHolder, obs);
       }
       obs
@@ -83,13 +83,15 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
     });
   }
 
-  private createContractObservable(contractAddress: Address): Observable<SetFundingArg> {
+  private createContractObservable(
+    contractAddress: Address,
+    channelId: Bytes32
+  ): Observable<SetFundingArg> {
     const contract: Contract = new Contract(
       contractAddress,
       ContractArtifacts.EthAssetHolderArtifact.abi
     ).connect(this.provider);
-
-    return new Observable<SetFundingArg>(subscriber => {
+    const obs = new Observable<SetFundingArg>(subscriber => {
       // todo: add other event types
       contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
         subscriber.next({
@@ -99,5 +101,17 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
         })
       );
     });
+    const subj = new ReplaySubject<SetFundingArg>(1);
+    const multicastObs = obs.pipe(multicast(subj), refCount());
+
+    contract.holdings(channelId).then((holdings: string) => {
+      subj.next({
+        channelId,
+        assetHolderAddress: contractAddress,
+        amount: BN.from(holdings),
+      });
+    });
+
+    return multicastObs;
   }
 }
