@@ -1,7 +1,7 @@
-import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
+import {BN, isSimpleAllocation, checkThat} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage, stageGuard} from './state';
+import {Protocol, ProtocolResult, ChannelState, stageGuard} from './state';
 import {
   signState,
   noAction,
@@ -10,10 +10,12 @@ import {
   RequestLedgerFunding,
   requestLedgerFunding as requestLedgerFundingAction,
   SignState,
+  ApplicationProtocolAction,
 } from './actions';
 
 export type ProtocolState = {
   app: ChannelState;
+  ledgerFundingRequested?: boolean;
   fundingChannel?: ChannelState;
 };
 
@@ -110,12 +112,8 @@ const requestFundChannelIfMyTurn = ({
 const requestLedgerFunding = ({
   channelId,
   supported,
-  ledgerFundingRequested,
 }: ChannelState): RequestLedgerFunding | false => {
   if (!supported) return false;
-
-  // Don't submit another ledger funding request if one already exists
-  if (ledgerFundingRequested) return false;
 
   const {assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
 
@@ -130,11 +128,12 @@ const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStra
 
 const fundChannel = ({
   app,
+  ledgerFundingRequested,
 }: ProtocolState): SignState | FundChannel | RequestLedgerFunding | false =>
   isPrefundSetup(app.supported) &&
   isPrefundSetup(app.latestSignedByMe) &&
   ((isDirectlyFunded(app) && requestFundChannelIfMyTurn(app)) ||
-    (isLedgerFunded(app) && requestLedgerFunding(app)));
+    (isLedgerFunded(app) && !ledgerFundingRequested && requestLedgerFunding(app)));
 
 const signPostFundSetup = (ps: ProtocolState): SignState | false =>
   isPrefundSetup(ps.app.supported) &&
@@ -147,5 +146,7 @@ const signFinalState = (ps: ProtocolState): SignState | false =>
   !isFinal(ps.app.latestSignedByMe) &&
   signState({channelId: ps.app.channelId, ...ps.app.supported});
 
-export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+export const protocol: Protocol<ProtocolState> = (
+  ps: ProtocolState
+): ProtocolResult<ApplicationProtocolAction> =>
   signPostFundSetup(ps) || fundChannel(ps) || signFinalState(ps) || noAction;

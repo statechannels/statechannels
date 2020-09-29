@@ -419,11 +419,15 @@ export class Wallet implements WalletInterface {
       const nextChannelId = channels[0];
 
       await this.store.lockApp(nextChannelId, async tx => {
-        const channel = await this.store.getChannelV2(nextChannelId, tx);
+        const channel = await this.store.getChannel(nextChannelId, tx);
 
         if (!channel) {
           throw new Error('Channel not found');
         }
+
+        const addChannelToEndOfRunLoop = (channelId: string): void => {
+          if (!_.find(channels, channelId)) channels.push(channelId);
+        };
 
         const setError = async (e: Error): Promise<void> => {
           error = e;
@@ -437,21 +441,21 @@ export class Wallet implements WalletInterface {
 
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
-            case 'SignState':
+            case 'SignState': {
               const {outgoing} = await this.store.signState(action.channelId, action, tx);
               outgoing.map(n => outbox.push(n.notice));
               return;
-
+            }
             case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
               await OnchainService.fundChannel(action);
               return;
 
-            case 'RequestLedgerFunding':
+            case 'RequestLedgerFunding': {
               const ledgerChannelId = await this.store.requestLedgerFunding(channel, tx);
-              if (!_.find(channels, ledgerChannelId)) channels.push(ledgerChannelId);
+              addChannelToEndOfRunLoop(ledgerChannelId);
               return;
-
+            }
             case 'LedgerFundChannels':
               await this.store.ledgerFundChannels(action.channelId, tx);
               return;
@@ -461,17 +465,17 @@ export class Wallet implements WalletInterface {
           }
         };
 
+        const decideNextAction = async (
+          channel: ChannelState.ChannelState
+        ): Promise<ChannelState.ProtocolResult> => {
+          const channelType = (await this.store.isLedger(channel.channelId)) ? 'Ledger' : 'App';
+          return channelType === 'App'
+            ? Application.protocol(await this.store.getApplicationProtocolState(channel, tx))
+            : Ledger.protocol(await this.store.getLedgerProtocolState(channel, tx));
+        };
+
         const nextAction = recordFunctionMetrics(
-          channel.type === 'App'
-            ? Application.protocol({
-                app: channel,
-              })
-            : Ledger.protocol({
-                ledger: channel,
-                hasPendingRequests: (await this.store.getPendingRequests(channel.channelId)).some(
-                  x => x.status === 'pending'
-                ),
-              }),
+          await decideNextAction(channel),
           this.walletConfig.timingMetrics
         );
 
