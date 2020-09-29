@@ -10,7 +10,7 @@
     "ethers": "5.0.12"
   },
   "devDependencies": {
-    "@ethereum-waffle/compiler": "patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.diff",
+    "@ethereum-waffle/compiler": "patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.patch",
     "@statechannels/devtools": "^0.3.7",
     "@statechannels/jest-gas-reporter": "^0.3.7",
     "@types/eslint": "6.1.7",
