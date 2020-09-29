@@ -2,7 +2,7 @@
 set -e
 set -u
 
-yarn build
+yarn prepare
 
 if [ -d ./.clinic ]; then
   echo "Deleting .clinic folder"

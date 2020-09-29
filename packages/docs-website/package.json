@@ -28,8 +28,7 @@
   "private": "true",
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
-    "build": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
-    "build:netlify": "yarn build",
+    "build:netlify": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
     "deploy": "docusaurus deploy",
     "docusaurus": "docusaurus",
     "examples": "docusaurus-examples",

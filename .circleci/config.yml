@@ -184,7 +184,8 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - run: yarn --frozen-lockfile --cache-folder ~.cache/yarn
-      - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation artifacts (e.g. yarn.lock)
+      - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock or api-reports)
+      - run: yarn lint:check
       - <<: *save_dep
 
       - persist_to_workspace:
@@ -198,30 +199,6 @@ jobs:
             - node_modules
       - upload_logs:
           file: prepare-stats
-      - notify_slack
-
-  build:
-    <<: *defaults
-    resource_class: large
-    steps:
-      - checkout
-      - log_stats:
-          file: build-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: yarn lint:check
-      - run:
-          name: build
-          command: |
-            if [ "${CIRCLE_BRANCH}" = "master" ]
-            then
-                yarn build:ci
-            else
-                yarn build:ci:incremental
-            fi
-      - run: git diff --exit-code # Fails the job if you forgot to check in tracked build artifacts (e.g. api reports)
-      - upload_logs:
-          file: build-stats
       - notify_slack
 
   test:
@@ -464,9 +441,6 @@ workflows:
     jobs:
       - prepare
 
-      - build:
-          requires:
-            - prepare
       - test:
           requires:
             - prepare

@@ -42,12 +42,11 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
-    "build": "yarn build:typescript && yarn generate-api",
-    "build:typescript": "tsc -b .",
+    "prepare": "yarn build:typescript && yarn generate-api",
+    "build:typescript": "rm -rf lib; tsc -b .",
     "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
-    "prepare": "rm -rf lib && yarn build",
     "test": "jest",
     "test:ci": "jest --runInBand"
   }
