@@ -1,4 +1,4 @@
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
 import {
   Participant,
   SignatureEntry,
@@ -18,7 +18,6 @@ import {
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {utils} from 'ethers';
 import _ from 'lodash';
 
 import {DBBackend} from '../store';

@@ -1,6 +1,6 @@
 import {filter, map, first} from 'rxjs/operators';
 import {FundLedger, assertSimpleEthAllocation, BN} from '@statechannels/wallet-core';
-import [utils} from 'ethers';
+import {utils} from 'ethers';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 
 import {FakeChain} from '../chain';
