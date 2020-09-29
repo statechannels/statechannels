@@ -2555,7 +2555,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethereum-waffle/compiler@npm:3.1.0":
+"@ethereum-waffle/compiler@3.1.0":
   version: 3.1.0
   resolution: "@ethereum-waffle/compiler@npm:3.1.0"
   dependencies:
@@ -2568,6 +2568,22 @@ __metadata:
     node-fetch: ^2.6.0
     solc: ^0.6.3
   checksum: 37bf97c069867a31e06a4d07659d417503293b413b20f7a8337dc7e445b79c1624e24b3615936cf532128af80521504595bbf0164654917894609cabb4552f96
+  languageName: node
+  linkType: hard
+
+"@ethereum-waffle/compiler@patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.diff::locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol":
+  version: 3.1.0
+  resolution: "@ethereum-waffle/compiler@patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=37b135&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"
+  dependencies:
+    "@resolver-engine/imports": ^0.3.3
+    "@resolver-engine/imports-fs": ^0.3.3
+    "@types/mkdirp": ^0.5.2
+    "@types/node-fetch": ^2.5.5
+    ethers: ^5.0.1
+    mkdirp: ^0.5.1
+    node-fetch: ^2.6.0
+    solc: ^0.6.3
+  checksum: a09416e331509bf6e3917336535170fa905457cde131993412faa0110b7ba2a4208f6562cadbe8c2b2cab5195d16257c1a6c4ed4ed0584e1c4370bed2b82ca21
   languageName: node
   linkType: hard
 
@@ -5616,7 +5632,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@statechannels/nitro-protocol@workspace:packages/nitro-protocol"
   dependencies:
-    "@ethereum-waffle/compiler": 3.1.0
+    "@ethereum-waffle/compiler": "patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.diff"
     "@openzeppelin/contracts": 3.0.1
     "@statechannels/devtools": ^0.3.7
     "@statechannels/jest-gas-reporter": ^0.3.7
