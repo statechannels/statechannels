@@ -139,18 +139,14 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther('1000000');
 
-    const opts = [
+    const args: string[] = [
       [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
       [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
       SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : []
-    ]
-      .reduce((a, b) => a.concat(b))
-      .join(' ');
+    ].reduce((a, b) => a.concat(b));
 
-    const cmd = `ganache-cli ${opts}`;
-
-    this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
+    this.server = spawn('ganache-cli', args, {stdio: 'pipe', shell: true});
     this.server.stdout.on('data', data => {
       if (SHOW_VERBOSE_GANACHE_OUTPUT) {
         extractLogsFromVerboseGanacheOutput(this.buffer, data.toString());
