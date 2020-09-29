@@ -1,51 +1,466 @@
-Unknown Syntax Error: Command not found; did you mean one of:
-
-  0. yarn --welcome
-  1. yarn cache clean [--mirror] [--all]
-  2. yarn config get [--json] [--no-redacted] <name>
-  3. yarn config set [--json] [-H,--home] <name> <value>
-  4. yarn set resolution [-s,--save] <descriptor> <resolution>
-  5. yarn set version from sources [--path #0] [--repository #0] [--branch #0] [--plugin #0] [--no-minify] [-f,--force]
-  6. yarn set version [--only-if-needed] <version>
-  7. yarn set version [--only-if-needed] <version>
-  8. yarn workspaces list [-v,--verbose] [--json]
-  9. yarn --clipanion=definitions
- 10. yarn -h
- 11. yarn -h
- 12. yarn -h
- 13. yarn <leadingArgument> ...
- 14. yarn --version
- 15. yarn --version
- 16. yarn add [--json] [-E,--exact] [-T,--tilde] [-C,--caret] [-D,--dev] [-P,--peer] [-O,--optional] [--prefer-dev] [-i,--interactive] [--cached] ...
- 17. yarn bin [-v,--verbose] [--json] [name]
- 18. yarn config [-v,--verbose] [--why] [--json]
- 19. yarn dedupe [-s,--strategy #0] [-c,--check] [--json] ...
- 20. yarn exec <commandName> ...
- 21. yarn install [--json] [--immutable] [--immutable-cache] [--check-cache] [--inline-builds]
- 22. yarn link [-A,--all] [-p,--private] [-r,--relative] <destination>
- 23. yarn node ...
- 24. yarn plugin import from sources [--path #0] [--repository #0] [--branch #0] [--no-minify] [-f,--force] <name>
- 25. yarn plugin import <name>
- 26. yarn plugin remove <name>
- 27. yarn plugin list [--json]
- 28. yarn plugin runtime [--json]
- 29. yarn rebuild ...
- 30. yarn remove [-A,--all] ...
- 31. yarn run
- 32. yarn up [-i,--interactive] [-v,--verbose] [-E,--exact] [-T,--tilde] [-C,--caret] ...
- 33. yarn why [-R,--recursive] [--peers] <package>
- 34. yarn workspace <workspaceName> <commandName> ...
- 35. yarn create [-p,--package #0] [-q,--quiet] <command> ...
- 36. yarn dlx [-p,--package #0] [-q,--quiet] <command> ...
- 37. yarn init [-p,--private] [-w,--workspace] [-i,--install]
- 38. yarn npm info [-f,--fields #0] [--json] ...
- 39. yarn npm login [-s,--scope #0] [--publish]
- 40. yarn npm logout [-s,--scope #0] [--publish] [-A,--all]
- 41. yarn npm publish [--access #0] [--tag #0] [--tolerate-republish]
- 42. yarn npm whoami [-s,--scope #0] [--publish]
- 43. yarn pack [--install-if-needed] [-n,--dry-run] [--json] [-o,--out #0] [--filename #0]
- 44. yarn patch-commit <patchFolder>
- 45. yarn patch <package>
- 46. yarn unplug [-A,--all] [-R,--recursive] [--json] ...
-
-While running --silent ts-json-schema-generator --path=src/types.ts
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Address": {
+      "description": "Ethereum Address",
+      "pattern": "^0x([a-fA-F0-9]{40})|0$",
+      "type": "string"
+    },
+    "Allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocationItems": {
+          "items": {
+            "$ref": "#/definitions/AllocationItem"
+          },
+          "type": "array"
+        },
+        "assetHolderAddress": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "assetHolderAddress",
+        "allocationItems"
+      ],
+      "type": "object"
+    },
+    "AllocationItem": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/Uint256"
+        },
+        "destination": {
+          "$ref": "#/definitions/Bytes32"
+        }
+      },
+      "required": [
+        "destination",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "Allocations": {
+      "items": {
+        "$ref": "#/definitions/Allocation"
+      },
+      "type": "array"
+    },
+    "Bytes": {
+      "description": "Bytes",
+      "pattern": "^0x([a-fA-F0-9]*)$",
+      "type": "string"
+    },
+    "Bytes32": {
+      "description": "Bytes32",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
+    "ChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
+        "type": {
+          "enum": [
+            "GetChannel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "CloseLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "CloseLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "FundGuarantor": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "guarantorId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "jointChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "jointChannelId",
+            "ledgerId",
+            "guarantorId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundGuarantor"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "FundLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Guarantee": {
+      "additionalProperties": false,
+      "properties": {
+        "assetHolderAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "destinations": {
+          "items": {
+            "$ref": "#/definitions/Bytes32"
+          },
+          "type": "array"
+        },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        }
+      },
+      "required": [
+        "assetHolderAddress",
+        "targetChannelId",
+        "destinations"
+      ],
+      "type": "object"
+    },
+    "Guarantees": {
+      "items": {
+        "$ref": "#/definitions/Guarantee"
+      },
+      "type": "array"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Payload"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "sender": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "recipient",
+        "sender",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Objective": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/OpenChannel"
+        },
+        {
+          "$ref": "#/definitions/VirtuallyFund"
+        },
+        {
+          "$ref": "#/definitions/FundGuarantor"
+        },
+        {
+          "$ref": "#/definitions/FundLedger"
+        },
+        {
+          "$ref": "#/definitions/CloseLedger"
+        }
+      ]
+    },
+    "OpenChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "fundingStrategy": {
+              "enum": [
+                "Direct",
+                "Ledger",
+                "Virtual",
+                "Unfunded",
+                "Unknown"
+              ],
+              "type": "string"
+            },
+            "targetChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "targetChannelId",
+            "fundingStrategy"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "OpenChannel"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "Outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Guarantees"
+        },
+        {
+          "$ref": "#/definitions/Allocations"
+        }
+      ]
+    },
+    "Participant": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/definitions/Address"
+        },
+        "participantId": {
+          "type": "string"
+        },
+        "signingAddress": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "participantId",
+        "signingAddress",
+        "destination"
+      ],
+      "type": "object"
+    },
+    "Payload": {
+      "additionalProperties": false,
+      "properties": {
+        "objectives": {
+          "items": {
+            "$ref": "#/definitions/Objective"
+          },
+          "type": "array"
+        },
+        "requests": {
+          "items": {
+            "$ref": "#/definitions/ChannelRequest"
+          },
+          "type": "array"
+        },
+        "signedStates": {
+          "items": {
+            "$ref": "#/definitions/SignedState"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "SignedState": {
+      "additionalProperties": false,
+      "properties": {
+        "appData": {
+          "$ref": "#/definitions/Bytes"
+        },
+        "appDefinition": {
+          "$ref": "#/definitions/Address"
+        },
+        "chainId": {
+          "type": "string"
+        },
+        "challengeDuration": {
+          "$ref": "#/definitions/Uint48"
+        },
+        "channelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
+        "channelNonce": {
+          "$ref": "#/definitions/Uint48"
+        },
+        "isFinal": {
+          "type": "boolean"
+        },
+        "outcome": {
+          "$ref": "#/definitions/Outcome"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "turnNum": {
+          "$ref": "#/definitions/Uint48"
+        }
+      },
+      "required": [
+        "chainId",
+        "participants",
+        "channelNonce",
+        "appDefinition",
+        "challengeDuration",
+        "outcome",
+        "turnNum",
+        "appData",
+        "isFinal",
+        "channelId",
+        "signatures"
+      ],
+      "type": "object"
+    },
+    "Uint256": {
+      "description": "Uint256",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
+    "Uint48": {
+      "type": "number"
+    },
+    "VirtuallyFund": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "jointChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            },
+            "targetChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "targetChannelId",
+            "jointChannelId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "VirtuallyFund"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    }
+  }
+}
