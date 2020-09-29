@@ -13,7 +13,7 @@
     "strict": false,
     /* Enable all strict type-checking options. */
     "esModuleInterop": true,
-    "types": ["node", "jest"]
+    "types": ["node"]
   },
   "exclude": ["lib", "node_modules"]
 }

@@ -5589,7 +5589,7 @@ __metadata:
     "@types/easy-table": 0.0.32
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
-    "@types/jest": 25.1.0
+    "@types/node": ^14.11.2
     "@types/prettier": 1.19.0
     "@typescript-eslint/eslint-plugin": 2.18.0
     "@typescript-eslint/parser": 2.18.0
@@ -5602,7 +5602,7 @@ __metadata:
     lint-staged: 10.0.4
     prettier: 1.19.1
     solc: 0.6.1
-    typescript: 3.7.5
+    typescript: 4.0.3
   languageName: unknown
   linkType: soft
 
@@ -8202,6 +8202,13 @@ __metadata:
   version: 13.5.1
   resolution: "@types/node@npm:13.5.1"
   checksum: 1d502507b73196026f87489c6ba37528d3e907270b5d7aa02e20bd44dacbd7d7256b5a51797018b1e00ac68a0822aa568dbbc83fca9065f94acb42cad0956a82
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^14.11.2":
+  version: 14.11.2
+  resolution: "@types/node@npm:14.11.2"
+  checksum: 3badcce3991cd8487b549b2541c9a9809f77ded06a2846dd9c73948d12a442290b31abef2d4b0304cc7e30539614ae82ff3b70d93a4b9a82e19128b3d17a9e0f
   languageName: node
   linkType: hard
 
@@ -21692,31 +21699,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"jest-haste-map@npm:^25.5.1":
-  version: 25.5.1
-  resolution: "jest-haste-map@npm:25.5.1"
-  dependencies:
-    "@jest/types": ^25.5.0
-    "@types/graceful-fs": ^4.1.2
-    anymatch: ^3.0.3
-    fb-watchman: ^2.0.0
-    fsevents: ^2.1.2
-    graceful-fs: ^4.2.4
-    jest-serializer: ^25.5.0
-    jest-util: ^25.5.0
-    jest-worker: ^25.5.0
-    micromatch: ^4.0.2
-    sane: ^4.0.3
-    walker: ^1.0.7
-    which: ^2.0.2
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  checksum: f806838fafc4ff04337c8bcf3de22927db8271165372ddba81587e24d664e85418ecf2c4d566a588eccedf4a8a4078499d75867494c3696ef272f0fe216f4b1a
-  languageName: node
-  linkType: hard
-
-"jest-haste-map@npm:^26.3.0":
+"jest-haste-map@npm:26.3.0, jest-haste-map@npm:^26.3.0":
   version: 26.3.0
   resolution: "jest-haste-map@npm:26.3.0"
   dependencies:
@@ -21738,6 +21721,30 @@ fsevents@^1.2.7:
     fsevents:
       optional: true
   checksum: 6a526146d7f4db00f690384cc18ec89805617006bcdc02080b16ca53bc0a843a5cd74469997a24302c536575ca90e36b59f92eda80b189a2d44560e840642c1d
+  languageName: node
+  linkType: hard
+
+"jest-haste-map@npm:^25.5.1":
+  version: 25.5.1
+  resolution: "jest-haste-map@npm:25.5.1"
+  dependencies:
+    "@jest/types": ^25.5.0
+    "@types/graceful-fs": ^4.1.2
+    anymatch: ^3.0.3
+    fb-watchman: ^2.0.0
+    fsevents: ^2.1.2
+    graceful-fs: ^4.2.4
+    jest-serializer: ^25.5.0
+    jest-util: ^25.5.0
+    jest-worker: ^25.5.0
+    micromatch: ^4.0.2
+    sane: ^4.0.3
+    walker: ^1.0.7
+    which: ^2.0.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  checksum: f806838fafc4ff04337c8bcf3de22927db8271165372ddba81587e24d664e85418ecf2c4d566a588eccedf4a8a4078499d75867494c3696ef272f0fe216f4b1a
   languageName: node
   linkType: hard
 
@@ -34520,6 +34527,16 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
+typescript@4.0.3:
+  version: 4.0.3
+  resolution: "typescript@npm:4.0.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 5c892e132756a83d22030d7fb38be47cde27613f71d233dbe7faf79e4a92852c5146bfddcaf8c2da1a37d35ae8bf7b8c888fdcd763d5ad184cea6b21e7466838
+  languageName: node
+  linkType: hard
+
 "typescript@^3.5.1, typescript@^3.8.3, typescript@~3.9.5":
   version: 3.9.7
   resolution: "typescript@npm:3.9.7"
@@ -34537,6 +34554,16 @@ resolve@~1.12.0:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: cf3413606dfe8a8c8e08392afe1f52975541b900ad407bc072279ad27b57ce4939eac389e74477bb0f8747122cf3442b944023ddfd87143d3b9ea3122fff40ad
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@4.0.3#builtin<compat/typescript>":
+  version: 4.0.3
+  resolution: "typescript@patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 72db87d09f728c83062d64b5e12ed52effb6278963b6bc5c006219b22c104e02b8ce80164261de554923d3c47d894a1ca937ed542328caccb83ebaedeae98a69
   languageName: node
   linkType: hard
 
