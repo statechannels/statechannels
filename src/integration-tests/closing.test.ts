@@ -35,7 +35,7 @@ test('concludes on their turn', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: BN.from(utils.exZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
