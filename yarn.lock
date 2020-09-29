@@ -5469,14 +5469,17 @@ __metadata:
     "@microsoft/api-extractor": 7.9.2
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
+    "@types/node": ^14.11.2
     "@typescript-eslint/eslint-plugin": 2.18.0
     "@typescript-eslint/parser": 2.18.0
     ajv: 6.11.0
     eslint: 6.8.0
     eslint-plugin-prettier: 3.1.2
     eslint-plugin-tsdoc: 0.2.6
+    jest: ^25.1.0
     lint-staged: 10.0.4
     ts-json-schema-generator: 0.60.0
+    typescript: ^4.0.3
   languageName: unknown
   linkType: soft
 
@@ -8007,7 +8010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
+"@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:2.0.3, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
   version: 2.0.3
   resolution: "@types/istanbul-lib-coverage@npm:2.0.3"
   checksum: d6f6dbf66d2d2d7d80d093329f0428ac279440510030bfd0080545bba6882433444430905e6e31eba299b890e50ccf2b6a7de9345d7d0ed52ff174f8ead48855
@@ -8749,6 +8752,15 @@ __metadata:
   dependencies:
     "@types/yargs-parser": "*"
   checksum: 2133c8cb5878d13959844f98e546e69dacdf44cd9baf87d84c828a1a093febfc97c8f4df19cffd34a4a4f726a3cdb1851da4391176accf56534c5f8a1c271f46
+  languageName: node
+  linkType: hard
+
+"@types/yargs@npm:15.0.7":
+  version: 15.0.7
+  resolution: "@types/yargs@npm:15.0.7"
+  dependencies:
+    "@types/yargs-parser": "*"
+  checksum: df076111e3564fb2e92dc11fe0b32b096bb3ed8e241dd70205159c83d32a0ba281ea73108a995679cb29c6a2fa434c5a90237e33ba9cdcba2e98165e35a74440
   languageName: node
   linkType: hard
 
@@ -21556,7 +21568,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"jest-cli@npm:^25.1.0":
+"jest-cli@npm:^25.1.0, jest-cli@npm:^25.5.4":
   version: 25.5.4
   resolution: "jest-cli@npm:25.5.4"
   dependencies:
@@ -22104,6 +22116,19 @@ fsevents@^1.2.7:
   bin:
     jest: ./bin/jest.js
   checksum: 3e0f692f6d1f93bb3fce15acbdcae08e8a688ea4ca0f2974fb1357bac4a18585bd9d19ac752cd5103479f9807c5bc9f764eb6b4595265a4fe57f3b7a7bcf9206
+  languageName: node
+  linkType: hard
+
+"jest@npm:^25.1.0":
+  version: 25.5.4
+  resolution: "jest@npm:25.5.4"
+  dependencies:
+    "@jest/core": ^25.5.4
+    import-local: ^3.0.2
+    jest-cli: ^25.5.4
+  bin:
+    jest: bin/jest.js
+  checksum: aa4a0c3d6999036892d2c652afb87c4e8329a9303999fe595a91efaf674c2d0ff6eceed373042f82094fdd837264b01771c5a69dc0ee96533cc178860eac8991
   languageName: node
   linkType: hard
 
@@ -34530,7 +34555,7 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
-typescript@4.0.3:
+"typescript@4.0.3, typescript@^4.0.3":
   version: 4.0.3
   resolution: "typescript@npm:4.0.3"
   bin:
@@ -34560,7 +34585,7 @@ typescript@4.0.3:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.0.3#builtin<compat/typescript>":
+"typescript@patch:typescript@4.0.3#builtin<compat/typescript>, typescript@patch:typescript@^4.0.3#builtin<compat/typescript>":
   version: 4.0.3
   resolution: "typescript@patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"
   bin:

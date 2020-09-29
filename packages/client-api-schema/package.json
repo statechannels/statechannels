@@ -8,7 +8,9 @@
     "Liam Horne <liam@l4v.io>"
   ],
   "dependencies": {
-    "ajv": "6.11.0"
+    "@types/node": "^14.11.2",
+    "ajv": "6.11.0",
+    "jest": "^25.1.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.9.2",
@@ -20,7 +22,8 @@
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-tsdoc": "0.2.6",
     "lint-staged": "10.0.4",
-    "ts-json-schema-generator": "0.60.0"
+    "ts-json-schema-generator": "0.60.0",
+    "typescript": "^4.0.3"
   },
   "files": [
     "lib/src"
@@ -39,9 +42,9 @@
   "repository": "statechannels/monorepo/blob/master/packages/client-api-schema",
   "scripts": {
     "prepare": "yarn build:generate-schema && yarn build:typescript && yarn generate-api",
-    "build:generate-schema": "yarn --silent ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
-    "build:typescript": "rm -rf lib; tsc -b",
-    "generate-api": "api-extractor run --local",
+    "build:generate-schema": "yarn ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
+    "build:typescript": "rm -rf lib; yarn tsc -b",
+    "generate-api": "yarn api-extractor run --local",
     "lint:check": "eslint \"src/**/*.ts\" --cache",
     "lint:write": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
