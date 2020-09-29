@@ -62,3 +62,12 @@ storybook-static
 ganache-deployments.json
 ganache-deployments*.json
 *.lock
+
+# yarn 2
+# https://yarnpkg.com/advanced/qa#which-files-should-be-gitignored
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
