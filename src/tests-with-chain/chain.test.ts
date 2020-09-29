@@ -1,7 +1,6 @@
-import {Contract, utils, providers, utils} from 'ethers';
+import {Contract, utils, providers} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {first} from 'rxjs/operators';
-
 import {
   simpleEthAllocation,
   createSignatureEntry,
