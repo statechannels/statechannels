@@ -9,10 +9,13 @@ import _ from 'lodash';
 
 import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
-import {logger} from '../../logger';
+import {logger as parentLogger} from '../../logger';
 
 import {StateChannelWorkerData} from './worker-data';
 const ONE_DAY = 86400000;
+
+const logger = parentLogger.child({module: 'Worker-Manager'});
+
 export class WorkerManager {
   private pool?: Pool<Worker>;
   private threadAmount: number;
@@ -21,6 +24,8 @@ export class WorkerManager {
     if (this.threadAmount > 0) {
       this.pool = new Pool({
         create: (): Worker => {
+          logger.trace('Starting worker');
+
           const worker = new Worker(path.resolve(__dirname, './loader.js'), {
             workerData: walletConfig,
           });
@@ -30,6 +35,7 @@ export class WorkerManager {
           worker.on('error', err => {
             throw err;
           });
+          logger.trace('Started worker %o', worker.threadId);
           return worker;
         },
         destroy: (worker: Worker): Promise<number> => worker.terminate(),
@@ -41,6 +47,7 @@ export class WorkerManager {
     }
   }
   public async warmUpThreads(): Promise<void> {
+    logger.trace('Warming up threads');
     const acquire = _.range(this.threadAmount).map(() => this.pool?.acquire().promise);
     const workers = await Promise.all(acquire);
     workers.forEach(w => {
@@ -49,6 +56,7 @@ export class WorkerManager {
     });
   }
   public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
+    logger.trace('PushMessage called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'PushMessage', args};
@@ -64,10 +72,12 @@ export class WorkerManager {
     );
 
     worker.postMessage(data);
+
     return resultPromise;
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
+    logger.trace('UpdateChannel called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
@@ -84,6 +94,7 @@ export class WorkerManager {
     );
 
     worker.postMessage(data);
+
     return resultPromise;
   }
 
