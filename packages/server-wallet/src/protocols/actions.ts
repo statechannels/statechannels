@@ -22,11 +22,10 @@ export type RequestLedgerFunding = {
   type: 'RequestLedgerFunding';
   channelId: Bytes32;
   assetHolderAddress: Address;
-  deductions: AllocationItem[];
 };
-export type LedgerFundChannel = {
-  type: 'LedgerFundChannel';
-  fundingChannelid: Bytes32;
+export type LedgerFundChannels = {
+  type: 'LedgerFundChannels';
+  channelId: Bytes32;
 };
 
 /*
@@ -47,30 +46,29 @@ export const fundChannel = appAction<FundChannel>('FundChannel');
 export const notifyApp = appAction<NotifyApp>('NotifyApp');
 export const signState = appAction<SignState>('SignState');
 
-export const ledgerFundChannel = ledgerAction<LedgerFundChannel>('LedgerFundChannel');
+export const ledgerFundChannels = ledgerAction<LedgerFundChannels>('LedgerFundChannels');
 
 /*
 Guards
 */
 
-const guard = <T extends {type: string}>(type: T['type']) => (a: T): a is T => a.type === type;
+const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
+  a: ProtocolAction
+): a is T => a.type === type;
 
-const appGuard = <A extends ApplicationProtocolAction>(t: A['type']) => guard<A>(t);
-const ledgerGuard = <A extends LedgerProtocolAction>(t: A['type']) => guard<A>(t);
-
-export const isSignState = appGuard<SignState>('SignState');
-export const isNotifyApp = appGuard<NotifyApp>('NotifyApp');
-export const isFundChannel = appGuard<FundChannel>('FundChannel');
-export const isRequestLedgerFunding = appGuard<RequestLedgerFunding>('RequestLedgerFunding');
+export const isSignState = guard<SignState>('SignState');
+export const isNotifyApp = guard<NotifyApp>('NotifyApp');
+export const isFundChannel = guard<FundChannel>('FundChannel');
+export const isRequestLedgerFunding = guard<RequestLedgerFunding>('RequestLedgerFunding');
 export const isOutgoing = isNotifyApp;
 
-export const isLedgerFundChannel = ledgerGuard<LedgerFundChannel>('LedgerFundChannel');
+export const isLedgerFundChannels = guard<LedgerFundChannels>('LedgerFundChannels');
 
 /*
 Types
 */
 
 export type ApplicationProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;
-export type LedgerProtocolAction = LedgerFundChannel;
+export type LedgerProtocolAction = LedgerFundChannels;
 
 export type ProtocolAction = ApplicationProtocolAction | LedgerProtocolAction;

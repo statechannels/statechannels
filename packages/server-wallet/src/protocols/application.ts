@@ -117,15 +117,11 @@ const requestLedgerFunding = ({
   // Don't submit another ledger funding request if one already exists
   if (ledgerFundingRequested) return false;
 
-  const {assetHolderAddress, allocationItems: deductions} = checkThat(
-    supported.outcome,
-    isSimpleAllocation
-  );
+  const {assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
 
   return requestLedgerFundingAction({
     channelId,
     assetHolderAddress,
-    deductions,
   });
 };
 

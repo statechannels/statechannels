@@ -443,12 +443,10 @@ export class Store {
   private pending_updates: {
     // Store requests for the ledger's funds
     [fundingChannelId: string]: {
-      newOutcome?: Outcome;
       ledgerChannelId: Bytes32;
       fundingChannelId: Bytes32;
       status:
         | 'pending' // Request added to DB
-        | 'queued' // Request approved, next step is to sign and send
         | 'inflight' // Signed and sent ledger update
         | 'done' // Counterparty signed back and update was applied; ready for garbage collect ?
         | 'fail'; // Rejected for some reason (e.g., no funds, counterparty rejected)
@@ -495,54 +493,44 @@ export class Store {
   }
 
   // Assume that ledger channel has a lock on it ?
-  async queueNextChannelFunding(tx?: Transaction): Promise<void> {
-    const queuedUpdate = _.find(Object.values(this.pending_updates), v => v.status === 'queued');
-
-    if (queuedUpdate) throw new Error('cannot queue anymore updates, previous one not executed');
-
-    const firstPendingUpdate = _.find(
-      Object.values(this.pending_updates),
-      v => v.status === 'pending'
-    );
-
-    if (!firstPendingUpdate) throw new Error('no pending updates to handle');
-
-    const ledger = await this.getChannelV2(firstPendingUpdate.ledgerChannelId, tx);
-    const toFund = await this.getChannelV2(firstPendingUpdate.fundingChannelId, tx);
-
-    let newOutcome: Outcome;
-
-    try {
-      newOutcome = allocateToTarget(
-        ledger.supported!.outcome,
-        checkThat(toFund.supported!.outcome, isSimpleAllocation).allocationItems,
-        firstPendingUpdate.fundingChannelId
-      );
-    } catch (e) {
-      if (e.toString() === 'Insufficient funds in ledger channel') throw e;
-      throw e;
-    }
-
-    this.pending_updates[firstPendingUpdate.fundingChannelId] = {
-      ...this.pending_updates[firstPendingUpdate.fundingChannelId],
-      newOutcome,
-      status: 'queued',
-    };
-  }
-
-  // Assume that ledger channel has a lock on it ?
-  async ledgerFundChannel(
-    fundingChannelId: Bytes32,
+  async ledgerFundChannels(
+    ledgerChannelId: Bytes32,
     tx: Transaction
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const {ledgerChannelId, newOutcome} = this.pending_updates[fundingChannelId];
     const ledger = await this.getChannelV2(ledgerChannelId);
-    this.pending_updates[fundingChannelId].status = 'inflight';
+
+    const updates = await Promise.all(
+      _.chain(Object.values(this.pending_updates))
+        .filter(v => v.status === 'pending')
+        .map(async ({fundingChannelId}) => await this.getChannelV2(fundingChannelId, tx))
+        .value()
+    );
+
+    // This could fail at some point if there is no longer space to fund stuff
+    // TODO: Handle that case
+    // } catch (e) {
+    //   if (e.toString() === 'Insufficient funds in ledger channel')
+    // }
+
+    const newOutcome = updates.reduce(
+      (outcome, {channelId, supported}) =>
+        allocateToTarget(
+          outcome,
+          checkThat(supported!.outcome, isSimpleAllocation).allocationItems,
+          channelId
+        ),
+      ledger.supported!.outcome
+    );
+
+    updates.map(({channelId}) => {
+      this.pending_updates[channelId].status = 'inflight';
+    });
+
     return await this.signState(
       ledger.channelId,
       {
         ...ledger.supported!,
-        turnNum: ledger.supported!.turnNum + 2,
+        turnNum: ledger.supported!.turnNum + 1,
         outcome: newOutcome!,
       },
       tx
@@ -551,6 +539,18 @@ export class Store {
 
   async isLedger(channelId: Bytes32): Promise<boolean> {
     return !!this.ledgers[channelId];
+  }
+
+  async getPendingRequests(
+    ledgerChannelId: Bytes32
+  ): Promise<
+    {
+      ledgerChannelId: Bytes32;
+      fundingChannelId: Bytes32;
+      status: 'pending' | 'inflight' | 'done' | 'fail';
+    }[]
+  > {
+    return Object.values(this.pending_updates).filter(v => v.ledgerChannelId === ledgerChannelId);
   }
 
   async getChannelV2(
@@ -562,9 +562,11 @@ export class Store {
     }
   > {
     const channelState = await this.getChannel(channelId, tx);
+    const type = (await this.isLedger(channelId)) ? 'Ledger' : 'App';
     return {
       ...channelState,
-      type: (await this.isLedger(channelId)) ? 'Ledger' : 'App',
+      type,
+      ledgerFundingRequested: !!this.pending_updates[channelId],
     };
   }
 

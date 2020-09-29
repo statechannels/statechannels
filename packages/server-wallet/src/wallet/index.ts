@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 import {
   UpdateChannelParams,
@@ -448,15 +449,11 @@ export class Wallet implements WalletInterface {
 
             case 'RequestLedgerFunding':
               const ledgerChannelId = await this.store.requestLedgerFunding(channel, tx);
-              channels.push(ledgerChannelId);
+              if (!_.find(channels, ledgerChannelId)) channels.push(ledgerChannelId);
               return;
 
-            case 'LedgerFundChannel':
-              await this.store.ledgerFundChannel(action.fundingChannelid, tx);
-              return;
-
-            case 'QueueNextFunding':
-              await this.store.queueNextChannelFunding(tx);
+            case 'LedgerFundChannels':
+              await this.store.ledgerFundChannels(action.channelId, tx);
               return;
 
             default:
@@ -466,8 +463,15 @@ export class Wallet implements WalletInterface {
 
         const nextAction = recordFunctionMetrics(
           channel.type === 'App'
-            ? Application.protocol({app: channel})
-            : Ledger.protocol({ledger: channel}),
+            ? Application.protocol({
+                app: channel,
+              })
+            : Ledger.protocol({
+                ledger: channel,
+                hasPendingRequests: (await this.store.getPendingRequests(channel.channelId)).some(
+                  x => x.status === 'pending'
+                ),
+              }),
           this.walletConfig.timingMetrics
         );
 
