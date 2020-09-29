@@ -6228,10 +6228,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["@ethereum-waffle/compiler", [
-        ["patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=37b135&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol", {
-          "packageLocation": "./.yarn/cache/@ethereum-waffle-compiler-patch-d6bc6cada5-a09416e331.zip/node_modules/@ethereum-waffle/compiler/",
+        ["patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=a961ce&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol", {
+          "packageLocation": "./.yarn/cache/@ethereum-waffle-compiler-patch-652e7e3ea0-6ebd5f4c46.zip/node_modules/@ethereum-waffle/compiler/",
           "packageDependencies": [
-            ["@ethereum-waffle/compiler", "patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=37b135&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"],
+            ["@ethereum-waffle/compiler", "patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=a961ce&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"],
             ["@resolver-engine/imports", "npm:0.3.3"],
             ["@resolver-engine/imports-fs", "npm:0.3.3"],
             ["@types/mkdirp", "npm:0.5.2"],
@@ -9186,6 +9186,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@resolver-engine-imports-fs-npm-0.3.3-042599e4d4-119e3d712a.zip/node_modules/@resolver-engine/imports-fs/",
           "packageDependencies": [
             ["@resolver-engine/imports-fs", "npm:0.3.3"],
+            ["@resolver-engine/core", "npm:0.3.3"],
             ["@resolver-engine/fs", "npm:0.3.3"],
             ["@resolver-engine/imports", "npm:0.3.3"],
             ["debug", "virtual:8bb97bed484f021974a05538f31c077871d2363ce26ebed59b11577446762350604c9011c0660ae55b141dd86d888615a377ccccd7a87c5e54ae38233a22d5a9#npm:3.2.6"]
@@ -9648,7 +9649,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./packages/nitro-protocol/",
           "packageDependencies": [
             ["@statechannels/nitro-protocol", "workspace:packages/nitro-protocol"],
-            ["@ethereum-waffle/compiler", "patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=37b135&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"],
+            ["@ethereum-waffle/compiler", "patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=a961ce&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"],
             ["@openzeppelin/contracts", "npm:3.0.1"],
             ["@statechannels/devtools", "workspace:packages/devtools"],
             ["@statechannels/jest-gas-reporter", "workspace:packages/jest-gas-reporter"],

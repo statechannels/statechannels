@@ -2573,7 +2573,7 @@ __metadata:
 
 "@ethereum-waffle/compiler@patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.diff::locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol":
   version: 3.1.0
-  resolution: "@ethereum-waffle/compiler@patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=37b135&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"
+  resolution: "@ethereum-waffle/compiler@patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.diff::version=3.1.0&hash=a961ce&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"
   dependencies:
     "@resolver-engine/imports": ^0.3.3
     "@resolver-engine/imports-fs": ^0.3.3
@@ -2583,7 +2583,7 @@ __metadata:
     mkdirp: ^0.5.1
     node-fetch: ^2.6.0
     solc: ^0.6.3
-  checksum: a09416e331509bf6e3917336535170fa905457cde131993412faa0110b7ba2a4208f6562cadbe8c2b2cab5195d16257c1a6c4ed4ed0584e1c4370bed2b82ca21
+  checksum: 6ebd5f4c4684e93720652683ea76cbf94c6c3dedc50953fc690579ce901a6af5483c17f373842c342c2325261137f7682ab6265ff5a9ddfda7266055162272e9
   languageName: node
   linkType: hard
 
@@ -5200,7 +5200,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@resolver-engine/core@npm:^0.3.3":
+"@resolver-engine/core@npm:0.3.3, @resolver-engine/core@npm:^0.3.3":
   version: 0.3.3
   resolution: "@resolver-engine/core@npm:0.3.3"
   dependencies:
