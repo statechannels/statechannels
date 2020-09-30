@@ -8,11 +8,10 @@ import {
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
   convertAddressToBytes32,
-  convertBytes32ToAddress
+  convertBytes32ToAddress,
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
-import {Wallet} from 'ethers';
+import { Wallet, utils } from 'ethers';
 
 import {
   State,
@@ -22,23 +21,27 @@ import {
   SignedState,
   Destination,
   SimpleAllocation,
-  SignatureEntry
+  SignatureEntry,
 } from './types';
-import {BN} from './bignumber';
+import { BN } from './bignumber';
 
 export function toNitroState(state: State): NitroState {
-  const {channelNonce, participants, chainId} = state;
-  const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
+  const { channelNonce, participants, chainId } = state;
+  const channel = {
+    channelNonce,
+    chainId,
+    participants: participants.map((x) => x.signingAddress),
+  };
 
   return {
     ..._.pick(state, 'appData', 'isFinal', 'challengeDuration', 'appDefinition', 'turnNum'),
     outcome: convertToNitroOutcome(state.outcome),
-    channel
+    channel,
   };
 }
 
 export function fromNitroState(state: NitroState): State {
-  const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
+  const { appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum } = state;
 
   return {
     appDefinition,
@@ -49,12 +52,12 @@ export function fromNitroState(state: NitroState): State {
     challengeDuration: challengeDuration,
     channelNonce: Number(channel.channelNonce),
     chainId: channel.chainId,
-    participants: channel.participants.map(x => ({
+    participants: channel.participants.map((x) => ({
       signingAddress: x,
       // FIXME: Get real values
       participantId: x,
-      destination: x.padStart(64, '0') as Destination
-    }))
+      destination: x.padStart(64, '0') as Destination,
+    })),
   };
 }
 
@@ -62,26 +65,26 @@ export function fromNitroState(state: NitroState): State {
 // NitroSignedStates for a signed state with multiple signatures
 export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
   const state = toNitroState(signedState);
-  const {signatures} = signedState;
-  return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
+  const { signatures } = signedState;
+  return signatures.map((sig) => ({ state, signature: utils.splitSignature(sig.signature) }));
 }
 
 export function calculateChannelId(channelConstants: ChannelConstants): string {
-  const {chainId, channelNonce, participants} = channelConstants;
-  const addresses = participants.map(p => p.signingAddress);
-  return getChannelId({chainId, channelNonce, participants: addresses});
+  const { chainId, channelNonce, participants } = channelConstants;
+  const addresses = participants.map((p) => p.signingAddress);
+  return getChannelId({ chainId, channelNonce, participants: addresses });
 }
 
 export function createSignatureEntry(state: State, privateKey: string): SignatureEntry {
-  const {address} = new Wallet(privateKey);
+  const { address } = new Wallet(privateKey);
   const nitroState = toNitroState(state);
-  const {signature} = signNitroState(nitroState, privateKey);
-  return {signature: joinSignature(signature), signer: address};
+  const { signature } = signNitroState(nitroState, privateKey);
+  return { signature: utils.joinSignature(signature), signer: address };
 }
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
-  const {signature} = signNitroState(nitroState, privateKey);
-  return joinSignature(signature);
+  const { signature } = signNitroState(nitroState, privateKey);
+  return utils.joinSignature(signature);
 }
 
 export function hashState(state: State): string {
@@ -91,7 +94,7 @@ export function hashState(state: State): string {
 
 export function getSignerAddress(state: State, signature: string): string {
   const nitroState = toNitroState(state);
-  return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
+  return getNitroSignerAddress({ state: nitroState, signature: utils.splitSignature(signature) });
 }
 
 export function statesEqual(left: State, right: State) {
@@ -131,7 +134,7 @@ export function outcomesEqual(left: Outcome, right?: Outcome) {
 
 export const firstState = (
   outcome: Outcome,
-  {channelNonce, chainId, challengeDuration, appDefinition, participants}: ChannelConstants,
+  { channelNonce, chainId, challengeDuration, appDefinition, participants }: ChannelConstants,
   appData?: string
 ): State => ({
   appData: appData || '0x',
@@ -142,24 +145,24 @@ export const firstState = (
   challengeDuration,
   appDefinition,
   participants,
-  outcome
+  outcome,
 });
 
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
-  return allocationItems.map(a => ({
+  return allocationItems.map((a) => ({
     amount: a.amount,
     destination:
-      a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
+      a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination,
   }));
 }
 
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
-  return allocationItems.map(a => ({
+  return allocationItems.map((a) => ({
     amount: BN.from(a.amount),
     destination:
       a.destination.substr(2, 22) === '00000000000000000000'
         ? (convertBytes32ToAddress(a.destination) as Destination)
-        : (a.destination as Destination)
+        : (a.destination as Destination),
   }));
 }
 
@@ -169,8 +172,8 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       return [
         {
           assetHolderAddress: outcome.assetHolderAddress,
-          allocationItems: convertToNitroAllocationItems(outcome.allocationItems)
-        }
+          allocationItems: convertToNitroAllocationItems(outcome.allocationItems),
+        },
       ];
     case 'SimpleGuarantee':
       return [
@@ -178,9 +181,9 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
           assetHolderAddress: outcome.assetHolderAddress,
           guarantee: {
             targetChannelId: outcome.targetChannelId,
-            destinations: outcome.destinations
-          }
-        }
+            destinations: outcome.destinations,
+          },
+        },
       ];
     case 'MixedAllocation':
       // TODO: Update NitroOutcome to support multiple asset holders
@@ -196,7 +199,7 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
     return {
       type: 'SimpleAllocation',
       assetHolderAddress: singleOutcomeItem.assetHolderAddress,
-      allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems'])
+      allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems']),
     };
   }
 
@@ -205,14 +208,14 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
       type: 'SimpleGuarantee',
       assetHolderAddress: singleOutcomeItem.assetHolderAddress,
       targetChannelId: singleOutcomeItem['guarantee'].targetChannelId,
-      destinations: singleOutcomeItem['guarantee'].destinations
+      destinations: singleOutcomeItem['guarantee'].destinations,
     };
   }
 
   return {
     type: 'MixedAllocation',
     // FIXME: Figure out what needs to be here
-    simpleAllocations: []
+    simpleAllocations: [],
     // simpleAllocations: outcome.map(fromNitroOutcome)
   };
 }
@@ -222,5 +225,5 @@ export function nextState(state: State, outcome: Outcome) {
     throw new Error('Attempting to change outcome type');
   }
 
-  return {...state, turnNum: state.turnNum + 1, outcome};
+  return { ...state, turnNum: state.turnNum + 1, outcome };
 }
