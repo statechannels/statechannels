@@ -3,6 +3,7 @@ import {BN, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import {Observable} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
+import {NonceManager} from '@ethersproject/experimental';
 
 import {Address, Bytes32} from '../type-aliases';
 
@@ -36,14 +37,14 @@ interface ChainModifierInterface {
 }
 
 export class ChainService implements ChainModifierInterface, ChainEventEmitterInterface {
-  private readonly ethWallet: Wallet;
+  private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<SetFundingArg>> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
-    this.ethWallet = new Wallet(pk, new providers.JsonRpcProvider(provider));
+    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
   }
 
   // Only used for unit tests

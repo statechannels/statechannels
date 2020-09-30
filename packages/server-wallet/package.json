@@ -7,6 +7,7 @@
     "@statechannels/client-api-schema": "^0.3.9-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.9-alpha.0",
     "@statechannels/wallet-core": "^0.3.9",
+    "@ethersproject/experimental": "^5.0.4",
     "@statechannels/wasm-utils": "0.1.5",
     "ethers": "5.0.12",
     "fp-ts": "2.7.0",
