@@ -1,5 +1,5 @@
 import {spawn} from 'child_process';
-const ganache = require('ganache-core');
+const ganache = require('ganache-cli');
 import {ethers} from 'ethers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill = require('tree-kill'); // This library uses `export =` syntax
@@ -8,7 +8,7 @@ import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 
-import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
+import {LOG_TO_CONSOLE, SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
 import {logger} from './logger';
 
 function findClosingPosition(data: string) {
@@ -137,38 +137,18 @@ export class GanacheServer {
     logger.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
     this.fundedPrivateKey = accounts[0].privateKey;
 
-    const oneMillion = ethers.utils.parseEther('1000000');
-
-    // const args: string[] = [
-    //   ['ganache-cli'],
-    //   [`--networkId ${this.chainId}`, `--port ${this.port}`],
-    //   accounts.map((a) => `--account ${a.privateKey},${a.amount || oneMillion}`),
-    //   [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
-    //   SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : [],
-    // ].reduce((a, b) => a.concat(b));
-
-    // this.server = spawn('npx', args, {stdio: 'pipe', shell: false});
+    const oneMillion = ethers.utils.parseEther('1000000').toHexString();
 
     this.server = ganache.server({
       network_id: this.chainId,
-      accounts,
+      accounts: accounts.map((a) => {
+        return {balance: oneMillion, secretKey: a.privateKey};
+      }),
       gasLimit,
       gasPrice,
     });
 
-    this.server.stdout.on('data', (data) => {
-      if (SHOW_VERBOSE_GANACHE_OUTPUT) {
-        extractLogsFromVerboseGanacheOutput(this.buffer, data.toString());
-      } else {
-        logger.info(data.toString());
-      }
-    });
-
-    this.server.stderr.on('data', (data) => {
-      logger.error({error: data.toString()}, `Server threw error`);
-      throw new Error('Ganache server failed to start');
-    });
-
+    this.server.listen(this.port, () => {});
     this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${this.port}`);
   }
 
