@@ -27303,6 +27303,27 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"pino-pretty@npm:4.2.1":
+  version: 4.2.1
+  resolution: "pino-pretty@npm:4.2.1"
+  dependencies:
+    "@hapi/bourne": ^2.0.0
+    args: ^5.0.1
+    chalk: ^4.0.0
+    dateformat: ^3.0.3
+    fast-safe-stringify: ^2.0.7
+    jmespath: ^0.15.0
+    joycon: ^2.2.5
+    pump: ^3.0.0
+    readable-stream: ^3.6.0
+    split2: ^3.1.1
+    strip-json-comments: ^3.1.1
+  bin:
+    pino-pretty: bin.js
+  checksum: 7e67470f90c40c601640167f1563885f899030cccd78ef0cbc126a2af55e996de730ed04d525f70b0e6e6bb616d4e993833c3a4abf57c041c25ebbae400dec9d
+  languageName: node
+  linkType: hard
+
 "pino-pretty@npm:^2.2.2":
   version: 2.6.1
   resolution: "pino-pretty@npm:2.6.1"
@@ -33032,7 +33053,7 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
-"strip-json-comments@npm:^3.0.1":
+"strip-json-comments@npm:^3.0.1, strip-json-comments@npm:^3.1.1":
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: f16719ce25abc58a55ef82b1c27f541dcfa5d544f17158f62d10be21ff9bd22fde45a53c592b29d80ad3c97ccb67b7451c4833913fdaeadb508a40f5e0a9c206

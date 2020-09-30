@@ -34646,6 +34646,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["fast-redact", "npm:2.0.0"],
             ["fast-safe-stringify", "npm:2.0.7"],
             ["flatstr", "npm:1.0.12"],
+            ["pino-pretty", "npm:4.2.1"],
             ["pino-std-serializers", "npm:2.5.0"],
             ["quick-format-unescaped", "npm:3.0.3"],
             ["sonic-boom", "npm:0.7.7"]
@@ -34659,6 +34660,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["fast-redact", "npm:2.0.0"],
             ["fast-safe-stringify", "npm:2.0.7"],
             ["flatstr", "npm:1.0.12"],
+            ["pino-pretty", "npm:4.2.1"],
             ["pino-std-serializers", "npm:2.5.0"],
             ["quick-format-unescaped", "npm:4.0.1"],
             ["sonic-boom", "npm:1.1.0"]
@@ -34672,6 +34674,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["fast-redact", "npm:2.0.0"],
             ["fast-safe-stringify", "npm:2.0.7"],
             ["flatstr", "npm:1.0.12"],
+            ["pino-pretty", "npm:4.2.1"],
             ["pino-std-serializers", "npm:2.5.0"],
             ["quick-format-unescaped", "npm:4.0.1"],
             ["sonic-boom", "npm:1.1.0"]
@@ -34715,6 +34718,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@hapi/bourne", "npm:2.0.0"],
             ["args", "npm:5.0.1"],
             ["chalk", "npm:3.0.0"],
+            ["dateformat", "npm:3.0.3"],
+            ["fast-safe-stringify", "npm:2.0.7"],
+            ["jmespath", "npm:0.15.0"],
+            ["joycon", "npm:2.2.5"],
+            ["pump", "npm:3.0.0"],
+            ["readable-stream", "npm:3.6.0"],
+            ["split2", "npm:3.2.2"],
+            ["strip-json-comments", "npm:3.1.1"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:4.2.1", {
+          "packageLocation": "./.yarn/cache/pino-pretty-npm-4.2.1-923b0499ef-7e67470f90.zip/node_modules/pino-pretty/",
+          "packageDependencies": [
+            ["pino-pretty", "npm:4.2.1"],
+            ["@hapi/bourne", "npm:2.0.0"],
+            ["args", "npm:5.0.1"],
+            ["chalk", "npm:4.1.0"],
             ["dateformat", "npm:3.0.3"],
             ["fast-safe-stringify", "npm:2.0.7"],
             ["jmespath", "npm:0.15.0"],
