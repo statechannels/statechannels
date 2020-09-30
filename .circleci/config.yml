@@ -172,7 +172,7 @@ jobs:
       - run: yarn
       - run: yarn bootstrap
       - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock or api-reports)
-      - run: yarn lint:check
+      # - run: yarn lint:check
       - <<: *save_dep
 
       - persist_to_workspace:
