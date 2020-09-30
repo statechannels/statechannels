@@ -7,7 +7,7 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
-import {LedgerProtocolAction, noAction, SignState, signState} from './actions';
+import {LedgerProtocolAction, noAction, SignLedgerStateForRequests, signState} from './actions';
 
 export type ProtocolState = {
   ledger: ChannelState;
@@ -48,10 +48,14 @@ const outcomeMergedWithLatestState = (
   allocationItems: _.intersection(latestOutcome.allocationItems, newOutcome.allocationItems),
 });
 
-const computeNewOutcome = ({ledger, channelsPendingRequest}: ProtocolState): SignState | false => {
+const computeNewOutcome = ({
+  ledger,
+  channelsPendingRequest,
+}: ProtocolState): SignLedgerStateForRequests | false => {
   let newOutcome = newOutcomeBasedOnMyPendingUpdates({ledger, channelsPendingRequest});
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   let newTurnNum = ledger.latestSignedByMe!.turnNum + 2;
+  let requestChannelIds = [];
 
   const counterPartyProposedNewUpdate =
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -65,25 +69,35 @@ const computeNewOutcome = ({ledger, channelsPendingRequest}: ProtocolState): Sig
     }
   }
 
+  requestChannelIds = _.xor(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    checkThat(ledger.latestSignedByMe!.outcome, isSimpleAllocation).allocationItems,
+    newOutcome.allocationItems
+  ).map(x => x.destination);
+
   // FIXME: Need to somehow also dispatch an action to do this:
   // updates.map(({channelId}) => {
   //   this.pending_updates[channelId].status = 'inflight';
   // });
 
-  return signState({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ...ledger.supported!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    outcome: newOutcome!,
-    turnNum: newTurnNum,
-    channelId: ledger.channelId,
-  });
+  return {
+    ...signState({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ...ledger.supported!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      outcome: newOutcome!,
+      turnNum: newTurnNum,
+      channelId: ledger.channelId,
+    }),
+    type: 'SignLedgerStateForRequests',
+    requestChannelIds,
+  };
 };
 
 const hasPendingFundingRequests = (ps: ProtocolState): boolean =>
   ps.channelsPendingRequest.length > 0;
 
-const handleFundingRequests = (ps: ProtocolState): SignState | false =>
+const handleFundingRequests = (ps: ProtocolState): SignLedgerStateForRequests | false =>
   hasPendingFundingRequests(ps) && computeNewOutcome(ps);
 
 export const protocol: Protocol<ProtocolState> = (

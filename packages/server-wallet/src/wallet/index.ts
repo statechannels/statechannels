@@ -27,7 +27,6 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Knex from 'knex';
-import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
@@ -454,6 +453,13 @@ export class Wallet implements WalletInterface {
             case 'RequestLedgerFunding': {
               const ledgerChannelId = await this.store.requestLedgerFunding(channel, tx);
               addChannelToEndOfRunLoop(ledgerChannelId);
+              return;
+            }
+
+            case 'SignLedgerStateForRequests': {
+              const {outgoing} = await this.store.signState(action.channelId, action, tx);
+              this.store.markRequestsAsInflight(action.requestChannelIds);
+              outgoing.map(n => outbox.push(n.notice));
               return;
             }
 

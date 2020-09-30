@@ -2,11 +2,11 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Payload} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {Notice} from '../protocols/actions';
+import {Outgoing} from '../protocols/actions';
 
 // Merges any messages to the same recipient into one message
 // This makes message delivery less painful with the request/response model
-export function mergeOutgoing(outgoing: Notice[]): Notice[] {
+export function mergeOutgoing(outgoing: Outgoing[]): Outgoing[] {
   if (outgoing.length === 0) return outgoing;
 
   const senders = outgoing.map(o => o.params.sender);

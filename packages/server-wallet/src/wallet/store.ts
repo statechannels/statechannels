@@ -509,6 +509,12 @@ export class Store {
     return Object.values(this.pending_updates).filter(v => v.ledgerChannelId === ledgerChannelId);
   }
 
+  async markRequestsAsInflight(channelIds: Bytes32[]): Promise<void> {
+    for (const channelId of channelIds) {
+      this.pending_updates[channelId].status = 'inflight';
+    }
+  }
+
   async getApplicationProtocolState(
     channel: ChannelState,
     tx?: Transaction

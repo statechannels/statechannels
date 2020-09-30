@@ -2,7 +2,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {channelWithVars} from '../../models/__test__/fixtures/channel';
-import {Notice} from '../../protocols/actions';
+import {Outgoing} from '../../protocols/actions';
 import {addHash} from '../../state-utils';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {mergeChannelResults, mergeOutgoing} from '../messaging';
@@ -37,11 +37,11 @@ describe('mergeOutgoing', () => {
     const state1 = stateSignedBy()({turnNum: 1});
     const state2 = stateSignedBy()({turnNum: 2});
 
-    const message1: Notice = {
+    const message1: Outgoing = {
       method: 'MessageQueued',
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state1]}},
     };
-    const message2: Notice = {
+    const message2: Outgoing = {
       method: 'MessageQueued',
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state2]}},
     };
@@ -59,7 +59,7 @@ describe('mergeOutgoing', () => {
   test('it handles duplicate states', () => {
     const state = stateSignedBy()({turnNum: 1});
 
-    const message: Notice = {
+    const message: Outgoing = {
       method: 'MessageQueued',
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state]}},
     };
