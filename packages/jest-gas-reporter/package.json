@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/jest-gas-reporter",
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
-  "version": "0.3.7",
+  "version": "0.3.9-alpha.0",
   "author": "Alex Gap <alex@magmo.com>",
   "dependencies": {
     "@jest/reporters": "^25.5.1",

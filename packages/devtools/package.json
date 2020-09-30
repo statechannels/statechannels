@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/devtools",
   "description": "Scripts used for our team development processes",
-  "version": "0.3.7",
+  "version": "0.3.9-alpha.0",
   "author": "statechannels",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
