@@ -1,4 +1,5 @@
 const path = require('path');
+const PnpWebpackPlugin = require(`pnp-webpack-plugin`);
 
 const baseConfig = {
   entry: './src/index.ts',
@@ -6,15 +7,19 @@ const baseConfig = {
     rules: [
       {
         test: /\.ts$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
-      }
-    ]
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
   },
   resolve: {
     extensions: ['.ts', '.js'],
-    mainFields: ['unpkg', 'browser', 'module', 'main']
-  }
+    mainFields: ['unpkg', 'browser', 'module', 'main'],
+    plugins: [PnpWebpackPlugin],
+  },
+  resolveLoader: {
+    plugins: [PnpWebpackPlugin.moduleLoader(module)],
+  },
 };
 
 const cdnConfig = {
@@ -24,8 +29,8 @@ const cdnConfig = {
   output: {
     filename: 'iframe-channel-provider.min.js',
     libraryTarget: 'window',
-    path: path.resolve(__dirname, 'dist')
-  }
+    path: path.resolve(__dirname, 'dist'),
+  },
 };
 
 const cdnDebugConfig = {
@@ -35,8 +40,8 @@ const cdnDebugConfig = {
   devtool: 'inline-source-map',
   output: {
     ...cdnConfig.output,
-    filename: 'iframe-channel-provider.js'
-  }
+    filename: 'iframe-channel-provider.js',
+  },
 };
 
 module.exports = [cdnDebugConfig];

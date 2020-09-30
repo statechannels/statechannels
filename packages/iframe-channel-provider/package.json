@@ -45,12 +45,13 @@
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "pino": "6.2.0",
+    "pnp-webpack-plugin": "^1.6.4",
     "prettier": "1.19.1",
     "ts-jest": "25.0.0",
-    "ts-loader": "7.0.5",
-    "typescript": "3.7.5",
-    "webpack": "4.41.5",
-    "webpack-cli": "^3.3.9"
+    "ts-loader": "^8.0.4",
+    "typescript": "4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
   },
   "jest": {
     "roots": [
