@@ -5674,9 +5674,11 @@ __metadata:
     "@statechannels/channel-client": ^0.3.8-alpha.0
     "@statechannels/client-api-schema": ^0.3.8-alpha.0
     "@statechannels/iframe-channel-provider": ^0.3.8-alpha.0
+    "@statechannels/nitro-protocol": "workspace:packages/nitro-protocol"
+    "@types/jest": ^26.0.14
     "@types/node": 13.5.1
     "@types/wait-on": 4.0.0
-    canvas: 2.6.1
+    canvas: ^2.6.1
     eslint-plugin-jest: 23.6.0
     jest: 25.1.0
     ts-jest: 25.0.0
@@ -8248,6 +8250,16 @@ __metadata:
     jest-diff: ^25.2.1
     pretty-format: ^25.2.1
   checksum: fe92624fd7b3b5358ffba8e59108b484de1d01df08dfc66bb597d59d09900db1950717adb8d42ce5f81ba615fa0b8de55fd5446808d92f75b45e08fcbe4cec6e
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^26.0.14":
+  version: 26.0.14
+  resolution: "@types/jest@npm:26.0.14"
+  dependencies:
+    jest-diff: ^25.2.1
+    pretty-format: ^25.2.1
+  checksum: bddbe82d12217c5217efabcad09e4fbe2c5eaecf9392da9b0edbe4c3d9fb240b3fab914f88c5f3708f6d5046640a2782458944873eae4ac01abcb17d32d3c78f
   languageName: node
   linkType: hard
 
@@ -12443,7 +12455,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvas@npm:2.6.1":
+"canvas@npm:^2.6.1":
   version: 2.6.1
   resolution: "canvas@npm:2.6.1"
   dependencies:

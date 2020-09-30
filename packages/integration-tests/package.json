@@ -7,9 +7,11 @@
     "@statechannels/channel-client": "^0.3.8-alpha.0",
     "@statechannels/client-api-schema": "^0.3.8-alpha.0",
     "@statechannels/iframe-channel-provider": "^0.3.8-alpha.0",
+    "@statechannels/nitro-protocol": "workspace:packages/nitro-protocol",
+    "@types/jest": "^26.0.14",
     "@types/node": "13.5.1",
     "@types/wait-on": "4.0.0",
-    "canvas": "2.6.1",
+    "canvas": "^2.6.1",
     "eslint-plugin-jest": "23.6.0",
     "jest": "25.1.0",
     "ts-jest": "25.0.0",
@@ -20,6 +22,6 @@
   "private": true,
   "repository": "statechannels/monorepo/blob/master/packages/integration-tests",
   "scripts": {
-    "integration-tests": "jest"
+    "integration-tests": "yarn jest"
   }
 }
