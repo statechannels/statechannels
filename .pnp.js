@@ -9006,15 +9006,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["@openzeppelin/contracts", [
-        ["npm:3.0.1", {
-          "packageLocation": "./.yarn/cache/@openzeppelin-contracts-npm-3.0.1-dd01b49cbe-8b8164a8ee.zip/node_modules/@openzeppelin/contracts/",
-          "packageDependencies": [
-            ["@openzeppelin/contracts", "npm:3.0.1"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["@pacote/is-plain-object", [
         ["npm:1.1.3", {
           "packageLocation": "./.yarn/cache/@pacote-is-plain-object-npm-1.1.3-e94359b599-4c9dfe3fb7.zip/node_modules/@pacote/is-plain-object/",
@@ -9658,7 +9649,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["@statechannels/nitro-protocol", "workspace:packages/nitro-protocol"],
             ["@ethereum-waffle/compiler", "patch:@ethereum-waffle/compiler@npm%3A3.1.0#./patches/wafflepatch.patch::version=3.1.0&hash=a961ce&locator=%40statechannels%2Fnitro-protocol%40workspace%3Apackages%2Fnitro-protocol"],
-            ["@openzeppelin/contracts", "npm:3.0.1"],
             ["@statechannels/devtools", "workspace:packages/devtools"],
             ["@statechannels/jest-gas-reporter", "workspace:packages/jest-gas-reporter"],
             ["@types/eslint", "npm:6.1.7"],

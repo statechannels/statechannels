@@ -5164,13 +5164,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:3.0.1":
-  version: 3.0.1
-  resolution: "@openzeppelin/contracts@npm:3.0.1"
-  checksum: 8b8164a8ee26615b95ebdd54648f75da2c7ffafeb6c6fb7ac1fd17896be3a93a6f5ce5a249abc458919105ebf36de1f47a1118491912d8cfbbb15387bd1926e6
-  languageName: node
-  linkType: hard
-
 "@pacote/is-plain-object@npm:^1.1.3":
   version: 1.1.3
   resolution: "@pacote/is-plain-object@npm:1.1.3"
@@ -5642,7 +5635,6 @@ __metadata:
   resolution: "@statechannels/nitro-protocol@workspace:packages/nitro-protocol"
   dependencies:
     "@ethereum-waffle/compiler": "patch:@ethereum-waffle/compiler@3.1.0#./patches/wafflepatch.patch"
-    "@openzeppelin/contracts": 3.0.1
     "@statechannels/devtools": ^0.3.7
     "@statechannels/jest-gas-reporter": ^0.3.7
     "@types/eslint": 6.1.7

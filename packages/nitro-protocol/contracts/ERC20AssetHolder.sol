@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 import './AssetHolder.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import './@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
   * @dev Ther ERC20AssetHolder contract extends the AssetHolder contract, and adds the following functionality: it allows ERC20 tokens to be escrowed against a state channelId and to be transferred to external destinations.
