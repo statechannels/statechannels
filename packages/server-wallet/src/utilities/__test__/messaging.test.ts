@@ -17,7 +17,7 @@ describe('mergeChannelResults', () => {
     expect(result[0]).toMatchObject({turnNum: 2});
   });
 
-  test("it doesn't merge  different channels", () => {
+  test("it doesn't merge different channels", () => {
     const duplicateChannelResult: ChannelResult[] = [
       channelWithVars({channelId: '0x123'}).channelResult,
       channelWithVars({channelId: '0xabc'}).channelResult,
@@ -52,6 +52,8 @@ describe('mergeOutgoing', () => {
   });
 
   test('it handles duplicate states', () => {
+    // We use two seperate state objects that are equivalent to avoid things passing
+    // due to object references being the same
     const state1 = stateSignedBy()({turnNum: 1});
     const state2 = stateSignedBy()({turnNum: 1});
     const message1: Notice = {
