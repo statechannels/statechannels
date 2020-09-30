@@ -8,7 +8,7 @@
     "removeComments": false,
     "target": "es2015",
     "esModuleInterop": true,
-    "types": ["react", "jest", "node"]
+    "types": ["jest", "node"]
   },
-  "references": [{"path": "../iframe-channel-provider"}, {"path": "../client-api-schema"}]
+  "references": [{ "path": "../iframe-channel-provider" }, { "path": "../client-api-schema" }]
 }
