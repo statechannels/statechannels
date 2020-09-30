@@ -5730,17 +5730,20 @@ __metadata:
   resolution: "@statechannels/wallet-core@workspace:packages/wallet-core"
   dependencies:
     "@babel/core": 7.11.4
+    "@statechannels/client-api-schema": "workspace:packages/client-api-schema"
     "@statechannels/devtools": ^0.3.7
     "@statechannels/nitro-protocol": ^0.3.7
     "@statechannels/wire-format": ^0.3.8-alpha.0
     "@types/babel__core": 7.1.7
+    "@types/jest": ^25.1.0
     "@types/lodash": 4.14.149
+    "@types/node": ^14.11.2
     awesome-typescript-loader: 5.2.1
     ethers: 5.0.12
     jest: 25.1.0
     lodash: 4.17.19
     ts-jest: 25.0.0
-    typescript: 3.7.5
+    typescript: 4.0.3
   languageName: unknown
   linkType: soft
 
@@ -8072,6 +8075,16 @@ __metadata:
   dependencies:
     jest-diff: ^25.1.0
   checksum: 9d0bf8e990545a3dd6c8ddcaecb9ddc5964f0c0fb916dbd94ac3034d75f414154f9e1fbee3a57236b7d8aa60e989f8306b708757d40743d2bc05048851941d4b
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^25.1.0":
+  version: 25.2.3
+  resolution: "@types/jest@npm:25.2.3"
+  dependencies:
+    jest-diff: ^25.2.1
+    pretty-format: ^25.2.1
+  checksum: fe92624fd7b3b5358ffba8e59108b484de1d01df08dfc66bb597d59d09900db1950717adb8d42ce5f81ba615fa0b8de55fd5446808d92f75b45e08fcbe4cec6e
   languageName: node
   linkType: hard
 
@@ -21597,7 +21610,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"jest-diff@npm:^25.1.0, jest-diff@npm:^25.5.0":
+"jest-diff@npm:^25.1.0, jest-diff@npm:^25.2.1, jest-diff@npm:^25.5.0":
   version: 25.5.0
   resolution: "jest-diff@npm:25.5.0"
   dependencies:
@@ -28539,7 +28552,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^25.5.0":
+"pretty-format@npm:^25.2.1, pretty-format@npm:^25.5.0":
   version: 25.5.0
   resolution: "pretty-format@npm:25.5.0"
   dependencies:
