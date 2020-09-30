@@ -76,7 +76,7 @@
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "prepare": "rm -rf dist; yarn build:typescript && yarn webpack && yarn generate-api",
     "prepublish": "yarn webpack",
-    "test": "jest --watch",
+    "test": "yarn jest --watch",
     "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
     "test:coverage": "jest --coverage"
   },

@@ -166,7 +166,7 @@
     "start": "yarn node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
-    "test": "jest -c ./config/jest/jest.config.js",
+    "test": "yarn jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand && yarn test:with-chain",
     "test:with-chain": "jest --runInBand -c ./config/jest/jest.with-chain.config.js"
   }

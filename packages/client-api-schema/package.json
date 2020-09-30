@@ -8,19 +8,21 @@
     "Liam Horne <liam@l4v.io>"
   ],
   "dependencies": {
-    "@types/node": "^14.11.2",
     "ajv": "6.11.0",
-    "jest": "^25.1.0"
+    "ts-jest": "25.0.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.9.2",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
+    "@types/jest": "^26.0.14",
+    "@types/node": "^14.11.2",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-tsdoc": "0.2.6",
+    "jest": "^25.1.0",
     "lint-staged": "10.0.4",
     "ts-json-schema-generator": "0.60.0",
     "typescript": "^4.0.3"
@@ -47,7 +49,7 @@
     "generate-api": "yarn api-extractor run --local",
     "lint:check": "eslint \"src/**/*.ts\" --cache",
     "lint:write": "eslint \"src/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "yarn jest",
     "test:ci": "yarn test --ci --runInBand"
   }
 }

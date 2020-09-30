@@ -36,7 +36,7 @@
     "lint:write": "eslint . --ext .ts --fix",
     "prepare": "rm -rf lib; yarn tsc -b",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test": "jest -c ./config/jest/jest.config.js",
+    "test": "yarn jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand"
   },
   "types": "lib/src/index.d.ts"

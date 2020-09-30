@@ -55,7 +55,7 @@
     "start-servers": "./bin/start-servers.sh",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "yarn workspaces foreach -vpi run test",
-    "test:ci": "yarn workspaces foreach -vpi run test",
+    "test:ci": "yarn workspaces foreach -vpi run test:ci",
     "test:ci:incremental": "yarn test:ci --concurrency 3 --since $(git merge-base $CIRCLE_BRANCH origin/master)"
   },
   "workspaces": [
