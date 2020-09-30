@@ -27,16 +27,6 @@ integration_test_settings: &integration_test_settings
   environment:
     SC_ENV: << parameters.sc_env >>
 
-save_dep: &save_dep
-  save_cache:
-    key: v7-dependency-cache-{{ checksum "yarn.lock" }}
-    paths:
-      - .yarn
-
-restore_dep: &restore_dep
-  restore_cache:
-    key: v7-dependency-cache-{{ checksum "yarn.lock" }}
-
 save_built_artifacts: &save_built_artifacts
   save_cache:
     # Force a new cache on each build
@@ -168,13 +158,10 @@ jobs:
       - checkout
       - log_stats:
           file: prepare-stats
-      - <<: *restore_dep
       - run: yarn
       - run: yarn bootstrap
       - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock or api-reports)
       # - run: yarn lint:check
-      - <<: *save_dep
-
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
@@ -182,7 +169,6 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/client-api-schema/types
-            - .yarn
       - upload_logs:
           file: prepare-stats
       - notify_slack
@@ -376,7 +362,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - <<: *restore_dep
       - <<: *restore_built_artifacts
       - run:
           rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
