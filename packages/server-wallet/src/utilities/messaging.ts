@@ -4,7 +4,8 @@ import _ from 'lodash';
 
 import {Notice} from '../protocols/actions';
 
-// Merges any messages to the same recipient to make
+// Merges any messages to the same recipient into one message
+// This makes message delivery less painful with the request/response model
 export function mergeOutgoing(outgoing: Notice[]): Notice[] {
   if (outgoing.length === 0) return outgoing;
 
