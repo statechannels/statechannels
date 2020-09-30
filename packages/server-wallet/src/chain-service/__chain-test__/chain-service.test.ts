@@ -95,4 +95,22 @@ describe('registerChannel', () => {
       })
     );
   });
+
+  it('Receives correct initial holding', async () => {
+    const channelId = randomChannelId();
+    await waitForChannelFunding(0, 5, channelId);
+
+    await new Promise(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        onHoldingUpdated: arg => {
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: ethAssetHolderAddress,
+            amount: BN.from(5),
+          });
+          resolve();
+        },
+      })
+    );
+  });
 });
