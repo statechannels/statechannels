@@ -21,6 +21,53 @@ afterEach(async () => {
 
 beforeEach(async () => await seedAlicesSigningWallet(w.knex));
 
+it('sends the post fund setup when the funding event is provided for multiple channels', async () => {
+  const c1 = channel({
+    channelNonce: 1,
+    vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0, channelNonce: 1})],
+  });
+  const c2 = channel({
+    channelNonce: 2,
+    vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0, channelNonce: 2})],
+  });
+  await Channel.query(w.knex).insert(c1);
+  await Channel.query(w.knex).insert(c2);
+  const channelIds = [c1, c2].map(c => c.channelId);
+  const result = await w.updateFundingForChannels(
+    channelIds.map(cId => ({
+      channelId: cId,
+      token: '0x00',
+      amount: BN.from(4),
+    }))
+  );
+
+  await expect(
+    Funding.getFundingAmount(w.knex, c1.channelId, ETH_ASSET_HOLDER_ADDRESS)
+  ).resolves.toEqual('0x04');
+
+  await expect(
+    Funding.getFundingAmount(w.knex, c2.channelId, ETH_ASSET_HOLDER_ADDRESS)
+  ).resolves.toEqual('0x04');
+
+  expect(result).toMatchObject({
+    outbox: [
+      {
+        params: {
+          recipient: 'bob',
+          sender: 'alice',
+          data: {
+            signedStates: [
+              {turnNum: 3, channelNonce: 1},
+              {turnNum: 3, channelNonce: 2},
+            ],
+          },
+        },
+      },
+    ],
+    channelResults: channelIds.map(cId => ({channelId: cId, turnNum: 0})),
+  });
+});
+
 it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0})]});
   await Channel.query(w.knex).insert(c);
