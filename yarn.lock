@@ -5164,6 +5164,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:3.0.1":
+  version: 3.0.1
+  resolution: "@openzeppelin/contracts@npm:3.0.1"
+  checksum: 8b8164a8ee26615b95ebdd54648f75da2c7ffafeb6c6fb7ac1fd17896be3a93a6f5ce5a249abc458919105ebf36de1f47a1118491912d8cfbbb15387bd1926e6
+  languageName: node
+  linkType: hard
+
 "@pacote/is-plain-object@npm:^1.1.3":
   version: 1.1.3
   resolution: "@pacote/is-plain-object@npm:1.1.3"
@@ -5666,6 +5673,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@statechannels/nitro-protocol@npm:0.3.6":
+  version: 0.3.6
+  resolution: "@statechannels/nitro-protocol@npm:0.3.6"
+  dependencies:
+    "@openzeppelin/contracts": 3.0.1
+    ethers: 5.0.12
+  checksum: eba1e501d87093431898c8492b570096edf20ea60213c6bce520955e318b020a8e089556f66b8bb03f085050fcda10b6ea64d3b1bbf3c396435129325a7aaa03
+  languageName: node
+  linkType: hard
+
 "@statechannels/server-wallet@workspace:packages/server-wallet":
   version: 0.0.0-use.local
   resolution: "@statechannels/server-wallet@workspace:packages/server-wallet"
@@ -5681,7 +5698,7 @@ __metadata:
     "@types/body-parser": 1.19.0
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
-    "@types/express": ^4.17.8
+    "@types/express": 4.17.1
     "@types/express-pino-logger": 4.0.2
     "@types/jest": 25.1.0
     "@types/lodash": 4.14.149
@@ -5714,7 +5731,7 @@ __metadata:
     lint-staged: 10.0.4
     nodemon: 1.19.4
     npm-run-all: 4.1.5
-    objection: 2.1.2
+    objection: 2.2.3
     p-queue: 6.6.0
     pg: 7.17.1
     pino: 6.2.0
@@ -7869,15 +7886,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.8":
-  version: 4.17.8
-  resolution: "@types/express@npm:4.17.8"
+"@types/express@npm:4.17.1":
+  version: 4.17.1
+  resolution: "@types/express@npm:4.17.1"
   dependencies:
     "@types/body-parser": "*"
     "@types/express-serve-static-core": "*"
-    "@types/qs": "*"
     "@types/serve-static": "*"
-  checksum: 9220ef3cb010faea3f77f85453b0ef3bd41e70003ac7d0ea2b7611ac9c36184995256cc61a7bb205f80a3bc51006cf7ccb29a0186c0d1fe0c0582946a0e65e7a
+  checksum: 9bf150a786d691292766967dbcabbb7ba0ac2f5dd9effc995fce45fa1e1f7c126240d746f49e5f4cd04f16b8274dd64093307473002262e40adcaac7c2218529
   languageName: node
   linkType: hard
 
@@ -9600,6 +9616,18 @@ __metadata:
     json-schema-traverse: ^0.4.1
     uri-js: ^4.2.2
   checksum: 50d72b0a10326732072f5481b1b6bd5a43f8d770878b8f88ba5bb232abb745cefbf7f87a0e64679bd477d4a8bba0b3aea084675bd34943db5279c15907ee658f
+  languageName: node
+  linkType: hard
+
+"ajv@npm:^6.12.0":
+  version: 6.12.5
+  resolution: "ajv@npm:6.12.5"
+  dependencies:
+    fast-deep-equal: ^3.1.1
+    fast-json-stable-stringify: ^2.0.0
+    json-schema-traverse: ^0.4.1
+    uri-js: ^4.2.2
+  checksum: d9ec559bd71be2479b91d293a5b14c96d60ba89f471d8b3369443830b6c72954bdc38f480194413f45f46fc250c8bd769275584ffde033aeb3c56cc218868d95
   languageName: node
   linkType: hard
 
@@ -26124,15 +26152,15 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"objection@npm:2.1.2":
-  version: 2.1.2
-  resolution: "objection@npm:2.1.2"
+"objection@npm:2.2.3":
+  version: 2.2.3
+  resolution: "objection@npm:2.2.3"
   dependencies:
-    ajv: ^6.10.2
+    ajv: ^6.12.0
     db-errors: ^0.2.3
   peerDependencies:
     knex: 0.x
-  checksum: 7b1af999fd4c506529dda2e099e8739154ed4478086316221dfb9b8f0b97380baaa5eca50a1e142c4c36399829c6b2f09a184c8ca615dbfaf068e8dd75f5a425
+  checksum: 7e8beb59b3a5a7cc730305a7db63aecf856528e711139d24c647bdc52cf126ed51f50e657b0746b2b4dd5b8712e36d9846dd6f64a098fdac29783979b34ba424
   languageName: node
   linkType: hard
 

@@ -9006,6 +9006,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["@openzeppelin/contracts", [
+        ["npm:3.0.1", {
+          "packageLocation": "./.yarn/cache/@openzeppelin-contracts-npm-3.0.1-dd01b49cbe-8b8164a8ee.zip/node_modules/@openzeppelin/contracts/",
+          "packageDependencies": [
+            ["@openzeppelin/contracts", "npm:3.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["@pacote/is-plain-object", [
         ["npm:1.1.3", {
           "packageLocation": "./.yarn/cache/@pacote-is-plain-object-npm-1.1.3-e94359b599-4c9dfe3fb7.zip/node_modules/@pacote/is-plain-object/",
@@ -9646,6 +9655,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["@statechannels/nitro-protocol", [
+        ["npm:0.3.6", {
+          "packageLocation": "./.yarn/cache/@statechannels-nitro-protocol-npm-0.3.6-18e3b7fffc-eba1e501d8.zip/node_modules/@statechannels/nitro-protocol/",
+          "packageDependencies": [
+            ["@statechannels/nitro-protocol", "npm:0.3.6"],
+            ["@openzeppelin/contracts", "npm:3.0.1"],
+            ["ethers", "npm:5.0.12"]
+          ],
+          "linkType": "HARD",
+        }],
         ["workspace:packages/nitro-protocol", {
           "packageLocation": "./packages/nitro-protocol/",
           "packageDependencies": [
@@ -9697,7 +9715,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/body-parser", "npm:1.19.0"],
             ["@types/eslint", "npm:6.1.7"],
             ["@types/eslint-plugin-prettier", "npm:2.2.0"],
-            ["@types/express", "npm:4.17.8"],
+            ["@types/express", "npm:4.17.1"],
             ["@types/express-pino-logger", "npm:4.0.2"],
             ["@types/jest", "npm:25.1.0"],
             ["@types/lodash", "npm:4.14.149"],
@@ -9730,7 +9748,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lint-staged", "npm:10.0.4"],
             ["nodemon", "npm:1.19.4"],
             ["npm-run-all", "npm:4.1.5"],
-            ["objection", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.1.2"],
+            ["objection", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.2.3"],
             ["p-queue", "npm:6.6.0"],
             ["pg", "npm:7.17.1"],
             ["pino", "npm:6.2.0"],
@@ -9776,7 +9794,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["npm:0.1.5", {
           "packageLocation": "./.yarn/cache/@statechannels-wasm-utils-npm-0.1.5-824c2d7756-4c4625e20b.zip/node_modules/@statechannels/wasm-utils/",
           "packageDependencies": [
-            ["@statechannels/wasm-utils", "npm:0.1.5"]
+            ["@statechannels/wasm-utils", "npm:0.1.5"],
+            ["@statechannels/nitro-protocol", "npm:0.3.6"]
           ],
           "linkType": "HARD",
         }]
@@ -12760,21 +12779,20 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["@types/express", [
-        ["npm:4.17.7", {
-          "packageLocation": "./.yarn/cache/@types-express-npm-4.17.7-3f74d07476-99b795c60e.zip/node_modules/@types/express/",
+        ["npm:4.17.1", {
+          "packageLocation": "./.yarn/cache/@types-express-npm-4.17.1-1029da53c1-9bf150a786.zip/node_modules/@types/express/",
           "packageDependencies": [
-            ["@types/express", "npm:4.17.7"],
+            ["@types/express", "npm:4.17.1"],
             ["@types/body-parser", "npm:1.19.0"],
             ["@types/express-serve-static-core", "npm:4.17.9"],
-            ["@types/qs", "npm:6.9.4"],
             ["@types/serve-static", "npm:1.13.5"]
           ],
           "linkType": "HARD",
         }],
-        ["npm:4.17.8", {
-          "packageLocation": "./.yarn/cache/@types-express-npm-4.17.8-c21b94ed16-9220ef3cb0.zip/node_modules/@types/express/",
+        ["npm:4.17.7", {
+          "packageLocation": "./.yarn/cache/@types-express-npm-4.17.7-3f74d07476-99b795c60e.zip/node_modules/@types/express/",
           "packageDependencies": [
-            ["@types/express", "npm:4.17.8"],
+            ["@types/express", "npm:4.17.7"],
             ["@types/body-parser", "npm:1.19.0"],
             ["@types/express-serve-static-core", "npm:4.17.9"],
             ["@types/qs", "npm:6.9.4"],
@@ -14758,6 +14776,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/ajv-npm-6.12.4-c4dcb5109f-50d72b0a10.zip/node_modules/ajv/",
           "packageDependencies": [
             ["ajv", "npm:6.12.4"],
+            ["fast-deep-equal", "npm:3.1.3"],
+            ["fast-json-stable-stringify", "npm:2.1.0"],
+            ["json-schema-traverse", "npm:0.4.1"],
+            ["uri-js", "npm:4.2.2"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:6.12.5", {
+          "packageLocation": "./.yarn/cache/ajv-npm-6.12.5-15b6d1a59d-d9ec559bd7.zip/node_modules/ajv/",
+          "packageDependencies": [
+            ["ajv", "npm:6.12.5"],
             ["fast-deep-equal", "npm:3.1.3"],
             ["fast-json-stable-stringify", "npm:2.1.0"],
             ["json-schema-traverse", "npm:0.4.1"],
@@ -33304,12 +33333,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["objection", [
-        ["virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.1.2", {
-          "packageLocation": "./.yarn/$$virtual/objection-virtual-116fb5fe2e/0/cache/objection-npm-2.1.2-77336fd4a3-7b1af999fd.zip/node_modules/objection/",
+        ["virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.2.3", {
+          "packageLocation": "./.yarn/$$virtual/objection-virtual-7eaa86a1ff/0/cache/objection-npm-2.2.3-ca90c0a5a6-7e8beb59b3.zip/node_modules/objection/",
           "packageDependencies": [
-            ["objection", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.1.2"],
+            ["objection", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.2.3"],
             ["@types/knex", null],
-            ["ajv", "npm:6.12.4"],
+            ["ajv", "npm:6.12.5"],
             ["db-errors", "npm:0.2.3"],
             ["knex", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:0.20.9"]
           ],
