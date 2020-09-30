@@ -1,7 +1,7 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {BN, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
-import {Observable} from 'rxjs';
+import {concat, from, Observable} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 
@@ -40,6 +40,7 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<FundingChangedArg>> = new Map();
+  private addressToContract: Map<Address, Contract> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -74,45 +75,44 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
     assetHolders.map(async assetHolder => {
       let obs = this.addressToObservable.get(assetHolder);
       if (!obs) {
-        obs = this.createContractObservable(assetHolder, channelId, subscriber);
+        const contract: Contract = new Contract(
+          assetHolder,
+          ContractArtifacts.EthAssetHolderArtifact.abi
+        ).connect(this.provider);
+        this.addressToContract.set(assetHolder, contract);
+
+        obs = this.createContractObservable(contract);
         this.addressToObservable.set(assetHolder, obs);
       }
-      obs
-        .pipe(filter(event => event.channelId === channelId))
-        // todo: subscriber method should be based on event type
-        .subscribe({next: subscriber.onFundingChanged});
+      // Fetch the current contract holding, and emit as an event
+      const contract = this.addressToContract.get(assetHolder);
+      if (!contract) throw new Error('The addressToContract mapping should contain the contract');
+      const currentFunding = from(
+        (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
+          channelId,
+          assetHolderAddress: contract.address,
+          amount: BN.from(holding),
+        }))
+      );
+
+      // todo: subscriber method should be based on event type
+      concat(currentFunding, obs.pipe(filter(event => event.channelId === channelId))).subscribe({
+        next: subscriber.onFundingChanged,
+      });
     });
   }
 
-  private createContractObservable(
-    contractAddress: Address,
-    channelId: Bytes32,
-    subscriber: ChainEventSubscriberInterface
-  ): Observable<FundingChangedArg> {
-    const contract: Contract = new Contract(
-      contractAddress,
-      ContractArtifacts.EthAssetHolderArtifact.abi
-    ).connect(this.provider);
-
+  private createContractObservable(contract: Contract): Observable<FundingChangedArg> {
     // Create an observable that emits events on contract events
     const obs = new Observable<FundingChangedArg>(subs => {
       // todo: add other event types
       contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
         subs.next({
           channelId: destination,
-          assetHolderAddress: contractAddress,
+          assetHolderAddress: contract.address,
           amount: BN.from(destinationHoldings),
         })
       );
-    });
-
-    // Fetch the current contract holding, and emit as an event
-    contract.holdings(channelId).then((holding: any) => {
-      subscriber.onFundingChanged({
-        channelId,
-        assetHolderAddress: contractAddress,
-        amount: BN.from(holding),
-      });
     });
 
     return obs.pipe(share());
