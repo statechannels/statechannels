@@ -60,6 +60,6 @@
     "lint:write": "eslint \"*/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
     "prepare": "rm -rf ./lib; tsc -b",
-    "start:shared-ganache": "node lib/src/ganache/start-ganache-script.js"
+    "start:shared-ganache": "yarn node lib/src/ganache/start-ganache-script.js"
   }
 }
