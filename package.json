@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/xstate-wallet",
   "description": "State channel wallet using xstate.",
-  "version": "0.3.9-alpha.0",
+  "version": "0.3.9",
   "author": "Alex Gap",
   "babel": {
     "presets": [
@@ -26,12 +26,12 @@
     "@sentry/browser": "5.15.5",
     "@statechannels/client-api-schema": "^0.3.9-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.9-alpha.0",
-    "@statechannels/wallet-core": "^0.3.9-alpha.0",
+    "@statechannels/wallet-core": "^0.3.9",
     "@statechannels/wire-format": "^0.3.9-alpha.0",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
-    "babel-plugin-const-enum": "1.0.1",
     "babel-loader": "8.1.0",
+    "babel-plugin-const-enum": "1.0.1",
     "babel-plugin-named-asset-import": "0.3.6",
     "babel-preset-react-app": "9.1.0",
     "case-sensitive-paths-webpack-plugin": "^2.3.0",
