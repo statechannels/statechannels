@@ -8875,7 +8875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/wait-on@npm:4.0.0":
+"@types/wait-on@npm:4.0.0, @types/wait-on@npm:^4.0.0":
   version: 4.0.0
   resolution: "@types/wait-on@npm:4.0.0"
   checksum: 7059a4591526464ec479529d5f9c438b0d22d5fc06c0b92175b5c84849ee04839350a01139476011b6ef40761b6a37f541bfb8a0a0f65b0b109044d9843e6235
@@ -31671,6 +31671,7 @@ resolve@~1.12.0:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@types/prettier": 1.19.0
+    "@types/wait-on": ^4.0.0
     eslint-plugin-import: 2.20.0
     husky: 3.0.7
     lerna: 3.22.1

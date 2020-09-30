@@ -103,6 +103,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",
           "packageDependencies": [
             ["@types/prettier", "npm:1.19.0"],
+            ["@types/wait-on", "npm:4.0.0"],
             ["eslint-plugin-import", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.20.0"],
             ["husky", "npm:3.0.7"],
             ["lerna", "npm:3.22.1"],
@@ -39868,6 +39869,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["root-workspace-0b6124", "workspace:."],
             ["@types/prettier", "npm:1.19.0"],
+            ["@types/wait-on", "npm:4.0.0"],
             ["eslint-plugin-import", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.20.0"],
             ["husky", "npm:3.0.7"],
             ["lerna", "npm:3.22.1"],
