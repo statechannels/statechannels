@@ -91,7 +91,7 @@ describe('registerChannel', () => {
         amount: BN.from(5),
       })
     ).wait();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 200));
     expect(mock).toHaveBeenCalledWith({
       channelId,
       assetHolderAddress: ethAssetHolderAddress,
