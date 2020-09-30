@@ -54,6 +54,7 @@ import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {ProtocolState as ApplicationProtocolState} from '../protocols/application';
 import {ProtocolState as LedgerProtocolState} from '../protocols/ledger';
+import {LedgerRequests} from '../models/ledger-requests';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -441,18 +442,7 @@ export class Store {
    * Below is an in-memory protototype of ledger funding data structured and store methods
    */
 
-  private pending_updates: {
-    // Store requests for the ledger's funds
-    [fundingChannelId: string]: {
-      ledgerChannelId: Bytes32;
-      fundingChannelId: Bytes32;
-      status:
-        | 'pending' // Request added to DB
-        | 'inflight' // Signed and sent ledger update
-        | 'done' // Counterparty signed back and update was applied; ready for garbage collect ?
-        | 'fail'; // Rejected for some reason (e.g., no funds, counterparty rejected)
-    };
-  } = {};
+  private pending_updates = new LedgerRequests();
 
   private ledgers: {
     // Store information about asset holder of ledger
@@ -464,7 +454,6 @@ export class Store {
 
   async requestLedgerFunding(
     {channelId, supported}: ChannelState,
-    // eslint-disable-next-line
     tx: Transaction
   ): Promise<Bytes32> {
     if (!supported) throw new Error('cannot fund unsupported channel');
@@ -478,17 +467,18 @@ export class Store {
 
     if (!ledgerRecord) throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
 
-    // TODO: Turn into a DB query
-    {
-      if (this.pending_updates[channelId])
-        throw new Error('app already has a pending funding request. abort');
+    if (await this.pending_updates.getRequest(channelId, tx))
+      throw new Error('app already has a pending funding request. abort');
 
-      this.pending_updates[channelId] = {
+    await this.pending_updates.setRequest(
+      channelId,
+      {
         ledgerChannelId: ledgerRecord.ledgerChannelId,
         status: 'pending',
         fundingChannelId: channelId,
-      };
-    }
+      },
+      tx
+    );
 
     return ledgerRecord.ledgerChannelId;
   }
@@ -497,32 +487,13 @@ export class Store {
     return !!this.ledgers[channelId];
   }
 
-  // Probbaly a Requests model method
-  private async getPendingRequests(
-    ledgerChannelId: Bytes32,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: Transaction
-  ): Promise<
-    {
-      ledgerChannelId: Bytes32;
-      fundingChannelId: Bytes32;
-      status: 'pending' | 'inflight' | 'done' | 'fail';
-    }[]
-  > {
-    return _.chain(this.pending_updates)
-      .mapValues()
-      .filter(['ledgerChannelId', ledgerChannelId])
-      .value();
-  }
-
   async markRequests(
     channelIds: Bytes32[],
     status: 'pending' | 'inflight' | 'done',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<void> {
     for (const channelId of channelIds) {
-      this.pending_updates[channelId].status = status;
+      await this.pending_updates.setRequestStatus(channelId, status, tx);
     }
   }
 
@@ -530,7 +501,7 @@ export class Store {
     channel: ChannelState,
     tx?: Transaction
   ): Promise<ApplicationProtocolState> {
-    const update = this.pending_updates[channel.channelId];
+    const update = await this.pending_updates.getRequest(channel.channelId, tx);
     return {
       app: channel,
       ledgerFundingRequested: !!update,
@@ -543,7 +514,7 @@ export class Store {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<LedgerProtocolState> {
-    const requests = await this.getPendingRequests(ledger.channelId, tx);
+    const requests = await this.pending_updates.getPendingRequests(ledger.channelId, tx);
     return {
       ledger,
       channelsPendingRequest: await Promise.all(
