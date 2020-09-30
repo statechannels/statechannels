@@ -1,10 +1,10 @@
-import {Zero} from '@ethersproject/constants';
+import { constants } from 'ethers';
 import * as _ from 'lodash';
 
-import {DomainBudget, AssetBudget} from '../types';
-import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../config';
+import { DomainBudget, AssetBudget } from '../types';
+import { HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS } from '../config';
 
-import {checkThat, exists} from './helpers';
+import { checkThat, exists } from './helpers';
 
 export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBudget {
   return {
@@ -14,13 +14,13 @@ export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBud
       [ETH_ASSET_HOLDER_ADDRESS]: _.assign(
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          availableReceiveCapacity: Zero,
-          availableSendCapacity: Zero,
-          channels: {}
+          availableReceiveCapacity: constants.Zero,
+          availableSendCapacity: constants.Zero,
+          channels: {},
         },
         opts
-      )
-    }
+      ),
+    },
   };
 }
 

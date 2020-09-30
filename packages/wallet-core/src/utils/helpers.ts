@@ -1,7 +1,7 @@
-import {hexZeroPad} from '@ethersproject/bytes';
+import { utils } from 'ethers';
 
-import {BN} from '../bignumber';
-import {Uint256} from '../types';
+import { BN } from '../bignumber';
+import { Uint256 } from '../types';
 export function unreachable(x: never) {
   return x;
 }
@@ -22,11 +22,11 @@ export function checkThat<T, S = undefined>(t: T | S, isTypeT: TypeGuard<T, S>):
 }
 
 export function createDestination(address: string): string {
-  return hexZeroPad(address, 32);
+  return utils.hexZeroPad(address, 32);
 }
 
 export function formatAmount(amount: Uint256): Uint256 {
-  return hexZeroPad(BN.from(amount), 32) as Uint256;
+  return utils.hexZeroPad(BN.from(amount), 32) as Uint256;
 }
 
 export function arrayToRecord<T, K extends keyof T>(
@@ -41,6 +41,6 @@ export function arrayToRecord<T, K extends keyof T>(
 
 export function recordToArray<T>(record: Record<string | number, T | undefined>): Array<T> {
   return Object.keys(record)
-    .map(k => record[k])
-    .filter(e => e !== undefined) as Array<T>;
+    .map((k) => record[k])
+    .filter((e) => e !== undefined) as Array<T>;
 }
