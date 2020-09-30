@@ -7,7 +7,7 @@ import {NonceManager} from '@ethersproject/experimental';
 
 import {Address, Bytes32} from '../type-aliases';
 
-export type FundingChangedArg = {
+export type HoldingUpdatedArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
   amount: Uint256;
@@ -21,7 +21,7 @@ type FundChannelArg = {
 };
 
 export interface ChainEventSubscriberInterface {
-  onFundingChanged(arg: FundingChangedArg): void;
+  onHoldingUpdated(arg: HoldingUpdatedArg): void;
 }
 
 interface ChainEventEmitterInterface {
@@ -39,7 +39,7 @@ interface ChainModifierInterface {
 export class ChainService implements ChainModifierInterface, ChainEventEmitterInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
-  private addressToObservable: Map<Address, Observable<FundingChangedArg>> = new Map();
+  private addressToObservable: Map<Address, Observable<HoldingUpdatedArg>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
@@ -87,7 +87,7 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
       // Fetch the current contract holding, and emit as an event
       const contract = this.addressToContract.get(assetHolder);
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
-      const currentFunding = from(
+      const currentHolding = from(
         (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
           channelId,
           assetHolderAddress: contract.address,
@@ -96,15 +96,15 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
       );
 
       // todo: subscriber method should be based on event type
-      concat(currentFunding, obs.pipe(filter(event => event.channelId === channelId))).subscribe({
-        next: subscriber.onFundingChanged,
+      concat(currentHolding, obs.pipe(filter(event => event.channelId === channelId))).subscribe({
+        next: subscriber.onHoldingUpdated,
       });
     });
   }
 
-  private createContractObservable(contract: Contract): Observable<FundingChangedArg> {
+  private createContractObservable(contract: Contract): Observable<HoldingUpdatedArg> {
     // Create an observable that emits events on contract events
-    const obs = new Observable<FundingChangedArg>(subs => {
+    const obs = new Observable<HoldingUpdatedArg>(subs => {
       // todo: add other event types
       contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
         subs.next({

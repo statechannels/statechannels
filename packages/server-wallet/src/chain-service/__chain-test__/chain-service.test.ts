@@ -60,7 +60,7 @@ describe('registerChannel', () => {
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        onFundingChanged: arg => {
+        onHoldingUpdated: arg => {
           switch (counter) {
             case 0:
               expect(arg).toMatchObject({
