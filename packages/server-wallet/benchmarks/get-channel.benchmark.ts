@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
 import Knex from 'knex';
+import yargs from 'yargs';
 
 configureEnvVariables();
-
 import adminKnex from '../src/db-admin/db-admin-connection';
 import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
@@ -14,21 +14,24 @@ import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/confi
 
 const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
+const {argv} = yargs.option('calls', {
+  type: 'number',
+  default: 500,
+  description: 'The duration to run the stress test in seconds',
+  alias: 'c',
+});
+const NUM_CALLS = argv.calls;
+
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();
 
   await seedAlicesSigningWallet(knex);
   const c = withSupportedState()({vars: [stateVars()]});
-  const result = await Channel.query().insert(c);
-
-  c.protocolState;
-
-  result.protocolState;
+  await Channel.query(knex).insert(c);
 
   const wallet = new Wallet(defaultConfig);
 
-  const NUM_CALLS = 100;
   const iter = _.range(NUM_CALLS);
   const key = `getChannel x ${NUM_CALLS}`;
   console.time(key);
@@ -38,9 +41,7 @@ async function benchmark(): Promise<void> {
   }
   console.timeEnd(key);
 
-  await adminKnex.destroy();
-
-  await wallet.destroy();
+  process.exit(0);
 }
 
-benchmark();
+benchmark().catch(console.error);

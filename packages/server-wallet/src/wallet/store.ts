@@ -285,7 +285,15 @@ export class Store {
   }
 
   async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
-    return (await Channel.forId(channelId, tx || this.knex))?.protocolState;
+    // This is somewhat faster than Channel.forId for simply fetching a channel:
+    // - the signingWallet isn't needed to construct the protocol state
+    // - withGraphJoined is slightly faster in this case
+    return (
+      await Channel.query(tx ?? this.knex)
+        .where({'channels.channel_id': channelId})
+        .withGraphJoined('funding')
+        .first()
+    )?.protocolState;
   }
 
   async getStates(
