@@ -73,8 +73,8 @@ export type WalletInterface = {
   getState(args: GetStateParams): SingleChannelResult;
   syncChannel(args: SyncChannelParams): SingleChannelResult;
 
-  updateChannelFunding(args: UpdateChannelFundingParams): void;
-
+  updateChannelFunding(args: UpdateChannelFundingParams): SingleChannelResult;
+  updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): MultipleChannelResult;
 
@@ -103,6 +103,7 @@ export class Wallet implements WalletInterface {
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
+    this.updateFundingForChannels = this.updateFundingForChannels.bind(this);
     this.getSigningAddress = this.getSigningAddress.bind(this);
     this.createChannel = this.createChannel.bind(this);
     this.createChannels = this.createChannels.bind(this);
@@ -171,6 +172,17 @@ export class Wallet implements WalletInterface {
     return participant;
   }
 
+  public async updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult {
+    const results = await Promise.all(args.map(a => this.updateChannelFunding(a)));
+
+    const channelResults = results.map(r => r.channelResult);
+    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+
+    return {
+      channelResults: mergeChannelResults(channelResults),
+      outbox: mergeOutgoing(outgoing),
+    };
+  }
   public async updateChannelFunding({
     channelId,
     token,
