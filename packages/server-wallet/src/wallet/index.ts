@@ -66,6 +66,7 @@ export type WalletInterface = {
   createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult;
   createChannel(args: CreateChannelParams): SingleChannelResult;
   joinChannel(args: JoinChannelParams): SingleChannelResult;
+  joinChannels(channelIds: ChannelId[]): MultipleChannelResult;
   updateChannel(args: UpdateChannelParams): SingleChannelResult;
   closeChannel(args: CloseChannelParams): SingleChannelResult;
   getChannels(): MultipleChannelResult;
@@ -108,6 +109,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
     this.createChannels = this.createChannels.bind(this);
     this.createChannelInternal = this.createChannelInternal.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
+    this.joinChannels = this.joinChannels.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
     this.updateChannelInternal = this.updateChannelInternal.bind(this);
     this.pushMessageInternal = this.pushMessageInternal.bind(this);
@@ -244,6 +246,19 @@ export class Wallet implements WalletInterface, ChainEventListener {
     );
     return {outbox: mergeOutgoing(outgoing.map(n => n.notice)), channelResult};
   }
+
+  async joinChannels(channelIds: ChannelId[]): MultipleChannelResult {
+    const results = await Promise.all(channelIds.map(channelId => this.joinChannel({channelId})));
+
+    const channelResults = results.map(r => r.channelResult);
+    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+
+    return {
+      channelResults: mergeChannelResults(channelResults),
+      outbox: mergeOutgoing(outgoing),
+    };
+  }
+
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
