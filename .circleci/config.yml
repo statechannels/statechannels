@@ -31,21 +31,7 @@ save_dep: &save_dep
   save_cache:
     key: v7-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
-      - ~/.cache/yarn
-      - node_modules
-      - packages/benchmarking/node_modules
-      - packages/channel-client/node_modules
-      - packages/client-api-schema/node_modules
-      - packages/devtools/node_modules
-      - packages/docs-website/node_modules
-      - packages/iframe-channel-provider/node_modules
-      - packages/integration-tests/node_modules
-      - packages/jest-gas-reporter/node_modules
-      - packages/nitro-protocol/node_modules
-      - packages/server-wallet/node_modules
-      - packages/wallet-core/node_modules
-      - packages/wire-format/node_modules
-      - packages/xstate-wallet/node_modules
+      - .yarn
 
 restore_dep: &restore_dep
   restore_cache:
@@ -195,9 +181,8 @@ jobs:
             - packages/*/dist
             - packages/*/build
             - packages/*/lib
-            - packages/*/node_modules
             - packages/client-api-schema/types
-            - node_modules
+            - .yarn
       - upload_logs:
           file: prepare-stats
       - notify_slack
