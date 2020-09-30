@@ -7,7 +7,7 @@ import {NonceManager} from '@ethersproject/experimental';
 
 import {Address, Bytes32} from '../type-aliases';
 
-export type SetFundingArg = {
+export type FundingChangedArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
   amount: Uint256;
@@ -21,7 +21,7 @@ type FundChannelArg = {
 };
 
 export interface ChainEventSubscriberInterface {
-  setFunding(arg: SetFundingArg): void;
+  onFundingChanged(arg: FundingChangedArg): void;
 }
 
 interface ChainEventEmitterInterface {
@@ -39,7 +39,7 @@ interface ChainModifierInterface {
 export class ChainService implements ChainModifierInterface, ChainEventEmitterInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
-  private addressToObservable: Map<Address, Observable<SetFundingArg>> = new Map();
+  private addressToObservable: Map<Address, Observable<FundingChangedArg>> = new Map();
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -80,7 +80,7 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
       obs
         .pipe(filter(event => event.channelId === channelId))
         // todo: subscriber method should be based on event type
-        .subscribe({next: subscriber.setFunding});
+        .subscribe({next: subscriber.onFundingChanged});
     });
   }
 
@@ -88,14 +88,14 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
     contractAddress: Address,
     channelId: Bytes32,
     subscriber: ChainEventSubscriberInterface
-  ): Observable<SetFundingArg> {
+  ): Observable<FundingChangedArg> {
     const contract: Contract = new Contract(
       contractAddress,
       ContractArtifacts.EthAssetHolderArtifact.abi
     ).connect(this.provider);
 
     // Create an observable that emits events on contract events
-    const obs = new Observable<SetFundingArg>(subscriber => {
+    const obs = new Observable<FundingChangedArg>(subscriber => {
       // todo: add other event types
       contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
         subscriber.next({
@@ -108,7 +108,7 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
 
     // Fetch the current contract holding, and emit as an event
     contract.holdings(channelId).then((holding: any) => {
-      subscriber.setFunding({
+      subscriber.onFundingChanged({
         channelId,
         assetHolderAddress: contractAddress,
         amount: BN.from(holding),
