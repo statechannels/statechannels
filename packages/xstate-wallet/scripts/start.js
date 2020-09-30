@@ -58,7 +58,7 @@ void (async () => {
     // Add contract addresses to process.env if running ganache
     // const {deployer} = await await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX);
     // Assume ganache is running
-    const deployedArtifacts = await deploy(deployer);
+    const deployedArtifacts = await deploy();
     process.env = { ...process.env, ...deployedArtifacts };
   }
 
