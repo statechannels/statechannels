@@ -73,7 +73,6 @@ const startServer = (command: string, port: number): E2EServer => {
       // eslint-disable-next-line no-process-env
       ...process.env,
       LOG_LEVEL: 'trace',
-      LOG_DESTINATION: '/tmp/server-wallet-stress-test.log',
     },
   });
 
