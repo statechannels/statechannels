@@ -5895,22 +5895,29 @@ __metadata:
     "@types/async-lock": 1.1.1
     "@types/babel__core": 7.1.7
     "@types/babel__preset-env": 7.9.0
+    "@types/case-sensitive-paths-webpack-plugin": ^2.1.4
     "@types/dotenv-webpack": 1.8.0
+    "@types/eslint": ^7.2.3
     "@types/file-loader": 4.2.0
+    "@types/fs-extra": ^9.0.1
     "@types/git-revision-webpack-plugin": 3.0.0
     "@types/html-webpack-plugin": 3.2.2
+    "@types/lodash": ^4.14.161
     "@types/mini-css-extract-plugin": 0.9.0
     "@types/node-sass": 4.11.0
     "@types/optimize-css-assets-webpack-plugin": 5.0.1
     "@types/pino": 6.0.0
+    "@types/prop-types": ^15.7.3
     "@types/react": 16.9.48
     "@types/react-dev-utils": 9.0.4
     "@types/react-dom": 16.9.8
     "@types/react-is": 16.7.1
     "@types/react-router-dom": 5.1.3
+    "@types/resolve": ^1.17.1
     "@types/segment-analytics": 0.0.32
     "@types/storybook__addon-info": 5.2.1
     "@types/styled-components": 4.4.2
+    "@types/terser-webpack-plugin": ^4.2.0
     "@types/url-parse": 1.4.3
     "@types/webpack": 4.41.12
     "@types/webpack-dev-server": 3.11.0
@@ -7799,6 +7806,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/case-sensitive-paths-webpack-plugin@npm:^2.1.4":
+  version: 2.1.4
+  resolution: "@types/case-sensitive-paths-webpack-plugin@npm:2.1.4"
+  dependencies:
+    "@types/webpack": "*"
+  checksum: 37f26b40f660c9a014ded31e07af14b464ad971b865984c7f99756263f4bd82ab3bd60ce15b00a6637c9775d8222c6e3aa134bc112beebc9d10a55720d517a89
+  languageName: node
+  linkType: hard
+
 "@types/chai@npm:4.2.0":
   version: 4.2.0
   resolution: "@types/chai@npm:4.2.0"
@@ -7925,6 +7941,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/eslint@npm:^7.2.3":
+  version: 7.2.3
+  resolution: "@types/eslint@npm:7.2.3"
+  dependencies:
+    "@types/estree": "*"
+    "@types/json-schema": "*"
+  checksum: 2ddb3378eb3f8aa043d30e1685b4aa6d346c239bd82f96f62c532f418bf935d67d198ac405bedfaee1f4a22b03fb9df33611f28b85038fa1a7e4641ce0d16d1b
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*":
   version: 0.0.45
   resolution: "@types/estree@npm:0.0.45"
@@ -7997,6 +8023,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 53b1daf72ab73b2d4cb9801e5d73a3fd2d3f8758b52815a6eca6ccfa18d307c17fe7a361865264dc96f5de5a905672cd999d8ac68ef49690266e3e6a10ab3cff
+  languageName: node
+  linkType: hard
+
+"@types/fs-extra@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "@types/fs-extra@npm:9.0.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: a7c0f7373620b5045fb5fc6ccc28c8752a08f93c03127036e292cfa35bf123bd2cdbe534aaac5800a8383af37490c8b8d1192361ea24a4c7e4177ebe97c3b429
   languageName: node
   linkType: hard
 
@@ -8509,7 +8544,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*":
+"@types/prop-types@npm:*, @types/prop-types@npm:^15.7.3":
   version: 15.7.3
   resolution: "@types/prop-types@npm:15.7.3"
   checksum: bd0eab69d5120ad3784d0c9985f902653d5924707a7f2b3702a330e762dfd61b6494954cb54ad0c52b918ffd6f1e7e27c9270e4442bc15250de348596f2f60cb
@@ -8671,6 +8706,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/resolve@npm:^1.17.1":
+  version: 1.17.1
+  resolution: "@types/resolve@npm:1.17.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: 8e72a73574f9489760662498c1ad512a8d4084a5db15f327e0d785cb277bb0a3146cd049241a8e3268bd0ed204ad3ee7b4a6b4622ef681e70547be9af258ca6a
+  languageName: node
+  linkType: hard
+
 "@types/responselike@npm:^1.0.0":
   version: 1.0.0
   resolution: "@types/responselike@npm:1.0.0"
@@ -8768,6 +8812,16 @@ __metadata:
   version: 1.0.0
   resolution: "@types/tcp-port-used@npm:1.0.0"
   checksum: 3715b57555fb0d7ab34ef99a5bb153f4a5ed7ff8db6fe9d7b8e62a8f4c78a2f383d3707fbc3a73fad540ed20d5be5a24c92417aa2ee4febfb1752eb2af00a304
+  languageName: node
+  linkType: hard
+
+"@types/terser-webpack-plugin@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "@types/terser-webpack-plugin@npm:4.2.0"
+  dependencies:
+    "@types/webpack": "*"
+    terser: ^4.6.13
+  checksum: 05e8572ae660a66f1c2a2deea50686cbd1a8714f6d53b369d5b251840ab225e41e3009d847a8a700dbbc3c88022879b7baf381b7e92a38ae5cdc3d71411edc32
   languageName: node
   linkType: hard
 
@@ -34058,7 +34112,7 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
-"terser@npm:^4.0.0, terser@npm:^4.1.2, terser@npm:^4.6.12, terser@npm:^4.6.2, terser@npm:^4.6.3, terser@npm:^4.7.0, terser@npm:^4.8.0":
+"terser@npm:^4.0.0, terser@npm:^4.1.2, terser@npm:^4.6.12, terser@npm:^4.6.13, terser@npm:^4.6.2, terser@npm:^4.6.3, terser@npm:^4.7.0, terser@npm:^4.8.0":
   version: 4.8.0
   resolution: "terser@npm:4.8.0"
   dependencies:

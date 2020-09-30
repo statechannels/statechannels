@@ -9274,7 +9274,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["@rimble/connection-banner", "virtual:c0a3d24e365636e612f8fb964a46f08819a1736159a9688907e2a5c3449471c585e61c977184007dcfe8c76ff736e58efca5090f62abd7ddb3ff48eb59d89c0b#npm:1.2.3"],
             ["@rimble/utils", "npm:1.2.3"],
-            ["@types/prop-types", null],
+            ["@types/prop-types", "npm:15.7.3"],
             ["@types/react", "npm:16.9.19"],
             ["@types/react-dom", "npm:16.9.8"],
             ["@types/rimble-ui", null],
@@ -9919,22 +9919,29 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/async-lock", "npm:1.1.1"],
             ["@types/babel__core", "npm:7.1.7"],
             ["@types/babel__preset-env", "npm:7.9.0"],
+            ["@types/case-sensitive-paths-webpack-plugin", "npm:2.1.4"],
             ["@types/dotenv-webpack", "npm:1.8.0"],
+            ["@types/eslint", "npm:7.2.3"],
             ["@types/file-loader", "npm:4.2.0"],
+            ["@types/fs-extra", "npm:9.0.1"],
             ["@types/git-revision-webpack-plugin", "npm:3.0.0"],
             ["@types/html-webpack-plugin", "npm:3.2.2"],
+            ["@types/lodash", "npm:4.14.161"],
             ["@types/mini-css-extract-plugin", "npm:0.9.0"],
             ["@types/node-sass", "npm:4.11.0"],
             ["@types/optimize-css-assets-webpack-plugin", "npm:5.0.1"],
             ["@types/pino", "npm:6.0.0"],
+            ["@types/prop-types", "npm:15.7.3"],
             ["@types/react", "npm:16.9.19"],
             ["@types/react-dev-utils", "npm:9.0.4"],
             ["@types/react-dom", "npm:16.9.8"],
             ["@types/react-is", "npm:16.7.1"],
             ["@types/react-router-dom", "npm:5.1.3"],
+            ["@types/resolve", "npm:1.17.1"],
             ["@types/segment-analytics", "npm:0.0.32"],
             ["@types/storybook__addon-info", "npm:5.2.1"],
             ["@types/styled-components", "npm:4.4.2"],
+            ["@types/terser-webpack-plugin", "npm:4.2.0"],
             ["@types/url-parse", "npm:1.4.3"],
             ["@types/webpack", "npm:4.41.12"],
             ["@types/webpack-dev-server", "npm:3.11.0"],
@@ -12702,6 +12709,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["@types/case-sensitive-paths-webpack-plugin", [
+        ["npm:2.1.4", {
+          "packageLocation": "./.yarn/cache/@types-case-sensitive-paths-webpack-plugin-npm-2.1.4-0314b0c5db-37f26b40f6.zip/node_modules/@types/case-sensitive-paths-webpack-plugin/",
+          "packageDependencies": [
+            ["@types/case-sensitive-paths-webpack-plugin", "npm:2.1.4"],
+            ["@types/webpack", "npm:4.41.21"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["@types/chai", [
         ["npm:4.2.0", {
           "packageLocation": "./.yarn/cache/@types-chai-npm-4.2.0-4bcefb247f-c6d89a076d.zip/node_modules/@types/chai/",
@@ -12828,6 +12845,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/json-schema", "npm:7.0.5"]
           ],
           "linkType": "HARD",
+        }],
+        ["npm:7.2.3", {
+          "packageLocation": "./.yarn/cache/@types-eslint-npm-7.2.3-d51e473e5f-2ddb3378eb.zip/node_modules/@types/eslint/",
+          "packageDependencies": [
+            ["@types/eslint", "npm:7.2.3"],
+            ["@types/estree", "npm:0.0.45"],
+            ["@types/json-schema", "npm:7.0.5"]
+          ],
+          "linkType": "HARD",
         }]
       ]],
       ["@types/eslint-plugin-prettier", [
@@ -12924,6 +12950,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-fs-extra-npm-8.1.0-f40b532d8a-53b1daf72a.zip/node_modules/@types/fs-extra/",
           "packageDependencies": [
             ["@types/fs-extra", "npm:8.1.0"],
+            ["@types/node", "npm:14.6.1"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:9.0.1", {
+          "packageLocation": "./.yarn/cache/@types-fs-extra-npm-9.0.1-655e67e711-a7c0f73736.zip/node_modules/@types/fs-extra/",
+          "packageDependencies": [
+            ["@types/fs-extra", "npm:9.0.1"],
             ["@types/node", "npm:14.6.1"]
           ],
           "linkType": "HARD",
@@ -13693,6 +13727,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:14.6.1"]
           ],
           "linkType": "HARD",
+        }],
+        ["npm:1.17.1", {
+          "packageLocation": "./.yarn/cache/@types-resolve-npm-1.17.1-9a8396bef2-8e72a73574.zip/node_modules/@types/resolve/",
+          "packageDependencies": [
+            ["@types/resolve", "npm:1.17.1"],
+            ["@types/node", "npm:14.6.1"]
+          ],
+          "linkType": "HARD",
         }]
       ]],
       ["@types/responselike", [
@@ -13810,6 +13852,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-tcp-port-used-npm-1.0.0-b9acf10165-3715b57555.zip/node_modules/@types/tcp-port-used/",
           "packageDependencies": [
             ["@types/tcp-port-used", "npm:1.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@types/terser-webpack-plugin", [
+        ["npm:4.2.0", {
+          "packageLocation": "./.yarn/cache/@types-terser-webpack-plugin-npm-4.2.0-01365c17dd-05e8572ae6.zip/node_modules/@types/terser-webpack-plugin/",
+          "packageDependencies": [
+            ["@types/terser-webpack-plugin", "npm:4.2.0"],
+            ["@types/webpack", "npm:4.41.21"],
+            ["terser", "npm:4.8.0"]
           ],
           "linkType": "HARD",
         }]
@@ -23098,7 +23151,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/$$virtual/eslint-plugin-react-virtual-87ae947ea6/0/cache/eslint-plugin-react-npm-7.19.0-cf65a17ee2-3e5b7bd3b2.zip/node_modules/eslint-plugin-react/",
           "packageDependencies": [
             ["eslint-plugin-react", "virtual:c0a3d24e365636e612f8fb964a46f08819a1736159a9688907e2a5c3449471c585e61c977184007dcfe8c76ff736e58efca5090f62abd7ddb3ff48eb59d89c0b#npm:7.19.0"],
-            ["@types/eslint", null],
+            ["@types/eslint", "npm:7.2.3"],
             ["array-includes", "npm:3.1.1"],
             ["doctrine", "npm:2.1.0"],
             ["eslint", "npm:7.10.0"],
@@ -39490,7 +39543,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@styled-system/prop-types", "virtual:3e16a1e9ad084fd4abc95c6bfc32c50089223afc0a2b2528fdfd7f045ff2f5e1251422cfe5042b5d235c4fac6e3927207a7eebc5cbc42b46b15a29c5675feac5#npm:5.1.5"],
             ["@styled-system/theme-get", "npm:5.1.2"],
             ["@svgr/rollup", "npm:4.3.3"],
-            ["@types/prop-types", null],
+            ["@types/prop-types", "npm:15.7.3"],
             ["@types/react", "npm:16.9.19"],
             ["@types/react-dom", "npm:16.9.8"],
             ["@types/styled-components", "npm:4.4.2"],
