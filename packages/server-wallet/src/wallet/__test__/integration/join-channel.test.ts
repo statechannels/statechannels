@@ -23,6 +23,35 @@ afterEach(async () => {
 beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
 describe('directly funded app', () => {
+  it('signs multiple prefund setups when joining multiple channels', async () => {
+    const appData = '0x0f00';
+    const preFS = {turnNum: 0, appData};
+    const state1 = {...preFS, channelNonce: 1};
+    const state2 = {...preFS, channelNonce: 2};
+
+    const c1 = channel({channelNonce: 1, vars: [stateWithHashSignedBy(bob())(state1)]});
+
+    await Channel.query(w.knex).insert(c1);
+    const c2 = channel({channelNonce: 2, vars: [stateWithHashSignedBy(bob())(state2)]});
+
+    await Channel.query(w.knex).insert(c2);
+    const channelIds = [c1, c2].map(c => c.channelId);
+    const result = await w.joinChannels(channelIds);
+    expect(result).toMatchObject({
+      outbox: [
+        {params: {recipient: 'bob', sender: 'alice', data: {signedStates: [state1, state2]}}},
+      ],
+      channelResults: [{channelId: c1.channelId}, {channelId: c2.channelId}],
+    });
+
+    await Promise.all(
+      channelIds.map(async c => {
+        const updated = await Channel.forId(c, w.knex);
+        expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
+      })
+    );
+  });
+
   it('signs the prefund setup ', async () => {
     const appData = '0x0f00';
     const preFS = {turnNum: 0, appData};
