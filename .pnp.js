@@ -11111,6 +11111,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["style-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:1.2.1"],
             ["terser-webpack-plugin", "virtual:02145413a4e7d81b3f38a4d18521a7ab2fc8cba7c33eccb20d43af154196c326db988f0f4e1a5c24cafe98146771dd698be524c83fc78fdfdac1b73fff4433ad#npm:2.3.8"],
             ["ts-dedent", "npm:1.1.1"],
+            ["ts-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:7.0.5"],
             ["unfetch", "npm:4.1.0"],
             ["url-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:2.3.0"],
             ["util-deprecate", "npm:1.0.2"],
@@ -11231,6 +11232,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["style-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:1.2.1"],
             ["terser-webpack-plugin", "virtual:d9417c1e99c6a61d448a38737586da2d3ffc5f590c82593abba25fce89f5be4987cfdf9d92e919619942d41ead16b381982363adec4e278e0855c4d59f28f95a#npm:3.1.0"],
             ["ts-dedent", "npm:1.1.1"],
+            ["ts-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:7.0.5"],
             ["unfetch", "npm:4.1.0"],
             ["url-loader", "virtual:02145413a4e7d81b3f38a4d18521a7ab2fc8cba7c33eccb20d43af154196c326db988f0f4e1a5c24cafe98146771dd698be524c83fc78fdfdac1b73fff4433ad#npm:4.1.0"],
             ["util-deprecate", "npm:1.0.2"],
@@ -11349,6 +11351,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["style-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:1.2.1"],
             ["terser-webpack-plugin", "virtual:d9417c1e99c6a61d448a38737586da2d3ffc5f590c82593abba25fce89f5be4987cfdf9d92e919619942d41ead16b381982363adec4e278e0855c4d59f28f95a#npm:3.1.0"],
             ["ts-dedent", "npm:1.1.1"],
+            ["ts-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:7.0.5"],
             ["unfetch", "npm:4.1.0"],
             ["url-loader", "virtual:02145413a4e7d81b3f38a4d18521a7ab2fc8cba7c33eccb20d43af154196c326db988f0f4e1a5c24cafe98146771dd698be524c83fc78fdfdac1b73fff4433ad#npm:4.1.0"],
             ["util-deprecate", "npm:1.0.2"],
@@ -43234,6 +43237,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["micromatch", "npm:4.0.2"],
             ["semver", "npm:6.3.0"],
             ["typescript", "patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"]
+          ],
+          "packagePeers": [
+            "@types/typescript",
+            "typescript"
+          ],
+          "linkType": "HARD",
+        }],
+        ["virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:7.0.5", {
+          "packageLocation": "./.yarn/$$virtual/ts-loader-virtual-b1a61c1407/0/cache/ts-loader-npm-7.0.5-e45679a570-4f55f2c9f5.zip/node_modules/ts-loader/",
+          "packageDependencies": [
+            ["ts-loader", "virtual:6c9d920de39e43797af97c746541dedd91e2de0853a5d22c8306fe00ee0bb5eda6667b950c0bd311b60ba28adcc0397fcb5fd2a77416007fa4f8d6de8ad3174d#npm:7.0.5"],
+            ["@types/typescript", null],
+            ["chalk", "npm:2.4.2"],
+            ["enhanced-resolve", "npm:4.3.0"],
+            ["loader-utils", "npm:1.4.0"],
+            ["micromatch", "npm:4.0.2"],
+            ["semver", "npm:6.3.0"],
+            ["typescript", null]
           ],
           "packagePeers": [
             "@types/typescript",
