@@ -71,10 +71,10 @@ describe('happy path', () => {
 
     const createArgs = createChannelArgs({appData: '0xaf00'});
     const NUM_CHANNELS = 10;
-    const createPromises = Array(NUM_CHANNELS)
-      .fill(createArgs)
-      .map(w.createChannel);
-    await expect(Promise.all(createPromises)).resolves.not.toThrow();
+
+    const result = await w.createChannels(createArgs, NUM_CHANNELS);
+    expect(result.channelResults).toHaveLength(NUM_CHANNELS);
+    expect(result.outbox).toHaveLength(NUM_CHANNELS);
 
     expect(await Channel.query(w.knex).resultSize()).toEqual(NUM_CHANNELS);
   }, 10_000);
