@@ -121,7 +121,7 @@ describe('channel results', () => {
 
     const p = wallet.pushMessage({signedStates: signedStates.map(s => serializeState(s))});
 
-    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
+    await expectResults(p, [{turnNum: six, appData: '0x0f00'}, {turnNum: five}]);
 
     const channelsAfter = await Channel.query(wallet.knex).select();
 
