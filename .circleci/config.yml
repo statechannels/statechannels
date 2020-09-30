@@ -120,6 +120,8 @@ commands:
     steps:
       - store_artifacts:
           path: /home/circleci/project/artifacts
+      - store_artifacts:
+          path: /tmp/*.log
 
   notify_slack:
     description: 'Notify slack '
@@ -306,6 +308,7 @@ jobs:
           command: yarn test:stress
           no_output_timeout: 10m
       - upload_artifacts
+
   server-wallet-stress-test:
     <<: *defaults
     resource_class: xlarge
@@ -334,6 +337,7 @@ jobs:
           command: yarn test:stress
           no_output_timeout: 10m
       - upload_artifacts
+
   server-wallet-profiling:
     <<: *defaults
     steps:
