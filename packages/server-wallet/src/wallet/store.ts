@@ -24,7 +24,6 @@ import {
   convertToParticipant,
   isSimpleAllocation,
   checkThat,
-  allocateToTarget,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -494,57 +493,6 @@ export class Store {
     return ledgerRecord.ledgerChannelId;
   }
 
-  // TODO: Also handle defunding
-  // Assume that ledger channel has a lock on it ?
-  async ledgerFundChannels(
-    ledgerChannelId: Bytes32,
-    tx: Transaction
-  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
-    const ledger = await this.getChannel(ledgerChannelId);
-
-    const updates = await Promise.all(
-      _.chain(Object.values(this.pending_updates))
-        .filter(v => v.status === 'pending')
-        .map(async ({fundingChannelId}) => await this.getChannel(fundingChannelId, tx))
-        .value()
-    );
-
-    // This could fail at some point if there is no longer space to fund stuff
-    // TODO: Handle that case
-    // } catch (e) {
-    //   if (e.toString() === 'Insufficient funds in ledger channel')
-    // }
-
-    const newOutcome = updates.reduce(
-      (outcome, {channelId, supported}) =>
-        allocateToTarget(
-          outcome,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          checkThat(supported!.outcome, isSimpleAllocation).allocationItems,
-          channelId
-        ),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ledger.supported!.outcome
-    );
-
-    updates.map(({channelId}) => {
-      this.pending_updates[channelId].status = 'inflight';
-    });
-
-    return await this.signState(
-      ledger.channelId,
-      {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...ledger.supported!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        turnNum: ledger.supported!.turnNum + 1,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        outcome: newOutcome!,
-      },
-      tx
-    );
-  }
-
   async isLedger(channelId: Bytes32): Promise<boolean> {
     return !!this.ledgers[channelId];
   }
@@ -578,11 +526,14 @@ export class Store {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<LedgerProtocolState> {
+    const channelsPendingRequest = await Promise.all(
+      Object.values(this.pending_updates)
+        .filter(x => x.ledgerChannelId === channel.channelId && x.status === 'pending')
+        .map(c => this.getChannel(c.fundingChannelId, tx))
+    );
     return {
       ledger: channel,
-      hasPendingRequests: Object.values(this.pending_updates).some(
-        x => x.ledgerChannelId === channel.channelId && x.status === 'pending'
-      ),
+      channelsPendingRequest,
     };
   }
 

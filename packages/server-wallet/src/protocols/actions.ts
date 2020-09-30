@@ -23,10 +23,6 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
-export type LedgerFundChannels = {
-  type: 'LedgerFundChannels';
-  channelId: Bytes32;
-};
 
 /*
 Action creators
@@ -43,8 +39,6 @@ export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const notifyApp = actionConstructor<NotifyApp>('NotifyApp');
 export const signState = actionConstructor<SignState>('SignState');
 
-export const ledgerFundChannels = actionConstructor<LedgerFundChannels>('LedgerFundChannels');
-
 /*
 Guards
 */
@@ -59,13 +53,11 @@ export const isFundChannel = guard<FundChannel>('FundChannel');
 export const isRequestLedgerFunding = guard<RequestLedgerFunding>('RequestLedgerFunding');
 export const isOutgoing = isNotifyApp;
 
-export const isLedgerFundChannels = guard<LedgerFundChannels>('LedgerFundChannels');
-
 /*
 Types
 */
 
 export type ApplicationProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;
-export type LedgerProtocolAction = LedgerFundChannels;
+export type LedgerProtocolAction = SignState;
 
 export type ProtocolAction = ApplicationProtocolAction | LedgerProtocolAction;

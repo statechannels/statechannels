@@ -456,9 +456,6 @@ export class Wallet implements WalletInterface {
               addChannelToEndOfRunLoop(ledgerChannelId);
               return;
             }
-            case 'LedgerFundChannels':
-              await this.store.ledgerFundChannels(action.channelId, tx);
-              return;
 
             default:
               throw 'Unimplemented';

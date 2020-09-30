@@ -19,6 +19,8 @@ export type ProtocolState = {
   fundingChannel?: ChannelState;
 };
 
+type SupportedChannelState = ChannelState & Required<Pick<ChannelState, 'supported'>>;
+
 const isPrefundSetup = stageGuard('PrefundSetup');
 
 // These are currently unused, but will be used
@@ -68,10 +70,7 @@ const requestFundChannelIfMyTurn = ({
   myIndex,
   participants,
   funding,
-}: ChannelState): FundChannel | false => {
-  // Sanity-check (should have been checked by prior application protocol guard)
-  if (!supported) return false;
-
+}: SupportedChannelState): FundChannel | false => {
   // Don't submit another chain service request if one already exists
   if (chainServiceRequests.indexOf('fund') > -1) return false;
 
@@ -112,9 +111,7 @@ const requestFundChannelIfMyTurn = ({
 const requestLedgerFunding = ({
   channelId,
   supported,
-}: ChannelState): RequestLedgerFunding | false => {
-  if (!supported) return false;
-
+}: SupportedChannelState): RequestLedgerFunding | false => {
   const {assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
 
   return requestLedgerFundingAction({
@@ -125,6 +122,7 @@ const requestLedgerFunding = ({
 
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
+const isSupported = (app: ChannelState): app is SupportedChannelState => !!app.support;
 
 const fundChannel = ({
   app,
@@ -132,6 +130,7 @@ const fundChannel = ({
 }: ProtocolState): SignState | FundChannel | RequestLedgerFunding | false =>
   isPrefundSetup(app.supported) &&
   isPrefundSetup(app.latestSignedByMe) &&
+  isSupported(app) &&
   ((isDirectlyFunded(app) && requestFundChannelIfMyTurn(app)) ||
     (isLedgerFunded(app) && !ledgerFundingRequested && requestLedgerFunding(app)));
 
