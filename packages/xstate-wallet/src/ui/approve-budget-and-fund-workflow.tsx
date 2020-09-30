@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import './wallet.scss';
 import {useService} from '@xstate/react';
-import {formatEther} from '@ethersproject/units';
 import {Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon} from 'rimble-ui';
 import {BN} from '@statechannels/wallet-core';
+import {utils} from 'ethers';
+
 import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
 
 import {track} from '../segment-analytics';
@@ -58,8 +59,8 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You don&#39;t have enough ETH in your wallet!
       </Text>
       <Text pb={3} fontSize={1}>
-        You&#39;ll need at least {formatEther(BN.from(playerAmount))} ETH in your Metamask wallet to
-        fund the channel. You can get more ETH{' '}
+        You&#39;ll need at least {utils.formatEther(BN.from(playerAmount))} ETH in your Metamask
+        wallet to fund the channel. You can get more ETH{' '}
         <Link target="_blank" href={FAUCET_LINK}>
           here.
         </Link>
@@ -78,16 +79,16 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Flex justifyContent="center" pb={2}>
         <Box>
-          <Text>Send: {formatEther(BN.from(playerAmount))} ETH</Text>
-          <Text>Receive: {formatEther(BN.from(hubAmount))} ETH</Text>
+          <Text>Send: {utils.formatEther(BN.from(playerAmount))} ETH</Text>
+          <Text>Receive: {utils.formatEther(BN.from(hubAmount))} ETH</Text>
         </Box>
       </Flex>
       <Text fontSize={1} pb={2}>
         <strong>{budget.domain}</strong> will manage these funds.
       </Text>
       <Text pb={3} fontSize={1}>
-        You will deposit {formatEther(BN.from(playerAmount))} ETH into a channel. Our hub will also
-        make a deposit.
+        You will deposit {utils.formatEther(BN.from(playerAmount))} ETH into a channel. Our hub will
+        also make a deposit.
         <Tooltip message="This allows you to transact with anyone else connected to the same hub.">
           <Icon name="Info" size="20" />
         </Tooltip>

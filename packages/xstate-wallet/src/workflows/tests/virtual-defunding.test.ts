@@ -13,7 +13,7 @@ import {
   makeDestination,
   BN
 } from '@statechannels/wallet-core';
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import {constants as ethersConstants} from 'ethers';
 
 import {TestStore} from '../../test-store';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
@@ -37,7 +37,7 @@ const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = ethersConstants.AddressZero;
 const alice = participants[ParticipantIdx.A];
 const bob = participants[ParticipantIdx.B];
 const hub = participants[ParticipantIdx.Hub];
@@ -61,7 +61,7 @@ const privateKeys: Record<string, string> = {
 };
 
 const state = (constants: ChannelConstants, outcome: Outcome, turnNum = 0): SignedState => {
-  const state = {...constants, isFinal: false, turnNum, appData: HashZero, outcome};
+  const state = {...constants, isFinal: false, turnNum, appData: ethersConstants.HashZero, outcome};
 
   return {
     ...state,

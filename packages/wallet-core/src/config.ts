@@ -1,4 +1,4 @@
-import {AddressZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
 
 import {Destination} from './types';
 
@@ -27,7 +27,8 @@ export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 
-export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADDRESS || AddressZero;
+export const ETH_ASSET_HOLDER_ADDRESS: string =
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero;
 
 export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
 export const HUB_ADDRESS: string =
@@ -42,9 +43,9 @@ export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
   : undefined;
 
 export const NITRO_ADJUDICATOR_ADDRESS: string =
-  process.env.NITRO_ADJUDICATOR_ADDRESS || AddressZero;
+  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero;
 
-export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || AddressZero;
+export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || constants.AddressZero;
 
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 

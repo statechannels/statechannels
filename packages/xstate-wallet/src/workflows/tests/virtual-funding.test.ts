@@ -12,7 +12,7 @@ import {
   simpleEthGuarantee,
   BN
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
 
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
@@ -40,7 +40,7 @@ jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = constants.AddressZero;
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,
