@@ -20,7 +20,7 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
   const mergedOutgoing: Record<string, Payload> = {};
 
   for (const notice of outgoing) {
-    const {recipient, data} = notice.params;
+    const {recipient, data} = notice.params as {recipient: string; data: Payload};
     if (!mergedOutgoing[recipient]) {
       mergedOutgoing[recipient] = {};
     }
@@ -28,9 +28,9 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
     const {signedStates, requests, objectives} = mergedOutgoing[recipient];
 
     mergedOutgoing[recipient] = {
-      signedStates: mergeProp(signedStates, (data as Payload).signedStates),
-      requests: mergeProp(requests, (data as Payload).requests),
-      objectives: mergeProp(objectives, (data as Payload).objectives),
+      signedStates: mergeProp(signedStates, data.signedStates),
+      requests: mergeProp(requests, data.requests),
+      objectives: mergeProp(objectives, data.objectives),
     };
   }
   return Object.keys(mergedOutgoing).map(k => ({
@@ -52,7 +52,7 @@ function mergeProp<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
 }
 
 export function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
-  const sorted = _.orderBy(channelResults, ['channelId', 'turnNum'], ['desc', 'desc']);
-
+  const sorted = _.sortBy(channelResults, ['channelId', 'turnNum'], ['desc', 'desc']);
+  console.log(sorted);
   return _.uniqWith(sorted, (a, b) => a.channelId === b.channelId);
 }
