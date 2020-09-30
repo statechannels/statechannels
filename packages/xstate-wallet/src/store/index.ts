@@ -127,7 +127,6 @@ export const enum ObjectStores {
 
 declare global {
   interface Window {
-    channelProvider: import('@statechannels/iframe-channel-provider').ChannelProviderInterface;
     ethereum: any;
   }
 }
