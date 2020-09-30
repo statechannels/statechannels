@@ -1,4 +1,5 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
 import {channelWithVars} from '../../models/__test__/fixtures/channel';
 import {Notice} from '../../protocols/actions';
@@ -56,20 +57,14 @@ describe('mergeOutgoing', () => {
   });
 
   test('it handles duplicate states', () => {
-    // We use two seperate state objects that are equivalent to avoid things passing
-    // due to object references being the same
-    const state1 = stateSignedBy()({turnNum: 1});
-    const state2 = stateSignedBy()({turnNum: 1});
-    const message1: Notice = {
-      method: 'MessageQueued',
-      params: {recipient: USER1, sender: USER2, data: {signedStates: [state1]}},
-    };
-    const message2: Notice = {
-      method: 'MessageQueued',
-      params: {recipient: USER1, sender: USER2, data: {signedStates: [state2]}},
-    };
+    const state = stateSignedBy()({turnNum: 1});
 
-    const merged = mergeOutgoing([message1, message2]);
+    const message: Notice = {
+      method: 'MessageQueued',
+      params: {recipient: USER1, sender: USER2, data: {signedStates: [state]}},
+    };
+    // We perform a deep clone to avoid things passing due to object references being the same
+    const merged = mergeOutgoing([message, _.cloneDeep(message)]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(1);
