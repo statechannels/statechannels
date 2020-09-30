@@ -10,4 +10,5 @@ module.exports = {
       packageJson: 'package.json',
     },
   },
+  a,
 };

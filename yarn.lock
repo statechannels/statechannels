@@ -5723,7 +5723,7 @@ __metadata:
     "@statechannels/jest-gas-reporter": ^0.3.7
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
-    "@types/jest": 25.1.0
+    "@types/jest": ^26.0.14
     "@types/node": 13.5.1
     "@types/prettier": 1.19.0
     "@types/webpack": 4.41.12
@@ -5736,13 +5736,13 @@ __metadata:
     eslint-plugin-prettier: 3.1.2
     etherlime-lib: 1.1.5
     ethers: 5.0.12
-    ganache-cli: 6.9.1
     jest: 25.1.0
     lint-staged: 10.0.4
     npm-run-all: 4.1.5
     prettier: 1.19.1
     prettier-plugin-solidity: 1.0.0-alpha.34
     solidoc: "https://github.com/statechannels/solidoc.git#a4d4d244e367c6cf654079d1f157d5eb5903b9af"
+    ts-jest: 25.0.0
     typescript: 4.0.3
     webpack: 4.41.5
   languageName: unknown
@@ -11497,21 +11497,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bindings@npm:^1.2.1, bindings@npm:^1.5.0":
+"bindings@npm:^1.5.0":
   version: 1.5.0
   resolution: "bindings@npm:1.5.0"
   dependencies:
     file-uri-to-path: 1.0.0
   checksum: bd623dec58f126eb0c30f04a20da7080f06cdd5af26bf5a91615e70055fbba66c4cec5c88b156e8181c1d822f2392034a40a9121ef3ebc25638dc2163332b12d
-  languageName: node
-  linkType: hard
-
-"bip66@npm:^1.1.5":
-  version: 1.1.5
-  resolution: "bip66@npm:1.1.5"
-  dependencies:
-    safe-buffer: ^5.0.1
-  checksum: cf83531dc486619df484225bf5e01dfe1341941dc3b7bf6d296b1a76244a9dcc2af36886a8039eafe0e27d72daaeccfce1686eee72b2119b99b90985bc55cf10
   languageName: node
   linkType: hard
 
@@ -11573,7 +11564,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bn.js@npm:^4.0.0, bn.js@npm:^4.1.0, bn.js@npm:^4.11.0, bn.js@npm:^4.11.1, bn.js@npm:^4.11.8, bn.js@npm:^4.4.0":
+"bn.js@npm:^4.0.0, bn.js@npm:^4.1.0, bn.js@npm:^4.11.0, bn.js@npm:^4.11.1, bn.js@npm:^4.4.0":
   version: 4.11.9
   resolution: "bn.js@npm:4.11.9"
   checksum: 31630d3560b28931010980886a0f657b37ce818ba237867cd838e89a1a0b71044fb4977aa56376616997b372bbb3f55d3bb25e5378c48c1d24a47bfb4235b60e
@@ -11763,7 +11754,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-aes@npm:^1.0.0, browserify-aes@npm:^1.0.4, browserify-aes@npm:^1.0.6, browserify-aes@npm:^1.2.0":
+"browserify-aes@npm:^1.0.0, browserify-aes@npm:^1.0.4, browserify-aes@npm:^1.2.0":
   version: 1.2.0
   resolution: "browserify-aes@npm:1.2.0"
   dependencies:
@@ -16109,17 +16100,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drbg.js@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "drbg.js@npm:1.0.1"
-  dependencies:
-    browserify-aes: ^1.0.6
-    create-hash: ^1.1.2
-    create-hmac: ^1.1.4
-  checksum: 57de7be981a8dddede102443bca1a8ed72edb943a2c72fdc297216ea1ed91c57f3336f250e273fa7dbcf6b95f3699fed3a90ebd8e6ba7c2ab1ae9e81f6c9d80f
-  languageName: node
-  linkType: hard
-
 "dup@npm:^1.0.0":
   version: 1.0.0
   resolution: "dup@npm:1.0.0"
@@ -17233,21 +17213,6 @@ __metadata:
     secp256k1: ^4.0.1
     setimmediate: ^1.0.5
   checksum: dd0c177dc4ed8a98cf9f821947cc5b6cc4f8088cac9fce1f7ea4577721ab42f24db661db13930a39e59c8bef50e7f979e721ee34c41019b404d2d530d5520327
-  languageName: node
-  linkType: hard
-
-"ethereumjs-util@npm:6.1.0":
-  version: 6.1.0
-  resolution: "ethereumjs-util@npm:6.1.0"
-  dependencies:
-    bn.js: ^4.11.0
-    create-hash: ^1.1.2
-    ethjs-util: 0.1.6
-    keccak: ^1.0.2
-    rlp: ^2.0.0
-    safe-buffer: ^5.1.1
-    secp256k1: ^3.0.1
-  checksum: 80b610b42ce1c050017e4848a0bc67d2adf61d01c66c61144ee2c3e69600bba09c2511741a1ddf579aadd2d878ddaa346766069ab7e742af6578cb41fb270de7
   languageName: node
   linkType: hard
 
@@ -18784,19 +18749,6 @@ fsevents@^1.2.7:
   bin:
     ganache-cli: cli.js
   checksum: 5d0f8495e775efb4d0d8a29cfd302f4b954e5eac374f91133f81c915a769b8973c1a909d11b793df925450135fc8d4eff4daecc39195f93f3ba0f7535c974c3a
-  languageName: node
-  linkType: hard
-
-"ganache-cli@npm:6.9.1":
-  version: 6.9.1
-  resolution: "ganache-cli@npm:6.9.1"
-  dependencies:
-    ethereumjs-util: 6.1.0
-    source-map-support: 0.5.12
-    yargs: 13.2.4
-  bin:
-    ganache-cli: cli.js
-  checksum: 15c3e2b073343285aeebf4f05dc99bf99d9a1771e64a3a035b51b9389ff1b8d9ec7529ee0dec87dd003b263f9a33ee199dc749e904eee04395245634555690e7
   languageName: node
   linkType: hard
 
@@ -23027,19 +22979,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"keccak@npm:^1.0.2":
-  version: 1.4.0
-  resolution: "keccak@npm:1.4.0"
-  dependencies:
-    bindings: ^1.2.1
-    inherits: ^2.0.3
-    nan: ^2.2.1
-    node-gyp: latest
-    safe-buffer: ^5.1.0
-  checksum: 22dfcd7892a465b8fe5966976b64641a1fe6ee0f7395661a84d224d06fdf7574aa4daab7f92d5c6ba92b9f5e82ef67255cda58d95f383cd00e093acec50630a8
-  languageName: node
-  linkType: hard
-
 "keccak@npm:^3.0.0":
   version: 3.0.1
   resolution: "keccak@npm:3.0.1"
@@ -25433,7 +25372,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.0, nan@npm:^2.2.1":
+"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.0":
   version: 2.14.1
   resolution: "nan@npm:2.14.1"
   dependencies:
@@ -31608,7 +31547,7 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
-"rlp@npm:^2.0.0, rlp@npm:^2.2.3":
+"rlp@npm:^2.2.3":
   version: 2.2.6
   resolution: "rlp@npm:2.2.6"
   dependencies:
@@ -31985,23 +31924,6 @@ resolve@~1.12.0:
     js-base64: ^2.1.8
     source-map: ^0.4.2
   checksum: c7765c38cdc8835d9733b6e230e87caee075d43b96284b8637c1ef531c3384f8454d78ecf6be6954b92ed1bd65299e3232ff510f1f62b9ddb0174e2dceb85f01
-  languageName: node
-  linkType: hard
-
-"secp256k1@npm:^3.0.1":
-  version: 3.8.0
-  resolution: "secp256k1@npm:3.8.0"
-  dependencies:
-    bindings: ^1.5.0
-    bip66: ^1.1.5
-    bn.js: ^4.11.8
-    create-hash: ^1.2.0
-    drbg.js: ^1.0.1
-    elliptic: ^6.5.2
-    nan: ^2.14.0
-    node-gyp: latest
-    safe-buffer: ^5.1.2
-  checksum: 8c3c8fa6c0db00fd295f5cba4efe84beaacc563f2f63a4b82519141658bbde8893988976035eb4aed67e612cad87952598c16ed6e83a64331b1f10916647ebe1
   languageName: node
   linkType: hard
 
