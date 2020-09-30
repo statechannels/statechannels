@@ -42,7 +42,11 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
 
 function mergeProp<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
   if (a && b) {
-    return _.uniqWith(_.concat(a, b), _.isEqual);
+    return _.orderBy(
+      _.uniqWith(_.concat(a, b), _.isEqual),
+      ['channelId', 'turnNum'],
+      ['desc', 'asc']
+    );
   } else if (a) {
     return a;
   } else if (b) {
@@ -53,7 +57,7 @@ function mergeProp<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
 }
 
 export function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
-  const sorted = _.sortBy(channelResults, ['channelId', 'turnNum'], ['desc', 'desc']);
-  console.log(sorted);
+  const sorted = _.orderBy(channelResults, ['channelId', 'turnNum'], ['desc', 'desc']);
+
   return _.uniqWith(sorted, (a, b) => a.channelId === b.channelId);
 }

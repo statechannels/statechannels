@@ -45,10 +45,14 @@ describe('mergeOutgoing', () => {
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state2]}},
     };
 
-    const merged = mergeOutgoing([message1, message2]);
+    const merged = mergeOutgoing([message2, message1]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(2);
+    // Merging should sort the states by ascending turnNum
+    expect(
+      (merged[0] as any).params.data.signedStates.map((s: {turnNum: number}) => s.turnNum)
+    ).toEqual([1, 2]);
   });
 
   test('it handles duplicate states', () => {
