@@ -5676,13 +5676,16 @@ __metadata:
     "@statechannels/nitro-protocol": ^0.3.7
     "@statechannels/wallet-core": ^0.3.8-alpha.0
     "@statechannels/wasm-utils": 0.1.5
+    "@statechannels/wire-format": "workspace:packages/wire-format"
     "@types/autocannon": ^4.1.0
     "@types/body-parser": 1.19.0
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
+    "@types/express": ^4.17.8
     "@types/express-pino-logger": 4.0.2
     "@types/jest": 25.1.0
     "@types/lodash": 4.14.149
+    "@types/node": ^14.11.2
     "@types/nodemon": 1.19.0
     "@types/pg": 7.14.0
     "@types/pino": 6.0.0
@@ -5691,6 +5694,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 2.18.0
     "@typescript-eslint/parser": 2.18.0
     autocannon: ^6.4.0
+    axios: ^0.20.0
     body-parser: 1.19.0
     cli-table3: 0.6.0
     clinic: 7.0.0
@@ -5702,6 +5706,7 @@ __metadata:
     eslint-plugin-unicorn: 21.0.0
     ethers: 5.0.12
     evt: 1.8.8
+    express: ^4.17.1
     express-pino-logger: 5.0.0
     fp-ts: 2.7.0
     jest: 25.1.0
@@ -5717,9 +5722,10 @@ __metadata:
     prettier: 1.19.1
     pure-evm: 0.1.3
     tarn: ^3.0.0
+    tree-kill: ^1.2.2
     ts-jest: 25.0.0
     ts-node: 8.9.1
-    typescript: 3.7.5
+    typescript: 4.0.3
     unitimer: 3.13.0
     yargs: 15.4.1
   languageName: unknown
@@ -7860,6 +7866,18 @@ __metadata:
     "@types/qs": "*"
     "@types/serve-static": "*"
   checksum: 99b795c60e7368b575794574c35d0ffd0d119c52bc681af6beda2fee70aada78e8aef07fc0db3b88f594d5d935847de4187561d2456760eeb4fde5d10dbb3780
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:^4.17.8":
+  version: 4.17.8
+  resolution: "@types/express@npm:4.17.8"
+  dependencies:
+    "@types/body-parser": "*"
+    "@types/express-serve-static-core": "*"
+    "@types/qs": "*"
+    "@types/serve-static": "*"
+  checksum: 9220ef3cb010faea3f77f85453b0ef3bd41e70003ac7d0ea2b7611ac9c36184995256cc61a7bb205f80a3bc51006cf7ccb29a0186c0d1fe0c0582946a0e65e7a
   languageName: node
   linkType: hard
 
@@ -10484,6 +10502,15 @@ __metadata:
   dependencies:
     follow-redirects: 1.5.10
   checksum: bad346deea24050f9953ce09bb8015f85a99a7b8f016806adccfab0b8981827d1fbee9c77c0ef7c70cc48392c1af6bbc65e07c3e88221d17282d2d5fd0a191f6
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.20.0":
+  version: 0.20.0
+  resolution: "axios@npm:0.20.0"
+  dependencies:
+    follow-redirects: ^1.10.0
+  checksum: 6cf2e963176a0d18fc457d7cb71cb6cf552193619b161fc61070d9a4db3a26a87ecfe760ba36e7af174c05a6a9898dc52cfeb5c0e62e19fddd9788739553ad73
   languageName: node
   linkType: hard
 
@@ -17981,7 +18008,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.10.0":
   version: 1.13.0
   resolution: "follow-redirects@npm:1.13.0"
   checksum: f220828d3f153da30ea616fdbe9f6676e74e4e68c51d336a751037c1d556e2de34aa5918f58951fa19bb6517c9c88b4403a0a8bdfc40d3e779d37def2ac0f2c4
@@ -34096,7 +34123,7 @@ resolve@~1.12.0:
   languageName: node
   linkType: hard
 
-"tree-kill@npm:1.2.2":
+"tree-kill@npm:1.2.2, tree-kill@npm:^1.2.2":
   version: 1.2.2
   resolution: "tree-kill@npm:1.2.2"
   bin:
