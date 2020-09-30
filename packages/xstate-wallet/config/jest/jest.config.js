@@ -1,4 +1,4 @@
-const {resolve} = require('path');
+const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
 module.exports = {
   globalSetup: '<rootDir>/jest/test-setup.ts',
@@ -10,11 +10,14 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
     '^.+\\.scss$': '<rootDir>/config/jest/cssTransform.js',
-    '^(?!.*\\.(js|jsx|mjs|css|json)$)': '<rootDir>/config/jest/fileTransform.js'
+    '^(?!.*\\.(js|jsx|mjs|css|json)$)': '<rootDir>/config/jest/fileTransform.js',
   },
   globals: {
     GIT_VERSION: 'jest-GIT_VERSION',
     GIT_COMMIT_HASH: 'jest-GIT_COMMIT_HASH',
     GIT_BRANCH: 'jest-GIT_BRANCH',
-  }
+    'ts-jest': {
+      packageJson: 'package.json',
+    },
+  },
 };

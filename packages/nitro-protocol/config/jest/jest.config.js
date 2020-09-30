@@ -1,12 +1,13 @@
-const {configureEnvVariables} = require('@statechannels/devtools');
+const { configureEnvVariables } = require('@statechannels/devtools');
 configureEnvVariables();
-const {resolve} = require('path');
+const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
 
 module.exports = {
   globals: {
     'ts-jest': {
       tsConfig: './tsconfig.json',
+      packageJson: 'package.json',
     },
   },
   rootDir: root,

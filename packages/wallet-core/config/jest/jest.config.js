@@ -1,4 +1,4 @@
-const {resolve} = require('path');
+const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
 module.exports = {
   globalSetup: '<rootDir>/jest/test-setup.ts',
@@ -8,11 +8,16 @@ module.exports = {
   testEnvironment: 'jsdom',
   preset: 'ts-jest',
   transform: {
-    '^.+\\.ts$': 'ts-jest'
+    '^.+\\.ts$': 'ts-jest',
   },
   globals: {
     GIT_VERSION: 'jest-GIT_VERSION',
     GIT_COMMIT_HASH: 'jest-GIT_COMMIT_HASH',
-    GIT_BRANCH: 'jest-GIT_BRANCH'
-  }
+    GIT_BRANCH: 'jest-GIT_BRANCH',
+    globals: {
+      'ts-jest': {
+        packageJson: 'package.json',
+      },
+    },
+  },
 };
