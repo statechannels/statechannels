@@ -497,8 +497,11 @@ export class Store {
     return !!this.ledgers[channelId];
   }
 
-  async getPendingRequests(
-    ledgerChannelId: Bytes32
+  // Probbaly a Requests model method
+  private async getPendingRequests(
+    ledgerChannelId: Bytes32,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tx?: Transaction
   ): Promise<
     {
       ledgerChannelId: Bytes32;
@@ -506,12 +509,20 @@ export class Store {
       status: 'pending' | 'inflight' | 'done' | 'fail';
     }[]
   > {
-    return Object.values(this.pending_updates).filter(v => v.ledgerChannelId === ledgerChannelId);
+    return _.chain(this.pending_updates)
+      .mapValues()
+      .filter(['ledgerChannelId', ledgerChannelId])
+      .value();
   }
 
-  async markRequestsAsInflight(channelIds: Bytes32[]): Promise<void> {
+  async markRequests(
+    channelIds: Bytes32[],
+    status: 'pending' | 'inflight' | 'done',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    tx?: Transaction
+  ): Promise<void> {
     for (const channelId of channelIds) {
-      this.pending_updates[channelId].status = 'inflight';
+      this.pending_updates[channelId].status = status;
     }
   }
 
@@ -528,18 +539,25 @@ export class Store {
   }
 
   async getLedgerProtocolState(
-    channel: ChannelState,
+    ledger: ChannelState,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<LedgerProtocolState> {
-    const channelsPendingRequest = await Promise.all(
-      Object.values(this.pending_updates)
-        .filter(x => x.ledgerChannelId === channel.channelId && x.status === 'pending')
-        .map(c => this.getChannel(c.fundingChannelId, tx))
-    );
+    const requests = await this.getPendingRequests(ledger.channelId, tx);
     return {
-      ledger: channel,
-      channelsPendingRequest,
+      ledger,
+      channelsPendingRequest: await Promise.all(
+        _.chain(requests)
+          .filter(['status', 'pending'])
+          .map(req => this.getChannel(req.fundingChannelId, tx))
+          .value()
+      ),
+      channelsWithInflightRequest: await Promise.all(
+        _.chain(requests)
+          .filter(['status', 'inflight'])
+          .map(req => this.getChannel(req.fundingChannelId, tx))
+          .value()
+      ),
     };
   }
 

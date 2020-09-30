@@ -6,18 +6,27 @@ import {
   SimpleAllocation,
 } from '@statechannels/wallet-core';
 
+import {Bytes32} from '../type-aliases';
+
 import {Protocol, ProtocolResult, ChannelState} from './state';
-import {LedgerProtocolAction, noAction, SignLedgerStateForRequests, signState} from './actions';
+import {
+  LedgerProtocolAction,
+  MarkLedgerFundingRequestsAsComplete,
+  noAction,
+  SignLedgerStateForRequests,
+  signState,
+} from './actions';
 
 export type ProtocolState = {
   ledger: ChannelState;
   channelsPendingRequest: ChannelState[];
+  channelsWithInflightRequest: ChannelState[];
 };
 
-const newOutcomeBasedOnMyPendingUpdates = ({
-  ledger,
-  channelsPendingRequest,
-}: ProtocolState): SimpleAllocation =>
+const newOutcomeBasedOnMyPendingUpdates = (
+  supportedOutcome: SimpleAllocation,
+  channelsPendingRequest: ChannelState[]
+): SimpleAllocation =>
   // This could fail at some point if there is no longer space to fund stuff
   // TODO: Handle that case
   // } catch (e) {
@@ -35,8 +44,7 @@ const newOutcomeBasedOnMyPendingUpdates = ({
         ),
         isSimpleAllocation
       ),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    checkThat(ledger.supported!.outcome, isSimpleAllocation)
+    supportedOutcome
   );
 
 const outcomeMergedWithLatestState = (
@@ -49,57 +57,83 @@ const outcomeMergedWithLatestState = (
 });
 
 const computeNewOutcome = ({
-  ledger,
+  ledger: {supported, latest, latestSignedByMe, channelId},
   channelsPendingRequest,
 }: ProtocolState): SignLedgerStateForRequests | false => {
-  let newOutcome = newOutcomeBasedOnMyPendingUpdates({ledger, channelsPendingRequest});
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let newTurnNum = ledger.latestSignedByMe!.turnNum + 2;
-  let requestChannelIds = [];
+  if (!supported) return false;
+  if (!latestSignedByMe) return false;
 
-  const counterPartyProposedNewUpdate =
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ledger.latest.turnNum === ledger.latestSignedByMe!.turnNum + 2;
+  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+  const latestOutcome = checkThat(latest.outcome, isSimpleAllocation);
+  const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
+
+  const counterPartyProposedNewUpdate = latest.turnNum === latestSignedByMe.turnNum + 2;
+
+  let newOutcome = newOutcomeBasedOnMyPendingUpdates(supportedOutcome, channelsPendingRequest);
+  let newTurnNum = latestSignedByMe.turnNum + 2;
+  let unmetRequests: Bytes32[] = [];
 
   if (counterPartyProposedNewUpdate) {
-    const proposedOutcome = checkThat(ledger.latest.outcome, isSimpleAllocation);
-    if (!_.isEqual(newOutcome, proposedOutcome)) {
-      newTurnNum = ledger.latest.turnNum + 2;
-      newOutcome = outcomeMergedWithLatestState(proposedOutcome, newOutcome);
+    if (!_.isEqual(newOutcome, latestOutcome)) {
+      const mergedOutcome = outcomeMergedWithLatestState(latestOutcome, newOutcome);
+      unmetRequests = _.xor(mergedOutcome.allocationItems, newOutcome.allocationItems).map(
+        x => x.destination
+      );
+      newTurnNum = latest.turnNum + 2;
+      newOutcome = mergedOutcome;
     }
   }
 
-  requestChannelIds = _.xor(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    checkThat(ledger.latestSignedByMe!.outcome, isSimpleAllocation).allocationItems,
-    newOutcome.allocationItems
-  ).map(x => x.destination);
-
-  // FIXME: Need to somehow also dispatch an action to do this:
-  // updates.map(({channelId}) => {
-  //   this.pending_updates[channelId].status = 'inflight';
-  // });
-
   return {
     ...signState({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ...ledger.supported!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      outcome: newOutcome!,
+      channelId,
+      ...supported,
+      outcome: newOutcome,
       turnNum: newTurnNum,
-      channelId: ledger.channelId,
     }),
+
     type: 'SignLedgerStateForRequests',
-    requestChannelIds,
+
+    // The setof channels which neither agree on go back to pending
+    unmetRequests,
+
+    // The unique set of channels they both agreed to fund get marked done
+    inflightRequests: _.xor(myLatestOutcome.allocationItems, newOutcome.allocationItems).map(
+      x => x.destination
+    ),
   };
+};
+
+const markRequestsAsComplete = ({
+  ledger,
+  channelsWithInflightRequest,
+}: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
+  if (!ledger.supported) return false;
+  const doneRequests = _.xor(
+    checkThat(ledger.supported.outcome, isSimpleAllocation).allocationItems.map(x => x.destination),
+    channelsWithInflightRequest.map(r => r.channelId)
+  );
+  return (
+    doneRequests.length > 0 && {
+      type: 'MarkLedgerFundingRequestsAsComplete',
+      doneRequests,
+    }
+  );
 };
 
 const hasPendingFundingRequests = (ps: ProtocolState): boolean =>
   ps.channelsPendingRequest.length > 0;
 
-const handleFundingRequests = (ps: ProtocolState): SignLedgerStateForRequests | false =>
+const hasInflightFundingRequests = (ps: ProtocolState): boolean =>
+  ps.channelsWithInflightRequest.length > 0;
+
+const handingPendingRequests = (ps: ProtocolState): SignLedgerStateForRequests | false =>
   hasPendingFundingRequests(ps) && computeNewOutcome(ps);
+
+const handleCompleteRequests = (ps: ProtocolState): MarkLedgerFundingRequestsAsComplete | false =>
+  hasInflightFundingRequests(ps) && markRequestsAsComplete(ps);
 
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
-): ProtocolResult<LedgerProtocolAction> => handleFundingRequests(ps) || noAction;
+): ProtocolResult<LedgerProtocolAction> =>
+  handingPendingRequests(ps) || handleCompleteRequests(ps) || noAction;

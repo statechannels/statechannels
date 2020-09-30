@@ -458,10 +458,15 @@ export class Wallet implements WalletInterface {
 
             case 'SignLedgerStateForRequests': {
               const {outgoing} = await this.store.signState(action.channelId, action, tx);
-              this.store.markRequestsAsInflight(action.requestChannelIds);
+              await this.store.markRequests(action.inflightRequests, 'inflight', tx);
+              await this.store.markRequests(action.unmetRequests, 'pending', tx);
               outgoing.map(n => outbox.push(n.notice));
               return;
             }
+
+            case 'MarkLedgerFundingRequestsAsComplete':
+              await this.store.markRequests(action.doneRequests, 'done', tx);
+              return;
 
             default:
               throw 'Unimplemented';

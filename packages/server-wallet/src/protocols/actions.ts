@@ -23,12 +23,16 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
-export type SignLedgerStateForRequests = {
+export type SignLedgerStateForRequests = StateVariables & {
   type: 'SignLedgerStateForRequests';
   channelId: Bytes32;
-} & StateVariables & {
-    requestChannelIds: Bytes32[];
-  };
+  inflightRequests: Bytes32[];
+  unmetRequests: Bytes32[];
+};
+export type MarkLedgerFundingRequestsAsComplete = {
+  type: 'MarkLedgerFundingRequestsAsComplete';
+  doneRequests: Bytes32[];
+};
 
 /*
 Action creators
@@ -64,6 +68,6 @@ Types
 */
 
 export type ApplicationProtocolAction = SignState | NotifyApp | FundChannel | RequestLedgerFunding;
-export type LedgerProtocolAction = SignLedgerStateForRequests;
+export type LedgerProtocolAction = SignLedgerStateForRequests | MarkLedgerFundingRequestsAsComplete;
 
 export type ProtocolAction = ApplicationProtocolAction | LedgerProtocolAction;
