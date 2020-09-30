@@ -1,7 +1,7 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import { Allocation, Guarantee, Outcome } from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -47,10 +47,10 @@ export function createDepositTransaction(
   expectedHeld: string,
   amount: string
 ): ethers.providers.TransactionRequest {
-  const data = EthAssetHolderContractInterface.functions.deposit.encode([
+  const data = EthAssetHolderContractInterface.encodeFunctionData('deposit', [
     destination,
     expectedHeld,
     amount,
   ]);
-  return {data};
+  return { data };
 }

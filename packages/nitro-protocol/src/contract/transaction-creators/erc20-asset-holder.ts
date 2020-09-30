@@ -1,7 +1,7 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import { Allocation, Guarantee, Outcome } from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -46,10 +46,10 @@ export function createDepositTransaction(
   expectedHeld: string,
   amount: string
 ): ethers.providers.TransactionRequest {
-  const data = Erc20AssetHolderContractInterface.functions.deposit.encode([
+  const data = Erc20AssetHolderContractInterface.encodeFunctionData('deposit', [
     destination,
     expectedHeld,
     amount,
   ]);
-  return {data};
+  return { data };
 }

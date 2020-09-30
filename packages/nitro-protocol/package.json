@@ -33,7 +33,7 @@
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
     "solidoc": "https://github.com/statechannels/solidoc.git#a4d4d244e367c6cf654079d1f157d5eb5903b9af",
-    "typescript": "3.7.5",
+    "typescript": "4.0.3",
     "webpack": "4.41.5"
   },
   "directories": {
@@ -63,7 +63,7 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo.git",
   "scripts": {
-    "build:typescript": "rm -rf lib; tsc -b .",
+    "build:typescript": "rm -rf lib; yarn tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "yarn node ./bin/compile.js",
     "docgen": "solidoc",
