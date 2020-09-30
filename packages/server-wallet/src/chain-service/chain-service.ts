@@ -95,10 +95,10 @@ export class ChainService implements ChainModifierInterface, ChainEventEmitterIn
     ).connect(this.provider);
 
     // Create an observable that emits events on contract events
-    const obs = new Observable<FundingChangedArg>(subscriber => {
+    const obs = new Observable<FundingChangedArg>(subs => {
       // todo: add other event types
       contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
-        subscriber.next({
+        subs.next({
           channelId: destination,
           assetHolderAddress: contractAddress,
           amount: BN.from(destinationHoldings),
