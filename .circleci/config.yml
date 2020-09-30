@@ -169,6 +169,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/client-api-schema/types
+            - .yarn
       - upload_logs:
           file: prepare-stats
       - notify_slack
