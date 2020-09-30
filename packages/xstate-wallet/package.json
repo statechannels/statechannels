@@ -163,7 +163,7 @@
     "lint:write": "eslint . --ext .ts --fix",
     "prepare": "node scripts/build.js",
     "release:netlify:production": "netlify deploy --site $XSTATE_WALLET_NETLIFY_ID --dir=build",
-    "start": "node scripts/start.js",
+    "start": "yarn node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
     "test": "jest -c ./config/jest/jest.config.js",
