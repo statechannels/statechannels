@@ -1,5 +1,5 @@
 import {spawn} from 'child_process';
-
+const ganache = require('ganache-core');
 import {ethers} from 'ethers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill = require('tree-kill'); // This library uses `export =` syntax
@@ -139,15 +139,24 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther('1000000');
 
-    const args: string[] = [
-      [`--networkId ${this.chainId}`, `--port ${this.port}`],
-      accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
-      [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
-      SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : []
-    ].reduce((a, b) => a.concat(b));
+    // const args: string[] = [
+    //   ['ganache-cli'],
+    //   [`--networkId ${this.chainId}`, `--port ${this.port}`],
+    //   accounts.map((a) => `--account ${a.privateKey},${a.amount || oneMillion}`),
+    //   [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
+    //   SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : [],
+    // ].reduce((a, b) => a.concat(b));
 
-    this.server = spawn('ganache-cli', args, {stdio: 'pipe', shell: true});
-    this.server.stdout.on('data', data => {
+    // this.server = spawn('npx', args, {stdio: 'pipe', shell: false});
+
+    this.server = ganache.server({
+      network_id: this.chainId,
+      accounts,
+      gasLimit,
+      gasPrice,
+    });
+
+    this.server.stdout.on('data', (data) => {
       if (SHOW_VERBOSE_GANACHE_OUTPUT) {
         extractLogsFromVerboseGanacheOutput(this.buffer, data.toString());
       } else {
@@ -155,7 +164,7 @@ export class GanacheServer {
       }
     });
 
-    this.server.stderr.on('data', data => {
+    this.server.stderr.on('data', (data) => {
       logger.error({error: data.toString()}, `Server threw error`);
       throw new Error('Ganache server failed to start');
     });
@@ -202,7 +211,7 @@ export class GanacheServer {
 
       deployedArtifacts[artifact.contractName] = {
         address: deployedArtifact.contractAddress,
-        abi: JSON.stringify(artifact.abi)
+        abi: JSON.stringify(artifact.abi),
       };
     }
     logger.info({deployedArtifacts}, 'Contracts deployed to chain');
