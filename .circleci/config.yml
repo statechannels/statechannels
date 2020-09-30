@@ -264,6 +264,7 @@ jobs:
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 6
       SERVER_DB_USER: root
+      LOG_DESTINATION: /home/circleci/project/artifacts/wallet.log
     steps:
       - checkout
       - attach_workspace:
@@ -283,6 +284,7 @@ jobs:
           command: yarn test:stress
           no_output_timeout: 10m
       - upload_artifacts
+
   server-wallet-stress-test:
     <<: *defaults
     resource_class: xlarge
@@ -311,6 +313,7 @@ jobs:
           command: yarn test:stress
           no_output_timeout: 10m
       - upload_artifacts
+
   server-wallet-profiling:
     <<: *defaults
     steps:

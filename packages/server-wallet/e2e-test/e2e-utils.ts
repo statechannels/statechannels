@@ -69,6 +69,11 @@ export const startReceiverServer = (): E2EServer =>
 const startServer = (command: string, port: number): E2EServer => {
   const server = spawn('yarn', ['node', command], {
     stdio: 'inherit',
+    env: {
+      // eslint-disable-next-line no-process-env
+      ...process.env,
+      LOG_LEVEL: 'trace',
+    },
   });
 
   server.on('error', data => console.error(data.toString()));

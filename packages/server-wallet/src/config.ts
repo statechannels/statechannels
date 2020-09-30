@@ -4,6 +4,7 @@
 
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
+import * as pino from 'pino';
 
 export interface ServerWalletConfig {
   nodeEnv?: 'test' | 'development' | 'production';
@@ -25,6 +26,8 @@ export interface ServerWalletConfig {
   timingMetrics: boolean;
   metricsOutputFile?: string;
   workerThreadAmount: number;
+  logLevel: pino.Level;
+  logDestination?: string; // console or undefined will log to console
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -52,6 +55,8 @@ export const defaultConfig: ServerWalletConfig = {
   timingMetrics: process.env.TIMING_METRICS === 'ON',
   metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
   workerThreadAmount: Number.parseInt(process.env.AMOUNT_OF_WORKER_THREADS || '0', 10),
+  logLevel: (process.env.LOG_LEVEL as pino.Level) || 'info',
+  logDestination: process.env.LOG_DESTINATION || 'console',
 };
 
 export function extractDBConfigFromServerWalletConfig(
