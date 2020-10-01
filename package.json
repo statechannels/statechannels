@@ -60,7 +60,7 @@
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "lerna run test --stream --concurrency 8",
     "test:ci": "lerna run test:ci --stream --no-sort --include-dependents",
-    "test:ci:incremental": "yarn test:ci --concurrency 3 --since $(git merge-base $CIRCLE_BRANCH origin/master)"
+    "test:ci:incremental": "yarn test:ci --concurrency 8 --since $(git merge-base $CIRCLE_BRANCH origin/master)"
   },
   "workspaces": {
     "packages": [
