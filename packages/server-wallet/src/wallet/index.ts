@@ -89,7 +89,7 @@ export type WalletInterface = {
   // Register chain <-> Wallet communication
   attachChainService(provider: OnchainServiceInterface): void;
 
-  mergeMessages(messages: Message[]): Message;
+  mergeMessages(messages: Message[]): MultipleChannelMessage;
 };
 
 export class Wallet implements WalletInterface, ChainEventListener {
@@ -141,7 +141,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
     this.attachChainService(this.chainService);
   }
 
-  public mergeMessages(messages: Message[]): Message {
+  public mergeMessages(messages: Message[]): MultipleChannelMessage {
     const channelResults = mergeChannelResults(
       messages
         .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
@@ -149,9 +149,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
     );
 
     const outbox = mergeOutgoing(messages.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
-    return channelResults.length === 1
-      ? {channelResult: channelResults[0], outbox}
-      : {channelResults, outbox};
+    return {channelResults, outbox};
   }
 
   public async destroy(): Promise<void> {
