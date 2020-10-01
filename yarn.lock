@@ -5961,16 +5961,16 @@ __metadata:
     "@statechannels/nitro-protocol": ^0.3.7
     "@statechannels/wallet-core": ^0.3.8-alpha.0
     "@statechannels/wasm-utils": 0.1.5
-    "@statechannels/wire-format": "workspace:packages/wire-format"
+    "@statechannels/wire-format": ^0.3.8-alpha.0
     "@types/autocannon": ^4.1.0
     "@types/body-parser": 1.19.0
     "@types/eslint": 6.1.7
     "@types/eslint-plugin-prettier": 2.2.0
     "@types/express": 4.17.1
     "@types/express-pino-logger": 4.0.2
-    "@types/jest": 25.1.0
+    "@types/jest": 26.0.14
     "@types/lodash": 4.14.149
-    "@types/node": ^14.11.2
+    "@types/node": ^13.5.1
     "@types/nodemon": 1.19.0
     "@types/pg": 7.14.0
     "@types/pino": 6.0.0
@@ -5997,6 +5997,7 @@ __metadata:
     jest: 25.1.0
     knex: 0.20.9
     lint-staged: 10.0.4
+    lodash: ^4.17.20
     nodemon: 1.19.4
     npm-run-all: 4.1.5
     objection: 2.2.3
@@ -6008,7 +6009,7 @@ __metadata:
     pure-evm: 0.1.3
     tarn: ^3.0.0
     tree-kill: ^1.2.2
-    ts-jest: 25.0.0
+    ts-jest: 25.1.0
     ts-node: 8.9.1
     typescript: 4.0.3
     unitimer: 3.13.0
@@ -6021,7 +6022,7 @@ __metadata:
   resolution: "@statechannels/wallet-core@workspace:packages/wallet-core"
   dependencies:
     "@babel/core": 7.11.4
-    "@statechannels/client-api-schema": "workspace:packages/client-api-schema"
+    "@statechannels/client-api-schema": ^0.3.8-alpha.0
     "@statechannels/devtools": ^0.3.7
     "@statechannels/nitro-protocol": ^0.3.7
     "@statechannels/wire-format": ^0.3.8-alpha.0
@@ -8013,7 +8014,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:26.x, @types/jest@npm:^26.0.14":
+"@types/jest@npm:26.0.14, @types/jest@npm:26.x, @types/jest@npm:^26.0.14":
   version: 26.0.14
   resolution: "@types/jest@npm:26.0.14"
   dependencies:
@@ -8194,6 +8195,13 @@ __metadata:
   version: 13.5.1
   resolution: "@types/node@npm:13.5.1"
   checksum: 1d502507b73196026f87489c6ba37528d3e907270b5d7aa02e20bd44dacbd7d7256b5a51797018b1e00ac68a0822aa568dbbc83fca9065f94acb42cad0956a82
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^13.5.1":
+  version: 13.13.21
+  resolution: "@types/node@npm:13.13.21"
+  checksum: 8e88d06fa585e932d3158644d2aefb9dcd3a3e0383594d820044b5264f912126c0fe32b33cdb83e2e1d11560240c64e5b1ac72bbe5bb0f96936f3bd1bb76aeb3
   languageName: node
   linkType: hard
 
@@ -35133,6 +35141,28 @@ resolve@~1.12.0:
   bin:
     ts-jest: cli.js
   checksum: a2bccb761686d9475937fa2643f4d02f10ff538be1c8b393caaf4fa20a41cd989ecf40aeae9f104b477d279c026a85a3ffbede99862cfebda794a31a77fc027e
+  languageName: node
+  linkType: hard
+
+"ts-jest@npm:25.1.0":
+  version: 25.1.0
+  resolution: "ts-jest@npm:25.1.0"
+  dependencies:
+    bs-logger: 0.x
+    buffer-from: 1.x
+    fast-json-stable-stringify: 2.x
+    json5: 2.x
+    lodash.memoize: 4.x
+    make-error: 1.x
+    mkdirp: 0.x
+    resolve: 1.x
+    semver: ^5.5
+    yargs-parser: 10.x
+  peerDependencies:
+    jest: ">=25 <26"
+  bin:
+    ts-jest: cli.js
+  checksum: 72faba125a3567655c8dfea59b61aad217c5301df0146d94366ae4c0fb7dd67ac15a4641d0b3d82bcda8ef054bbaa0fbf2f6ac1b1d83d53e3727512f4ad09462
   languageName: node
   linkType: hard
 

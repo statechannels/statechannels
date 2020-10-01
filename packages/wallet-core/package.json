@@ -4,7 +4,7 @@
   "version": "0.3.8-alpha.0",
   "author": "Alex Gap",
   "dependencies": {
-    "@statechannels/client-api-schema": "workspace:packages/client-api-schema",
+    "@statechannels/client-api-schema": "^0.3.8-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.7",
     "@statechannels/wire-format": "^0.3.8-alpha.0",
     "ethers": "5.0.12",

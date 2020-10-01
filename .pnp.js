@@ -9845,9 +9845,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/eslint-plugin-prettier", "npm:2.2.0"],
             ["@types/express", "npm:4.17.1"],
             ["@types/express-pino-logger", "npm:4.0.2"],
-            ["@types/jest", "npm:25.1.0"],
+            ["@types/jest", "npm:26.0.14"],
             ["@types/lodash", "npm:4.14.149"],
-            ["@types/node", "npm:14.11.2"],
+            ["@types/node", "npm:13.13.21"],
             ["@types/nodemon", "npm:1.19.0"],
             ["@types/pg", "npm:7.14.0"],
             ["@types/pino", "npm:6.0.0"],
@@ -9874,6 +9874,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["jest", "npm:25.1.0"],
             ["knex", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:0.20.9"],
             ["lint-staged", "npm:10.0.4"],
+            ["lodash", "npm:4.17.20"],
             ["nodemon", "npm:1.19.4"],
             ["npm-run-all", "npm:4.1.5"],
             ["objection", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:2.2.3"],
@@ -9885,7 +9886,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["pure-evm", "npm:0.1.3"],
             ["tarn", "npm:3.0.0"],
             ["tree-kill", "npm:1.2.2"],
-            ["ts-jest", "virtual:35a76288f9b7fedd7ddaf876169b3a00486a555c7562bd5bd1545a1d7257c86d9ae2721336d46b20f11dd6ee1e29118825a5579a3349ed5226bf855d62c26acb#npm:25.0.0"],
+            ["ts-jest", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:25.1.0"],
             ["ts-node", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:8.9.1"],
             ["typescript", "patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"],
             ["unitimer", "npm:3.13.0"],
@@ -12622,6 +12623,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-node-npm-10.17.13-1336f79ddd-54c6ee789e.zip/node_modules/@types/node/",
           "packageDependencies": [
             ["@types/node", "npm:10.17.13"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:13.13.21", {
+          "packageLocation": "./.yarn/cache/@types-node-npm-13.13.21-79673be3de-8e88d06fa5.zip/node_modules/@types/node/",
+          "packageDependencies": [
+            ["@types/node", "npm:13.13.21"]
           ],
           "linkType": "HARD",
         }],
@@ -42949,6 +42957,29 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["ts-jest", "virtual:35a76288f9b7fedd7ddaf876169b3a00486a555c7562bd5bd1545a1d7257c86d9ae2721336d46b20f11dd6ee1e29118825a5579a3349ed5226bf855d62c26acb#npm:25.0.0"],
             ["@types/jest", "npm:25.1.0"],
+            ["bs-logger", "npm:0.2.6"],
+            ["buffer-from", "npm:1.1.1"],
+            ["fast-json-stable-stringify", "npm:2.1.0"],
+            ["jest", "npm:25.1.0"],
+            ["json5", "npm:2.1.3"],
+            ["lodash.memoize", "npm:4.1.2"],
+            ["make-error", "npm:1.3.6"],
+            ["mkdirp", "npm:0.5.5"],
+            ["resolve", "patch:resolve@npm%3A1.17.0#builtin<compat/resolve>::version=1.17.0&hash=3388aa"],
+            ["semver", "npm:5.7.1"],
+            ["yargs-parser", "npm:10.1.0"]
+          ],
+          "packagePeers": [
+            "@types/jest",
+            "jest"
+          ],
+          "linkType": "HARD",
+        }],
+        ["virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:25.1.0", {
+          "packageLocation": "./.yarn/$$virtual/ts-jest-virtual-9aaf34d5aa/0/cache/ts-jest-npm-25.1.0-090121d766-72faba125a.zip/node_modules/ts-jest/",
+          "packageDependencies": [
+            ["ts-jest", "virtual:408e2ab896f46956c19bd3be2ba4ac1a7fbdec7e068b633523ccc144344112041f28afcb091e7238a58b88c31b2d056b700e12d181031a35edafef381af472a8#npm:25.1.0"],
+            ["@types/jest", "npm:26.0.14"],
             ["bs-logger", "npm:0.2.6"],
             ["buffer-from", "npm:1.1.1"],
             ["fast-json-stable-stringify", "npm:2.1.0"],
