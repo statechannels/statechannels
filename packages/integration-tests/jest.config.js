@@ -7,7 +7,8 @@ module.exports = {
   },
   preset: 'ts-jest',
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-environment-jsdom-fourteen',
   testEnvironmentOptions: { url: 'http://anything.com', resources: 'usable' },
   globalSetup: './jest.setup.ts',
+  setupFiles: ['jest-canvas-mock'],
 };

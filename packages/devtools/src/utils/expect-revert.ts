@@ -1,5 +1,5 @@
 /* global expect */
-let expect: any;
+let expect: Function;
 
 export async function expectRevert(fn: () => void, pattern?: string | RegExp) {
   // Where is expect coming from?
