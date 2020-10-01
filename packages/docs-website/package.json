@@ -5,8 +5,9 @@
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
-    "@docusaurus/core": "2.0.0-alpha.59",
-    "@docusaurus/preset-classic": "2.0.0-alpha.59",
+    "@docusaurus/core": "2.0.0-alpha.64",
+    "@docusaurus/preset-classic": "2.0.0-alpha.64",
+    "@mdx-js/react": "^1.6.18",
     "@microsoft/api-documenter": "7.8.21",
     "@statechannels/channel-client": "^0.3.8-alpha.0",
     "@statechannels/iframe-channel-provider": "^0.3.8-alpha.0",
