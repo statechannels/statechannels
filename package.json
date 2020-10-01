@@ -50,7 +50,7 @@
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "yarn workspaces foreach -avp --private --jobs 8 run test",
     "test:ci": "yarn workspaces foreach -avp --private --jobs 8 run test:ci",
-    "test:ci:incremental": "yarn test:ci --concurrency 3 --since $(git merge-base $CIRCLE_BRANCH origin/master)"
+    "test:ci:incremental": "yarn test:ci"
   },
   "workspaces": [
     "packages/*"
