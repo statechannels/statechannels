@@ -10124,6 +10124,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-prettier", "virtual:91c3a6ee439a3b7730f7e960a2ac32f2b1db77c1636ba6df6276d3e9eacc89ba4389065ccf9ced85c8f417934b21f1d0300ee793d611a35bc0adc0e7f78915e4#npm:3.1.2"],
             ["jest", "npm:25.1.0"],
             ["lint-staged", "npm:10.0.4"],
+            ["ts-jest", "virtual:676d21819843f1f142ad1ad443bb4917692bd31af556caec675641f73487498ac2b92189f4fbb73fe366e8424748d23c7fe7936068007f8a0c31b9d2958c7f90#npm:26.4.1"],
             ["ts-json-schema-generator", "npm:0.60.0"],
             ["typescript", "patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"]
           ],
@@ -44275,6 +44276,33 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packagePeers": [
             "@types/jest",
             "jest"
+          ],
+          "linkType": "HARD",
+        }],
+        ["virtual:676d21819843f1f142ad1ad443bb4917692bd31af556caec675641f73487498ac2b92189f4fbb73fe366e8424748d23c7fe7936068007f8a0c31b9d2958c7f90#npm:26.4.1", {
+          "packageLocation": "./.yarn/$$virtual/ts-jest-virtual-45252720a5/0/cache/ts-jest-npm-26.4.1-57675b03fb-d57275098b.zip/node_modules/ts-jest/",
+          "packageDependencies": [
+            ["ts-jest", "virtual:676d21819843f1f142ad1ad443bb4917692bd31af556caec675641f73487498ac2b92189f4fbb73fe366e8424748d23c7fe7936068007f8a0c31b9d2958c7f90#npm:26.4.1"],
+            ["@types/jest", "npm:25.1.0"],
+            ["@types/typescript", null],
+            ["bs-logger", "npm:0.2.6"],
+            ["buffer-from", "npm:1.1.1"],
+            ["fast-json-stable-stringify", "npm:2.1.0"],
+            ["jest", "npm:25.1.0"],
+            ["jest-util", "npm:26.3.0"],
+            ["json5", "npm:2.1.3"],
+            ["lodash.memoize", "npm:4.1.2"],
+            ["make-error", "npm:1.3.6"],
+            ["mkdirp", "npm:1.0.4"],
+            ["semver", "npm:7.3.2"],
+            ["typescript", "patch:typescript@npm%3A4.0.3#builtin<compat/typescript>::version=4.0.3&hash=5b02a2"],
+            ["yargs-parser", "npm:20.2.0"]
+          ],
+          "packagePeers": [
+            "@types/jest",
+            "@types/typescript",
+            "jest",
+            "typescript"
           ],
           "linkType": "HARD",
         }],
