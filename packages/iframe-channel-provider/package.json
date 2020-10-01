@@ -54,6 +54,12 @@
     "webpack-cli": "^3.3.12"
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json",
+        "packageJson": "package.json"
+      }
+    },
     "roots": [
       "./src",
       "./tests"
