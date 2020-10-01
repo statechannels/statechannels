@@ -15,6 +15,7 @@
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "mermaid": "8.8.0",
+    "prism-react-renderer": "^1.1.1",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "remarkable-admonitions": "0.2.1"
@@ -23,7 +24,8 @@
     "@types/highlight.js": "9.12.4",
     "@types/mermaid": "8.2.1",
     "@types/react": "16.9.48",
-    "@types/react-dom": "16.9.8"
+    "@types/react-dom": "16.9.8",
+    "fs-extra": "^9.0.1"
   },
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
@@ -36,7 +38,7 @@
     "rename-version": "docusaurus-rename-version",
     "start": "yarn trigger-api-generation && yarn api-documenter && docusaurus start",
     "swizzle": "docusaurus swizzle",
-    "trigger-api-generation": "cd ../.. && yarn lerna run generate-api cd packages/docs-website",
+    "trigger-api-generation": "cd ../.. && yarn workspaces foreach run generate-api && cd packages/docs-website",
     "write-translations": "docusaurus-write-translations"
   }
 }
