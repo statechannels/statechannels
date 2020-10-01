@@ -5,16 +5,15 @@ import {
   State,
   SignedState,
   createSignatureEntry,
-  BN
+  BN,
 } from '@statechannels/wallet-core';
-import {ethers} from 'ethers';
-import {hexZeroPad} from '@ethersproject/bytes';
+import { ethers, utils } from 'ethers';
 
-import {FakeChain} from '../chain';
-import {Backend} from '../store/dexie-backend';
-import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../config';
+import { FakeChain } from '../chain';
+import { Backend } from '../store/dexie-backend';
+import { CHALLENGE_DURATION, CHAIN_NETWORK_ID } from '../config';
 
-import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
+import { Player, hookUpMessaging, generateCloseRequest } from './helpers';
 
 jest.setTimeout(30000);
 
@@ -36,12 +35,12 @@ test('concludes on their turn', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32)),
     },
     {
       destination: playerA.destination,
-      amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
-    }
+      amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32)),
+    },
   ]);
 
   hookUpMessaging(playerA, playerB);
@@ -54,25 +53,25 @@ test('concludes on their turn', async () => {
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
     appDefinition: ethers.constants.AddressZero,
-    participants: [playerA.participant, playerB.participant]
+    participants: [playerA.participant, playerB.participant],
   };
 
   const allSignState: SignedState = {
     ...state,
-    signatures: [playerA, playerB].map(({privateKey}) => createSignatureEntry(state, privateKey))
+    signatures: [playerA, playerB].map(({ privateKey }) => createSignatureEntry(state, privateKey)),
   };
 
-  const {channelId} = await playerB.store.createEntry(allSignState);
+  const { channelId } = await playerB.store.createEntry(allSignState);
   await playerA.store.createEntry(allSignState);
 
-  [playerA, playerB].forEach(async player => {
+  [playerA, playerB].forEach(async (player) => {
     player.startAppWorkflow('running', {
       channelId,
       applicationDomain: 'localhost',
-      fundingStrategy: 'Direct'
+      fundingStrategy: 'Direct',
     });
     player.workflowMachine?.send('SPAWN_OBSERVERS');
-    await player.store.setFunding(channelId, {type: 'Direct'});
+    await player.store.setFunding(channelId, { type: 'Direct' });
   });
 
   await playerA.messagingService.receiveRequest(generateCloseRequest(channelId), 'localhost');

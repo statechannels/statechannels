@@ -1,10 +1,10 @@
-import {Wallet} from 'ethers';
+import { Wallet } from 'ethers';
 import {
   Participant,
   SignatureEntry,
   SignedState,
   signState,
-  makeDestination
+  makeDestination,
 } from '@statechannels/wallet-core';
 import {
   isStateChannelsNotification,
@@ -14,23 +14,23 @@ import {
   UpdateChannelRequest,
   CloseChannelRequest,
   ApproveBudgetAndFundRequest,
-  CloseAndWithdrawRequest
+  CloseAndWithdrawRequest,
 } from '@statechannels/client-api-schema';
-import {interpret, Interpreter} from 'xstate';
-import {Guid} from 'guid-typescript';
-import {hexZeroPad} from '@ethersproject/bytes';
+import { interpret, Interpreter } from 'xstate';
+import { Guid } from 'guid-typescript';
+import { utils } from 'ethers';
 import _ from 'lodash';
 
-import {DBBackend} from '../store';
-import {TestStore} from '../test-store';
-import {Chain} from '../chain';
-import {ETH_TOKEN} from '../constants';
-import {logger} from '../logger';
-import {ADD_LOGS} from '../config';
+import { DBBackend } from '../store';
+import { TestStore } from '../test-store';
+import { Chain } from '../chain';
+import { ETH_TOKEN } from '../constants';
+import { logger } from '../logger';
+import { ADD_LOGS } from '../config';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
-import {CreateAndFundLedger, Application as App} from '../workflows';
-import {ChannelWallet, logTransition} from '../channel-wallet';
-import {MessagingServiceInterface, MessagingService} from '../messaging';
+import { CreateAndFundLedger, Application as App } from '../workflows';
+import { ChannelWallet, logTransition } from '../channel-wallet';
+import { MessagingServiceInterface, MessagingService } from '../messaging';
 
 const log = logger.info.bind(logger);
 
@@ -57,38 +57,38 @@ export class Player {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
       CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
-      {devTools: true}
+      { devTools: true }
     )
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
 
       .start();
 
-    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
+    this.channelWallet.workflows.push({ id: workflowId, service, domain: 'TODO' });
   }
   startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
       CreateAndFundLedger.createAndFundLedgerWorkflow(this.store, context),
       {
-        devTools: true
+        devTools: true,
       }
     )
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
 
       .start();
 
-    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
+    this.channelWallet.workflows.push({ id: workflowId, service, domain: 'TODO' });
   }
   startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
       App.workflow(this.store, this.messagingService).withContext(context),
-      {devTools: true}
+      { devTools: true }
     )
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, this.id))
       .start(startingState);
 
-    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
+    this.channelWallet.workflows.push({ id: workflowId, service, domain: 'TODO' });
   }
   get workflowMachine(): Interpreter<any, any, any, any> | undefined {
     return this.channelWallet.workflows[0]?.service;
@@ -103,7 +103,7 @@ export class Player {
     return {
       participantId: this.signingAddress,
       destination: this.destination,
-      signingAddress: this.signingAddress
+      signingAddress: this.signingAddress,
     };
   }
   get participantId(): string {
@@ -113,10 +113,13 @@ export class Player {
   signState(state: SignedState): SignedState {
     const mySignature: SignatureEntry = {
       signature: signState(state, this.privateKey),
-      signer: this.signingAddress
+      signer: this.signingAddress,
     };
 
-    return {...state, signatures: _.unionBy(state.signatures, [mySignature], sig => sig.signature)};
+    return {
+      ...state,
+      signatures: _.unionBy(state.signatures, [mySignature], (sig) => sig.signature),
+    };
   }
 
   static async createPlayer(
@@ -132,18 +135,18 @@ export class Player {
 }
 
 export function hookUpMessaging(playerA: Player, playerB: Player) {
-  playerA.channelWallet.onSendMessage(async message => {
+  playerA.channelWallet.onSendMessage(async (message) => {
     if (isStateChannelsNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE A->B:');
+      ADD_LOGS && log({ pushMessageRequest }, 'MESSAGE A->B:');
       await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
 
-  playerB.channelWallet.onSendMessage(message => {
+  playerB.channelWallet.onSendMessage((message) => {
     if (isStateChannelsNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      ADD_LOGS && log({pushMessageRequest}, 'MESSAGE B->A:');
+      ADD_LOGS && log({ pushMessageRequest }, 'MESSAGE B->A:');
 
       playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
@@ -155,7 +158,7 @@ function generatePushMessage(messageParams): PushMessageRequest {
     jsonrpc: '2.0',
     id: 111111111,
     method: 'PushMessage',
-    params: messageParams
+    params: messageParams,
   };
 }
 
@@ -165,8 +168,8 @@ export function generateCloseRequest(channelId: string): CloseChannelRequest {
     method: 'CloseChannel',
     id: 777777777,
     params: {
-      channelId
-    }
+      channelId,
+    },
   };
 }
 
@@ -184,25 +187,25 @@ export function generatePlayerUpdate(
       appData: '0x00',
       allocations: [
         {
-          token: hexZeroPad('0x00', 32),
+          token: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32),
             },
             {
               destination: playerB.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
-            }
-          ]
-        }
-      ]
-    }
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32),
+            },
+          ],
+        },
+      ],
+    },
   };
 }
 
 export function generateJoinChannelRequest(channelId: string): JoinChannelRequest {
-  return {id: 222222222, method: 'JoinChannel', jsonrpc: '2.0', params: {channelId}};
+  return { id: 222222222, method: 'JoinChannel', jsonrpc: '2.0', params: { channelId } };
 }
 
 export function generateCreateChannelRequest(
@@ -217,23 +220,23 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: hexZeroPad('0x00', 32),
+          token: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32),
             },
             {
               destination: playerB.destination,
-              amount: hexZeroPad('0x06f05b59d3b20000', 32)
-            }
-          ]
-        }
+              amount: utils.hexZeroPad('0x06f05b59d3b20000', 32),
+            },
+          ],
+        },
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
       appData: '0x00',
-      fundingStrategy: 'Direct'
-    }
+      fundingStrategy: 'Direct',
+    },
   };
 }
 
@@ -249,9 +252,9 @@ export function generateApproveBudgetAndFundRequest(
       token: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
-      requestedSendCapacity: hexZeroPad('0x5', 32),
-      requestedReceiveCapacity: hexZeroPad('0x5', 32)
-    }
+      requestedSendCapacity: utils.hexZeroPad('0x5', 32),
+      requestedReceiveCapacity: utils.hexZeroPad('0x5', 32),
+    },
   };
 }
 
@@ -264,7 +267,7 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
-      hubParticipantId: hub.participantId
-    }
+      hubParticipantId: hub.participantId,
+    },
   };
 }

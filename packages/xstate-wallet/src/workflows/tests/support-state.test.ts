@@ -1,4 +1,4 @@
-import {interpret} from 'xstate';
+import { interpret } from 'xstate';
 import {
   firstState,
   calculateChannelId,
@@ -7,19 +7,19 @@ import {
   Outcome,
   State,
   SignedState,
-  BN
+  BN,
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
+import { constants } from 'ethers';
 
-import {Store} from '../../store';
-import {FakeChain} from '../../chain';
-import {TestStore} from '../../test-store';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {machine as concludeChannel} from '../conclude-channel';
-import {Init, machine as createChannel} from '../create-and-fund';
+import { Store } from '../../store';
+import { FakeChain } from '../../chain';
+import { TestStore } from '../../test-store';
+import { ETH_ASSET_HOLDER_ADDRESS } from '../../config';
+import { machine as concludeChannel } from '../conclude-channel';
+import { Init, machine as createChannel } from '../create-and-fund';
 
-import {subscribeToMessages} from './message-service';
-import {wallet1, wallet2, participants, TEST_APP_DOMAIN} from './data';
+import { subscribeToMessages } from './message-service';
+import { wallet1, wallet2, participants, TEST_APP_DOMAIN } from './data';
 
 jest.setTimeout(5000);
 
@@ -32,43 +32,43 @@ const targetChannel: ChannelConstants = {
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition,
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
-const destinations = participants.map(p => p.destination);
+const destinations = participants.map((p) => p.destination);
 
 const amounts = [BN.from(7), BN.from(5)];
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [0, 1].map(i => ({
+  allocationItems: [0, 1].map((i) => ({
     destination: destinations[i],
-    amount: amounts[i]
-  }))
+    amount: amounts[i],
+  })),
 };
 
-const context: Init = {channelId: targetChannelId, funding: 'Direct'};
+const context: Init = { channelId: targetChannelId, funding: 'Direct' };
 
 const allSignedState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
+  signatures: [wallet1, wallet2].map(({ privateKey }) => createSignatureEntry(state, privateKey)),
 });
 
 const ASignedStateOnly = (state: State) => ({
   ...state,
-  signatures: [createSignatureEntry(state, wallet1.privateKey)]
+  signatures: [createSignatureEntry(state, wallet1.privateKey)],
 });
 
 const BSignedStateOnly = (state: State) => ({
   ...state,
-  signatures: [createSignatureEntry(state, wallet2.privateKey)]
+  signatures: [createSignatureEntry(state, wallet2.privateKey)],
 });
 
 const noSignedState = (state: State) => ({
   ...state,
-  signatures: []
+  signatures: [],
 });
 
 const runUntilSuccess = async (machine, stores: Array<TestStore>) => {
@@ -77,9 +77,9 @@ const runUntilSuccess = async (machine, stores: Array<TestStore>) => {
 
   await Promise.all(
     services.map(
-      service =>
-        new Promise(resolve =>
-          service.onTransition(state => state.matches('success') && service.stop() && resolve())
+      (service) =>
+        new Promise((resolve) =>
+          service.onTransition((state) => state.matches('success') && service.stop() && resolve())
         )
     )
   );
@@ -104,15 +104,15 @@ const setupStores = async (entryState: SignedState) => {
   const bStore = new TestStore(chain);
   await bStore.initialize([wallet2.privateKey]);
   await aStore.createEntry(entryState, {
-    applicationDomain: TEST_APP_DOMAIN
+    applicationDomain: TEST_APP_DOMAIN,
   });
   await bStore.createEntry(entryState, {
-    applicationDomain: TEST_APP_DOMAIN
+    applicationDomain: TEST_APP_DOMAIN,
   });
 
   subscribeToMessages({
     [participants[0].participantId]: aStore,
-    [participants[1].participantId]: bStore
+    [participants[1].participantId]: bStore,
   });
 
   return [aStore, bStore];
@@ -120,7 +120,7 @@ const setupStores = async (entryState: SignedState) => {
 
 const finalState = (outcome, targetChannel) => ({
   ...firstState(outcome, targetChannel),
-  isFinal: true
+  isFinal: true,
 });
 
 //TODO: Re-enable these tests

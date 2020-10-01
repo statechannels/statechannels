@@ -1,22 +1,22 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import './wallet.scss';
-import {useService} from '@xstate/react';
-import {formatEther} from '@ethersproject/units';
-import {Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon} from 'rimble-ui';
-import {BN} from '@statechannels/wallet-core';
-import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
+import { useService } from '@xstate/react';
+import { utils } from 'ethers';
+import { Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon } from 'rimble-ui';
+import { BN } from '@statechannels/wallet-core';
+import { ApproveBudgetAndFundService } from '../workflows/approve-budget-and-fund';
 
-import {track} from '../segment-analytics';
-import {getAmountsFromBudget} from './selectors';
-import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
+import { track } from '../segment-analytics';
+import { getAmountsFromBudget } from './selectors';
+import { ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK } from '../config';
 interface Props {
   service: ApproveBudgetAndFundService;
 }
 
 export const ApproveBudgetAndFund = (props: Props) => {
   const [current, _send] = useService(props.service);
-  const {budget} = current.context;
-  const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
+  const { budget } = current.context;
+  const { playerAmount, hubAmount } = getAmountsFromBudget(budget);
 
   const send = (
     event:
@@ -25,7 +25,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
       | 'USER_APPROVES_RETRY'
       | 'USER_REJECTS_RETRY'
   ) => () => {
-    track(event, {domain: current.context.budget.domain});
+    track(event, { domain: current.context.budget.domain });
     _send(event);
   };
 
@@ -58,15 +58,15 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You don&#39;t have enough ETH in your wallet!
       </Text>
       <Text pb={3} fontSize={1}>
-        You&#39;ll need at least {formatEther(BN.from(playerAmount))} ETH in your Metamask wallet to
-        fund the channel. You can get more ETH{' '}
+        You&#39;ll need at least {utils.formatEther(BN.from(playerAmount))} ETH in your Metamask
+        wallet to fund the channel. You can get more ETH{' '}
         <Link target="_blank" href={FAUCET_LINK}>
           here.
         </Link>
       </Text>
     </Flex>
   );
-  const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
+  const waitForUserApproval = ({ waiting }: { waiting: boolean } = { waiting: false }) => (
     <Flex alignItems="left" flexDirection="column">
       <Heading textAlign="center" mb={2}>
         App Budget
@@ -160,7 +160,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
     </Flex>
   );
 
-  const depositWaitMining = ({transactionId}: {transactionId: string}) => (
+  const depositWaitMining = ({ transactionId }: { transactionId: string }) => (
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
@@ -236,29 +236,29 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
   if (current.matches('waitForUserApproval')) {
     return waitForUserApproval();
-  } else if (current.matches({waitForSufficientFunds: 'init'})) {
+  } else if (current.matches({ waitForSufficientFunds: 'init' })) {
     return waitForSufficientFundsInit;
-  } else if (current.matches({waitForSufficientFunds: 'waitForFunds'})) {
+  } else if (current.matches({ waitForSufficientFunds: 'waitForFunds' })) {
     return waitForSufficientFunds;
   } else if (current.matches('createLedger')) {
     return waitForSufficientFunds;
   } else if (current.matches('waitForPreFS')) {
     return waitForPreFS;
-  } else if (current.matches({deposit: 'init'})) {
+  } else if (current.matches({ deposit: 'init' })) {
     return depositInit;
-  } else if (current.matches({deposit: 'waitTurn'})) {
+  } else if (current.matches({ deposit: 'waitTurn' })) {
     if (stateTimerExpired) {
       return hubTimeout;
     } else {
       return depositWaitTurn;
     }
-  } else if (current.matches({deposit: 'submitTransaction'})) {
+  } else if (current.matches({ deposit: 'submitTransaction' })) {
     return depositSubmitTransaction;
-  } else if (current.matches({deposit: 'waitMining'})) {
+  } else if (current.matches({ deposit: 'waitMining' })) {
     return depositWaitMining(current.context);
-  } else if (current.matches({deposit: 'retry'})) {
+  } else if (current.matches({ deposit: 'retry' })) {
     return depositRetry();
-  } else if (current.matches({deposit: 'waitFullyFunded'})) {
+  } else if (current.matches({ deposit: 'waitFullyFunded' })) {
     return depositFullyFunded;
   } else if (current.matches('createBudget')) {
     return depositFullyFunded;

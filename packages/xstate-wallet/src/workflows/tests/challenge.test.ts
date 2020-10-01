@@ -1,14 +1,14 @@
-import {interpret} from 'xstate';
-import {ethers} from 'ethers';
-import {hexZeroPad} from '@ethersproject/bytes';
-import waitForExpect from 'wait-for-expect';
-import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';
+import { interpret } from 'xstate';
+import { ethers, utils } from 'ethers';
 
-import {FakeChain} from '../../chain';
-import {TestStore} from '../../test-store';
-import {Player} from '../../integration-tests/helpers';
-import {machine as challengeMachine} from '../challenge-channel';
-import {CHALLENGE_DURATION, CHAIN_NETWORK_ID} from '../../config';
+import waitForExpect from 'wait-for-expect';
+import { signState, State, simpleEthAllocation, BN } from '@statechannels/wallet-core';
+
+import { FakeChain } from '../../chain';
+import { TestStore } from '../../test-store';
+import { Player } from '../../integration-tests/helpers';
+import { machine as challengeMachine } from '../challenge-channel';
+import { CHALLENGE_DURATION, CHAIN_NETWORK_ID } from '../../config';
 
 jest.setTimeout(50000);
 
@@ -42,12 +42,12 @@ beforeEach(async () => {
     outcome: simpleEthAllocation([
       {
         destination: playerA.destination,
-        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
+        amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32)),
       },
       {
         destination: playerA.destination,
-        amount: BN.from(hexZeroPad('0x06f05b59d3b20000', 32))
-      }
+        amount: BN.from(utils.hexZeroPad('0x06f05b59d3b20000', 32)),
+      },
     ]),
     turnNum: 5,
     appData: '0x00',
@@ -56,27 +56,27 @@ beforeEach(async () => {
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
     appDefinition: ethers.constants.AddressZero,
-    participants: [playerA.participant, playerB.participant]
+    participants: [playerA.participant, playerB.participant],
   };
 
   const allSignState = {
     ...state,
-    signatures: [playerA, playerB].map(({privateKey, signingAddress}) => ({
+    signatures: [playerA, playerB].map(({ privateKey, signingAddress }) => ({
       signature: signState(state, privateKey),
-      signer: signingAddress
-    }))
+      signer: signingAddress,
+    })),
   };
 
   channelId = (await store.createEntry(allSignState)).channelId;
 });
 
 it('initializes and starts challenge thing', async () => {
-  const service = interpret(challengeMachine(store, {channelId})).start();
+  const service = interpret(challengeMachine(store, { channelId })).start();
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('waitForResponseOrTimeout');
     const {
-      channelStorage: {finalizesAt, turnNumRecord}
+      channelStorage: { finalizesAt, turnNumRecord },
     } = await fakeChain.getChainInfo(channelId);
     expect(finalizesAt).toEqual(state.challengeDuration + 1);
     expect(turnNumRecord).toEqual(state.turnNum);
@@ -84,16 +84,16 @@ it('initializes and starts challenge thing', async () => {
 });
 
 it('finalized when timeout ends', async () => {
-  const service = interpret(challengeMachine(store, {channelId})).start();
+  const service = interpret(challengeMachine(store, { channelId })).start();
 
   // Wait until the challenge is on-chain, then fast-forward the blocks.
   service.onTransition(
-    ({value}) => value === 'waitForResponseOrTimeout' && fakeChain.setBlockNumber(301) // NOTE: CHALLENGE_DURATION is 300)
+    ({ value }) => value === 'waitForResponseOrTimeout' && fakeChain.setBlockNumber(301) // NOTE: CHALLENGE_DURATION is 300)
   );
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
-    const {finalized} = await fakeChain.getChainInfo(channelId);
+    const { finalized } = await fakeChain.getChainInfo(channelId);
     expect(finalized).toBe(true);
   }, 10_000);
 });

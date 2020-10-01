@@ -1,12 +1,12 @@
-import {filter, map, first} from 'rxjs/operators';
-import {FundLedger, assertSimpleEthAllocation, BN} from '@statechannels/wallet-core';
-import {hexZeroPad} from '@ethersproject/bytes';
-import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
+import { filter, map, first } from 'rxjs/operators';
+import { FundLedger, assertSimpleEthAllocation, BN } from '@statechannels/wallet-core';
+import { utils } from 'ethers';
+import { ApproveBudgetAndFundResponse } from '@statechannels/client-api-schema';
 
-import {FakeChain} from '../chain';
-import {TEST_APP_DOMAIN} from '../workflows/tests/data';
+import { FakeChain } from '../chain';
+import { TEST_APP_DOMAIN } from '../workflows/tests/data';
 
-import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
+import { Player, generateApproveBudgetAndFundRequest, hookUpMessaging } from './helpers';
 
 jest.setTimeout(30000);
 
@@ -32,12 +32,12 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   // This should be similar to how the actual hub handles this
   hub.store.objectiveFeed
     .pipe(filter((o): o is FundLedger => o.type === 'FundLedger'))
-    .subscribe(async o => {
+    .subscribe(async (o) => {
       const entry = await hub.store.getEntry(o.data.ledgerId);
       hub.startCreateAndFundLedger({
         ledgerId: o.data.ledgerId,
         participants: o.participants,
-        initialOutcome: assertSimpleEthAllocation(entry.latest.outcome)
+        initialOutcome: assertSimpleEthAllocation(entry.latest.outcome),
       });
     });
 
@@ -47,8 +47,8 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   );
   const createBudgetPromise = playerA.messagingService.outboxFeed
     .pipe(
-      filter(m => 'id' in m && m.id === createBudgetEvent.id),
-      map(m => m as ApproveBudgetAndFundResponse),
+      filter((m) => 'id' in m && m.id === createBudgetEvent.id),
+      map((m) => m as ApproveBudgetAndFundResponse),
       first()
     )
     .toPromise();
@@ -59,7 +59,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   //   fakeChain;
   //   expect(playerA.workflowState).toEqual('waitForUserApproval');
   // }, 3000);
-  playerA.channelWallet.workflows[0].service.send({type: 'USER_APPROVES_BUDGET'});
+  playerA.channelWallet.workflows[0].service.send({ type: 'USER_APPROVES_BUDGET' });
 
   await createBudgetPromise;
 
@@ -69,11 +69,11 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   const allocation = assertSimpleEthAllocation(ledgerEntry.supported.outcome);
   expect(allocation.allocationItems).toContainEqual({
     destination: hub.destination,
-    amount: BN.from(hexZeroPad('0x5', 32))
+    amount: BN.from(utils.hexZeroPad('0x5', 32)),
   });
   expect(allocation.allocationItems).toContainEqual({
     destination: playerA.destination,
-    amount: BN.from(hexZeroPad('0x5', 32))
+    amount: BN.from(utils.hexZeroPad('0x5', 32)),
   });
   // Check that the funds are reflected on chain
   const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);

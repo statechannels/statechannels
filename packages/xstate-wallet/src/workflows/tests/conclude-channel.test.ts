@@ -1,4 +1,4 @@
-import {interpret} from 'xstate';
+import { interpret } from 'xstate';
 import {
   firstState,
   calculateChannelId,
@@ -6,20 +6,20 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  BN
+  BN,
 } from '@statechannels/wallet-core';
-import {AddressZero} from '@ethersproject/constants';
+import { constants } from 'ethers';
 
-import {Store} from '../../store';
-import {FakeChain} from '../../chain';
-import {TestStore} from '../../test-store';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
-import {machine as concludeChannel} from '../conclude-channel';
-import {Init, machine as createChannel} from '../create-and-fund';
-import {MessagingService} from '../../messaging';
+import { Store } from '../../store';
+import { FakeChain } from '../../chain';
+import { TestStore } from '../../test-store';
+import { ETH_ASSET_HOLDER_ADDRESS, HUB } from '../../config';
+import { machine as concludeChannel } from '../conclude-channel';
+import { Init, machine as createChannel } from '../create-and-fund';
+import { MessagingService } from '../../messaging';
 
-import {subscribeToMessages} from './message-service';
-import {SimpleHub} from './simple-hub';
+import { subscribeToMessages } from './message-service';
+import { SimpleHub } from './simple-hub';
 import {
   wallet1,
   wallet2,
@@ -30,49 +30,49 @@ import {
   third,
   second,
   TEST_APP_DOMAIN,
-  budget
+  budget,
 } from './data';
 
 jest.setTimeout(20000);
 
-const {add} = BN;
+const { add } = BN;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = constants.AddressZero;
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition,
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
-const destinations = participants.map(p => p.destination);
+const destinations = participants.map((p) => p.destination);
 
-const ledgerChannel: ChannelConstants = {...targetChannel, channelNonce: 1};
+const ledgerChannel: ChannelConstants = { ...targetChannel, channelNonce: 1 };
 
 const amounts = [BN.from(7), BN.from(5)];
-const ledgerAmounts = amounts.map(a => add(a, 2));
+const ledgerAmounts = amounts.map((a) => add(a, 2));
 const depositAmount = ledgerAmounts.reduce(add);
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [0, 1].map(i => ({
+  allocationItems: [0, 1].map((i) => ({
     destination: destinations[i],
-    amount: amounts[i]
-  }))
+    amount: amounts[i],
+  })),
 };
 
-const context: Init = {channelId: targetChannelId, funding: 'Direct'};
+const context: Init = { channelId: targetChannelId, funding: 'Direct' };
 
 let aStore: TestStore;
 let bStore: TestStore;
 const allSignedState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
+  signatures: [wallet1, wallet2].map(({ privateKey }) => createSignatureEntry(state, privateKey)),
 });
 
 let chain: FakeChain;
@@ -80,33 +80,35 @@ let chain: FakeChain;
 const createLedgerChannels = async () => {
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
-  let signatures = [wallet1, wallet3].map(({privateKey}) =>
+  let signatures = [wallet1, wallet3].map(({ privateKey }) =>
     createSignatureEntry(state, privateKey)
   );
   await aStore.createBudget(budget(BN.from(7), BN.from(7)));
   await bStore.createBudget(budget(BN.from(7), BN.from(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
-  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(await aStore.createEntry({ ...state, signatures }));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
-  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
+  signatures = [wallet2, wallet3].map(({ privateKey }) => createSignatureEntry(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
+  await bStore.setLedgerByEntry(await bStore.createEntry({ ...state, signatures }));
 
   const services = [
     [aStore, aMessagingService],
-    [bStore, bMessagingService]
+    [bStore, bMessagingService],
   ].map(([store, messaging]) =>
-    interpret(createChannel(store, messaging).withContext({...context, funding: 'Virtual'})).start()
+    interpret(
+      createChannel(store, messaging).withContext({ ...context, funding: 'Virtual' })
+    ).start()
   );
 
   await Promise.all(
     services.map(
-      service =>
-        new Promise(resolve =>
-          service.onTransition(state => state.matches('success') && service.stop() && resolve())
+      (service) =>
+        new Promise((resolve) =>
+          service.onTransition((state) => state.matches('success') && service.stop() && resolve())
         )
     )
   );
@@ -115,20 +117,20 @@ const createLedgerChannels = async () => {
 const resolveOnTransition = (service, passCond, rejectString?: string) =>
   new Promise((resolve, reject) => {
     setTimeout(() => reject(rejectString), 5_000);
-    service.onTransition(state => passCond(state) && service.stop() && resolve());
+    service.onTransition((state) => passCond(state) && service.stop() && resolve());
   });
 
 const runUntilSuccess = async (machine, fundingType: 'Direct' | 'Virtual') => {
   const runMachine = (store: Store, messagingService) =>
     interpret(machine(store, messagingService).withContext(context)).start();
   const services = [runMachine(aStore, aMessagingService), runMachine(bStore, bMessagingService)];
-  const targetState = fundingType == 'Direct' ? 'success' : {virtualDefunding: 'asLeaf'};
+  const targetState = fundingType == 'Direct' ? 'success' : { virtualDefunding: 'asLeaf' };
 
   await Promise.all(
-    services.map(service =>
+    services.map((service) =>
       resolveOnTransition(
         service,
-        state => state.matches(targetState),
+        (state) => state.matches(targetState),
         `Did not hit target ${JSON.stringify(targetState)}`
       )
     )
@@ -164,15 +166,15 @@ const concludeTwiceAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
 };
 
 const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') => {
-  const crashState = fundingType == 'Direct' ? 'withdrawing' : {virtualDefunding: 'gettingRole'};
+  const crashState = fundingType == 'Direct' ? 'withdrawing' : { virtualDefunding: 'gettingRole' };
   const successState =
-    fundingType == 'Direct' ? {withdrawing: 'submitTransaction'} : {virtualDefunding: 'asLeaf'};
+    fundingType == 'Direct' ? { withdrawing: 'submitTransaction' } : { virtualDefunding: 'asLeaf' };
 
   interpret(concludeChannel(bStore, bMessagingService).withContext(context)).start();
 
   // Simulate A crashes before withdrawing
   const aMachine = interpret(concludeChannel(aStore, aMessagingService).withContext(context))
-    .onTransition(state => state.value === crashState && aMachine.stop())
+    .onTransition((state) => state.value === crashState && aMachine.stop())
     .start();
 
   const entryA1 = await aStore.getEntry(targetChannelId);
@@ -181,7 +183,7 @@ const concludeAfterCrashAndAssert = async (fundingType: 'Direct' | 'Virtual') =>
   // A concludes again
   await resolveOnTransition(
     interpret(concludeChannel(aStore, aMessagingService).withContext(context)).start(),
-    state => state.matches(successState),
+    (state) => state.matches(successState),
     `Did not hit success state ${successState}`
   );
 
@@ -204,7 +206,7 @@ beforeEach(async () => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     await store.createEntry(allSignedState(firstState(allocation, targetChannel)), {
-      applicationDomain: TEST_APP_DOMAIN
+      applicationDomain: TEST_APP_DOMAIN,
     });
 
     const ledgerEntry = await store.createEntry(
@@ -216,16 +218,16 @@ beforeEach(async () => {
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore,
-    [HUB.participantId]: hubStore
+    [HUB.participantId]: hubStore,
   });
 });
 
 async function signFinalState(finalizer: Store, other: Store) {
   const targetChannelState = (await finalizer.getEntry(targetChannelId)).supported;
-  const {supported: finalState} = await finalizer.signAndAddState(targetChannelId, {
+  const { supported: finalState } = await finalizer.signAndAddState(targetChannelId, {
     ...targetChannelState,
     turnNum: targetChannelState.turnNum + 1,
-    isFinal: true
+    isFinal: true,
   });
 
   await other.addState(finalState);

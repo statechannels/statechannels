@@ -1,8 +1,7 @@
-import {AddressZero} from '@ethersproject/constants';
-import {EventEmitter} from 'eventemitter3';
-import {filter, map, concatAll} from 'rxjs/operators';
-import {Observable, fromEvent, merge, from, of} from 'rxjs';
-import {Wallet} from 'ethers';
+import { EventEmitter } from 'eventemitter3';
+import { filter, map, concatAll } from 'rxjs/operators';
+import { Observable, fromEvent, merge, from, of } from 'rxjs';
+import { Wallet, constants } from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
 import {
@@ -21,19 +20,19 @@ import {
   SimpleAllocation,
   Funding,
   BN,
-  Uint256
+  Uint256,
 } from '@statechannels/wallet-core';
 
-import {Chain, FakeChain} from '../chain';
-import {CHAIN_NETWORK_ID, HUB} from '../config';
-import {checkThat, recordToArray} from '../utils';
-import {logger} from '../logger';
-import {DB_NAME} from '../constants';
+import { Chain, FakeChain } from '../chain';
+import { CHAIN_NETWORK_ID, HUB } from '../config';
+import { checkThat, recordToArray } from '../utils';
+import { logger } from '../logger';
+import { DB_NAME } from '../constants';
 
-import {ChannelStoreEntry} from './channel-store-entry';
-import {MemoryBackend} from './memory-backend';
+import { ChannelStoreEntry } from './channel-store-entry';
+import { MemoryBackend } from './memory-backend';
 
-import {Errors, DBBackend, ObjectStores} from '.';
+import { Errors, DBBackend, ObjectStores } from '.';
 
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
@@ -75,23 +74,23 @@ export class Store {
 
       if (!privateKeys?.length && !currentAddress) {
         // generate the first private key
-        const {privateKey} = Wallet.createRandom();
+        const { privateKey } = Wallet.createRandom();
         privateKeys = [privateKey];
       }
 
       await Promise.all(
-        privateKeys?.map(pk => this.backend.setPrivateKey(new Wallet(pk).address, pk)) || []
+        privateKeys?.map((pk) => this.backend.setPrivateKey(new Wallet(pk).address, pk)) || []
       );
 
       if (!segmentId) {
         segmentId = await this.getAddress();
         identify(segmentId);
-        track('created a wallet', {address: segmentId});
+        track('created a wallet', { address: segmentId });
       } else {
         identify(segmentId);
       }
 
-      track('initialized a wallet', {address: segmentId});
+      track('initialized a wallet', { address: segmentId });
     });
   };
 
@@ -112,11 +111,11 @@ export class Store {
     // fromEvent<'foo'>(this._eventEmitter, 'channelUpdated') would happily return
     // Observable<'foo'>
     const newEntries = fromEvent<ChannelStoreEntry>(this._eventEmitter, 'channelUpdated').pipe(
-      filter(cs => cs.channelId === channelId)
+      filter((cs) => cs.channelId === channelId)
     );
 
     const currentEntry = from(this.backend.getChannel(channelId)).pipe(
-      filter<ChannelStoreEntry>(c => !!c)
+      filter<ChannelStoreEntry>((c) => !!c)
     );
 
     return merge(currentEntry, newEntries);
@@ -141,19 +140,19 @@ export class Store {
       'readwrite',
       [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
       async () => {
-        const addresses = state.participants.map(x => x.signingAddress);
+        const addresses = state.participants.map((x) => x.signingAddress);
         const privateKeys = await this.backend.privateKeys();
-        const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+        const myIndex = addresses.findIndex((address) => !!privateKeys[address]);
         if (myIndex === -1) throw Error(Errors.notInChannel);
 
         await this.setNonce(addresses, state.channelNonce);
 
         const data: ChannelStoredData = {
           channelConstants: state,
-          stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
+          stateVariables: [{ ...state, stateHash: hashState(state), signatures: [] }],
           myIndex,
           funding: undefined,
-          applicationDomain
+          applicationDomain,
         };
 
         await this.backend.setChannel(calculateChannelId(state), data);
@@ -166,7 +165,7 @@ export class Store {
       const channelEntry = await this.getEntry(channelId);
 
       if (channelEntry.funding) {
-        logger.error({funding: channelEntry.funding}, 'Channel %s already funded', channelId);
+        logger.error({ funding: channelEntry.funding }, 'Channel %s already funded', channelId);
         throw Error(Errors.channelFunded);
       }
       channelEntry.setFunding(funding);
@@ -176,9 +175,9 @@ export class Store {
 
   private ledgerLock = new AsyncLock();
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
-    return new Promise(resolve =>
+    return new Promise((resolve) =>
       // TODO: Does this need a timeout?
-      this.ledgerLock.acquire(channelId, release => resolve({release, channelId}))
+      this.ledgerLock.acquire(channelId, (release) => resolve({ release, channelId }))
     );
   }
 
@@ -200,7 +199,7 @@ export class Store {
 
       if (typeof entry.applicationDomain === 'string') throw Error(Errors.domainExistsOnChannel);
 
-      await this.backend.setChannel(channelId, {...entry.data(), applicationDomain});
+      await this.backend.setChannel(channelId, { ...entry.data(), applicationDomain });
     });
 
   public setLedger = (ledgerId: string) =>
@@ -213,7 +212,7 @@ export class Store {
         // This is not on the Store interface itself -- it is useful to set up a test store
         await this.backend.setChannel(entry.channelId, entry.data());
         const address = await this.getAddress();
-        const hub = entry.participants.find(p => p.signingAddress !== address) as Participant;
+        const hub = entry.participants.find((p) => p.signingAddress !== address) as Participant;
         await this.backend.setLedger(hub.participantId, entry.channelId);
       }
     );
@@ -221,7 +220,7 @@ export class Store {
   public getApplicationChannels = (applicationDomain: string, includeClosed = false) =>
     this.backend.transaction('readonly', [ObjectStores.channels], async () =>
       recordToArray(await this.backend.channels()).filter(
-        channel =>
+        (channel) =>
           !!channel &&
           channel.applicationDomain === applicationDomain &&
           (!channel.hasConclusionProof || includeClosed) &&
@@ -233,7 +232,7 @@ export class Store {
     participants: Participant[],
     challengeDuration: number,
     stateVars: StateVariables,
-    appDefinition = AddressZero,
+    appDefinition = constants.AddressZero,
     applicationDomain?: string
   ) =>
     this.backend
@@ -242,9 +241,9 @@ export class Store {
         [ObjectStores.privateKeys, ObjectStores.nonces, ObjectStores.channels],
         async () => {
           stateVars = _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal');
-          const addresses = participants.map(x => x.signingAddress);
+          const addresses = participants.map((x) => x.signingAddress);
           const privateKeys = await this.backend.privateKeys();
-          const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+          const myIndex = addresses.findIndex((address) => !!privateKeys[address]);
           if (myIndex === -1) {
             throw Error(Errors.notInChannel);
           }
@@ -259,14 +258,14 @@ export class Store {
               channelNonce,
               participants,
               appDefinition,
-              ...stateVars
+              ...stateVars,
             },
             applicationDomain
           );
           return this.signAndAddStateWithinTx(entry.channelId, stateVars);
         }
       )
-      .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
+      .then(({ entry, signedState }) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
   private async getNonce(addresses: string[]): Promise<number> {
     return (await this.backend.getNonce(this.nonceKeyFromAddresses(addresses))) ?? -1;
@@ -288,34 +287,37 @@ export class Store {
 
   public updateChannel = (
     channelId: string,
-    updateData: Partial<{outcome: SimpleAllocation; appData: string; isFinal: boolean}>
+    updateData: Partial<{ outcome: SimpleAllocation; appData: string; isFinal: boolean }>
   ) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const {supported: existingState, myTurn} = await this.getEntry(channelId);
+        const { supported: existingState, myTurn } = await this.getEntry(channelId);
         if (!myTurn) {
-          logger.error({channelId, updateData, existingState}, 'Updating channel when not my turn');
+          logger.error(
+            { channelId, updateData, existingState },
+            'Updating channel when not my turn'
+          );
           throw Error(Errors.notMyTurn);
         }
 
         const newState = _.merge(existingState, {
           turnNum: existingState.turnNum + 1,
-          ...updateData
+          ...updateData,
         });
 
         return this.signAndAddStateWithinTx(channelId, newState);
       })
-      .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
+      .then(({ entry, signedState }) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
   public signFinalState = (channelId: string) =>
     this.backend
       .transaction('readwrite', [ObjectStores.channels, ObjectStores.privateKeys], async () => {
-        const {supported, latestSignedByMe} = await this.getEntry(channelId);
+        const { supported, latestSignedByMe } = await this.getEntry(channelId);
         if (!supported.isFinal) throw new Error('Supported state not final');
         if (latestSignedByMe.turnNum === supported.turnNum) return; // already signed
         return await this.signAndAddStateWithinTx(channelId, supported);
       })
-      .then(result => {
+      .then((result) => {
         if (result) this.emitChannelUpdatedEventAfterTX(result.entry, result.signedState);
       });
 
@@ -326,13 +328,13 @@ export class Store {
     if (this.backend.transactionOngoing) throw Error(Errors.emittingDuringTransaction);
 
     this._eventEmitter.emit('channelUpdated', entry);
-    if (signedState) this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+    if (signedState) this._eventEmitter.emit('addToOutbox', { signedStates: [signedState] });
 
     return entry;
   }
 
   public signAndAddState = (channelId: string, stateVars: StateVariables) =>
-    this.signAndAddStateWithinTx(channelId, stateVars).then(({entry, signedState}) =>
+    this.signAndAddStateWithinTx(channelId, stateVars).then(({ entry, signedState }) =>
       this.emitChannelUpdatedEventAfterTX(entry, signedState)
     );
 
@@ -342,7 +344,7 @@ export class Store {
         const stateHash = hashState(state);
         const channelId = calculateChannelId(state);
         const entry = await this.getEntry(channelId);
-        const {isSupportedByMe} = entry;
+        const { isSupportedByMe } = entry;
 
         // We only sign the state if we haven't signed it already
         if (!isSupportedByMe || entry.latestSignedByMe.stateHash !== stateHash) {
@@ -350,11 +352,11 @@ export class Store {
         } else {
           // The support state machine was started with a state that we already support
           // That's fine but we output a warning in case that's unexpected
-          logger.warn({state}, 'The state is already supported');
+          logger.warn({ state }, 'The state is already supported');
           return;
         }
       })
-      .then(args => {
+      .then((args) => {
         if (!args) return;
         this.emitChannelUpdatedEventAfterTX(args.entry, args.signedState);
       });
@@ -371,15 +373,15 @@ export class Store {
           await this.getPrivateKey(entry.myAddress)
         );
         await this.backend.setChannel(channelId, entry.data());
-        return {entry, signedState};
+        return { entry, signedState };
       }
     );
 
   async addObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
-    if (!_.find(objectives, o => _.isEqual(o, objective))) {
+    if (!_.find(objectives, (o) => _.isEqual(o, objective))) {
       this.objectives.push(objective);
-      addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+      addToOutbox && this._eventEmitter.emit('addToOutbox', { objectives: [objective] });
       this._eventEmitter.emit('newObjective', objective);
     }
   }
@@ -394,12 +396,12 @@ export class Store {
           const memoryChannelStorage =
             (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
           // TODO: This is kind of awkward
-          state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
+          state.signatures.forEach((sig) => memoryChannelStorage.addState(state, sig));
           await this.backend.setChannel(channelId, memoryChannelStorage.data());
           return memoryChannelStorage;
         }
       )
-      .then(entry => this.emitChannelUpdatedEventAfterTX(entry));
+      .then((entry) => this.emitChannelUpdatedEventAfterTX(entry));
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
@@ -407,8 +409,8 @@ export class Store {
   }
 
   async pushMessage(message: Payload) {
-    await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
-    message.objectives?.map(o => this.addObjective(o, false));
+    await Promise.all(message.signedStates?.map((signedState) => this.addState(signedState)) || []);
+    message.objectives?.map((o) => this.addObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
@@ -422,7 +424,7 @@ export class Store {
   }
 
   public createBudget = (budget: DomainBudget) =>
-    this.backend.transaction('readwrite', [ObjectStores.budgets], async tx => {
+    this.backend.transaction('readwrite', [ObjectStores.budgets], async (tx) => {
       const existingBudget = await this.backend.getBudget(budget.domain);
       if (existingBudget) {
         logger.error(Errors.budgetAlreadyExists);
@@ -432,7 +434,7 @@ export class Store {
       await this.backend.setBudget(budget.domain, budget);
     });
 
-  public clearBudget = domain =>
+  public clearBudget = (domain) =>
     this.backend.transaction('readwrite', [ObjectStores.budgets], () =>
       this.backend.deleteBudget(domain)
     );
@@ -446,8 +448,8 @@ export class Store {
       'readwrite',
       [ObjectStores.budgets, ObjectStores.channels, ObjectStores.privateKeys],
       async () => {
-        const {applicationDomain, supported, participants} = await this.getEntry(ledgerChannelId);
-        const {outcome} = supported;
+        const { applicationDomain, supported, participants } = await this.getEntry(ledgerChannelId);
+        const { outcome } = supported;
         if (typeof applicationDomain !== 'string') throw Error(Errors.noDomainForChannel);
 
         const currentBudget = await this.getBudget(applicationDomain);
@@ -460,7 +462,7 @@ export class Store {
         if (!channelBudget) throw Error(Errors.channelNotInBudget);
         const playerAddress = await this.getAddress();
 
-        const playerDestination = participants.find(p => p.signingAddress === playerAddress)
+        const playerDestination = participants.find((p) => p.signingAddress === playerAddress)
           ?.destination;
         if (!playerDestination) {
           throw Error(Errors.cannotFindDestination);
@@ -480,7 +482,7 @@ export class Store {
   public reserveFunds = (
     assetHolderAddress: string,
     channelId: string,
-    amount: {send: Uint256; receive: Uint256}
+    amount: { send: Uint256; receive: Uint256 }
   ) =>
     this.backend.transaction(
       'readwrite',
@@ -510,8 +512,8 @@ export class Store {
           availableReceiveCapacity: BN.sub(assetBudget.availableReceiveCapacity, amount.receive),
           channels: {
             ...assetBudget.channels,
-            [channelId]: {amount: BN.add(amount.send, amount.receive)}
-          }
+            [channelId]: { amount: BN.add(amount.send, amount.receive) },
+          },
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);
 
@@ -522,14 +524,14 @@ export class Store {
 
 export function supportedStateFeed(store: Store, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
-    filter(e => e.isSupported),
-    map(({supported}) => ({state: supported}))
+    filter((e) => e.isSupported),
+    map(({ supported }) => ({ state: supported }))
   );
 }
 
 function getAllocationAmount(outcome: Outcome, destination: string) {
-  const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
-  const amount = allocationItems.find(a => a.destination === destination)?.amount;
+  const { allocationItems } = checkThat(outcome, isSimpleEthAllocation);
+  const amount = allocationItems.find((a) => a.destination === destination)?.amount;
   if (!amount) throw Error(Errors.amountNotFound + ` ${destination}`);
 
   return amount;

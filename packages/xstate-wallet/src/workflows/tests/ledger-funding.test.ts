@@ -1,4 +1,4 @@
-import {interpret} from 'xstate';
+import { interpret } from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {
   checkThat,
@@ -10,21 +10,21 @@ import {
   Outcome,
   State,
   SignedState,
-  BN
+  BN,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
-import {AddressZero} from '@ethersproject/constants';
+import { constants } from 'ethers';
 
-import {FakeChain, Chain} from '../../chain';
-import {TestStore} from '../../test-store';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
-import {Init, machine, Errors} from '../ledger-funding';
+import { FakeChain, Chain } from '../../chain';
+import { TestStore } from '../../test-store';
+import { ETH_ASSET_HOLDER_ADDRESS } from '../../config';
+import { Init, machine, Errors } from '../ledger-funding';
 
-import {wallet1, wallet2, participants} from './data';
-import {subscribeToMessages} from './message-service';
+import { wallet1, wallet2, participants } from './data';
+import { subscribeToMessages } from './message-service';
 
 jest.setTimeout(10000);
-const {add} = BN;
+const { add } = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -36,7 +36,7 @@ const targetChannel: ChannelConstants = {
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition,
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
@@ -45,27 +45,27 @@ const ledgerChannel: ChannelConstants = {
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition,
 };
 const ledgerChannelId = calculateChannelId(ledgerChannel);
 
-const destinations = participants.map(p => p.destination);
+const destinations = participants.map((p) => p.destination);
 const amounts = [BN.from(7), BN.from(5)];
 const deductionAmounts = [BN.from(3), BN.from(2)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems: [0, 1].map(i => ({
+  allocationItems: [0, 1].map((i) => ({
     destination: destinations[i],
-    amount: amounts[i]
-  }))
+    amount: amounts[i],
+  })),
 };
-const deductions = [0, 1].map(i => ({
+const deductions = [0, 1].map((i) => ({
   destination: destinations[i],
-  amount: deductionAmounts[i]
+  amount: deductionAmounts[i],
 }));
 
-const context: Init = {targetChannelId, ledgerChannelId, deductions};
+const context: Init = { targetChannelId, ledgerChannelId, deductions };
 
 let chain: Chain;
 let aStore: TestStore;
@@ -73,7 +73,7 @@ let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
+  signatures: [wallet1, wallet2].map(({ privateKey }) => createSignatureEntry(state, privateKey)),
 });
 
 describe('success', () => {
@@ -94,7 +94,7 @@ describe('success', () => {
 
     subscribeToMessages({
       [participants[0].participantId]: aStore,
-      [participants[1].participantId]: bStore
+      [participants[1].participantId]: bStore,
     });
   });
 
@@ -106,27 +106,27 @@ describe('success', () => {
     const aService = interpret(machine(aStore).withContext(context));
 
     const bService = interpret(machine(bStore).withContext(context));
-    [aService, bService].map(s => s.start());
+    [aService, bService].map((s) => s.start());
 
     await waitForExpect(async () => {
       expect(bService.state.value).toEqual('success');
       expect(aService.state.value).toEqual('success');
 
-      const {supported: supportedState} = await aStore.getEntry(ledgerChannelId);
+      const { supported: supportedState } = await aStore.getEntry(ledgerChannelId);
       const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
       expect(outcome.allocationItems).toMatchObject(
         [0, 1]
-          .map(i => ({
+          .map((i) => ({
             destination: destinations[i],
-            amount: BN.sub(amounts[i], deductionAmounts[i])
+            amount: BN.sub(amounts[i], deductionAmounts[i]),
           }))
-          .concat([{destination: targetChannelId as any, amount: deductionAmounts.reduce(add)}])
+          .concat([{ destination: targetChannelId as any, amount: deductionAmounts.reduce(add) }])
       );
 
       expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({
         type: 'Indirect',
-        ledgerId: ledgerChannelId
+        ledgerId: ledgerChannelId,
       });
     }, EXPECT_TIMEOUT);
   });
@@ -141,17 +141,17 @@ describe('success', () => {
     // Note: We need player B to block on the lock since technically
     // if player B signs state 1 then state 1 is supported and it won't block
     // waiting for player A
-    const {release} = await bStore.acquireChannelLock(context.ledgerChannelId);
+    const { release } = await bStore.acquireChannelLock(context.ledgerChannelId);
 
-    [aService, bService].map(s => s.start());
+    [aService, bService].map((s) => s.start());
 
     await waitForExpect(async () => {
       expect(bService.state.value).toEqual('acquiringLock');
-      expect(aService.state.value).toEqual({fundingTarget: 'supportState'});
+      expect(aService.state.value).toEqual({ fundingTarget: 'supportState' });
     }, EXPECT_TIMEOUT);
 
-    aService.onTransition(s => {
-      if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
+    aService.onTransition((s) => {
+      if (_.isEqual(s.value, { fundTarget: 'getTargetOutcome' })) {
         expect((s.context as any).lock).toBeDefined();
       }
     });
@@ -167,26 +167,26 @@ describe('failure modes', () => {
   type Data = {
     ledgerOutcome?: Outcome;
     initialTargetState?: SignedState;
-    chainInfo?: {amount: string; finalized: boolean};
+    chainInfo?: { amount: string; finalized: boolean };
   };
   const oneWeiDeposited: Data = {
     ledgerOutcome: outcome,
-    chainInfo: {amount: '1', finalized: false}
+    chainInfo: { amount: '1', finalized: false },
   };
   const fiveTotalAllocated: Data = {
     ledgerOutcome: {
       type: 'SimpleAllocation',
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocationItems: [0, 1].map(i => ({
+      allocationItems: [0, 1].map((i) => ({
         destination: destinations[i],
-        amount: BN.sub(deductionAmounts[i], 1)
-      }))
-    }
+        amount: BN.sub(deductionAmounts[i], 1),
+      })),
+    },
   };
 
-  const finalizedLedger: Data = {chainInfo: {finalized: true, amount: '12'}};
+  const finalizedLedger: Data = { chainInfo: { finalized: true, amount: '12' } };
   const unsupportedTarget: Data = {
-    initialTargetState: {...firstState(outcome, targetChannel), signatures: []}
+    initialTargetState: { ...firstState(outcome, targetChannel), signatures: [] },
   };
 
   test.each`
@@ -195,11 +195,11 @@ describe('failure modes', () => {
     ${'underallocated'}     | ${fiveTotalAllocated} | ${Errors.underallocated}
     ${'finalized'}          | ${finalizedLedger}    | ${Errors.finalized}
     ${'unsupported target'} | ${unsupportedTarget}  | ${Errors.unSupportedTargetChannel + targetChannelId}
-  `('failure mode: $description', async ({error, data}: {error: string; data: Data}) => {
+  `('failure mode: $description', async ({ error, data }: { error: string; data: Data }) => {
     const ledgerOutcome = data.ledgerOutcome ?? outcome;
     const initialTargetState =
       data.initialTargetState ?? allSignState(firstState(outcome, targetChannel));
-    const chainInfo = data.chainInfo ?? {amount: '12', finalized: false};
+    const chainInfo = data.chainInfo ?? { amount: '12', finalized: false };
 
     aStore = new TestStore(chain);
     await aStore.initialize([wallet1.privateKey]);
@@ -216,7 +216,7 @@ describe('failure modes', () => {
 
     subscribeToMessages({
       [participants[0].participantId]: aStore,
-      [participants[1].participantId]: bStore
+      [participants[1].participantId]: bStore,
     });
 
     const _chain = new FakeChain();
@@ -224,16 +224,16 @@ describe('failure modes', () => {
     chainInfo.finalized && _chain.finalizeSync(ledgerChannelId);
     (aStore as any).chain = _chain;
 
-    aStore.createEntry(allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: 1}));
+    aStore.createEntry(allSignState({ ...firstState(ledgerOutcome, ledgerChannel), turnNum: 1 }));
     aStore.chain.initialize();
 
     const aService = interpret(machine(aStore).withContext(context), {
-      parent: {send: () => undefined} as any // Consumes uncaught errors
+      parent: { send: () => undefined } as any, // Consumes uncaught errors
     }).start();
 
     await waitForExpect(async () => {
       expect(aService.state.value).toEqual('failure');
-      expect(aService.state.context).toMatchObject({error});
+      expect(aService.state.context).toMatchObject({ error });
     }, EXPECT_TIMEOUT);
   });
 });

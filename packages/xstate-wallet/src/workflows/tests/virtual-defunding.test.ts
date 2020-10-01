@@ -1,4 +1,4 @@
-import {interpret} from 'xstate';
+import { interpret } from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {
   calculateChannelId,
@@ -11,33 +11,33 @@ import {
   simpleEthAllocation,
   simpleEthGuarantee,
   makeDestination,
-  BN
+  BN,
 } from '@statechannels/wallet-core';
-import {AddressZero, HashZero} from '@ethersproject/constants';
+import { constants } from 'ethers';
 
-import {TestStore} from '../../test-store';
-import {ParticipantIdx} from '../virtual-funding-as-leaf';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
-import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import { TestStore } from '../../test-store';
+import { ParticipantIdx } from '../virtual-funding-as-leaf';
+import { ETH_ASSET_HOLDER_ADDRESS, HUB } from '../../config';
+import { MessagingServiceInterface, MessagingService } from '../../messaging';
 
 import {
   wallet1,
   wallet2,
   wallet3,
   threeParticipants as participants,
-  TEST_APP_DOMAIN
+  TEST_APP_DOMAIN,
 } from './data';
-import {subscribeToMessages} from './message-service';
-import {SimpleHub} from './simple-hub';
+import { subscribeToMessages } from './message-service';
+import { SimpleHub } from './simple-hub';
 
-import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
+import { VirtualDefundingAsLeaf, VirtualDefundingAsHub } from '..';
 
 jest.setTimeout(20000);
-const {add} = BN;
+const { add } = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = constants.AddressZero;
 const alice = participants[ParticipantIdx.A];
 const bob = participants[ParticipantIdx.B];
 const hub = participants[ParticipantIdx.Hub];
@@ -51,23 +51,23 @@ const channelConstants = (participants: Participant[]): ChannelConstants => ({
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition,
 });
 
 const privateKeys: Record<string, string> = {
   [alice.participantId]: wallet1.privateKey,
   [bob.participantId]: wallet2.privateKey,
-  [hub.participantId]: wallet3.privateKey
+  [hub.participantId]: wallet3.privateKey,
 };
 
 const state = (constants: ChannelConstants, outcome: Outcome, turnNum = 0): SignedState => {
-  const state = {...constants, isFinal: false, turnNum, appData: HashZero, outcome};
+  const state = { ...constants, isFinal: false, turnNum, appData: HashZero, outcome };
 
   return {
     ...state,
-    signatures: constants.participants.map(p =>
+    signatures: constants.participants.map((p) =>
       createSignatureEntry(state, privateKeys[p.participantId])
-    )
+    ),
   };
 };
 
@@ -93,16 +93,16 @@ const totalTargetAmount = targetAmounts.reduce(add);
 const targetChannel = channelConstants(aliceAndBob);
 const targetChannelId = calculateChannelId(targetChannel);
 const targetOutcome = simpleEthAllocation([
-  {destination: alice.destination, amount: targetAmounts[0]},
-  {destination: bob.destination, amount: targetAmounts[1]}
+  { destination: alice.destination, amount: targetAmounts[0] },
+  { destination: bob.destination, amount: targetAmounts[1] },
 ]);
 const targetTurnNum = 5;
 const targetState = state(targetChannel, targetOutcome, targetTurnNum);
 
 const jointChannel = channelConstants(participants);
 const jointOutcome = simpleEthAllocation([
-  {destination: makeDestination(targetChannelId), amount: totalTargetAmount},
-  {destination: hub.destination, amount: totalTargetAmount}
+  { destination: makeDestination(targetChannelId), amount: totalTargetAmount },
+  { destination: hub.destination, amount: totalTargetAmount },
 ]);
 const jointState = state(jointChannel, jointOutcome, 1);
 const jointChannelId = calculateChannelId(jointState);
@@ -120,9 +120,9 @@ const guarantor1Id = calculateChannelId(guarantor1State);
 const ledger1Amounts = [5, 7].map(BN.from);
 const ledger1 = channelConstants(aliceAndHub);
 const ledger1Outcome = simpleEthAllocation([
-  {destination: hub.destination, amount: ledger1Amounts[0]},
-  {destination: alice.destination, amount: ledger1Amounts[1]},
-  {destination: makeDestination(guarantor1Id), amount: totalTargetAmount}
+  { destination: hub.destination, amount: ledger1Amounts[0] },
+  { destination: alice.destination, amount: ledger1Amounts[1] },
+  { destination: makeDestination(guarantor1Id), amount: totalTargetAmount },
 ]);
 const ledger1TurnNum = 8;
 const ledger1State = state(ledger1, ledger1Outcome, ledger1TurnNum);
@@ -141,15 +141,15 @@ const guarantor2Id = calculateChannelId(guarantor2State);
 const ledger2Amounts = [5, 7].map(BN.from);
 const ledger2 = channelConstants(bobAndHub);
 const ledger2Outcome = simpleEthAllocation([
-  {destination: makeDestination(hub.destination), amount: ledger2Amounts[0]},
-  {destination: makeDestination(bob.destination), amount: ledger2Amounts[1]},
-  {destination: makeDestination(targetChannelId), amount: totalTargetAmount}
+  { destination: makeDestination(hub.destination), amount: ledger2Amounts[0] },
+  { destination: makeDestination(bob.destination), amount: ledger2Amounts[1] },
+  { destination: makeDestination(targetChannelId), amount: totalTargetAmount },
 ]);
 const ledger2TurnNum = 6;
 const ledger2State = state(ledger2, ledger2Outcome, ledger2TurnNum);
 const ledger2Id = calculateChannelId(ledger2State);
 
-const context: VirtualDefundingAsLeaf.Init = {targetChannelId};
+const context: VirtualDefundingAsLeaf.Init = { targetChannelId };
 
 let aStore: TestStore;
 let bStore: TestStore;
@@ -164,9 +164,9 @@ const generateBudget = (ledgerAmounts): DomainBudget => ({
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       availableReceiveCapacity: ledgerAmounts[1],
       availableSendCapacity: ledgerAmounts[0],
-      channels: {[targetChannelId]: {amount: totalTargetAmount}}
-    }
-  }
+      channels: { [targetChannelId]: { amount: totalTargetAmount } },
+    },
+  },
 });
 
 beforeEach(async () => {
@@ -176,14 +176,14 @@ beforeEach(async () => {
   await aStore.createBudget(generateBudget(ledger1Amounts));
 
   await aStore.createEntry(ledger1State, {
-    funding: {type: 'Direct'},
-    applicationDomain: TEST_APP_DOMAIN
+    funding: { type: 'Direct' },
+    applicationDomain: TEST_APP_DOMAIN,
   });
-  await aStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
+  await aStore.createEntry(guarantor1State, { funding: { type: 'Indirect', ledgerId: ledger1Id } });
   await aStore.createEntry(jointState, {
-    funding: {type: 'Guarantee', guarantorChannelId: guarantor1Id}
+    funding: { type: 'Guarantee', guarantorChannelId: guarantor1Id },
   });
-  await aStore.createEntry(targetState, {funding: {type: 'Virtual', jointChannelId}});
+  await aStore.createEntry(targetState, { funding: { type: 'Virtual', jointChannelId } });
 
   bStore = new TestStore();
   await bStore.initialize([wallet2.privateKey]);
@@ -191,14 +191,14 @@ beforeEach(async () => {
   await bStore.createBudget(generateBudget(ledger2Amounts));
 
   await bStore.createEntry(ledger2State, {
-    funding: {type: 'Direct'},
-    applicationDomain: TEST_APP_DOMAIN
+    funding: { type: 'Direct' },
+    applicationDomain: TEST_APP_DOMAIN,
   });
-  await bStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
+  await bStore.createEntry(guarantor2State, { funding: { type: 'Indirect', ledgerId: ledger2Id } });
   await bStore.createEntry(jointState, {
-    funding: {type: 'Guarantee', guarantorChannelId: guarantor2Id}
+    funding: { type: 'Guarantee', guarantorChannelId: guarantor2Id },
   });
-  await bStore.createEntry(targetState, {funding: {type: 'Virtual', jointChannelId}});
+  await bStore.createEntry(targetState, { funding: { type: 'Virtual', jointChannelId } });
 });
 
 test('virtual defunding with a simple hub', async () => {
@@ -215,24 +215,24 @@ test('virtual defunding with a simple hub', async () => {
   subscribeToMessages({
     [alice.participantId]: aStore,
     [bob.participantId]: bStore,
-    [hub.participantId]: hubStore
+    [hub.participantId]: hubStore,
   });
 
-  services.forEach(service => service.start());
+  services.forEach((service) => service.start());
 
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
     const expectedAmounts1 = [
       BN.add(targetAmounts[1], ledger1Amounts[0]),
-      BN.add(targetAmounts[0], ledger1Amounts[1])
+      BN.add(targetAmounts[0], ledger1Amounts[1]),
     ];
     expectBudgetIsUpdated(expectedAmounts1, aStore);
 
-    const {supported} = await aStore.getEntry(ledger1Id);
+    const { supported } = await aStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
-      {destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0])},
-      {destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1])}
+      { destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0]) },
+      { destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1]) },
     ]);
   }, EXPECT_TIMEOUT);
 });
@@ -241,13 +241,17 @@ test('virtual defunding with a proper hub', async () => {
   const hubStore = new TestStore();
   await hubStore.initialize([wallet3.privateKey]);
 
-  await hubStore.createEntry(ledger1State, {funding: {type: 'Direct'}});
+  await hubStore.createEntry(ledger1State, { funding: { type: 'Direct' } });
   hubStore.createEntry(jointState, {
-    funding: {type: 'Guarantees', guarantorChannelIds: [guarantor1Id, guarantor2Id]}
+    funding: { type: 'Guarantees', guarantorChannelIds: [guarantor1Id, guarantor2Id] },
   });
-  await hubStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
-  await hubStore.createEntry(ledger2State, {funding: {type: 'Direct'}});
-  await hubStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
+  await hubStore.createEntry(guarantor1State, {
+    funding: { type: 'Indirect', ledgerId: ledger1Id },
+  });
+  await hubStore.createEntry(ledger2State, { funding: { type: 'Direct' } });
+  await hubStore.createEntry(guarantor2State, {
+    funding: { type: 'Indirect', ledgerId: ledger2Id },
+  });
 
   const aService = interpret(
     VirtualDefundingAsLeaf.machine(aStore, aMessaging).withContext(context)
@@ -256,26 +260,26 @@ test('virtual defunding with a proper hub', async () => {
     VirtualDefundingAsLeaf.machine(bStore, bMessaging).withContext(context)
   );
   const hubService = interpret(
-    VirtualDefundingAsHub.machine(hubStore).withContext({jointChannelId})
+    VirtualDefundingAsHub.machine(hubStore).withContext({ jointChannelId })
   );
   const services = [aService, bService, hubService];
 
   subscribeToMessages({
     [alice.participantId]: aStore,
     [bob.participantId]: bStore,
-    [hub.participantId]: hubStore
+    [hub.participantId]: hubStore,
   });
 
-  services.forEach(service => service.start());
+  services.forEach((service) => service.start());
 
   await waitForExpect(async () => {
     expect(hubService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supported} = await hubStore.getEntry(ledger1Id);
+    const { supported } = await hubStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
-      {destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0])},
-      {destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1])}
+      { destination: hub.destination, amount: BN.add(targetAmounts[1], ledger1Amounts[0]) },
+      { destination: alice.destination, amount: BN.add(targetAmounts[0], ledger1Amounts[1]) },
     ]);
   }, EXPECT_TIMEOUT);
 });

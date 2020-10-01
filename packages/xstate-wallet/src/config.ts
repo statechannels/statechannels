@@ -1,5 +1,5 @@
-import {AddressZero} from '@ethersproject/constants';
-import {Destination} from '@statechannels/wallet-core';
+import { constants } from 'ethers';
+import { Destination } from '@statechannels/wallet-core';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -45,9 +45,9 @@ export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
   : undefined;
 
 export const NITRO_ADJUDICATOR_ADDRESS: string =
-  process.env.NITRO_ADJUDICATOR_ADDRESS || AddressZero;
+  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero;
 
-export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || AddressZero;
+export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || constants.AddressZero;
 
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 
@@ -65,7 +65,7 @@ export const LOG_LEVEL = ADD_LOGS
 export const HUB = {
   destination: HUB_DESTINATION,
   signingAddress: HUB_ADDRESS,
-  participantId: 'firebase:simple-hub'
+  participantId: 'firebase:simple-hub',
 };
 
 export const TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';

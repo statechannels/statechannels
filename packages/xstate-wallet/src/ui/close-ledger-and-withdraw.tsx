@@ -1,14 +1,14 @@
 import React from 'react';
 import './wallet.scss';
-import {useService} from '@xstate/react';
+import { useService } from '@xstate/react';
 
-import {formatEther} from '@ethersproject/units';
-import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
-import {DomainBudget, BN} from '@statechannels/wallet-core';
-import {track} from '../segment-analytics';
-import {getAmountsFromBudget} from './selectors';
-import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
-import {TARGET_NETWORK} from '../config';
+import { utils } from 'ethers';
+import { Button, Heading, Flex, Text, Link, Loader } from 'rimble-ui';
+import { DomainBudget, BN } from '@statechannels/wallet-core';
+import { track } from '../segment-analytics';
+import { getAmountsFromBudget } from './selectors';
+import { CloseLedgerAndWithdrawService } from '../workflows/close-ledger-and-withdraw';
+import { TARGET_NETWORK } from '../config';
 
 interface Props {
   service: CloseLedgerAndWithdrawService;
@@ -18,12 +18,12 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
   const [current, _send] = useService(props.service);
 
   const send = (event: 'USER_APPROVES_CLOSE' | 'USER_REJECTS_CLOSE') => () => {
-    track(event, {domain: current.context.domain});
+    track(event, { domain: current.context.domain });
     _send(event);
   };
 
-  const waitForUserApproval = ({waiting, budget}: {waiting: boolean; budget: DomainBudget}) => {
-    const {playerAmount} = getAmountsFromBudget(budget);
+  const waitForUserApproval = ({ waiting, budget }: { waiting: boolean; budget: DomainBudget }) => {
+    const { playerAmount } = getAmountsFromBudget(budget);
     return (
       <Flex alignItems="left" flexDirection="column">
         <Heading textAlign="center" mb={0}>
@@ -37,8 +37,8 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
         </Text>
 
         <Text pb={3} fontSize={1}>
-          You will receive {formatEther(BN.from(playerAmount))} ETH and the budget will be closed
-          with the channel hub.
+          You will receive {utils.formatEther(BN.from(playerAmount))} ETH and the budget will be
+          closed with the channel hub.
         </Text>
         <Button disabled={waiting} onClick={send('USER_APPROVES_CLOSE')} id="approve-withdraw">
           Close and Withdraw
@@ -75,7 +75,7 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
     </Flex>
   );
 
-  const withdrawWaitMining = ({transactionId}: {transactionId: string}) => (
+  const withdrawWaitMining = ({ transactionId }: { transactionId: string }) => (
     <Flex alignItems="center" flexDirection="column">
       <Heading>Withdraw funds</Heading>
 
@@ -96,8 +96,8 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
   );
 
   if (current.matches('waitForUserApproval')) {
-    const {budget} = current.context;
-    return waitForUserApproval({waiting: false, budget});
+    const { budget } = current.context;
+    return waitForUserApproval({ waiting: false, budget });
   } else if (
     current.matches('createObjective') ||
     current.matches('fetchBudget') ||
@@ -105,13 +105,13 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
   ) {
     return working;
   } else if (
-    current.matches({closeLedger: 'constructFinalState'}) ||
-    current.matches({closeLedger: 'supportState'})
+    current.matches({ closeLedger: 'constructFinalState' }) ||
+    current.matches({ closeLedger: 'supportState' })
   ) {
     return talkingToHub;
-  } else if (current.matches({withdraw: 'submitTransaction'})) {
+  } else if (current.matches({ withdraw: 'submitTransaction' })) {
     return withdrawSubmitTransaction;
-  } else if (current.matches({withdraw: 'waitMining'})) {
+  } else if (current.matches({ withdraw: 'waitMining' })) {
     return withdrawWaitMining(current.context);
   } else if (current.matches('done')) {
     // workflow hides ui, so user shouldn't ever see this
