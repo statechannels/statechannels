@@ -2,20 +2,20 @@ import {
   Objective,
   ChannelStoredData,
   DomainBudget,
-  StateVariables
+  StateVariables,
 } from '@statechannels/wallet-core';
-import {filter, map} from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
-import {Store} from './store';
-import {ChannelStoreEntry} from './channel-store-entry';
+import { Store } from './store';
+import { ChannelStoreEntry } from './channel-store-entry';
 
-export {Store} from './store';
+export { Store } from './store';
 
 // TODO: Move to somewhere better?
 export function supportedStateFeed(store: Store, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
-    filter(e => !!e.supported),
-    map(e => ({state: {...e.channelConstants, ...(e.supported as StateVariables)}}))
+    filter((e) => !!e.supported),
+    map((e) => ({ state: { ...e.channelConstants, ...(e.supported as StateVariables) } }))
   );
 }
 
@@ -44,7 +44,7 @@ export enum Errors {
   invalidTransition = 'Invalid transition',
   invalidAppData = 'Invalid app data',
   emittingDuringTransaction = 'Attempting to emit event during transaction',
-  notMyTurn = "Cannot update channel unless it's your turn"
+  notMyTurn = "Cannot update channel unless it's your turn",
 }
 
 export interface DBBackend {
@@ -122,12 +122,11 @@ export const enum ObjectStores {
   privateKeys = 'privateKeys',
   destinationAddress = 'destinationAddress',
   ledgers = 'ledgers',
-  budgets = 'budgets'
+  budgets = 'budgets',
 }
 
 declare global {
   interface Window {
-    channelProvider: import('@statechannels/iframe-channel-provider').ChannelProviderInterface;
     ethereum: any;
   }
 }
