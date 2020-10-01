@@ -49,8 +49,13 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-export type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
-export type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+export type SingleChannelResult = Promise<SingleChannelMessage>;
+export type MultipleChannelResult = Promise<MultipleChannelMessage>;
+type SingleChannelMessage = {outbox: Outgoing[]; channelResult: ChannelResult};
+type MultipleChannelMessage = {outbox: Outgoing[]; channelResults: ChannelResult[]};
+type Message = SingleChannelMessage | MultipleChannelMessage;
+const isSingleChannelMessage = (message: Message): message is SingleChannelMessage =>
+  'channelResult' in message;
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
@@ -83,6 +88,8 @@ export type WalletInterface = {
 
   // Register chain <-> Wallet communication
   attachChainService(provider: OnchainServiceInterface): void;
+
+  mergeMessages(messages: Message[]): Message;
 };
 
 export class Wallet implements WalletInterface, ChainEventListener {
@@ -119,6 +126,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
     this.getState = this.getState.bind(this);
     this.pushMessage = this.pushMessage.bind(this);
     this.takeActions = this.takeActions.bind(this);
+    this.mergeMessages = this.mergeMessages.bind(this);
     this.destroy = this.destroy.bind(this);
 
     // set up timing metrics
@@ -131,6 +139,19 @@ export class Wallet implements WalletInterface, ChainEventListener {
 
     this.chainService = new OnchainService();
     this.attachChainService(this.chainService);
+  }
+
+  public mergeMessages(messages: Message[]): Message {
+    const channelResults = mergeChannelResults(
+      messages
+        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
+        .reduce((cr1, cr2) => cr1.concat(cr2))
+    );
+
+    const outbox = mergeOutgoing(messages.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
+    return channelResults.length === 1
+      ? {channelResult: channelResults[0], outbox}
+      : {channelResults, outbox};
   }
 
   public async destroy(): Promise<void> {
