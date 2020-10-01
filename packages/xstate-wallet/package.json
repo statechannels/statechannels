@@ -139,9 +139,7 @@
   "license": "MIT",
   "main": "index.js",
   "private": false,
-  "resolutions": {
-    "scrypt": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz"
-  },
+  "resolutions": {},
   "scripts": {
     "build-storybook": "build-storybook --quiet",
     "build:netlify:production": "yarn prepare && cp _redirects build/_redirects",
