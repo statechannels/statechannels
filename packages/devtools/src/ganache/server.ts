@@ -1,8 +1,7 @@
-import {spawn} from 'child_process';
 const ganache = require('ganache-cli');
 import {ethers} from 'ethers';
+import {Server} from 'http';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
-import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 
 import {ETHERLIME_ACCOUNTS} from '../constants';
@@ -123,7 +122,7 @@ function extractLogsFromVerboseGanacheOutput(buffer: string, newData = ''): stri
 export class GanacheServer {
   provider: ethers.providers.JsonRpcProvider;
   fundedPrivateKey: string;
-  server: any;
+  server: Server;
   private buffer = '';
 
   constructor(
@@ -167,7 +166,7 @@ export class GanacheServer {
   }
 
   async close() {
-    kill(this.server.pid);
+    this.server.close();
     await waitUntilFree(this.port, 500, this.timeout);
   }
 
