@@ -21,9 +21,6 @@
     ]
   },
   "dependencies": {
-    "@ethersproject/bytes": "^5.0.4",
-    "@ethersproject/constants": "^5.0.4",
-    "@ethersproject/units": "^5.0.4",
     "@material-ui/icons": "4.9.1",
     "@rimble/connection-banner": "1.2.3",
     "@rimble/utils": "1.2.3",
@@ -32,6 +29,7 @@
     "@statechannels/nitro-protocol": "^0.3.7",
     "@statechannels/wallet-core": "^0.3.8-alpha.0",
     "@statechannels/wire-format": "^0.3.8-alpha.0",
+    "@types/jest": "^26.0.14",
     "@xstate/react": "1.0.0-rc.3",
     "async-lock": "1.2.2",
     "awesome-typescript-loader": "5.2.1",
@@ -95,11 +93,6 @@
     "@babel/core": "7.11.4",
     "@babel/preset-env": "7.11.0",
     "@statechannels/devtools": "^0.3.7",
-    "@storybook/addon-actions": "6.0.16",
-    "@storybook/addon-essentials": "6.0.16",
-    "@storybook/addon-info": "5.3.19",
-    "@storybook/addon-links": "6.0.16",
-    "@storybook/addons": "6.0.16",
     "@storybook/react": "6.0.16",
     "@types/async-lock": "1.1.1",
     "@types/babel__core": "7.1.7",
@@ -146,7 +139,7 @@
     "react-is": "16.13.1",
     "storybook": "6.0.16",
     "ts-jest": "^26.4.1",
-    "typescript": "4.0.3",
+    "typescript": "3.7.5",
     "wait-for-expect": "3.0.2"
   },
   "engines": {

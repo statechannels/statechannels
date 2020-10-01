@@ -10,7 +10,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "preserveSymlinks": true,
-
     "noUnusedLocals": true,
     "outDir": "lib",
     "strict": false,

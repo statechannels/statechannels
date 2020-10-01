@@ -78,16 +78,16 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Flex justifyContent="center" pb={2}>
         <Box>
-          <Text>Send: {formatEther(BN.from(playerAmount))} ETH</Text>
-          <Text>Receive: {formatEther(BN.from(hubAmount))} ETH</Text>
+          <Text>Send: {utils.formatEther(BN.from(playerAmount))} ETH</Text>
+          <Text>Receive: {utils.formatEther(BN.from(hubAmount))} ETH</Text>
         </Box>
       </Flex>
       <Text fontSize={1} pb={2}>
         <strong>{budget.domain}</strong> will manage these funds.
       </Text>
       <Text pb={3} fontSize={1}>
-        You will deposit {formatEther(BN.from(playerAmount))} ETH into a channel. Our hub will also
-        make a deposit.
+        You will deposit {utils.formatEther(BN.from(playerAmount))} ETH into a channel. Our hub will
+        also make a deposit.
         <Tooltip message="This allows you to transact with anyone else connected to the same hub.">
           <Icon name="Info" size="20" />
         </Tooltip>

@@ -51,7 +51,7 @@ it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and se
   ETHAssetHolder.deposit(
     channelId, // destination
     utils.parseUnits('0', 'wei'), // expectedHeld
-    utils.arseUnits('1', 'wei'), // amount
+    utils.parseUnits('1', 'wei'), // amount
     { value: utils.parseUnits('1', 'wei') } // msgValue
   );
 

@@ -29,7 +29,7 @@ const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = AddressZero;
+const appDefinition = constants.AddressZero;
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,

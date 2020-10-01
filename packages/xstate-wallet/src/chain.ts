@@ -19,7 +19,6 @@ import {
 import { Contract, Wallet, utils, providers } from 'ethers';
 import { Observable, fromEvent, from, merge, interval } from 'rxjs';
 import { filter, map, flatMap, distinctUntilChanged } from 'rxjs/operators';
-import { utils } from 'ethers';
 import EventEmitter from 'eventemitter3';
 
 import { getProvider } from './utils/contract-utils';

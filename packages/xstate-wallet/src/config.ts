@@ -26,7 +26,8 @@ export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 
-export const ETH_ASSET_HOLDER_ADDRESS: string = process.env.ETH_ASSET_HOLDER_ADDRESS || AddressZero;
+export const ETH_ASSET_HOLDER_ADDRESS: string =
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero;
 
 export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
 
