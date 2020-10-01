@@ -2,7 +2,7 @@ import {Wallet, providers, BigNumber} from 'ethers';
 import {randomChannelId} from '@statechannels/nitro-protocol';
 
 import {TransactionSubmissionService, TransactionSubmissionError} from '../transaction-submission';
-import {defaultConfig} from '../../config';
+import {defaultConfig} from '../../../config';
 import {TransactionSubmissionStore} from '../store';
 
 import {MinimalTransaction} from '..';
