@@ -1,5 +1,4 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import { Contract, Wallet, ethers } from 'ethers';
 
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
@@ -7,11 +6,11 @@ import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json'
 import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json';
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
-import {AllocationAssetOutcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
-import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { channelDataToChannelStorageHash } from '../../../src/contract/channel-storage';
+import { AllocationAssetOutcome } from '../../../src/contract/outcome';
+import { State } from '../../../src/contract/state';
+import { concludePushOutcomeAndTransferAllArgs } from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
@@ -28,7 +27,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {signStates} from '../../../src';
+import { signStates } from '../../../src';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -91,9 +90,9 @@ let channelNonce = 400;
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand              | heldBefore                    | heldAfter                     | newOutcome | payouts                       | reasonString
-    ${accepts1} | ${{ETH: {A: 1}}}              | ${{ETH: {c: 1}}}              | ${{ETH: {c: 0}}}              | ${{}}      | ${{ETH: {A: 1}}}              | ${undefined}
-    ${accepts2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    description | outcomeShortHand                    | heldBefore                          | heldAfter                           | newOutcome | payouts                             | reasonString
+    ${accepts1} | ${{ ETH: { A: 1 } }}                | ${{ ETH: { c: 1 } }}                | ${{ ETH: { c: 0 } }}                | ${{}}      | ${{ ETH: { A: 1 } }}                | ${undefined}
+    ${accepts2} | ${{ ETH: { A: 1 }, TOK: { A: 2 } }} | ${{ ETH: { c: 1 }, TOK: { c: 2 } }} | ${{ ETH: { c: 0 }, TOK: { c: 0 } }} | ${{}}      | ${{ ETH: { A: 1 }, TOK: { A: 2 } }} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -114,11 +113,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      const channel: Channel = {chainId, participants, channelNonce};
+      const channel: Channel = { chainId, participants, channelNonce };
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const support = oneState;
-      const {appData, whoSignedWhat} = support;
+      const { appData, whoSignedWhat } = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
       const initialChannelStorageHash = ethers.constants.HashZero;
@@ -130,7 +129,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         newOutcome,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
+      ].map((object) => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
@@ -166,12 +165,12 @@ describe('concludePushOutcomeAndTransferAll', () => {
       // Form transaction
       const tx = NitroAdjudicator.concludePushOutcomeAndTransferAll(
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
-        {gasLimit: 3000000}
+        { gasLimit: 3000000 }
       );
 
       // Switch on overall test expectation
       if (reasonString) {
-        await expectRevert(() => tx, reasonString);
+        await expect(() => tx).rejects.toThrowError(reasonString);
       } else {
         const receipt = await (await tx).wait();
         await writeGasConsumption(
@@ -194,7 +193,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         );
 
         // Extract logs
-        const {logs} = await (await tx).wait();
+        const { logs } = await (await tx).wait();
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
@@ -206,11 +205,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expectedEvents.push({
           contract: NitroAdjudicator.address,
           name: 'Concluded',
-          args: {channelId},
+          args: { channelId },
         });
 
         // Add AssetTransferred events to expectations
-        Object.keys(payouts).forEach(assetHolder => {
+        Object.keys(payouts).forEach((assetHolder) => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );

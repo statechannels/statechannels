@@ -1,16 +1,16 @@
 // @ts-ignore
 // @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+
+import { Contract, Wallet, ethers } from 'ethers';
 
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
-import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { AllocationAssetOutcome, hashAssetOutcome } from '../../../src/contract/outcome';
+import { State } from '../../../src/contract/state';
+import { createPushOutcomeTransaction } from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
@@ -83,7 +83,7 @@ describe('pushOutcome', () => {
       outcomeHashExits,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+      const channel: Channel = { chainId, channelNonce, participants };
       const channelId = getChannelId(channel);
       const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
@@ -96,15 +96,15 @@ describe('pushOutcome', () => {
         {
           assetHolderAddress: ETHAssetHolder.address,
           allocationItems: [
-            {destination: A, amount: '1'},
-            {destination: B, amount: '2'},
+            { destination: A, amount: '1' },
+            { destination: B, amount: '2' },
           ],
         },
         {
           assetHolderAddress: ERC20AssetHolder.address,
           allocationItems: [
-            {destination: C, amount: '3'},
-            {destination: D, amount: '4'},
+            { destination: C, amount: '3' },
+            { destination: D, amount: '4' },
           ],
         },
       ];
@@ -155,10 +155,9 @@ describe('pushOutcome', () => {
         const regex = new RegExp(
           '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
         );
-        await expectRevert(
-          () => sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest),
-          regex
-        );
+        await expect(() =>
+          sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest)
+        ).rejects.toThrowError(regex);
       } else {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
         // Check 2x AssetHolder storage against the expected value

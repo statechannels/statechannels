@@ -1,11 +1,11 @@
 // @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, utils} from 'ethers';
-const {id, keccak256} = utils;
+
+import { Contract, Wallet, utils } from 'ethers';
+const { id, keccak256 } = utils;
 
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { getTestProvider, setupContracts } from '../../test-helpers';
 
 const provider = getTestProvider();
 let AssetHolder: Contract;
@@ -29,7 +29,7 @@ beforeAll(async () => {
     AssetHolderArtifact,
     process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
   );
-  const channel: Channel = {chainId, participants, channelNonce};
+  const channel: Channel = { chainId, participants, channelNonce };
   channelId = getChannelId(channel);
 });
 

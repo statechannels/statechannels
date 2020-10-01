@@ -1,13 +1,12 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import { Contract, Wallet, ethers } from 'ethers';
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
-import {Outcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
-import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { channelDataToChannelStorageHash } from '../../../src/contract/channel-storage';
+import { Outcome } from '../../../src/contract/outcome';
+import { hashState, State } from '../../../src/contract/state';
+import { respondArgs } from '../../../src/contract/transaction-creators/force-move';
 import {
   NO_ONGOING_CHALLENGE,
   RESPONSE_UNAUTHORIZED,
@@ -19,7 +18,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {sign} from '../../../src/signatures';
+import { sign } from '../../../src/signatures';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -28,7 +27,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const assetHolderAddress = Wallet.createRandom().address;
-const outcome: Outcome = [{assetHolderAddress, allocationItems: []}];
+const outcome: Outcome = [{ assetHolderAddress, allocationItems: [] }];
 let appDefinition;
 
 // Populate wallets and participants array
@@ -87,7 +86,7 @@ describe('respond', () => {
       slotEmpty,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+      const channel: Channel = { chainId, channelNonce, participants };
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
@@ -129,11 +128,11 @@ describe('respond', () => {
       const responseSignature = await sign(responder, responseStateHash);
 
       const tx = ForceMove.respond(
-        ...respondArgs({challengeState, responseSignature, responseState})
+        ...respondArgs({ challengeState, responseSignature, responseState })
       );
 
       if (reasonString) {
-        await expectRevert(() => tx, reasonString);
+        await expect(() => tx).rejects.toThrowError(reasonString);
       } else {
         const receipt = await (await tx).wait();
         await writeGasConsumption('./respond.gas.md', description, receipt.gasUsed);

@@ -1,6 +1,6 @@
 // @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+
+import { Contract, Wallet, ethers } from 'ethers';
 
 // @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
@@ -8,9 +8,9 @@ import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json'
 import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json';
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { AllocationAssetOutcome, encodeOutcome } from '../../../src/contract/outcome';
+import { hashState, State } from '../../../src/contract/state';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
@@ -88,8 +88,8 @@ const finalized = true;
 
 describe('pushOutcomeAndTransferAll', () => {
   it.each`
-    description     | setOutcome                    | heldBefore                    | newOutcome | heldAfter                     | payouts                       | reasonString
-    ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    description     | setOutcome                          | heldBefore                          | newOutcome | heldAfter                           | payouts                             | reasonString
+    ${description2} | ${{ ETH: { A: 1 }, TOK: { A: 2 } }} | ${{ ETH: { c: 1 }, TOK: { c: 2 } }} | ${{}}      | ${{ ETH: { c: 0 }, TOK: { c: 0 } }} | ${{ ETH: { A: 1 }, TOK: { A: 2 } }} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -107,7 +107,7 @@ describe('pushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString: string;
     }) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+      const channel: Channel = { chainId, channelNonce, participants };
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
@@ -119,7 +119,7 @@ describe('pushOutcomeAndTransferAll', () => {
         newOutcome,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
+      ].map((object) => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
@@ -168,7 +168,7 @@ describe('pushOutcomeAndTransferAll', () => {
         stateHash,
         challengerAddress,
         encodedOutcome,
-        {gasLimit: 300000}
+        { gasLimit: 300000 }
       );
 
       // Call method in a slightly different way if expecting a revert
@@ -176,9 +176,9 @@ describe('pushOutcomeAndTransferAll', () => {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
         );
-        await expectRevert(() => tx1, regex);
+        await expect(() => tx1).rejects.toThrowError(regex);
       } else {
-        const {logs} = await (await tx1).wait();
+        const { logs } = await (await tx1).wait();
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
@@ -187,7 +187,7 @@ describe('pushOutcomeAndTransferAll', () => {
         let expectedEvents = [];
 
         // Add AssetTransferred events to expectations
-        Object.keys(payouts).forEach(assetHolder => {
+        Object.keys(payouts).forEach((assetHolder) => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );

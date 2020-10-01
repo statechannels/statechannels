@@ -1,5 +1,4 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, ethers} from 'ethers';
+import { Contract, ethers } from 'ethers';
 
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
@@ -8,7 +7,7 @@ import {
   parseChannelStorageHash,
 } from '../../../src/contract/channel-storage';
 // @ts-ignore
-import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
+import { getTestProvider, randomChannelId, setupContracts } from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -30,12 +29,12 @@ describe('storage', () => {
     turnNumRecord | finalizesAt
     ${0x42}       | ${0x9001}
     ${123456}     | ${789}
-  `('Hashing and data retrieval', async storage => {
-    const blockchainStorage = {...storage, ...zeroData};
+  `('Hashing and data retrieval', async (storage) => {
+    const blockchainStorage = { ...storage, ...zeroData };
     const blockchainHash = await ForceMove.hashChannelData(blockchainStorage);
     const clientHash = channelDataToChannelStorageHash(storage);
 
-    const expected = {...storage, fingerprint: '0x' + clientHash.slice(2 + 24)};
+    const expected = { ...storage, fingerprint: '0x' + clientHash.slice(2 + 24) };
 
     expect(clientHash).toEqual(blockchainHash);
     expect(await ForceMove.matchesHash(blockchainStorage, blockchainHash)).toBe(true);
@@ -45,10 +44,10 @@ describe('storage', () => {
 
     // Testing getData is a little more laborious
     await (await ForceMove.setChannelStorage(ethers.constants.HashZero, blockchainStorage)).wait();
-    const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getChannelStorage(
+    const { turnNumRecord, finalizesAt, fingerprint: f } = await ForceMove.getChannelStorage(
       ethers.constants.HashZero
     );
-    expect({turnNumRecord, finalizesAt, fingerprint: f._hex}).toMatchObject(expected);
+    expect({ turnNumRecord, finalizesAt, fingerprint: f._hex }).toMatchObject(expected);
   });
 });
 
@@ -73,8 +72,8 @@ describe('_requireChannelOpen', () => {
     ${'works'}   | ${0}          | ${'0x00'}
   `(
     '$result with turnNumRecord: $turnNumRecord, finalizesAt: $finalizesAt',
-    async ({turnNumRecord, finalizesAt, result}) => {
-      const blockchainStorage = {turnNumRecord, finalizesAt, ...zeroData};
+    async ({ turnNumRecord, finalizesAt, result }) => {
+      const blockchainStorage = { turnNumRecord, finalizesAt, ...zeroData };
 
       await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
@@ -83,7 +82,9 @@ describe('_requireChannelOpen', () => {
 
       const tx = ForceMove.requireChannelOpen(channelId);
       // eslint-disable-next-line no-unused-expressions
-      result === 'reverts' ? await expectRevert(() => tx, 'Channel not open.') : await tx;
+      result === 'reverts'
+        ? await expect(() => tx).rejects.toThrowError('Channel not open.')
+        : await tx;
     }
   );
 });
