@@ -6114,7 +6114,7 @@ __metadata:
     ajv: 6.11.0
     eslint: 6.8.0
     eslint-plugin-prettier: 3.1.2
-    jest: 25.1.0
+    jest: 26.4.2
     lint-staged: 10.0.4
     ts-jest: ^26.4.1
     ts-json-schema-generator: 0.60.0
@@ -6156,8 +6156,10 @@ __metadata:
     "@types/fs-extra": ^9.0.1
     "@types/git-revision-webpack-plugin": 3.0.0
     "@types/html-webpack-plugin": 3.2.2
+    "@types/jest": ^26.0.14
     "@types/lodash": ^4.14.161
     "@types/mini-css-extract-plugin": 0.9.0
+    "@types/node": ^14.11.2
     "@types/node-sass": 4.11.0
     "@types/optimize-css-assets-webpack-plugin": 5.0.1
     "@types/pino": 6.0.0
@@ -6202,7 +6204,7 @@ __metadata:
     guid-typescript: 1.0.9
     html-webpack-plugin: 4.0.0-beta.5
     is-wsl: ^2.2.0
-    jest: 25.1.0
+    jest: ^26.4.2
     jsonrpc-lite: 2.1.0
     lodash: ^4.17.20
     mini-css-extract-plugin: 0.9.0
@@ -6235,10 +6237,10 @@ __metadata:
     style-loader: 1.1.3
     styled-components: 5.0.0
     terser-webpack-plugin: ^4.2.2
-    ts-jest: 25.0.0
+    ts-jest: ^26.4.1
     ts-loader: 7.0.5
     ts-pnp: ^1.2.0
-    typescript: 3.7.5
+    typescript: 4.0.3
     url-loader: 3.0.0
     url-parse: 1.4.7
     wait-for-expect: 3.0.2
@@ -23336,6 +23338,19 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"jest@npm:26.4.2, jest@npm:^26.4.2":
+  version: 26.4.2
+  resolution: "jest@npm:26.4.2"
+  dependencies:
+    "@jest/core": ^26.4.2
+    import-local: ^3.0.2
+    jest-cli: ^26.4.2
+  bin:
+    jest: bin/jest.js
+  checksum: e577e4863188a5cba6454c9f3208774d7b38562c276aefae4b2abd8ff1006406026c33390bcea33f29a4d83115b3fafdbb113bfcc6124da6b4136797600855ad
+  languageName: node
+  linkType: hard
+
 "jest@npm:^25.1.0":
   version: 25.5.4
   resolution: "jest@npm:25.5.4"
@@ -23346,19 +23361,6 @@ fsevents@^1.2.7:
   bin:
     jest: bin/jest.js
   checksum: aa4a0c3d6999036892d2c652afb87c4e8329a9303999fe595a91efaf674c2d0ff6eceed373042f82094fdd837264b01771c5a69dc0ee96533cc178860eac8991
-  languageName: node
-  linkType: hard
-
-"jest@npm:^26.4.2":
-  version: 26.4.2
-  resolution: "jest@npm:26.4.2"
-  dependencies:
-    "@jest/core": ^26.4.2
-    import-local: ^3.0.2
-    jest-cli: ^26.4.2
-  bin:
-    jest: bin/jest.js
-  checksum: e577e4863188a5cba6454c9f3208774d7b38562c276aefae4b2abd8ff1006406026c33390bcea33f29a4d83115b3fafdbb113bfcc6124da6b4136797600855ad
   languageName: node
   linkType: hard
 
