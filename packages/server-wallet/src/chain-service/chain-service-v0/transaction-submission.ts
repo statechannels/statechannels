@@ -2,7 +2,7 @@ import {providers, Wallet} from 'ethers';
 import PriorityQueue from 'p-queue';
 import {Bytes32} from '@statechannels/client-api-schema';
 
-import {logger} from '../logger';
+import {logger} from '../../logger';
 
 import {
   TransactionSubmissionServiceInterface,

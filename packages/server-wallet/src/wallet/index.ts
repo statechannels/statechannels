@@ -37,7 +37,7 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
-import {OnchainServiceInterface} from '../onchain-service';
+import {OnchainServiceInterface} from '../chain-service/chain-service-v0';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';

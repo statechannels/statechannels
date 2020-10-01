@@ -5,10 +5,10 @@ import {TransactionSubmissionService} from '../transaction-submission';
 import {OnchainService} from '../onchain-service';
 // FIXME: replace with
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
-import {Wallet} from '../../../src';
+import {Wallet} from '../../..';
 import {TransactionSubmissionStore, OnchainServiceStore} from '../store';
 import {FundingEvent} from '../types';
-import {defaultConfig} from '../../config';
+import {defaultConfig} from '../../../config';
 
 jest.mock('../../../src/wallet');
 
