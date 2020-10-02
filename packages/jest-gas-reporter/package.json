@@ -15,7 +15,7 @@
     "@types/easy-table": "0.0.32",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
-    "@types/jest": "25.1.0",
+    "@types/node": "^14.11.2",
     "@types/prettier": "1.19.0",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
@@ -35,7 +35,7 @@
     "lint:check": "eslint \"src/**/*.ts\" --cache",
     "lint:write": "eslint \"src/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
-    "prepare": "rm -rf lib; tsc -b"
+    "prepare": "rm -rf lib; yarn tsc -b"
   },
   "types": "lib/src/index.d.ts"
 }
