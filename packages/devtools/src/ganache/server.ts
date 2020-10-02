@@ -157,7 +157,7 @@ export class GanacheServer {
 
     this.server.stderr.on('data', data => {
       logger.error({error: data.toString()}, `Server threw error`);
-      throw new Error('Ganache server failed to start');
+      throw new Error(`Ganache server failed to start. Error is ${data}`);
     });
 
     this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${this.port}`);
