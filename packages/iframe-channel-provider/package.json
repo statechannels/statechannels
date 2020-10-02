@@ -15,7 +15,7 @@
     ]
   },
   "dependencies": {
-    "@statechannels/client-api-schema": "^0.3.8-alpha.0",
+    "@statechannels/client-api-schema": "^0.3.9-alpha.0",
     "eventemitter3": "4.0.0",
     "guid-typescript": "1.0.9",
     "lodash": "^4.17.20",

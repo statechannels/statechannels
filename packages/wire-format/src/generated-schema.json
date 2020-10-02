@@ -64,9 +64,7 @@
           "$ref": "#/definitions/Bytes32"
         },
         "type": {
-          "enum": [
-            "GetChannel"
-          ],
+          "const": "GetChannel",
           "type": "string"
         }
       },
@@ -98,9 +96,7 @@
           "type": "array"
         },
         "type": {
-          "enum": [
-            "CloseLedger"
-          ],
+          "const": "CloseLedger",
           "type": "string"
         }
       },
@@ -141,9 +137,7 @@
           "type": "array"
         },
         "type": {
-          "enum": [
-            "FundGuarantor"
-          ],
+          "const": "FundGuarantor",
           "type": "string"
         }
       },
@@ -176,9 +170,7 @@
           "type": "array"
         },
         "type": {
-          "enum": [
-            "FundLedger"
-          ],
+          "const": "FundLedger",
           "type": "string"
         }
       },
@@ -290,9 +282,7 @@
           "type": "array"
         },
         "type": {
-          "enum": [
-            "OpenChannel"
-          ],
+          "const": "OpenChannel",
           "type": "string"
         }
       },
@@ -449,9 +439,7 @@
           "type": "array"
         },
         "type": {
-          "enum": [
-            "VirtuallyFund"
-          ],
+          "const": "VirtuallyFund",
           "type": "string"
         }
       },
