@@ -22,7 +22,9 @@
     "remarkable-admonitions": "0.2.1"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.1",
     "@types/highlight.js": "9.12.4",
+    "@types/mdx-js__react": "^1.5.3",
     "@types/mermaid": "8.2.1",
     "@types/react": "16.9.48",
     "@types/react-dom": "16.9.8",

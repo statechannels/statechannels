@@ -27,14 +27,6 @@
     "state channels"
   ],
   "private": true,
-  "resolutions": {
-    "**/react": "16.8.0",
-    "**/react-dom": "16.8.0",
-    "@babel/core": "7.8.3",
-    "@types/react": "16.9.19",
-    "@types/webgl2": "0.0.5",
-    "broccoli": "3.3.3"
-  },
   "scripts": {
     "build": "lerna run build",
     "build:ci": "lerna run build:ci --stream --concurrency 2",
