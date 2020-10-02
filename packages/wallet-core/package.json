@@ -4,6 +4,7 @@
   "version": "0.3.9",
   "author": "Alex Gap",
   "dependencies": {
+    "@statechannels/client-api-schema": "^0.3.9-alpha.0",
     "@statechannels/nitro-protocol": "^0.3.9-alpha.0",
     "@statechannels/wire-format": "^0.3.9-alpha.0",
     "ethers": "5.0.12",
@@ -13,7 +14,9 @@
     "@babel/core": "7.11.4",
     "@statechannels/devtools": "^0.3.9-alpha.0",
     "@types/babel__core": "7.1.7",
+    "@types/jest": "^25.1.0",
     "@types/lodash": "4.14.149",
+    "@types/node": "^14.11.2",
     "awesome-typescript-loader": "5.2.1",
     "jest": "25.1.0",
     "ts-jest": "25.0.0",
@@ -33,7 +36,7 @@
     "lint:write": "eslint . --ext .ts --fix",
     "prepare": "rm -rf lib; yarn tsc -b",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test": "jest -c ./config/jest/jest.config.js",
+    "test": "yarn jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test --ci --runInBand"
   },
   "types": "lib/src/index.d.ts"
