@@ -1,4 +1,8 @@
-import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
+import {
+  ContractArtifacts,
+  createERC20DepositTransaction,
+  createETHDepositTransaction,
+} from '@statechannels/nitro-protocol';
 import {BN, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import {concat, from, Observable} from 'rxjs';
@@ -6,6 +10,10 @@ import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 
 import {Address, Bytes32} from '../type-aliases';
+
+// todo: is it reasonablet to assume that the ethAssetHolder address is defined as runtime configuration?
+/* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
+const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
 
 export type HoldingUpdatedArg = {
   channelId: Bytes32;
@@ -38,6 +46,10 @@ interface ChainModifierInterface {
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
 
+function isEthAssetHolder(address: Address): boolean {
+  return address === ethAssetHolderAddress;
+}
+
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
@@ -56,13 +68,25 @@ export class ChainService implements ChainServiceInterface {
     this.provider.polling = false;
   }
 
-  // todo: only works with eth-asset-holder
-  fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
-    //todo: add retries
+  private addContractMapping(assetHolderAddress: Address): Contract {
+    const artifact = isEthAssetHolder(assetHolderAddress)
+      ? ContractArtifacts.EthAssetHolderArtifact
+      : ContractArtifacts.Erc20AssetHolderArtifact;
+    const contract: Contract = new Contract(assetHolderAddress, artifact.abi, this.provider);
+    this.addressToContract.set(assetHolderAddress, contract);
+    return contract;
+  }
+
+  async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
+    const assetHolderAddress = arg.assetHolderAddress;
+    const createDepositTransaction = isEthAssetHolder(assetHolderAddress)
+      ? createETHDepositTransaction
+      : createERC20DepositTransaction;
+
     const transactionRequest = {
-      ...createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
-      to: arg.assetHolderAddress,
-      value: arg.amount,
+      ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
+      to: assetHolderAddress,
+      value: isEthAssetHolder(assetHolderAddress) ? arg.amount : undefined,
     };
     return this.ethWallet.sendTransaction({
       ...transactionRequest,
@@ -77,13 +101,8 @@ export class ChainService implements ChainServiceInterface {
     assetHolders.map(async assetHolder => {
       let obs = this.addressToObservable.get(assetHolder);
       if (!obs) {
-        const contract: Contract = new Contract(
-          assetHolder,
-          ContractArtifacts.EthAssetHolderArtifact.abi
-        ).connect(this.provider);
-        this.addressToContract.set(assetHolder, contract);
-
-        obs = this.createContractObservable(contract);
+        const contract = this.addContractMapping(assetHolder);
+        obs = this.addContractObservable(contract);
         this.addressToObservable.set(assetHolder, obs);
       }
       // Fetch the current contract holding, and emit as an event
@@ -104,7 +123,7 @@ export class ChainService implements ChainServiceInterface {
     });
   }
 
-  private createContractObservable(contract: Contract): Observable<HoldingUpdatedArg> {
+  private addContractObservable(contract: Contract): Observable<HoldingUpdatedArg> {
     // Create an observable that emits events on contract events
     const obs = new Observable<HoldingUpdatedArg>(subs => {
       // todo: add other event types
