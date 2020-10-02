@@ -72,11 +72,13 @@ it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0})]});
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
-  const result = await w.updateChannelFunding({
-    channelId: c.channelId,
-    token: '0x00',
-    amount: BN.from(4),
-  });
+  const result = await w.updateFundingForChannels([
+    {
+      channelId: c.channelId,
+      token: '0x00',
+      amount: BN.from(4),
+    },
+  ]);
 
   await expect(
     Funding.getFundingAmount(w.knex, channelId, ETH_ASSET_HOLDER_ADDRESS)
@@ -92,6 +94,6 @@ it('sends the post fund setup when the funding event is provided', async () => {
         },
       },
     ],
-    channelResult: {channelId: c.channelId, turnNum: 0}, // The turnNum is coming from the supported state so we expect it be 0 still
+    channelResults: [{channelId: c.channelId, turnNum: 0}], // The turnNum is coming from the supported state so we expect it be 0 still
   });
 });

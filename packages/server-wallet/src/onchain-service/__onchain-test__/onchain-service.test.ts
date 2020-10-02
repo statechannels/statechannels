@@ -99,7 +99,7 @@ describe('OnchainTransactionService', () => {
     });
 
     // Check mock
-    expect(channelWallet.updateChannelFunding).toHaveBeenCalled();
+    expect(channelWallet.updateFundingForChannels).toHaveBeenCalled();
   });
 
   it('should not fail if channel is already registered', async () => {

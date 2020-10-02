@@ -47,11 +47,13 @@ export default class ReceiverController {
     if (channelResult && channelResult.turnNum % 2 === 0) {
       const {
         outbox: [messageToSendToPayer],
-      } = await this.time('react', async () =>
-        (channelResult.status === 'proposed' ? this.wallet.joinChannel : this.wallet.updateChannel)(
-          channelResult
-        )
-      );
+      } = await this.time('react', async () => {
+        if (channelResult.status === 'proposed') {
+          return this.wallet.joinChannels([channelResult.channelId]);
+        } else {
+          return this.wallet.updateChannel(channelResult);
+        }
+      });
 
       const walletResponse = messageToSendToPayer.params.data as Payload;
 

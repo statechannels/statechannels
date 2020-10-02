@@ -23,9 +23,9 @@ describe('happy path', () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
     const appData = '0xaf00';
-    const createPromise = w.createChannel(createChannelArgs({appData}));
+    const createPromise = w.createChannels(createChannelArgs({appData}), 1);
     await expect(createPromise).resolves.toMatchObject({
-      channelResult: {channelId: expect.any(String)},
+      channelResults: [{channelId: expect.any(String)}],
     });
 
     await expect(createPromise).resolves.toMatchObject({
@@ -49,9 +49,9 @@ describe('happy path', () => {
           },
         },
       ],
-      channelResult: {channelId: expect.any(String), turnNum: 0, appData},
+      channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
     });
-    const {channelId} = (await createPromise).channelResult;
+    const {channelId} = (await createPromise).channelResults[0];
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, w.knex);
@@ -81,4 +81,4 @@ describe('happy path', () => {
 });
 
 it("doesn't create a channel if it doesn't have a signing wallet", () =>
-  expect(w.createChannel(createChannelArgs())).rejects.toThrow('Not in channel'));
+  expect(w.createChannels(createChannelArgs(), 1)).rejects.toThrow('Not in channel'));

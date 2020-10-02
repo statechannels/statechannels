@@ -69,8 +69,7 @@ export type WalletInterface = {
 
   // App channel management
   createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult;
-  createChannel(args: CreateChannelParams): SingleChannelResult;
-  joinChannel(args: JoinChannelParams): SingleChannelResult;
+
   joinChannels(channelIds: ChannelId[]): MultipleChannelResult;
   updateChannel(args: UpdateChannelParams): SingleChannelResult;
   closeChannel(args: CloseChannelParams): SingleChannelResult;
@@ -78,7 +77,6 @@ export type WalletInterface = {
   getState(args: GetStateParams): SingleChannelResult;
   syncChannel(args: SyncChannelParams): SingleChannelResult;
 
-  updateChannelFunding(args: UpdateChannelFundingParams): SingleChannelResult;
   updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): MultipleChannelResult;
@@ -113,10 +111,10 @@ export class Wallet implements WalletInterface, ChainEventListener {
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
     this.updateFundingForChannels = this.updateFundingForChannels.bind(this);
     this.getSigningAddress = this.getSigningAddress.bind(this);
-    this.createChannel = this.createChannel.bind(this);
+
     this.createChannels = this.createChannels.bind(this);
     this.createChannelInternal = this.createChannelInternal.bind(this);
-    this.joinChannel = this.joinChannel.bind(this);
+
     this.joinChannels = this.joinChannels.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
     this.updateChannelInternal = this.updateChannelInternal.bind(this);
@@ -206,7 +204,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
       outbox: mergeOutgoing(outgoing),
     };
   }
-  public async updateChannelFunding({
+  private async updateChannelFunding({
     channelId,
     token,
     amount,
@@ -246,12 +244,6 @@ export class Wallet implements WalletInterface, ChainEventListener {
       channelResults: mergeChannelResults(channelResults),
       outbox: mergeOutgoing(outgoing.map(n => n.notice)),
     };
-  }
-
-  async createChannel(args: CreateChannelParams): SingleChannelResult {
-    const {participants} = args;
-    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
-    return this.createChannelInternal(args, channelNonce);
   }
 
   async createChannelInternal(
