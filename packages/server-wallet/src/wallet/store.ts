@@ -1,4 +1,4 @@
-import { Transaction, TransactionOrKnex } from 'objection';
+import {Transaction, TransactionOrKnex} from 'objection';
 import {
   Objective,
   Outcome,
@@ -23,11 +23,11 @@ import {
   isOpenChannel,
   convertToParticipant,
 } from '@statechannels/wallet-core';
-import { Payload as WirePayload, SignedState as WireSignedState } from '@statechannels/wire-format';
-import { State as NitroState } from '@statechannels/nitro-protocol';
+import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
+import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-import { ChannelResult, FundingStrategy } from '@statechannels/client-api-schema';
-import { ethers, constants } from 'ethers';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
+import {ethers, constants} from 'ethers';
 import Knex from 'knex';
 
 import {
@@ -38,17 +38,17 @@ import {
   CHANNEL_COLUMNS,
   isChannelMissingError,
 } from '../models/channel';
-import { SigningWallet } from '../models/signing-wallet';
-import { addHash } from '../state-utils';
-import { ChannelState, ChainServiceApi } from '../protocols/state';
-import { WalletError, Values } from '../errors/wallet-error';
-import { Bytes32, Address, Uint256, Bytes } from '../type-aliases';
-import { validateTransitionWithEVM } from '../evm-validator';
-import { timerFactory, recordFunctionMetrics, setupDBMetrics } from '../metrics';
-import { pick } from '../utilities/helpers';
-import { Funding } from '../models/funding';
-import { Nonce } from '../models/nonce';
-import { recoverAddress } from '../utilities/signatures';
+import {SigningWallet} from '../models/signing-wallet';
+import {addHash} from '../state-utils';
+import {ChannelState, ChainServiceApi} from '../protocols/state';
+import {WalletError, Values} from '../errors/wallet-error';
+import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
+import {validateTransitionWithEVM} from '../evm-validator';
+import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
+import {pick} from '../utilities/helpers';
+import {Funding} from '../models/funding';
+import {Nonce} from '../models/nonce';
+import {recoverAddress} from '../utilities/signatures';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -61,7 +61,7 @@ function isUniqueViolationError(error: any): error is UniqueViolationError {
 }
 
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
-  throw new ChannelError(ChannelError.reasons.channelMissing, { channelId });
+  throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -139,7 +139,11 @@ export class Store {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer(
         'getting channel',
-        async () => await Channel.query(tx).where({ channelId }).forUpdate().first()
+        async () =>
+          await Channel.query(tx)
+            .where({channelId})
+            .forUpdate()
+            .first()
       );
 
       if (!channel) return onChannelMissing(channelId);
@@ -151,14 +155,14 @@ export class Store {
     channelId: Bytes32,
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
-  ): Promise<{ outgoing: SyncState; channelResult: ChannelResult }> {
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
 
     let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
-    const state: StateWithHash = addHash({ ...channel.channelConstants, ...vars });
+    const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
-    const { supported } = channel;
+    const {supported} = channel;
     if (supported) {
       const supportedNitroState = {
         turnNum: supported.turnNum,
@@ -191,7 +195,7 @@ export class Store {
     const signatureEntry = await timer('signing', async () =>
       channel.signingWallet.signState(state)
     );
-    const signedState = { ...state, signatures: [signatureEntry] };
+    const signedState = {...state, signatures: [signatureEntry]};
 
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
@@ -222,7 +226,7 @@ export class Store {
     }
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
-    const outgoing = state.participants.filter(notMe).map(({ participantId: recipient }) => ({
+    const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
       type: 'NotifyApp' as 'NotifyApp',
       notice: {
         method: 'MessageQueued' as 'MessageQueued',
@@ -230,9 +234,9 @@ export class Store {
       },
     }));
 
-    const { channelResult } = channel;
+    const {channelResult} = channel;
 
-    return { outgoing, channelResult };
+    return {outgoing, channelResult};
   }
 
   async addMyState(
@@ -258,8 +262,8 @@ export class Store {
 
     const result = await timer('updating', async () =>
       Channel.query(tx)
-        .where({ channelId: channel.channelId })
-        .patch({ vars: channel.vars })
+        .where({channelId: channel.channelId})
+        .patch({vars: channel.vars})
         .returning('*')
         .first()
     );
@@ -275,8 +279,8 @@ export class Store {
     const channel = await Channel.forId(channelId, tx);
 
     await Channel.query(tx)
-      .where({ channelId: channel.channelId })
-      .patch({ chainServiceRequests: [...channel.chainServiceRequests, type] });
+      .where({channelId: channel.channelId})
+      .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
   }
 
   async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
@@ -294,13 +298,13 @@ export class Store {
   async getStates(
     channelId: Bytes32,
     tx?: Transaction
-  ): Promise<{ states: SignedStateWithHash[]; channelState: ChannelState }> {
+  ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
     const channel = await Channel.forId(channelId, tx || this.knex);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
 
-    const { vars, channelConstants, protocolState: channelState } = channel;
-    return { states: vars.map(ss => _.merge(ss, channelConstants)), channelState };
+    const {vars, channelConstants, protocolState: channelState} = channel;
+    return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   }
 
   async getChannels(): Promise<ChannelState[]> {
@@ -334,18 +338,18 @@ export class Store {
   async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
     if (isOpenChannel(objective)) {
       const {
-        data: { targetChannelId: channelId, fundingStrategy },
+        data: {targetChannelId: channelId, fundingStrategy},
       } = objective;
 
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(channelId, tx);
       if (!channel) {
-        throw new StoreError(StoreError.reasons.channelMissing, { channelId });
+        throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
       return await Channel.query(tx)
-        .where({ channelId: channel.channelId })
-        .patch({ fundingStrategy })
+        .where({channelId: channel.channelId})
+        .patch({fundingStrategy})
         .returning('*')
         .first();
     } else {
@@ -385,7 +389,7 @@ export class Store {
       ));
 
     if (!this.skipEvmValidation && channel.supported) {
-      const { supported } = channel;
+      const {supported} = channel;
 
       const supportedNitroState = toNitroState(supported);
       if (
@@ -422,8 +426,8 @@ export class Store {
 
     const result = await timer('updating', async () =>
       Channel.query(tx)
-        .where({ channelId: channel.channelId })
-        .patch({ vars: channel.vars })
+        .where({channelId: channel.channelId})
+        .patch({vars: channel.vars})
         .returning('*')
         .first()
     );
@@ -436,9 +440,9 @@ export class Store {
     appData: Bytes,
     outcome: Outcome,
     fundingStrategy: FundingStrategy
-  ): Promise<{ outgoing: SyncState; channelResult: ChannelResult }> {
+  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
-      const { channelId } = await createChannel(constants, fundingStrategy, tx);
+      const {channelId} = await createChannel(constants, fundingStrategy, tx);
       return await this.signState(
         channelId,
         {
@@ -494,7 +498,7 @@ async function createChannel(
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
 
-  const { address: signingAddress } = await getSigningWallet(constants, txOrKnex);
+  const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
 
   const cols: RequiredColumns = pick(
     {
@@ -508,7 +512,10 @@ async function createChannel(
     ...CHANNEL_COLUMNS
   );
   const channel = Channel.fromJson(cols);
-  return await Channel.query(txOrKnex).insert(channel).returning('*').first();
+  return await Channel.query(txOrKnex)
+    .insert(channel)
+    .returning('*')
+    .first();
 }
 async function getChannel(
   channelId: string,
@@ -527,7 +534,9 @@ async function getSigningWallet(
   txOrKnex: TransactionOrKnex
 ): Promise<SigningWallet> {
   const addresses = channel.participants.map(p => p.signingAddress);
-  const signingWallet = await SigningWallet.query(txOrKnex).whereIn('address', addresses).first();
+  const signingWallet = await SigningWallet.query(txOrKnex)
+    .whereIn('address', addresses)
+    .first();
 
   if (!signingWallet) {
     throw new StoreError(StoreError.reasons.notInChannel);
@@ -553,7 +562,7 @@ async function recoverParticipantSignatures(
           `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
         );
       }
-      return { signature: sig, signer: recoveredAddress };
+      return {signature: sig, signer: recoveredAddress};
     })
   );
 }
@@ -602,7 +611,7 @@ function addState(
   signedState: SignedStateWithHash
 ): SignedStateVarsWithHash[] {
   const clonedVariables = _.cloneDeep(vars);
-  const { stateHash } = signedState;
+  const {stateHash} = signedState;
   const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
   if (existingStateIndex > -1) {
     const mergedSignatures = _.uniqBy(
@@ -613,7 +622,7 @@ function addState(
     clonedVariables[existingStateIndex].signatures = mergedSignatures;
     return clonedVariables;
   } else {
-    return clonedVariables.concat({ ...signedState, stateHash });
+    return clonedVariables.concat({...signedState, stateHash});
   }
 }
 
@@ -625,7 +634,7 @@ function clearOldStates(
   // If we don't have a supported state we don't clean anything out
   if (support && support.length > 0) {
     // The support is returned in descending turn number so we need to grab the last element to find the earliest state
-    const { stateHash: firstSupportStateHash } = support[support.length - 1];
+    const {stateHash: firstSupportStateHash} = support[support.length - 1];
 
     // Find where the first support state is in our current state array
     const supportIndex = sorted.findIndex(sv => sv.stateHash === firstSupportStateHash);

@@ -1,7 +1,7 @@
-import { utils } from 'ethers';
+import {utils} from 'ethers';
 
-import { BN } from '../bignumber';
-import { Uint256 } from '../types';
+import {BN} from '../bignumber';
+import {Uint256} from '../types';
 export function unreachable(x: never) {
   return x;
 }
@@ -41,6 +41,6 @@ export function arrayToRecord<T, K extends keyof T>(
 
 export function recordToArray<T>(record: Record<string | number, T | undefined>): Array<T> {
   return Object.keys(record)
-    .map((k) => record[k])
-    .filter((e) => e !== undefined) as Array<T>;
+    .map(k => record[k])
+    .filter(e => e !== undefined) as Array<T>;
 }
