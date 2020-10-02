@@ -1,5 +1,4 @@
 import React from 'react';
-import {State, EventData} from 'xstate';
 import './wallet.scss';
 import {Flex, Heading, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
@@ -18,7 +17,6 @@ import {Application} from '../workflows';
 
 interface Props {
   current: Application.WorkflowState;
-  send: (event: any, payload?: EventData | undefined) => State<any, any, any, any>;
 }
 
 export const ApplicationWorkflow = (props: Props) => {

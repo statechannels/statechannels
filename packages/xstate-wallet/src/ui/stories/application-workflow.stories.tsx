@@ -29,9 +29,7 @@ if (Application.config.states) {
       machine.start(state);
       storiesOf('Workflows / Application', module).add(
         state.toString(),
-        renderComponentInFrontOfApp(
-          <ApplicationWorkflow current={machine.state} send={machine.send} />
-        )
+        renderComponentInFrontOfApp(<ApplicationWorkflow current={machine.state} />)
       );
       machine.stop();
     }

@@ -30,7 +30,7 @@
     "@statechannels/wallet-core": "^0.3.9-alpha.0",
     "@statechannels/wire-format": "^0.3.9-alpha.0",
     "@types/jest": "^26.0.14",
-    "@xstate/react": "1.0.0-rc.3",
+    "@xstate/react": "1.0.1",
     "async-lock": "1.2.2",
     "awesome-typescript-loader": "5.2.1",
     "babel-loader": "8.1.0",
@@ -87,7 +87,7 @@
     "webpack-manifest-plugin": "2.2.0",
     "webpack-merge": "4.2.2",
     "workbox-webpack-plugin": "5.0.0",
-    "xstate": "4.9.1"
+    "xstate": "4.13.0"
   },
   "devDependencies": {
     "@babel/core": "7.11.4",
