@@ -46,7 +46,7 @@ export function createDepositTransaction(
   expectedHeld: string,
   amount: string
 ): ethers.providers.TransactionRequest {
-  const data = Erc20AssetHolderContractInterface.functions.deposit.encode([
+  const data = Erc20AssetHolderContractInterface.encodeFunctionData('deposit', [
     destination,
     expectedHeld,
     amount,
