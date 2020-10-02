@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "0.3.10-alpha.0",
+  "version": "0.3.10-alpha.1",
   "author": "",
   "dependencies": {
     "@ethersproject/experimental": "^5.0.4",
