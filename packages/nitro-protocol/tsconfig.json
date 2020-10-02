@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     /* Basic Options */
+    "baseUrl": "src",
     "lib": ["es5", "es6"],
     "outDir": "lib" /* Redirect output structure to the directory. */,
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
