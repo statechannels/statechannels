@@ -19,9 +19,7 @@ export const Wallet = (props: Props) => {
   return (
     <WindowContext.Provider value={window}>
       <Layout>
-        {props.workflow.id === 'application-workflow' && (
-          <ApplicationWorkflow current={current} send={send} />
-        )}
+        {props.workflow.id === 'application-workflow' && <ApplicationWorkflow current={current} />}
         {props.workflow.id === 'enable-ethereum' && (
           <EnableEthereum current={current} send={send} />
         )}
