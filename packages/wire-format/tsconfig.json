@@ -10,5 +10,5 @@
     "target": "es2015",
     "types": ["node", "jest"]
   },
-  "include": ["./src"]
+  "include": ["./src", "./src/generated-schema.json"]
 }
