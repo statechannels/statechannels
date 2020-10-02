@@ -16,8 +16,11 @@
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
     "eslint-plugin-prettier": "3.1.2",
+    "jest": "26.4.2",
     "lint-staged": "10.0.4",
-    "ts-json-schema-generator": "0.60.0"
+    "ts-jest": "^26.4.1",
+    "ts-json-schema-generator": "0.60.0",
+    "typescript": "^4.0.3"
   },
   "files": [
     "lib/src"
@@ -35,12 +38,12 @@
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/client-api-schema",
   "scripts": {
-    "build:generate-schema": "yarn --silent ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
-    "build:typescript": "rm -rf lib; tsc -b",
+    "build:generate-schema": "yarn ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
+    "build:typescript": "rm -rf lib; yarn tsc -b",
     "lint:check": "eslint \"src/**/*.ts\" --cache",
     "lint:write": "eslint \"src/**/*.ts\" --fix",
     "prepare": "yarn build:generate-schema && yarn build:typescript",
-    "test": "jest",
+    "test": "yarn jest",
     "test:ci": "yarn test --ci --runInBand"
   }
 }
