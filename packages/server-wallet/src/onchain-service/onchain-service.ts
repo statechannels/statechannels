@@ -241,11 +241,13 @@ export class OnchainService implements OnchainServiceInterface {
     fundingEvt.attach(e => {
       // Call the appropriate callback on the wallet
       this.channelWallet &&
-        this.channelWallet.updateChannelFunding({
-          channelId: e.channelId,
-          amount: BN.from(e.amount),
-          token: info.tokenAddress,
-        });
+        this.channelWallet.updateFundingForChannels([
+          {
+            channelId: e.channelId,
+            amount: BN.from(e.amount),
+            token: info.tokenAddress,
+          },
+        ]);
     });
 
     // Post to evt on every onchain deposit event

@@ -49,8 +49,13 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-export type SingleChannelResult = Promise<{outbox: Outgoing[]; channelResult: ChannelResult}>;
-export type MultipleChannelResult = Promise<{outbox: Outgoing[]; channelResults: ChannelResult[]}>;
+export type SingleChannelResult = Promise<SingleChannelMessage>;
+export type MultipleChannelResult = Promise<MultipleChannelMessage>;
+type SingleChannelMessage = {outbox: Outgoing[]; channelResult: ChannelResult};
+type MultipleChannelMessage = {outbox: Outgoing[]; channelResults: ChannelResult[]};
+type Message = SingleChannelMessage | MultipleChannelMessage;
+const isSingleChannelMessage = (message: Message): message is SingleChannelMessage =>
+  'channelResult' in message;
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
@@ -64,16 +69,15 @@ export type WalletInterface = {
 
   // App channel management
   createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult;
-  createChannel(args: CreateChannelParams): SingleChannelResult;
-  joinChannel(args: JoinChannelParams): SingleChannelResult;
+
+  joinChannels(channelIds: ChannelId[]): MultipleChannelResult;
   updateChannel(args: UpdateChannelParams): SingleChannelResult;
   closeChannel(args: CloseChannelParams): SingleChannelResult;
   getChannels(): MultipleChannelResult;
   getState(args: GetStateParams): SingleChannelResult;
   syncChannel(args: SyncChannelParams): SingleChannelResult;
 
-  updateChannelFunding(args: UpdateChannelFundingParams): void;
-
+  updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): MultipleChannelResult;
 
@@ -82,6 +86,8 @@ export type WalletInterface = {
 
   // Register chain <-> Wallet communication
   attachChainService(provider: OnchainServiceInterface): void;
+
+  mergeMessages(messages: Message[]): MultipleChannelMessage;
 };
 
 export class Wallet implements WalletInterface, ChainEventListener {
@@ -103,11 +109,13 @@ export class Wallet implements WalletInterface, ChainEventListener {
     // Bind methods to class instance
     this.getParticipant = this.getParticipant.bind(this);
     this.updateChannelFunding = this.updateChannelFunding.bind(this);
+    this.updateFundingForChannels = this.updateFundingForChannels.bind(this);
     this.getSigningAddress = this.getSigningAddress.bind(this);
-    this.createChannel = this.createChannel.bind(this);
+
     this.createChannels = this.createChannels.bind(this);
     this.createChannelInternal = this.createChannelInternal.bind(this);
-    this.joinChannel = this.joinChannel.bind(this);
+
+    this.joinChannels = this.joinChannels.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
     this.updateChannelInternal = this.updateChannelInternal.bind(this);
     this.pushMessageInternal = this.pushMessageInternal.bind(this);
@@ -116,6 +124,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
     this.getState = this.getState.bind(this);
     this.pushMessage = this.pushMessage.bind(this);
     this.takeActions = this.takeActions.bind(this);
+    this.mergeMessages = this.mergeMessages.bind(this);
     this.destroy = this.destroy.bind(this);
 
     // set up timing metrics
@@ -128,6 +137,17 @@ export class Wallet implements WalletInterface, ChainEventListener {
 
     this.chainService = new OnchainService();
     this.attachChainService(this.chainService);
+  }
+
+  public mergeMessages(messages: Message[]): MultipleChannelMessage {
+    const channelResults = mergeChannelResults(
+      messages
+        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
+        .reduce((cr1, cr2) => cr1.concat(cr2))
+    );
+
+    const outbox = mergeOutgoing(messages.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
+    return {channelResults, outbox};
   }
 
   public async destroy(): Promise<void> {
@@ -173,7 +193,18 @@ export class Wallet implements WalletInterface, ChainEventListener {
     return participant;
   }
 
-  public async updateChannelFunding({
+  public async updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult {
+    const results = await Promise.all(args.map(a => this.updateChannelFunding(a)));
+
+    const channelResults = results.map(r => r.channelResult);
+    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+
+    return {
+      channelResults: mergeChannelResults(channelResults),
+      outbox: mergeOutgoing(outgoing),
+    };
+  }
+  private async updateChannelFunding({
     channelId,
     token,
     amount,
@@ -215,12 +246,6 @@ export class Wallet implements WalletInterface, ChainEventListener {
     };
   }
 
-  async createChannel(args: CreateChannelParams): SingleChannelResult {
-    const {participants} = args;
-    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
-    return this.createChannelInternal(args, channelNonce);
-  }
-
   async createChannelInternal(
     args: CreateChannelParams,
     channelNonce: number
@@ -244,6 +269,19 @@ export class Wallet implements WalletInterface, ChainEventListener {
     );
     return {outbox: mergeOutgoing(outgoing.map(n => n.notice)), channelResult};
   }
+
+  async joinChannels(channelIds: ChannelId[]): MultipleChannelResult {
+    const results = await Promise.all(channelIds.map(channelId => this.joinChannel({channelId})));
+
+    const channelResults = results.map(r => r.channelResult);
+    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+
+    return {
+      channelResults: mergeChannelResults(channelResults),
+      outbox: mergeOutgoing(outgoing),
+    };
+  }
+
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));

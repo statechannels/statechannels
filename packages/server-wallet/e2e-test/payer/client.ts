@@ -70,25 +70,28 @@ export default class PayerClient {
   public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
-      channelResult: {channelId},
-    } = await this.wallet.createChannel({
-      appData: '0x',
-      appDefinition: AddressZero,
-      fundingStrategy: 'Direct',
-      participants: [this.me, receiver],
-      allocations: [
-        {
-          token: AddressZero,
-          allocationItems: [
-            {
-              amount: BN.from(0),
-              destination: this.destination,
-            },
-            {amount: BN.from(0), destination: receiver.destination},
-          ],
-        },
-      ],
-    });
+      channelResults: [{channelId}],
+    } = await this.wallet.createChannels(
+      {
+        appData: '0x',
+        appDefinition: AddressZero,
+        fundingStrategy: 'Direct',
+        participants: [this.me, receiver],
+        allocations: [
+          {
+            token: AddressZero,
+            allocationItems: [
+              {
+                amount: BN.from(0),
+                destination: this.destination,
+              },
+              {amount: BN.from(0), destination: receiver.destination},
+            ],
+          },
+        ],
+      },
+      1
+    );
 
     const reply = await this.messageReceiverAndExpectReply(params.data);
 
