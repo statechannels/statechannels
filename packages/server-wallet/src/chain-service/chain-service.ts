@@ -13,7 +13,7 @@ export type HoldingUpdatedArg = {
   amount: Uint256;
 };
 
-type FundChannelArg = {
+export type FundChannelArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
   expectedHeld: Uint256;
@@ -36,7 +36,9 @@ interface ChainModifierInterface {
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
 }
 
-export class ChainService implements ChainModifierInterface, ChainEventEmitterInterface {
+export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
+
+export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<HoldingUpdatedArg>> = new Map();

@@ -37,12 +37,17 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
-import {OnchainServiceInterface} from '../onchain-service';
+import {OnchainServiceInterface} from '../chain-service/chain-service-v0';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
-import {ChainEventListener, OnchainService, SetFundingArg} from '../mock-chain-service';
+import {
+  ChainServiceInterface,
+  MockChainService,
+  ChainEventSubscriberInterface,
+  HoldingUpdatedArg,
+} from '../chain-service';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -90,11 +95,11 @@ export type WalletInterface = {
   mergeMessages(messages: Message[]): MultipleChannelMessage;
 };
 
-export class Wallet implements WalletInterface, ChainEventListener {
+export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   manager: WorkerManager;
   knex: Knex;
   store: Store;
-  chainService: OnchainService;
+  chainService: ChainServiceInterface;
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
@@ -135,8 +140,7 @@ export class Wallet implements WalletInterface, ChainEventListener {
       setupMetrics(this.walletConfig.metricsOutputFile);
     }
 
-    this.chainService = new OnchainService();
-    this.attachChainService(this.chainService);
+    this.chainService = new MockChainService();
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelMessage {
@@ -303,7 +307,10 @@ export class Wallet implements WalletInterface, ChainEventListener {
     const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
     const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
-    return {outbox: mergeOutgoing(outbox.concat(nextOutbox)), channelResult: nextChannelResult};
+    return {
+      outbox: mergeOutgoing(outbox.concat(nextOutbox)),
+      channelResult: nextChannelResult,
+    };
   }
 
   async updateChannel(args: UpdateChannelParams): SingleChannelResult {
@@ -429,7 +436,10 @@ export class Wallet implements WalletInterface, ChainEventListener {
       // Modifies outbox, may append new messages
       await Promise.all(wirePayload.requests.map(handleRequest(outbox)));
 
-    return {outbox: mergeOutgoing(outbox), channelResults: mergeChannelResults(channelResults)};
+    return {
+      outbox: mergeOutgoing(outbox),
+      channelResults: mergeChannelResults(channelResults),
+    };
   }
 
   onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
@@ -475,7 +485,11 @@ export class Wallet implements WalletInterface, ChainEventListener {
             }
             case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              await OnchainService.fundChannel(action);
+              await this.chainService.fundChannel({
+                ...action,
+                expectedHeld: BN.from(action.expectedHeld),
+                amount: BN.from(action.amount),
+              });
               return;
             default:
               throw 'Unimplemented';
@@ -505,8 +519,8 @@ export class Wallet implements WalletInterface, ChainEventListener {
     return {outbox, error, channelResults};
   };
 
-  // ChainListener implementation
-  setFunding(arg: SetFundingArg): void {
+  // ChainEventSubscriberInterface implementation
+  onHoldingUpdated(arg: HoldingUpdatedArg): void {
     // note: updateChannelFunding is an async function.
     // todo: this returns a Promise<SingleChannelResult>. How should the SingleChannelResult get relayed to the application?
     this.updateChannelFunding({

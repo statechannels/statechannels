@@ -1,7 +1,7 @@
 import {Evt} from 'evt/lib/types';
 import pino from 'pino';
 
-import {Values} from '../errors/wallet-error';
+import {Values} from '../../errors/wallet-error';
 
 import {FundingEvent} from './types';
 

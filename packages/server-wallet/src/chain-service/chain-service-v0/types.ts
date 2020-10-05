@@ -4,7 +4,7 @@ import {Evt} from 'evt';
 
 // FIXME: replace with
 // import {Wallet as ChannelWallet} from '@statechannels/server-wallet';
-import {Wallet as ChannelWallet} from '..';
+import {Wallet as ChannelWallet} from '../..';
 
 // TODO: maybe remove?
 export type AssetHolderInformation = {

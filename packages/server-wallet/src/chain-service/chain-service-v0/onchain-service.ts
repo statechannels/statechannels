@@ -4,7 +4,8 @@ import {providers, Contract, BigNumber, Event, constants} from 'ethers';
 import {Evt} from 'evt';
 import {BN} from '@statechannels/wallet-core';
 
-import {logger} from '../logger';
+import {logger} from '../../logger';
+import {Wallet as ChannelWallet} from '../..';
 
 import {
   OnchainServiceInterface,
@@ -19,7 +20,6 @@ import {addEvtHandler} from './utils';
 
 // FIXME: replace with
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
-import {Wallet as ChannelWallet} from '..';
 
 const getAssetHolderContract = (info: AssetHolderInformation): Contract => {
   // Make sure the contract object with the correct abi
