@@ -5,7 +5,6 @@ const {HashZero} = ethers.constants;
 
 const {defaultAbiCoder} = ethers.utils;
 
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';

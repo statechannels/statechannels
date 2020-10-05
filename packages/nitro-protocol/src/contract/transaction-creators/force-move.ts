@@ -5,7 +5,7 @@ import {signChallengeMessage} from '../../signatures';
 import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
-// @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+// https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 export const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
 interface CheckpointData {

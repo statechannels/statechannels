@@ -1,4 +1,3 @@
-// @ts-ignore
 import {Contract, Wallet, utils} from 'ethers';
 const {id} = utils;
 

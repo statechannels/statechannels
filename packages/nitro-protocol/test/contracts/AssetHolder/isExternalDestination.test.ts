@@ -1,4 +1,3 @@
-// @ts-ignore
 import {Contract, Wallet} from 'ethers';
 
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';

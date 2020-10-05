@@ -1,13 +1,11 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
 
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {
   channelDataToChannelStorageHash,
   parseChannelStorageHash,
 } from '../../../src/contract/channel-storage';
-// @ts-ignore
 import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();

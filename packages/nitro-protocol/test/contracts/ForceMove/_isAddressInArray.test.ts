@@ -1,4 +1,3 @@
-// @ts-ignore
 import {Contract, Wallet} from 'ethers';
 
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';

@@ -1,5 +1,3 @@
-// @ts-ignore
-import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, utils} from 'ethers';
 
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';

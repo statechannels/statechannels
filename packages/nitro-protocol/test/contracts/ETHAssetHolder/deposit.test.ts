@@ -2,7 +2,6 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, BigNumber, ethers} from 'ethers';
 const {parseUnits} = ethers.utils;
 
-// @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts, writeGasConsumption} from '../../test-helpers';

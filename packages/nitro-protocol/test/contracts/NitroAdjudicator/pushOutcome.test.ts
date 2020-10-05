@@ -1,10 +1,7 @@
-// @ts-ignore
-// @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
 import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-// @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
