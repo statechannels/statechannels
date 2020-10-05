@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.3.9-alpha.0",
+  "version": "0.3.10-alpha.0",
   "author": "statechannels",
   "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@ethereum-waffle/compiler": "3.1.0",
-    "@statechannels/devtools": "^0.3.9-alpha.0",
+    "@statechannels/devtools": "^0.3.10-alpha.0",
     "@statechannels/jest-gas-reporter": "^0.3.9-alpha.0",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
