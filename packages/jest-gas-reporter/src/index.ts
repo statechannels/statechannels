@@ -32,6 +32,7 @@ interface Options {
 
 interface ParsedArtifact {
   abi: (string | utils.FunctionFragment | utils.EventFragment)[];
+  // eslint-disable-next-line @typescript-eslint/ban-types
   deployedBytecode: object;
   contractName: string;
   networks: {[networkName: string]: {address: string}};

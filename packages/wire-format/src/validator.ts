@@ -31,6 +31,7 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
 }
 
 export const messageIsValid = ajv.compile({$ref: 'api.json#/definitions/Message'});
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function validateMessage(jsonBlob: object): Message {
   const valid = messageIsValid(jsonBlob);
   if (!valid) {
@@ -41,6 +42,7 @@ export function validateMessage(jsonBlob: object): Message {
 }
 
 export const stateIsValid = ajv.compile({$ref: 'api.json#/definitions/SignedState'});
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function validateState(jsonBlob: object): SignedState {
   const valid = stateIsValid(jsonBlob);
   if (!valid) {
