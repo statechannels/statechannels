@@ -333,10 +333,10 @@
       "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-152724555-238-241-152724555-205-242-152724555-168-243-152724555-0-517%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-152724555-295-298-152724555-262-299-152724555-168-300-152724555-0-574%3E"
     },
     "EnableEthereumResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-152724555-297-383-152724555-280-384-152724555-243-385-152724555-0-517%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-152724555-354-440-152724555-337-441-152724555-300-442-152724555-0-574%3E"
     },
     "FundingStrategy": {
       "enum": [
@@ -364,7 +364,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2CGetBudgetParams%3E"
     },
     "GetBudgetResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-310555162-322-325-310555162-308-325-310555162-291-326-310555162-259-327-310555162-0-328)%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-310555162-379-382-310555162-365-382-310555162-348-383-310555162-259-384-310555162-0-385)%3E"
     },
     "GetChannelsRequest": {
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344%3E"
@@ -394,10 +394,10 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "GetWalletInformationRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-91574456-193-196-91574456-154-197-91574456-111-198-91574456-0-359%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-91574456-250-253-91574456-211-254-91574456-111-255-91574456-0-416%3E"
     },
     "GetWalletInformationResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-91574456-258-356-91574456-241-357-91574456-198-358-91574456-0-359%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-91574456-315-413-91574456-298-414-91574456-255-415-91574456-0-416%3E"
     },
     "InvalidAppData": {
       "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-778394619-912-932-778394619-844-934-778394619-815-935-778394619-0-1239%3E"
@@ -1076,7 +1076,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1427>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1484>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1111,7 +1111,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"WalletReady\",structure-148781504-954-957-148781504-919-958-148781504-893-959-148781504-0-1427>": {
+    "JsonRpcNotification<\"WalletReady\",structure-148781504-1011-1014-148781504-976-1015-148781504-893-1016-148781504-0-1484>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1293,7 +1293,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"EnableEthereum\",structure-152724555-238-241-152724555-205-242-152724555-168-243-152724555-0-517>": {
+    "JsonRpcRequest<\"EnableEthereum\",structure-152724555-295-298-152724555-262-299-152724555-168-300-152724555-0-574>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1424,7 +1424,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetWalletInformation\",structure-91574456-193-196-91574456-154-197-91574456-111-198-91574456-0-359>": {
+    "JsonRpcRequest<\"GetWalletInformation\",structure-91574456-250-253-91574456-211-254-91574456-111-255-91574456-0-416>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1580,7 +1580,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<(DomainBudget|structure-310555162-322-325-310555162-308-325-310555162-291-326-310555162-259-327-310555162-0-328)>": {
+    "JsonRpcResponse<(DomainBudget|structure-310555162-379-382-310555162-365-382-310555162-348-383-310555162-259-384-310555162-0-385)>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1750,7 +1750,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-1193164467-381-383-1193164467-364-384-1193164467-330-385-1193164467-0-570>": {
+    "JsonRpcResponse<structure-1193164467-438-440-1193164467-421-441-1193164467-330-442-1193164467-0-627>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1776,7 +1776,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-152724555-297-383-152724555-280-384-152724555-243-385-152724555-0-517>": {
+    "JsonRpcResponse<structure-152724555-354-440-152724555-337-441-152724555-300-442-152724555-0-574>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1818,7 +1818,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-91574456-258-356-91574456-241-357-91574456-198-358-91574456-0-359>": {
+    "JsonRpcResponse<structure-91574456-315-413-91574456-298-414-91574456-255-415-91574456-0-416>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -2119,7 +2119,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22SyncChannel%22%2CSyncChannelParams%3E"
     },
     "SyncChannelResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-1193164467-381-383-1193164467-364-384-1193164467-330-385-1193164467-0-570%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-1193164467-438-440-1193164467-421-441-1193164467-330-442-1193164467-0-627%3E"
     },
     "TokenBudget": {
       "additionalProperties": false,
@@ -2149,7 +2149,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1427%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1484%3E"
     },
     "Uint256": {
       "description": "Uint256",
@@ -2208,7 +2208,7 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "WalletReady": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-148781504-954-957-148781504-919-958-148781504-893-959-148781504-0-1427%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-148781504-1011-1014-148781504-976-1015-148781504-893-1016-148781504-0-1484%3E"
     }
   }
 }
