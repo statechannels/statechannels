@@ -331,6 +331,7 @@ export class ChannelClient implements BrowserChannelClientInterface {
    * @returns A promise that resolves to a ChannelResult.
    *
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   async getBudget(hubParticipantId: string): Promise<DomainBudget | {}> {
     return this.provider.send('GetBudget', {hubParticipantId});
   }
@@ -343,6 +344,7 @@ export class ChannelClient implements BrowserChannelClientInterface {
    * @returns A promise that resolves to a DomainBudget.
    *
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   async closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}> {
     return this.provider.send('CloseAndWithdraw', {
       hubParticipantId

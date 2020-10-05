@@ -74,7 +74,9 @@ export interface BrowserChannelClientInterface extends ChannelClientInterface {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<DomainBudget>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   closeAndWithdraw(hubParticipantId: string): Promise<DomainBudget | {}>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   getBudget(hubAddress: string): Promise<DomainBudget | {}>;
 }
 
