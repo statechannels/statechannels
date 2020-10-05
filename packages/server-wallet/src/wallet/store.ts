@@ -224,7 +224,7 @@ export class Store {
             type: 'OpenChannel',
             data: {
               targetChannelId: channel.channelId,
-              fundingStrategy: 'Direct',
+              fundingStrategy: channel.fundingStrategy,
             },
           },
         ],
@@ -444,7 +444,7 @@ export class Store {
 
   private pending_updates = new LedgerRequests();
 
-  private ledgers: {
+  public ledgers: {
     // Store information about asset holder of ledger
     [ledgerChannelId: string]: {
       ledgerChannelId: Bytes32;

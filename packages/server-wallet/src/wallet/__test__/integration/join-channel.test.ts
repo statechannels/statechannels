@@ -9,6 +9,7 @@ import {bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {alice} from '../fixtures/participants';
 import {defaultConfig} from '../../../config';
+import { connection } from '../../../db-admin/knexfile';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -104,6 +105,104 @@ describe('directly funded app', () => {
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });
+
+describe('ledger funded app', () => {
+
+  // Copy and pasted from directly funded, changing only the fundingStrategy
+  it('signs the prefund setup ', async () => {
+    const appData = '0x0f00';
+    const preFS = {turnNum: 0, appData};
+
+    const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)], fundingStrategy: 'Ledger'});
+    await Channel.query(w.knex).insert(c);
+
+    const channelId = c.channelId;
+    const current = await Channel.forId(channelId, w.knex);
+    expect(current.protocolState).toMatchObject({latest: preFS, supported: undefined});
+
+    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+      outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}}],
+      // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
+    });
+
+    const updated = await Channel.forId(channelId, w.knex);
+    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
+  });
+
+  // Copy and pasted from directly funded, changing only the fundingStrategy
+  it('signs the prefund setup and postfund setup, when there are no deposits to make', async () => {
+    const outcome = simpleEthAllocation([]);
+    const preFS = {turnNum: 0, outcome};
+    const postFS = {turnNum: 3, outcome};
+    const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)], fundingStrategy: 'Ledger'});
+    await Channel.query(w.knex).insert(c);
+
+    const outcomeWire = serializeOutcome(outcome);
+    const preFSWire = {turnNum: 0, outcome: outcomeWire};
+    const postFSWire = {turnNum: 3, outcome: outcomeWire};
+
+    const channelId = c.channelId;
+    const current = await Channel.forId(channelId, w.knex);
+    expect(current.latest).toMatchObject(preFS);
+
+    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+      outbox: [
+        {
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [preFSWire, postFSWire]},
+          },
+        },
+      ],
+      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
+      // implementation
+      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
+    });
+
+    const updated = await Channel.forId(channelId, w.knex);
+    expect(updated.protocolState).toMatchObject({latest: postFS, supported: preFS});
+  });
+
+  it.only('signs the prefund setup and makes a ledger request', async () => {
+    // FIXME: Put a ledger Channel in the DB
+    {
+      const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
+      const running = {turnNum: 4, outcome};
+      const ledger = channel({channelNonce:2 ,vars: [stateWithHashSignedBy(bob())(running)]});
+      await Channel.query(w.knex).insert(ledger);
+      w.__setLedger(ledger.channelId, outcome.assetHolderAddress)
+    }
+
+    const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
+    const preFS = {turnNum: 0, outcome};
+    const c = channel({
+      fundingStrategy: 'Ledger',
+      vars: [stateWithHashSignedBy(bob())(preFS)]
+    });
+    await Channel.query(w.knex).insert(c);
+
+    const channelId = c.channelId;
+    const current = await Channel.forId(channelId, w.knex);
+    expect(current.latest).toMatchObject(preFS);
+
+    const data = {signedStates: [preFS]};
+    const ret = await w.joinChannel({channelId})
+    console.log(JSON.stringify(ret, null, 2))
+    expect(ret).toMatchObject({
+      outbox: [
+        {method: 'MessageQueued', params: {recipient: 'bob', sender: 'alice', data}},
+      ],
+      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
+      // implementation
+      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
+    });
+
+    const updated = await Channel.forId(channelId, w.knex);
+    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
+  });
+
+})
 
 describe('virtually funded app', () => {
   it.skip('signs the prefund setup and messages the hub', async () => {

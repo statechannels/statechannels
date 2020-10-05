@@ -46,6 +46,7 @@ import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
+import { channel } from '../models/__test__/fixtures/channel';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -406,6 +407,13 @@ export class Wallet implements WalletInterface {
   // Should be called after wallet creation
   attachChainService(provider: OnchainServiceInterface): void {
     provider.attachChannelWallet(this);
+  }
+
+  __setLedger(ledgerChannelId: Bytes32, assetHolderAddress:Address): void {
+    this.store.ledgers[ledgerChannelId] = {
+      ledgerChannelId,
+      assetHolderAddress
+    }
   }
 
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
