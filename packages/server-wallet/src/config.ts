@@ -28,6 +28,7 @@ export interface ServerWalletConfig {
   workerThreadAmount: number;
   logLevel: pino.Level;
   logDestination?: string; // console or undefined will log to console
+  postgresPoolSize?: {max: number; min: number};
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -72,5 +73,6 @@ export function extractDBConfigFromServerWalletConfig(
       password: serverWalletConfig.postgresDBPassword,
     },
     ...knexSnakeCaseMappers(),
+    pool: serverWalletConfig.postgresPoolSize || {},
   };
 }
