@@ -127,6 +127,8 @@
     "@types/webpack-manifest-plugin": "2.1.0",
     "@types/webpack-merge": "4.1.5",
     "@types/workbox-webpack-plugin": "5.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
     "babel-loader": "8.1.0",
     "dotenv-webpack": "2.0.0",
     "eslint": "^7.10.0",
