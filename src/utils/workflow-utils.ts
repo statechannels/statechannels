@@ -70,7 +70,7 @@ export function getDataAndInvoke2<T>(
           autoForward: true
         }
       },
-      done: {type: 'final' as 'final'}
+      done: {type: 'final' as const}
     },
     onDone
   };
