@@ -10,7 +10,10 @@ import {ServerWalletConfig} from '../../config';
 import {isStateChannelWorkerData} from './worker-data';
 
 // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
-const walletConfig = {...(workerData as ServerWalletConfig), postgresPoolSize: {min: 0, max: 1}};
+const walletConfig: ServerWalletConfig = {
+  ...(workerData as ServerWalletConfig),
+  postgresPoolSize: {min: 0, max: 1},
+};
 
 const logger = createLogger(walletConfig);
 
