@@ -4,7 +4,7 @@ import {BigNumber, Contract, providers} from 'ethers';
 
 import {defaultConfig} from '../../config';
 import {Address} from '../../type-aliases';
-import {ChainService} from '../chain-service';
+import {ChainService, HoldingUpdatedArg} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -80,39 +80,42 @@ describe('registerChannel', () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();
     let counter = 0;
+    let resolve: () => void;
+    const p = new Promise(r => (resolve = r));
 
-    await new Promise(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        onHoldingUpdated: arg => {
-          switch (counter) {
-            case 0:
-              expect(arg).toMatchObject({
-                channelId,
-                assetHolderAddress: ethAssetHolderAddress,
-                amount: BN.from(0),
-              });
-              counter++;
-              fundChannel(0, 5, wrongChannelId);
-              fundChannel(0, 5, channelId);
-              break;
-            case 1:
-              expect(arg).toMatchObject({
-                channelId,
-                assetHolderAddress: ethAssetHolderAddress,
-                amount: BN.from(5),
-              });
-              counter++;
-              resolve();
-              break;
-            default:
-              throw new Error('Should not reach here');
-          }
-        },
-      })
-    );
+    const onHoldingUpdated = (arg: HoldingUpdatedArg): void => {
+      switch (counter) {
+        case 0:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: ethAssetHolderAddress,
+            amount: BN.from(0),
+          });
+          counter++;
+          fundChannel(0, 5, wrongChannelId);
+          fundChannel(0, 5, channelId);
+          break;
+        case 1:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: ethAssetHolderAddress,
+            amount: BN.from(5),
+          });
+          counter++;
+          resolve();
+          break;
+        default:
+          throw new Error('Should not reach here');
+      }
+    };
+
+    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      onHoldingUpdated,
+    });
+    await p;
   });
 
-  it('Receives correct initial holding', async () => {
+  it('Receives correct initial holding when holdings are not 0', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
 
@@ -129,4 +132,57 @@ describe('registerChannel', () => {
       })
     );
   });
+
+  it('Channel with multiple asset holders', async () => {
+    const channelId = randomChannelId();
+    let counter = 0;
+    let resolve: () => void;
+    const p = new Promise(r => (resolve = r));
+    const onHoldingUpdated = (arg: HoldingUpdatedArg): void => {
+      switch (counter) {
+        // todo: there is no guarantee that the initial callback for ethAssetHolder will be invoked
+        // before the callback for erc20AssetHolder
+        case 0:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: ethAssetHolderAddress,
+            amount: BN.from(0),
+          });
+          counter++;
+          break;
+        case 1:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: erc20AssetHolderAddress,
+            amount: BN.from(0),
+          });
+          counter++;
+          fundChannel(0, 5, channelId, ethAssetHolderAddress);
+          break;
+        case 2:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: ethAssetHolderAddress,
+            amount: BN.from(5),
+          });
+          counter++;
+          fundChannel(0, 5, channelId, erc20AssetHolderAddress);
+          break;
+        case 3:
+          expect(arg).toMatchObject({
+            channelId,
+            assetHolderAddress: erc20AssetHolderAddress,
+            amount: BN.from(5),
+          });
+          resolve();
+          break;
+        default:
+          throw new Error('Should not reach here');
+      }
+    };
+    chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
+      onHoldingUpdated,
+    });
+    await p;
+  }, 10_000);
 });
