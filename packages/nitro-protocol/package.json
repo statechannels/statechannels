@@ -12,7 +12,7 @@
   "devDependencies": {
     "@ethereum-waffle/compiler": "3.1.0",
     "@statechannels/devtools": "^0.3.10",
-    "@statechannels/jest-gas-reporter": "^0.3.9-alpha.0",
+    "@statechannels/jest-gas-reporter": "^0.3.10",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
