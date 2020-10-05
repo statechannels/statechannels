@@ -24,7 +24,7 @@ export interface ChainEventSubscriberInterface {
   onHoldingUpdated(arg: HoldingUpdatedArg): void;
 }
 
-export interface ChainEventEmitterInterface {
+interface ChainEventEmitterInterface {
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
@@ -32,7 +32,7 @@ export interface ChainEventEmitterInterface {
   ): void;
 }
 
-export interface ChainModifierInterface {
+interface ChainModifierInterface {
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
 }
 
