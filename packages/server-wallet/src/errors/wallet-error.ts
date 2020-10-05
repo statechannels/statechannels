@@ -19,6 +19,7 @@ export abstract class WalletError extends Error {
     super(reason);
   }
 }
+// eslint-disable-next-line @typescript-eslint/ban-types
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(
   obj: X,
   prop: Y
@@ -27,6 +28,7 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
   return obj.hasOwnProperty(prop);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isWalletError(error: any): error is WalletError {
   if (!error?.type) return false;
   if (!(typeof error.type === 'string' || error.type instanceof String)) return false;

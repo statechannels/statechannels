@@ -21,8 +21,6 @@ import {addEvtHandler} from './utils';
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
 import {Wallet as ChannelWallet} from '..';
 
-type Values<E> = E[keyof E];
-
 const getAssetHolderContract = (info: AssetHolderInformation): Contract => {
   // Make sure the contract object with the correct abi
   return new Contract(

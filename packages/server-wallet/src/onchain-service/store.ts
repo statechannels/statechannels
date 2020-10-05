@@ -5,19 +5,11 @@ import {
   ChannelEventRecord,
   OnchainServiceStoreInterface,
   ChannelEventRecordMap,
-  TransactionStatus,
-  TransactionStatusEventMap,
   NoncedMinimalTransaction,
   TransactionSubmissionStoreInterface,
   ChainEventNames,
 } from './types';
 import {isFundingEvent} from './utils';
-
-// TODO: This will definitely change when we use to a more permanent store
-type TransactionModel<T extends TransactionStatus> = {
-  status: T;
-  data: TransactionStatusEventMap[T];
-};
 
 export class TransactionSubmissionStore implements TransactionSubmissionStoreInterface {
   // NOTE: V0 has an in-memory store, which will eventually be

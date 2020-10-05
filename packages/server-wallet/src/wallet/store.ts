@@ -227,9 +227,9 @@ export class Store {
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
-      type: 'NotifyApp' as 'NotifyApp',
+      type: 'NotifyApp' as const,
       notice: {
-        method: 'MessageQueued' as 'MessageQueued',
+        method: 'MessageQueued' as const,
         params: serializeMessage(data, recipient, sender, channelId),
       },
     }));
