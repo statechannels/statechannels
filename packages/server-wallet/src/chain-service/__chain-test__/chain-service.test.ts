@@ -1,6 +1,6 @@
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN} from '@statechannels/wallet-core';
-import {BigNumber, Contract, providers, Wallet} from 'ethers';
+import {BigNumber, Contract, providers} from 'ethers';
 
 import {defaultConfig} from '../../config';
 import {Address} from '../../type-aliases';
@@ -9,13 +9,11 @@ import {ChainService} from '../chain-service';
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
 const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
-const erc20Address = process.env.ERC20_ADDRESS!;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-const ethWallet = new Wallet(defaultConfig.serverPrivateKey, provider);
 
 let chainService: ChainService;
 
@@ -67,12 +65,6 @@ describe('fundChannel', () => {
 
 it('Fund erc20', async () => {
   const channelId = randomChannelId();
-  const tokenContract: Contract = new Contract(
-    erc20Address,
-    ContractArtifacts.TokenArtifact.abi,
-    ethWallet
-  );
-  await (await tokenContract.increaseAllowance(erc20AssetHolderAddress, BN.from(5))).wait();
 
   await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
   const contract: Contract = new Contract(
