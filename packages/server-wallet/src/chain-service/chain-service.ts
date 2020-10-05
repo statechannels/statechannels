@@ -68,6 +68,7 @@ export class ChainService implements ChainServiceInterface {
   async destructor(): Promise<void> {
     this.provider.removeAllListeners();
     this.provider.polling = false;
+    this.addressToContract.forEach(contract => contract.removeAllListeners());
   }
 
   private addContractMapping(assetHolderAddress: Address, abiType: AbiType): Contract {
@@ -125,7 +126,7 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return this.ethWallet.sendTransaction({
+    return await this.ethWallet.sendTransaction({
       ...transactionRequest,
     });
   }
@@ -138,7 +139,7 @@ export class ChainService implements ChainServiceInterface {
     assetHolders.map(async assetHolder => {
       const obs = this.getOrAddContractObservable(assetHolder);
       // Fetch the current contract holding, and emit as an event
-      const contract = this.addressToContract.get(assetHolder);
+      const contract = this.getOrAddContractMapping(assetHolder, 'AssetHolder');
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
       const currentHolding = from(
         (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
