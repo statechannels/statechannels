@@ -4,7 +4,7 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.3.10-alpha.1",
+  "version": "0.3.10",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
