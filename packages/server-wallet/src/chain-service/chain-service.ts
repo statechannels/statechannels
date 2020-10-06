@@ -28,6 +28,7 @@ export type FundChannelArg = {
   assetHolderAddress: Address;
   expectedHeld: Uint256;
   amount: Uint256;
+  allowanceAlreadyIncreased?: boolean;
 };
 
 export interface ChainEventSubscriberInterface {
@@ -114,7 +115,8 @@ export class ChainService implements ChainServiceInterface {
       ? createETHDepositTransaction
       : createERC20DepositTransaction;
 
-    if (!isEthFunding) {
+    // if the argument object does not specify increaseAllowance, assume true
+    if (!isEthFunding && !arg.allowanceAlreadyIncreased) {
       const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress, 'AssetHolder');
       const tokenAddress = await assetHolderContract.Token();
       const tokenContract = this.getOrAddContractMapping(tokenAddress, 'Token');

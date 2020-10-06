@@ -75,7 +75,6 @@
   },
   "main": "lib/src/index.js",
   "scripts": {
-    "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "db:create": "createdb server_wallet_${NODE_ENV}",
     "db:drop": "dropdb server_wallet_${NODE_ENV}",
     "db:migrate": "npx knex migrate:latest --cwd src/db-admin",
