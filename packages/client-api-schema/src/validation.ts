@@ -51,6 +51,7 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
  * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsRequest}
  * @returns The input, but with the correct type, if it is valid.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function parseRequest(jsonBlob: object): StateChannelsRequest {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
@@ -67,6 +68,7 @@ export function parseRequest(jsonBlob: object): StateChannelsRequest {
  * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsResponse}
  * @returns The input, but with the correct type, if it is valid.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function parseResponse(jsonBlob: object): StateChannelsResponse {
   const valid = validateResponse(jsonBlob);
   if (!valid) {
@@ -87,6 +89,7 @@ export function parseResponse(jsonBlob: object): StateChannelsResponse {
  * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsNotification}
  * @returns The input, but with the correct type, if it is valid.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function parseNotification(jsonBlob: object): StateChannelsNotification {
   const valid = validateNotification(jsonBlob);
   if (!valid) {
@@ -107,6 +110,7 @@ export function parseNotification(jsonBlob: object): StateChannelsNotification {
  * @param jsonBlob - A javascript object that might be a valid {@link StateChannelsErrorResponse}
  * @returns The input, but with the correct type, if it is valid.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function parseErrorResponse(jsonBlob: object): StateChannelsErrorResponse {
   const valid = validateErrorResponse(jsonBlob);
   if (!valid) {

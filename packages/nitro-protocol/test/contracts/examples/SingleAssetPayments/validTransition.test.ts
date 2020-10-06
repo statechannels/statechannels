@@ -1,4 +1,3 @@
-// @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
 

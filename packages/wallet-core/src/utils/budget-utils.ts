@@ -1,4 +1,4 @@
-import {Zero} from '@ethersproject/constants';
+import {constants} from 'ethers';
 import * as _ from 'lodash';
 
 import {DomainBudget, AssetBudget} from '../types';
@@ -14,8 +14,8 @@ export function ethBudget(domain: string, opts: Partial<AssetBudget>): DomainBud
       [ETH_ASSET_HOLDER_ADDRESS]: _.assign(
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          availableReceiveCapacity: Zero,
-          availableSendCapacity: Zero,
+          availableReceiveCapacity: constants.Zero,
+          availableSendCapacity: constants.Zero,
           channels: {}
         },
         opts

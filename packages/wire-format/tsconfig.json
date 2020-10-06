@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "src",
     "lib": ["es6"],
     "esModuleInterop": true,
     "resolveJsonModule": true,

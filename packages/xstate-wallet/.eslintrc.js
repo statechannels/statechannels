@@ -36,7 +36,9 @@ module.exports = {
     ...leftoverTsLintRules,
 
     'no-restricted-imports': ['error', {patterns: ['**/lib', '**/src']}],
-    'arrow-body-style': 'error'
+    'arrow-body-style': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/ban-types': 'off'
   },
 
   overrides: [

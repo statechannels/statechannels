@@ -26,9 +26,8 @@ import {
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-import {HashZero} from '@ethersproject/constants';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
-import {ethers} from 'ethers';
+import {ethers, constants} from 'ethers';
 import Knex from 'knex';
 
 import {
@@ -97,7 +96,7 @@ export class Store {
     return {
       participantId: signingAddress,
       signingAddress,
-      destination: makeDestination(HashZero),
+      destination: makeDestination(constants.HashZero),
     };
   }
 
@@ -228,9 +227,9 @@ export class Store {
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
-      type: 'NotifyApp' as 'NotifyApp',
+      type: 'NotifyApp' as const,
       notice: {
-        method: 'MessageQueued' as 'MessageQueued',
+        method: 'MessageQueued' as const,
         params: serializeMessage(data, recipient, sender, channelId),
       },
     }));
@@ -381,7 +380,10 @@ export class Store {
       maybeChannel ||
       (await timer('get channel', async () => getChannel(channelId, tx))) ||
       (await createChannel(
-        {...wireSignedState, participants: wireSignedState.participants.map(convertToParticipant)},
+        {
+          ...wireSignedState,
+          participants: wireSignedState.participants.map(convertToParticipant),
+        },
         'Unknown',
         tx
       ));

@@ -7,7 +7,7 @@ import {
   ChannelResult,
   ChannelStatus
 } from '@statechannels/client-api-schema';
-import {AddressZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
 
 import {
   Allocation,
@@ -30,7 +30,7 @@ export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
       amount: formatAmount(BN.from(assetBudget.channels[channelId].amount))
     }));
     return {
-      token: tokenAddress(assetHolderAddress) || AddressZero,
+      token: tokenAddress(assetHolderAddress) || constants.AddressZero,
       availableReceiveCapacity: formatAmount(assetBudget.availableReceiveCapacity),
       availableSendCapacity: formatAmount(assetBudget.availableSendCapacity),
       channels

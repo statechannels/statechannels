@@ -6,6 +6,7 @@ export interface SyncChannelParams {
   channelId: ChannelId;
 }
 export type SyncChannelRequest = JsonRpcRequest<'SyncChannel', SyncChannelParams>;
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type SyncChannelResponse = JsonRpcResponse<{}>;
 
 type ErrorCodes = AllErrors['SyncChannel'];

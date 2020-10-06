@@ -4,12 +4,16 @@
     // We build for the browser and need to use import assignment for some modules
     // (i.e., eventemitter3) which is forbidden when targeting ECMAScript modules.
     "module": "commonjs",
+    "baseUrl": "src",
     "esModuleInterop": true,
     "removeComments": false,
     "declarationDir": "dist",
     "outDir": "dist",
     "jsx": "preserve",
-    "target": "es5"
+    "target": "es5",
+    "types": ["node", "jest"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  "exclude": ["./node_modules"],
+  "references": [{"path": "../client-api-schema"}]
 }

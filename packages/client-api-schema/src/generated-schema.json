@@ -223,7 +223,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22CloseAndWithdraw%22%2CCloseAndWithdrawParams%3E"
     },
     "CloseAndWithdrawResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-736846332-356-374-736846332-339-375-736846332-300-376-736846332-0-498%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-1049299556-356-374-1049299556-339-375-1049299556-300-376-1049299556-0-498%3E"
     },
     "CloseChannelError": {
       "anyOf": [
@@ -333,10 +333,10 @@
       "$ref": "#/definitions/JsonRpcError%3C100%2C%22Ethereum%20Not%20Enabled%22%3E"
     },
     "EnableEthereumRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-721393493-238-241-721393493-205-242-721393493-168-243-721393493-0-517%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22EnableEthereum%22%2Cstructure-152724555-295-298-152724555-262-299-152724555-168-300-152724555-0-574%3E"
     },
     "EnableEthereumResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-721393493-297-383-721393493-280-384-721393493-243-385-721393493-0-517%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-152724555-354-440-152724555-337-441-152724555-300-442-152724555-0-574%3E"
     },
     "FundingStrategy": {
       "enum": [
@@ -364,13 +364,13 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetBudget%22%2CGetBudgetParams%3E"
     },
     "GetBudgetResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-45911622-322-325-45911622-308-325-45911622-291-326-45911622-259-327-45911622-0-328)%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3C(DomainBudget%7Cstructure-310555162-379-382-310555162-365-382-310555162-348-383-310555162-259-384-310555162-0-385)%3E"
     },
     "GetChannelsRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-946177841-247-273-946177841-217-274-946177841-184-275-946177841-0-344%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src%2Fdata-types.ts-2747-3043-src%2Fdata-types.ts-0-3460%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-2747-3043-src_data-types.ts-0-3460%5B%5D%3E"
     },
     "GetStateError": {
       "$ref": "#/definitions/JsonRpcError%3C1200%2C%22Could%20not%20find%20channel%22%3E"
@@ -394,16 +394,16 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "GetWalletInformationRequest": {
-      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-825486248-193-196-825486248-154-197-825486248-111-198-825486248-0-359%3E"
+      "$ref": "#/definitions/JsonRpcRequest%3C%22GetWalletInformation%22%2Cstructure-91574456-250-253-91574456-211-254-91574456-111-255-91574456-0-416%3E"
     },
     "GetWalletInformationResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-825486248-258-356-825486248-241-357-825486248-198-358-825486248-0-359%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-91574456-315-413-91574456-298-414-91574456-255-415-91574456-0-416%3E"
     },
     "InvalidAppData": {
-      "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-1165839259-912-932-1165839259-844-934-1165839259-815-935-1165839259-0-1239%3E"
+      "$ref": "#/definitions/JsonRpcError%3C402%2C%22Invalid%20app%20data%22%2Cstructure-778394619-912-932-778394619-844-934-778394619-815-935-778394619-0-1239%3E"
     },
     "InvalidTransition": {
-      "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-1165839259-742-812-1165839259-669-814-1165839259-637-815-1165839259-0-1239%3E"
+      "$ref": "#/definitions/JsonRpcError%3C401%2C%22Invalid%20transition%22%2Cstructure-778394619-742-812-778394619-669-814-778394619-637-815-778394619-0-1239%3E"
     },
     "JoinChannelError": {
       "anyOf": [
@@ -438,10 +438,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 100,
           "description": "Error code",
-          "enum": [
-            100
-          ],
           "type": "number"
         },
         "data": {
@@ -450,10 +448,8 @@
           }
         },
         "message": {
+          "const": "Ethereum Not Enabled",
           "description": "Error message",
-          "enum": [
-            "Ethereum Not Enabled"
-          ],
           "type": "string"
         }
       },
@@ -468,10 +464,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1000,
           "description": "Error code",
-          "enum": [
-            1000
-          ],
           "type": "number"
         },
         "data": {
@@ -480,10 +474,8 @@
           }
         },
         "message": {
+          "const": "Could not find signing address",
           "description": "Error message",
-          "enum": [
-            "Could not find signing address"
-          ],
           "type": "string"
         }
       },
@@ -498,10 +490,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1001,
           "description": "Error code",
-          "enum": [
-            1001
-          ],
           "type": "number"
         },
         "data": {
@@ -510,10 +500,8 @@
           }
         },
         "message": {
+          "const": "Invalid App Definition",
           "description": "Error message",
-          "enum": [
-            "Invalid App Definition"
-          ],
           "type": "string"
         }
       },
@@ -528,10 +516,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1002,
           "description": "Error code",
-          "enum": [
-            1002
-          ],
           "type": "number"
         },
         "data": {
@@ -540,10 +526,8 @@
           }
         },
         "message": {
+          "const": "This token is not supported",
           "description": "Error message",
-          "enum": [
-            "This token is not supported"
-          ],
           "type": "string"
         }
       },
@@ -558,10 +542,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1100,
           "description": "Error code",
-          "enum": [
-            1100
-          ],
           "type": "number"
         },
         "data": {
@@ -570,10 +552,8 @@
           }
         },
         "message": {
+          "const": "Could not find channel",
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
           "type": "string"
         }
       },
@@ -588,10 +568,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1101,
           "description": "Error code",
-          "enum": [
-            1101
-          ],
           "type": "number"
         },
         "data": {
@@ -600,10 +578,8 @@
           }
         },
         "message": {
+          "const": "Invalid Transition",
           "description": "Error message",
-          "enum": [
-            "Invalid Transition"
-          ],
           "type": "string"
         }
       },
@@ -618,10 +594,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1200,
           "description": "Error code",
-          "enum": [
-            1200
-          ],
           "type": "number"
         },
         "data": {
@@ -630,10 +604,8 @@
           }
         },
         "message": {
+          "const": "Could not find channel",
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
           "type": "string"
         }
       },
@@ -648,10 +620,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 1300,
           "description": "Error code",
-          "enum": [
-            1300
-          ],
           "type": "number"
         },
         "data": {
@@ -660,10 +630,8 @@
           }
         },
         "message": {
+          "const": "Could not find channel",
           "description": "Error message",
-          "enum": [
-            "Could not find channel"
-          ],
           "type": "string"
         }
       },
@@ -678,10 +646,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 200,
           "description": "Error code",
-          "enum": [
-            200
-          ],
           "type": "number"
         },
         "data": {
@@ -690,10 +656,8 @@
           }
         },
         "message": {
+          "const": "User declined",
           "description": "Error message",
-          "enum": [
-            "User declined"
-          ],
           "type": "string"
         }
       },
@@ -708,10 +672,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 300,
           "description": "Error code",
-          "enum": [
-            300
-          ],
           "type": "number"
         },
         "data": {
@@ -720,10 +682,8 @@
           }
         },
         "message": {
+          "const": "Not your turn",
           "description": "Error message",
-          "enum": [
-            "Not your turn"
-          ],
           "type": "string"
         }
       },
@@ -738,10 +698,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 301,
           "description": "Error code",
-          "enum": [
-            301
-          ],
           "type": "number"
         },
         "data": {
@@ -750,10 +708,8 @@
           }
         },
         "message": {
+          "const": "Channel not found",
           "description": "Error message",
-          "enum": [
-            "Channel not found"
-          ],
           "type": "string"
         }
       },
@@ -768,10 +724,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 400,
           "description": "Error code",
-          "enum": [
-            400
-          ],
           "type": "number"
         },
         "data": {
@@ -780,10 +734,8 @@
           }
         },
         "message": {
+          "const": "Channel not found",
           "description": "Error message",
-          "enum": [
-            "Channel not found"
-          ],
           "type": "string"
         }
       },
@@ -793,15 +745,13 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<401,\"Invalid transition\",structure-1165839259-742-812-1165839259-669-814-1165839259-637-815-1165839259-0-1239>": {
+    "JsonRpcError<401,\"Invalid transition\",structure-778394619-742-812-778394619-669-814-778394619-637-815-778394619-0-1239>": {
       "additionalProperties": false,
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 401,
           "description": "Error code",
-          "enum": [
-            401
-          ],
           "type": "number"
         },
         "data": {
@@ -822,10 +772,8 @@
           "type": "object"
         },
         "message": {
+          "const": "Invalid transition",
           "description": "Error message",
-          "enum": [
-            "Invalid transition"
-          ],
           "type": "string"
         }
       },
@@ -835,15 +783,13 @@
       ],
       "type": "object"
     },
-    "JsonRpcError<402,\"Invalid app data\",structure-1165839259-912-932-1165839259-844-934-1165839259-815-935-1165839259-0-1239>": {
+    "JsonRpcError<402,\"Invalid app data\",structure-778394619-912-932-778394619-844-934-778394619-815-935-778394619-0-1239>": {
       "additionalProperties": false,
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 402,
           "description": "Error code",
-          "enum": [
-            402
-          ],
           "type": "number"
         },
         "data": {
@@ -860,10 +806,8 @@
           "type": "object"
         },
         "message": {
+          "const": "Invalid app data",
           "description": "Error message",
-          "enum": [
-            "Invalid app data"
-          ],
           "type": "string"
         }
       },
@@ -878,10 +822,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 403,
           "description": "Error code",
-          "enum": [
-            403
-          ],
           "type": "number"
         },
         "data": {
@@ -890,10 +832,8 @@
           }
         },
         "message": {
+          "const": "Not your turn",
           "description": "Error message",
-          "enum": [
-            "Not your turn"
-          ],
           "type": "string"
         }
       },
@@ -908,10 +848,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 404,
           "description": "Error code",
-          "enum": [
-            404
-          ],
           "type": "number"
         },
         "data": {
@@ -920,10 +858,8 @@
           }
         },
         "message": {
+          "const": "Channel closed",
           "description": "Error message",
-          "enum": [
-            "Channel closed"
-          ],
           "type": "string"
         }
       },
@@ -938,10 +874,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 500,
           "description": "Error code",
-          "enum": [
-            500
-          ],
           "type": "number"
         },
         "data": {
@@ -950,10 +884,8 @@
           }
         },
         "message": {
+          "const": "Wallet error",
           "description": "Error message",
-          "enum": [
-            "Wallet error"
-          ],
           "type": "string"
         }
       },
@@ -968,10 +900,8 @@
       "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "code": {
+          "const": 900,
           "description": "Error code",
-          "enum": [
-            900
-          ],
           "type": "number"
         },
         "data": {
@@ -980,10 +910,8 @@
           }
         },
         "message": {
+          "const": "Wrong participant",
           "description": "Error message",
-          "enum": [
-            "Wrong participant"
-          ],
           "type": "string"
         }
       },
@@ -1006,10 +934,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         }
       },
@@ -1025,17 +951,13 @@
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "BudgetUpdated",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "BudgetUpdated"
-          ],
           "type": "string"
         },
         "params": {
@@ -1055,17 +977,13 @@
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "ChannelClosed",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelClosed"
-          ],
           "type": "string"
         },
         "params": {
@@ -1085,17 +1003,13 @@
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "ChannelProposed",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelProposed"
-          ],
           "type": "string"
         },
         "params": {
@@ -1115,17 +1029,13 @@
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "ChannelUpdated",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "ChannelUpdated"
-          ],
           "type": "string"
         },
         "params": {
@@ -1145,17 +1055,13 @@
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "MessageQueued",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "MessageQueued"
-          ],
           "type": "string"
         },
         "params": {
@@ -1170,22 +1076,18 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"UIUpdate\",structure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427>": {
+    "JsonRpcNotification<\"UIUpdate\",structure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1484>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "UIUpdate",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "UIUpdate"
-          ],
           "type": "string"
         },
         "params": {
@@ -1209,22 +1111,18 @@
       ],
       "type": "object"
     },
-    "JsonRpcNotification<\"WalletReady\",structure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427>": {
+    "JsonRpcNotification<\"WalletReady\",structure-148781504-1011-1014-148781504-976-1015-148781504-893-1016-148781504-0-1484>": {
       "additionalProperties": false,
       "description": "Specifies notification headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "WalletReady",
           "description": "Generic type of the Notification name",
-          "enum": [
-            "WalletReady"
-          ],
           "type": "string"
         },
         "params": {
@@ -1249,17 +1147,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "ApproveBudgetAndFund",
           "description": "Generic type of the request method",
-          "enum": [
-            "ApproveBudgetAndFund"
-          ],
           "type": "string"
         },
         "params": {
@@ -1284,17 +1178,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "ChallengeChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "ChallengeChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1319,17 +1209,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "CloseAndWithdraw",
           "description": "Generic type of the request method",
-          "enum": [
-            "CloseAndWithdraw"
-          ],
           "type": "string"
         },
         "params": {
@@ -1354,17 +1240,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "CloseChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "CloseChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1389,17 +1271,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "CreateChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "CreateChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1415,7 +1293,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"EnableEthereum\",structure-721393493-238-241-721393493-205-242-721393493-168-243-721393493-0-517>": {
+    "JsonRpcRequest<\"EnableEthereum\",structure-152724555-295-298-152724555-262-299-152724555-168-300-152724555-0-574>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1424,17 +1302,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "EnableEthereum",
           "description": "Generic type of the request method",
-          "enum": [
-            "EnableEthereum"
-          ],
           "type": "string"
         },
         "params": {
@@ -1460,17 +1334,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "GetBudget",
           "description": "Generic type of the request method",
-          "enum": [
-            "GetBudget"
-          ],
           "type": "string"
         },
         "params": {
@@ -1486,7 +1356,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetChannels\",structure-946177841-247-273-946177841-217-274-946177841-184-275-946177841-0-344>": {
+    "JsonRpcRequest<\"GetChannels\",structure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1495,17 +1365,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "GetChannels",
           "description": "Generic type of the request method",
-          "enum": [
-            "GetChannels"
-          ],
           "type": "string"
         },
         "params": {
@@ -1536,17 +1402,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "GetState",
           "description": "Generic type of the request method",
-          "enum": [
-            "GetState"
-          ],
           "type": "string"
         },
         "params": {
@@ -1562,7 +1424,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcRequest<\"GetWalletInformation\",structure-825486248-193-196-825486248-154-197-825486248-111-198-825486248-0-359>": {
+    "JsonRpcRequest<\"GetWalletInformation\",structure-91574456-250-253-91574456-211-254-91574456-111-255-91574456-0-416>": {
       "additionalProperties": false,
       "description": "Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1571,17 +1433,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "GetWalletInformation",
           "description": "Generic type of the request method",
-          "enum": [
-            "GetWalletInformation"
-          ],
           "type": "string"
         },
         "params": {
@@ -1607,17 +1465,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "JoinChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "JoinChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1642,17 +1496,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "PushMessage",
           "description": "Generic type of the request method",
-          "enum": [
-            "PushMessage"
-          ],
           "type": "string"
         },
         "params": {
@@ -1677,17 +1527,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "SyncChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "SyncChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1712,17 +1558,13 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "method": {
+          "const": "UpdateChannel",
           "description": "Generic type of the request method",
-          "enum": [
-            "UpdateChannel"
-          ],
           "type": "string"
         },
         "params": {
@@ -1738,7 +1580,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<(DomainBudget|structure-45911622-322-325-45911622-308-325-45911622-291-326-45911622-259-327-45911622-0-328)>": {
+    "JsonRpcResponse<(DomainBudget|structure-310555162-379-382-310555162-365-382-310555162-348-383-310555162-259-384-310555162-0-385)>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1747,10 +1589,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1782,10 +1622,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1809,10 +1647,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1836,10 +1672,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1854,7 +1688,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src/data-types.ts-2747-3043-src/data-types.ts-0-3460[]>": {
+    "JsonRpcResponse<def-interface-src_data-types.ts-2747-3043-src_data-types.ts-0-3460[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1863,10 +1697,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1884,7 +1716,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-160360211-381-383-160360211-364-384-160360211-330-385-160360211-0-570>": {
+    "JsonRpcResponse<structure-1049299556-356-374-1049299556-339-375-1049299556-300-376-1049299556-0-498>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1893,10 +1725,42 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
+          "type": "string"
+        },
+        "result": {
+          "additionalProperties": false,
+          "description": "The generic type of the response",
+          "properties": {
+            "success": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "success"
           ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JsonRpcResponse<structure-1193164467-438-440-1193164467-421-441-1193164467-330-442-1193164467-0-627>": {
+      "additionalProperties": false,
+      "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
+      "properties": {
+        "id": {
+          "description": "Identifier for the response",
+          "type": "number"
+        },
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "Spec version",
           "type": "string"
         },
         "result": {
@@ -1912,7 +1776,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-721393493-297-383-721393493-280-384-721393493-243-385-721393493-0-517>": {
+    "JsonRpcResponse<structure-152724555-354-440-152724555-337-441-152724555-300-442-152724555-0-574>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1921,10 +1785,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -1956,7 +1818,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<structure-736846332-356-374-736846332-339-375-736846332-300-376-736846332-0-498>": {
+    "JsonRpcResponse<structure-91574456-315-413-91574456-298-414-91574456-255-415-91574456-0-416>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1965,46 +1827,8 @@
           "type": "number"
         },
         "jsonrpc": {
+          "const": "2.0",
           "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "additionalProperties": false,
-          "description": "The generic type of the response",
-          "properties": {
-            "success": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "success"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "JsonRpcResponse<structure-825486248-258-356-825486248-241-357-825486248-198-358-825486248-0-359>": {
-      "additionalProperties": false,
-      "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
-      "properties": {
-        "id": {
-          "description": "Identifier for the response",
-          "type": "number"
-        },
-        "jsonrpc": {
-          "description": "Spec version",
-          "enum": [
-            "2.0"
-          ],
           "type": "string"
         },
         "result": {
@@ -2295,7 +2119,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22SyncChannel%22%2CSyncChannelParams%3E"
     },
     "SyncChannelResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-160360211-381-383-160360211-364-384-160360211-330-385-160360211-0-570%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cstructure-1193164467-438-440-1193164467-421-441-1193164467-330-442-1193164467-0-627%3E"
     },
     "TokenBudget": {
       "additionalProperties": false,
@@ -2325,7 +2149,7 @@
       "type": "object"
     },
     "UiNotification": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-683137520-869-891-683137520-837-892-683137520-808-893-683137520-0-1427%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22UIUpdate%22%2Cstructure-148781504-869-891-148781504-837-892-148781504-808-893-148781504-0-1484%3E"
     },
     "Uint256": {
       "description": "Uint256",
@@ -2384,7 +2208,7 @@
       "$ref": "#/definitions/JsonRpcResponse%3CChannelResult%3E"
     },
     "WalletReady": {
-      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-683137520-954-957-683137520-919-958-683137520-893-959-683137520-0-1427%3E"
+      "$ref": "#/definitions/JsonRpcNotification%3C%22WalletReady%22%2Cstructure-148781504-1011-1014-148781504-976-1015-148781504-893-1016-148781504-0-1484%3E"
     }
   }
 }

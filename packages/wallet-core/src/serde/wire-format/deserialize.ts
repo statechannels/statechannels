@@ -70,12 +70,11 @@ export function hashWireState(state: SignedStateWire) {
 }
 
 export function deserializeState(state: SignedStateWire): SignedState {
-  const stateWithoutChannelId = {...state};
-  delete stateWithoutChannelId.channelId;
   const deserializedState = {
-    ...stateWithoutChannelId,
+    ...state,
+    channelId: undefined,
     outcome: deserializeOutcome(state.outcome),
-    participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
+    participants: state.participants.map(convertToInternalParticipant)
   };
 
   return {

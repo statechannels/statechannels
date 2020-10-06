@@ -45,6 +45,7 @@ export const addEvtHandler = (
 
 export const logger = pino();
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isFundingEvent(e: any): e is FundingEvent {
   if (!e?.transactionHash) return false;
   if (!e?.blockNumber) return false;

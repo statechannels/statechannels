@@ -12,6 +12,7 @@ type PushMessageRequest = {
 
 export type StateChannelWorkerData = UpdateChannelRequest | PushMessageRequest;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isStateChannelWorkerData(data: any): data is StateChannelWorkerData {
   return (
     'operation' in data && (data.operation === 'UpdateChannel' || data.operation === 'PushMessage')

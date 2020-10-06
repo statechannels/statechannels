@@ -5,6 +5,7 @@ import {Config} from 'knex';
 // Populate env vars as knexfile is used directly in yarn scripts
 // FIXME We should not need to depend on devtools at this step.
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@statechannels/devtools').configureEnvVariables();
 } catch (err) {
   if (/Cannot find module '@statechannels\/devtools'/.test(err.message))

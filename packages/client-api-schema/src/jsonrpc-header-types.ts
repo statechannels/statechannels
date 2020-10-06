@@ -2,6 +2,7 @@
  * Specifies request headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
   /**
    * Identifier for the resquest
@@ -27,6 +28,7 @@ export interface JsonRpcRequest<MethodName = string, RequestParams = object> {
  * Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }
  * @beta
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface JsonRpcResponse<ResponseType = object> {
   /**
    * Identifier for the response
@@ -93,6 +95,7 @@ export interface JsonRpcErrorResponse<Error = any> {
  */
 export interface JsonRpcNotification<
   NotificationName extends string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
   NotificationParams extends object
 > {
   /**
@@ -118,7 +121,8 @@ function isJsonRpc(message: unknown): boolean {
  * @returns true if the message is a JSON-RPC request, false otherwise
  * @beta
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
   return (
     isJsonRpc(message) &&
@@ -136,7 +140,9 @@ export function isJsonRpcRequest(message: any): message is JsonRpcRequest {
  * @returns true if the message is a JSON-RPC notification, false otherwise
  * @beta
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function isJsonRpcNotification<Name extends string, Params extends object>(
+  // eslint-disable-next-line @typescript-eslint/ban-types
   message: object
 ): message is JsonRpcNotification<Name, Params> {
   return isJsonRpc(message) && 'method' in message && !('id' in message);
@@ -147,7 +153,9 @@ export function isJsonRpcNotification<Name extends string, Params extends object
  * @returns true if the message is a JSON-RPC response, false otherwis
  * @beta
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function isJsonRpcResponse<ResponseType = object>(
+  // eslint-disable-next-line @typescript-eslint/ban-types
   message: object
 ): message is JsonRpcResponse<ResponseType> {
   return isJsonRpc(message) && 'result' in message;
@@ -159,6 +167,7 @@ export function isJsonRpcResponse<ResponseType = object>(
  * @beta
  */
 export function isJsonRpcErrorResponse<Code extends number, Message, Data = undefined>(
+  // eslint-disable-next-line @typescript-eslint/ban-types
   message: object
 ): message is JsonRpcErrorResponse<JsonRpcError<Code, Message, Data>> {
   return isJsonRpc(message) && 'id' in message && 'error' in message;

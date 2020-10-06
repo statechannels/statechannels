@@ -319,11 +319,13 @@ export class Channel extends Model implements RequiredColumns {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isChannelError(err: any): err is ChannelError {
   if (err.type === WalletError.errors.ChannelError) return true;
   return false;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isChannelMissingError(err: any): err is ChannelError {
   if (isChannelError(err) && err.reason === ChannelError.reasons.channelMissing) {
     return true;

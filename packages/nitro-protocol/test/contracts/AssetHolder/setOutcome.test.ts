@@ -1,4 +1,3 @@
-// @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, utils} from 'ethers';
 const {id, keccak256} = utils;

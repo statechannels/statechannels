@@ -97,7 +97,7 @@ export function getChallengeClearedEvent(
 ): ChallengeClearedEvent {
   const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
 
-  // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+  // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
   const decodedTransaction = new Interface(NitroAdjudicatorArtifact.abi).parseTransaction(tx);
 
   if (decodedTransaction.name === 'respond') {

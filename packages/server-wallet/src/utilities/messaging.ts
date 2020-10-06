@@ -36,7 +36,7 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
   }
   return Object.keys(mergedOutgoing).map(k => ({
     params: {sender, recipient: k, data: mergedOutgoing[k]},
-    method: 'MessageQueued' as 'MessageQueued',
+    method: 'MessageQueued' as const,
   }));
 }
 

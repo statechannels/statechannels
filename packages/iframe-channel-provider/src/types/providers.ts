@@ -71,7 +71,6 @@ export interface Web3ChannelProviderInterface extends ChannelProviderInterface {
  * the application.
  * @beta
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IFrameChannelProviderInterface extends Web3ChannelProviderInterface {
   /**
    * Trigger the mounting of the <iframe/> element which loads the wallet.

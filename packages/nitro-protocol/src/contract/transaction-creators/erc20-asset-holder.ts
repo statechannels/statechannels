@@ -5,7 +5,6 @@ import {Allocation, Guarantee, Outcome} from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
-// @ts-ignore
 const Erc20AssetHolderContractInterface = new ethers.utils.Interface(Erc20AssetHolderArtifact.abi);
 
 export function createTransferAllTransaction(

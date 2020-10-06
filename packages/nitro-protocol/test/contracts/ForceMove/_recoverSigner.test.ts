@@ -1,4 +1,3 @@
-// @ts-ignore
 import {Contract, Wallet, ethers} from 'ethers';
 const {arrayify, id} = ethers.utils;
 

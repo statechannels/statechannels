@@ -12,6 +12,7 @@ export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', Ch
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
 export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type WalletReady = JsonRpcNotification<'WalletReady', {}>;
 
 export type StateChannelsNotification =

@@ -10,9 +10,8 @@ import {
   convertAddressToBytes32,
   convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature} from '@ethersproject/bytes';
 import * as _ from 'lodash';
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
 
 import {
   State,
@@ -28,7 +27,11 @@ import {BN} from './bignumber';
 
 export function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
-  const channel = {channelNonce, chainId, participants: participants.map(x => x.signingAddress)};
+  const channel = {
+    channelNonce,
+    chainId,
+    participants: participants.map(x => x.signingAddress)
+  };
 
   return {
     ..._.pick(state, 'appData', 'isFinal', 'challengeDuration', 'appDefinition', 'turnNum'),
@@ -63,7 +66,7 @@ export function fromNitroState(state: NitroState): State {
 export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
   const state = toNitroState(signedState);
   const {signatures} = signedState;
-  return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
+  return signatures.map(sig => ({state, signature: utils.splitSignature(sig.signature)}));
 }
 
 export function calculateChannelId(channelConstants: ChannelConstants): string {
@@ -76,12 +79,12 @@ export function createSignatureEntry(state: State, privateKey: string): Signatur
   const {address} = new Wallet(privateKey);
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return {signature: joinSignature(signature), signer: address};
+  return {signature: utils.joinSignature(signature), signer: address};
 }
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return joinSignature(signature);
+  return utils.joinSignature(signature);
 }
 
 export function hashState(state: State): string {
@@ -91,7 +94,7 @@ export function hashState(state: State): string {
 
 export function getSignerAddress(state: State, signature: string): string {
   const nitroState = toNitroState(state);
-  return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
+  return getNitroSignerAddress({state: nitroState, signature: utils.splitSignature(signature)});
 }
 
 export function statesEqual(left: State, right: State) {

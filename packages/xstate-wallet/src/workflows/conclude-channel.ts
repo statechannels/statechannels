@@ -77,7 +77,7 @@ const virtualDefunding = {
       }
     },
     asHub: {invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}},
-    success: {type: 'final' as 'final'}
+    success: {type: 'final' as const}
   },
   onDone: 'success'
 };

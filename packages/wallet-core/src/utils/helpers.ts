@@ -1,4 +1,4 @@
-import {hexZeroPad} from '@ethersproject/bytes';
+import {utils} from 'ethers';
 
 import {BN} from '../bignumber';
 import {Uint256} from '../types';
@@ -22,11 +22,11 @@ export function checkThat<T, S = undefined>(t: T | S, isTypeT: TypeGuard<T, S>):
 }
 
 export function createDestination(address: string): string {
-  return hexZeroPad(address, 32);
+  return utils.hexZeroPad(address, 32);
 }
 
 export function formatAmount(amount: Uint256): Uint256 {
-  return hexZeroPad(BN.from(amount), 32) as Uint256;
+  return utils.hexZeroPad(BN.from(amount), 32) as Uint256;
 }
 
 export function arrayToRecord<T, K extends keyof T>(

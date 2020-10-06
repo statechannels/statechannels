@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils} from 'ethers';
 
-// @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {

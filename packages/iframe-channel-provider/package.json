@@ -15,24 +15,27 @@
     ]
   },
   "dependencies": {
+    "@statechannels/client-api-schema": "^0.3.9-alpha.0",
     "eventemitter3": "4.0.0",
     "guid-typescript": "1.0.9",
+    "lodash": "^4.17.20",
     "normalize-url": "4.5.0",
     "pino": "6.2.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.9.2",
+    "@microsoft/api-extractor": "7.10.1",
     "@statechannels/client-api-schema": "^0.3.10",
     "@types/debug": "4.1.5",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
+    "@types/lodash": "^4.14.161",
     "@types/node": "13.5.1",
     "@types/pino": "6.0.0",
     "@types/prettier": "1.19.0",
-    "@types/webpack": "4.41.12",
-    "@typescript-eslint/eslint-plugin": "2.18.0",
-    "@typescript-eslint/parser": "2.18.0",
+    "@types/webpack": "^4.41.22",
+    "@typescript-eslint/eslint-plugin": "4.3.0",
+    "@typescript-eslint/parser": "4.3.0",
     "debug": "4.1.1",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
@@ -43,14 +46,21 @@
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "pino": "6.2.0",
+    "pnp-webpack-plugin": "^1.6.4",
     "prettier": "1.19.1",
     "ts-jest": "25.0.0",
-    "ts-loader": "7.0.5",
-    "typescript": "3.7.5",
-    "webpack": "4.41.5",
-    "webpack-cli": "3.3.9"
+    "ts-loader": "^8.0.4",
+    "typescript": "4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json",
+        "packageJson": "package.json"
+      }
+    },
     "roots": [
       "./src",
       "./tests"
@@ -71,9 +81,9 @@
     "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
-    "prepare": "rm -rf dist; yarn build:typescript && webpack && yarn generate-api",
-    "prepublish": "webpack",
-    "test": "jest --watch",
+    "prepare": "rm -rf dist; yarn build:typescript && yarn webpack && yarn generate-api",
+    "prepublish": "yarn webpack",
+    "test": "yarn jest --watch",
     "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
     "test:coverage": "jest --coverage"
   },

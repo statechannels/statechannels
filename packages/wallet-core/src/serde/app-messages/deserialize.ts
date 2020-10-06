@@ -5,7 +5,7 @@ import {
   DomainBudget as AppDomainBudget,
   ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
-import {AddressZero} from '@ethersproject/constants';
+import {constants} from 'ethers';
 
 import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
@@ -31,7 +31,7 @@ export function deserializeBudgetRequest(
 
 export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBudget {
   const assetBudgets: AssetBudget[] = DomainBudget.budgets.map(b => ({
-    assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
+    assetHolderAddress: assetHolderAddress(b.token) || constants.AddressZero,
     availableReceiveCapacity: BN.from(b.availableReceiveCapacity),
     availableSendCapacity: BN.from(b.availableSendCapacity),
     channels: b.channels.reduce((record, item) => {

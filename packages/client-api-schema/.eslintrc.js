@@ -11,6 +11,8 @@ module.exports = {
   ],
   plugins: ['eslint-plugin-tsdoc'],
   rules: {
+    '@typescript-eslint/ban-types': 'off',
+    // TODO remove this ^^
     'tsdoc/syntax': 'warn'
   },
   env: {

@@ -21,8 +21,6 @@ import {addEvtHandler} from './utils';
 // FIXME: replace with
 // import {Wallet as ChannelWallet, WalletError as ChannelWalletError} from '@statechannels/server-wallet';
 
-type Values<E> = E[keyof E];
-
 const getAssetHolderContract = (info: AssetHolderInformation): Contract => {
   // Make sure the contract object with the correct abi
   return new Contract(

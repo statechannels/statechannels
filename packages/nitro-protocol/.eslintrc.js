@@ -20,5 +20,9 @@ module.exports = {
   extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
   rules: {
     ...leftoverTsLintRules,
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    // TODO remove this ^^^
+    '@typescript-eslint/ban-types': 'off',
+    // TODO remove this ^^^
   },
 };

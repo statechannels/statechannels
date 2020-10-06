@@ -2,7 +2,6 @@ import {expectRevert} from '@statechannels/devtools';
 import {ethers, Contract, Wallet} from 'ethers';
 const {HashZero} = ethers.constants;
 
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';

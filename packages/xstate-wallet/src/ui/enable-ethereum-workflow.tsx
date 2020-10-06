@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {EventData} from 'xstate';
+import {Sender} from 'xstate';
 import './wallet.scss';
 import {Button, Box, Flex, Icon, Text, MetaMaskButton, Flash, Heading} from 'rimble-ui';
 
@@ -12,7 +12,7 @@ import {track} from '../segment-analytics';
 
 interface Props {
   current: WorkflowState;
-  send: (event: any, payload?: EventData | undefined) => WorkflowState;
+  send: Sender<any>;
 }
 
 export const EnableEthereum = (props: Props) => {
