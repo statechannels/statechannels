@@ -18,11 +18,11 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 
 let chainService: ChainService;
 
-beforeEach(() => {
+beforeAll(() => {
   chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
 });
 
-afterEach(() => chainService.destructor());
+afterAll(() => chainService.destructor());
 
 function fundChannel(
   expectedHeld: number,

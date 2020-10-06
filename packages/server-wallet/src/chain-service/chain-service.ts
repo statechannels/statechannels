@@ -51,11 +51,19 @@ function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
 }
 
+function isError(e: any): e is Error {
+  return !!e.error;
+}
+
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<HoldingUpdatedArg>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
+  private transactionQueue: {
+    request: providers.TransactionRequest;
+    resolve: (response: providers.TransactionResponse) => void;
+  }[] = [];
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -93,6 +101,38 @@ export class ChainService implements ChainServiceInterface {
     return obs;
   }
 
+  private async internalProcessTransactionQueue(): Promise<void> {
+    while (this.transactionQueue.length) {
+      try {
+        const response = await this.ethWallet.sendTransaction(this.transactionQueue[0].request);
+        this.transactionQueue[0].resolve(response);
+      } catch (e) {
+        this.transactionQueue[0].resolve(e);
+      }
+      this.transactionQueue.splice(0, 1);
+    }
+  }
+
+  private async processTransactionQueue(): Promise<void> {
+    if (this.transactionQueue.length === 1) {
+      this.internalProcessTransactionQueue();
+    }
+  }
+
+  private async sendTransaction(
+    request: providers.TransactionRequest
+  ): Promise<providers.TransactionResponse> {
+    const response = await new Promise<providers.TransactionResponse | Error>(resolve => {
+      this.transactionQueue.push({
+        request,
+        resolve,
+      });
+      this.processTransactionQueue();
+    });
+    if (isError(response)) throw response;
+    return response;
+  }
+
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     const assetHolderAddress = arg.assetHolderAddress;
     const isEthFunding = isEthAssetHolder(assetHolderAddress);
@@ -113,7 +153,7 @@ export class ChainService implements ChainServiceInterface {
         to: tokenAddress,
       };
 
-      await (await this.ethWallet.sendTransaction(increaseAllowanceRequest)).wait();
+      await (await this.sendTransaction(increaseAllowanceRequest)).wait();
     }
 
     const depositRequest = {
@@ -121,7 +161,7 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return await this.ethWallet.sendTransaction(depositRequest);
+    return await this.sendTransaction(depositRequest);
   }
 
   registerChannel(
