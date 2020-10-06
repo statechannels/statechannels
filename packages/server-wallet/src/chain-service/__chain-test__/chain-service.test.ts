@@ -1,6 +1,7 @@
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN} from '@statechannels/wallet-core';
 import {BigNumber, Contract, providers} from 'ethers';
+import _ from 'lodash';
 
 import {defaultConfig} from '../../config';
 import {Address} from '../../type-aliases';
@@ -135,54 +136,35 @@ describe('registerChannel', () => {
 
   it('Channel with multiple asset holders', async () => {
     const channelId = randomChannelId();
-    let counter = 0;
     let resolve: () => void;
     const p = new Promise(r => (resolve = r));
+    const objectsToMatch = _.flatten(
+      [0, 5].map(amount =>
+        [ethAssetHolderAddress, erc20AssetHolderAddress].map(assetHolderAddress => ({
+          channelId,
+          assetHolderAddress,
+          amount: BN.from(amount),
+        }))
+      )
+    );
+
     const onHoldingUpdated = (arg: HoldingUpdatedArg): void => {
-      switch (counter) {
-        // todo: there is no guarantee that the initial callback for ethAssetHolder will be invoked
-        // before the callback for erc20AssetHolder
-        case 0:
-          expect(arg).toMatchObject({
-            channelId,
-            assetHolderAddress: ethAssetHolderAddress,
-            amount: BN.from(0),
-          });
-          counter++;
-          break;
-        case 1:
-          expect(arg).toMatchObject({
-            channelId,
-            assetHolderAddress: erc20AssetHolderAddress,
-            amount: BN.from(0),
-          });
-          counter++;
-          fundChannel(0, 5, channelId, ethAssetHolderAddress);
-          break;
-        case 2:
-          expect(arg).toMatchObject({
-            channelId,
-            assetHolderAddress: ethAssetHolderAddress,
-            amount: BN.from(5),
-          });
-          counter++;
-          fundChannel(0, 5, channelId, erc20AssetHolderAddress);
-          break;
-        case 3:
-          expect(arg).toMatchObject({
-            channelId,
-            assetHolderAddress: erc20AssetHolderAddress,
-            amount: BN.from(5),
-          });
-          resolve();
-          break;
-        default:
-          throw new Error('Should not reach here');
-      }
+      const index = objectsToMatch.findIndex(
+        predicate =>
+          predicate.channelId === arg.channelId &&
+          predicate.amount === arg.amount &&
+          predicate.assetHolderAddress === arg.assetHolderAddress
+      );
+      expect(index).toBeGreaterThan(-1);
+      // Note, splice mutates the array on which it is called
+      objectsToMatch.splice(index, 1);
+      if (!objectsToMatch.length) resolve();
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       onHoldingUpdated,
     });
+    fundChannel(0, 5, channelId, ethAssetHolderAddress);
+    fundChannel(0, 5, channelId, erc20AssetHolderAddress);
     await p;
-  }, 10_000);
+  }, 15_000);
 });
