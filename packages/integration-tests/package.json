@@ -12,10 +12,10 @@
     "@types/node": "13.5.1",
     "@types/wait-on": "4.0.0",
     "eslint-plugin-jest": "23.6.0",
-    "jest": "^26.4.2",
+    "jest": "26.4.2",
     "jest-canvas-mock": "^2.3.0",
     "jest-environment-jsdom-fourteen": "^1.0.1",
-    "ts-jest": "^26.4.1",
+    "ts-jest": "26.4.1",
     "typescript": "4.0.3",
     "wait-on": "4.0.0"
   },
