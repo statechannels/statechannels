@@ -1,19 +1,23 @@
-import {randomChannelId} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN} from '@statechannels/wallet-core';
-import {providers} from 'ethers';
+import {BigNumber, Contract, providers, Wallet} from 'ethers';
 
 import {defaultConfig} from '../../config';
+import {Address} from '../../type-aliases';
 import {ChainService} from '../chain-service';
 
-/* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
+const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
+const erc20Address = process.env.ERC20_ADDRESS!;
+/* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-let rpcEndpoint: string;
+if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = defaultConfig.rpcEndpoint;
+const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
+const ethWallet = new Wallet(defaultConfig.serverPrivateKey, provider);
+
 let chainService: ChainService;
-beforeAll(() => {
-  if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-  rpcEndpoint = defaultConfig.rpcEndpoint;
-});
 
 beforeEach(() => {
   chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
@@ -24,14 +28,15 @@ afterEach(() => chainService.destructor());
 function fundChannel(
   expectedHeld: number,
   amount: number,
-  channelId: string = randomChannelId()
+  channelId: string = randomChannelId(),
+  assetHolderAddress: Address = ethAssetHolderAddress
 ): {
   channelId: string;
   request: Promise<providers.TransactionResponse>;
 } {
   const request = chainService.fundChannel({
     channelId,
-    assetHolderAddress: ethAssetHolderAddress,
+    assetHolderAddress,
     expectedHeld: BN.from(expectedHeld),
     amount: BN.from(amount),
   });
@@ -41,9 +46,10 @@ function fundChannel(
 async function waitForChannelFunding(
   expectedHeld: number,
   amount: number,
-  channelId: string = randomChannelId()
+  channelId: string = randomChannelId(),
+  assetHolderAddress: Address = ethAssetHolderAddress
 ): Promise<string> {
-  const request = await fundChannel(expectedHeld, amount, channelId).request;
+  const request = await fundChannel(expectedHeld, amount, channelId, assetHolderAddress).request;
   await request.wait();
   return channelId;
 }
@@ -57,6 +63,24 @@ describe('fundChannel', () => {
     // todo: is there a good way to validate that the error thrown is one we expect?
     await expect(fundChannelPromise).rejects.toThrow();
   });
+});
+
+it('Fund erc20', async () => {
+  const channelId = randomChannelId();
+  const tokenContract: Contract = new Contract(
+    erc20Address,
+    ContractArtifacts.TokenArtifact.abi,
+    ethWallet
+  );
+  await (await tokenContract.increaseAllowance(erc20AssetHolderAddress, BN.from(5))).wait();
+
+  await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
+  const contract: Contract = new Contract(
+    erc20AssetHolderAddress,
+    ContractArtifacts.Erc20AssetHolderArtifact.abi,
+    provider
+  );
+  expect(await contract.holdings(channelId)).toEqual(BigNumber.from(5));
 });
 
 describe('registerChannel', () => {

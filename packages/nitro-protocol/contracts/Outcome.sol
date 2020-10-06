@@ -33,5 +33,4 @@ library Outcome {
         bytes32 targetChannelId;
         bytes32[] destinations;
     }
-
 }

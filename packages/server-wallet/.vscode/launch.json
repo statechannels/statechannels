@@ -30,31 +30,17 @@
       "args": [
         "node_modules/.bin/jest",
         "--runInBand",
-        "--env=jsdom",
         "--config=${workspaceRoot}/jest/jest.chain.config.js",
         "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "console": "integratedTerminal",
+      "autoAttachChildProcesses": false,
       "internalConsoleOptions": "neverOpen",
       "env": {
         "NODE_ENV": "test"
       }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Server",
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "neverOpen",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "args": ["${workspaceFolder}/src/hub/server.ts"],
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "skipFiles": ["<node_internals>/**/*.js"]
     }
   ]
 }
