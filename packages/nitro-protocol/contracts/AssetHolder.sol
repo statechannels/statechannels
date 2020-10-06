@@ -5,26 +5,24 @@ import '@openzeppelin/contracts/math/SafeMath.sol';
 import './interfaces/IAssetHolder.sol';
 
 /**
-  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
-*/
+ * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
+ */
 contract AssetHolder is IAssetHolder {
     using SafeMath for uint256;
 
-    address AdjudicatorAddress;
+    address public AdjudicatorAddress;
 
     mapping(bytes32 => uint256) public holdings;
 
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
-
     /**
-    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
-    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
-    * @param channelId Unique identifier for a state channel.
-    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-    */
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
+     * @param channelId Unique identifier for a state channel.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     */
     function _transferAll(bytes32 channelId, bytes memory allocationBytes) internal {
-
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
             (Outcome.AllocationItem[])
@@ -101,18 +99,18 @@ contract AssetHolder is IAssetHolder {
                 holdings[allocation[m].destination] += payoutAmount;
             }
         }
-
     }
+
     // **************
     // Public methods
     // **************
 
     /**
-    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
-    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
-    * @param channelId Unique identifier for a state channel.
-    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-    */
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
+     * @param channelId Unique identifier for a state channel.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     */
     function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
         // checks
         require(
@@ -131,22 +129,26 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
-    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-    * @param channelId Unique identifier for a state channel.
-    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-    */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external AdjudicatorOnly virtual {
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+     * @param channelId Unique identifier for a state channel.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     */
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes)
+        external
+        virtual
+        AdjudicatorOnly
+    {
         _transferAll(channelId, allocationBytes);
     }
 
     /**
-    * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
-    * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
-    * @param guarantorChannelId Unique identifier for a guarantor state channel.
-    * @param guaranteeBytes The abi.encode of Outcome.Guarantee
-    * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-    */
+     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+     * @param guarantorChannelId Unique identifier for a guarantor state channel.
+     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+     */
     function claimAll(
         bytes32 guarantorChannelId,
         bytes memory guaranteeBytes,
@@ -223,7 +225,7 @@ contract AssetHolder is IAssetHolder {
 
         // next, increase payouts according to original allocation order
         // this block only has an effect if balance > 0
-        for (uint256 j= 0; j < allocation.length; j++) {
+        for (uint256 j = 0; j < allocation.length; j++) {
             // for each entry in the target channel's outcome
             if (balance == 0) {
                 break;
@@ -263,12 +265,15 @@ contract AssetHolder is IAssetHolder {
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(guarantorChannelId, allocation[j].destination, payouts[j]);
+                    emit AssetTransferred(
+                        guarantorChannelId,
+                        allocation[j].destination,
+                        payouts[j]
+                    );
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
             }
-
         }
         assert(k == newAllocationLength);
 
@@ -285,7 +290,6 @@ contract AssetHolder is IAssetHolder {
         } else {
             delete assetOutcomeHashes[guarantee.targetChannelId];
         }
-
     }
 
     // **************
@@ -298,22 +302,22 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
-    * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
-    * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
-    * @param channelId Unique identifier for a state channel.
-    * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
-    */
+     * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
+     * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
+     * @param channelId Unique identifier for a state channel.
+     * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
+     */
     function _setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash) internal {
         require(assetOutcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
         assetOutcomeHashes[channelId] = assetOutcomeHash;
     }
 
     /**
-    * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
-    * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
-    * @param channelId Unique identifier for a state channel.
-    * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
-    */
+     * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
+     * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
+     * @param channelId Unique identifier for a state channel.
+     * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
+     */
     function setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
         external
         AdjudicatorOnly
@@ -328,39 +332,39 @@ contract AssetHolder is IAssetHolder {
     // **************
 
     /**
-    * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
-    * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
-    * @param destination ethereum address to be credited.
-    * @param amount Quantity of assets to be transferred.
-    */
+     * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+     * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+     * @param destination ethereum address to be credited.
+     * @param amount Quantity of assets to be transferred.
+     */
     function _transferAsset(address payable destination, uint256 amount) internal virtual {}
 
     /**
-    * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
-    * @dev Checks if a given destination is external (and can therefore have assets transferred to it) or not.
-    * @param destination Destination to be checked.
-    * @return True if the destination is external, false otherwise.
-    */
+     * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
+     * @dev Checks if a given destination is external (and can therefore have assets transferred to it) or not.
+     * @param destination Destination to be checked.
+     * @return True if the destination is external, false otherwise.
+     */
     function _isExternalDestination(bytes32 destination) internal pure returns (bool) {
         return uint96(bytes12(destination)) == 0;
     }
 
     /**
-    * @notice Converts an ethereum address to a nitro external destination.
-    * @dev Converts an ethereum address to a nitro external destination.
-    * @param participant The address to be converted.
-    * @return The input address left-padded with zeros.
-    */
+     * @notice Converts an ethereum address to a nitro external destination.
+     * @dev Converts an ethereum address to a nitro external destination.
+     * @param participant The address to be converted.
+     * @return The input address left-padded with zeros.
+     */
     function _addressToBytes32(address participant) internal pure returns (bytes32) {
         return bytes32(uint256(participant));
     }
 
     /**
-    * @notice Converts a nitro destination to an ethereum address.
-    * @dev Converts a nitro destination to an ethereum address.
-    * @param destination The destination to be converted.
-    * @return The rightmost 160 bits of the input string.
-    */
+     * @notice Converts a nitro destination to an ethereum address.
+     * @dev Converts a nitro destination to an ethereum address.
+     * @param destination The destination to be converted.
+     * @return The rightmost 160 bits of the input string.
+     */
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
         return address(uint160(uint256(destination)));
     }
