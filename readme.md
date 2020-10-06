@@ -104,7 +104,7 @@ We follow the convention at https://github.com/conventional-changelog/commitlint
 ```shell
 yarn commitlint --from=HEAD~1 --verbose
 ```
-
+For help authoring commits, you can check out https://commitizen.github.io/cz-cli/.
 ### Publishing packages
 
 All of the public packages in this repository are kept in lockstep. Use, e.g.
