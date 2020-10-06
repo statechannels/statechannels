@@ -139,7 +139,6 @@ export class GanacheServer {
     // ganache core exports a very permissive object[] type for accounts
     // it should be {balance: HexString, secretKey: string}[]
     const serverOptions: ganache.IServerOptions = {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       network_id: this.chainId,
       accounts: accounts.map(a => {
         return {balance: oneMillion, secretKey: a.privateKey};
