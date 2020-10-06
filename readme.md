@@ -97,6 +97,14 @@ To run all tests:
 yarn test
 ```
 
+### Authoring conventional commits
+
+We follow the convention at https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional. Your commits will be linted against this convention. You can do this yourself locally by running
+
+```shell
+yarn commitlint --from=HEAD~1 --verbose
+```
+
 ### Publishing packages
 
 All of the public packages in this repository are kept in lockstep. Use, e.g.
