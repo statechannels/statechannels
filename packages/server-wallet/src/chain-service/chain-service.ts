@@ -46,6 +46,10 @@ interface ChainModifierInterface {
 }
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
+type TransactionQueueEntry = {
+  request: providers.TransactionRequest;
+  resolve: (response: providers.TransactionResponse) => void;
+};
 
 function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
@@ -60,10 +64,7 @@ export class ChainService implements ChainServiceInterface {
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<HoldingUpdatedArg>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
-  private transactionQueue: {
-    request: providers.TransactionRequest;
-    resolve: (response: providers.TransactionResponse) => void;
-  }[] = [];
+  private transactionQueue: TransactionQueueEntry[] = [];
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -101,7 +102,7 @@ export class ChainService implements ChainServiceInterface {
     return obs;
   }
 
-  private async internalProcessTransactionQueue(): Promise<void> {
+  private async transactionQueueLoop(): Promise<void> {
     while (this.transactionQueue.length) {
       try {
         const response = await this.ethWallet.sendTransaction(this.transactionQueue[0].request);
@@ -113,9 +114,12 @@ export class ChainService implements ChainServiceInterface {
     }
   }
 
-  private async processTransactionQueue(): Promise<void> {
+  private async addToTransactionQueue(entry: TransactionQueueEntry): Promise<void> {
+    this.transactionQueue.push(entry);
+    // If there is one element in the queue, we have pushed this element. We need to trigger queue loop.
+    // If there are two or more elements in the queue, whoever pushed the first element on the queue already triggered the queue loop
     if (this.transactionQueue.length === 1) {
-      this.internalProcessTransactionQueue();
+      this.transactionQueueLoop();
     }
   }
 
@@ -123,11 +127,10 @@ export class ChainService implements ChainServiceInterface {
     request: providers.TransactionRequest
   ): Promise<providers.TransactionResponse> {
     const response = await new Promise<providers.TransactionResponse | Error>(resolve => {
-      this.transactionQueue.push({
+      this.addToTransactionQueue({
         request,
         resolve,
       });
-      this.processTransactionQueue();
     });
     if (isError(response)) throw response;
     return response;
