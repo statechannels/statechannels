@@ -59,8 +59,9 @@ describe('fundChannel', () => {
     await waitForChannelFunding(5, 5, channelId);
 
     const {request: fundChannelPromise} = fundChannel(5, 5, channelId);
-    // todo: is there a good way to validate that the error thrown is one we expect?
-    await expect(fundChannelPromise).rejects.toThrow();
+    await expect(fundChannelPromise).rejects.toThrow(
+      'cannot estimate gas; transaction may fail or may require manual gas limit'
+    );
   });
 });
 
