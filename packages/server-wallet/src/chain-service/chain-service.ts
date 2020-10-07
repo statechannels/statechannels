@@ -2,8 +2,9 @@ import {
   ContractArtifacts,
   createERC20DepositTransaction,
   createETHDepositTransaction,
+  Transactions,
 } from '@statechannels/nitro-protocol';
-import {BN, Uint256} from '@statechannels/wallet-core';
+import {BN, SignedState, toNitroSignedState, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
@@ -11,9 +12,11 @@ import {NonceManager} from '@ethersproject/experimental';
 
 import {Address, Bytes32} from '../type-aliases';
 
-// todo: is it reasonablet to assume that the ethAssetHolder address is defined as runtime configuration?
-/* eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion */
+// todo: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
+/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
+const nitroAdjudicatorAddress = process.env.NITRO_ADJUDICATOR_ADDRESS!;
+/* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 export type HoldingUpdatedArg = {
   channelId: Bytes32;
@@ -43,6 +46,7 @@ interface ChainEventEmitterInterface {
 
 interface ChainModifierInterface {
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
+  concludeAndWithdraw(finalizationProof: SignedState[]): Promise<providers.TransactionResponse>;
 }
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
@@ -167,6 +171,19 @@ export class ChainService implements ChainServiceInterface {
       value: isEthFunding ? arg.amount : undefined,
     };
     return this.sendTransaction(depositRequest);
+  }
+
+  async concludeAndWithdraw(
+    finalizationProof: SignedState[]
+  ): Promise<providers.TransactionResponse> {
+    const transactionRequest = {
+      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+        finalizationProof.flatMap(toNitroSignedState)
+      ),
+      to: nitroAdjudicatorAddress,
+    };
+
+    return this.sendTransaction(transactionRequest);
   }
 
   registerChannel(
