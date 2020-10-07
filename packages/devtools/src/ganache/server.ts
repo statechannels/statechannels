@@ -1,15 +1,13 @@
-import {spawn} from 'child_process';
-
-import {ethers} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
-import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
+import ganache from 'ganache-core';
 
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 
-import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
 import {logger} from './logger';
+import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
 
 function findClosingPosition(data: string) {
   let closePos = 0;
@@ -137,29 +135,29 @@ export class GanacheServer {
     logger.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
     this.fundedPrivateKey = accounts[0].privateKey;
 
-    const oneMillion = ethers.utils.parseEther('1000000');
+    const oneMillion = ethers.utils.parseEther('1000000').toHexString();
 
-    const args: string[] = [
-      [`--networkId ${this.chainId}`, `--port ${this.port}`],
-      accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
-      [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`],
-      SHOW_VERBOSE_GANACHE_OUTPUT ? ['--verbose'] : []
-    ].reduce((a, b) => a.concat(b));
-
-    this.server = spawn('ganache-cli', args, {stdio: 'pipe', shell: true});
-    this.server.stdout.on('data', data => {
-      if (SHOW_VERBOSE_GANACHE_OUTPUT) {
-        extractLogsFromVerboseGanacheOutput(this.buffer, data.toString());
-      } else {
-        logger.info(data.toString());
+    // ganache core exports a very permissive object[] type for accounts
+    // it should be {balance: HexString, secretKey: string}[]
+    const serverOptions: ganache.IServerOptions = {
+      network_id: this.chainId,
+      accounts: accounts.map(a => ({balance: oneMillion, secretKey: a.privateKey})),
+      gasLimit,
+      gasPrice: BigNumber.from(gasPrice).toHexString(),
+      verbose: SHOW_VERBOSE_GANACHE_OUTPUT,
+      logger: {
+        log: x => {
+          SHOW_VERBOSE_GANACHE_OUTPUT
+            ? extractLogsFromVerboseGanacheOutput(this.buffer, x)
+            : logger.info(x);
+        }
       }
-    });
+    };
 
-    this.server.stderr.on('data', data => {
-      logger.error({error: data.toString()}, `Server threw error`);
-      throw new Error(`Ganache server failed to start. Error is ${data}`);
-    });
+    this.server = ganache.server(serverOptions);
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.server.listen(this.port, () => {});
     this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${this.port}`);
   }
 
@@ -178,7 +176,7 @@ export class GanacheServer {
   }
 
   async close() {
-    kill(this.server.pid);
+    this.server.close();
     await waitUntilFree(this.port, 500, this.timeout);
   }
 
