@@ -1,10 +1,12 @@
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
-import {BN} from '@statechannels/wallet-core';
-import {BigNumber, Contract, providers} from 'ethers';
+import {BN, simpleEthAllocation, State} from '@statechannels/wallet-core';
+import {BigNumber, constants, Contract, providers} from 'ethers';
 import _ from 'lodash';
 
 import {defaultConfig} from '../../config';
 import {Address} from '../../type-aliases';
+import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainService, HoldingUpdatedArg} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -168,4 +170,25 @@ describe('registerChannel', () => {
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
     await p;
   }, 15_000);
+});
+
+describe('concludeAndWithdraw', () => {
+  it('Successful concludeAndWithdraw', async () => {
+    const state1: State = {
+      appData: constants.HashZero,
+      appDefinition: constants.AddressZero,
+      isFinal: false,
+      turnNum: 4,
+      outcome: simpleEthAllocation([
+        {destination: alice().destination, amount: BN.from(1)},
+        {destination: bob().destination, amount: BN.from(3)},
+      ]),
+      participants: [alice(), bob()],
+      channelNonce: 1,
+      chainId: '0x01',
+      challengeDuration: 9001,
+    };
+    const signatures = [aWallet(), bWallet()].map(sw => sw.signState(state1));
+    await (await chainService.concludeAndWithdraw([{...state1, signatures: signatures}])).wait();
+  });
 });
