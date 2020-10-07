@@ -7,6 +7,7 @@ import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 
 import {logger} from './logger';
+import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
 
 function findClosingPosition(data: string) {
   let closePos = 0;
@@ -143,9 +144,12 @@ export class GanacheServer {
       accounts: accounts.map(a => ({balance: oneMillion, secretKey: a.privateKey})),
       gasLimit,
       gasPrice: BigNumber.from(gasPrice).toHexString(),
+      verbose: SHOW_VERBOSE_GANACHE_OUTPUT,
       logger: {
         log: x => {
-          extractLogsFromVerboseGanacheOutput(x);
+          SHOW_VERBOSE_GANACHE_OUTPUT
+            ? extractLogsFromVerboseGanacheOutput(this.buffer, x)
+            : logger.info(x);
         }
       }
     };
