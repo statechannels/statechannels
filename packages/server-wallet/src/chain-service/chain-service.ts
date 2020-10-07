@@ -108,6 +108,8 @@ export class ChainService implements ChainServiceInterface {
         const response = await this.ethWallet.sendTransaction(this.transactionQueue[0].request);
         this.transactionQueue[0].resolve(response);
       } catch (e) {
+        // https://github.com/ethers-io/ethers.js/issues/972
+        this.ethWallet.incrementTransactionCount(-1);
         this.transactionQueue[0].resolve(e);
       }
       this.transactionQueue.splice(0, 1);
