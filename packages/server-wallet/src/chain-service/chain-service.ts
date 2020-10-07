@@ -198,7 +198,7 @@ export class ChainService implements ChainServiceInterface {
     // Create an observable that emits events on contract events
     const obs = new Observable<HoldingUpdatedArg>(subs => {
       // todo: add other event types
-      contract.on('Deposited', (destination, amountDeposited, destinationHoldings) =>
+      contract.on('Deposited', (destination, _amountDeposited, destinationHoldings) =>
         subs.next({
           channelId: destination,
           assetHolderAddress: contract.address,
