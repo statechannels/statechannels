@@ -140,7 +140,7 @@ export class GanacheServer {
     // it should be {balance: HexString, secretKey: string}[]
     const serverOptions: ganache.IServerOptions = {
       network_id: this.chainId,
-      accounts: accounts.map(a => ({balance: oneMillion, secretKey: a.privateKey}),
+      accounts: accounts.map(a => ({balance: oneMillion, secretKey: a.privateKey})),
       gasLimit,
       gasPrice: BigNumber.from(gasPrice).toHexString(),
       logger: {
