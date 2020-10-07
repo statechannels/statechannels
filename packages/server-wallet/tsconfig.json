@@ -2,14 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    // ["es2017", "esnext.bigint", "dom"] needed for https://github.com/bitauth/libauth#typescript-types
-    "lib": [
-      "es5",
-      "es6",
-      "ES2017",
-      "esnext.bigint",
-      "dom"
-    ],
+    "lib": ["ES2019", "dom"],
     "target": "es2019",
     "module": "commonjs",
     "outDir": "lib",
@@ -31,10 +24,5 @@
       "path": "../wallet-core"
     }
   ],
-  "include": [
-    "src",
-    "e2e-test",
-    "deployment",
-    "jest"
-  ]
+  "include": ["src", "e2e-test", "deployment", "jest"]
 }
