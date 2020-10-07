@@ -166,7 +166,7 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return await this.sendTransaction(depositRequest);
+    return this.sendTransaction(depositRequest);
   }
 
   registerChannel(
