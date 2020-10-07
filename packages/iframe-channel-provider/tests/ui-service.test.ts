@@ -29,6 +29,6 @@ describe('UIService', () => {
 
   it("should return a reference to the iframe's content window", async () => {
     const target = await uiService.getTarget();
-    expect(target.constructor).toEqual(Window);
+    expect(target.constructor.toString()).toEqual(Window.toString());
   });
 });
