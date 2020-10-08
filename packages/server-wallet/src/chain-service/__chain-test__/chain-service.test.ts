@@ -1,5 +1,11 @@
 import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
-import {BN, makeDestination, simpleEthAllocation, State} from '@statechannels/wallet-core';
+import {
+  BN,
+  makeDestination,
+  simpleEthAllocation,
+  simpleTokenAllocation,
+  State,
+} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
@@ -15,6 +21,7 @@ import {ChainService, HoldingUpdatedArg} from '../chain-service';
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
 const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
+const erc20Address = process.env.ERC20_ADDRESS!;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
@@ -22,12 +29,17 @@ const rpcEndpoint = defaultConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
 let chainService: ChainService;
+let channelNonce = 0;
 
 beforeAll(() => {
   chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
 });
 
 afterAll(() => chainService.destructor());
+
+function getChannelNonce() {
+  return channelNonce++;
+}
 
 function fundChannel(
   expectedHeld: number,
@@ -56,6 +68,49 @@ async function waitForChannelFunding(
   const request = await fundChannel(expectedHeld, amount, channelId, assetHolderAddress).request;
   await request.wait();
   return channelId;
+}
+
+async function setUpConclude(isEth = true) {
+  const aEthWallet = Wallet.createRandom();
+  const bEthWallet = Wallet.createRandom();
+
+  const alice = aliceParticipant({destination: makeDestination(aEthWallet.address)});
+  const bob = bobParticipant({destination: makeDestination(bEthWallet.address)});
+  const outcome = isEth
+    ? simpleEthAllocation([
+        {destination: alice.destination, amount: BN.from(1)},
+        {destination: bob.destination, amount: BN.from(3)},
+      ])
+    : simpleTokenAllocation(erc20AssetHolderAddress, [
+        {destination: alice.destination, amount: BN.from(1)},
+        {destination: bob.destination, amount: BN.from(3)},
+      ]);
+  const state1: State = {
+    appData: constants.HashZero,
+    appDefinition: constants.AddressZero,
+    isFinal: true,
+    turnNum: 4,
+    outcome,
+    participants: [alice, bob],
+    channelNonce: getChannelNonce(),
+    chainId: '0x01',
+    challengeDuration: 9001,
+  };
+  const channelId = getChannelId({
+    channelNonce: state1.channelNonce,
+    chainId: state1.chainId,
+    participants: [alice, bob].map(p => p.signingAddress),
+  });
+  const signatures = [aWallet(), bWallet()].map(sw => sw.signState(state1));
+
+  await waitForChannelFunding(
+    0,
+    4,
+    channelId,
+    isEth ? ethAssetHolderAddress : erc20AssetHolderAddress
+  );
+  await (await chainService.concludeAndWithdraw([{...state1, signatures}])).wait();
+  return {aAddress: aEthWallet.address, bAddress: bEthWallet.address};
 }
 
 describe('fundChannel', () => {
@@ -176,37 +231,22 @@ describe('registerChannel', () => {
 });
 
 describe('concludeAndWithdraw', () => {
-  it('Successful concludeAndWithdraw', async () => {
-    const aEthWallet = Wallet.createRandom();
-    const bEthWallet = Wallet.createRandom();
+  it('Successful concludeAndWithdraw with eth allocation', async () => {
+    const {aAddress, bAddress} = await setUpConclude();
 
-    const alice = aliceParticipant({destination: makeDestination(aEthWallet.address)});
-    const bob = bobParticipant({destination: makeDestination(bEthWallet.address)});
-    const state1: State = {
-      appData: constants.HashZero,
-      appDefinition: constants.AddressZero,
-      isFinal: true,
-      turnNum: 4,
-      outcome: simpleEthAllocation([
-        {destination: alice.destination, amount: BN.from(1)},
-        {destination: bob.destination, amount: BN.from(3)},
-      ]),
-      participants: [alice, bob],
-      channelNonce: 1,
-      chainId: '0x01',
-      challengeDuration: 9001,
-    };
-    const channelId = getChannelId({
-      channelNonce: state1.channelNonce,
-      chainId: state1.chainId,
-      participants: [alice, bob].map(p => p.signingAddress),
-    });
-    const signatures = [aWallet(), bWallet()].map(sw => sw.signState(state1));
+    expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
+    expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
+  });
 
-    await waitForChannelFunding(0, 5, channelId);
-    await (await chainService.concludeAndWithdraw([{...state1, signatures}])).wait();
+  it('Successful concludeAndWithdraw with erc20 allocation', async () => {
+    const {aAddress, bAddress} = await setUpConclude(false);
 
-    expect(await provider.getBalance(aEthWallet.address)).toEqual(BigNumber.from(1));
-    expect(await provider.getBalance(bEthWallet.address)).toEqual(BigNumber.from(3));
+    const erc20Contract: Contract = new Contract(
+      erc20Address,
+      ContractArtifacts.TokenArtifact.abi,
+      provider
+    );
+    expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
+    expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
   });
 });
