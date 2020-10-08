@@ -2,6 +2,7 @@ export type Values<E> = E[keyof E];
 export abstract class WalletError extends Error {
   static readonly errors = {
     ChannelError: 'ChannelError',
+    ApproveObjectiveError: 'ApproveObjectiveError',
     JoinChannelError: 'JoinChannelError',
     CloseChannelError: 'CloseChannelError',
     UpdateChannelError: 'UpdateChannelError',

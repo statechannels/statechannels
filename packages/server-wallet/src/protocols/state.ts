@@ -64,7 +64,14 @@ export const stage = (state: State | undefined): Stage =>
     : 'Running';
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, latestSignedByMe, support} = channelState;
+  const {
+    channelId,
+    supported,
+    latest,
+    latestSignedByMe,
+    support,
+    chainServiceRequests,
+  } = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
 
@@ -72,7 +79,13 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     switch (stage(supported)) {
       case 'Missing':
       case 'PrefundSetup':
-        return latestSignedByMe ? 'opening' : 'proposed';
+        return latestSignedByMe
+          ? chainServiceRequests &&
+            chainServiceRequests.length === 1 &&
+            chainServiceRequests[0] === 'fund'
+            ? 'funding'
+            : 'opening'
+          : 'proposed';
       case 'PostfundSetup':
       case 'Running':
         return 'running';

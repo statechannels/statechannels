@@ -28,7 +28,7 @@ afterAll(async () => {
   execSync('dropdb TEST_B $PSQL_ARGS');
 });
 
-const testCases: FundingStrategy[] = ['Unfunded', 'Direct', 'Ledger', 'Virtual'];
+const testCases: FundingStrategy[] = ['Unfunded', 'Direct' /*, 'Ledger', 'Virtual'*/];
 
 it.each(testCases)(
   'Creates a %s-funded channel between two wallets ',
@@ -51,6 +51,7 @@ it.each(testCases)(
     const allocation: Allocation = {
       allocationItems: [
         {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
+        {destination: participantB.destination, amount: BigNumber.from(1).toHexString()},
       ],
       token: '0x00', // must be even length
     };
@@ -75,51 +76,116 @@ it.each(testCases)(
       turnNum: 0,
     });
 
-    //    > PreFund0
+    //    > PreFund0A
     const resultB0 = await b.pushMessage(
       getPayloadFor(participantB.participantId, resultA0.outbox)
     );
+
+    expect(resultB0.objectivesToApprove).toBeDefined();
+    expect(resultB0.objectivesToApprove).toHaveLength(1);
+    const objective = /* eslint-disable-line */ resultB0.objectivesToApprove![0]
+    expect(objective).toMatchObject({
+      type: 'OpenChannel',
+      data: {
+        fundingStrategy,
+        targetChannelId: channelId,
+      },
+    });
 
     expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
       status: 'proposed',
       turnNum: 0,
     });
 
-    //      PreFund1
-    const resultB1 = await b.joinChannel({channelId});
+    //      PreFund0B
+    const resultB1 = await b.approveObjective(objective.objectiveId);
     expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
-      status: 'opening', // should this be 'funding' ?
+      status: 'opening',
       turnNum: 0,
     });
 
-    //  PreFund1 <
-    // PostFund2
+    // <split based on funding>
     const resultA1 = await a.pushMessage(
       getPayloadFor(participantA.participantId, resultB1.outbox)
     );
 
-    expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-      status: 'funding', // should this be 'funding' ?
-      turnNum: 0,
-    });
+    if (fundingStrategy === 'Direct') {
+      //  PreFund0B <
+      resultA1;
 
-    //    > PostFund2
-    //      PostFund3
-    const resultB2 = await b.pushMessage(
-      getPayloadFor(participantB.participantId, resultA1.outbox)
-    );
-    expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-      status: 'running', // should this be 'running' ?
-      turnNum: 0,
-    });
+      /**
+       * In this case, there is no auto-advancing to the running stage. Instead we have
+       * an intermediate 'funding' stage where each party must fund their channel. A funds
+       * first, and then B funds. B signs turnNum 3 on the call to updateFundingForChannels
+       * and then sends it to A, who responds back to B
+       */
 
-    // PostFund3 <
-    const resultA2 = await a.pushMessage(
-      getPayloadFor(participantA.participantId, resultB2.outbox)
-    );
-    expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-      status: 'running', // should this be 'running' ?
-      turnNum: 0,
-    });
+      expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+        status: 'funding',
+        turnNum: 0,
+      });
+
+      const depositByA = {channelId, token: '0x00', amount: BigNumber.from(1).toHexString()}; // A sends 1 ETH (1 total)
+
+      // This would have been triggered by A's Chain Service by request
+      await a.updateFundingForChannels([depositByA]);
+      await b.updateFundingForChannels([depositByA]);
+
+      // Then, this would be triggered by B's Chain Service after observing A's deposit
+      const depositByB = {channelId, token: '0x00', amount: BigNumber.from(2).toHexString()}; // B sends 1 ETH (2 total)
+
+      // < PostFund3B
+      const resultA2 = await a.updateFundingForChannels([depositByB]);
+
+      // PostFund3A >
+      const resultB2 = await b.updateFundingForChannels([depositByB]);
+
+      expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+        status: 'funding', // Still opening because turnNum 3 is not supported yet, but is signed by A
+        turnNum: 0,
+      });
+
+      expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+        status: 'funding', // Still opening because turnNum 3 is not supported yet, but is signed by B
+        turnNum: 0,
+      });
+
+      //  PostFund3B <
+      const resultA3 = await a.pushMessage(
+        getPayloadFor(participantA.participantId, resultB2.outbox)
+      );
+      expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
+        status: 'running',
+        turnNum: 3,
+      });
+
+      //  > PostFund3A
+      const resultB3 = await b.pushMessage(
+        getPayloadFor(participantB.participantId, resultA2.outbox)
+      );
+      expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
+        status: 'running',
+        turnNum: 3,
+      });
+    } else if (fundingStrategy === 'Unfunded') {
+      //  PreFund0B & PostFund3B <
+      // PostFund3A
+      resultA1;
+
+      /**
+       * In this case, resultA1 auto-signed PostFundA0
+       */
+      expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+        status: 'running', // should this be 'funding' ?
+        turnNum: 3,
+      });
+      const resultB2 = await b.pushMessage(
+        getPayloadFor(participantB.participantId, resultA1.outbox)
+      );
+      expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+        status: 'running', // should this be 'running' ?
+        turnNum: 3,
+      });
+    }
   }
 );

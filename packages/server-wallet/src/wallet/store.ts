@@ -64,8 +64,18 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
+export type ObjectiveStoredInDB = Objective & {
+  objectiveId: number;
+  status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+};
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
+  // FIXME: (Liam) Turn into a new DB table
+  public objectives: {
+    [objectiveId: number]: ObjectiveStoredInDB;
+  } = {};
+
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
@@ -200,7 +210,7 @@ export class Store {
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
-    let data: Payload = {
+    const data: Payload = {
       signedStates: [signedState],
       objectives: [],
     };
@@ -209,21 +219,6 @@ export class Store {
      * In this case Bob will send an objective to Alice
      */
 
-    if (signedState.turnNum === 0) {
-      data = {
-        ...data,
-        objectives: [
-          {
-            participants: channel.participants,
-            type: 'OpenChannel',
-            data: {
-              targetChannelId: channel.channelId,
-              fundingStrategy: 'Direct',
-            },
-          },
-        ],
-      };
-    }
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
@@ -311,31 +306,37 @@ export class Store {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
-  async pushMessage(message: WirePayload): Promise<Bytes32[]> {
+  async pushMessage(
+    message: WirePayload
+  ): Promise<{channelIds: Bytes32[]; objectives: ObjectiveStoredInDB[]}> {
     return this.knex.transaction(async tx => {
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
       for (const ss of message.signedStates || []) {
         await this.addSignedState(ss.channelId, undefined, ss, tx);
       }
 
-      const objectives = message.objectives?.map(deserializeObjective) || [];
-      for (const o of objectives) {
-        await this.addObjective(o, tx);
+      const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
+      const storedObjectives = [];
+      for (const o of deserializedObjectives) {
+        storedObjectives.push(await this.addObjective(o, tx));
       }
 
       function isDefined(s: string | undefined): s is string {
         return s !== undefined;
       }
       const objectiveChannelIds =
-        objectives
+        storedObjectives
           .map(objective => (isOpenChannel(objective) ? objective.data.targetChannelId : undefined))
           .filter(isDefined) || [];
 
-      return stateChannelIds.concat(objectiveChannelIds);
+      return {
+        channelIds: stateChannelIds.concat(objectiveChannelIds),
+        objectives: storedObjectives.filter(o => o.status === 'pending'),
+      };
     });
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<Channel> {
+  async addObjective(objective: Objective, tx: Transaction): Promise<ObjectiveStoredInDB> {
     if (isOpenChannel(objective)) {
       const {
         data: {targetChannelId: channelId, fundingStrategy},
@@ -347,11 +348,28 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
-      return await Channel.query(tx)
+      if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
+        throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
+
+      // FIXME: (Liam) Does it make sense to do the INSERT here?
+      this.objectives[0 /* FIXME: come up with id strategy */] = {
+        objectiveId: 0,
+        status: 'pending',
+        type: objective.type,
+        participants: channel.participants,
+        data: {
+          fundingStrategy,
+          targetChannelId: channelId,
+        },
+      };
+
+      await Channel.query(tx)
         .where({channelId: channel.channelId})
         .patch({fundingStrategy})
         .returning('*')
         .first();
+
+      return this.objectives[0];
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -443,7 +461,7 @@ export class Store {
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
       const {channelId} = await createChannel(constants, fundingStrategy, tx);
-      return await this.signState(
+      const {outgoing, channelResult} = await this.signState(
         channelId,
         {
           ...constants,
@@ -454,6 +472,22 @@ export class Store {
         },
         tx
       );
+      const objective: Objective = {
+        participants: constants.participants,
+        type: 'OpenChannel',
+        data: {
+          targetChannelId: channelId,
+          fundingStrategy,
+        },
+      };
+      this.objectives[constants.channelNonce /* TODO: (Liam) what to use for id? */] = {
+        ...objective,
+        objectiveId: constants.channelNonce,
+        status: 'approved',
+      };
+      // FIXME: Message serialization should not be inside store.signState
+      ((outgoing[0].notice.params.data as unknown) as Payload).objectives = [objective];
+      return {outgoing, channelResult};
     });
   }
 
@@ -485,6 +519,7 @@ class StoreError extends WalletError {
     invalidTransition: 'Invalid state transition',
     channelMissing: 'Channel not found',
     unimplementedObjective: 'Unimplemented objective',
+    unimplementedFundingStrategy: 'Unimplemented funding strategy',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);

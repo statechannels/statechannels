@@ -62,6 +62,7 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   });
 };
 
+const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 
 // todo: the only cases considered so far are directly funded
@@ -74,7 +75,7 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
-  isFunded(ps) &&
+  (isFunded(ps) || isUnfunded(ps.app)) &&
   signState({channelId: ps.app.channelId, ...ps.app.latestSignedByMe, turnNum: 3});
 
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>

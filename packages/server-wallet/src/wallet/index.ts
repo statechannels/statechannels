@@ -35,6 +35,7 @@ import * as Application from '../protocols/application';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
+import * as ApproveObjective from '../handlers/approve-objective';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {OnchainServiceInterface} from '../chain-service/chain-service-v0';
@@ -51,15 +52,23 @@ import {
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 
-import {Store, AppHandler, MissingAppHandler} from './store';
+import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
 export type SingleChannelResult = Promise<SingleChannelMessage>;
 export type MultipleChannelResult = Promise<MultipleChannelMessage>;
-type SingleChannelMessage = {outbox: Outgoing[]; channelResult: ChannelResult};
-type MultipleChannelMessage = {outbox: Outgoing[]; channelResults: ChannelResult[]};
+type SingleChannelMessage = {
+  outbox: Outgoing[];
+  channelResult: ChannelResult;
+  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+};
+type MultipleChannelMessage = {
+  outbox: Outgoing[];
+  channelResults: ChannelResult[];
+  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+};
 type Message = SingleChannelMessage | MultipleChannelMessage;
 const isSingleChannelMessage = (message: Message): message is SingleChannelMessage =>
   'channelResult' in message;
@@ -291,6 +300,31 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
+  async approveObjective(objectiveId: number): SingleChannelResult {
+    const objective = this.store.objectives[objectiveId];
+
+    if (!objective)
+      throw new ApproveObjective.ApproveObjectiveError(
+        ApproveObjective.ApproveObjectiveError.reasons.objectiveNotFound,
+        {objectiveId}
+      );
+
+    if (objective.type !== 'OpenChannel')
+      throw new ApproveObjective.ApproveObjectiveError(
+        ApproveObjective.ApproveObjectiveError.reasons.unimplemented,
+        {type: objective.type}
+      );
+
+    // FIXME: This should probably be done within the critical code of the joinChannel
+    this.store.objectives[objectiveId].status = 'approved';
+
+    const {
+      data: {targetChannelId},
+    } = objective;
+
+    return this.joinChannel({channelId: targetChannelId});
+  }
+
   async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
     const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
@@ -433,7 +467,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       };
     }
 
-    const channelIds = await this.store.pushMessage(wirePayload);
+    const {channelIds, objectives} = await this.store.pushMessage(wirePayload);
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
@@ -444,6 +478,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return {
       outbox: mergeOutgoing(outbox),
       channelResults: mergeChannelResults(channelResults),
+      objectivesToApprove: objectives,
     };
   }
 
