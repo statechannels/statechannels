@@ -276,7 +276,7 @@ describe('concludeAndWithdraw', () => {
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
     await p;
-  });
+  }, 10_000);
 
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
@@ -321,5 +321,5 @@ describe('concludeAndWithdraw', () => {
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
 
     await p;
-  });
+  }, 10_000);
 });
