@@ -1,11 +1,14 @@
-import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
-import {BN, simpleEthAllocation, State} from '@statechannels/wallet-core';
-import {BigNumber, constants, Contract, providers} from 'ethers';
+import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
+import {BN, makeDestination, simpleEthAllocation, State} from '@statechannels/wallet-core';
+import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
 import {defaultConfig} from '../../config';
 import {Address} from '../../type-aliases';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import {
+  alice as aliceParticipant,
+  bob as bobParticipant,
+} from '../../wallet/__test__/fixtures/participants';
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainService, HoldingUpdatedArg} from '../chain-service';
 
@@ -174,21 +177,36 @@ describe('registerChannel', () => {
 
 describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw', async () => {
+    const aEthWallet = Wallet.createRandom();
+    const bEthWallet = Wallet.createRandom();
+
+    const alice = aliceParticipant({destination: makeDestination(aEthWallet.address)});
+    const bob = bobParticipant({destination: makeDestination(bEthWallet.address)});
     const state1: State = {
       appData: constants.HashZero,
       appDefinition: constants.AddressZero,
-      isFinal: false,
+      isFinal: true,
       turnNum: 4,
       outcome: simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(1)},
-        {destination: bob().destination, amount: BN.from(3)},
+        {destination: alice.destination, amount: BN.from(1)},
+        {destination: bob.destination, amount: BN.from(3)},
       ]),
-      participants: [alice(), bob()],
+      participants: [alice, bob],
       channelNonce: 1,
       chainId: '0x01',
       challengeDuration: 9001,
     };
+    const channelId = getChannelId({
+      channelNonce: state1.channelNonce,
+      chainId: state1.chainId,
+      participants: [alice, bob].map(p => p.signingAddress),
+    });
     const signatures = [aWallet(), bWallet()].map(sw => sw.signState(state1));
-    await (await chainService.concludeAndWithdraw([{...state1, signatures: signatures}])).wait();
+
+    await waitForChannelFunding(0, 5, channelId);
+    await (await chainService.concludeAndWithdraw([{...state1, signatures}])).wait();
+
+    expect(await provider.getBalance(aEthWallet.address)).toEqual(BigNumber.from(1));
+    expect(await provider.getBalance(bEthWallet.address)).toEqual(BigNumber.from(3));
   });
 });
