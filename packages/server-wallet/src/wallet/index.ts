@@ -47,6 +47,7 @@ import {
   MockChainService,
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
+  AssetTransferredArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 
@@ -535,6 +536,10 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
   dbAdmin(): DBAdmin {
     return new DBAdmin(this.knex);
+  }
+
+  onAssetTransferred(_arg: AssetTransferredArg): void {
+    // todo: implement me
   }
 }
 
