@@ -1,3 +1,5 @@
+import {execSync} from 'child_process';
+
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
@@ -7,12 +9,18 @@ import {Wallet} from '../wallet';
 
 import {getChannelResultFor, getPayloadFor} from './test-helpers';
 
-// Assume that DBs with these names exist.
 const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
 
 beforeAll(async () => {
+  execSync('createdb TEST_A $PSQL_ARGS');
+  execSync('createdb TEST_B $PSQL_ARGS');
   await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
+});
+afterAll(async () => {
+  await Promise.all([a.destroy(), b.destroy()]);
+  execSync('dropdb TEST_A $PSQL_ARGS');
+  execSync('dropdb TEST_B $PSQL_ARGS');
 });
 
 it('Create a fake-funded channel between two wallets ', async () => {
