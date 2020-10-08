@@ -241,6 +241,7 @@ describe('registerChannel', () => {
 describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
+
     let counter = 0;
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
@@ -278,7 +279,37 @@ describe('concludeAndWithdraw', () => {
   });
 
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
-    const {aAddress, bAddress, state, signatures} = await setUpConclude(false);
+    const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
+
+    let counter = 0;
+    const p = new Promise(resolve =>
+      chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
+        onHoldingUpdated: _.noop,
+        onAssetTransferred: (arg: AssetTransferredArg) => {
+          switch (counter) {
+            case 0:
+              expect(arg).toMatchObject({
+                amount: BN.from(1),
+                assetHolderAddress: erc20AssetHolderAddress,
+                to: makeDestination(aAddress).toLocaleLowerCase(),
+                channelId,
+              });
+              counter++;
+              break;
+            case 1:
+              expect(arg).toMatchObject({
+                amount: BN.from(3),
+                assetHolderAddress: erc20AssetHolderAddress,
+                to: makeDestination(bAddress).toLocaleLowerCase(),
+                channelId,
+              });
+              resolve();
+              break;
+          }
+        },
+      })
+    );
+
     await (await chainService.concludeAndWithdraw([{...state, signatures}])).wait();
 
     const erc20Contract: Contract = new Contract(
@@ -288,5 +319,7 @@ describe('concludeAndWithdraw', () => {
     );
     expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
+
+    await p;
   });
 });
