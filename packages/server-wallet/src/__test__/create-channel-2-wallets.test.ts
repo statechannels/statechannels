@@ -31,7 +31,7 @@ afterAll(async () => {
 const testCases: FundingStrategy[] = ['Unfunded', 'Direct', 'Ledger', 'Virtual'];
 
 it.each(testCases)(
-  'Create a %s-funded channel between two wallets ',
+  'Creates a %s-funded channel between two wallets ',
   async (fundingStrategy: FundingStrategy) => {
     const participantA: Participant = {
       signingAddress: await a.getSigningAddress(),
