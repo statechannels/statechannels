@@ -16,7 +16,7 @@ import {
   bob as bobParticipant,
 } from '../../wallet/__test__/fixtures/participants';
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
-import {ChainService, HoldingUpdatedArg} from '../chain-service';
+import {AssetTransferredArg, ChainService, HoldingUpdatedArg} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
@@ -109,8 +109,13 @@ async function setUpConclude(isEth = true) {
     channelId,
     isEth ? ethAssetHolderAddress : erc20AssetHolderAddress
   );
-  await (await chainService.concludeAndWithdraw([{...state1, signatures}])).wait();
-  return {aAddress: aEthWallet.address, bAddress: bEthWallet.address};
+  return {
+    channelId,
+    aAddress: aEthWallet.address,
+    bAddress: bEthWallet.address,
+    state: state1,
+    signatures,
+  };
 }
 
 describe('fundChannel', () => {
@@ -235,14 +240,46 @@ describe('registerChannel', () => {
 
 describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
-    const {aAddress, bAddress} = await setUpConclude();
+    const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
+    let counter = 0;
+    const p = new Promise(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        onHoldingUpdated: _.noop,
+        onAssetTransferred: (arg: AssetTransferredArg) => {
+          switch (counter) {
+            case 0:
+              expect(arg).toMatchObject({
+                amount: BN.from(1),
+                assetHolderAddress: ethAssetHolderAddress,
+                to: makeDestination(aAddress).toLocaleLowerCase(),
+                channelId,
+              });
+              counter++;
+              break;
+            case 1:
+              expect(arg).toMatchObject({
+                amount: BN.from(3),
+                assetHolderAddress: ethAssetHolderAddress,
+                to: makeDestination(bAddress).toLocaleLowerCase(),
+                channelId,
+              });
+              resolve();
+              break;
+          }
+        },
+      })
+    );
+
+    await (await chainService.concludeAndWithdraw([{...state, signatures}])).wait();
 
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
+    await p;
   });
 
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
-    const {aAddress, bAddress} = await setUpConclude(false);
+    const {aAddress, bAddress, state, signatures} = await setUpConclude(false);
+    await (await chainService.concludeAndWithdraw([{...state, signatures}])).wait();
 
     const erc20Contract: Contract = new Contract(
       erc20Address,
