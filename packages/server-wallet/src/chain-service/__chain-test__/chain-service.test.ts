@@ -173,6 +173,7 @@ describe('registerChannel', () => {
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       onHoldingUpdated,
+      onAssetTransferred: _.noop,
     });
     await p;
   });
@@ -191,6 +192,7 @@ describe('registerChannel', () => {
           });
           resolve();
         },
+        onAssetTransferred: _.noop,
       })
     );
   });
@@ -223,6 +225,7 @@ describe('registerChannel', () => {
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       onHoldingUpdated,
+      onAssetTransferred: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);

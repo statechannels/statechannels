@@ -24,6 +24,13 @@ export type HoldingUpdatedArg = {
   amount: Uint256;
 };
 
+export type AssetTransferredArg = {
+  channelId: Bytes32;
+  assetHolderAddress: Address;
+  to: Bytes32;
+  amount: Uint256;
+};
+
 export type FundChannelArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
@@ -34,6 +41,7 @@ export type FundChannelArg = {
 
 export interface ChainEventSubscriberInterface {
   onHoldingUpdated(arg: HoldingUpdatedArg): void;
+  onAssetTransferred(arg: AssetTransferredArg): void;
 }
 
 interface ChainEventEmitterInterface {
@@ -57,8 +65,11 @@ type TransactionQueueEntry = {
   resolve: (response: providers.TransactionResponse) => void;
 };
 
+const Deposited = 'Deposited' as const;
+const AssetTransferred = 'AssetTransferred' as const;
 type DepositedEvent = {type: 'Deposited'} & HoldingUpdatedArg;
-type ContractEvent = DepositedEvent;
+type AssetTransferredEvent = {type: 'AssetTransferred'} & AssetTransferredArg;
+type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
 function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
@@ -203,6 +214,7 @@ export class ChainService implements ChainServiceInterface {
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
       const currentHolding = from(
         (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
+          type: Deposited,
           channelId,
           assetHolderAddress: contract.address,
           amount: BN.from(holding),
@@ -211,7 +223,18 @@ export class ChainService implements ChainServiceInterface {
 
       // todo: subscriber method should be based on event type
       concat(currentHolding, obs.pipe(filter(event => event.channelId === channelId))).subscribe({
-        next: subscriber.onHoldingUpdated,
+        next: event => {
+          switch (event.type) {
+            case Deposited:
+              subscriber.onHoldingUpdated(event);
+              break;
+            case AssetTransferred:
+              subscriber.onAssetTransferred(event);
+              break;
+            default:
+              throw new Error('Unexpected event from contract observable');
+          }
+        },
       });
     });
   }
@@ -220,12 +243,21 @@ export class ChainService implements ChainServiceInterface {
     // Create an observable that emits events on contract events
     const obs = new Observable<ContractEvent>(subs => {
       // todo: add other event types
-      contract.on('Deposited', (destination, _amountDeposited, destinationHoldings) =>
+      contract.on(Deposited, (destination, _amountDeposited, destinationHoldings) =>
         subs.next({
-          type: 'Deposited',
+          type: Deposited,
           channelId: destination,
           assetHolderAddress: contract.address,
           amount: BN.from(destinationHoldings),
+        })
+      );
+      contract.on(AssetTransferred, (channelId, destination, payoutAmount) =>
+        subs.next({
+          type: AssetTransferred,
+          channelId,
+          assetHolderAddress: contract.address,
+          to: destination,
+          amount: BN.from(payoutAmount),
         })
       );
     });
