@@ -167,7 +167,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
                     assetOutcome.allocationOrGuaranteeBytes
                 );
             } else {
-                revert();
+                revert('_transferAllFromAllAssetHolders: AssetOutcomeType is not an allocation');
             }
         }
     }
