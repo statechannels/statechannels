@@ -45,15 +45,20 @@ interface ChainEventEmitterInterface {
 }
 
 interface ChainModifierInterface {
+  // todo: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
   concludeAndWithdraw(finalizationProof: SignedState[]): Promise<providers.TransactionResponse>;
 }
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
+
 type TransactionQueueEntry = {
   request: providers.TransactionRequest;
   resolve: (response: providers.TransactionResponse) => void;
 };
+
+type DepositedEvent = {type: 'Deposited'} & HoldingUpdatedArg;
+type ContractEvent = DepositedEvent;
 
 function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
@@ -66,7 +71,7 @@ function isError(e: any): e is Error {
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
-  private addressToObservable: Map<Address, Observable<HoldingUpdatedArg>> = new Map();
+  private addressToObservable: Map<Address, Observable<ContractEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private transactionQueue: TransactionQueueEntry[] = [];
 
@@ -96,7 +101,7 @@ export class ChainService implements ChainServiceInterface {
     return this.addressToContract.get(contractAddress) ?? this.addContractMapping(contractAddress);
   }
 
-  private getOrAddContractObservable(assetHolderAddress: Address): Observable<HoldingUpdatedArg> {
+  private getOrAddContractObservable(assetHolderAddress: Address): Observable<ContractEvent> {
     let obs = this.addressToObservable.get(assetHolderAddress);
     if (!obs) {
       const contract = this.getOrAddContractMapping(assetHolderAddress);
@@ -211,12 +216,13 @@ export class ChainService implements ChainServiceInterface {
     });
   }
 
-  private addContractObservable(contract: Contract): Observable<HoldingUpdatedArg> {
+  private addContractObservable(contract: Contract): Observable<ContractEvent> {
     // Create an observable that emits events on contract events
-    const obs = new Observable<HoldingUpdatedArg>(subs => {
+    const obs = new Observable<ContractEvent>(subs => {
       // todo: add other event types
       contract.on('Deposited', (destination, _amountDeposited, destinationHoldings) =>
         subs.next({
+          type: 'Deposited',
           channelId: destination,
           assetHolderAddress: contract.address,
           amount: BN.from(destinationHoldings),
