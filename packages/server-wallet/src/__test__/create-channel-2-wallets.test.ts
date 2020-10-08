@@ -116,8 +116,8 @@ it.each(testCases)(
       /**
        * In this case, there is no auto-advancing to the running stage. Instead we have
        * an intermediate 'funding' stage where each party must fund their channel. A funds
-       * first, and then B funds. B signs turnNum 3 on the call to updateFundingForChannels
-       * and then sends it to A, who responds back to B
+       * first, and then B funds. A and B both signs turnNum 3 on the call to updateFundingForChannels
+       * and then sends the newly signed state to each other at the same time.
        */
 
       expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
