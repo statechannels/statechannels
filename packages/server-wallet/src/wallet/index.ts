@@ -48,6 +48,7 @@ import {
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
 } from '../chain-service';
+import {DBAdmin} from '../db-admin/db-admin';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -226,6 +227,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return await this.store.getOrCreateSigningAddress();
   }
 
+  async createChannel(args: CreateChannelParams): MultipleChannelResult {
+    return this.createChannels(args, 1);
+  }
   async createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult {
     const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
@@ -527,6 +531,10 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       ...arg,
       token: arg.assetHolderAddress,
     });
+  }
+
+  dbAdmin(): DBAdmin {
+    return new DBAdmin(this.knex);
   }
 }
 
