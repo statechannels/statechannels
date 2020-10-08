@@ -1,24 +1,10 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
-
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
+
 import {defaultConfig} from '../config';
-
-// Spin up Wallets for A and B
-// A calls createChannel(X, 'fake-funding')
-// Assert A gets the correct ChannelResult.results
-// push outbox into B
-
-// Assert that we get a joinChannel notification
-// b.wallet.joinChannel
-// Assert that the channel result says 'funded'
-// (Is there also a notification? Probably not...)
-// push outbox into A
-// A should get a ChannelResult with 'funded and running'
-// push outbox into B
-// B should get a ChannelResult with 'running'
-
 import {Wallet} from '../wallet';
+
 import {getChannelResultFor, getPayloadFor} from './test-helpers';
 
 // Assume that DBs with these names exist.
@@ -60,20 +46,54 @@ it('Create a fake-funded channel between two wallets ', async () => {
     fundingStrategy: 'Direct',
   };
 
-  const resultA = await a.createChannel(channelParams);
+  //        A <> B
+  // PreFund0
+  const resultA0 = await a.createChannel(channelParams);
 
   // TODO compute the channelId for a better test
-  const channelId = resultA.channelResults[0].channelId;
+  const channelId = resultA0.channelResults[0].channelId;
 
-  expect(getChannelResultFor(channelId, resultA.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
-  const resultB = await b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
+  //    > PreFund0
+  const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
 
-  expect(getChannelResultFor(channelId, resultB.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
     status: 'proposed',
     turnNum: 0,
   });
+
+  //      PreFund1
+  const resultB1 = await b.joinChannel({channelId});
+  expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
+    status: 'opening', // should this be 'funding' ?
+    turnNum: 0,
+  });
+
+  //  PreFund1 <
+  // PostFund2
+  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
+
+  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+    status: 'opening', // should this be 'funding' ?
+    turnNum: 0,
+  });
+
+  //   //    > PostFund2
+  //   //      PostFund3
+  //   const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1.outbox));
+  //   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+  //     status: 'opening', // should this be 'running' ?
+  //     turnNum: 0,
+  //   });
+
+  //   // PostFund3 <
+  //   const resultA2 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
+  //   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+  //     status: 'opening', // should this be 'running' ?
+  //     turnNum: 0,
+  //   });
 });
