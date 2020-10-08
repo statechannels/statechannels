@@ -176,14 +176,14 @@ it.each(testCases)(
        * In this case, resultA1 auto-signed PostFundA0
        */
       expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-        status: 'running', // should this be 'funding' ?
+        status: 'running',
         turnNum: 3,
       });
       const resultB2 = await b.pushMessage(
         getPayloadFor(participantB.participantId, resultA1.outbox)
       );
       expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-        status: 'running', // should this be 'running' ?
+        status: 'running',
         turnNum: 3,
       });
     }
