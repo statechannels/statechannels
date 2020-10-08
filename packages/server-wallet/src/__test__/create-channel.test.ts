@@ -91,23 +91,27 @@ it.each(testCases)(
     );
 
     expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-      status: 'opening', // should this be 'funding' ?
+      status: 'funding', // should this be 'funding' ?
       turnNum: 0,
     });
 
-    //   //    > PostFund2
-    //   //      PostFund3
-    //   const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1.outbox));
-    //   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-    //     status: 'opening', // should this be 'running' ?
-    //     turnNum: 0,
-    //   });
+    //    > PostFund2
+    //      PostFund3
+    const resultB2 = await b.pushMessage(
+      getPayloadFor(participantB.participantId, resultA1.outbox)
+    );
+    expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+      status: 'running', // should this be 'running' ?
+      turnNum: 0,
+    });
 
-    //   // PostFund3 <
-    //   const resultA2 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
-    //   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-    //     status: 'opening', // should this be 'running' ?
-    //     turnNum: 0,
-    //   });
+    // PostFund3 <
+    const resultA2 = await a.pushMessage(
+      getPayloadFor(participantA.participantId, resultB2.outbox)
+    );
+    expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+      status: 'running', // should this be 'running' ?
+      turnNum: 0,
+    });
   }
 );
