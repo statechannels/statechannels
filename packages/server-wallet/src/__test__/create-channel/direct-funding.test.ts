@@ -49,7 +49,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Unfunded',
+    fundingStrategy: 'Direct',
   };
 
   //        A <> B
@@ -73,7 +73,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   expect(objective).toMatchObject({
     type: 'OpenChannel',
     data: {
-      fundingStrategy: 'Unfunded',
+      fundingStrategy: 'Direct',
       targetChannelId: channelId,
     },
   });
@@ -90,19 +90,56 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //  PreFund0B & PostFund3B <
-  // PostFund3A
+  //  PreFund0B <
   const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
 
   /**
-   * In this case, resultA1 auto-signed PostFundA0
+   * In this case, there is no auto-advancing to the running stage. Instead we have
+   * an intermediate 'funding' stage where each party must fund their channel. A funds
+   * first, and then B funds. A and B both signs turnNum 3 on the call to updateFundingForChannels
+   * and then sends the newly signed state to each other at the same time.
    */
+
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+    status: 'funding',
+    turnNum: 0,
+  });
+
+  const depositByA = {channelId, token: '0x00', amount: BigNumber.from(1).toHexString()}; // A sends 1 ETH (1 total)
+
+  // This would have been triggered by A's Chain Service by request
+  await a.updateFundingForChannels([depositByA]);
+  await b.updateFundingForChannels([depositByA]);
+
+  // Then, this would be triggered by B's Chain Service after observing A's deposit
+  const depositByB = {channelId, token: '0x00', amount: BigNumber.from(2).toHexString()}; // B sends 1 ETH (2 total)
+
+  // < PostFund3B
+  const resultA2 = await a.updateFundingForChannels([depositByB]);
+
+  // PostFund3A >
+  const resultB2 = await b.updateFundingForChannels([depositByB]);
+
+  expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+    status: 'funding', // Still opening because turnNum 3 is not supported yet, but is signed by A
+    turnNum: 0,
+  });
+
+  expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+    status: 'funding', // Still opening because turnNum 3 is not supported yet, but is signed by B
+    turnNum: 0,
+  });
+
+  //  PostFund3B <
+  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
+  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
-  const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1.outbox));
-  expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+
+  //  > PostFund3A
+  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
+  expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
