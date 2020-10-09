@@ -37,7 +37,6 @@ import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
-import {OnchainServiceInterface} from '../chain-service/chain-service-v0';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
@@ -90,9 +89,6 @@ export type WalletInterface = {
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
-
-  // Register chain <-> Wallet communication
-  attachChainService(provider: OnchainServiceInterface): void;
 
   mergeMessages(messages: Message[]): MultipleChannelMessage;
 };
@@ -449,11 +445,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
   onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
     throw 'Unimplemented';
-  }
-
-  // Should be called after wallet creation
-  attachChainService(provider: OnchainServiceInterface): void {
-    provider.attachChannelWallet(this);
   }
 
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
