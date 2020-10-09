@@ -54,66 +54,73 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   //        A <> B
   // PreFund0
-  const resultA0 = await a.createChannel(channelParams);
+  const aCreateChannelOutput = await a.createChannel(channelParams);
 
   // TODO compute the channelId for a better test
-  const channelId = resultA0.channelResults[0].channelId;
+  const channelId = aCreateChannelOutput.channelResults[0].channelId;
 
-  expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, aCreateChannelOutput.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
   // A sends PreFund0 to B
-  const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+  const bProposeChannelPushOutput = await b.pushMessage(
+    getPayloadFor(participantB.participantId, aCreateChannelOutput.outbox)
+  );
 
-  expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, bProposeChannelPushOutput.channelResults)).toMatchObject({
     status: 'proposed',
     turnNum: 0,
   });
 
-  // after joinChannel, B generates PreFund1
-  const resultB1 = await b.joinChannel({channelId});
-  expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
+  // after joinChannel, B double-signs PreFund0
+  const bJoinChannelOutput = await b.joinChannel({channelId});
+  expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
   // B sends countersigned PreFund0 to A
-  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
+  const aPushJoinChannelOutput = await a.pushMessage(
+    getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
+  );
 
-  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
   // Both A and B have PreFund states, we are now ready to fund
-  const resultA1b = await a.updateChannelFunding({channelId, token, amount: aBal});
+  const aFundOutput = await a.updateChannelFunding({channelId, token, amount: aBal});
 
-  expect(getChannelResultFor(channelId, [resultA1b.channelResult])).toMatchObject({
+  expect(getChannelResultFor(channelId, [aFundOutput.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0, // this is the currently latest _supported_ turnNum, not the latest turnNum
   });
 
   // A sends PostFund3 to B
-  const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1b.outbox));
-  expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+  const bPushPostFundOutput = await b.pushMessage(
+    getPayloadFor(participantB.participantId, aFundOutput.outbox)
+  );
+  expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
-  const resultB3 = await b.updateChannelFunding({channelId, token, amount: aBal});
+  const bFundOutput = await b.updateChannelFunding({channelId, token, amount: aBal});
 
-  expect(getChannelResultFor(channelId, [resultB3.channelResult])).toMatchObject({
+  expect(getChannelResultFor(channelId, [bFundOutput.channelResult])).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
-  // console.log('resultB2b', resultB2b);
 
   // B sends PostFund3 to A
-  const resultA2 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  const aPushPostFundOutput = await a.pushMessage(
+    getPayloadFor(participantA.participantId, bFundOutput.outbox)
+  );
   // A has funding and a double-signed PostFund3
-  expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+  expect(getChannelResultFor(channelId, aPushPostFundOutput.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });

@@ -64,7 +64,6 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         },
       },
     ],
-    // why is this 0, when the turnNums above are 3? Is it the latest _supported_ turnNum?
     channelResults: channelIds.map(cId => ({channelId: cId, turnNum: 0})),
   });
 });
