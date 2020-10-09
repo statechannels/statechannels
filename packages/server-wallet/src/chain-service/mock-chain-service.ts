@@ -50,6 +50,10 @@ export class MockChainService implements ChainServiceInterface {
     return;
   }
 
+  unregisterChannel(_channelId: Bytes32): void {
+    return;
+  }
+
   concludeAndWithdraw(_finalizationProof: SignedState[]): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }

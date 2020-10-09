@@ -169,6 +169,7 @@ describe('registerChannel', () => {
             amount: BN.from(5),
           });
           counter++;
+          chainService.unregisterChannel(channelId);
           resolve();
           break;
         default:
