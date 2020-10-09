@@ -4,10 +4,9 @@ import {CreateChannelParams, Participant, Allocation} from '@statechannels/clien
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
-import {defaultConfig} from '../config';
-import {Wallet} from '../wallet';
-
-import {getChannelResultFor, getPayloadFor} from './test-helpers';
+import {defaultConfig} from '../../config';
+import {Wallet} from '../../wallet';
+import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
@@ -39,11 +38,12 @@ it('Create a fake-funded channel between two wallets ', async () => {
     ),
   };
 
+  const token = '0x00'; // must be even length
+  const aBal = BigNumber.from(1).toHexString();
+
   const allocation: Allocation = {
-    allocationItems: [
-      {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
-    ],
-    token: '0x00', // must be even length
+    allocationItems: [{destination: participantA.destination, amount: aBal}],
+    token,
   };
 
   const channelParams: CreateChannelParams = {
@@ -66,7 +66,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //    > PreFund0
+  // A sends PreFund0 to B
   const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
 
   expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
@@ -74,34 +74,49 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //      PreFund1
+  // after joinChannel, B generates PreFund1
   const resultB1 = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
-    status: 'opening', // should this be 'funding' ?
+    status: 'opening',
     turnNum: 0,
   });
 
-  //  PreFund1 <
-  // PostFund2
+  // B sends countersigned PreFund0 to A
   const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
 
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-    status: 'opening', // should this be 'funding' ?
+    status: 'opening',
     turnNum: 0,
   });
 
-  //   //    > PostFund2
-  //   //      PostFund3
-  //   const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1.outbox));
-  //   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-  //     status: 'opening', // should this be 'running' ?
-  //     turnNum: 0,
-  //   });
+  // Both A and B have PreFund states, we are now ready to fund
+  const resultA1b = await a.updateChannelFunding({channelId, token, amount: aBal});
 
-  //   // PostFund3 <
-  //   const resultA2 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
-  //   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-  //     status: 'opening', // should this be 'running' ?
-  //     turnNum: 0,
-  //   });
+  expect(getChannelResultFor(channelId, [resultA1b.channelResult])).toMatchObject({
+    status: 'opening',
+    turnNum: 0, // this is the currently latest _supported_ turnNum, not the latest turnNum
+  });
+
+  // A sends PostFund3 to B
+  const resultB2 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA1b.outbox));
+  expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
+    status: 'opening',
+    turnNum: 0,
+  });
+
+  const resultB3 = await b.updateChannelFunding({channelId, token, amount: aBal});
+
+  expect(getChannelResultFor(channelId, [resultB3.channelResult])).toMatchObject({
+    status: 'running',
+    turnNum: 3,
+  });
+  // console.log('resultB2b', resultB2b);
+
+  // B sends PostFund3 to A
+  const resultA2 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  // A has funding and a double-signed PostFund3
+  expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
+    status: 'running',
+    turnNum: 3,
+  });
 });

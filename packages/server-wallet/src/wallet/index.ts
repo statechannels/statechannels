@@ -209,7 +209,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       outbox: mergeOutgoing(outgoing),
     };
   }
-  private async updateChannelFunding({
+  async updateChannelFunding({
     channelId,
     token,
     amount,
