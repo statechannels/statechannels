@@ -6,7 +6,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {BN, SignedState, toNitroSignedState, Uint256} from '@statechannels/wallet-core';
 import {Contract, providers, utils, Wallet} from 'ethers';
-import {concat, from, Observable} from 'rxjs';
+import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 
@@ -50,6 +50,7 @@ interface ChainEventEmitterInterface {
     assetHolders: Address[],
     listener: ChainEventSubscriberInterface
   ): void;
+  unregisterChannel(channelId: Bytes32): void;
 }
 
 interface ChainModifierInterface {
@@ -84,6 +85,9 @@ export class ChainService implements ChainServiceInterface {
   private provider: providers.JsonRpcProvider;
   private addressToObservable: Map<Address, Observable<ContractEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
+  private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
+
+  // todo: the custom FIFO promise queue can be replaced by https://www.npmjs.com/package/p-queue
   private transactionQueue: TransactionQueueEntry[] = [];
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
@@ -221,8 +225,10 @@ export class ChainService implements ChainServiceInterface {
         }))
       );
 
-      // todo: subscriber method should be based on event type
-      concat(currentHolding, obs.pipe(filter(event => event.channelId === channelId))).subscribe({
+      const subscription = concat(
+        currentHolding,
+        obs.pipe(filter(event => event.channelId === channelId))
+      ).subscribe({
         next: event => {
           switch (event.type) {
             case Deposited:
@@ -236,7 +242,24 @@ export class ChainService implements ChainServiceInterface {
           }
         },
       });
+      const subscriptions = this.channelToSubscription.get(channelId) ?? [];
+      this.channelToSubscription.set(channelId, [...subscriptions, subscription]);
     });
+  }
+
+  /** Implementation note:
+   *  The following is a simplified API that assumes a single registerChannel call per channel.
+   *  If we would like to allow for multiple registrations per channel, registerChannel should return a registration ID.
+   *  unregisterChannel will require the registration ID as a parameter.
+   */
+  unregisterChannel(channelId: Bytes32): void {
+    const subscriptions = this.channelToSubscription.get(channelId);
+    if (subscriptions?.length !== 1) {
+      throw new Error(
+        'Unregister channel implementation only works when there is one subscriber per channel'
+      );
+    }
+    subscriptions.map(s => s.unsubscribe());
   }
 
   private addContractObservable(contract: Contract): Observable<ContractEvent> {
