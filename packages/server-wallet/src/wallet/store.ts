@@ -200,37 +200,22 @@ export class Store {
     channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
     const sender = channel.participants[channel.myIndex].participantId;
-    let data: Payload = {
-      signedStates: [signedState],
-      objectives: [],
-    };
-    /** todo:
-     * What happens if Bob is adding his signature to prefund0 from Alice?
-     * In this case Bob will send an objective to Alice
-     */
 
-    if (signedState.turnNum === 0) {
-      data = {
-        ...data,
-        objectives: [
-          {
-            participants: channel.participants,
-            type: 'OpenChannel',
-            data: {
-              targetChannelId: channel.channelId,
-              fundingStrategy: 'Direct',
-            },
-          },
-        ],
-      };
-    }
     const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
 
     const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
       type: 'NotifyApp' as const,
       notice: {
         method: 'MessageQueued' as const,
-        params: serializeMessage(data, recipient, sender, channelId),
+        params: serializeMessage(
+          {
+            signedStates: [signedState],
+            objectives: [],
+          },
+          recipient,
+          sender,
+          channelId
+        ),
       },
     }));
 
@@ -443,7 +428,7 @@ export class Store {
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
       const {channelId} = await createChannel(constants, fundingStrategy, tx);
-      return await this.signState(
+      const {outgoing, channelResult} = await this.signState(
         channelId,
         {
           ...constants,
@@ -454,6 +439,17 @@ export class Store {
         },
         tx
       );
+      const objective: Objective = {
+        participants: constants.participants,
+        type: 'OpenChannel',
+        data: {
+          targetChannelId: channelId,
+          fundingStrategy,
+        },
+      };
+      // TODO: Message serialization should not be inside store.signState
+      ((outgoing[0].notice.params.data as unknown) as Payload).objectives = [objective];
+      return {outgoing, channelResult};
     });
   }
 
