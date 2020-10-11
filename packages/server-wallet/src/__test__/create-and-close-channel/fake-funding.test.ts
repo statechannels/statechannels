@@ -58,7 +58,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Direct',
+    fundingStrategy: 'Unfunded',
   };
 
   //        A <> B
@@ -94,41 +94,24 @@ it('Create a fake-funded channel between two wallets ', async () => {
   const aPushJoinChannelOutput = await a.pushMessage(
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
-
   expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
-  // Both A and B have PreFund states, we are now ready to fund
-  const aFundOutput = await a.updateChannelFunding({channelId, token, amount: aBal});
-
-  expect(getChannelResultFor(channelId, [aFundOutput.channelResult])).toMatchObject({
-    status: 'opening',
-    turnNum: 0, // this is the currently latest _supported_ turnNum, not the latest turnNum
-  });
-
   // A sends PostFund3 to B
   const bPushPostFundOutput = await b.pushMessage(
-    getPayloadFor(participantB.participantId, aFundOutput.outbox)
+    getPayloadFor(participantB.participantId, aPushJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  const bFundOutput = await b.updateChannelFunding({channelId, token, amount: aBal});
-
-  expect(getChannelResultFor(channelId, [bFundOutput.channelResult])).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
   // B sends PostFund3 to A
   const aPushPostFundOutput = await a.pushMessage(
-    getPayloadFor(participantA.participantId, bFundOutput.outbox)
+    getPayloadFor(participantA.participantId, bPushPostFundOutput.outbox)
   );
-  // A has funding and a double-signed PostFund3
   expect(getChannelResultFor(channelId, aPushPostFundOutput.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
