@@ -16,6 +16,10 @@ export type FundChannel = {
   expectedHeld: Uint256;
   amount: Uint256;
 };
+export type CompleteObjective = {
+  type: 'CompleteObjective';
+  /* TODO: (Stored Objectives) put objective id here? */ channelId: Bytes32;
+};
 
 /*
 Action creators
@@ -28,6 +32,7 @@ const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['t
 ): A => ({...props, type} as A);
 export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const signState = actionConstructor<SignState>('SignState');
+export const completeObjective = actionConstructor<CompleteObjective>('CompleteObjective');
 
 const guard = <T extends ProtocolAction>(type: ProtocolAction['type']) => (
   a: ProtocolAction
@@ -38,4 +43,4 @@ export const isFundChannel = guard<FundChannel>('FundChannel');
 
 export type Outgoing = Notice;
 
-export type ProtocolAction = SignState | FundChannel;
+export type ProtocolAction = SignState | FundChannel | CompleteObjective;

@@ -88,6 +88,12 @@ export type OpenChannel = _Objective<
     fundingStrategy: FundingStrategy;
   }
 >;
+export type CloseChannel = _Objective<
+  'CloseChannel',
+  {
+    targetChannelId: Bytes32;
+  }
+>;
 export type VirtuallyFund = _Objective<
   'VirtuallyFund',
   {
@@ -118,7 +124,13 @@ export type CloseLedger = _Objective<
   }
 >;
 
-export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
+export type Objective =
+  | OpenChannel
+  | CloseChannel
+  | VirtuallyFund
+  | FundGuarantor
+  | FundLedger
+  | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;

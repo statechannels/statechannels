@@ -5,7 +5,7 @@ import {
   channel,
   withSupportedState as channelWithSupportedState,
 } from '../../../models/__test__/fixtures/channel';
-import {ProtocolState} from '../../application';
+import {ProtocolState} from '../../close-channel';
 import {stateVars} from '../../../wallet/__test__/fixtures/state-vars';
 
 export const applicationProtocolState = fixture({app: channel().protocolState});

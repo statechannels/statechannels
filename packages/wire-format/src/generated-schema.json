@@ -74,6 +74,39 @@
       ],
       "type": "object"
     },
+    "CloseChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "targetChannelId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "targetChannelId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "const": "CloseChannel",
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
     "CloseLedger": {
       "additionalProperties": false,
       "properties": {
@@ -234,6 +267,9 @@
       "anyOf": [
         {
           "$ref": "#/definitions/OpenChannel"
+        },
+        {
+          "$ref": "#/definitions/CloseChannel"
         },
         {
           "$ref": "#/definitions/VirtuallyFund"
