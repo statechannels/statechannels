@@ -22,6 +22,7 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
+  Objective,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -448,7 +449,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
-    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
+    const handleMissingChannel: MissingAppHandler<void> = () => {
       throw new CloseChannel.CloseChannelError(
         CloseChannel.CloseChannelError.reasons.channelMissing,
         {channelId}
@@ -463,10 +464,14 @@ export class Wallet extends EventEmitter<WalletEvent>
       // const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
       // return {outbox: outgoing.map(n => n.notice), channelResult};
 
-      this.store.objectives[channel.latest.channelNonce] = {
+      const objective: Objective = {
         type: 'CloseChannel',
         data: {targetChannelId: channelId},
         participants: [],
+      };
+
+      this.store.objectives[channel.latest.channelNonce] = {
+        ...objective,
         status: 'approved',
         objectiveId: channel.latest.channelNonce,
       };
@@ -475,6 +480,14 @@ export class Wallet extends EventEmitter<WalletEvent>
     await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
 
     const {channelResults, outbox} = await this.takeActions([channelId]);
+
+    (outbox[0].params.data as Payload).objectives = [
+      {
+        type: 'CloseChannel',
+        data: {targetChannelId: channelId},
+        participants: [],
+      },
+    ];
 
     return {outbox, channelResult: channelResults[0]};
   }
