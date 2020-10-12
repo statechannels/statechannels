@@ -166,6 +166,17 @@ describe('directly funded app', () => {
       w.knex
     );
 
+    w.store.objectives[current.channelNonce] = {
+      type: 'OpenChannel',
+      participants: current.participants,
+      data: {
+        targetChannelId: current.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'pending',
+      objectiveId: current.channelNonce,
+    };
+
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [
         {
