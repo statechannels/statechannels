@@ -49,8 +49,6 @@ test.each`
   expect(protocol(ps)).toMatchObject(action);
 });
 
-// todo: add the following test case once https://github.com/statechannels/the-graph/issues/80 is resolved
-//
 test.each`
   supported        | latestSignedByMe | latest           | funding      | cond
   ${undefined}     | ${prefundState}  | ${prefundState}  | ${funded}    | ${'when I have signed the prefund state, but it is not supported'}
