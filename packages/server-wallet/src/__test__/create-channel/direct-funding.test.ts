@@ -170,19 +170,19 @@ it('Closes the channel', async () => {
     getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
   );
 
-  // B pushed isFinal4, generated isFinal5 or countersigned isFinal4?
+  // B pushed isFinal4, generated countersigned isFinal4
   expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
     status: 'closed',
-    turnNum: 5,
+    turnNum: 4,
   });
 
-  // A pushed isFinal5 or the countersigned isFinal4?
+  // A pushed the countersigned isFinal4
   const aPushMessageResult = await a.pushMessage(
     getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
   );
 
   expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
     status: 'closed',
-    turnNum: 5,
+    turnNum: 4,
   });
 });
