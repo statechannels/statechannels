@@ -9,7 +9,6 @@ import {BigNumber, ethers} from 'ethers';
 
 import {defaultConfig} from '../../config';
 import {Wallet} from '../../wallet';
-import {participant} from '../../wallet/__test__/fixtures/participants';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
@@ -171,13 +170,13 @@ it('Closes the channel', async () => {
     getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
   );
 
-  // B pushed isFinal4, generated isFinal
+  // B pushed isFinal4, generated isFinal5 or countersigned isFinal4?
   expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 5,
   });
 
-  // A pushed isFinal
+  // A pushed isFinal5 or the countersigned isFinal4?
   const aPushMessageResult = await a.pushMessage(
     getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
   );
