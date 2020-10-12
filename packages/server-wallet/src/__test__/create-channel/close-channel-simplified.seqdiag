@@ -1,0 +1,8 @@
+participant WalletA
+participant AppA
+participant AppB
+participant WalletB
+AppA->WalletA: closeChannel
+WalletA-->WalletB: isFinal m + 1
+WalletB-->WalletA: isFinal m + 2
+
