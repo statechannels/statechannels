@@ -17,6 +17,8 @@ AppB->WalletB: updateFunding(A)
 AppA->WalletA: updateFunding(B)
 WalletA->AppA: 3a
 AppA->AppB: 3a
+AppB->WalletB: pushMessage
 AppB->WalletB: updateFunding(B)
 WalletB->AppB: 3b
 AppB->AppA: 3b
+AppA->WalletA: pushMessage
