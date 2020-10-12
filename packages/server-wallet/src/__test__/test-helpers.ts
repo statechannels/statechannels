@@ -17,6 +17,6 @@ export function getChannelResultFor(
     channelResult => channelResult.channelId === channelId
   );
   if (filteredChannelResults.length != 1)
-    throw Error(`Expected exactly one message in outbox: found ${filteredChannelResults.length}`);
+    throw Error(`Expected exactly one channel result: found ${filteredChannelResults.length}`);
   return filteredChannelResults[0];
 }

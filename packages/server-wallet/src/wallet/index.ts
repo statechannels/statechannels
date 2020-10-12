@@ -31,10 +31,12 @@ import EventEmitter from 'eventemitter3';
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {logger} from '../logger';
-import * as Application from '../protocols/application';
+import * as OpenChannelProtocol from '../protocols/open-channel';
+import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
+import * as ApproveObjective from '../handlers/approve-objective';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
@@ -52,13 +54,21 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {AppBytecode} from '../models/app-bytecode';
 
-import {Store, AppHandler, MissingAppHandler} from './store';
+import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-export type SingleChannelOutput = {outbox: Outgoing[]; channelResult: ChannelResult};
-export type MultipleChannelOutput = {outbox: Outgoing[]; channelResults: ChannelResult[]};
+export type SingleChannelOutput = {
+  outbox: Outgoing[];
+  channelResult: ChannelResult;
+  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+};
+export type MultipleChannelOutput = {
+  outbox: Outgoing[];
+  channelResults: ChannelResult[];
+  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+};
 type Message = SingleChannelOutput | MultipleChannelOutput;
 type WalletEvent = {singleChannelOutput: SingleChannelOutput};
 
@@ -320,6 +330,31 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
   }
 
+  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+    const objective = this.store.objectives[objectiveId];
+
+    if (!objective)
+      throw new ApproveObjective.ApproveObjectiveError(
+        ApproveObjective.ApproveObjectiveError.reasons.objectiveNotFound,
+        {objectiveId}
+      );
+
+    if (objective.type !== 'OpenChannel')
+      throw new ApproveObjective.ApproveObjectiveError(
+        ApproveObjective.ApproveObjectiveError.reasons.unimplemented,
+        {type: objective.type}
+      );
+
+    // FIXME: This should probably be done within the critical code of the joinChannel
+    this.store.objectives[objectiveId].status = 'approved';
+
+    const {
+      data: {targetChannelId},
+    } = objective;
+
+    return this.joinChannel({channelId: targetChannelId});
+  }
+
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const {myIndex, participants} = channel;
@@ -338,6 +373,15 @@ export class Wallet extends EventEmitter<WalletEvent>
         channelId,
       });
     };
+
+    // FIXME: This is just to get existing joinChannel API pattern to keep working
+    /* eslint-disable-next-line */
+    const {objectiveId} = _.find(
+      this.store.objectives,
+      o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
+    )!;
+    this.store.objectives[objectiveId].status = 'approved';
+    // END FIXME
 
     const {outbox, channelResult} = await this.store.lockApp(
       channelId,
@@ -410,19 +454,29 @@ export class Wallet extends EventEmitter<WalletEvent>
         {channelId}
       );
     };
-    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const {myIndex, participants} = channel;
 
-      const nextState = getOrThrow(CloseChannel.closeChannel(channel));
-      const signedState = await this.store.signState(channelId, nextState, tx);
+    const criticalCode: AppHandler<void> = async (tx, channel) => {
+      // TODO: (Objectives Rewrite) Keeping this here b/c we need to do input validation
+      // and check if its our turn and throw an error as existing tests expect
+      getOrThrow(CloseChannel.closeChannel(channel));
 
-      return {
-        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
-        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
+      // const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
+      // return {outbox: outgoing.map(n => n.notice), channelResult};
+
+      this.store.objectives[channel.latest.channelNonce] = {
+        type: 'CloseChannel',
+        data: {targetChannelId: channelId},
+        participants: [],
+        status: 'approved',
+        objectiveId: channel.latest.channelNonce,
       };
     };
 
-    return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
+    await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
+
+    const {channelResults, outbox} = await this.takeActions([channelId]);
+
+    return {outbox, channelResult: channelResults[0]};
   }
 
   async getChannels(): Promise<MultipleChannelOutput> {
@@ -474,9 +528,16 @@ export class Wallet extends EventEmitter<WalletEvent>
       };
     }
 
-    const channelIds = await this.store.pushMessage(wirePayload);
+    const {channelIds, objectives, channelResults: fromStoring} = await this.store.pushMessage(
+      wirePayload
+    );
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
+
+    for (const channel of fromStoring) {
+      if (!_.some(channelResults, c => c.channelId === channel.channelId))
+        channelResults.push(channel);
+    }
 
     if (wirePayload.requests && wirePayload.requests.length > 0)
       // Modifies outbox, may append new messages
@@ -485,6 +546,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     return {
       outbox: mergeOutgoing(outbox),
       channelResults: mergeChannelResults(channelResults),
+      objectivesToApprove: objectives,
     };
   }
 
@@ -492,13 +554,35 @@ export class Wallet extends EventEmitter<WalletEvent>
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
     let error: Error | undefined = undefined;
-    while (channels.length && !error) {
-      await this.store.lockApp(channels[0], async tx => {
+
+    // FIXME: Only get objectives which are:
+    // 1. Approved but not executed yet
+    // 2. Related to one of the channels
+    const objectives = Object.values(this.store.objectives).filter(
+      objective =>
+        // Only supports these two
+        (objective.type === 'OpenChannel' || objective.type === 'CloseChannel') &&
+        // Only runs on those with relevant channels
+        _.includes(channels, objective.data.targetChannelId) &&
+        // Only runs on pending or approved
+        (objective.status === 'approved' || // Need approved b.c. next action to take
+          objective.status === 'pending') /* Need pending because you want new channel result */
+    );
+
+    while (objectives.length && !error) {
+      const objective = objectives[0];
+
+      if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
+        throw new Error('not implememnted');
+
+      const channel = objective.data.targetChannelId;
+
+      await this.store.lockApp(channel, async tx => {
         // For the moment, we are only considering directly funded app channels.
         // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
         // In the future, we can have an App model which collects all the relevant channels for an app channel,
         // and a Ledger model which stores ledger-specific data (eg. queued requests)
-        const app = await this.store.getChannel(channels[0], tx);
+        const app = await this.store.getChannel(channel, tx);
 
         if (!app) {
           throw new Error('Channel not found');
@@ -508,8 +592,8 @@ export class Wallet extends EventEmitter<WalletEvent>
           error = e;
           await tx.rollback(error);
         };
-        const markChannelAsDone = (): void => {
-          channels.shift();
+        const markObjectiveAsDone = (): void => {
+          objectives.shift();
           channelResults.push(ChannelState.toChannelResult(app));
         };
 
@@ -531,17 +615,25 @@ export class Wallet extends EventEmitter<WalletEvent>
                 amount: BN.from(action.amount),
               });
               return;
+            case 'CompleteObjective':
+              this.store.objectives[objective.objectiveId].status = 'succeeded';
+              markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
+              return;
             default:
               throw 'Unimplemented';
           }
         };
 
+        const fsm = {OpenChannel: OpenChannelProtocol, CloseChannel: CloseChannelProtocol}[
+          objective.type
+        ];
+
         const nextAction = recordFunctionMetrics(
-          Application.protocol({app}),
+          fsm.protocol({app}),
           this.walletConfig.timingMetrics
         );
 
-        if (!nextAction) markChannelAsDone();
+        if (!nextAction) markObjectiveAsDone();
         else {
           try {
             await doAction(nextAction);
