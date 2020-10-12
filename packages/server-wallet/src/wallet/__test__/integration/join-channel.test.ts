@@ -1,8 +1,11 @@
+import {BN, serializeOutcome, simpleEthAllocation} from '@statechannels/wallet-core';
+
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedBobsSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob, alice} from '../fixtures/signing-wallets';
+import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
@@ -40,6 +43,29 @@ describe('directly funded app', () => {
 
     await Channel.query(w.knex).insert(c2);
     const channelIds = [c1, c2].map(c => c.channelId);
+
+    w.store.objectives[c1.channelNonce] = {
+      type: 'OpenChannel',
+      participants: c1.participants,
+      data: {
+        targetChannelId: c1.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'pending',
+      objectiveId: c1.channelNonce,
+    };
+
+    w.store.objectives[c2.channelNonce] = {
+      type: 'OpenChannel',
+      participants: c2.participants,
+      data: {
+        targetChannelId: c2.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'pending',
+      objectiveId: c2.channelNonce,
+    };
+
     const result = await w.joinChannels(channelIds);
     expect(result).toMatchObject({
       outbox: [
@@ -83,6 +109,18 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
 
     expect(current.protocolState).toMatchObject({latest: preFS0, supported: undefined});
+
+    w.store.objectives[current.channelNonce] = {
+      type: 'OpenChannel',
+      participants: current.participants,
+      data: {
+        targetChannelId: current.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'pending',
+      objectiveId: current.channelNonce,
+    };
+
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [{params: {recipient: 'alice', sender: 'bob', data: {signedStates: [preFS1]}}}],
       channelResult: {channelId, turnNum: 1, appData, status: 'opening'},
@@ -91,5 +129,53 @@ describe('directly funded app', () => {
     const updated = await Channel.forId(channelId, w.knex);
 
     expect(updated.protocolState).toMatchObject({latest: preFS1, supported: preFS1});
+  });
+
+  it('signs the prefund setup and makes a deposit, when I am first to deposit in a directly funded app', async () => {
+    const outcome = simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]);
+    const preFS0 = {turnNum: 0, outcome};
+    const preFS1 = {turnNum: 1, outcome};
+
+    const c = channel({
+      signingAddress: bob().address,
+      vars: [stateWithHashSignedBy(alice())(preFS0)],
+    });
+    await Channel.query(w.knex).insert(c);
+
+    const channelId = c.channelId;
+    const current = await Channel.forId(channelId, w.knex);
+    expect(current.latest).toMatchObject(preFS0);
+
+    w.store.objectives[current.channelNonce] = {
+      type: 'OpenChannel',
+      participants: current.participants,
+      data: {
+        targetChannelId: current.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'pending',
+      objectiveId: current.channelNonce,
+    };
+
+    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {
+            recipient: 'alice',
+            sender: 'bob',
+            data: {signedStates: [{...preFS1, outcome: serializeOutcome(preFS1.outcome)}]},
+          },
+        },
+      ],
+      channelResult: {channelId, turnNum: 1, status: 'opening'},
+    });
+
+    const updated = await Channel.forId(channelId, w.knex);
+    expect(updated.protocolState).toMatchObject({
+      latest: preFS1,
+      supported: preFS1,
+      chainServiceRequests: ['fund'],
+    });
   });
 });
