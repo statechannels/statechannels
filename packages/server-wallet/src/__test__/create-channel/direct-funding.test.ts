@@ -1,4 +1,9 @@
-import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
+import {
+  CreateChannelParams,
+  Participant,
+  Allocation,
+  CloseChannelParams,
+} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
@@ -8,6 +13,8 @@ import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
+
+let channelId: string;
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -44,7 +51,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     token: '0x00', // must be even length
   };
 
-  const channelParams: CreateChannelParams = {
+  const createChannelParams: CreateChannelParams = {
     participants: [participantA, participantB],
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
@@ -54,10 +61,10 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   //        A <> B
   // PreFund0
-  const resultA0 = await a.createChannel(channelParams);
+  const resultA0 = await a.createChannel(createChannelParams);
 
   // TODO compute the channelId for a better test
-  const channelId = resultA0.channelResults[0].channelId;
+  channelId = resultA0.channelResults[0].channelId;
 
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
     status: 'opening',
@@ -131,5 +138,28 @@ it('Create a fake-funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
+  });
+});
+
+it.skip('Rejects closing with `not your turn`', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  const bCloseChannel = await b.closeChannel(closeChannelParams);
+
+  expect(bCloseChannel).toThrow();
+});
+
+it('Closes the channel', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+
+  expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
+    status: 'closing',
+    turnNum: 0,
   });
 });
