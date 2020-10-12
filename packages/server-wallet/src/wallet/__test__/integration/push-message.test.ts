@@ -176,6 +176,17 @@ describe('when the application protocol returns an action', () => {
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
 
+    wallet.store.objectives[0] = {
+      type: 'OpenChannel',
+      objectiveId: 0,
+      status: 'approved',
+      participants: c.participants,
+      data: {
+        targetChannelId: c.channelId,
+        fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+      },
+    };
+
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
     expect(c.supported).toBeUndefined();
     const {channelId} = c;
@@ -205,6 +216,15 @@ describe('when the application protocol returns an action', () => {
     const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
     const p = wallet.pushMessage({
       signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
+      objectives: [
+        {
+          type: 'CloseChannel',
+          participants: [],
+          data: {
+            targetChannelId: channelId,
+          },
+        },
+      ],
     });
     await expectResults(p, [{channelId, status: 'closed'}]);
     await expect(p).resolves.toMatchObject({

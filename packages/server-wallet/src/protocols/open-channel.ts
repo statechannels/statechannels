@@ -2,7 +2,14 @@ import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-co
 import _ from 'lodash';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, fundChannel as requestFundChannel, FundChannel} from './actions';
+import {
+  signState,
+  noAction,
+  fundChannel as requestFundChannel,
+  FundChannel,
+  completeObjective,
+  CompleteObjective,
+} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -11,9 +18,8 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
 
 const isPrefundSetup = stageGuard('PrefundSetup');
 // These are currently unused, but will be used
-// const isPostfundSetup = stageGuard('PostfundSetup');
-// const isRunning = stageGuard('Running');
-const isFinal = stageGuard('Final');
+const isPostfundSetup = stageGuard('PostfundSetup');
+const isRunning = stageGuard('Running');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
 const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
@@ -84,14 +90,13 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
 const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 
-// todo: the only cases considered so far are directly funded
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
   isDirectlyFunded(ps.app) &&
   requestFundChannelIfMyTurn(ps);
 
-const signPostfundSetup = (ps: ProtocolState): ProtocolResult | false =>
+const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   myTurnToPostfund(ps) &&
   (isFunded(ps) || isUnfunded(ps.app)) &&
   ps.app.latestSignedByMe &&
@@ -102,10 +107,9 @@ const signPostfundSetup = (ps: ProtocolState): ProtocolResult | false =>
     turnNum: myPostfundTurnNumber(ps),
   });
 
-const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
-  isFinal(ps.app.supported) &&
-  !isFinal(ps.app.latestSignedByMe) &&
-  signState({channelId: ps.app.channelId, ...ps.app.supported});
+const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
+  (isRunning(ps.app.supported) || isPostfundSetup(ps.app.supported)) &&
+  completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  signPostfundSetup(ps) || fundChannel(ps) || signFinalState(ps) || noAction;
+  signPostFundSetup(ps) || fundChannel(ps) || completeOpenChannel(ps) || noAction;
