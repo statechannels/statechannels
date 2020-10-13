@@ -33,7 +33,6 @@ import Knex from 'knex';
 
 import {
   Channel,
-  SyncState,
   RequiredColumns,
   ChannelError,
   CHANNEL_COLUMNS,
@@ -50,6 +49,7 @@ import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
+import {Outgoing} from '../protocols/actions';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -404,7 +404,7 @@ export class Store {
     appData: Bytes,
     outcome: Outcome,
     fundingStrategy: FundingStrategy
-  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+  ): Promise<{outgoing: Outgoing[]; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
       const {channelId, myIndex, participants} = await createChannel(
         constants,
@@ -445,11 +445,8 @@ export class Store {
       const notMe = (_p: any, i: number): boolean => i !== myIndex;
 
       const outgoing = participants.filter(notMe).map(({participantId: recipient}) => ({
-        type: 'NotifyApp' as const,
-        notice: {
-          method: 'MessageQueued' as const,
-          params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
-        },
+        method: 'MessageQueued' as const,
+        params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
       }));
 
       return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
