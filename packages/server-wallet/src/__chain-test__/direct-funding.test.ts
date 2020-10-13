@@ -61,7 +61,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   };
 
   let counter = 0;
-  const p = new Promise<SingleChannelOutput>(resolve => {
+  const postFundAPromise = new Promise<SingleChannelOutput>(resolve => {
     const aNotificationReceiver: NotificationReceiver = {
       onWalletNotification(message: SingleChannelOutput) {
         if (counter > 0) {
@@ -85,7 +85,6 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //    > PreFund0A
   const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, preFundA.outbox));
 
   expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
@@ -93,14 +92,12 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //      PreFund0B
   const prefundB = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [prefundB.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
-  //  PreFund0B <
   const resultA0 = await a.pushMessage(getPayloadFor(participantA.participantId, prefundB.outbox));
 
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
@@ -108,14 +105,13 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  const postFundA = await p;
+  const postFundA = await postFundAPromise;
   await new Promise(r => setTimeout(r, 1_000));
   expect(getChannelResultFor(channelId, [postFundA.channelResult])).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
     turnNum: 0,
   });
 
-  //  PostFund3B <
   const postFundB = await b.pushMessage(
     getPayloadFor(participantB.participantId, postFundA.outbox)
   );
@@ -129,4 +125,4 @@ it('Create a fake-funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
-}, 20_000);
+}, 10_000);

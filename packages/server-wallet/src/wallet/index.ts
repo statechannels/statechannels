@@ -22,7 +22,6 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
-  SimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -138,6 +137,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     this.pushMessage = this.pushMessage.bind(this);
     this.takeActions = this.takeActions.bind(this);
     this.mergeMessages = this.mergeMessages.bind(this);
+    this.registerChannelWithChainService = this.registerChannelWithChainService.bind(this);
     this.destroy = this.destroy.bind(this);
     this.registerAppDefintion = this.registerAppDefintion.bind(this);
 
@@ -285,14 +285,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     );
     const channelResults = results.map(r => r.channelResult);
     const outgoing = results.map(r => r.outgoing).reduce((p, c) => p.concat(c));
-    channelResults.map(cr =>
-      this.chainService.registerChannel(
-        cr.channelId,
-        // todo: clean this up
-        [(outcome as SimpleAllocation).assetHolderAddress],
-        this
-      )
-    );
+    channelResults.map(this.registerChannelWithChainService);
     return {
       channelResults: mergeChannelResults(channelResults),
       outbox: mergeOutgoing(outgoing),
@@ -362,15 +355,8 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
     const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
-    channelResults.map(cr =>
-      // todo: the asset holder address should be derived from the allocation
-      this.chainService.registerChannel(
-        cr.channelId,
-        // todo: clean this up
-        [(deserializeAllocations(cr.allocations) as SimpleAllocation).assetHolderAddress],
-        this
-      )
-    );
+    this.registerChannelWithChainService(nextChannelResult);
+
     return {
       outbox: mergeOutgoing(outbox.concat(nextOutbox)),
       channelResult: nextChannelResult,
@@ -587,12 +573,17 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     );
   }
 
-  dbAdmin(): DBAdmin {
-    return new DBAdmin(this.knex);
-  }
-
   onAssetTransferred(_arg: AssetTransferredArg): void {
     // todo: implement me
+  }
+
+  private registerChannelWithChainService(cr: ChannelResult): void {
+    const assetHolderAddresses = cr.allocations.map(a => getAssetHolderAddress(a.token));
+    this.chainService.registerChannel(cr.channelId, assetHolderAddresses, this);
+  }
+
+  dbAdmin(): DBAdmin {
+    return new DBAdmin(this.knex);
   }
 }
 
