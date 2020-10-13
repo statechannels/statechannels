@@ -75,13 +75,13 @@ describe('directly funded app', () => {
   it('signs the prefund setup and postfund setup, when there are no deposits to make', async () => {
     const outcome = simpleEthAllocation([]);
     const preFS = {turnNum: 0, outcome};
-    const postFS = {turnNum: 3, outcome};
+    const postFS = {turnNum: 2, outcome};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
     await Channel.query(w.knex).insert(c);
 
     const outcomeWire = serializeOutcome(outcome);
     const preFSWire = {turnNum: 0, outcome: outcomeWire};
-    const postFSWire = {turnNum: 3, outcome: outcomeWire};
+    const postFSWire = {turnNum: 2, outcome: outcomeWire};
 
     const channelId = c.channelId;
     const current = await Channel.forId(channelId, w.knex);

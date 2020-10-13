@@ -60,8 +60,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
           sender: 'alice',
           data: {
             signedStates: [
-              {turnNum: 3, channelNonce: 1},
-              {turnNum: 3, channelNonce: 2},
+              {turnNum: 2, channelNonce: 1},
+              {turnNum: 2, channelNonce: 2},
             ],
           },
         },
@@ -91,7 +91,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
         params: {
           recipient: 'bob',
           sender: 'alice',
-          data: {signedStates: [{turnNum: 3}]},
+          data: {signedStates: [{turnNum: 2}]},
         },
       },
     ],
