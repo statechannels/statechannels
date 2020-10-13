@@ -90,7 +90,7 @@
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
-    "test:chain": "jest -c ./jest/jest.chain.config.js",
+    "test:chain": "jest -c ./jest/jest.chain.config.js --runInBand",
     "test:ci": "yarn test --bail && yarn test:chain --bail",
     "test:e2e": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
     "test:stress": "yarn tsc;NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts"
