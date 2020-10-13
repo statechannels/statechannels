@@ -22,6 +22,7 @@ import {
   Payload,
   isOpenChannel,
   convertToParticipant,
+  SignedState,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -40,7 +41,7 @@ import {
 } from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
-import {ChannelState, ChainServiceApi} from '../protocols/state';
+import {ChannelState, ChainServiceApi, toChannelResult} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -155,10 +156,10 @@ export class Store {
     channelId: Bytes32,
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
-  ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
+  ): Promise<SignedState> {
     const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
 
-    let channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
+    const channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
@@ -197,46 +198,9 @@ export class Store {
     );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    channel = await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
+    await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
-    const sender = channel.participants[channel.myIndex].participantId;
-    let data: Payload = {
-      signedStates: [signedState],
-      objectives: [],
-    };
-    /** todo:
-     * What happens if Bob is adding his signature to prefund0 from Alice?
-     * In this case Bob will send an objective to Alice
-     */
-
-    if (signedState.turnNum === 0) {
-      data = {
-        ...data,
-        objectives: [
-          {
-            participants: channel.participants,
-            type: 'OpenChannel',
-            data: {
-              targetChannelId: channel.channelId,
-              fundingStrategy: 'Direct',
-            },
-          },
-        ],
-      };
-    }
-    const notMe = (_p: any, i: number): boolean => i !== channel.myIndex;
-
-    const outgoing = state.participants.filter(notMe).map(({participantId: recipient}) => ({
-      type: 'NotifyApp' as const,
-      notice: {
-        method: 'MessageQueued' as const,
-        params: serializeMessage(data, recipient, sender, channelId),
-      },
-    }));
-
-    const {channelResult} = channel;
-
-    return {outgoing, channelResult};
+    return signedState;
   }
 
   async addMyState(
@@ -442,8 +406,12 @@ export class Store {
     fundingStrategy: FundingStrategy
   ): Promise<{outgoing: SyncState; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
-      const {channelId} = await createChannel(constants, fundingStrategy, tx);
-      return await this.signState(
+      const {channelId, myIndex, participants} = await createChannel(
+        constants,
+        fundingStrategy,
+        tx
+      );
+      const signedState = await this.signState(
         channelId,
         {
           ...constants,
@@ -454,6 +422,37 @@ export class Store {
         },
         tx
       );
+
+      /** todo:
+       * What happens if Bob is adding his signature to prefund0 from Alice?
+       * In this case Bob will send an objective to Alice
+       */
+
+      const data: Payload = {
+        signedStates: [signedState],
+        objectives: [
+          {
+            participants,
+            type: 'OpenChannel',
+            data: {
+              targetChannelId: channelId,
+              fundingStrategy: 'Direct',
+            },
+          },
+        ],
+      };
+
+      const notMe = (_p: any, i: number): boolean => i !== myIndex;
+
+      const outgoing = participants.filter(notMe).map(({participantId: recipient}) => ({
+        type: 'NotifyApp' as const,
+        notice: {
+          method: 'MessageQueued' as const,
+          params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
+        },
+      }));
+
+      return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
     });
   }
 
