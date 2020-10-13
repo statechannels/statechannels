@@ -57,7 +57,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Unfunded',
+    fundingStrategy: 'Direct',
   };
 
   let counter = 0;
@@ -125,4 +125,4 @@ it('Create a directly funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
-}, 20_000);
+}, 10_000);
