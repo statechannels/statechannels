@@ -22,6 +22,7 @@ import {
   Zero,
   serializeMessage,
   ChannelConstants,
+  Payload,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -163,22 +164,11 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     const {participants, myIndex} = channelState;
 
-    const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
-    const sender = participants[myIndex].participantId;
-
     return {
-      outbox: peers.map(recipient => ({
-        method: 'MessageQueued',
-        params: serializeMessage(
-          {
-            signedStates: states,
-            requests: [{type: 'GetChannel', channelId}],
-          },
-          recipient,
-          sender,
-          channelId
-        ),
-      })),
+      outbox: createOutboxFor(channelId, myIndex, participants, {
+        signedStates: states,
+        requests: [{type: 'GetChannel', channelId}],
+      }),
       channelResult: ChannelState.toChannelResult(channelState),
     };
   }
@@ -295,9 +285,15 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
+      const {myIndex, participants} = channel;
+
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-      const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
-      return {outbox: outgoing.map(n => n.notice), channelResult};
+      const signedState = await this.store.signState(channelId, nextState, tx);
+
+      return {
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
+        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
+      };
     };
 
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
@@ -342,6 +338,8 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       );
     };
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
+      const {myIndex, participants} = channel;
+
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
         this.walletConfig.timingMetrics
@@ -353,11 +351,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
           this.walletConfig.timingMetrics
         )
       );
-      const {outgoing, channelResult} = await timer('signing state', async () =>
+      const signedState = await timer('signing state', () =>
         this.store.signState(channelId, nextState, tx)
       );
 
-      return {outbox: mergeOutgoing(outgoing.map(n => n.notice)), channelResult};
+      return {
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
+        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
+      };
     };
 
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
@@ -371,10 +372,15 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       );
     };
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const nextState = getOrThrow(CloseChannel.closeChannel(channel));
-      const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
+      const {myIndex, participants} = channel;
 
-      return {outbox: outgoing.map(n => n.notice), channelResult};
+      const nextState = getOrThrow(CloseChannel.closeChannel(channel));
+      const signedState = await this.store.signState(channelId, nextState, tx);
+
+      return {
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
+        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
+      };
     };
 
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
@@ -423,15 +429,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
         const {participants, myIndex} = channelState;
 
-        const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
-        const {participantId: sender} = participants[myIndex];
-
-        peers.map(recipient => {
-          outbox.push({
-            method: 'MessageQueued',
-            params: serializeMessage({signedStates}, recipient, sender, channelId),
-          });
-        });
+        createOutboxFor(channelId, myIndex, participants, {signedStates}).map(outgoing =>
+          outbox.push(outgoing)
+        );
       };
     }
 
@@ -481,8 +481,11 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
             case 'SignState': {
-              const {outgoing} = await this.store.signState(action.channelId, action, tx);
-              outgoing.map(n => outbox.push(n.notice));
+              const {myIndex, participants, channelId} = app;
+              const signedState = await this.store.signState(action.channelId, action, tx);
+              createOutboxFor(channelId, myIndex, participants, {
+                signedStates: [signedState],
+              }).map(outgoing => outbox.push(outgoing));
               return;
             }
             case 'FundChannel':
@@ -555,3 +558,16 @@ export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
     }
   )(result);
 }
+
+const createOutboxFor = (
+  channelId: Bytes32,
+  myIndex: number,
+  participants: Participant[],
+  data: Payload
+): Outgoing[] =>
+  participants
+    .filter((_p, i: number): boolean => i !== myIndex)
+    .map(({participantId: recipient}) => ({
+      method: 'MessageQueued' as const,
+      params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
+    }));

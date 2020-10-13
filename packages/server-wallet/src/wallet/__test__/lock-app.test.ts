@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
-import {StateVariables} from '@statechannels/wallet-core';
+import {SignedState, StateVariables} from '@statechannels/wallet-core';
 
 import {Channel, ChannelError} from '../../models/channel';
 import {withSupportedState} from '../../models/__test__/fixtures/channel';
@@ -30,7 +29,7 @@ it('works', async () => {
     store.lockApp(channelId, async tx =>
       store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, tx)
     )
-  ).resolves.toMatchObject({channelResult: {turnNum: 6}});
+  ).resolves.toMatchObject({turnNum: 6});
 });
 const next = ({turnNum, appData, isFinal, outcome}: StateVariables): StateVariables => ({
   turnNum: turnNum + 1,
@@ -60,8 +59,8 @@ describe('concurrency', () => {
     numResolved = 0;
     numRejected = 0;
     numSettled = 0;
-    countResolvedPromise = ({channelResult}: {channelResult: ChannelResult}): any => {
-      expect(channelResult).toMatchObject({turnNum: 6});
+    countResolvedPromise = ({turnNum}: SignedState): any => {
+      expect(turnNum).toBe(6);
       numResolved += 1;
     };
     countRejectedPromise = (error: Error): any => {
