@@ -22,6 +22,7 @@ import {
   Zero,
   serializeMessage,
   ChannelConstants,
+  Payload,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -163,22 +164,11 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     const {participants, myIndex} = channelState;
 
-    const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
-    const sender = participants[myIndex].participantId;
-
     return {
-      outbox: peers.map(recipient => ({
-        method: 'MessageQueued',
-        params: serializeMessage(
-          {
-            signedStates: states,
-            requests: [{type: 'GetChannel', channelId}],
-          },
-          recipient,
-          sender,
-          channelId
-        ),
-      })),
+      outbox: createOutboxFor(channelId, myIndex, participants, {
+        signedStates: states,
+        requests: [{type: 'GetChannel', channelId}],
+      }),
       channelResult: ChannelState.toChannelResult(channelState),
     };
   }
@@ -301,17 +291,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       const signedState = await this.store.signState(channelId, nextState, tx);
 
       return {
-        outbox: participants
-          .filter((_p, i: number): boolean => i !== myIndex)
-          .map(({participantId: recipient}) => ({
-            method: 'MessageQueued' as const,
-            params: serializeMessage(
-              {signedStates: [signedState]},
-              recipient,
-              participants[myIndex].participantId,
-              channelId
-            ),
-          })),
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
         channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
       };
     };
@@ -376,17 +356,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       );
 
       return {
-        outbox: participants
-          .filter((_p, i: number): boolean => i !== myIndex)
-          .map(({participantId: recipient}) => ({
-            method: 'MessageQueued' as const,
-            params: serializeMessage(
-              {signedStates: [signedState]},
-              recipient,
-              participants[myIndex].participantId,
-              channelId
-            ),
-          })),
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
         channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
       };
     };
@@ -408,17 +378,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       const signedState = await this.store.signState(channelId, nextState, tx);
 
       return {
-        outbox: participants
-          .filter((_p, i: number): boolean => i !== myIndex)
-          .map(({participantId: recipient}) => ({
-            method: 'MessageQueued' as const,
-            params: serializeMessage(
-              {signedStates: [signedState]},
-              recipient,
-              participants[myIndex].participantId,
-              channelId
-            ),
-          })),
+        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
         channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
       };
     };
@@ -469,15 +429,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
         const {participants, myIndex} = channelState;
 
-        const peers = participants.map(p => p.participantId).filter((_, idx) => idx !== myIndex);
-        const {participantId: sender} = participants[myIndex];
-
-        peers.map(recipient => {
-          outbox.push({
-            method: 'MessageQueued',
-            params: serializeMessage({signedStates}, recipient, sender, channelId),
-          });
-        });
+        createOutboxFor(channelId, myIndex, participants, {signedStates}).map(outgoing =>
+          outbox.push(outgoing)
+        );
       };
     }
 
@@ -529,19 +483,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
             case 'SignState': {
               const {myIndex, participants, channelId} = app;
               const signedState = await this.store.signState(action.channelId, action, tx);
-              participants
-                .filter((_p, i: number): boolean => i !== myIndex)
-                .map(({participantId: recipient}) =>
-                  outbox.push({
-                    method: 'MessageQueued',
-                    params: serializeMessage(
-                      {signedStates: [signedState]},
-                      recipient,
-                      participants[myIndex].participantId,
-                      channelId
-                    ),
-                  })
-                );
+              createOutboxFor(channelId, myIndex, participants, {
+                signedStates: [signedState],
+              }).map(outgoing => outbox.push(outgoing));
               return;
             }
             case 'FundChannel':
@@ -614,3 +558,16 @@ export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
     }
   )(result);
 }
+
+const createOutboxFor = (
+  channelId: Bytes32,
+  myIndex: number,
+  participants: Participant[],
+  data: Payload
+): Outgoing[] =>
+  participants
+    .filter((_p, i: number): boolean => i !== myIndex)
+    .map(({participantId: recipient}) => ({
+      method: 'MessageQueued' as const,
+      params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
+    }));
