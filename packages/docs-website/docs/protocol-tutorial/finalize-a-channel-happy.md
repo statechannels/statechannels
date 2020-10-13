@@ -23,8 +23,7 @@ In the following example the participants support the state by countersigning it
 // In lesson6.test.ts
 
 /* Import ethereum wallet utilities  */
-import {ethers} from 'ethers';
-const {bigNumberify} = ethers.utils;
+import {BigNumber, ethers} from 'ethers';
 const {AddressZero, HashZero} = ethers.constants;
 
 /* Import statechannels wallet utilities  */
@@ -45,7 +44,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 const chainId = '0x1234';
-const channelNonce = bigNumberify(0).toHexString();
+const channelNonce = BigNumber.from(0).toHexString();
 const channel: Channel = {chainId, channelNonce, participants};
 const largestTurnNum = 4;
 const state: State = {

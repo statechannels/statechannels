@@ -8,5 +8,5 @@ The quickest way to get going with nitro protocol is to clone our [nitro-tutoria
 If you would prefer to start from scratch, follow the steps in the [quick start](/protocol-docs/quick-start) and follow along below.
 
 :::tip
-This tutorial follows @statechannels/nitro-protocol at v0.1.6
+This tutorial follows @statechannels/nitro-protocol at v0.4.0
 :::
