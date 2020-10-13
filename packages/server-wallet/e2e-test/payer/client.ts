@@ -93,9 +93,11 @@ export default class PayerClient {
       1
     );
 
-    const reply = await this.messageReceiverAndExpectReply(params.data);
+    const prefund2 = await this.messageReceiverAndExpectReply(params.data);
 
-    await this.wallet.pushMessage(reply);
+    const postfund1 = await this.wallet.pushMessage(prefund2);
+    const postfund2 = await this.messageReceiverAndExpectReply(postfund1.outbox[0].params.data);
+    await this.wallet.pushMessage(postfund2);
 
     const {channelResult} = await this.wallet.getState({channelId});
 
