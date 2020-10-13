@@ -3,6 +3,8 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@types/prettier": "1.19.0",
     "eslint-plugin-import": "2.20.0",
     "husky": "3.0.7",
