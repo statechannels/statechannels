@@ -107,7 +107,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   readonly walletConfig: ServerWalletConfig;
   constructor(
     walletConfig?: ServerWalletConfig,
-    private notificationReceiver?: NotificationReceiver
+    public notificationReceiver?: NotificationReceiver
   ) {
     this.walletConfig = walletConfig || defaultConfig;
     this.manager = new WorkerManager(this.walletConfig);
@@ -162,10 +162,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       );
       this.chainService = new MockChainService();
     }
-  }
-
-  public setNotificatonReceiver(nr: NotificationReceiver): void {
-    this.notificationReceiver = nr;
   }
 
   public async registerAppDefintion(appDefinition: string): Promise<void> {

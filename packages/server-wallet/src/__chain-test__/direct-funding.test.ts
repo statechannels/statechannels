@@ -70,7 +70,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
         counter++;
       },
     };
-    a.setNotificatonReceiver(aNotificationReceiver);
+    a.notificationReceiver = aNotificationReceiver;
   });
 
   //        A <> B
