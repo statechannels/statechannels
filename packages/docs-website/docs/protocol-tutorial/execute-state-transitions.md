@@ -149,7 +149,7 @@ const fromState: State = {
   isFinal: false,
   challengeDuration: 0x0,
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
-  appData: '0x0'
+  appData: '0x00'
 };
 
 /* Construct another state */
@@ -284,7 +284,7 @@ const state: State = {
   outcome: [],
   turnNum: 1,
   isFinal: false,
-  appData: '0x0',
+  appData: '0x00',
   appDefinition: AddressZero,
   challengeDuration: 0x5
 };

@@ -66,6 +66,7 @@ The `transferAll` method is available on all asset holders, including the `ETHAs
 
 ```typescript
 // In lesson14.test.ts
+import {BigNumber, ethers} from 'ethers';
 import {encodeAllocation} from '@statechannels/nitro-protocol';
 
 const amount = '0x03';
