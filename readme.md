@@ -104,26 +104,36 @@ We follow the convention at https://github.com/conventional-changelog/commitlint
 ```shell
 yarn commitlint --from=HEAD~1 --verbose
 ```
+
 For help authoring commits, you can check out https://commitizen.github.io/cz-cli/.
+
 ### Publishing packages
 
-All of the public packages in this repository are kept in lockstep. Use, e.g.
+To publish you will need to trigger a github action:
 
-```shell
-yarn lerna version minor
+![publishing via a github](./notes/publishing.png)
+
+1. Select the actions tab
+2. Select whether you want to do a regular publish (`Publish Packages`) or a pre-release (`Publish Packages (canary)`)
+3. Click on `Run workflow`
+4. Select the branch (regular publishes will fail unless on master)
+5. For regular publishes, a PR will be created to get the updated version and changelog info back into master. You should merge this immediately!
+
+#### Fixing a failed publish
+
+Sometimes things will go wrong on CI and the git tags will be created but the package will not be published.
+To fix this you can do the following locally:
+
+```
+# fetch down any publish tags
+git fetch --tags
+
+# push packages to the registries, without creating new releases
+npx lerna publish from-package
 ```
 
-to increase the version in all of them (this works for the docs website, too), as well as pushing the version update to github.
-
-Use
-
-```shell
-yarn lerna publish from-git
-```
-
-to publish the packages to npm (you will need to be logged in with `npm login`, and have your HEAD at the tagged commit -- so it's best to not commit between `version` and `publish`).
-
-You may need to manually bump the version of devtools installed at the monorepo root to avoid installation problems.
+You might need a `npm login --registry https://testnet.thegraph.com/npm-registry/` if you don't
+already have an access token in your `.npmrc`.
 
 ## Typescript doc comments
 
