@@ -42,10 +42,8 @@ export function convertBytes32ToAddress(bytes32: string): string {
 // 0x0000000000000000000000009546E319878D2ca7a21b481F873681DF344E0Df8
 export function convertAddressToBytes32(address: string): string {
   const normalizedAddress = BigNumber.from(address).toHexString();
-  if (normalizedAddress.length !== 42) {
-    throw new Error(
-      `Address value is not right length. Expected length of 42 received length ${normalizedAddress.length} instead.`
-    );
+  if (!utils.isAddress(address)) {
+    throw new Error(`Input is not a valid Ethereum address.`);
   }
 
   // We pad to 66 = (32*2) + 2('0x')
