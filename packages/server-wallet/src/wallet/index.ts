@@ -55,12 +55,10 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-export type SingleChannelResult = Promise<SingleChannelMessage>;
-export type MultipleChannelResult = Promise<MultipleChannelMessage>;
-type SingleChannelMessage = {outbox: Outgoing[]; channelResult: ChannelResult};
-type MultipleChannelMessage = {outbox: Outgoing[]; channelResults: ChannelResult[]};
-type Message = SingleChannelMessage | MultipleChannelMessage;
-const isSingleChannelMessage = (message: Message): message is SingleChannelMessage =>
+export type SingleChannelOutput = {outbox: Outgoing[]; channelResult: ChannelResult};
+export type MultipleChannelOutput = {outbox: Outgoing[]; channelResults: ChannelResult[]};
+type Message = SingleChannelOutput | MultipleChannelOutput;
+const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
 
 export interface UpdateChannelFundingParams {
@@ -74,23 +72,26 @@ export type WalletInterface = {
   getParticipant(): Promise<Participant | undefined>;
 
   // App channel management
-  createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult;
+  createChannels(
+    args: CreateChannelParams,
+    amountOfChannels: number
+  ): Promise<MultipleChannelOutput>;
 
-  joinChannels(channelIds: ChannelId[]): MultipleChannelResult;
-  updateChannel(args: UpdateChannelParams): SingleChannelResult;
-  closeChannel(args: CloseChannelParams): SingleChannelResult;
-  getChannels(): MultipleChannelResult;
-  getState(args: GetStateParams): SingleChannelResult;
-  syncChannel(args: SyncChannelParams): SingleChannelResult;
+  joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
+  updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+  closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
+  getChannels(): Promise<MultipleChannelOutput>;
+  getState(args: GetStateParams): Promise<SingleChannelOutput>;
+  syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
 
-  updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult;
+  updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Wallet <-> Wallet communication
-  pushMessage(m: unknown): MultipleChannelResult;
+  pushMessage(m: unknown): Promise<MultipleChannelOutput>;
 
   // Wallet -> App communication
   onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
 
-  mergeMessages(messages: Message[]): MultipleChannelMessage;
+  mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
 
 export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
@@ -141,7 +142,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     this.chainService = new MockChainService();
   }
 
-  public mergeMessages(messages: Message[]): MultipleChannelMessage {
+  public mergeMessages(messages: Message[]): MultipleChannelOutput {
     const channelResults = mergeChannelResults(
       messages
         .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
@@ -157,7 +158,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
   }
 
-  public async syncChannel({channelId}: SyncChannelParams): SingleChannelResult {
+  public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {participants, myIndex} = channelState;
@@ -195,7 +196,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return participant;
   }
 
-  public async updateFundingForChannels(args: UpdateChannelFundingParams[]): MultipleChannelResult {
+  public async updateFundingForChannels(
+    args: UpdateChannelFundingParams[]
+  ): Promise<MultipleChannelOutput> {
     const results = await Promise.all(args.map(a => this.updateChannelFunding(a)));
 
     const channelResults = results.map(r => r.channelResult);
@@ -210,7 +213,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     channelId,
     token,
     amount,
-  }: UpdateChannelFundingParams): SingleChannelResult {
+  }: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
     const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolder);
@@ -224,10 +227,13 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return await this.store.getOrCreateSigningAddress();
   }
 
-  async createChannel(args: CreateChannelParams): MultipleChannelResult {
+  async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
     return this.createChannels(args, 1);
   }
-  async createChannels(args: CreateChannelParams, amountOfChannels: number): MultipleChannelResult {
+  async createChannels(
+    args: CreateChannelParams,
+    amountOfChannels: number
+  ): Promise<MultipleChannelOutput> {
     const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
     const results = await Promise.all(
@@ -254,7 +260,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   async createChannelInternal(
     args: CreateChannelParams,
     channelNonce: number
-  ): SingleChannelResult {
+  ): Promise<SingleChannelOutput> {
     const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
     const outcome: Outcome = deserializeAllocations(allocations);
 
@@ -275,7 +281,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return {outbox: mergeOutgoing(outgoing.map(n => n.notice)), channelResult};
   }
 
-  async joinChannels(channelIds: ChannelId[]): MultipleChannelResult {
+  async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
     const results = await Promise.all(channelIds.map(channelId => this.joinChannel({channelId})));
 
     const channelResults = results.map(r => r.channelResult);
@@ -287,14 +293,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
-  async joinChannel({channelId}: JoinChannelParams): SingleChannelResult {
-    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
+  async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
       const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
       return {outbox: outgoing.map(n => n.notice), channelResult};
     };
 
-    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.channelNotFound, {
         channelId,
       });
@@ -314,7 +320,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
-  async updateChannel(args: UpdateChannelParams): SingleChannelResult {
+  async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
     if (this.walletConfig.workerThreadAmount > 0) {
       return this.manager.updateChannel(args);
     } else {
@@ -327,15 +333,15 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     channelId,
     allocations,
     appData,
-  }: UpdateChannelParams): SingleChannelResult {
+  }: UpdateChannelParams): Promise<SingleChannelOutput> {
     const timer = timerFactory(this.walletConfig.timingMetrics, `updateChannel ${channelId}`);
-    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
         {channelId}
       );
     };
-    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
+    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
         this.walletConfig.timingMetrics
@@ -357,14 +363,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
-  async closeChannel({channelId}: CloseChannelParams): SingleChannelResult {
-    const handleMissingChannel: MissingAppHandler<SingleChannelResult> = () => {
+  async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
+    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new CloseChannel.CloseChannelError(
         CloseChannel.CloseChannelError.reasons.channelMissing,
         {channelId}
       );
     };
-    const criticalCode: AppHandler<SingleChannelResult> = async (tx, channel) => {
+    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const nextState = getOrThrow(CloseChannel.closeChannel(channel));
       const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
 
@@ -374,7 +380,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
-  async getChannels(): MultipleChannelResult {
+  async getChannels(): Promise<MultipleChannelOutput> {
     const channelStates = await this.store.getChannels();
     return {
       channelResults: mergeChannelResults(channelStates.map(ChannelState.toChannelResult)),
@@ -382,7 +388,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
-  async getState({channelId}: GetStateParams): SingleChannelResult {
+  async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
     try {
       const channel = await this.store.getChannel(channelId);
 
@@ -396,7 +402,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     }
   }
 
-  async pushMessage(rawPayload: unknown): MultipleChannelResult {
+  async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     if (this.walletConfig.workerThreadAmount > 0) {
       return this.manager.pushMessage(rawPayload);
     } else {
@@ -405,7 +411,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   // The internal implementation of pushMessage responsible for actually pushing the message into the wallet
-  async pushMessageInternal(rawPayload: unknown): MultipleChannelResult {
+  async pushMessageInternal(rawPayload: unknown): Promise<MultipleChannelOutput> {
     const store = this.store;
 
     const wirePayload = validatePayload(rawPayload);
@@ -518,7 +524,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   // ChainEventSubscriberInterface implementation
   onHoldingUpdated(arg: HoldingUpdatedArg): void {
     // note: updateChannelFunding is an async function.
-    // todo: this returns a Promise<SingleChannelResult>. How should the SingleChannelResult get relayed to the application?
+    // todo: this returns a Promise<Promise<SingleChannelOutput>>. How should the Promise<SingleChannelOutput> get relayed to the application?
     this.updateChannelFunding({
       ...arg,
       token: arg.assetHolderAddress,

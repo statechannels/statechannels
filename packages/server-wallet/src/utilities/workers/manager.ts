@@ -7,7 +7,7 @@ import {Either} from 'fp-ts/lib/Either';
 import {isLeft} from 'fp-ts/lib/These';
 import _ from 'lodash';
 
-import {MultipleChannelResult, SingleChannelResult} from '../../wallet';
+import {MultipleChannelOutput, SingleChannelOutput} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
 import {logger as parentLogger} from '../../logger';
 
@@ -55,13 +55,13 @@ export class WorkerManager {
       else throw Error('No worker acquired');
     });
   }
-  public async pushMessage(args: unknown): Promise<MultipleChannelResult> {
+  public async pushMessage(args: unknown): Promise<MultipleChannelOutput> {
     logger.trace('PushMessage called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'PushMessage', args};
-    const resultPromise = new Promise<any>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, MultipleChannelResult>) => {
+    const resultPromise = new Promise<MultipleChannelOutput>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, MultipleChannelOutput>) => {
         this.pool?.release(worker);
         if (isLeft(response)) {
           reject(response.left);
@@ -76,13 +76,13 @@ export class WorkerManager {
     return resultPromise;
   }
 
-  public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelResult> {
+  public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
     logger.trace('UpdateChannel called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
-    const resultPromise = new Promise<any>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, SingleChannelResult>) => {
+    const resultPromise = new Promise<SingleChannelOutput>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, SingleChannelOutput>) => {
         this.pool?.release(worker);
         if (isLeft(response)) {
           logger.error(response);
