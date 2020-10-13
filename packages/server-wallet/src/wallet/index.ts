@@ -16,12 +16,13 @@ import {
   Outcome,
   convertToParticipant,
   Participant,
-  assetHolderAddress,
   BN,
-  Zero,
   serializeMessage,
   ChannelConstants,
   Payload,
+  assetHolderAddress as getAssetHolderAddress,
+  Zero,
+  SimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -42,10 +43,11 @@ import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
 import {
   ChainServiceInterface,
-  MockChainService,
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
   AssetTransferredArg,
+  ChainService,
+  MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {AppBytecode} from '../models/app-bytecode';
@@ -60,6 +62,10 @@ export type MultipleChannelOutput = {outbox: Outgoing[]; channelResults: Channel
 type Message = SingleChannelOutput | MultipleChannelOutput;
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
+
+export interface NotificationReceiver {
+  onWalletNotification(message: SingleChannelMessage): void;
+}
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
@@ -100,7 +106,10 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   chainService: ChainServiceInterface;
 
   readonly walletConfig: ServerWalletConfig;
-  constructor(walletConfig?: ServerWalletConfig) {
+  constructor(
+    walletConfig?: ServerWalletConfig,
+    private notificationReceiver?: NotificationReceiver
+  ) {
     this.walletConfig = walletConfig || defaultConfig;
     this.manager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
@@ -140,7 +149,23 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       setupMetrics(this.walletConfig.metricsOutputFile);
     }
 
-    this.chainService = new MockChainService();
+    if (walletConfig?.rpcEndpoint && walletConfig.serverPrivateKey) {
+      this.chainService = new ChainService(
+        walletConfig.rpcEndpoint,
+        walletConfig.serverPrivateKey,
+        // todo: remove this
+        50
+      );
+    } else {
+      logger.warn(
+        'rpcEndpoint and serverPrivateKey must be defined for the wallet to use chain service'
+      );
+      this.chainService = new MockChainService();
+    }
+  }
+
+  public setNotificatonReceiver(nr: NotificationReceiver): void {
+    this.notificationReceiver = nr;
   }
 
   public async registerAppDefintion(appDefinition: string): Promise<void> {
@@ -166,6 +191,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   public async destroy(): Promise<void> {
     await this.manager.destroy();
     await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
+    this.chainService.destructor();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
@@ -213,12 +239,21 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     token,
     amount,
   }: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
-    const assetHolder = assetHolderAddress(token || Zero);
+    const assetHolderAddress = getAssetHolderAddress(token || Zero);
+    return this.updateChannelFundingForAssetHolder({
+      channelId,
+      assetHolderAddress,
+      amount: BN.from(amount),
+    });
+  }
 
-    await this.store.updateFunding(channelId, BN.from(amount), assetHolder);
-
+  private async updateChannelFundingForAssetHolder({
+    channelId,
+    assetHolderAddress,
+    amount,
+  }: HoldingUpdatedArg): Promise<SingleChannelOutput> {
+    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
     const {channelResults, outbox} = await this.takeActions([channelId]);
-
     return {outbox, channelResult: channelResults[0]};
   }
 
@@ -250,6 +285,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     );
     const channelResults = results.map(r => r.channelResult);
     const outgoing = results.map(r => r.outgoing).reduce((p, c) => p.concat(c));
+    channelResults.map(cr =>
+      this.chainService.registerChannel(
+        cr.channelId,
+        // todo: clean this up
+        [(outcome as SimpleAllocation).assetHolderAddress],
+        this
+      )
+    );
     return {
       channelResults: mergeChannelResults(channelResults),
       outbox: mergeOutgoing(outgoing),
@@ -319,6 +362,15 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
     const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
+    channelResults.map(cr =>
+      // todo: the asset holder address should be derived from the allocation
+      this.chainService.registerChannel(
+        cr.channelId,
+        // todo: clean this up
+        [(deserializeAllocations(cr.allocations) as SimpleAllocation).assetHolderAddress],
+        this
+      )
+    );
     return {
       outbox: mergeOutgoing(outbox.concat(nextOutbox)),
       channelResult: nextChannelResult,
@@ -533,7 +585,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     this.updateChannelFunding({
       ...arg,
       token: arg.assetHolderAddress,
-    });
+    }).then(this.notificationReceiver?.onWalletNotification);
   }
 
   dbAdmin(): DBAdmin {

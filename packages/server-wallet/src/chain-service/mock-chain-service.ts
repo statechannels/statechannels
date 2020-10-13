@@ -61,4 +61,8 @@ export class MockChainService implements ChainServiceInterface {
   async fetchBytecode(_appDefinition: string): Promise<string> {
     return '0x0';
   }
+
+  destructor(): void {
+    return;
+  }
 }

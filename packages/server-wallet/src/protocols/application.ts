@@ -10,13 +10,14 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
 
 const isPrefundSetup = stageGuard('PrefundSetup');
+const isPostfundSetup = stageGuard('PostfundSetup');
+
 // These are currently unused, but will be used
-// const isPostfundSetup = stageGuard('PostfundSetup');
 // const isRunning = stageGuard('Running');
 const isFinal = stageGuard('Final');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
-const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
+function isFunded({app: {funding, supported}}: ProtocolState): boolean {
   if (!supported) return false;
 
   const allocation = checkThat(supported?.outcome, isSimpleAllocation);
@@ -27,7 +28,7 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   const funded = BN.gte(currentFunding, targetFunding) ? true : false;
 
   return funded;
-};
+}
 
 // At the time of implementation, all particiapants sign turn 0 as prefund state
 // This function should also work with prefund state with increasing turn numbers.
