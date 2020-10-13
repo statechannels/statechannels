@@ -6,7 +6,7 @@ configureEnvVariables();
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
-import {defaultConfig} from '../../src/config';
+import {processEnvConfig} from '../../src/config';
 
 import {PerformanceTimer} from './timers';
 
@@ -42,7 +42,7 @@ export default {
 
     const payerClient = recordFunctionMetrics(
       new PayerClient(alice().privateKey, `http://127.0.0.1:65535`, {
-        ...defaultConfig,
+        ...processEnvConfig,
         postgresDBName: database,
       })
     );

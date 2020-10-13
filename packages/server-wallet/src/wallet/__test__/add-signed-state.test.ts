@@ -4,12 +4,12 @@ import {SignedState as WireSignedState} from '@statechannels/wire-format';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {processEnvConfig} from '../../config';
 
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+  store = new Store(knex, processEnvConfig.timingMetrics, processEnvConfig.skipEvmValidation);
 });
 
 describe('addSignedState', () => {

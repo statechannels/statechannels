@@ -13,12 +13,12 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
   extractDBConfigFromServerWalletConfig,
-  defaultConfig,
+  processEnvConfig,
   ServerWalletConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'payer'};
-export const receiverConfig: ServerWalletConfig = {...defaultConfig, postgresDBName: 'receiver'};
+export const payerConfig: ServerWalletConfig = {...processEnvConfig, postgresDBName: 'payer'};
+export const receiverConfig: ServerWalletConfig = {...processEnvConfig, postgresDBName: 'receiver'};
 
 import {PerformanceTimer} from './payer/timers';
 

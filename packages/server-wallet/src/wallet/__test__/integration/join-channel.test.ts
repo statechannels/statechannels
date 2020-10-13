@@ -8,11 +8,11 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {alice} from '../fixtures/participants';
-import {defaultConfig} from '../../../config';
+import {processEnvConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = new Wallet(defaultConfig);
+  w = new Wallet(processEnvConfig);
   await truncate(w.knex);
 });
 

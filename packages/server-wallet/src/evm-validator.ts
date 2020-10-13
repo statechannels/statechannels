@@ -5,7 +5,7 @@ import {Transaction} from 'objection';
 
 import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
-import {defaultConfig} from './config';
+import {processEnvConfig} from './config';
 
 const MISSING = '0x';
 const bytecodeCache: Record<string, string | undefined> = {};
@@ -29,7 +29,7 @@ export const validateTransitionWithEVM = async (
   const bytecode =
     bytecodeCache[from.appDefinition] ??
     (bytecodeCache[from.appDefinition] =
-      (await AppBytecode.getBytecode(defaultConfig.chainNetworkID, from.appDefinition, tx)) ||
+      (await AppBytecode.getBytecode(processEnvConfig.chainNetworkID, from.appDefinition, tx)) ||
       MISSING);
   if (bytecode === MISSING) {
     // logger.warn(

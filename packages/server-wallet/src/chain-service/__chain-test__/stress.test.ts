@@ -3,7 +3,7 @@ import {BN} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultConfig} from '../../config';
+import {processEnvConfig} from '../../config';
 import {ChainService} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -11,15 +11,15 @@ const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
 const erc20Address = process.env.ERC20_ADDRESS!;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultConfig.rpcEndpoint;
+if (!processEnvConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = processEnvConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-const ethWallet = new Wallet(defaultConfig.serverPrivateKey, provider);
+const ethWallet = new Wallet(processEnvConfig.serverPrivateKey, provider);
 
 let chainService: ChainService;
 
 beforeEach(() => {
-  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
+  chainService = new ChainService(rpcEndpoint, processEnvConfig.serverPrivateKey, 50);
 });
 
 afterEach(() => chainService.destructor());

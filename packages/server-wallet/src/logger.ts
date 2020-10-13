@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {defaultConfig, ServerWalletConfig} from './config';
+import {processEnvConfig, ServerWalletConfig} from './config';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
   // eslint-disable-next-line no-process-env
@@ -11,4 +11,4 @@ export function createLogger(config: ServerWalletConfig): pino.Logger {
   return destination ? pino({level: config.logLevel}, destination) : pino({level: config.logLevel});
 }
 
-export const logger = createLogger(defaultConfig);
+export const logger = createLogger(processEnvConfig);

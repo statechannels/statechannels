@@ -4,12 +4,12 @@ import Knex from 'knex';
 configureEnvVariables();
 
 import adminKnex from '../src/db-admin/db-admin-connection';
-import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';
+import {extractDBConfigFromServerWalletConfig, processEnvConfig} from '../src/config';
 
 export let testKnex: Knex;
 
 beforeAll(async () => {
-  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+  testKnex = Knex(extractDBConfigFromServerWalletConfig(processEnvConfig));
 
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();

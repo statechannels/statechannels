@@ -42,7 +42,11 @@ import {isWalletError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
+import {
+  ServerWalletConfig,
+  extractDBConfigFromServerWalletConfig,
+  processEnvConfig,
+} from '../config';
 import {
   ChainServiceInterface,
   MockChainService,
@@ -108,7 +112,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   chainService: ChainServiceInterface;
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
-    this.walletConfig = walletConfig || defaultConfig;
+    this.walletConfig = walletConfig || processEnvConfig;
     this.manager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.store = new Store(

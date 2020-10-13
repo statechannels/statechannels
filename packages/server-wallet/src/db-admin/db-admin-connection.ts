@@ -1,6 +1,6 @@
 import Knex from 'knex';
 
-import {defaultConfig} from '../config';
+import {processEnvConfig} from '../config';
 
 import * as knexConfig from './knexfile';
 
@@ -15,7 +15,7 @@ export const truncate = async (
   knex: Knex,
   tables = ['signing_wallets', 'channels', 'nonces']
 ): Promise<void> => {
-  if (defaultConfig.nodeEnv !== 'development' && defaultConfig.nodeEnv !== 'test') {
+  if (processEnvConfig.nodeEnv !== 'development' && processEnvConfig.nodeEnv !== 'test') {
     throw 'No admin connection allowed';
   }
   await Promise.all(tables.map(table => knex.raw(`TRUNCATE TABLE ${table} CASCADE;`)));

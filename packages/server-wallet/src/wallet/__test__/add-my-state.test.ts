@@ -3,7 +3,7 @@ import Objection from 'objection';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {processEnvConfig} from '../../config';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {stateWithHashSignedBy2} from './fixtures/states';
@@ -12,7 +12,7 @@ import {alice, bob} from './fixtures/signing-wallets';
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+  store = new Store(knex, processEnvConfig.timingMetrics, processEnvConfig.skipEvmValidation);
 });
 
 describe('addSignedState', () => {

@@ -5,12 +5,12 @@ import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {Wallet, Message as Payload} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
-import {defaultConfig} from '../../src/config';
+import {processEnvConfig} from '../../src/config';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
     new Wallet(receiverConfig),
-    defaultConfig.timingMetrics
+    processEnvConfig.timingMetrics
   );
 
   public async warmup(): Promise<void> {
@@ -18,7 +18,7 @@ export default class ReceiverController {
   }
 
   private readonly myParticipantID: string = 'receiver';
-  private time = timerFactory(defaultConfig.timingMetrics, 'controller');
+  private time = timerFactory(processEnvConfig.timingMetrics, 'controller');
   public get participantInfo(): Participant {
     return {
       participantId: this.myParticipantID,

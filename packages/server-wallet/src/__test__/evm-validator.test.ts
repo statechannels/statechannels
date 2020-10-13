@@ -5,7 +5,7 @@ import {appBytecode} from '../models/__test__/fixtures/app-bytecode';
 import {AppBytecode} from '../models/app-bytecode';
 import {createState} from '../wallet/__test__/fixtures/states';
 import {validateTransitionWithEVM} from '../evm-validator';
-import {defaultConfig} from '../config';
+import {processEnvConfig} from '../config';
 import {testKnex as knex} from '../../jest/knex-setup-teardown';
 
 const COUNTING_APP_DEFINITION = '0xfffffffffffffffffffffffffffffffffffffffff';
@@ -19,7 +19,7 @@ beforeEach(async () => {
 it('returns true for a valid transition', async () => {
   // Sanity check that we're validating with byte code
   expect(
-    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
+    await AppBytecode.getBytecode(processEnvConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
   const fromState = toNitroState(
     createState({
@@ -39,7 +39,7 @@ it('returns true for a valid transition', async () => {
 it('returns false for an invalid transition', async () => {
   // Sanity check that we're validating with byte code
   expect(
-    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
+    await AppBytecode.getBytecode(processEnvConfig.chainNetworkID, COUNTING_APP_DEFINITION, knex)
   ).toBeDefined();
   const fromState = toNitroState(
     createState({
@@ -59,7 +59,7 @@ it('returns false for an invalid transition', async () => {
 it('skips validating when no byte code exists for the app definition', async () => {
   // Sanity check that the bytecode doesn't exist
   expect(
-    await AppBytecode.getBytecode(defaultConfig.chainNetworkID, UNDEFINED_APP_DEFINITION, knex)
+    await AppBytecode.getBytecode(processEnvConfig.chainNetworkID, UNDEFINED_APP_DEFINITION, knex)
   ).toBeUndefined();
   const state = toNitroState(
     createState({

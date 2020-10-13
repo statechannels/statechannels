@@ -2,12 +2,12 @@
 import {GanacheServer} from '@statechannels/devtools';
 import {utils} from 'ethers';
 
-import {defaultConfig} from '../src/config';
+import {processEnvConfig} from '../src/config';
 import {deploy} from '../deployment/deploy';
 
 export default async function setup(): Promise<void> {
   const account = {
-    privateKey: defaultConfig.serverPrivateKey,
+    privateKey: processEnvConfig.serverPrivateKey,
     amount: utils.parseEther('100').toString(),
   };
   if (!process.env.GANACHE_PORT) {

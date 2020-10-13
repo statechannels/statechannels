@@ -9,7 +9,7 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultConfig} from '../../config';
+import {processEnvConfig} from '../../config';
 import {Address} from '../../type-aliases';
 import {
   alice as aliceParticipant,
@@ -24,15 +24,15 @@ const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
 const erc20Address = process.env.ERC20_ADDRESS!;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultConfig.rpcEndpoint;
+if (!processEnvConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = processEnvConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
 let chainService: ChainService;
 let channelNonce = 0;
 
 beforeAll(() => {
-  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
+  chainService = new ChainService(rpcEndpoint, processEnvConfig.serverPrivateKey, 50);
 });
 
 afterAll(() => chainService.destructor());

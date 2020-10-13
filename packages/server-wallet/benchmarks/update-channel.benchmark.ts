@@ -11,11 +11,11 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/config';
+import {processEnvConfig, extractDBConfigFromServerWalletConfig} from '../src/config';
 
-const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+const knex = Knex(extractDBConfigFromServerWalletConfig(processEnvConfig));
 
-const NUM_UPDATES = defaultConfig.timingMetrics ? 10 : 100;
+const NUM_UPDATES = processEnvConfig.timingMetrics ? 10 : 100;
 
 async function setup(n = NUM_UPDATES): Promise<Channel[]> {
   const iter = _.range(n);
@@ -35,7 +35,7 @@ async function setup(n = NUM_UPDATES): Promise<Channel[]> {
 async function benchmark(): Promise<void> {
   await adminKnex.migrate.rollback();
   await adminKnex.migrate.latest();
-  const wallet = new Wallet(defaultConfig);
+  const wallet = new Wallet(processEnvConfig);
 
   // Warm up each worker thread.
   // eslint-disable-next-line no-process-env

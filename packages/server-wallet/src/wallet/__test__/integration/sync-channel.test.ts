@@ -7,12 +7,12 @@ import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../../config';
+import {processEnvConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
   await truncate(knex);
-  w = new Wallet(defaultConfig);
+  w = new Wallet(processEnvConfig);
 });
 
 afterEach(async () => {

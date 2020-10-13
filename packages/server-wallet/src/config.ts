@@ -32,7 +32,7 @@ export interface ServerWalletConfig {
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
-export const defaultConfig: ServerWalletConfig = {
+export const processEnvConfig: ServerWalletConfig = {
   nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
   postgresDatabaseUrl: process.env.SERVER_URL,
   postgresHost: process.env.SERVER_HOST,

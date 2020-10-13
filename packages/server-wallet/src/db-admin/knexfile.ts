@@ -16,14 +16,14 @@ WARNING: @statechannels/devtools not detected.
   else throw err;
 }
 
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {processEnvConfig, extractDBConfigFromServerWalletConfig} from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
 
 let knexConfig: Config = {
-  ...extractDBConfigFromServerWalletConfig(defaultConfig),
-  debug: defaultConfig.debugKnex === 'TRUE',
+  ...extractDBConfigFromServerWalletConfig(processEnvConfig),
+  debug: processEnvConfig.debugKnex === 'TRUE',
   migrations: {
     directory: path.join(BASE_PATH, 'migrations'),
     loadExtensions: extensions,
@@ -43,7 +43,7 @@ let knexConfig: Config = {
   wrapIdentifier: undefined,
 };
 
-if (defaultConfig.nodeEnv === 'development') {
+if (processEnvConfig.nodeEnv === 'development') {
   knexConfig = {...knexConfig, pool: {min: 0, max: 1}};
 }
 

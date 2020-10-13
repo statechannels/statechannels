@@ -10,9 +10,9 @@ import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
-import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';
+import {extractDBConfigFromServerWalletConfig, processEnvConfig} from '../src/config';
 
-const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
+const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(processEnvConfig));
 
 const {argv} = yargs.option('calls', {
   type: 'number',
@@ -30,7 +30,7 @@ async function benchmark(): Promise<void> {
   const c = withSupportedState()({vars: [stateVars()]});
   await Channel.query(knex).insert(c);
 
-  const wallet = new Wallet(defaultConfig);
+  const wallet = new Wallet(processEnvConfig);
 
   const iter = _.range(NUM_CALLS);
   const key = `getChannel x ${NUM_CALLS}`;
