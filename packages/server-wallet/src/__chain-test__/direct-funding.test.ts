@@ -3,7 +3,7 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultConfig} from '../config';
-import {NotificationReceiver, SingleChannelMessage, Wallet} from '../wallet';
+import {NotificationReceiver, SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
@@ -61,9 +61,9 @@ it('Create a fake-funded channel between two wallets ', async () => {
   };
 
   let counter = 0;
-  const p = new Promise<SingleChannelMessage>(resolve => {
+  const p = new Promise<SingleChannelOutput>(resolve => {
     const aNotificationReceiver: NotificationReceiver = {
-      onWalletNotification(message: SingleChannelMessage) {
+      onWalletNotification(message: SingleChannelOutput) {
         if (counter > 0) {
           resolve(message);
         }
@@ -116,13 +116,13 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   //  PostFund3B <
-  const resultB1 = await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
-  expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
+  const postFundB = await b.pushMessage(
+    getPayloadFor(participantB.participantId, postFundA.outbox)
+  );
+  expect(getChannelResultFor(channelId, postFundB.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
-
-  const postFundB = await b.syncChannel({channelId});
 
   const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, postFundB.outbox));
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({

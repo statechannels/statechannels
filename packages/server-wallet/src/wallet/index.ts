@@ -64,7 +64,7 @@ const isSingleChannelMessage = (message: Message): message is SingleChannelOutpu
   'channelResult' in message;
 
 export interface NotificationReceiver {
-  onWalletNotification(message: SingleChannelMessage): void;
+  onWalletNotification(message: SingleChannelOutput): void;
 }
 
 export interface UpdateChannelFundingParams {
@@ -582,10 +582,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   onHoldingUpdated(arg: HoldingUpdatedArg): void {
     // note: updateChannelFunding is an async function.
     // todo: this returns a Promise<Promise<SingleChannelOutput>>. How should the Promise<SingleChannelOutput> get relayed to the application?
-    this.updateChannelFunding({
-      ...arg,
-      token: arg.assetHolderAddress,
-    }).then(this.notificationReceiver?.onWalletNotification);
+    this.updateChannelFundingForAssetHolder(arg).then(
+      this.notificationReceiver?.onWalletNotification
+    );
   }
 
   dbAdmin(): DBAdmin {
