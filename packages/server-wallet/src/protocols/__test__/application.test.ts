@@ -18,7 +18,7 @@ const outcome2 = simpleEthAllocation([
 ]);
 const prefundState = {outcome, turnNum: 0};
 const prefundState2 = {outcome: outcome2, turnNum: 0};
-const postFundState = {outcome, turnNum: 3};
+const postFundState = {outcome, turnNum: 2};
 const closingState = {outcome, turnNum: 4, isFinal: true};
 
 const runningState = {outcome, turnNum: 7};

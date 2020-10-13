@@ -38,8 +38,14 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   const allocation: Allocation = {
     allocationItems: [
-      {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
-      {destination: participantB.destination, amount: BigNumber.from(1).toHexString()},
+      {
+        destination: participantA.destination,
+        amount: BigNumber.from(1).toHexString(),
+      },
+      {
+        destination: participantB.destination,
+        amount: BigNumber.from(1).toHexString(),
+      },
     ],
     token: '0x00', // must be even length
   };
@@ -94,18 +100,25 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  const depositByA = {channelId, token: '0x00', amount: BigNumber.from(1).toHexString()}; // A sends 1 ETH (1 total)
+  const depositByA = {
+    channelId,
+    token: '0x00',
+    amount: BigNumber.from(1).toHexString(),
+  }; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
   await a.updateFundingForChannels([depositByA]);
   await b.updateFundingForChannels([depositByA]);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
-  const depositByB = {channelId, token: '0x00', amount: BigNumber.from(2).toHexString()}; // B sends 1 ETH (2 total)
+  const depositByB = {
+    channelId,
+    token: '0x00',
+    amount: BigNumber.from(2).toHexString(),
+  }; // B sends 1 ETH (2 total)
 
   // < PostFund3B
   const resultA2 = await a.updateFundingForChannels([depositByB]);
-
   // PostFund3A >
   const resultB2 = await b.updateFundingForChannels([depositByB]);
 
@@ -119,16 +132,16 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  //  PostFund3B <
-  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
-  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
+  //  > PostFund3A
+  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
+  expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
-  //  > PostFund3A
-  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
-  expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
+  //  PostFund3B <
+  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
