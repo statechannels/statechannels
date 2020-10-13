@@ -16,7 +16,6 @@ A state channel can be thought of as an emergent property of data (which we call
 
 /* Import ethereum wallet utilities  */
 import {ethers} from 'ethers';
-const {bigNumberify} = ethers.utils;
 const {AddressZero, HashZero} = ethers.constants;
 
 /* Import statechannels wallet utilities  */
@@ -76,22 +75,22 @@ Notice that the outcome field must conform to the `Outcome` type, which we also 
 It is convenient to define some solidity structs, each containing a subset of the above data:
 
 ```solidity
-  struct FixedPart {
-        uint256 chainId;
-        address[] participants;
-        uint256 channelNonce;
-        address appDefinition;
-        uint256 challengeDuration;
-    }
+struct FixedPart {
+  uint256 chainId;
+  address[] participants;
+  uint256 channelNonce;
+  address appDefinition;
+  uint256 challengeDuration;
+}
 ```
 
 which contains information which must be identical in every state channel update, and
 
 ```solidity
-   struct VariablePart {
-        bytes outcome;
-        bytes appData;
-    }
+struct VariablePart {
+  bytes outcome;
+  bytes appData;
+}
 ```
 
 which contains fields which are allowed to change. These structs are part of the contract API, and we can import helper functions to extract a javascript encoding of them:
