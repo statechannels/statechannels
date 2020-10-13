@@ -150,12 +150,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     }
 
     if (walletConfig?.rpcEndpoint && walletConfig.serverPrivateKey) {
-      this.chainService = new ChainService(
-        walletConfig.rpcEndpoint,
-        walletConfig.serverPrivateKey,
-        // todo: remove this
-        50
-      );
+      this.chainService = new ChainService(walletConfig.rpcEndpoint, walletConfig.serverPrivateKey);
     } else {
       logger.warn(
         'rpcEndpoint and serverPrivateKey must be defined for the wallet to use chain service'
