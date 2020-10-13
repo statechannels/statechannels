@@ -119,7 +119,6 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   // < PostFund3B
   const resultA2 = await a.updateFundingForChannels([depositByB]);
-  // PostFund3A >
   const resultB2 = await b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
