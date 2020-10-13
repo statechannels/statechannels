@@ -19,7 +19,7 @@ const ethWallet = new Wallet(defaultTestConfig.serverPrivateKey, provider);
 let chainService: ChainService;
 
 beforeEach(() => {
-  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey, 50);
+  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey);
 });
 
 afterEach(() => chainService.destructor());

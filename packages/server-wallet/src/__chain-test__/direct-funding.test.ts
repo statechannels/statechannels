@@ -22,7 +22,7 @@ afterAll(async () => {
   b.destroy();
 });
 
-it('Create a fake-funded channel between two wallets ', async () => {
+it('Create a directly funded channel between two wallets ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
@@ -57,7 +57,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Direct',
+    fundingStrategy: 'Unfunded',
   };
 
   let counter = 0;
@@ -125,4 +125,4 @@ it('Create a fake-funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
-}, 10_000);
+}, 20_000);

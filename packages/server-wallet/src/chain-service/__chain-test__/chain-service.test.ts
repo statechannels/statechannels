@@ -32,7 +32,7 @@ let chainService: ChainService;
 let channelNonce = 0;
 
 beforeAll(() => {
-  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey, 50);
+  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey);
 });
 
 afterAll(() => chainService.destructor());

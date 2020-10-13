@@ -94,6 +94,9 @@ export class ChainService implements ChainServiceInterface {
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
+    if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
+      pollingInterval = pollingInterval ?? 50;
+    }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
     this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
   }
