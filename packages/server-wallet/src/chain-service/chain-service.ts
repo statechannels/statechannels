@@ -51,6 +51,7 @@ interface ChainEventEmitterInterface {
     listener: ChainEventSubscriberInterface
   ): void;
   unregisterChannel(channelId: Bytes32): void;
+  destructor(): void;
 }
 
 interface ChainModifierInterface {
