@@ -3,6 +3,6 @@ participant AppA
 participant AppB
 participant WalletB
 AppA->WalletA: closeChannel
-WalletA-->WalletB: isFinal m + 1
-WalletB-->WalletA: isFinal m + 2
+WalletA-->WalletB: isFinal m + 1 (A)
+WalletB-->WalletA: isFinal m + 1 (B)
 
