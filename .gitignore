@@ -62,3 +62,7 @@ storybook-static
 ganache-deployments.json
 ganache-deployments*.json
 *.lock
+
+
+# publishing workflow
+.npmrc
