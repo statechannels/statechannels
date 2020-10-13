@@ -1,4 +1,3 @@
-import {deserializeAllocations} from '@statechannels/wallet-core/lib/src/serde/app-messages/deserialize';
 import {
   UpdateChannelParams,
   CreateChannelParams,
@@ -12,6 +11,7 @@ import {
   ChannelId,
 } from '@statechannels/client-api-schema';
 import {
+  deserializeAllocations,
   validatePayload,
   ChannelRequest,
   Outcome,
