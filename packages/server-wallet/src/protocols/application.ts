@@ -10,7 +10,6 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
 
 const isPrefundSetup = stageGuard('PrefundSetup');
-const isPostfundSetup = stageGuard('PostfundSetup');
 
 // These are currently unused, but will be used
 // const isRunning = stageGuard('Running');
@@ -74,6 +73,8 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   if (!myAllocationItem) {
     throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
   }
+  if (BN.eq(myAllocationItem.amount, 0)) return false;
+
   return requestFundChannel({
     channelId: app.channelId,
     assetHolderAddress: assetHolderAddress,
