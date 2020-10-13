@@ -24,7 +24,6 @@ import {
   ChannelConstants,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Knex from 'knex';
 import _ from 'lodash';
 
@@ -214,7 +213,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     token,
     amount,
   }: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
-    const assetHolder = assetHolderAddress(token || Zero) || ETH_ASSET_HOLDER_ADDRESS;
+    const assetHolder = assetHolderAddress(token || Zero);
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolder);
 
