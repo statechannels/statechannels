@@ -134,6 +134,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     this.takeActions = this.takeActions.bind(this);
     this.mergeMessages = this.mergeMessages.bind(this);
     this.destroy = this.destroy.bind(this);
+    this.registerAppDefintion = this.registerAppDefintion.bind(this);
 
     // set up timing metrics
     if (this.walletConfig.timingMetrics) {
