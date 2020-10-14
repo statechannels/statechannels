@@ -1,0 +1,13 @@
+participant WalletA
+participant AppA
+participant AppB
+participant WalletB
+AppA->WalletA: createChannel
+WalletA-->WalletB: 0a
+WalletB->AppB: 'proposed'
+AppB->WalletB: joinChannel
+WalletB-->WalletA: 0b
+WalletB-->WalletA: 3b
+WalletA-->WalletB: 3a
+
+
