@@ -14,7 +14,7 @@ import {stateVars} from '../fixtures/state-vars';
 import {defaultTestConfig} from '../../../config';
 
 jest.setTimeout(20_000);
-console.log(defaultTestConfig.skipEvmValidation);
+
 const wallet = new Wallet(defaultTestConfig);
 
 afterAll(async () => {
