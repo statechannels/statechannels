@@ -7,5 +7,14 @@
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
-  "concurrency": "4"
+  "concurrency": "4",
+  "command": {
+    "publish": {
+      "registry": "https://registry.npmjs.org"
+    },
+    "version": {
+      "allowBranch": "master",
+      "message": "chore(release): publish [skip ci]"
+    }
+  }
 }
