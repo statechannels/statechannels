@@ -11,7 +11,7 @@
     "@statechannels/wasm-utils": "0.1.5",
     "@statechannels/wire-format": "0.4.0",
     "ethers": "5.0.12",
-    "evt": "1.8.8",
+    "eventemitter3": "4.0.7",
     "fp-ts": "2.7.0",
     "knex": "0.20.9",
     "lodash": "^4.17.20",
