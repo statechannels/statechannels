@@ -26,6 +26,7 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
+import EventEmitter from 'eventemitter3';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
@@ -59,6 +60,7 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 export type SingleChannelOutput = {outbox: Outgoing[]; channelResult: ChannelResult};
 export type MultipleChannelOutput = {outbox: Outgoing[]; channelResults: ChannelResult[]};
 type Message = SingleChannelOutput | MultipleChannelOutput;
+
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
 
@@ -98,7 +100,7 @@ export type WalletInterface = {
 
 // TODO: This should not be hardcoded
 const CHAIN_ID = '0x01';
-export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
+export class Wallet extends EventEmitter implements WalletInterface, ChainEventSubscriberInterface {
   manager: WorkerManager;
   knex: Knex;
   store: Store;
@@ -109,6 +111,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     walletConfig?: ServerWalletConfig,
     public notificationReceiver?: NotificationReceiver
   ) {
+    super();
     this.walletConfig = walletConfig || defaultConfig;
     this.manager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
@@ -557,11 +560,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
   // ChainEventSubscriberInterface implementation
   onHoldingUpdated(arg: HoldingUpdatedArg): void {
-    // note: updateChannelFunding is an async function.
-    // todo: this returns a Promise<Promise<SingleChannelOutput>>. How should the Promise<SingleChannelOutput> get relayed to the application?
-    this.updateChannelFundingForAssetHolder(arg).then(
-      this.notificationReceiver?.onWalletNotification
-    );
+    this.updateChannelFundingForAssetHolder(arg).then(arg => this.emit('singleChannelOutput', arg));
   }
 
   onAssetTransferred(_arg: AssetTransferredArg): void {
