@@ -51,6 +51,7 @@ import {
   AssetTransferredArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
+import {Objective as ObjectiveModel} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
@@ -290,7 +291,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
-    const objective = this.store.objectives[objectiveId];
+    const objective = await ObjectiveModel.forId(objectiveId, this.knex);
 
     if (!objective)
       throw new ApproveObjective.ApproveObjectiveError(

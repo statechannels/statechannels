@@ -26,4 +26,15 @@ export class Objective extends Model {
       data: JSON.stringify(objectiveToBeStored.data),
     });
   }
+
+  static async forId(objectiveId: number, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
+    const objective = await Objective.query(tx).findById(objectiveId);
+    return {
+      objectiveId: objective.objectiveId,
+      status: objective.status,
+      type: objective.type,
+      participants: JSON.parse(objective.participants),
+      data: JSON.parse(objective.data),
+    };
+  }
 }

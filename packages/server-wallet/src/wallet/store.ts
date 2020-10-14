@@ -373,8 +373,8 @@ export class Store {
       if (!channel) {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
       }
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[channel.channelNonce /* TODO: (Stored Objectives) id strategy */] = {
+
+      const objectiveToBeStored: ObjectiveStoredInDB = {
         objectiveId: channel.channelNonce,
         status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
         type: objective.type,
@@ -383,7 +383,14 @@ export class Store {
           targetChannelId,
         },
       };
-      return this.objectives[channel.channelNonce];
+      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
+      this.objectives[
+        channel.channelNonce /* TODO: (Stored Objectives) id strategy */
+      ] = objectiveToBeStored;
+
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
+
+      return objectiveToBeStored;
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -517,11 +524,17 @@ export class Store {
         params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
       }));
 
-      this.objectives[constants.channelNonce /* TODO: (Stored Objectives) id? */] = {
+      const objectiveToBeStored: ObjectiveStoredInDB = {
         ...objective,
         objectiveId: constants.channelNonce,
         status: 'approved',
       };
+
+      this.objectives[
+        constants.channelNonce /* TODO: (Stored Objectives) id? */
+      ] = objectiveToBeStored;
+
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
     });
