@@ -357,6 +357,11 @@ export class Wallet extends EventEmitter<WalletEvent>
       };
     };
 
+    if (await this.store.isLedger(channelId))
+      throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.internalChannel, {
+        channelId,
+      });
+
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.channelNotFound, {
         channelId,
@@ -417,12 +422,19 @@ export class Wallet extends EventEmitter<WalletEvent>
         this.walletConfig.timingMetrics
       );
 
+      if (await this.store.isLedger(channelId))
+        throw new UpdateChannel.UpdateChannelError(
+          UpdateChannel.UpdateChannelError.reasons.internalChannel,
+          {channelId}
+        );
+
       const nextState = getOrThrow(
         recordFunctionMetrics(
           UpdateChannel.updateChannel({channelId, appData, outcome}, channel),
           this.walletConfig.timingMetrics
         )
       );
+
       const signedState = await timer('signing state', () =>
         this.store.signState(channelId, nextState, tx)
       );
@@ -549,6 +561,13 @@ export class Wallet extends EventEmitter<WalletEvent>
       outbox: mergeOutgoing(outbox),
       channelResults: mergeChannelResults(channelResults),
       objectivesToApprove: objectives,
+    };
+  }
+
+  __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): void {
+    this.store.ledgers[ledgerChannelId] = {
+      ledgerChannelId,
+      assetHolderAddress,
     };
   }
 

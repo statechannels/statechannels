@@ -24,10 +24,13 @@ import {
   convertToParticipant,
   SignedState,
   objectiveId,
+  checkThat,
+  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
+import {compose, map, filter} from 'lodash/fp';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers, constants} from 'ethers';
 import Knex from 'knex';
@@ -42,6 +45,8 @@ import {
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi, toChannelResult} from '../protocols/state';
+import {ProtocolState as OpenChannelProtocolState} from '../protocols/open-channel';
+import {ProtocolState as LedgerFundingProtocolState} from '../protocols/ledger-funding';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -52,6 +57,7 @@ import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {Objective as ObjectiveModel} from '../models/objective';
+import {LedgerRequests, LedgerRequestStatus, LedgerRequestType} from '../models/ledger-requests';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -463,6 +469,92 @@ export class Store {
     );
 
     return result;
+  }
+
+  // TODO: Turn into SQL tables
+  private ledgerRequests = new LedgerRequests();
+  public ledgers: {
+    [ledgerChannelId: string]: {
+      ledgerChannelId: Bytes32;
+      assetHolderAddress: Address;
+    };
+  } = {};
+
+  async isLedger(channelId: Bytes32): Promise<boolean> {
+    return !!this.ledgers[channelId];
+  }
+
+  async requestLedgerFunding(
+    {channelId, supported}: ChannelState,
+    tx: Transaction
+  ): Promise<Bytes32> {
+    if (!supported) throw new Error('cannot fund unsupported channel');
+
+    const {assetHolderAddress} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const ledgerRecord = _.find(
+      Object.values(this.ledgers),
+      v => v.assetHolderAddress === assetHolderAddress
+    );
+
+    if (!ledgerRecord) throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
+
+    if (await this.ledgerRequests.getRequest(channelId, tx))
+      throw new Error('app already has a pending funding request. abort');
+
+    await this.ledgerRequests.setRequest(
+      channelId,
+      {
+        ledgerChannelId: ledgerRecord.ledgerChannelId,
+        status: 'pending',
+        fundingChannelId: channelId,
+      },
+      tx
+    );
+
+    return ledgerRecord.ledgerChannelId;
+  }
+
+  async markRequests(
+    channelIds: Bytes32[],
+    status: 'pending' | 'approved' | 'succeeded',
+    tx?: Transaction
+  ): Promise<void> {
+    for (const channelId of channelIds) {
+      await this.ledgerRequests.setRequestStatus(channelId, status, tx);
+    }
+  }
+
+  async getOpenChannelProtocolState(
+    channel: ChannelState,
+    tx?: Transaction
+  ): Promise<OpenChannelProtocolState> {
+    const update = await this.ledgerRequests.getRequest(channel.channelId, tx);
+    return {
+      app: channel,
+      ledgerFundingRequested: !!update,
+      fundingChannel: update ? await this.getChannel(update.ledgerChannelId, tx) : undefined,
+    };
+  }
+
+  async getLedgerProtocolState(
+    ledger: ChannelState,
+    tx?: Transaction
+  ): Promise<LedgerFundingProtocolState> {
+    const requests = await this.ledgerRequests.getPendingRequests(ledger.channelId, tx);
+
+    const getChannelsForRequests = async (status: LedgerRequestStatus): Promise<ChannelState[]> =>
+      await compose(
+        Promise.all,
+        map((req: LedgerRequestType) => this.getChannel(req.fundingChannelId, tx)),
+        filter(['status', status])
+      )(requests);
+
+    return {
+      ledger,
+      channelsPendingRequest: await getChannelsForRequests('pending'),
+      channelsWithInflightRequest: await getChannelsForRequests('approved'),
+    };
   }
 
   async createChannel(

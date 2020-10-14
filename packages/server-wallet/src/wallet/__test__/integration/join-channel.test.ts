@@ -1,4 +1,5 @@
 import {BN, serializeOutcome, simpleEthAllocation} from '@statechannels/wallet-core';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -197,5 +198,77 @@ describe('directly funded app', () => {
       supported: preFS1,
       chainServiceRequests: ['fund'],
     });
+  });
+});
+
+describe('ledger funded app', () => {
+  it('signs the prefund setup', async () => {
+    // NOTE: Put a ledger Channel in the DB
+    {
+      const ledger = await Channel.query(w.knex).insert(
+        channel({
+          channelNonce: 2,
+          vars: [
+            stateWithHashSignedBy(bob())({
+              turnNum: 4,
+              outcome: simpleEthAllocation([
+                {destination: alice().destination, amount: BN.from(5)},
+              ]),
+            }),
+          ],
+        })
+      );
+      w.__setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS);
+    }
+
+    const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
+    const preFS = {turnNum: 0, outcome};
+    const c = channel({
+      fundingStrategy: 'Ledger',
+      vars: [stateWithHashSignedBy(bob())(preFS)],
+    });
+
+    // NOTE: Placing test objects into the DB / Store
+    {
+      await Channel.query(w.knex).insert(c);
+
+      const current = await Channel.forId(c.channelId, w.knex);
+      expect(current.latest).toMatchObject(preFS);
+
+      w.store.objectives[current.channelNonce] = {
+        type: 'OpenChannel',
+        participants: current.participants,
+        data: {
+          targetChannelId: current.channelId,
+          fundingStrategy: 'Ledger',
+        },
+        status: 'pending',
+        objectiveId: current.channelNonce,
+      };
+    }
+
+    const channelId = c.channelId;
+
+    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [{...preFS, outcome: serializeOutcome(preFS.outcome)}]},
+          },
+        },
+      ],
+      channelResult: {
+        channelId,
+        turnNum: 0,
+        // outcome: serializeOutcome(preFS.outcome), // TODO: (Liam) This is empty... not sure why
+        status: 'opening',
+      },
+    });
+
+    const updated = await Channel.forId(channelId, w.knex);
+    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });

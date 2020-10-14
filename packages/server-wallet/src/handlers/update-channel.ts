@@ -26,6 +26,7 @@ export class UpdateChannelError extends WalletError {
     invalidLatestState: 'must have latest state',
     notInRunningStage: 'channel must be in running state',
     notMyTurn: 'it is not my turn',
+    internalChannel: 'channel is managed by wallet and cannot be modified by API',
   } as const;
 
   constructor(

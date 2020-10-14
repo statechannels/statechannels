@@ -20,6 +20,7 @@ export class JoinChannelError extends WalletError {
     channelNotFound: 'channel not found',
     invalidTurnNum: 'latest state must be turn 0',
     alreadySignedByMe: 'already signed prefund setup',
+    internalChannel: 'channel is managed by wallet and cannot be modified by API',
   } as const;
 
   constructor(

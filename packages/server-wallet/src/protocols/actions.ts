@@ -20,6 +20,21 @@ export type CompleteObjective = {
   type: 'CompleteObjective';
   /* TODO: (Stored Objectives) put objective id here? */ channelId: Bytes32;
 };
+export type RequestLedgerFunding = {
+  type: 'RequestLedgerFunding';
+  channelId: Bytes32;
+  assetHolderAddress: Address;
+};
+export type SignLedgerStateForRequests = StateVariables & {
+  type: 'SignLedgerStateForRequests';
+  channelId: Bytes32;
+  inflightRequests: Bytes32[];
+  unmetRequests: Bytes32[];
+};
+export type MarkLedgerFundingRequestsAsComplete = {
+  type: 'MarkLedgerFundingRequestsAsComplete';
+  doneRequests: Bytes32[];
+};
 
 /*
 Action creators
@@ -30,6 +45,8 @@ export const noAction = undefined;
 const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
   props: Omit<A, 'type'>
 ): A => ({...props, type} as A);
+
+export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
 export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const signState = actionConstructor<SignState>('SignState');
 export const completeObjective = actionConstructor<CompleteObjective>('CompleteObjective');
@@ -43,4 +60,20 @@ export const isFundChannel = guard<FundChannel>('FundChannel');
 
 export type Outgoing = Notice;
 
-export type ProtocolAction = SignState | FundChannel | CompleteObjective;
+export type OpenChannelProtocolAction =
+  | SignState
+  | FundChannel
+  | RequestLedgerFunding
+  | CompleteObjective;
+
+export type CloseChannelProtocolAction = SignState | CompleteObjective;
+
+export type LedgerProtocolAction =
+  | SignLedgerStateForRequests
+  | MarkLedgerFundingRequestsAsComplete
+  | CompleteObjective;
+
+export type ProtocolAction =
+  | OpenChannelProtocolAction
+  | CloseChannelProtocolAction
+  | LedgerProtocolAction;
