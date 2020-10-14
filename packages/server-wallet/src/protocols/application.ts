@@ -81,6 +81,7 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   });
 };
 
+const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 
 // todo: the only cases considered so far are directly funded
@@ -92,7 +93,7 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
 
 const signPostfundSetup = (ps: ProtocolState): ProtocolResult | false =>
   myTurnToPostfund(ps) &&
-  isFunded(ps) &&
+  (isFunded(ps) || isUnfunded(ps.app)) &&
   ps.app.latestSignedByMe &&
   ps.app.supported &&
   signState({

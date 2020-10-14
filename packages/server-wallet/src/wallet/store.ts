@@ -436,7 +436,7 @@ export class Store {
             type: 'OpenChannel',
             data: {
               targetChannelId: channelId,
-              fundingStrategy: 'Direct',
+              fundingStrategy,
             },
           },
         ],
