@@ -41,7 +41,7 @@ jobs:
 
       - name: publish packages to npm
         run: |
-          yarn run lerna version --conventional-commits --yes --exact --no-push --message "chore(release): publish [skip ci]"
+          yarn run lerna version --conventional-commits --yes --exact --no-push
           yarn run lerna publish from-git --yes
 
       - name: Create Pull Request
