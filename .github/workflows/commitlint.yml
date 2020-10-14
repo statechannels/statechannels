@@ -9,3 +9,27 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v2
+        id: linter
+        continue-on-error: true
+      - uses: actions/github-script@v3
+        continue-on-error: true
+        if: ${{ steps.linter.outcome=='failure' }}
+        with:
+          script: |
+            github.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ':carrot: conventional'
+            })
+      - uses: actions/github-script@v3
+        continue-on-error: true
+        if: ${{ steps.linter.outcome=='success' }}
+        with:
+          script: |
+            github.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [':carrot: conventional']
+            })
