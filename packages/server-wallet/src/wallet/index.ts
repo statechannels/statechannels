@@ -335,11 +335,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
     /* eslint-disable-next-line */
-    const {objectiveId} = _.find(
+    let objective = _.find(
       this.store.objectives,
       o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
-    )!;
-    this.store.objectives[objectiveId].status = 'approved';
+    );
+
+    if (objective === undefined) throw new Error('Could not find objective for this channel.');
+
+    this.store.objectives[objective.objectiveId].status = 'approved';
     // END FIXME
 
     const {outbox, channelResult} = await this.store.lockApp(
