@@ -14,7 +14,8 @@
     },
     "version": {
       "allowBranch": "master",
-      "message": "chore(release): publish [skip ci]"
+      "message": "chore(release): publish [skip ci]",
+      "includeMergedTags": true
     }
   }
 }
