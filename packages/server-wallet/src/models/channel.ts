@@ -15,13 +15,10 @@ import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
 import {ChannelState, toChannelResult, ChainServiceRequests} from '../protocols/state';
-import {NotifyApp} from '../protocols/actions';
 import {WalletError, Values} from '../errors/wallet-error';
 
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
-
-export type SyncState = NotifyApp[];
 
 export const REQUIRED_COLUMNS = [
   'chainId',

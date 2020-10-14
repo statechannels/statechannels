@@ -2,7 +2,6 @@ import {
   UpdateChannelParams,
   CreateChannelParams,
   SyncChannelParams,
-  StateChannelsNotification,
   JoinChannelParams,
   CloseChannelParams,
   ChannelResult,
@@ -29,7 +28,7 @@ import Knex from 'knex';
 import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
-import {Outgoing, ProtocolAction, isOutgoing} from '../protocols/actions';
+import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {logger} from '../logger';
 import * as Application from '../protocols/application';
 import * as UpdateChannel from '../handlers/update-channel';
@@ -87,9 +86,6 @@ export type WalletInterface = {
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
-
-  // Wallet -> App communication
-  onNotification(cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void};
 
   mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
@@ -242,7 +238,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     const outgoing = results.map(r => r.outgoing).reduce((p, c) => p.concat(c));
     return {
       channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outgoing.map(n => n.notice)),
+      outbox: mergeOutgoing(outgoing),
     };
   }
 
@@ -267,7 +263,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       outcome,
       fundingStrategy
     );
-    return {outbox: mergeOutgoing(outgoing.map(n => n.notice)), channelResult};
+    return {outbox: mergeOutgoing(outgoing), channelResult};
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
@@ -448,10 +444,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
-  onNotification(_cb: (notice: StateChannelsNotification) => void): {unsubscribe: () => void} {
-    throw 'Unimplemented';
-  }
-
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
@@ -506,10 +498,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         );
 
         if (!nextAction) markChannelAsDone();
-        else if (isOutgoing(nextAction)) {
-          outbox.push(nextAction.notice);
-          markChannelAsDone();
-        } else {
+        else {
           try {
             await doAction(nextAction);
           } catch (err) {
