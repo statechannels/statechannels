@@ -49,6 +49,7 @@ import {
   AssetTransferredArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
+import {AppBytecode} from '../models/app-bytecode';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -70,7 +71,7 @@ export interface UpdateChannelFundingParams {
 export type WalletInterface = {
   // App utilities
   getParticipant(): Promise<Participant | undefined>;
-
+  registerAppDefintion(appDefinition: string): Promise<void>;
   // App channel management
   createChannels(
     args: CreateChannelParams,
@@ -94,11 +95,14 @@ export type WalletInterface = {
   mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
 
+// TODO: This should not be hardcoded
+const CHAIN_ID = '0x01';
 export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   manager: WorkerManager;
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
+
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
     this.walletConfig = walletConfig || defaultConfig;
@@ -140,6 +144,18 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     }
 
     this.chainService = new MockChainService();
+  }
+
+  public async registerAppDefintion(appDefinition: string): Promise<void> {
+    if (await AppBytecode.getBytecode(CHAIN_ID, appDefinition, this.knex)) {
+      throw Error(`Bytecode already exists for app ${appDefinition} on chain ${CHAIN_ID}`);
+    }
+    const bytecode = await this.chainService.fetchBytecode(appDefinition);
+    if (!bytecode) {
+      throw Error(`Could not fetch bytecode for ${appDefinition}`);
+    }
+
+    await AppBytecode.insertBytecode(CHAIN_ID, appDefinition, bytecode, this.knex);
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
@@ -231,7 +247,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         const constants: ChannelConstants = {
           channelNonce,
           participants: participants.map(convertToParticipant),
-          chainId: '0x01',
+          chainId: CHAIN_ID,
           challengeDuration: 9001,
           appDefinition,
         };
@@ -256,7 +272,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     const constants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),
-      chainId: '0x01',
+      chainId: CHAIN_ID,
       challengeDuration: 9001,
       appDefinition,
     };

@@ -57,6 +57,7 @@ interface ChainModifierInterface {
   // todo: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
   concludeAndWithdraw(finalizationProof: SignedState[]): Promise<providers.TransactionResponse>;
+  fetchBytecode(address: string): Promise<string>;
 }
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
@@ -286,5 +287,9 @@ export class ChainService implements ChainServiceInterface {
     });
 
     return obs.pipe(share());
+  }
+
+  public async fetchBytecode(appDefinition: string): Promise<string> {
+    return this.provider.getCode(appDefinition);
   }
 }
