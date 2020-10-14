@@ -15,7 +15,6 @@ jobs:
         continue-on-error: true
         if: ${{ steps.linter.outcome=='failure' }}
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             github.issues.removeLabel({
               issue_number: context.issue.number,
