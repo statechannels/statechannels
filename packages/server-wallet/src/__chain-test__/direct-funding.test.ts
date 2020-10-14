@@ -60,11 +60,13 @@ it('Create a directly funded channel between two wallets ', async () => {
     fundingStrategy: 'Direct',
   };
 
-  const postFundAPromise = fromEvent<SingleChannelOutput>(a, 'singleChannelOutput')
+  // the type assertion is due to
+  // https://github.com/devanshj/rxjs-from-emitter/blob/master/docs/solving-some-from-event-flaws.md#the-way-fromevent-checks-if-the-first-argument-passed-is-an-emitter-or-not-is-incorrect
+  const postFundAPromise = fromEvent<SingleChannelOutput>(a as any, 'singleChannelOutput')
     .pipe(take(2))
     .toPromise();
 
-  const channelFundedBPromise = fromEvent<SingleChannelOutput>(b, 'singleChannelOutput')
+  const channelFundedBPromise = fromEvent<SingleChannelOutput>(b as any, 'singleChannelOutput')
     .pipe(take(2))
     .toPromise();
 

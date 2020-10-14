@@ -60,13 +60,10 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 export type SingleChannelOutput = {outbox: Outgoing[]; channelResult: ChannelResult};
 export type MultipleChannelOutput = {outbox: Outgoing[]; channelResults: ChannelResult[]};
 type Message = SingleChannelOutput | MultipleChannelOutput;
+type WalletEvent = {singleChannelOutput: SingleChannelOutput};
 
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
-
-export interface NotificationReceiver {
-  onWalletNotification(message: SingleChannelOutput): void;
-}
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
@@ -100,17 +97,15 @@ export type WalletInterface = {
 
 // TODO: This should not be hardcoded
 const CHAIN_ID = '0x01';
-export class Wallet extends EventEmitter implements WalletInterface, ChainEventSubscriberInterface {
+export class Wallet extends EventEmitter<WalletEvent>
+  implements WalletInterface, ChainEventSubscriberInterface {
   manager: WorkerManager;
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
 
   readonly walletConfig: ServerWalletConfig;
-  constructor(
-    walletConfig?: ServerWalletConfig,
-    public notificationReceiver?: NotificationReceiver
-  ) {
+  constructor(walletConfig?: ServerWalletConfig) {
     super();
     this.walletConfig = walletConfig || defaultConfig;
     this.manager = new WorkerManager(this.walletConfig);
