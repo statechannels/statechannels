@@ -18,8 +18,6 @@ afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
   await a.dbAdmin().dropDB();
   await b.dbAdmin().dropDB();
-  a.destroy();
-  b.destroy();
 });
 
 it('Create a directly funded channel between two wallets ', async () => {
