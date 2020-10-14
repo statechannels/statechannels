@@ -5,8 +5,8 @@ export async function up(knex: Knex): Promise<any> {
     table.integer('objectiveId');
     table.string('status');
     table.string('type');
-    table.string('participants');
-    table.string('data');
+    table.text('participants');
+    table.text('data');
   });
 }
 
