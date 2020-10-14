@@ -1,9 +1,11 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
+import {fromEvent} from 'rxjs';
+import {take} from 'rxjs/operators';
 
 import {defaultConfig} from '../config';
-import {NotificationReceiver, SingleChannelOutput, Wallet} from '../wallet';
+import {SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
@@ -58,18 +60,13 @@ it('Create a directly funded channel between two wallets ', async () => {
     fundingStrategy: 'Direct',
   };
 
-  let counter = 0;
-  const postFundAPromise = new Promise<SingleChannelOutput>(resolve => {
-    const aNotificationReceiver: NotificationReceiver = {
-      onWalletNotification(message: SingleChannelOutput) {
-        if (counter > 0) {
-          resolve(message);
-        }
-        counter++;
-      },
-    };
-    a.notificationReceiver = aNotificationReceiver;
-  });
+  const postFundAPromise = fromEvent<SingleChannelOutput>(a, 'singleChannelOutput')
+    .pipe(take(2))
+    .toPromise();
+
+  const channelFundedBPromise = fromEvent<SingleChannelOutput>(b, 'singleChannelOutput')
+    .pipe(take(2))
+    .toPromise();
 
   //        A <> B
   // PreFund0
@@ -104,7 +101,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 
   const postFundA = await postFundAPromise;
-  await new Promise(r => setTimeout(r, 1_000));
+  await channelFundedBPromise;
   expect(getChannelResultFor(channelId, [postFundA.channelResult])).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
     turnNum: 0,
