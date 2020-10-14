@@ -5,14 +5,14 @@ import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {SigningWallet} from '../../models/signing-wallet';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultConfig} from '../../config';
+import {defaultTestConfig} from '../../config';
 
 import {alice} from './fixtures/participants';
 
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultConfig.timingMetrics, defaultConfig.skipEvmValidation);
+  store = new Store(knex, defaultTestConfig.timingMetrics, defaultTestConfig.skipEvmValidation);
 });
 
 beforeEach(async () => {

@@ -5,11 +5,11 @@ import {truncate} from '../../../db-admin/db-admin-connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultConfig} from '../../../config';
+import {defaultTestConfig} from '../../../config';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = new Wallet(defaultConfig);
+  w = new Wallet(defaultTestConfig);
   await truncate(w.knex);
 });
 

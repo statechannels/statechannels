@@ -60,6 +60,11 @@ export const defaultConfig: ServerWalletConfig = {
   logDestination: process.env.LOG_DESTINATION || 'console',
 };
 
+export const defaultTestConfig = {
+  ...defaultConfig,
+  skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
+};
+
 export function extractDBConfigFromServerWalletConfig(
   serverWalletConfig: ServerWalletConfig
 ): Config {
