@@ -32,10 +32,10 @@ export const validateTransitionWithEVM = async (
       (await AppBytecode.getBytecode(defaultConfig.chainNetworkID, from.appDefinition, tx)) ||
       MISSING);
   if (bytecode === MISSING) {
-    // logger.warn(
-    //   `No bytecode found for appDefinition ${from.appDefinition} and chain id ${config.chainNetworkID}. Skipping valid transition check`
-    // );
-    return true;
+    logger.error('Missing bytecode', {
+      error: new Error(`No byte code for ${from.appDefinition}`),
+    });
+    return false;
   }
 
   const {data} = createValidTransitionTransaction(from, to);
