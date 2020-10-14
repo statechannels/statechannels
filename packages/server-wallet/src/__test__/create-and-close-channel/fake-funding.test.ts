@@ -1,4 +1,9 @@
-import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
+import {
+  CreateChannelParams,
+  Participant,
+  Allocation,
+  CloseChannelParams,
+} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
@@ -8,6 +13,10 @@ import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
 const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
+
+let channelId: string;
+let participantA: Participant;
+let participantB: Participant;
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -21,14 +30,14 @@ afterAll(async () => {
 });
 
 it('Create a fake-funded channel between two wallets ', async () => {
-  const participantA: Participant = {
+  participantA = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
     destination: makeDestination(
       '0xaaaa000000000000000000000000000000000000000000000000000000000001'
     ),
   };
-  const participantB: Participant = {
+  participantB = {
     signingAddress: await b.getSigningAddress(),
     participantId: 'b',
     destination: makeDestination(
@@ -49,7 +58,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Direct',
+    fundingStrategy: 'Unfunded',
   };
 
   //        A <> B
@@ -57,7 +66,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   const aCreateChannelOutput = await a.createChannel(channelParams);
 
   // TODO compute the channelId for a better test
-  const channelId = aCreateChannelOutput.channelResults[0].channelId;
+  channelId = aCreateChannelOutput.channelResults[0].channelId;
 
   expect(getChannelResultFor(channelId, aCreateChannelOutput.channelResults)).toMatchObject({
     status: 'opening',
@@ -75,53 +84,75 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // after joinChannel, B double-signs PreFund0
-  const bJoinChannelOutput = await b.joinChannel({channelId});
+  const bJoinChannelOutput = await b.approveObjective(
+    // eslint-disable-next-line
+    bProposeChannelPushOutput.objectivesToApprove![0].objectiveId
+  );
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
-  // B sends countersigned PreFund0 to A
+  // B sends countersigned PreFund0 to A _and_ PostFund03(since it is unfunded)
   const aPushJoinChannelOutput = await a.pushMessage(
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
 
   expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  // Both A and B have PreFund states, we are now ready to fund
-  const aFundOutput = await a.updateChannelFunding({channelId, token, amount: aBal});
-
-  expect(getChannelResultFor(channelId, [aFundOutput.channelResult])).toMatchObject({
-    status: 'opening',
-    turnNum: 0, // this is the currently latest _supported_ turnNum, not the latest turnNum
+    status: 'running',
+    turnNum: 3,
   });
 
   // A sends PostFund3 to B
   const bPushPostFundOutput = await b.pushMessage(
-    getPayloadFor(participantB.participantId, aFundOutput.outbox)
+    getPayloadFor(participantB.participantId, aPushJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  const bFundOutput = await b.updateChannelFunding({channelId, token, amount: aBal});
-
-  expect(getChannelResultFor(channelId, [bFundOutput.channelResult])).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
+});
 
-  // B sends PostFund3 to A
-  const aPushPostFundOutput = await a.pushMessage(
-    getPayloadFor(participantA.participantId, bFundOutput.outbox)
+it('Rejects b closing with `not your turn`', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  const bCloseChannel = b.closeChannel(closeChannelParams);
+
+  await expect(bCloseChannel).rejects.toMatchObject(new Error('not my turn'));
+});
+
+it('Closes the channel', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  // A generates isFinal4
+  const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+
+  expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
+    status: 'closing',
+    turnNum: 4,
+  });
+
+  const bPushMessageResult = await b.pushMessage(
+    getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
   );
-  // A has funding and a double-signed PostFund3
-  expect(getChannelResultFor(channelId, aPushPostFundOutput.channelResults)).toMatchObject({
-    status: 'running',
-    turnNum: 3,
+
+  // B pushed isFinal4, generated countersigned isFinal4
+  expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+  });
+
+  // A pushed the countersigned isFinal4
+  const aPushMessageResult = await a.pushMessage(
+    getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
+  );
+
+  expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
   });
 });
