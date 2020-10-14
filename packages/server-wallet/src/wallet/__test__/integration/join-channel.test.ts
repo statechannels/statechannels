@@ -106,7 +106,7 @@ describe('directly funded app', () => {
     expect(updated.protocolState).toMatchObject({latest: postFS, supported: preFS});
   });
 
-  it.skip('signs the prefund setup and makes a deposit, when I am first to deposit in a directly funded app', async () => {
+  it('signs the prefund setup and makes a deposit, when I am first to deposit in a directly funded app', async () => {
     const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
     const preFS = {turnNum: 0, outcome};
     const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
@@ -116,47 +116,25 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
-    const data = {signedStates: [preFS]};
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [
-        {method: 'MessageQueued', params: {recipient: 'bob', sender: 'alice', data}},
-        // TODO: It is unclear who will be responsible for making the deposit.
-        // If the client does, we should expect this. If not,
-        {method: 'SubmitTX', params: {transaction: expect.any(Object)}},
+        {
+          method: 'MessageQueued',
+          params: {
+            recipient: 'bob',
+            sender: 'alice',
+            data: {signedStates: [{...preFS, outcome: serializeOutcome(preFS.outcome)}]},
+          },
+        },
       ],
-      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
-      // implementation
-      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
+      channelResult: {channelId, turnNum: 0, status: 'opening'},
     });
 
     const updated = await Channel.forId(channelId, w.knex);
-    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
-  });
-});
-
-describe('virtually funded app', () => {
-  it.skip('signs the prefund setup and messages the hub', async () => {
-    const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
-    const preFS = {turnNum: 0, outcome};
-    const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query(w.knex).insert(c);
-
-    const channelId = c.channelId;
-    const current = await Channel.forId(channelId, w.knex);
-    expect(current.latest).toMatchObject(preFS);
-
-    const data = {signedStates: [preFS]};
-    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
-      outbox: [
-        {method: 'MessageQueued', params: {recipient: 'bob', sender: 'alice', data}},
-        {method: 'MessageQueued', params: {recipient: 'hub', sender: 'alice'}}, // TODO: Expect some specific data
-      ],
-      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
-      // implementation
-      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
+    expect(updated.protocolState).toMatchObject({
+      latest: preFS,
+      supported: preFS,
+      chainServiceRequests: ['fund'],
     });
-
-    const updated = await Channel.forId(channelId, w.knex);
-    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });
