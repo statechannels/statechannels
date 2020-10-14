@@ -30,20 +30,20 @@ To construct an outcome, you can import the `Outcome` type to ensure you're gett
 ```typescript
 // In lesson11.test.ts
 
+const { HashZero } = ethers.constants;
+
 import {
   AllocationAssetOutcome,
   Outcome,
   encodeOutcome,
   decodeOutcome,
-  convertAddressToBytes32
   } from '@statechannels/nitro-protocol';
 
-const externalDestination(convertAddressToBytes32(AddressZero));
 
 const assetOutcome: AllocationAssetOutcome = {
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
   allocationItems: [
-    {destination: externalDestination, amount: '0x03'}, // 3 wei
+    {destination: HashZero, amount: '0x03'}, // 3 wei
     // other payouts go here,
     // e.g. having destination: someOtherExternalDestintion
     // or destination: someChannelId
@@ -80,9 +80,9 @@ const assetOutcome: GuaranteeAssetOutcome = {
     targetChannelId: HashZero,
     destinations: [
       '0x000000000000000000000000000000000000000000000000000000000000000b',
-      '0x000000000000000000000000000000000000000000000000000000000000000a',
-    ],
-  },
+      '0x000000000000000000000000000000000000000000000000000000000000000a'
+    ]
+  }
 };
 ```
 

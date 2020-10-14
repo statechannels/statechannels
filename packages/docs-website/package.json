@@ -1,7 +1,7 @@
 {
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
@@ -9,9 +9,9 @@
     "@docusaurus/preset-classic": "2.0.0-alpha.64",
     "@mdx-js/react": "^1.6.18",
     "@microsoft/api-documenter": "7.8.21",
-    "@statechannels/channel-client": "^0.3.10",
-    "@statechannels/iframe-channel-provider": "^0.3.10",
-    "@statechannels/nitro-protocol": "^0.3.10",
+    "@statechannels/channel-client": "0.4.0",
+    "@statechannels/iframe-channel-provider": "0.3.11",
+    "@statechannels/nitro-protocol": "0.4.0",
     "clsx": "1.1.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
@@ -30,6 +30,7 @@
     "@types/react-dom": "16.9.8",
     "fs-extra": "^9.0.1"
   },
+  "private": true,
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
     "build:netlify": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",

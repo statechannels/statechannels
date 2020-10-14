@@ -1,13 +1,21 @@
 {
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "packages": [
-    "packages/*"
-  ],
-  "version": "0.3.10",
+  "packages": ["packages/*"],
+  "version": "independent",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
-  "concurrency": "4"
+  "concurrency": "4",
+  "command": {
+    "publish": {
+      "registry": "https://registry.npmjs.org"
+    },
+    "version": {
+      "allowBranch": "master",
+      "message": "chore(release): publish [skip ci]",
+      "includeMergedTags": true
+    }
+  }
 }

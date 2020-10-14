@@ -194,12 +194,12 @@ describe('when the application protocol returns an action', () => {
     const p = wallet.pushMessage({signedStates: [serializeState(stateSignedBy([bob()])(state))]});
     await expectResults(p, [{channelId, status: 'opening'}]);
     await expect(p).resolves.toMatchObject({
-      outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
+      outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 2}]}}}],
     });
 
     const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
-      latestSignedByMe: {turnNum: 3},
+      latestSignedByMe: {turnNum: 2},
       supported: {turnNum: 0},
     });
   });

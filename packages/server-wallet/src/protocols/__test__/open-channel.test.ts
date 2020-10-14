@@ -18,7 +18,7 @@ const outcome2 = simpleEthAllocation([
 ]);
 const prefundState = {outcome, turnNum: 0};
 const prefundState2 = {outcome: outcome2, turnNum: 0};
-const postFundState = {outcome, turnNum: 3};
+const postFundState = {outcome, turnNum: 2};
 
 const funded = (): Uint256 => BN.from(5);
 const notFunded = (): Uint256 => BN.from(0);
@@ -43,8 +43,6 @@ test.each`
   expect(protocol(ps)).toMatchObject(action);
 });
 
-// todo: add the following test case once https://github.com/statechannels/the-graph/issues/80 is resolved
-//
 test.each`
   supported        | latestSignedByMe | latest           | funding      | cond
   ${undefined}     | ${prefundState}  | ${prefundState}  | ${funded}    | ${'when I have signed the prefund state, but it is not supported'}

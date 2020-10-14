@@ -1,5 +1,5 @@
 import Objection from 'objection';
-import {signState, serializeState} from '@statechannels/wallet-core';
+import {signState} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -35,28 +35,13 @@ describe('signState', () => {
     c = await Channel.query(knex).insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
   });
 
-  it('signs the state, returning outgoing messages and a channelResult', async () => {
+  it('signs the state, returning the signed state', async () => {
     await expect(Channel.query(knex).where({id: c.id})).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
     const state = {...c.vars[0], ...c.channelConstants};
     const signature = signState(state, alice().privateKey);
     const result = await store.signState(c.channelId, c.vars[0], tx);
-    expect(result).toMatchObject({
-      outgoing: [
-        {
-          type: 'NotifyApp',
-          notice: {
-            method: 'MessageQueued',
-            params: {
-              data: {
-                signedStates: [{...serializeState(state), signatures: [signature]}],
-              },
-            },
-          },
-        },
-      ],
-      channelResult: {turnNum: c.vars[0].turnNum},
-    });
+    expect(result).toMatchObject({...state, signatures: [{signature, signer: alice().address}]});
   });
 
   it('uses a transaction', async () => {

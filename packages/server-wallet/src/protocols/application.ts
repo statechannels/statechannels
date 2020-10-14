@@ -29,6 +29,25 @@ const isFunded = ({app: {funding, supported}}: ProtocolState): boolean => {
   return funded;
 };
 
+// At the time of implementation, all particiapants sign turn 0 as prefund state
+// This function should also work with prefund state with increasing turn numbers.
+function myTurnToPostfund({app}: ProtocolState): boolean {
+  // I am the first participant
+  if (isPrefundSetup(app.supported) && isPrefundSetup(app.latestSignedByMe) && app.myIndex === 0) {
+    return true;
+  }
+
+  // I am NOT the first participant
+  // todo: this is not correct when there are more than 2 participants as we do not check that EVERY participant
+  //  before us has signed the postfund state.
+  //  A correct implementation is non-trivial when all participants sign turn 0 prefund states but increasing turn number postfund states.
+  return app.latest?.turnNum === myPostfundTurnNumber({app}) - 1;
+}
+
+function myPostfundTurnNumber({app}: ProtocolState): number {
+  return app.participants.length + app.myIndex;
+}
+
 const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false => {
   if (!app.supported) return false;
   if (app.chainServiceRequests.indexOf('fund') > -1) return false;
@@ -62,7 +81,6 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   });
 };
 
-const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 
 // todo: the only cases considered so far are directly funded
@@ -72,11 +90,16 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isDirectlyFunded(ps.app) &&
   requestFundChannelIfMyTurn(ps);
 
-const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
-  isPrefundSetup(ps.app.supported) &&
-  isPrefundSetup(ps.app.latestSignedByMe) &&
-  (isFunded(ps) || isUnfunded(ps.app)) &&
-  signState({channelId: ps.app.channelId, ...ps.app.latestSignedByMe, turnNum: 3});
+const signPostfundSetup = (ps: ProtocolState): ProtocolResult | false =>
+  myTurnToPostfund(ps) &&
+  isFunded(ps) &&
+  ps.app.latestSignedByMe &&
+  ps.app.supported &&
+  signState({
+    ...ps.app.latestSignedByMe,
+    channelId: ps.app.channelId,
+    turnNum: myPostfundTurnNumber(ps),
+  });
 
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   isFinal(ps.app.supported) &&
@@ -84,4 +107,4 @@ const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   signState({channelId: ps.app.channelId, ...ps.app.supported});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  signPostFundSetup(ps) || fundChannel(ps) || signFinalState(ps) || noAction;
+  signPostfundSetup(ps) || fundChannel(ps) || signFinalState(ps) || noAction;
