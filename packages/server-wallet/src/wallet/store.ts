@@ -50,6 +50,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
+import {Objective as ObjectiveModel} from '../models/objective';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -339,9 +340,8 @@ export class Store {
       if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[channel.channelNonce /* TODO: (Stored Objectives) id strategy */] = {
-        objectiveId: channel.channelNonce,
+      const objectiveToBeStored: ObjectiveStoredInDB = {
+        objectiveId: channel.channelNonce /* TODO: (Stored Objectives) id strategy */,
         status: 'pending',
         type: objective.type,
         participants: channel.participants,
@@ -350,6 +350,12 @@ export class Store {
           targetChannelId: channelId,
         },
       };
+      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
+      this.objectives[
+        channel.channelNonce /* TODO: (Stored Objectives) id strategy */
+      ] = objectiveToBeStored;
+
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
@@ -357,7 +363,7 @@ export class Store {
         .returning('*')
         .first();
 
-      return this.objectives[channel.channelNonce];
+      return objectiveToBeStored;
     } else if (objective.type === 'CloseChannel') {
       const {
         data: {targetChannelId},
