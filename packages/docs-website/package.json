@@ -30,6 +30,7 @@
     "@types/react-dom": "16.9.8",
     "fs-extra": "^9.0.1"
   },
+  "private": true,
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
     "build:netlify": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
