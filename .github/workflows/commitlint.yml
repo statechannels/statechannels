@@ -26,7 +26,6 @@ jobs:
         continue-on-error: true
         if: ${{ steps.linter.outcome=='success' }}
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             github.issues.addLabels({
               issue_number: context.issue.number,
