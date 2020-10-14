@@ -133,30 +133,3 @@ describe('directly funded app', () => {
     expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
   });
 });
-
-describe('virtually funded app', () => {
-  it.skip('signs the prefund setup and messages the hub', async () => {
-    const outcome = simpleEthAllocation([{destination: alice().destination, amount: BN.from(5)}]);
-    const preFS = {turnNum: 0, outcome};
-    const c = channel({vars: [stateWithHashSignedBy(bob())(preFS)]});
-    await Channel.query(w.knex).insert(c);
-
-    const channelId = c.channelId;
-    const current = await Channel.forId(channelId, w.knex);
-    expect(current.latest).toMatchObject(preFS);
-
-    const data = {signedStates: [preFS]};
-    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
-      outbox: [
-        {method: 'MessageQueued', params: {recipient: 'bob', sender: 'alice', data}},
-        {method: 'MessageQueued', params: {recipient: 'hub', sender: 'alice'}}, // TODO: Expect some specific data
-      ],
-      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
-      // implementation
-      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
-    });
-
-    const updated = await Channel.forId(channelId, w.knex);
-    expect(updated.protocolState).toMatchObject({latest: preFS, supported: preFS});
-  });
-});
