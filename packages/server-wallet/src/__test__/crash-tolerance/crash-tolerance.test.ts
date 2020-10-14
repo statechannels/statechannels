@@ -23,8 +23,7 @@ let participantB: Participant;
 beforeAll(async () => {
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
-  await b2.dbAdmin().createDB();
-  await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB(), b2.dbAdmin().migrateDB()]);
+  await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
 
   participantA = {
     signingAddress: await a.getSigningAddress(),
@@ -48,7 +47,7 @@ afterAll(async () => {
   await b2.dbAdmin().dropDB(); // Only need to drop the db once as it is shared with b
 });
 
-it.only('Create a fake-funded channel between two wallets ', async () => {
+it.only('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
