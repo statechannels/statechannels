@@ -18,17 +18,23 @@ export class AppBytecode extends Model implements RequiredColumns {
     return ['chain_id', 'app_definition'];
   }
 
-  static async insertBytecode(
+  static async upsertBytecode(
     chainId: Bytes32,
     appDefinition: Address,
     appBytecode: Bytes32,
     txOrKnex: TransactionOrKnex
   ): Promise<AppBytecode> {
-    return AppBytecode.query(txOrKnex).insert({
-      chainId,
-      appDefinition,
-      appBytecode,
-    });
+    const insert = (
+      await txOrKnex(this.tableName).insert({chainId, appDefinition, appBytecode})
+    ).toString();
+    const update = txOrKnex(this.tableName)
+      .update({appBytecode})
+      .where({chainId, appDefinition});
+
+    return txOrKnex.raw(`? ON CONFLICT (chain_id,app_definition) DO ? returning *`, [
+      insert,
+      update,
+    ]);
   }
 
   static async getBytecode(

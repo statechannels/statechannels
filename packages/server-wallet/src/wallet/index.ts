@@ -147,15 +147,12 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   public async registerAppDefintion(appDefinition: string): Promise<void> {
-    if (await AppBytecode.getBytecode(CHAIN_ID, appDefinition, this.knex)) {
-      throw Error(`Bytecode already exists for app ${appDefinition} on chain ${CHAIN_ID}`);
-    }
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     if (!bytecode) {
       throw Error(`Could not fetch bytecode for ${appDefinition}`);
     }
 
-    await AppBytecode.insertBytecode(CHAIN_ID, appDefinition, bytecode, this.knex);
+    await AppBytecode.upsertBytecode(CHAIN_ID, appDefinition, bytecode, this.knex);
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
