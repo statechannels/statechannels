@@ -291,6 +291,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+    // TOOD handle other types of objective
     const objective = await OpenChannelObjective.forId(objectiveId, this.knex);
 
     if (!objective)
@@ -307,6 +308,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     // FIXME: This should probably be done within the critical code of the joinChannel
     this.store.objectives[objectiveId].status = 'approved';
+    await OpenChannelObjective.approve(objective.objectiveId, this.knex);
 
     const {
       data: {targetChannelId},
@@ -336,14 +338,19 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
     /* eslint-disable-next-line */
-    let objective = _.find(
-      this.store.objectives,
-      o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
-    );
+    // let objective = _.find(
+    //   this.store.objectives,
+    //   o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
+    // );
+
+    // TODO replace above with:
+    const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
 
     if (objective === undefined) throw new Error('Could not find objective for this channel.');
 
     this.store.objectives[objective.objectiveId].status = 'approved';
+
+    await OpenChannelObjective.approve(objective.objectiveId, this.knex);
     // END FIXME
 
     const {outbox, channelResult} = await this.store.lockApp(
