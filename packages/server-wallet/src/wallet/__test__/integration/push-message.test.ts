@@ -180,7 +180,6 @@ describe('when the application protocol returns an action', () => {
       type: 'OpenChannel',
       objectiveId: 0,
       status: 'approved',
-      participants: c.participants,
       data: {
         targetChannelId: c.channelId,
         fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty

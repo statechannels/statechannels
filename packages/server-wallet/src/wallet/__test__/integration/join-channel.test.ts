@@ -39,7 +39,6 @@ describe('directly funded app', () => {
 
     w.store.objectives[c1.channelNonce] = {
       type: 'OpenChannel',
-      participants: c1.participants,
       data: {
         targetChannelId: c1.channelId,
         fundingStrategy: 'Direct',
@@ -50,7 +49,6 @@ describe('directly funded app', () => {
 
     w.store.objectives[c2.channelNonce] = {
       type: 'OpenChannel',
-      participants: c2.participants,
       data: {
         targetChannelId: c2.channelId,
         fundingStrategy: 'Direct',
@@ -88,7 +86,6 @@ describe('directly funded app', () => {
 
     w.store.objectives[current.channelNonce] = {
       type: 'OpenChannel',
-      participants: current.participants,
       data: {
         targetChannelId: current.channelId,
         fundingStrategy: 'Direct',
@@ -123,7 +120,6 @@ describe('directly funded app', () => {
 
     w.store.objectives[current.channelNonce] = {
       type: 'OpenChannel',
-      participants: current.participants,
       data: {
         targetChannelId: current.channelId,
         fundingStrategy: 'Direct',
@@ -163,7 +159,6 @@ describe('directly funded app', () => {
 
     w.store.objectives[current.channelNonce] = {
       type: 'OpenChannel',
-      participants: current.participants,
       data: {
         targetChannelId: current.channelId,
         fundingStrategy: 'Direct',

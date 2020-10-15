@@ -39,7 +39,6 @@ it('sends the post fund setup when the funding event is provided for multiple ch
 
   w.store.objectives[c1.channelNonce] = {
     type: 'OpenChannel',
-    participants: c1.participants,
     data: {
       targetChannelId: c1.channelId,
       fundingStrategy: 'Direct',
@@ -50,7 +49,6 @@ it('sends the post fund setup when the funding event is provided for multiple ch
 
   w.store.objectives[c2.channelNonce] = {
     type: 'OpenChannel',
-    participants: c2.participants,
     data: {
       targetChannelId: c2.channelId,
       fundingStrategy: 'Direct',
@@ -101,7 +99,6 @@ it('sends the post fund setup when the funding event is provided', async () => {
 
   w.store.objectives[c.channelNonce] = {
     type: 'OpenChannel',
-    participants: c.participants,
     data: {
       targetChannelId: c.channelId,
       fundingStrategy: 'Direct',
