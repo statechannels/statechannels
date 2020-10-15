@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-const tableName = 'open-channel-objectives';
+const tableName = 'close-channel-objectives';
 
 export async function up(knex: Knex): Promise<any> {
   return knex.schema.createTable(tableName, function(table) {
