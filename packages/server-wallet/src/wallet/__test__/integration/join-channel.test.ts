@@ -65,7 +65,7 @@ describe('directly funded app', () => {
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}}],
-      // channelResults: [{channelId, turnNum: 0, appData, status: 'funding'}],
+      channelResult: {channelId, turnNum: 0, appData, status: 'opening'},
     });
 
     const updated = await Channel.forId(channelId, w.knex);
@@ -97,9 +97,7 @@ describe('directly funded app', () => {
           },
         },
       ],
-      // TODO: channelResults is not calculated correctly: see the Channel model's channelResult
-      // implementation
-      // channelResults: [{channelId, turnNum: 3, outcome, status: 'funding'}],
+      channelResult: {channelId, turnNum: 0, status: 'opening'}, // The latest supported state still has turnnum: 0
     });
 
     const updated = await Channel.forId(channelId, w.knex);
