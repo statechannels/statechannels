@@ -51,6 +51,7 @@ import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {OpenChannelObjective} from '../models/open-channel-objective';
+import {CloseChannelObjective} from '../models/close-channel-objective';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -355,7 +356,7 @@ export class Store {
         channel.channelNonce /* TODO: (Stored Objectives) id strategy */
       ] = objectiveToBeStored;
 
-      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
+      await OpenChannelObjective.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
@@ -388,7 +389,7 @@ export class Store {
         channel.channelNonce /* TODO: (Stored Objectives) id strategy */
       ] = objectiveToBeStored;
 
-      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
+      await CloseChannelObjective.insert(objectiveToBeStored, tx);
 
       return objectiveToBeStored;
     } else {
