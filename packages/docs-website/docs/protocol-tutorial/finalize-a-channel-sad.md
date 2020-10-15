@@ -3,11 +3,11 @@ id: finalize-a-channel-sad
 title: Finalize a channel (sad)
 ---
 
-When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but `isFinal = false`) state(s) being submitted to the chain.
+When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all `n` participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but not necessarily `isFinal`) state(s) being submitted to the chain.
 
-The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
+The `forceMove` function allows anyone holding the appropriate off-chain state(s) to register a _challenge state_ on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
-States and signatures that imply a support proof are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](/protocol-tutorial/clear-a-challenge#call-respond) or [checkpoint](/protocol-tutorial/clear-a-challenge#call-checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
+The required data for this method consist of between `1` and `n` states, along with `n` signatures that imply a [support proof](/protocol-tutorial/execute-state-transitions#support-a-state-in-several-different-ways) for the challenge state. Once these are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](/protocol-tutorial/clear-a-challenge#call-respond) or [checkpoint](/protocol-tutorial/clear-a-challenge#call-checkpoint) transaction. We'll get to those shortly. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel (more on that below, too).
 
 ## Call `forceMove`
 
