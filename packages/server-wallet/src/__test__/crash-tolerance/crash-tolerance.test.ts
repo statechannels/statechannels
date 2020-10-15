@@ -7,7 +7,7 @@ import {
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
-import {processEnvConfig} from '../../config';
+import {defaultConfig as processEnvConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
