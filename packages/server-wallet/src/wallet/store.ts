@@ -74,11 +74,6 @@ export type ObjectiveStoredInDB = Objective & {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  // FIXME: (Stored Objectives) Turn into a new DB table
-  public objectives: {
-    [objectiveId: number]: ObjectiveStoredInDB;
-  } = {};
-
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
@@ -351,11 +346,8 @@ export class Store {
           targetChannelId: channelId,
         },
       };
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[
-        channel.channelNonce /* TODO: (Stored Objectives) id strategy */
-      ] = objectiveToBeStored;
 
+      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
       await OpenChannelObjective.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
@@ -385,10 +377,6 @@ export class Store {
         },
       };
       // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[
-        channel.channelNonce /* TODO: (Stored Objectives) id strategy */
-      ] = objectiveToBeStored;
-
       await CloseChannelObjective.insert(objectiveToBeStored, tx);
 
       return objectiveToBeStored;
@@ -530,10 +518,6 @@ export class Store {
         objectiveId: constants.channelNonce,
         status: 'approved',
       };
-
-      this.objectives[
-        constants.channelNonce /* TODO: (Stored Objectives) id? */
-      ] = objectiveToBeStored;
 
       if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
 

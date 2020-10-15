@@ -299,10 +299,12 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     switch (type) {
       case 'OpenChannel':
         objective = await OpenChannelObjective.forId(objectiveId, this.knex);
+        // FIXME: This should probably be done within the critical code of the joinChannel
         await OpenChannelObjective.approve(objectiveId, this.knex);
         break;
       case 'CloseChannel':
         objective = await CloseChannelObjective.forId(objectiveId, this.knex);
+        // FIXME: This should probably be done within the critical code of the joinChannel
         await CloseChannelObjective.approve(objectiveId, this.knex);
         break;
       default:
@@ -321,9 +323,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         ApproveObjective.ApproveObjectiveError.reasons.unimplemented,
         {type: objective.type}
       );
-
-    // FIXME: This should probably be done within the critical code of the joinChannel
-    this.store.objectives[objectiveId].status = 'approved';
 
     const {
       data: {targetChannelId},
@@ -352,19 +351,10 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
-    /* eslint-disable-next-line */
-    let objective = _.find(
-      this.store.objectives,
-      o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
-    );
-
-    // TODO replace above with:
-    // const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
+    const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
 
     if (objective === undefined)
       throw new Error(`Could not find objective for channel ${channelId}`);
-
-    this.store.objectives[objective.objectiveId].status = 'approved';
 
     await OpenChannelObjective.approve(objective.objectiveId, this.knex);
     // END FIXME
@@ -458,8 +448,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         status: 'approved',
         objectiveId: channel.latest.channelNonce,
       };
-      this.store.objectives[channel.latest.channelNonce] = objectiveToStore;
-
       await CloseChannelObjective.insert(objectiveToStore, tx);
     };
 
@@ -557,19 +545,19 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     // FIXME: Only get objectives which are:
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
-    const objectives = Object.values(this.store.objectives).filter(
-      objective =>
-        // Only supports these two
-        (objective.type === 'OpenChannel' || objective.type === 'CloseChannel') &&
-        // Only runs on those with relevant channels
-        _.includes(channels, objective.data.targetChannelId) &&
-        // Only runs on pending or approved
-        (objective.status === 'approved' || // Need approved b.c. next action to take
-          objective.status === 'pending') /* Need pending because you want new channel result */
-    );
+
+    const objectives = [
+      // Only supports these two
+      ...(await OpenChannelObjective.forTargetChannelIds(channels, this.store.knex)),
+      ...(await CloseChannelObjective.forTargetChannelIds(channels, this.store.knex)),
+    ]
+      .filter(x => x !== undefined)
+      .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
     while (objectives.length && !error) {
       const objective = objectives[0];
+
+      if (objective == undefined) throw new Error('Got an undefined objective '); // TODO Don't want to do this but it's a bit tricky getting type inference with Array.filter
 
       if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
         throw new Error('not implememnted');
@@ -615,7 +603,10 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
               });
               return;
             case 'CompleteObjective':
-              this.store.objectives[objective.objectiveId].status = 'succeeded';
+              if (objective.type === 'OpenChannel')
+                await OpenChannelObjective.succeed(objective.objectiveId, tx);
+              if (objective.type === 'CloseChannel')
+                await CloseChannelObjective.succeed(objective.objectiveId, tx);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               return;
             default:
