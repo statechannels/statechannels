@@ -4,12 +4,12 @@ import {BigNumber, ethers} from 'ethers';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {defaultConfig} from '../config';
+import {defaultTestConfig} from '../config';
 import {SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
-const b = new Wallet({...defaultConfig, postgresDBName: 'TEST_B'});
-const a = new Wallet({...defaultConfig, postgresDBName: 'TEST_A'});
+const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
