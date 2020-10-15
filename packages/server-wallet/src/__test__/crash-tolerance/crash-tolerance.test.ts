@@ -47,7 +47,7 @@ afterAll(async () => {
   await b2.dbAdmin().dropDB(); // Only need to drop the db once as it is shared with b
 });
 
-it.only('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
+it('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
