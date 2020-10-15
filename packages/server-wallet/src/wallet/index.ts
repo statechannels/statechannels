@@ -54,6 +54,7 @@ import {DBAdmin} from '../db-admin/db-admin';
 import {OpenChannelObjective} from '../models/open-channel-objective';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
+import {channel} from '../models/__test__/fixtures/channel';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -291,8 +292,9 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+    const objective = this.store.objectives[objectiveId];
     // TOOD handle other types of objective
-    const objective = await OpenChannelObjective.forId(objectiveId, this.knex);
+    // const objective = await OpenChannelObjective.forId(objectiveId, this.knex); // TODO handle other types of objective
 
     if (!objective)
       throw new ApproveObjective.ApproveObjectiveError(
@@ -338,15 +340,16 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
     /* eslint-disable-next-line */
-    // let objective = _.find(
-    //   this.store.objectives,
-    //   o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
-    // );
+    let objective = _.find(
+      this.store.objectives,
+      o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
+    );
 
     // TODO replace above with:
-    const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
+    // const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
 
-    if (objective === undefined) throw new Error('Could not find objective for this channel.');
+    if (objective === undefined)
+      throw new Error(`Could not find objective for channel ${channelId}`);
 
     this.store.objectives[objective.objectiveId].status = 'approved';
 
