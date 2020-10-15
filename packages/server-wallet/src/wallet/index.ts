@@ -23,6 +23,7 @@ import {
   ChannelConstants,
   Payload,
   Objective,
+  isOpenChannel,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -290,10 +291,15 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     };
   }
 
-  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
-    const objective = this.store.objectives[objectiveId];
-    // TOOD handle other types of objective
-    // const objective = await OpenChannelObjective.forId(objectiveId, this.knex); // TODO handle other types of objective
+  async approveObjective(
+    objectiveId: number,
+    type: Objective['type']
+  ): Promise<SingleChannelOutput> {
+    let objective: ObjectiveStoredInDB | undefined;
+    if (type === 'OpenChannel')
+      objective = await OpenChannelObjective.forId(objectiveId, this.knex);
+    // TODO handle other types of objective
+    else objective = this.store.objectives[objectiveId];
 
     if (!objective)
       throw new ApproveObjective.ApproveObjectiveError(
