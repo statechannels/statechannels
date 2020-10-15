@@ -50,7 +50,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
-import {Objective as ObjectiveModel} from '../models/objective';
+import {OpenChannelObjective} from '../models/open-channel-objective';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -344,7 +344,6 @@ export class Store {
         objectiveId: channel.channelNonce /* TODO: (Stored Objectives) id strategy */,
         status: 'pending',
         type: objective.type,
-        participants: channel.participants,
         data: {
           fundingStrategy,
           targetChannelId: channelId,
@@ -355,7 +354,7 @@ export class Store {
         channel.channelNonce /* TODO: (Stored Objectives) id strategy */
       ] = objectiveToBeStored;
 
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
+      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
@@ -378,7 +377,6 @@ export class Store {
         objectiveId: channel.channelNonce,
         status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
         type: objective.type,
-        participants: [], // TODO: (Stored Objectives) Unnecessary param ?
         data: {
           targetChannelId,
         },
@@ -388,7 +386,7 @@ export class Store {
         channel.channelNonce /* TODO: (Stored Objectives) id strategy */
       ] = objectiveToBeStored;
 
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
+      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
 
       return objectiveToBeStored;
     } else {
@@ -504,7 +502,6 @@ export class Store {
        */
 
       const objective: Objective = {
-        participants: constants.participants,
         type: 'OpenChannel',
         data: {
           targetChannelId: channelId,
@@ -534,7 +531,7 @@ export class Store {
         constants.channelNonce /* TODO: (Stored Objectives) id? */
       ] = objectiveToBeStored;
 
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
+      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
 
       return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
     });

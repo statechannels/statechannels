@@ -51,7 +51,7 @@ import {
   AssetTransferredArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Objective as ObjectiveModel} from '../models/objective';
+import {OpenChannelObjective} from '../models/open-channel-objective';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
@@ -291,7 +291,7 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
   }
 
   async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
-    const objective = await ObjectiveModel.forId(objectiveId, this.knex);
+    const objective = await OpenChannelObjective.forId(objectiveId, this.knex);
 
     if (!objective)
       throw new ApproveObjective.ApproveObjectiveError(
@@ -427,7 +427,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       const objective: Objective = {
         type: 'CloseChannel',
         data: {targetChannelId: channelId},
-        participants: [],
       };
 
       this.store.objectives[channel.latest.channelNonce] = {
@@ -445,7 +444,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
       {
         type: 'CloseChannel',
         data: {targetChannelId: channelId},
-        participants: [],
       },
     ];
 
