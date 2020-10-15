@@ -23,7 +23,6 @@ import {
   ChannelConstants,
   Payload,
   Objective,
-  isOpenChannel,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -53,6 +52,7 @@ import {
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {OpenChannelObjective} from '../models/open-channel-objective';
+import {CloseChannelObjective} from '../models/close-channel-objective';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
@@ -295,12 +295,21 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
     objectiveId: number,
     type: Objective['type']
   ): Promise<SingleChannelOutput> {
-    let objective: ObjectiveStoredInDB | undefined;
-    if (type === 'OpenChannel')
-      objective = await OpenChannelObjective.forId(objectiveId, this.knex);
-    // TODO handle other types of objective
-    else objective = this.store.objectives[objectiveId];
+    let objective: ObjectiveStoredInDB | undefined = undefined;
+    switch (type) {
+      case 'OpenChannel':
+        objective = await OpenChannelObjective.forId(objectiveId, this.knex);
+        await OpenChannelObjective.approve(objectiveId, this.knex);
+        break;
+      case 'CloseChannel':
+        objective = await CloseChannelObjective.forId(objectiveId, this.knex);
+        await CloseChannelObjective.approve(objectiveId, this.knex);
+        break;
+      default:
+        throw Error(`(Unimplemented) No DB table for objective type ${type}`);
+    }
 
+    // TODO these checks could live inside the relevant Model class(es)
     if (!objective)
       throw new ApproveObjective.ApproveObjectiveError(
         ApproveObjective.ApproveObjectiveError.reasons.objectiveNotFound,
@@ -315,7 +324,6 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
 
     // FIXME: This should probably be done within the critical code of the joinChannel
     this.store.objectives[objectiveId].status = 'approved';
-    await OpenChannelObjective.approve(objective.objectiveId, this.knex);
 
     const {
       data: {targetChannelId},
@@ -445,11 +453,14 @@ export class Wallet implements WalletInterface, ChainEventSubscriberInterface {
         data: {targetChannelId: channelId},
       };
 
-      this.store.objectives[channel.latest.channelNonce] = {
+      const objectiveToStore: ObjectiveStoredInDB = {
         ...objective,
         status: 'approved',
         objectiveId: channel.latest.channelNonce,
       };
+      this.store.objectives[channel.latest.channelNonce] = objectiveToStore;
+
+      await CloseChannelObjective.insert(objectiveToStore, tx);
     };
 
     await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
