@@ -115,4 +115,10 @@ export class OpenChannelObjective extends Model {
       .findById(objectiveId)
       .patch({status: 'approved'});
   }
+
+  static async succeed(objectiveId: number, tx: TransactionOrKnex): Promise<void> {
+    await OpenChannelObjective.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'succeeded'});
+  }
 }
