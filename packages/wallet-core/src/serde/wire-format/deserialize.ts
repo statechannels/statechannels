@@ -87,12 +87,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
 }
 
 export function deserializeObjective(objective: ObjectiveWire): Objective {
-  const participants = objective.participants.map(p => ({
-    ...p,
-    destination: makeDestination(p.destination)
-  }));
-
-  return {...objective, participants};
+  return {...objective};
 }
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity

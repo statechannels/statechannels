@@ -25,12 +25,11 @@ export function serializeMessage(
   channelId?: string
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
-  const objectives = message.objectives;
   const {requests} = message;
   return {
     recipient,
     sender,
-    data: {signedStates, objectives, requests}
+    data: {signedStates, requests}
   };
 }
 

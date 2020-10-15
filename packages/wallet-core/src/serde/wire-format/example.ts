@@ -164,19 +164,7 @@ export const internalMessageFormat: Payload = {
       data: {
         targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
         fundingStrategy: 'Direct'
-      },
-      participants: [
-        {
-          destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-          signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
-        },
-        {
-          destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-          signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
-        }
-      ]
+      }
     }
   ],
   requests: [
