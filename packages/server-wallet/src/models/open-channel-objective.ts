@@ -4,6 +4,26 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
 
+function extract(
+  objective: OpenChannelObjective | undefined
+):
+  | (OpenChannel & {
+      objectiveId: number;
+      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+    })
+  | undefined {
+  if (objective === undefined) return undefined;
+  return {
+    objectiveId: objective.objectiveId,
+    status: objective.status,
+    type: 'OpenChannel',
+    participants: [],
+    data: {
+      targetChannelId: objective.targetChannelId,
+      fundingStrategy: objective.fundingStrategy,
+    },
+  };
+}
 export class OpenChannelObjective extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly status!: ObjectiveStoredInDB['status'];
@@ -52,16 +72,26 @@ export class OpenChannelObjective extends Model {
       .first()
       .where({targetChannelId: targetChannelId});
     if (!objective) return undefined;
-    return {
-      objectiveId: objective.objectiveId,
-      status: objective.status,
-      type: 'OpenChannel',
-      participants: [],
-      data: {
-        targetChannelId: objective.targetChannelId,
-        fundingStrategy: objective.fundingStrategy,
-      },
-    };
+    return extract(objective);
+  }
+
+  static async forTargetChannelIds(
+    targetChannelIds: string[],
+    tx: TransactionOrKnex
+  ): Promise<
+    (
+      | (OpenChannel & {
+          objectiveId: number;
+          status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+        })
+      | undefined
+    )[]
+  > {
+    const objectives = await OpenChannelObjective.query(tx)
+      .select()
+      .whereIn('targetChannelId', targetChannelIds);
+
+    return objectives.map(extract);
   }
 
   static async forId(
@@ -77,16 +107,7 @@ export class OpenChannelObjective extends Model {
     console.log(`getting objective ${objectiveId}`);
     const objective = await OpenChannelObjective.query(tx).findById(objectiveId);
     if (!objective) return undefined;
-    return {
-      objectiveId: objective.objectiveId,
-      status: objective.status,
-      type: 'OpenChannel',
-      participants: [],
-      data: {
-        targetChannelId: objective.targetChannelId,
-        fundingStrategy: objective.fundingStrategy,
-      },
-    };
+    return extract(objective);
   }
 
   static async approve(objectiveId: number, tx: TransactionOrKnex): Promise<void> {
