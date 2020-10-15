@@ -324,3 +324,10 @@ describe('concludeAndWithdraw', () => {
     await p;
   }, 10_000);
 });
+
+describe('getBytecode', () => {
+  it('returns the bytecode for an app definition', async () => {
+    const bytecode = await chainService.fetchBytecode(ethAssetHolderAddress);
+    expect(bytecode).toMatch(/^0x[A-Fa-f0-9]{64,}$/);
+  });
+});
