@@ -1,5 +1,5 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
-import {isOpenChannel} from '@statechannels/wallet-core';
+import {isOpenChannel, OpenChannel} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
@@ -7,7 +7,7 @@ import {ObjectiveStoredInDB} from '../wallet/store';
 export class OpenChannelObjective extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly status!: ObjectiveStoredInDB['status'];
-  readonly type!: ObjectiveStoredInDB['type'];
+  readonly type!: 'OpenChannel';
   readonly targetChannelId!: string;
   readonly fundingStrategy!: FundingStrategy;
 
@@ -39,7 +39,13 @@ export class OpenChannelObjective extends Model {
   static async forTargetChannelId(
     targetChannelId: string,
     tx: TransactionOrKnex
-  ): Promise<ObjectiveStoredInDB | undefined> {
+  ): Promise<
+    | (OpenChannel & {
+        objectiveId: number;
+        status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+      })
+    | undefined
+  > {
     console.log(`getting objective for target channel ${targetChannelId}`);
     const objective = await OpenChannelObjective.query(tx)
       .select()
@@ -50,6 +56,7 @@ export class OpenChannelObjective extends Model {
       objectiveId: objective.objectiveId,
       status: objective.status,
       type: 'OpenChannel',
+      participants: [],
       data: {
         targetChannelId: objective.targetChannelId,
         fundingStrategy: objective.fundingStrategy,
@@ -60,7 +67,13 @@ export class OpenChannelObjective extends Model {
   static async forId(
     objectiveId: number,
     tx: TransactionOrKnex
-  ): Promise<ObjectiveStoredInDB | undefined> {
+  ): Promise<
+    | (OpenChannel & {
+        objectiveId: number;
+        status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+      })
+    | undefined
+  > {
     console.log(`getting objective ${objectiveId}`);
     const objective = await OpenChannelObjective.query(tx).findById(objectiveId);
     if (!objective) return undefined;
@@ -68,6 +81,7 @@ export class OpenChannelObjective extends Model {
       objectiveId: objective.objectiveId,
       status: objective.status,
       type: 'OpenChannel',
+      participants: [],
       data: {
         targetChannelId: objective.targetChannelId,
         fundingStrategy: objective.fundingStrategy,
