@@ -180,6 +180,7 @@ export class Store {
       };
 
       if (
+        !this.skipEvmValidation &&
         !(await timer('validating transition', async () =>
           validateTransitionWithEVM(supportedNitroState, toNitroState(state), tx)
         ))

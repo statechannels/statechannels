@@ -56,7 +56,7 @@ it('returns false for an invalid transition', async () => {
   expect(await validateTransitionWithEVM(fromState, toState, knex as any)).toBe(false);
 });
 
-it('skips validating when no byte code exists for the app definition', async () => {
+it('returns false when no byte code exists for the app definition', async () => {
   // Sanity check that the bytecode doesn't exist
   expect(
     await AppBytecode.getBytecode(defaultConfig.chainNetworkID, UNDEFINED_APP_DEFINITION, knex)
@@ -66,5 +66,5 @@ it('skips validating when no byte code exists for the app definition', async () 
       appDefinition: UNDEFINED_APP_DEFINITION,
     })
   );
-  expect(await validateTransitionWithEVM(state, state, knex as any)).toBe(true);
+  expect(await validateTransitionWithEVM(state, state, knex as any)).toBe(false);
 });

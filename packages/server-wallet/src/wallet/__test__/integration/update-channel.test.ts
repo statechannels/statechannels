@@ -6,12 +6,12 @@ import {truncate} from '../../../db-admin/db-admin-connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultConfig} from '../../../config';
+import {defaultTestConfig} from '../../../config';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 let w: Wallet;
 beforeEach(async () => {
   await truncate(knex);
-  w = new Wallet(defaultConfig);
+  w = new Wallet(defaultTestConfig);
 });
 afterEach(async () => {
   await w.destroy();

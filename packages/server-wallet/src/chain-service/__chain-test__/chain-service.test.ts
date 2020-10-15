@@ -9,7 +9,7 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultConfig} from '../../config';
+import {defaultTestConfig} from '../../config';
 import {Address} from '../../type-aliases';
 import {
   alice as aliceParticipant,
@@ -24,15 +24,15 @@ const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
 const erc20Address = process.env.ERC20_ADDRESS!;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-if (!defaultConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultConfig.rpcEndpoint;
+if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
 let chainService: ChainService;
 let channelNonce = 0;
 
 beforeAll(() => {
-  chainService = new ChainService(rpcEndpoint, defaultConfig.serverPrivateKey, 50);
+  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey, 50);
 });
 
 afterAll(() => chainService.destructor());
@@ -323,4 +323,11 @@ describe('concludeAndWithdraw', () => {
 
     await p;
   }, 10_000);
+});
+
+describe('getBytecode', () => {
+  it('returns the bytecode for an app definition', async () => {
+    const bytecode = await chainService.fetchBytecode(ethAssetHolderAddress);
+    expect(bytecode).toMatch(/^0x[A-Fa-f0-9]{64,}$/);
+  });
 });

@@ -11,10 +11,11 @@ import {stateSignedBy} from '../fixtures/states';
 import {truncate} from '../../../db-admin/db-admin-connection';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
-import {defaultConfig} from '../../../config';
+import {defaultTestConfig} from '../../../config';
 
 jest.setTimeout(20_000);
-const wallet = new Wallet(defaultConfig);
+
+const wallet = new Wallet(defaultTestConfig);
 
 afterAll(async () => {
   await wallet.destroy();

@@ -13,7 +13,7 @@ export default Knex(knexConfig);
 
 export const truncate = async (
   knex: Knex,
-  tables = ['signing_wallets', 'channels', 'nonces']
+  tables = ['signing_wallets', 'channels', 'nonces', 'app_bytecode']
 ): Promise<void> => {
   if (defaultConfig.nodeEnv !== 'development' && defaultConfig.nodeEnv !== 'test') {
     throw 'No admin connection allowed';

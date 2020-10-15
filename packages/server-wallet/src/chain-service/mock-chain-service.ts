@@ -57,4 +57,8 @@ export class MockChainService implements ChainServiceInterface {
   concludeAndWithdraw(_finalizationProof: SignedState[]): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }
+
+  async fetchBytecode(_appDefinition: string): Promise<string> {
+    return '0x0';
+  }
 }
