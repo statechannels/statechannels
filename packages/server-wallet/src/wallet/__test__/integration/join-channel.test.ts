@@ -37,27 +37,27 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c2);
     const channelIds = [c1, c2].map(c => c.channelId);
 
-    w.store.objectives[c1.channelNonce] = {
-      type: 'OpenChannel',
-      participants: c1.participants,
-      data: {
-        targetChannelId: c1.channelId,
-        fundingStrategy: 'Direct',
-      },
-      status: 'pending',
-      objectiveId: c1.channelNonce,
-    };
+    // w.store.objectives[c1.channelNonce] = {
+    //   type: 'OpenChannel',
+    //   participants: c1.participants,
+    //   data: {
+    //     targetChannelId: c1.channelId,
+    //     fundingStrategy: 'Direct',
+    //   },
+    //   status: 'pending',
+    //   objectiveId: c1.channelNonce,
+    // };
 
-    w.store.objectives[c2.channelNonce] = {
-      type: 'OpenChannel',
-      participants: c2.participants,
-      data: {
-        targetChannelId: c2.channelId,
-        fundingStrategy: 'Direct',
-      },
-      status: 'pending',
-      objectiveId: c2.channelNonce,
-    };
+    // w.store.objectives[c2.channelNonce] = {
+    //   type: 'OpenChannel',
+    //   participants: c2.participants,
+    //   data: {
+    //     targetChannelId: c2.channelId,
+    //     fundingStrategy: 'Direct',
+    //   },
+    //   status: 'pending',
+    //   objectiveId: c2.channelNonce,
+    // };
 
     const result = await w.joinChannels(channelIds);
     expect(result).toMatchObject({
@@ -86,16 +86,16 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
     expect(current.protocolState).toMatchObject({latest: preFS, supported: undefined});
 
-    w.store.objectives[current.channelNonce] = {
-      type: 'OpenChannel',
-      participants: current.participants,
-      data: {
-        targetChannelId: current.channelId,
-        fundingStrategy: 'Direct',
-      },
-      status: 'pending',
-      objectiveId: current.channelNonce,
-    };
+    // w.store.objectives[current.channelNonce] = {
+    //   type: 'OpenChannel',
+    //   participants: current.participants,
+    //   data: {
+    //     targetChannelId: current.channelId,
+    //     fundingStrategy: 'Direct',
+    //   },
+    //   status: 'pending',
+    //   objectiveId: current.channelNonce,
+    // };
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [preFS]}}}],
@@ -121,16 +121,16 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
-    w.store.objectives[current.channelNonce] = {
-      type: 'OpenChannel',
-      participants: current.participants,
-      data: {
-        targetChannelId: current.channelId,
-        fundingStrategy: 'Direct',
-      },
-      status: 'pending',
-      objectiveId: current.channelNonce,
-    };
+    // w.store.objectives[current.channelNonce] = {
+    //   type: 'OpenChannel',
+    //   participants: current.participants,
+    //   data: {
+    //     targetChannelId: current.channelId,
+    //     fundingStrategy: 'Direct',
+    //   },
+    //   status: 'pending',
+    //   objectiveId: current.channelNonce,
+    // };
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [
@@ -161,16 +161,16 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS);
 
-    w.store.objectives[current.channelNonce] = {
-      type: 'OpenChannel',
-      participants: current.participants,
-      data: {
-        targetChannelId: current.channelId,
-        fundingStrategy: 'Direct',
-      },
-      status: 'pending',
-      objectiveId: current.channelNonce,
-    };
+    // w.store.objectives[current.channelNonce] = {
+    //   type: 'OpenChannel',
+    //   participants: current.participants,
+    //   data: {
+    //     targetChannelId: current.channelId,
+    //     fundingStrategy: 'Direct',
+    //   },
+    //   status: 'pending',
+    //   objectiveId: current.channelNonce,
+    // };
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [

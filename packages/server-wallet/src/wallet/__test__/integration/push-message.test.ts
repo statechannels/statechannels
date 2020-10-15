@@ -176,16 +176,16 @@ describe('when the application protocol returns an action', () => {
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
 
-    wallet.store.objectives[0] = {
-      type: 'OpenChannel',
-      objectiveId: 0,
-      status: 'approved',
-      participants: c.participants,
-      data: {
-        targetChannelId: c.channelId,
-        fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
-      },
-    };
+    // wallet.store.objectives[0] = {
+    //   type: 'OpenChannel',
+    //   objectiveId: 0,
+    //   status: 'approved',
+    //   participants: c.participants,
+    //   data: {
+    //     targetChannelId: c.channelId,
+    //     fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+    //   },
+    // };
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
     expect(c.supported).toBeUndefined();

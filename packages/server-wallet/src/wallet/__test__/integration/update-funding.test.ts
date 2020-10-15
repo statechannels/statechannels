@@ -37,27 +37,27 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   await Channel.query(w.knex).insert(c2);
   const channelIds = [c1, c2].map(c => c.channelId);
 
-  w.store.objectives[c1.channelNonce] = {
-    type: 'OpenChannel',
-    participants: c1.participants,
-    data: {
-      targetChannelId: c1.channelId,
-      fundingStrategy: 'Direct',
-    },
-    status: 'approved',
-    objectiveId: c1.channelNonce,
-  };
+  // w.store.objectives[c1.channelNonce] = {
+  //   type: 'OpenChannel',
+  //   participants: c1.participants,
+  //   data: {
+  //     targetChannelId: c1.channelId,
+  //     fundingStrategy: 'Direct',
+  //   },
+  //   status: 'approved',
+  //   objectiveId: c1.channelNonce,
+  // };
 
-  w.store.objectives[c2.channelNonce] = {
-    type: 'OpenChannel',
-    participants: c2.participants,
-    data: {
-      targetChannelId: c2.channelId,
-      fundingStrategy: 'Direct',
-    },
-    status: 'approved',
-    objectiveId: c2.channelNonce,
-  };
+  // w.store.objectives[c2.channelNonce] = {
+  //   type: 'OpenChannel',
+  //   participants: c2.participants,
+  //   data: {
+  //     targetChannelId: c2.channelId,
+  //     fundingStrategy: 'Direct',
+  //   },
+  //   status: 'approved',
+  //   objectiveId: c2.channelNonce,
+  // };
 
   const result = await w.updateFundingForChannels(
     channelIds.map(cId => ({
@@ -99,16 +99,16 @@ it('sends the post fund setup when the funding event is provided', async () => {
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
 
-  w.store.objectives[c.channelNonce] = {
-    type: 'OpenChannel',
-    participants: c.participants,
-    data: {
-      targetChannelId: c.channelId,
-      fundingStrategy: 'Direct',
-    },
-    status: 'approved',
-    objectiveId: c.channelNonce,
-  };
+  // w.store.objectives[c.channelNonce] = {
+  //   type: 'OpenChannel',
+  //   participants: c.participants,
+  //   data: {
+  //     targetChannelId: c.channelId,
+  //     fundingStrategy: 'Direct',
+  //   },
+  //   status: 'approved',
+  //   objectiveId: c.channelNonce,
+  // };
 
   const result = await w.updateFundingForChannels([
     {
