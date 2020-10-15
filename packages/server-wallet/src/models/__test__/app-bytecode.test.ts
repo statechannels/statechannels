@@ -24,7 +24,7 @@ describe('AppBytecode model', () => {
   it('successfully updates when there is an entry', async () => {
     await AppBytecode.upsertBytecode(CHAIN_ID, APP_DEFINTION, BYTE_CODE1, knex);
     await AppBytecode.upsertBytecode(CHAIN_ID, APP_DEFINTION, BYTE_CODE2, knex);
-    const bytecode = AppBytecode.getBytecode(CHAIN_ID, APP_DEFINTION, knex);
+    const bytecode = await AppBytecode.getBytecode(CHAIN_ID, APP_DEFINTION, knex);
     expect(bytecode).toMatch(BYTE_CODE2);
   });
 });
