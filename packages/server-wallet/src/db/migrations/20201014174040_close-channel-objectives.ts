@@ -8,7 +8,6 @@ export async function up(knex: Knex): Promise<any> {
     table.string('status');
     table.string('type');
     table.string('target_channel_id');
-    table.string('funding_strategy');
   });
 }
 
