@@ -18,6 +18,11 @@ let channelId: string;
 let participantA: Participant;
 let participantB: Participant;
 
+async function crashAndRestart(wallet: Wallet) {
+  const dbName = wallet.dbAdmin().dbName;
+  await wallet.destroy();
+  return new Wallet({...processEnvConfig, postgresDBName: dbName}); // Wallet that will "restart" (same db)
+}
 beforeAll(async () => {
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
@@ -81,9 +86,8 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
     turnNum: 0,
   });
 
-  // Destory Wallet b and restart Wallet b2
-  await b.destroy();
-  b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
+  // Destory Wallet b and restart
+  b = await crashAndRestart(b);
 
   //      PreFund0B
   const resultB1 = await b.joinChannel({channelId});
