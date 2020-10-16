@@ -14,7 +14,6 @@ import {
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
-
 import kill = require('tree-kill');
 import {DBAdmin} from '../../src/db-admin/db-admin';
 

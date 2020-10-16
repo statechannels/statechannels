@@ -7,6 +7,7 @@ import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
+
 import {stateVars} from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
