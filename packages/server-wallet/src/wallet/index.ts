@@ -95,8 +95,6 @@ export type WalletInterface = {
   mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
 
-// TODO: This should not be hardcoded
-const CHAIN_ID = '0x01';
 export class Wallet extends EventEmitter<WalletEvent>
   implements WalletInterface, ChainEventSubscriberInterface {
   manager: WorkerManager;
@@ -163,7 +161,12 @@ export class Wallet extends EventEmitter<WalletEvent>
       throw Error(`Could not fetch bytecode for ${appDefinition}`);
     }
 
-    await AppBytecode.upsertBytecode(CHAIN_ID, appDefinition, bytecode, this.knex);
+    await AppBytecode.upsertBytecode(
+      this.walletConfig.chainNetworkID,
+      appDefinition,
+      bytecode,
+      this.knex
+    );
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
@@ -265,7 +268,7 @@ export class Wallet extends EventEmitter<WalletEvent>
         const constants: ChannelConstants = {
           channelNonce,
           participants: participants.map(convertToParticipant),
-          chainId: CHAIN_ID,
+          chainId: this.walletConfig.chainNetworkID,
           challengeDuration: 9001,
           appDefinition,
         };
@@ -291,7 +294,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     const constants: ChannelConstants = {
       channelNonce,
       participants: participants.map(convertToParticipant),
-      chainId: CHAIN_ID,
+      chainId: this.walletConfig.chainNetworkID,
       challengeDuration: 9001,
       appDefinition,
     };
