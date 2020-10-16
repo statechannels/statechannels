@@ -12,9 +12,7 @@ import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = new Wallet({...processEnvConfig, postgresDBName: 'TEST_A'});
-const b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
-const b2 = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
-// TODO needs to have same signing address as b? Pass in thru config
+let b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;
@@ -41,10 +39,10 @@ beforeAll(async () => {
   };
 });
 afterAll(async () => {
-  // Don't destory b here, it get's destroyed midway through test
-  await Promise.all([a.destroy(), b2.destroy()]);
+  // Don't destroy b here, it get's destroyed midway through test
+  await Promise.all([a.destroy(), b.destroy()]);
   await a.dbAdmin().dropDB();
-  await b2.dbAdmin().dropDB(); // Only need to drop the db once as it is shared with b
+  await b.dbAdmin().dropDB(); // Only need to drop the db once as it is shared with b
 });
 
 it('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
@@ -85,10 +83,12 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   });
 
   // Destory Wallet b and restart Wallet b2
-  await b.destroy();
+  // await b.destroy();
+  // b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
+  // TODO needs to have same signing address as b? Pass in thru config
 
   //      PreFund0B
-  const resultB1 = await b2.joinChannel({channelId});
+  const resultB1 = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
@@ -113,16 +113,17 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
 
   // This would have been triggered by A's Chain Service by request
   await a.updateFundingForChannels([depositByA]);
-  await b2.updateFundingForChannels([depositByA]);
+  await b.updateFundingForChannels([depositByA]);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
-  const depositByB = {channelId, token: '0x00', amount: BigNumber.from(2).toHexString()}; // B sends 1 ETH (2 total)
-
+  const depositByB = {
+    channelId,
+    token: '0x00',
+    amount: BigNumber.from(2).toHexString(),
+  }; // B sends 1 ETH (2 total)
   // < PostFund3B
   const resultA2 = await a.updateFundingForChannels([depositByB]);
-
-  // PostFund3A >
-  const resultB2 = await b2.updateFundingForChannels([depositByB]);
+  const resultB2 = await b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
@@ -134,16 +135,16 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
     turnNum: 0,
   });
 
-  //  PostFund3B <
-  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
-  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
+  //  > PostFund3A
+  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
+  expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
-  //  > PostFund3A
-  const resultB3 = await b2.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
-  expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
+  //  PostFund3B <
+  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
@@ -154,7 +155,7 @@ it('Rejects b closing with `not your turn`', async () => {
     channelId,
   };
 
-  const bCloseChannel = b2.closeChannel(closeChannelParams);
+  const bCloseChannel = b.closeChannel(closeChannelParams);
 
   await expect(bCloseChannel).rejects.toMatchObject(new Error('not my turn'));
 });
