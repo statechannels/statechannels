@@ -38,7 +38,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   await Channel.query(w.knex).insert(c2);
   const channelIds = [c1, c2].map(c => c.channelId);
 
-  OpenChannelObjective.insert(
+  await OpenChannelObjective.insert(
     {
       type: 'OpenChannel',
       participants: c1.participants,
@@ -52,7 +52,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     w.knex
   );
 
-  OpenChannelObjective.insert(
+  await OpenChannelObjective.insert(
     {
       type: 'OpenChannel',
       participants: c2.participants,
@@ -106,16 +106,19 @@ it('sends the post fund setup when the funding event is provided', async () => {
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
 
-  // w.store.objectives[c.channelNonce] = {
-  //   type: 'OpenChannel',
-  //   participants: c.participants,
-  //   data: {
-  //     targetChannelId: c.channelId,
-  //     fundingStrategy: 'Direct',
-  //   },
-  //   status: 'approved',
-  //   objectiveId: c.channelNonce,
-  // };
+  await OpenChannelObjective.insert(
+    {
+      type: 'OpenChannel',
+      participants: c.participants,
+      data: {
+        targetChannelId: c.channelId,
+        fundingStrategy: 'Direct',
+      },
+      status: 'approved',
+      objectiveId: c.channelNonce,
+    },
+    w.knex
+  );
 
   const result = await w.updateFundingForChannels([
     {
