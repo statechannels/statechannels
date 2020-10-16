@@ -1,9 +1,13 @@
 import * as path from 'path';
 import {promisify} from 'util';
 import {exec as rawExec} from 'child_process';
-const exec = promisify(rawExec);
 
+const exec = promisify(rawExec);
 import Knex from 'knex';
+
+import {SigningWallet} from '../models/signing-wallet';
+import {Channel} from '../models/channel';
+import {Nonce} from '../models/nonce';
 
 export class DBAdmin {
   knex: Knex;
@@ -24,7 +28,7 @@ export class DBAdmin {
   }
 
   async truncateDB(): Promise<void> {
-    const tables = ['signing_wallets', 'channels', 'nonces'];
+    const tables = [SigningWallet.tableName, Channel.tableName, Nonce.tableName];
     await Promise.all(tables.map(table => this.knex.raw(`TRUNCATE TABLE ${table} CASCADE;`)));
   }
 
