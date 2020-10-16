@@ -4,11 +4,11 @@ const tableName = 'close-channel-objectives';
 
 export async function up(knex: Knex): Promise<any> {
   return knex.schema.createTable(tableName, function(table) {
-    table.integer('objectiveId').primary();
+    table.integer('objective_id').primary();
     table.string('status');
     table.string('type');
-    table.string('targetChannelId');
-    table.string('fundingStrategy');
+    table.string('target_channel_id');
+    table.string('funding_strategy');
   });
 }
 
