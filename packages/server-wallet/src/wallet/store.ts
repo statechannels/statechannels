@@ -494,7 +494,7 @@ export class Store {
 
       const objective: Objective = {
         type: 'OpenChannel',
-        participants: [],
+        participants,
         data: {
           targetChannelId: channelId,
           fundingStrategy,
