@@ -8,10 +8,10 @@ import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateSignedBy} from '../fixtures/states';
-import {truncate} from '../../../db-admin/db-admin-connection';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {defaultTestConfig} from '../../../config';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 jest.setTimeout(20_000);
 
@@ -164,7 +164,7 @@ it("Doesn't store stale states", async () => {
 });
 
 it("doesn't store states for unknown signing addresses", async () => {
-  await truncate(wallet.knex, ['signing_wallets']);
+  await new DBAdmin(wallet.knex).truncateDB(['signing_wallets']);
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
   return expect(wallet.pushMessage({signedStates})).rejects.toThrow(Error('Not in channel'));

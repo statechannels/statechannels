@@ -13,8 +13,8 @@ import {
   PAYER_PORT,
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {truncate} from '../../src/db-admin/db-admin-connection';
 import {SigningWallet} from '../../src/models/signing-wallet';
+import {DBAdmin} from '../../src/db-admin/db-admin';
 
 const {argv} = yargs
   .option('duration', {
@@ -36,7 +36,7 @@ const {argv} = yargs
   await waitForServerToStart(payerServer);
 
   const [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
-  await Promise.all([knexPayer, knexReceiver].map(db => truncate(db)));
+  await Promise.all([knexPayer, knexReceiver].map(knex => new DBAdmin(knex).truncateDB()));
   // Adds Alice to Payer's Database
   await SWPayer.query(knexPayer).insert(alice());
 

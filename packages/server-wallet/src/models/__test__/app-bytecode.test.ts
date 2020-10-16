@@ -1,8 +1,8 @@
 import {constants} from 'ethers';
 
-import {truncate} from '../../db-admin/db-admin-connection';
 import {AppBytecode} from '../app-bytecode';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {DBAdmin} from '../../db-admin/db-admin';
 
 const CHAIN_ID = '0x01';
 const APP_DEFINTION = constants.AddressZero;
@@ -10,7 +10,7 @@ const BYTE_CODE1 = '0x01';
 const BYTE_CODE2 = '0x02';
 describe('AppBytecode model', () => {
   beforeEach(async () => {
-    truncate(knex);
+    await new DBAdmin(knex).truncateDB();
   });
 
   afterAll(async () => await knex.destroy());

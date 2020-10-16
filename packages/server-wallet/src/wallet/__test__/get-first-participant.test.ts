@@ -1,11 +1,11 @@
 import {ethers} from 'ethers';
 
-import {truncate} from '../../db-admin/db-admin-connection';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {SigningWallet} from '../../models/signing-wallet';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
+import {DBAdmin} from '../../db-admin/db-admin';
 
 import {alice} from './fixtures/participants';
 
@@ -16,7 +16,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await truncate(knex);
+  await new DBAdmin(knex).truncateDB();
 });
 
 describe('getFirstParticipant', () => {

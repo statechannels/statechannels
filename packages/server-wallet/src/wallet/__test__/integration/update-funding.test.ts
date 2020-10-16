@@ -4,19 +4,19 @@ import {ethers} from 'ethers';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {Channel} from '../../../models/channel';
-import {truncate} from '../../../db-admin/db-admin-connection';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {defaultTestConfig} from '../../../config';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 const {AddressZero} = ethers.constants;
 
 let w: Wallet;
 beforeEach(async () => {
   w = new Wallet(defaultTestConfig);
-  await truncate(w.knex);
+  await new DBAdmin(w.knex).truncateDB();
 });
 afterEach(async () => {
   await w.destroy();

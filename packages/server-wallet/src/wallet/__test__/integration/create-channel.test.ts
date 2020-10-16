@@ -2,14 +2,14 @@ import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {truncate} from '../../../db-admin/db-admin-connection';
 import {defaultTestConfig} from '../../../config';
 import {alice, bob} from '../fixtures/participants';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
   w = new Wallet(defaultTestConfig);
-  await truncate(w.knex);
+  await new DBAdmin(w.knex).truncateDB();
 });
 
 afterEach(async () => {

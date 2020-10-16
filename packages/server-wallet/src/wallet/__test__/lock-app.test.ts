@@ -5,10 +5,8 @@ import {Channel, ChannelError} from '../../models/channel';
 import {withSupportedState} from '../../models/__test__/fixtures/channel';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import adminKnex from '../../db-admin/db-admin-connection';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-
 import {stateVars} from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
@@ -102,7 +100,7 @@ describe('concurrency', () => {
   it(
     `works when run concurrently with ${NUM_ATTEMPTS} different channels`,
     async () => {
-      await adminKnex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
+      await knex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
 
       const channelIds = await Promise.all(
         _.range(NUM_ATTEMPTS).map(async channelNonce => {
