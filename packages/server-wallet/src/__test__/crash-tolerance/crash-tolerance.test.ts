@@ -83,9 +83,8 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   });
 
   // Destory Wallet b and restart Wallet b2
-  // await b.destroy();
-  // b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
-  // TODO needs to have same signing address as b? Pass in thru config
+  await b.destroy();
+  b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
 
   //      PreFund0B
   const resultB1 = await b.joinChannel({channelId});
