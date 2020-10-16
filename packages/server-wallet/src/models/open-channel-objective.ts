@@ -44,9 +44,6 @@ export class OpenChannelObjective extends Model {
       throw Error(
         'You may only store an OpenChannel objective in the open-channel-objectives tables'
       );
-    console.log(
-      `inserting objective ${objectiveToBeStored.objectiveId} with target channel ${objectiveToBeStored.data.targetChannelId}`
-    );
     return OpenChannelObjective.query(tx).insert({
       objectiveId: objectiveToBeStored.objectiveId,
       status: objectiveToBeStored.status,
@@ -66,7 +63,6 @@ export class OpenChannelObjective extends Model {
       })
     | undefined
   > {
-    console.log(`getting objective for target channel ${targetChannelId}`);
     const objective = await OpenChannelObjective.query(tx)
       .select()
       .first()
@@ -104,7 +100,6 @@ export class OpenChannelObjective extends Model {
       })
     | undefined
   > {
-    console.log(`getting objective ${objectiveId}`);
     const objective = await OpenChannelObjective.query(tx).findById(objectiveId);
     if (!objective) return undefined;
     return extract(objective);

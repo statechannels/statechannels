@@ -42,9 +42,6 @@ export class CloseChannelObjective extends Model {
       throw Error(
         'You may only store an CloseChannel objective in the close-channel-objectives tables'
       );
-    console.log(
-      `inserting objective ${objectiveToBeStored.objectiveId} with target channel ${objectiveToBeStored.data.targetChannelId}`
-    );
     return CloseChannelObjective.query(tx).insert({
       objectiveId: objectiveToBeStored.objectiveId,
       status: objectiveToBeStored.status,
@@ -63,7 +60,6 @@ export class CloseChannelObjective extends Model {
       })
     | undefined
   > {
-    console.log(`getting objective for target channel ${targetChannelId}`);
     const objective = await CloseChannelObjective.query(tx)
       .select()
       .first()
@@ -101,7 +97,6 @@ export class CloseChannelObjective extends Model {
       })
     | undefined
   > {
-    console.log(`getting objective ${objectiveId}`);
     const objective = await CloseChannelObjective.query(tx).findById(objectiveId);
     if (!objective) return undefined;
     return extract(objective);
