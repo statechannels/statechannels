@@ -46,7 +46,6 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi, toChannelResult} from '../protocols/state';
 import {ProtocolState as OpenChannelProtocolState} from '../protocols/open-channel';
-import {ProtocolState as LedgerFundingProtocolState} from '../protocols/ledger-funding';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -328,7 +327,7 @@ export class Store {
     });
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<ObjectiveStoredInDB> {
+  async addObjective(objective: Objective, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
     if (isOpenChannel(objective)) {
       const {
         data: {targetChannelId: channelId, fundingStrategy},
@@ -340,7 +339,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
-      if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
+      if (!_.includes(['Ledger', 'Direct', 'Unfunded'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
       const objectiveToBeStored: ObjectiveStoredInDB = {
@@ -471,8 +470,12 @@ export class Store {
     return result;
   }
 
-  // TODO: Turn into SQL tables
-  private ledgerRequests = new LedgerRequests();
+  // FIXME: Turn into SQL tables
+  public eraseLedgerDataFromMemory(): void {
+    this.ledgerRequests = new LedgerRequests();
+    this.ledgers = {};
+  }
+  public ledgerRequests = new LedgerRequests();
   public ledgers: {
     [ledgerChannelId: string]: {
       ledgerChannelId: Bytes32;
@@ -482,6 +485,10 @@ export class Store {
 
   async isLedger(channelId: Bytes32): Promise<boolean> {
     return !!this.ledgers[channelId];
+  }
+
+  async getPendingLedgerRequests(ledgerChannelId: Bytes32): Promise<LedgerRequestType[]> {
+    return await this.ledgerRequests.getPendingRequests(ledgerChannelId, undefined);
   }
 
   async requestLedgerFunding(
@@ -499,8 +506,10 @@ export class Store {
 
     if (!ledgerRecord) throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
 
-    if (await this.ledgerRequests.getRequest(channelId, tx))
-      throw new Error('app already has a pending funding request. abort');
+    const req = await this.ledgerRequests.getRequest(channelId, tx);
+
+    if (req) return req.ledgerChannelId;
+    // throw new Error('app already has a pending funding request. abort');
 
     await this.ledgerRequests.setRequest(
       channelId,
@@ -529,33 +538,55 @@ export class Store {
     channel: ChannelState,
     tx?: Transaction
   ): Promise<OpenChannelProtocolState> {
-    const update = await this.ledgerRequests.getRequest(channel.channelId, tx);
-    return {
-      app: channel,
-      ledgerFundingRequested: !!update,
-      fundingChannel: update ? await this.getChannel(update.ledgerChannelId, tx) : undefined,
-    };
+    switch (channel.fundingStrategy) {
+      case 'Direct':
+      case 'Unfunded':
+        return {app: channel};
+      case 'Ledger': {
+        const update = await this.ledgerRequests.getRequest(channel.channelId, tx);
+        if (!update) return {app: channel, ledgerFundingRequested: false};
+        else {
+          const requests = await this.ledgerRequests.getPendingRequests(update.ledgerChannelId, tx);
+
+          const getChannelsForRequests = async (
+            status: LedgerRequestStatus
+          ): Promise<ChannelState[]> =>
+            await Promise.all(
+              compose(
+                map((req: LedgerRequestType) => this.getChannel(req.fundingChannelId, tx)),
+                filter(['status', status])
+              )(requests)
+            );
+
+          return {
+            app: channel,
+            ledgerFundingRequested: true,
+            fundingChannel: await this.getChannel(update.ledgerChannelId, tx),
+            channelsPendingRequest: await getChannelsForRequests('pending'),
+            channelsWithInflightRequest: await getChannelsForRequests('approved'),
+          };
+        }
+      }
+      case 'Unknown':
+      case 'Virtual':
+      default:
+        console.log(channel.fundingStrategy);
+        throw new Error('getOpenChannelProtocolState: Unimplemented funding strategy');
+    }
   }
 
-  async getLedgerProtocolState(
-    ledger: ChannelState,
-    tx?: Transaction
-  ): Promise<LedgerFundingProtocolState> {
-    const requests = await this.ledgerRequests.getPendingRequests(ledger.channelId, tx);
+  // async getLedgerProtocolState(
+  //   ledger: ChannelState,
+  //   tx?: Transaction
+  // ): Promise<LedgerFundingProtocolState> {
+  //   const requests = await this.ledgerRequests.getPendingRequests(ledger.channelId, tx);
 
-    const getChannelsForRequests = async (status: LedgerRequestStatus): Promise<ChannelState[]> =>
-      await compose(
-        Promise.all,
-        map((req: LedgerRequestType) => this.getChannel(req.fundingChannelId, tx)),
-        filter(['status', status])
-      )(requests);
-
-    return {
-      ledger,
-      channelsPendingRequest: await getChannelsForRequests('pending'),
-      channelsWithInflightRequest: await getChannelsForRequests('approved'),
-    };
-  }
+  //   return {
+  //     ledger,
+  //     channelsPendingRequest: await getChannelsForRequests('pending'),
+  //     channelsWithInflightRequest: await getChannelsForRequests('approved'),
+  //   };
+  // }
 
   async createChannel(
     constants: ChannelConstants,

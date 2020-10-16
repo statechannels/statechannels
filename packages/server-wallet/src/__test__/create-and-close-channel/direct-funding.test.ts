@@ -44,7 +44,7 @@ afterAll(async () => {
   await b.dbAdmin().dropDB();
 });
 
-it('Create a fake-funded channel between two wallets ', async () => {
+it('Create a directly funded channel between two wallets ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {

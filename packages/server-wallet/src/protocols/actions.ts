@@ -64,7 +64,9 @@ export type OpenChannelProtocolAction =
   | SignState
   | FundChannel
   | RequestLedgerFunding
-  | CompleteObjective;
+  | CompleteObjective
+  | SignLedgerStateForRequests
+  | MarkLedgerFundingRequestsAsComplete;
 
 export type CloseChannelProtocolAction = SignState | CompleteObjective;
 

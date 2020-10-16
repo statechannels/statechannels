@@ -18,7 +18,7 @@ import {
 } from './actions';
 
 export type ProtocolState = {
-  ledger: ChannelState;
+  fundingChannel: ChannelState;
   channelsPendingRequest: ChannelState[];
   channelsWithInflightRequest: ChannelState[];
 };
@@ -30,7 +30,7 @@ const newOutcomeBasedOnMyPendingUpdates = (
   // This could fail at some point if there is no longer space to fund stuff
   // TODO: Handle that case
   // } catch (e) {
-  //   if (e.toString() === 'Insufficient funds in ledger channel')
+  //   if (e.toString() === 'Insufficient funds in fundingChannel channel')
   // }
   // TODO: All this usage of checkThat is annoying
   channelsPendingRequest.reduce(
@@ -57,7 +57,7 @@ const outcomeMergedWithLatestState = (
 });
 
 const computeNewOutcome = ({
-  ledger: {supported, latest, latestSignedByMe, channelId},
+  fundingChannel: {supported, latest, latestSignedByMe, channelId},
   channelsPendingRequest,
 }: ProtocolState): SignLedgerStateForRequests | false => {
   if (!supported) return false;
@@ -67,10 +67,10 @@ const computeNewOutcome = ({
   const latestOutcome = checkThat(latest.outcome, isSimpleAllocation);
   const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
 
-  const counterPartyProposedNewUpdate = latest.turnNum === latestSignedByMe.turnNum + 2;
+  const counterPartyProposedNewUpdate = latest.turnNum >= supported.turnNum + 2;
+  const newTurnNum = counterPartyProposedNewUpdate ? latest.turnNum : latest.turnNum + 2;
 
   let newOutcome = newOutcomeBasedOnMyPendingUpdates(supportedOutcome, channelsPendingRequest);
-  let newTurnNum = latestSignedByMe.turnNum + 2;
   let unmetRequests: Bytes32[] = [];
 
   if (counterPartyProposedNewUpdate) {
@@ -79,7 +79,6 @@ const computeNewOutcome = ({
       unmetRequests = _.xor(mergedOutcome.allocationItems, newOutcome.allocationItems).map(
         x => x.destination
       );
-      newTurnNum = latest.turnNum + 2;
       newOutcome = mergedOutcome;
     }
   }
@@ -95,28 +94,47 @@ const computeNewOutcome = ({
     type: 'SignLedgerStateForRequests',
 
     // The setof channels which neither agree on go back to pending
-    unmetRequests,
+    unmetRequests: unmetRequests.filter(
+      req =>
+        !_.includes(
+          supported.participants.map(p => p.destination),
+          req
+        )
+    ),
 
     // The unique set of channels they both agreed to fund get marked done
-    inflightRequests: _.xor(myLatestOutcome.allocationItems, newOutcome.allocationItems).map(
-      x => x.destination
-    ),
+    inflightRequests: _.xor(myLatestOutcome.allocationItems, newOutcome.allocationItems)
+      .map(x => x.destination)
+      .filter(
+        req =>
+          !_.includes(
+            supported.participants.map(p => p.destination),
+            req
+          )
+      ),
   };
 };
 
 const markRequestsAsComplete = ({
-  ledger,
+  fundingChannel: {supported},
   channelsWithInflightRequest,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
-  if (!ledger.supported) return false;
+  if (!supported) return false;
+  const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
   const doneRequests = _.xor(
-    checkThat(ledger.supported.outcome, isSimpleAllocation).allocationItems.map(x => x.destination),
-    channelsWithInflightRequest.map(r => r.channelId)
+    allocationItems.map(allocationItem => allocationItem.destination),
+    channelsWithInflightRequest.map(destination => destination.channelId)
   );
   return (
     doneRequests.length > 0 && {
       type: 'MarkLedgerFundingRequestsAsComplete',
-      doneRequests,
+      doneRequests: doneRequests.filter(
+        req =>
+          !_.includes(
+            supported.participants.map(p => p.destination),
+            req
+          )
+      ),
     }
   );
 };
@@ -132,6 +150,12 @@ const handingPendingRequests = (ps: ProtocolState): SignLedgerStateForRequests |
 
 const handleCompleteRequests = (ps: ProtocolState): MarkLedgerFundingRequestsAsComplete | false =>
   hasInflightFundingRequests(ps) && markRequestsAsComplete(ps);
+
+// NOTE: Deciding _not_ to care about turn taking
+// const myTurnToDoLedgerStuff = ({
+//   fundingChannel: {supported, participants, myIndex},
+// }: ProtocolState): boolean =>
+//   !!supported && (supported.turnNum + 1) % participants.length === myIndex;
 
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState

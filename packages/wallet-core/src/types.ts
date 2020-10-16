@@ -97,6 +97,7 @@ export type OpenChannel = _Objective<
   {
     targetChannelId: string;
     fundingStrategy: FundingStrategy;
+    // TODO: Put ledger channel id in here?
   }
 >;
 export type CloseChannel = _Objective<

@@ -31,7 +31,7 @@ import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 import {Bytes32, Uint256} from '../type-aliases';
-import {Outgoing, ProtocolAction} from '../protocols/actions';
+import {Outgoing} from '../protocols/actions';
 import {logger} from '../logger';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
@@ -576,11 +576,24 @@ export class Wallet extends EventEmitter<WalletEvent>
     const channelResults: ChannelResult[] = [];
     let error: Error | undefined = undefined;
 
+    // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
+    const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
+    const channelsWithPendingReqs = (
+      await Promise.all(ledgers.map(ledger => this.store.getPendingLedgerRequests(ledger)))
+    )
+      .flat()
+      .map(x => x.fundingChannelId);
+
     // FIXME: Only get objectives which are:
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
 
-    const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
+    const objectives = (
+      await ObjectiveModel.forTargetChannelIds(
+        channels.concat(channelsWithPendingReqs),
+        this.store.knex
+      )
+    )
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
@@ -609,54 +622,78 @@ export class Wallet extends EventEmitter<WalletEvent>
           error = e;
           await tx.rollback(error);
         };
+
         const markObjectiveAsDone = (): void => {
           objectives.shift();
           channelResults.push(ChannelState.toChannelResult(app));
         };
 
-        const doAction = async (action: ProtocolAction): Promise<any> => {
-          switch (action.type) {
-            case 'SignState': {
-              const {myIndex, participants, channelId} = app;
-              const signedState = await this.store.signState(action.channelId, action, tx);
-              createOutboxFor(channelId, myIndex, participants, {
-                signedStates: [signedState],
-              }).map(outgoing => outbox.push(outgoing));
-              return;
-            }
-            case 'FundChannel':
-              await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              await this.chainService.fundChannel({
-                ...action,
-                expectedHeld: BN.from(action.expectedHeld),
-                amount: BN.from(action.amount),
-              });
-              return;
-            case 'CompleteObjective':
-              if (objective.type === 'OpenChannel')
-                await ObjectiveModel.succeed(objective.objectiveId, tx);
-              if (objective.type === 'CloseChannel')
-                await ObjectiveModel.succeed(objective.objectiveId, tx);
-              markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
-              return;
-            default:
-              throw 'Unimplemented';
-          }
-        };
+        const fsm = {
+          OpenChannel: OpenChannelProtocol,
+          CloseChannel: CloseChannelProtocol,
+        }[objective.type];
 
-        const fsm = {OpenChannel: OpenChannelProtocol, CloseChannel: CloseChannelProtocol}[
-          objective.type
-        ];
+        const protocolState = {
+          OpenChannel: await this.store.getOpenChannelProtocolState(app, tx),
+          CloseChannel: await this.store.getOpenChannelProtocolState(app, tx),
+        }[objective.type];
 
-        const nextAction = recordFunctionMetrics(
-          fsm.protocol({app}),
+        const action = recordFunctionMetrics(
+          fsm.protocol(protocolState),
           this.walletConfig.timingMetrics
         );
 
-        if (!nextAction) markObjectiveAsDone();
+        if (!action) markObjectiveAsDone();
         else {
           try {
-            await doAction(nextAction);
+            switch (action.type) {
+              case 'SignState': {
+                const {myIndex, participants, channelId} = app;
+                const signedState = await this.store.signState(action.channelId, action, tx);
+                createOutboxFor(channelId, myIndex, participants, {
+                  signedStates: [signedState],
+                }).map(outgoing => outbox.push(outgoing));
+                return;
+              }
+              case 'FundChannel':
+                await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+                await this.chainService.fundChannel({
+                  ...action,
+                  expectedHeld: BN.from(action.expectedHeld),
+                  amount: BN.from(action.amount),
+                });
+                return;
+              case 'CompleteObjective':
+                if (objective.type === 'OpenChannel')
+                  await ObjectiveModel.succeed(objective.objectiveId, tx);
+                if (objective.type === 'CloseChannel')
+                  await ObjectiveModel.succeed(objective.objectiveId, tx);
+                markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
+                return;
+              case 'RequestLedgerFunding': {
+                await this.store.requestLedgerFunding(app, tx);
+                return;
+              }
+
+              case 'SignLedgerStateForRequests': {
+                // eslint-disable-next-line
+                const {myIndex, participants} = protocolState.fundingChannel!;
+                const signedState = await this.store.signState(action.channelId, action, tx);
+                await this.store.markRequests(action.inflightRequests, 'approved', tx);
+                await this.store.markRequests(action.unmetRequests, 'pending', tx);
+                createOutboxFor(action.channelId, myIndex, participants, {
+                  signedStates: [signedState],
+                }).map(outgoing => outbox.push(outgoing));
+                return;
+              }
+
+              case 'MarkLedgerFundingRequestsAsComplete':
+                await this.store.markRequests(action.doneRequests, 'succeeded', tx);
+                return;
+
+              default:
+                throw 'Unimplemented';
+            }
           } catch (err) {
             logger.error({err}, 'Error handling action');
             await setError(err);

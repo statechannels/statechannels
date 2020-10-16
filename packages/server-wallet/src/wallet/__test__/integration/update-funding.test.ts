@@ -10,20 +10,17 @@ import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
 
 const {AddressZero} = ethers.constants;
 
 let w: Wallet;
 beforeEach(async () => {
   w = new Wallet(defaultTestConfig);
-  await new DBAdmin(w.knex).truncateDB();
+  await seedAlicesSigningWallet(w.knex);
 });
 afterEach(async () => {
   await w.destroy();
 });
-
-beforeEach(async () => await seedAlicesSigningWallet(w.knex));
 
 it('sends the post fund setup when the funding event is provided for multiple channels', async () => {
   const c1 = channel({

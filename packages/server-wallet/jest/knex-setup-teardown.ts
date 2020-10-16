@@ -8,6 +8,12 @@ import {DBAdmin} from '../src/db-admin/db-admin';
 
 export let testKnex: Knex;
 
+// Helpful tip...
+// If you encounter
+// MigrationLocked: Migration table is already locked
+// Then add the following to beforeAll:
+// await adminKnex.raw('DELETE FROM knex_migrations_lock WHERE is_locked = 1;');
+
 beforeAll(async () => {
   testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
   await new DBAdmin(testKnex).truncateDB();
