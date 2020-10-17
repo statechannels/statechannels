@@ -16,7 +16,8 @@
     {"directory": "packages/xstate-wallet", "changeProcessCWD": true }
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.wordWrapColumn": 100
+  "editor.wordWrapColumn": 100,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
 }
 
 
