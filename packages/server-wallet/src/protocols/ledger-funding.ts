@@ -68,8 +68,8 @@ const computeNewOutcome = ({
   const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
 
   const counterPartyProposedNewUpdate = latest.turnNum >= supported.turnNum + 2;
-  const newTurnNum = counterPartyProposedNewUpdate ? latest.turnNum : latest.turnNum + 2;
 
+  let newTurnNum = supported.turnNum + 2;
   let newOutcome = newOutcomeBasedOnMyPendingUpdates(supportedOutcome, channelsPendingRequest);
   let unmetRequests: Bytes32[] = [];
 
@@ -79,6 +79,7 @@ const computeNewOutcome = ({
       unmetRequests = _.xor(mergedOutcome.allocationItems, newOutcome.allocationItems).map(
         x => x.destination
       );
+      newTurnNum += 2;
       newOutcome = mergedOutcome;
     }
   }
