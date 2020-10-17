@@ -1,4 +1,9 @@
-import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
+import {
+  CreateChannelParams,
+  Participant,
+  Allocation,
+  CloseChannelParams,
+} from '@statechannels/client-api-schema';
 import {BN, makeDestination} from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {ethers} from 'ethers';
@@ -206,5 +211,49 @@ it('Create a ledger funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
+  });
+});
+
+it('Rejects b closing with `not your turn`', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  const bCloseChannel = b.closeChannel(closeChannelParams);
+
+  await expect(bCloseChannel).rejects.toMatchObject(new Error('not my turn'));
+});
+
+it('Closes the channel', async () => {
+  const closeChannelParams: CloseChannelParams = {
+    channelId,
+  };
+
+  // A generates isFinal4
+  const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+
+  expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
+    status: 'closing',
+    turnNum: 4,
+  });
+
+  const bPushMessageResult = await b.pushMessage(
+    getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
+  );
+
+  // B pushed isFinal4, generated countersigned isFinal4
+  expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+  });
+
+  // A pushed the countersigned isFinal4
+  const aPushMessageResult = await a.pushMessage(
+    getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
+  );
+
+  expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
   });
 });
