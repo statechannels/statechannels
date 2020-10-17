@@ -15,7 +15,8 @@
     {"directory": "packages/wire-format", "changeProcessCWD": true },
     {"directory": "packages/xstate-wallet", "changeProcessCWD": true }
   ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.wordWrapColumn": 100
 }
 
 
