@@ -45,7 +45,7 @@
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest",
       }
-    }
+    },
     {
       "type": "node",
       "request": "launch",
