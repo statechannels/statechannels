@@ -1,13 +1,13 @@
 import Knex from 'knex';
 
+import {DBAdmin} from '../../db-admin/db-admin';
 import {SigningWallet} from '../../models/signing-wallet';
 import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
-import {truncate} from '../../db-admin/db-admin-connection';
 
 const seeds = [alice()];
 
 export async function seedAlicesSigningWallet(knex: Knex): Promise<void> {
-  await truncate(knex);
+  await new DBAdmin(knex).truncateDB();
   await SigningWallet.query(knex).insert(seeds);
 }
 

@@ -1,9 +1,13 @@
 import * as path from 'path';
 import {promisify} from 'util';
 import {exec as rawExec} from 'child_process';
-const exec = promisify(rawExec);
 
+const exec = promisify(rawExec);
 import Knex from 'knex';
+
+import {SigningWallet} from '../models/signing-wallet';
+import {Channel} from '../models/channel';
+import {Nonce} from '../models/nonce';
 
 export class DBAdmin {
   knex: Knex;
@@ -23,8 +27,13 @@ export class DBAdmin {
     return this.knex.migrate.latest({directory: path.join(__dirname, '../db/migrations')});
   }
 
-  async truncateDB(): Promise<void> {
-    const tables = ['signing_wallets', 'channels', 'nonces'];
+  async truncateDB(
+    tables = [SigningWallet.tableName, Channel.tableName, Nonce.tableName]
+  ): Promise<void> {
+    // eslint-disable-next-line no-process-env
+    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+      throw 'Cannot truncate unless in test or development environments';
+    }
     await Promise.all(tables.map(table => this.knex.raw(`TRUNCATE TABLE ${table} CASCADE;`)));
   }
 

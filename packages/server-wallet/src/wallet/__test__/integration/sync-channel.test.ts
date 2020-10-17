@@ -1,17 +1,18 @@
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {truncate} from '../../../db-admin/db-admin-connection';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../../config';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
-  await truncate(knex);
+  await new DBAdmin(knex).truncateDB();
+
   w = new Wallet(defaultTestConfig);
 });
 

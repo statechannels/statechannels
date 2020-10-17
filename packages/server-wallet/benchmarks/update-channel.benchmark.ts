@@ -5,7 +5,6 @@ import Knex from 'knex';
 
 configureEnvVariables();
 
-import adminKnex from '../src/db-admin/db-admin-connection';
 import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
@@ -33,8 +32,8 @@ async function setup(n = NUM_UPDATES): Promise<Channel[]> {
 }
 
 async function benchmark(): Promise<void> {
-  await adminKnex.migrate.rollback();
-  await adminKnex.migrate.latest();
+  await knex.migrate.rollback();
+  await knex.migrate.latest();
   const wallet = new Wallet(defaultConfig);
 
   // Warm up each worker thread.
@@ -79,7 +78,7 @@ async function benchmark(): Promise<void> {
 
   console.timeEnd(key);
 
-  await adminKnex.destroy();
+  await knex.destroy();
   await wallet.destroy();
 }
 
