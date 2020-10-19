@@ -143,23 +143,19 @@ const markRequestsAsComplete = ({
   if (!supported) return false;
   if (channelsPendingRequest.length === 0) return false;
 
-  const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
-  const doneRequests = _.intersection(
-    allocationItems.map(allocationItem => allocationItem.destination),
-    channelsPendingRequest.map(destination => destination.channelId)
-  ).filter(
-    req =>
-      !_.includes(
-        supported.participants.map(p => p.destination),
-        req
-      )
+  const doneRequests = channelsPendingRequest.filter(({channelId}) =>
+    _.some(
+      checkThat(supported.outcome, isSimpleAllocation).allocationItems,
+      allocationItem => allocationItem.destination === channelId
+    )
   );
-  return (
-    doneRequests.length > 0 && {
-      type: 'MarkLedgerFundingRequestsAsComplete',
-      doneRequests,
-    }
-  );
+
+  if (doneRequests.length === 0) return false;
+
+  return {
+    type: 'MarkLedgerFundingRequestsAsComplete',
+    doneRequests: doneRequests.map(channel => channel.channelId),
+  };
 };
 
 // NOTE: Deciding _not_ to care about turn taking
