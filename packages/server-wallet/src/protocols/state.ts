@@ -27,6 +27,7 @@ The ChannelState type is the data that protocols need about a given channel to d
 */
 export type ChannelState = {
   channelId: string;
+  channelNonce: number;
   myIndex: 0 | 1;
   participants: Participant[];
   support?: SignedStateWithHash[];

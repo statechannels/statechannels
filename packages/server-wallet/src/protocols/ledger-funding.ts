@@ -74,19 +74,33 @@ const computeNewOutcome = ({
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
+
+  const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Nothing left to do, no actions to take
   if (channelsPendingRequest.length === 0) return false;
 
+  // TODO: Sort should be somewhere else
+  channelsPendingRequest = channelsPendingRequest.sort(
+    (a, b) => a.latest.channelNonce - b.latest.channelNonce
+  );
+
+  const receivedOriginal =
+    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2;
+  const receivedMerged =
+    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2 * n;
+  const sentOriginal = latestSignedByMe.turnNum === supported.turnNum + n;
+  const sentMerged = latestSignedByMe.turnNum === supported.turnNum + 2 * n;
+
   // Avoid repeating action if awaiting response (for original proposal or counterproposal)
-  const receivedSomething = latestNotSignedByMe && latestNotSignedByMe.turnNum > supported.turnNum;
-  const sentOriginal = !receivedSomething && latestSignedByMe.turnNum === supported.turnNum + n;
-  const sentMerged = receivedSomething && latestSignedByMe.turnNum === supported.turnNum + 2 * n;
-  if (sentOriginal || sentMerged) return false;
+  if ((!receivedOriginal && sentOriginal) || (!receivedMerged && sentMerged)) return false;
 
   // Expect the new outcome to be supported allocating _all_ pending requests
-  const myExpectedOutcome = foldAllocateToTarget(supportedOutcome, channelsPendingRequest);
+  const myExpectedOutcome =
+    sentOriginal || sentMerged
+      ? myLatestOutcome
+      : foldAllocateToTarget(supportedOutcome, channelsPendingRequest);
 
   let newOutcome: Outcome = myExpectedOutcome;
   let newTurnNum: number = supported.turnNum + n;
@@ -96,7 +110,7 @@ const computeNewOutcome = ({
    * if it is, then (2) sign the intersection (3) with an increased turn number,
    * but otherwise just continue as normal (my signature will create a support)
    */
-  if (receivedSomething) {
+  if (receivedOriginal || receivedMerged) {
     const {
       outcome: conflictingOutcome,
       turnNum: conflictingTurnNum,

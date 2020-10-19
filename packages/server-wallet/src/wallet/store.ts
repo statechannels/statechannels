@@ -687,6 +687,17 @@ async function createChannel(
     },
     ...CHANNEL_COLUMNS
   );
+
+  const nonce = await Nonce.query(txOrKnex)
+    .where('value', constants.channelNonce)
+    .first();
+
+  if (!nonce)
+    await Nonce.next(
+      txOrKnex,
+      constants.participants.map(p => p.signingAddress)
+    );
+
   const channel = Channel.fromJson(cols);
   return await Channel.query(txOrKnex)
     .insert(channel)
