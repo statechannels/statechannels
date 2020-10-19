@@ -55,9 +55,9 @@ export function joinChannel(
   // TODO: use Action creator from another branch
   const signStateAction = (sv: StateVariables): SignState => {
     return {
+      ...sv,
       type: 'SignState',
       channelId: args.channelId,
-      ...sv,
     };
   };
 
