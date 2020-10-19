@@ -13,9 +13,9 @@ const prefundVars = {turnNum: 0, appData: '0x0f00'};
 const runningVars = {turnNum: 7, appData: '0x0f00'};
 
 test.each`
-  input                                                                        | result
-  ${channel({vars: [stateSignedBy([bob()])(prefundVars)]}).protocolState}      | ${{type: 'SignState', ...prefundVars}}
-  ${channelStateFixture({latest: prefundVars}, {latestSignedByMe: undefined})} | ${{type: 'SignState', ...prefundVars}}
+  input                                                                                                    | result
+  ${channel({signingAddress: bob().address, vars: [stateSignedBy([alice()])(prefundVars)]}).protocolState} | ${{type: 'SignState', ...prefundVars, turnNum: 1}}
+  ${channelStateFixture({myIndex: 1, latest: prefundVars}, {latestSignedByMe: undefined})}                 | ${{type: 'SignState', ...prefundVars, turnNum: 1}}
 `('happy path', ({input, result}) => {
   expect(joinChannel(joinChannelFixture(), input)).toMatchObject(right(result));
 });

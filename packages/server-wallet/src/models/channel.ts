@@ -192,8 +192,10 @@ export class Channel extends Model implements RequiredColumns {
     };
   }
 
-  public get sortedStates(): SignedStateVarsWithHash[] {
-    return this.vars.map(s => ({...this.channelConstants, ...s}));
+  public get sortedStates(): Array<SignedStateWithHash> {
+    return this.vars
+      .map(s => ({...this.channelConstants, ...s}))
+      .sort((s1, s2) => s2.turnNum - s1.turnNum);
   }
 
   public get myAddress(): Address {
@@ -271,7 +273,7 @@ export class Channel extends Model implements RequiredColumns {
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
     let previousState;
 
-    for (const signedState of this.signedStates) {
+    for (const signedState of this.sortedStates) {
       // If there is not a valid transition we know there cannot be a valid support
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
