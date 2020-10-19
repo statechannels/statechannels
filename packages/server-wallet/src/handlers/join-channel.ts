@@ -43,7 +43,7 @@ function ensureLatestStateIsPrefundSetup(cs: ChannelState): StepResult {
   return left(new JoinChannelError(JoinChannelError.reasons.invalidTurnNum));
 }
 
-function nextState(cs: ChannelState): StateVariables {
+function myPrefundState(cs: ChannelState): StateVariables {
   return {...cs.latest, turnNum: cs.myIndex};
 }
 // End helpers
