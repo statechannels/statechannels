@@ -65,7 +65,7 @@ export function joinChannel(
     channelState,
     ensureNotSignedByMe,
     chain(ensureLatestStateIsPrefundSetup),
-    map(nextState),
+    map(myPrefundState),
     map(signStateAction)
   );
 }
