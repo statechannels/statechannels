@@ -33,6 +33,7 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
+  latestNotSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => Uint256;
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;

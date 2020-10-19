@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import {
   allocateToTarget,
+  AllocationItem,
+  BN,
   checkThat,
   isSimpleAllocation,
+  Outcome,
+  SignedStateWithHash,
   SimpleAllocation,
 } from '@statechannels/wallet-core';
-
-import {Bytes32} from '../type-aliases';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
@@ -23,9 +25,12 @@ export type ProtocolState = {
   channelsWithInflightRequest: ChannelState[];
 };
 
-const newOutcomeBasedOnMyPendingUpdates = (
-  supportedOutcome: SimpleAllocation,
-  channelsPendingRequest: ChannelState[]
+const allocationItemComparator = (a: AllocationItem, b: AllocationItem): boolean =>
+  a.destination === b.destination && BN.eq(a.amount, b.amount);
+
+const foldAllocateToTarget = (
+  original: SimpleAllocation,
+  allocationTargets: ChannelState[]
 ): SimpleAllocation =>
   // This could fail at some point if there is no longer space to fund stuff
   // TODO: Handle that case
@@ -33,7 +38,7 @@ const newOutcomeBasedOnMyPendingUpdates = (
   //   if (e.toString() === 'Insufficient funds in fundingChannel channel')
   // }
   // TODO: All this usage of checkThat is annoying
-  channelsPendingRequest.reduce(
+  allocationTargets.reduce(
     (outcome, {channelId, supported}) =>
       checkThat(
         allocateToTarget(
@@ -44,44 +49,79 @@ const newOutcomeBasedOnMyPendingUpdates = (
         ),
         isSimpleAllocation
       ),
-    supportedOutcome
+    original
   );
 
-const outcomeMergedWithLatestState = (
-  latestOutcome: SimpleAllocation,
-  newOutcome: SimpleAllocation
-): SimpleAllocation => ({
+const mergedOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
   type: 'SimpleAllocation',
-  assetHolderAddress: newOutcome.assetHolderAddress,
-  allocationItems: _.intersection(latestOutcome.allocationItems, newOutcome.allocationItems),
+  assetHolderAddress: b.assetHolderAddress,
+  allocationItems: _.intersectionWith(
+    a.allocationItems,
+    b.allocationItems,
+    allocationItemComparator
+  ),
 });
 
 const computeNewOutcome = ({
-  fundingChannel: {supported, latest, latestSignedByMe, channelId},
+  fundingChannel: {
+    supported,
+    latestNotSignedByMe,
+    latestSignedByMe,
+    channelId,
+    participants: {length: n},
+  },
   channelsPendingRequest,
+  channelsWithInflightRequest,
 }: ProtocolState): SignLedgerStateForRequests | false => {
+  // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
 
+  // Nothing left to do, no actions to take
+  if (channelsPendingRequest.length + channelsWithInflightRequest.length === 0) return false;
+
+  // Avoid repeating action if awaiting response (for original proposal or counterproposal)
+  const receivedSomething = latestNotSignedByMe && latestNotSignedByMe.turnNum > supported.turnNum;
+  const sentOriginal = !receivedSomething && latestSignedByMe.turnNum === supported.turnNum + n;
+  const sentMerged = receivedSomething && latestSignedByMe.turnNum === supported.turnNum + 2 * n;
+  if (sentOriginal || sentMerged) return false;
+
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-  const latestOutcome = checkThat(latest.outcome, isSimpleAllocation);
   const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
 
-  const counterPartyProposedNewUpdate = latest.turnNum >= supported.turnNum + 2;
+  const channelsToFund = channelsPendingRequest.concat(channelsWithInflightRequest);
 
-  let newTurnNum = supported.turnNum + 2;
-  let newOutcome = newOutcomeBasedOnMyPendingUpdates(supportedOutcome, channelsPendingRequest);
-  let unmetRequests: Bytes32[] = [];
+  const myExpectedOutcome = foldAllocateToTarget(supportedOutcome, channelsToFund);
 
-  if (counterPartyProposedNewUpdate) {
-    if (!_.isEqual(newOutcome, latestOutcome)) {
-      const mergedOutcome = outcomeMergedWithLatestState(latestOutcome, newOutcome);
-      unmetRequests = _.xor(mergedOutcome.allocationItems, newOutcome.allocationItems).map(
-        x => x.destination
-      );
-      newTurnNum += 2;
-      newOutcome = mergedOutcome;
-    }
+  let newOutcome: Outcome;
+  let newTurnNum: number;
+  let channelsNotFunded: ChannelState[] = [];
+
+  if (receivedSomething) {
+    const {
+      outcome: conflictingOutcome,
+      turnNum: conflictingTurnNum,
+    } = latestNotSignedByMe as SignedStateWithHash;
+
+    const theirLatestOutcome = checkThat(conflictingOutcome, isSimpleAllocation);
+    const {allocationItems} = mergedOutcome(myExpectedOutcome, theirLatestOutcome);
+
+    const intersectingChannels = channelsToFund.filter(({channelId}) =>
+      _.some(allocationItems, ['destination', channelId])
+    );
+
+    channelsNotFunded = _.xorBy(channelsToFund, intersectingChannels, 'channelId');
+
+    // Can't just check unmetRequests because they may have
+    // sent over an update that we don't consider to be a request
+    newTurnNum = _.isEqual(theirLatestOutcome, myExpectedOutcome)
+      ? conflictingTurnNum
+      : conflictingTurnNum + n;
+
+    newOutcome = foldAllocateToTarget(supportedOutcome, intersectingChannels);
+  } else {
+    newOutcome = myExpectedOutcome;
+    newTurnNum = supported.turnNum + n;
   }
 
   return {
@@ -94,16 +134,10 @@ const computeNewOutcome = ({
 
     type: 'SignLedgerStateForRequests',
 
-    // The setof channels which neither agree on go back to pending
-    unmetRequests: unmetRequests.filter(
-      req =>
-        !_.includes(
-          supported.participants.map(p => p.destination),
-          req
-        )
-    ),
+    // The set of channels which neither agree on go back to pending
+    unmetRequests: channelsNotFunded.map(channel => channel.channelId),
 
-    // The unique set of channels they both agreed to fund get marked done
+    // The set of channels that I have decided to try to fund
     inflightRequests: _.xor(myLatestOutcome.allocationItems, newOutcome.allocationItems)
       .map(x => x.destination)
       .filter(
@@ -121,36 +155,25 @@ const markRequestsAsComplete = ({
   channelsWithInflightRequest,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
   if (!supported) return false;
+  if ((channelsWithInflightRequest || []).length === 0) return false;
   const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
-  const doneRequests = _.xor(
+  const doneRequests = _.intersection(
     allocationItems.map(allocationItem => allocationItem.destination),
     channelsWithInflightRequest.map(destination => destination.channelId)
+  ).filter(
+    req =>
+      !_.includes(
+        supported.participants.map(p => p.destination),
+        req
+      )
   );
   return (
     doneRequests.length > 0 && {
       type: 'MarkLedgerFundingRequestsAsComplete',
-      doneRequests: doneRequests.filter(
-        req =>
-          !_.includes(
-            supported.participants.map(p => p.destination),
-            req
-          )
-      ),
+      doneRequests,
     }
   );
 };
-
-const hasPendingFundingRequests = (ps: ProtocolState): boolean =>
-  ps.channelsPendingRequest.length > 0;
-
-const hasInflightFundingRequests = (ps: ProtocolState): boolean =>
-  ps.channelsWithInflightRequest.length > 0;
-
-const handingPendingRequests = (ps: ProtocolState): SignLedgerStateForRequests | false =>
-  hasPendingFundingRequests(ps) && computeNewOutcome(ps);
-
-const handleCompleteRequests = (ps: ProtocolState): MarkLedgerFundingRequestsAsComplete | false =>
-  hasInflightFundingRequests(ps) && markRequestsAsComplete(ps);
 
 // NOTE: Deciding _not_ to care about turn taking
 // const myTurnToDoLedgerStuff = ({
@@ -161,4 +184,4 @@ const handleCompleteRequests = (ps: ProtocolState): MarkLedgerFundingRequestsAsC
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
 ): ProtocolResult<LedgerProtocolAction> =>
-  handingPendingRequests(ps) || handleCompleteRequests(ps) || noAction;
+  markRequestsAsComplete(ps) || computeNewOutcome(ps) || noAction;

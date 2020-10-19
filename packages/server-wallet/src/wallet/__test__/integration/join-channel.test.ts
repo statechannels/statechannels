@@ -233,6 +233,7 @@ describe('ledger funded app scenarios', () => {
             alice(),
             bob()
           )({
+            appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,
             outcome: simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]),

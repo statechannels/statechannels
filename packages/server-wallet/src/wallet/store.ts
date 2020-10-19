@@ -575,19 +575,6 @@ export class Store {
     }
   }
 
-  // async getLedgerProtocolState(
-  //   ledger: ChannelState,
-  //   tx?: Transaction
-  // ): Promise<LedgerFundingProtocolState> {
-  //   const requests = await this.ledgerRequests.getPendingRequests(ledger.channelId, tx);
-
-  //   return {
-  //     ledger,
-  //     channelsPendingRequest: await getChannelsForRequests('pending'),
-  //     channelsWithInflightRequest: await getChannelsForRequests('approved'),
-  //   };
-  // }
-
   async createChannel(
     constants: ChannelConstants,
     appData: Bytes,
@@ -762,7 +749,11 @@ async function recoverParticipantSignatures(
 }
 
 function validateStateFreshness(signedState: State, channel: Channel): void {
-  if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {
+  if (
+    channel.latestSignedByMe &&
+    channel.latestSignedByMe.turnNum >= signedState.turnNum &&
+    channel.latest.appDefinition !== '0x0000000000000000000000000000000000000000'
+  ) {
     throw new StoreError(StoreError.reasons.staleState);
   }
 }
@@ -780,7 +771,8 @@ function validateInvariants(stateVars: SignedStateVarsWithHash[], myAddress: str
 
   const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
   if (duplicateTurnNums) {
-    throw new StoreError(StoreError.reasons.duplicateTurnNums);
+    console.warn(StoreError.reasons.duplicateTurnNums);
+    // throw new StoreError(StoreError.reasons.duplicateTurnNums);
   }
   if (!isReverseSorted(turnNums)) {
     throw new StoreError(StoreError.reasons.notSorted);

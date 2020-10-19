@@ -5,6 +5,7 @@ import {
   BN,
   makeDestination,
   SignedStateWithHash,
+  SimpleAllocation,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -23,7 +24,7 @@ import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
-jest.setTimeout(20_000);
+jest.setTimeout(100_000);
 
 const wallet = new Wallet(defaultTestConfig);
 
@@ -347,6 +348,7 @@ describe('ledger funded app scenarios', () => {
             alice(),
             bob()
           )({
+            appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,
             outcome: simpleEthAllocation([{destination: aliceP().destination, amount: BN.from(5)}]),
@@ -415,7 +417,7 @@ describe('ledger funded app scenarios', () => {
           params: {data},
         },
       ],
-      channelResults,
+      channelResults: [appChannelResult],
     } = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
     });
@@ -428,15 +430,12 @@ describe('ledger funded app scenarios', () => {
       ],
     });
 
-    expect(channelResults).toMatchObject([
-      {
-        channelId: app.channelId,
-        turnNum: 0,
-        // outcome: serializeOutcome(preFS.outcome), // TODO: (Liam) This is empty... not sure why
-        status: 'opening',
-      },
-      // TODO: Should ledger channel be here ?
-    ]);
+    expect(appChannelResult).toMatchObject({
+      channelId: app.channelId,
+      turnNum: 0,
+      // outcome: serializeOutcome(preFS.outcome), // TODO: (Liam) This is empty... not sure why
+      status: 'opening',
+    });
 
     const {protocolState} = await Channel.forId(ledger.channelId, wallet.knex);
 
@@ -479,8 +478,6 @@ describe('ledger funded app scenarios', () => {
         serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
       ],
     });
-
-    expect(appChannelResult).toBeDefined();
 
     expect(appChannelResult).toMatchObject({
       turnNum: 0,
@@ -525,9 +522,87 @@ describe('ledger funded app scenarios', () => {
       ],
     });
 
-    expect(appChannelResult).toBeDefined();
-
     expect(appChannelResult).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
+    });
+  });
+
+  it('proposes intersection of a ledger update it received', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice())(preFS)],
+    });
+
+    wallet.store.ledgerRequests.setRequest(app.channelId, {
+      ledgerChannelId: ledger.channelId,
+      fundingChannelId: app.channelId,
+      status: 'pending', // TODO: could this be approved?
+    });
+
+    const {
+      outbox: [
+        {
+          params: {data: payloadFromFirstPushMessage},
+        },
+      ],
+      channelResults: [appChannelResult1],
+    } = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
+    });
+
+    // We then push in a fake message from Bob signging the prefund setup
+    expect(payloadFromFirstPushMessage).toMatchObject({
+      signedStates: [
+        // Serialized ledger update signed _only_ by Alice for wire message
+        serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
+      ],
+    });
+
+    expect(appChannelResult1).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
+    });
+
+    // Using spread syntax to do a deep copy essentially
+    const conflictingUpdatedLedgerState = {
+      ...expectedUpdatedLedgerState,
+      outcome: {
+        ...expectedUpdatedLedgerState.outcome,
+        allocationItems: [
+          ...(expectedUpdatedLedgerState.outcome as SimpleAllocation).allocationItems,
+          {
+            destination: bobP().destination,
+            amount: BN.from(0),
+          },
+        ],
+      },
+    };
+
+    const {
+      outbox: [
+        {
+          params: {data: payloadFromSecondPushMessage},
+        },
+      ],
+      channelResults: [, appChannelResult2],
+    } = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(conflictingUpdatedLedgerState))],
+    });
+
+    const expectedResolvedUpdatedLedgerState = {
+      ...expectedUpdatedLedgerState,
+      turnNum: 8,
+    };
+
+    expect(payloadFromSecondPushMessage).toMatchObject({
+      signedStates: [
+        // Countersigned ledger update
+        serializeState(stateWithHashSignedBy(alice())(expectedResolvedUpdatedLedgerState)),
+      ],
+    });
+
+    expect(appChannelResult2).toMatchObject({
       turnNum: 0,
       status: 'opening',
     });
