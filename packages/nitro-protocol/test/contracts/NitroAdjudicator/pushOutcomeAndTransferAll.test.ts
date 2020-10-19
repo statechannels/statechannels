@@ -37,7 +37,7 @@ const addresses = {
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   ETH: undefined,
-  TOK: undefined,
+  ETH2: undefined,
 };
 
 // Constants for this test suite
@@ -68,7 +68,7 @@ beforeAll(async () => {
     process.env.TEST_ASSET_HOLDER2_ADDRESS
   );
   addresses.ETH = AssetHolder1.address;
-  addresses.TOK = AssetHolder2.address;
+  addresses.ETH2 = AssetHolder2.address;
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -84,8 +84,8 @@ const finalized = true;
 
 describe('pushOutcomeAndTransferAll', () => {
   it.each`
-    description     | setOutcome                    | heldBefore                    | newOutcome | heldAfter                     | payouts                       | reasonString
-    ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    description     | setOutcome                     | heldBefore                     | newOutcome | heldAfter                      | payouts                        | reasonString
+    ${description2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({

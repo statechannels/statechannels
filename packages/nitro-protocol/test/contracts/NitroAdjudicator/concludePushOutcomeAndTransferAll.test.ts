@@ -47,7 +47,7 @@ const addresses = {
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   ETH: undefined,
-  TOK: undefined,
+  ETH2: undefined,
 };
 
 // Populate wallets and participants array
@@ -72,12 +72,13 @@ beforeAll(async () => {
     process.env.TEST_ASSET_HOLDER2_ADDRESS
   );
   addresses.ETH = AssetHolder1.address;
-  addresses.TOK = AssetHolder2.address;
+  addresses.ETH2 = AssetHolder2.address;
   appDefinition = getPlaceHolderContractAddress();
 });
 
-const accepts1 = '1 Asset Types';
-const accepts2 = '2 Asset Types';
+const accepts1 = '{ETH: {A: 1}}';
+const accepts2 = '{ETH: {A: 1}, ETH2: {A: 2}}';
+const accepts3 = '{ETH2: {A: 1, B: 1}}';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
@@ -88,9 +89,10 @@ let channelNonce = 400;
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand              | heldBefore                    | heldAfter                     | newOutcome | payouts                       | reasonString
-    ${accepts1} | ${{ETH: {A: 1}}}              | ${{ETH: {c: 1}}}              | ${{ETH: {c: 0}}}              | ${{}}      | ${{ETH: {A: 1}}}              | ${undefined}
-    ${accepts2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    description | outcomeShortHand               | heldBefore                     | heldAfter                      | newOutcome | payouts                        | reasonString
+    ${accepts1} | ${{ETH: {A: 1}}}               | ${{ETH: {c: 1}}}               | ${{ETH: {c: 0}}}               | ${{}}      | ${{ETH: {A: 1}}}               | ${undefined}
+    ${accepts2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
+    ${accepts3} | ${{ETH2: {A: 1, B: 1}}}        | ${{ETH2: {c: 2}}}              | ${{ETH2: {c: 0}}}              | ${{}}      | ${{ETH2: {A: 1, B: 1}}}        | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
