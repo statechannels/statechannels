@@ -480,7 +480,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       {
         type: 'CloseChannel',
         participants: [],
-        data: {targetChannelId: channelId, fundingStrategy: },
+        data: {targetChannelId: channelId, fundingStrategy: 'Unknown'}, // TODO get this without another db tx
       },
     ];
 
