@@ -74,6 +74,7 @@ const computeNewOutcome = ({
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
+  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Nothing left to do, no actions to take
   if (channelsPendingRequest.length === 0) return false;
@@ -84,16 +85,17 @@ const computeNewOutcome = ({
   const sentMerged = receivedSomething && latestSignedByMe.turnNum === supported.turnNum + 2 * n;
   if (sentOriginal || sentMerged) return false;
 
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+  // Expect the new outcome to be supported allocating _all_ pending requests
+  const myExpectedOutcome = foldAllocateToTarget(supportedOutcome, channelsPendingRequest);
 
-  const channelsToFund = channelsPendingRequest;
+  let newOutcome: Outcome = myExpectedOutcome;
+  let newTurnNum: number = supported.turnNum + n;
 
-  const myExpectedOutcome = foldAllocateToTarget(supportedOutcome, channelsToFund);
-
-  let newOutcome: Outcome;
-  let newTurnNum: number;
-  let channelsNotFunded: ChannelState[] = [];
-
+  /**
+   * If I already received a proposal then (1) check if it is conflicting and
+   * if it is, then (2) sign the intersection (3) with an increased turn number,
+   * but otherwise just continue as normal (my signature will create a support)
+   */
   if (receivedSomething) {
     const {
       outcome: conflictingOutcome,
@@ -101,24 +103,17 @@ const computeNewOutcome = ({
     } = latestNotSignedByMe as SignedStateWithHash;
 
     const theirLatestOutcome = checkThat(conflictingOutcome, isSimpleAllocation);
-    const {allocationItems} = mergedOutcome(myExpectedOutcome, theirLatestOutcome);
 
-    const intersectingChannels = channelsToFund.filter(({channelId}) =>
-      _.some(allocationItems, ['destination', channelId])
-    );
+    if (!_.isEqual(theirLatestOutcome, myExpectedOutcome) /* (1) */) {
+      const merged = mergedOutcome(myExpectedOutcome, theirLatestOutcome);
 
-    channelsNotFunded = _.xorBy(channelsToFund, intersectingChannels, 'channelId');
+      const intersectingChannels = channelsPendingRequest.filter(({channelId}) =>
+        _.some(merged.allocationItems, ['destination', channelId])
+      );
 
-    // Can't just check unmetRequests because they may have
-    // sent over an update that we don't consider to be a request
-    newTurnNum = _.isEqual(theirLatestOutcome, myExpectedOutcome)
-      ? conflictingTurnNum
-      : conflictingTurnNum + n;
-
-    newOutcome = foldAllocateToTarget(supportedOutcome, intersectingChannels);
-  } else {
-    newOutcome = myExpectedOutcome;
-    newTurnNum = supported.turnNum + n;
+      newOutcome = foldAllocateToTarget(supportedOutcome, intersectingChannels); // (2)
+      newTurnNum = conflictingTurnNum + n; // (3)
+    }
   }
 
   return {
@@ -130,9 +125,6 @@ const computeNewOutcome = ({
     }),
 
     type: 'SignLedgerStateForRequests',
-
-    // The set of channels which neither agree on go back to pending
-    unmetRequests: channelsNotFunded.map(channel => channel.channelId),
   };
 };
 

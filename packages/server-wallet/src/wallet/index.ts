@@ -679,7 +679,6 @@ export class Wallet extends EventEmitter<WalletEvent>
                 // eslint-disable-next-line
                 const {myIndex, participants} = protocolState.fundingChannel!;
                 const signedState = await this.store.signState(action.channelId, action, tx);
-                await this.store.markRequests(action.unmetRequests, 'pending', tx);
                 createOutboxFor(action.channelId, myIndex, participants, {
                   signedStates: [signedState],
                 }).map(outgoing => outbox.push(outgoing));
@@ -687,7 +686,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               }
 
               case 'MarkLedgerFundingRequestsAsComplete':
-                await this.store.markRequests(action.doneRequests, 'succeeded', tx);
+                await this.store.markRequestsAsComplete(action.doneRequests, tx);
                 return;
 
               default:

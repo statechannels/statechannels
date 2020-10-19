@@ -524,13 +524,9 @@ export class Store {
     return ledgerRecord.ledgerChannelId;
   }
 
-  async markRequests(
-    channelIds: Bytes32[],
-    status: 'pending' | 'succeeded',
-    tx?: Transaction
-  ): Promise<void> {
+  async markRequestsAsComplete(channelIds: Bytes32[], tx?: Transaction): Promise<void> {
     for (const channelId of channelIds) {
-      await this.ledgerRequests.setRequestStatus(channelId, status, tx);
+      await this.ledgerRequests.setRequestStatus(channelId, 'succeeded', tx);
     }
   }
 
