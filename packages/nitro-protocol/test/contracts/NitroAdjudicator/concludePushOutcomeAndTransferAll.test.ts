@@ -51,8 +51,8 @@ const addresses = {
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   // // Externals preloaded with TOK (cheaper to pay to)
-  // At: randomExternalDestination(),
-  // Bt: randomExternalDestination(),
+  At: randomExternalDestination(),
+  Bt: randomExternalDestination(),
   // Asset Holders
   ETH: undefined,
   ETH2: undefined,
@@ -90,12 +90,16 @@ beforeAll(async () => {
   addresses.ETH2 = AssetHolder2.address;
   addresses.ERC20 = ERC20AssetHolder.address;
   appDefinition = getPlaceHolderContractAddress();
+  // Preload At and Bt with TOK
+  await (await Token.transfer('0x' + addresses.At.slice(26), BigNumber.from(1))).wait();
+  await (await Token.transfer('0x' + addresses.Bt.slice(26), BigNumber.from(1))).wait();
 });
 
 const accepts1 = '{ETH: {A: 1}}';
 const accepts2 = '{ETH: {A: 1}, ETH2: {A: 2}}';
 const accepts3 = '{ETH2: {A: 1, B: 1}}';
 const accepts4 = '{ERC20: {A: 1, B: 1}}';
+const accepts5 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
@@ -111,6 +115,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
     ${accepts2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
     ${accepts3} | ${{ETH2: {A: 1, B: 1}}}        | ${{ETH2: {c: 2}}}              | ${{ETH2: {c: 0}}}              | ${{}}      | ${{ETH2: {A: 1, B: 1}}}        | ${undefined}
     ${accepts4} | ${{ERC20: {A: 1, B: 1}}}       | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {A: 1, B: 1}}}       | ${undefined}
+    ${accepts5} | ${{ERC20: {At: 1, Bt: 1}}}     | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {At: 1, Bt: 1}}}     | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
