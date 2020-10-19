@@ -1,0 +1,17 @@
+participant WalletA
+participant AppA
+participant AppB
+participant WalletB
+AppA->WalletA: createChannel
+WalletA-->WalletB: 0a
+WalletB->AppB: 'proposed'
+Note over WalletB: crash/restart
+AppB->WalletB: joinChannel
+WalletB-->WalletA: 0b
+WalletA->AppA: result
+AppA->WalletA: updateFunding(A)
+AppB->WalletB: updateFunding(A)
+AppA->WalletA: updateFunding(B)
+WalletA-->WalletB: 3a
+AppB->WalletB: updateFunding(B)
+WalletB-->WalletA: 3b
