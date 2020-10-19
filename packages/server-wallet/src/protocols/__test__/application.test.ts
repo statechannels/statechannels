@@ -16,13 +16,13 @@ const outcome2 = simpleEthAllocation([
   {amount: BN.from(5), destination: bob().destination},
   {amount: BN.from(5), destination: alice().destination},
 ]);
-const prefundState = {outcome, turnNum: 0};
-const prefundState2 = {outcome: outcome2, turnNum: 0};
-const postFundState = {outcome, turnNum: 2};
-const closingState = {outcome, turnNum: 4, isFinal: true};
+const prefundState = {outcome, turnNum: 0, participants: [alice(), bob()]};
+const prefundState2 = {outcome: outcome2, turnNum: 0, participants: [alice(), bob()]};
+const postFundState = {outcome, turnNum: 2, participants: [alice(), bob()]};
+const closingState = {outcome, turnNum: 4, isFinal: true, participants: [alice(), bob()]};
 
-const runningState = {outcome, turnNum: 7};
-const closingState2 = {outcome, turnNum: 8, isFinal: true};
+const runningState = {outcome, turnNum: 7, participants: [alice(), bob()]};
+const closingState2 = {outcome, turnNum: 8, isFinal: true, participants: [alice(), bob()]};
 
 const funded = (): Uint256 => BN.from(5);
 const notFunded = (): Uint256 => BN.from(0);

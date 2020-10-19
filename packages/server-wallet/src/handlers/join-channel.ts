@@ -43,8 +43,8 @@ function ensureLatestStateIsPrefundSetup(cs: ChannelState): StepResult {
   return left(new JoinChannelError(JoinChannelError.reasons.invalidTurnNum));
 }
 
-function latest(cs: ChannelState): StateVariables {
-  return cs.latest;
+function nextState(cs: ChannelState): StateVariables {
+  return {...cs.latest, turnNum: cs.myIndex};
 }
 // End helpers
 
@@ -53,17 +53,19 @@ export function joinChannel(
   channelState: ChannelState
 ): HandlerResult {
   // TODO: use Action creator from another branch
-  const signStateAction = (sv: StateVariables): SignState => ({
-    type: 'SignState',
-    channelId: args.channelId,
-    ...sv,
-  });
+  const signStateAction = (sv: StateVariables): SignState => {
+    return {
+      type: 'SignState',
+      channelId: args.channelId,
+      ...sv,
+    };
+  };
 
   return pipe(
     channelState,
     ensureNotSignedByMe,
     chain(ensureLatestStateIsPrefundSetup),
-    map(latest),
+    map(nextState),
     map(signStateAction)
   );
 }

@@ -57,9 +57,9 @@ export const stage = (state: State | undefined): Stage =>
     ? 'Missing'
     : state.isFinal
     ? 'Final'
-    : state.turnNum === 0
+    : state.turnNum <= state.participants.length - 1
     ? 'PrefundSetup'
-    : state.turnNum === 3
+    : state.turnNum <= state.participants.length * 2 - 1
     ? 'PostfundSetup'
     : 'Running';
 

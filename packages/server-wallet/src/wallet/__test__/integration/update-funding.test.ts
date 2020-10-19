@@ -27,11 +27,17 @@ beforeEach(async () => await seedAlicesSigningWallet(w.knex));
 it('sends the post fund setup when the funding event is provided for multiple channels', async () => {
   const c1 = channel({
     channelNonce: 1,
-    vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0, channelNonce: 1})],
+    vars: [
+      stateWithHashSignedBy(alice())({turnNum: 0, channelNonce: 1}),
+      stateWithHashSignedBy(bob())({turnNum: 1, channelNonce: 1}),
+    ],
   });
   const c2 = channel({
     channelNonce: 2,
-    vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0, channelNonce: 2})],
+    vars: [
+      stateWithHashSignedBy(alice())({turnNum: 0, channelNonce: 2}),
+      stateWithHashSignedBy(bob())({turnNum: 1, channelNonce: 2}),
+    ],
   });
   await Channel.query(w.knex).insert(c1);
   await Channel.query(w.knex).insert(c2);
@@ -67,12 +73,17 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         },
       },
     ],
-    channelResults: channelIds.map(cId => ({channelId: cId, turnNum: 0})),
+    channelResults: channelIds.map(cId => ({channelId: cId, turnNum: 2})),
   });
 });
 
 it('sends the post fund setup when the funding event is provided', async () => {
-  const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 0})]});
+  const c = channel({
+    vars: [
+      stateWithHashSignedBy(alice())({turnNum: 0}),
+      stateWithHashSignedBy(bob())({turnNum: 1}),
+    ],
+  });
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
   const result = await w.updateFundingForChannels([
@@ -95,6 +106,6 @@ it('sends the post fund setup when the funding event is provided', async () => {
         },
       },
     ],
-    channelResults: [{channelId: c.channelId, turnNum: 0}], // The turnNum is coming from the supported state so we expect it be 0 still
+    channelResults: [{channelId: c.channelId, turnNum: 2}],
   });
 });
