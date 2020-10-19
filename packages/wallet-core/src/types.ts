@@ -103,6 +103,7 @@ export type CloseChannel = _Objective<
   'CloseChannel',
   {
     targetChannelId: string;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<
