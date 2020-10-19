@@ -28,7 +28,6 @@ export type RequestLedgerFunding = {
 export type SignLedgerStateForRequests = StateVariables & {
   type: 'SignLedgerStateForRequests';
   channelId: Bytes32;
-  inflightRequests: Bytes32[];
   unmetRequests: Bytes32[];
 };
 export type MarkLedgerFundingRequestsAsComplete = {

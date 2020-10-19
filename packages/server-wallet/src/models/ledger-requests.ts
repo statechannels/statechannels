@@ -7,7 +7,6 @@ import {Bytes32} from '../type-aliases';
 export type LedgerRequestStatus =
   | 'pending' // Request added to DB to be approved or rejected
   | 'rejected' // Rejected due to lack of available funds or some other reason
-  | 'approved' // Funds have been allocated and request is expected to go through
   | 'succeeded' // Counterparty signed back and update was applied
   | 'failed'; // Rejected for an unexpected reason (some error occurred)
 

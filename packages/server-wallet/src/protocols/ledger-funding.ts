@@ -22,7 +22,6 @@ import {
 export type ProtocolState = {
   fundingChannel: ChannelState;
   channelsPendingRequest: ChannelState[];
-  channelsWithInflightRequest: ChannelState[];
 };
 
 const allocationItemComparator = (a: AllocationItem, b: AllocationItem): boolean =>
@@ -71,14 +70,13 @@ const computeNewOutcome = ({
     participants: {length: n},
   },
   channelsPendingRequest,
-  channelsWithInflightRequest,
 }: ProtocolState): SignLedgerStateForRequests | false => {
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
 
   // Nothing left to do, no actions to take
-  if (channelsPendingRequest.length + channelsWithInflightRequest.length === 0) return false;
+  if (channelsPendingRequest.length === 0) return false;
 
   // Avoid repeating action if awaiting response (for original proposal or counterproposal)
   const receivedSomething = latestNotSignedByMe && latestNotSignedByMe.turnNum > supported.turnNum;
@@ -87,9 +85,8 @@ const computeNewOutcome = ({
   if (sentOriginal || sentMerged) return false;
 
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-  const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
 
-  const channelsToFund = channelsPendingRequest.concat(channelsWithInflightRequest);
+  const channelsToFund = channelsPendingRequest;
 
   const myExpectedOutcome = foldAllocateToTarget(supportedOutcome, channelsToFund);
 
@@ -136,30 +133,20 @@ const computeNewOutcome = ({
 
     // The set of channels which neither agree on go back to pending
     unmetRequests: channelsNotFunded.map(channel => channel.channelId),
-
-    // The set of channels that I have decided to try to fund
-    inflightRequests: _.xor(myLatestOutcome.allocationItems, newOutcome.allocationItems)
-      .map(x => x.destination)
-      .filter(
-        req =>
-          !_.includes(
-            supported.participants.map(p => p.destination),
-            req
-          )
-      ),
   };
 };
 
 const markRequestsAsComplete = ({
   fundingChannel: {supported},
-  channelsWithInflightRequest,
+  channelsPendingRequest,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
   if (!supported) return false;
-  if ((channelsWithInflightRequest || []).length === 0) return false;
+  if (channelsPendingRequest.length === 0) return false;
+
   const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
   const doneRequests = _.intersection(
     allocationItems.map(allocationItem => allocationItem.destination),
-    channelsWithInflightRequest.map(destination => destination.channelId)
+    channelsPendingRequest.map(destination => destination.channelId)
   ).filter(
     req =>
       !_.includes(

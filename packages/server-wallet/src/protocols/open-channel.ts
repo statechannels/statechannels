@@ -26,7 +26,6 @@ export type ProtocolState = {
   fundingChannel?: ChannelState;
   ledgerFundingRequested?: boolean;
   channelsPendingRequest?: ChannelState[];
-  channelsWithInflightRequest?: ChannelState[];
 };
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
@@ -186,7 +185,6 @@ export const protocol: Protocol<ProtocolState> = (
   (ps.ledgerFundingRequested &&
     !!ps.fundingChannel &&
     !!ps.channelsPendingRequest &&
-    !!ps.channelsWithInflightRequest &&
     ledgerFundingProtocol(ps as LedgerFundingProtocolState)) ||
   signPostFundSetup(ps) ||
   fundChannel(ps) ||

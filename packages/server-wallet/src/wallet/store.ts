@@ -526,7 +526,7 @@ export class Store {
 
   async markRequests(
     channelIds: Bytes32[],
-    status: 'pending' | 'approved' | 'succeeded',
+    status: 'pending' | 'succeeded',
     tx?: Transaction
   ): Promise<void> {
     for (const channelId of channelIds) {
@@ -563,7 +563,6 @@ export class Store {
             ledgerFundingRequested: true,
             fundingChannel: await this.getChannel(update.ledgerChannelId, tx),
             channelsPendingRequest: await getChannelsForRequests('pending'),
-            channelsWithInflightRequest: await getChannelsForRequests('approved'),
           };
         }
       }
