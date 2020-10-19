@@ -22,8 +22,8 @@ const prefundState2 = {outcome: outcome2, turnNum: 0, participants};
 const postFundState = {outcome, turnNum: 2, participants};
 const closingState = {outcome, turnNum: 4, isFinal: true, participants};
 
-const runningState = {outcome, turnNum: 7, participants: [alice(), bob()]};
-const closingState2 = {outcome, turnNum: 8, isFinal: true, participants: [alice(), bob()]};
+const runningState = {outcome, turnNum: 7, participants};
+const closingState2 = {outcome, turnNum: 8, isFinal: true, participants};
 
 const funded = (): Uint256 => BN.from(5);
 const notFunded = (): Uint256 => BN.from(0);
