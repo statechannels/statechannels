@@ -53,8 +53,7 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {OpenChannelObjective} from '../models/open-channel-objective';
-import {CloseChannelObjective} from '../models/close-channel-objective';
+import {Objective as ObjectiveModel} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
@@ -368,12 +367,12 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
-    const objective = await OpenChannelObjective.forTargetChannelId(channelId, this.knex);
+    const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
 
     if (objective === undefined)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    await OpenChannelObjective.approve(objective.objectiveId, this.knex);
+    await ObjectiveModel.approve(objective.objectiveId, this.knex);
     // END FIXME
 
     const {outbox, channelResult} = await this.store.lockApp(
@@ -462,7 +461,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       const objective: Objective = {
         type: 'CloseChannel',
         participants: [],
-        data: {targetChannelId: channelId},
+        data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
       };
 
       const objectiveToStore: ObjectiveStoredInDB = {
@@ -470,7 +469,7 @@ export class Wallet extends EventEmitter<WalletEvent>
         status: 'approved',
         objectiveId: channel.latest.channelNonce,
       };
-      await CloseChannelObjective.insert(objectiveToStore, tx);
+      await ObjectiveModel.insert(objectiveToStore, tx);
     };
 
     await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
@@ -481,7 +480,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       {
         type: 'CloseChannel',
         participants: [],
-        data: {targetChannelId: channelId},
+        data: {targetChannelId: channelId, fundingStrategy: },
       },
     ];
 
@@ -570,8 +569,8 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const objectives = [
       // Only supports these two
-      ...(await OpenChannelObjective.forTargetChannelIds(channels, this.store.knex)),
-      ...(await CloseChannelObjective.forTargetChannelIds(channels, this.store.knex)),
+      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
+      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
     ]
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
@@ -626,9 +625,9 @@ export class Wallet extends EventEmitter<WalletEvent>
               return;
             case 'CompleteObjective':
               if (objective.type === 'OpenChannel')
-                await OpenChannelObjective.succeed(objective.objectiveId, tx);
+                await ObjectiveModel.succeed(objective.objectiveId, tx);
               if (objective.type === 'CloseChannel')
-                await CloseChannelObjective.succeed(objective.objectiveId, tx);
+                await ObjectiveModel.succeed(objective.objectiveId, tx);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               return;
             default:
