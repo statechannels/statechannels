@@ -148,7 +148,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     if (walletConfig?.rpcEndpoint && walletConfig.serverPrivateKey) {
       this.chainService = new ChainService(walletConfig.rpcEndpoint, walletConfig.serverPrivateKey);
     } else {
-      logger.warn(
+      logger.debug(
         'rpcEndpoint and serverPrivateKey must be defined for the wallet to use chain service'
       );
       this.chainService = new MockChainService();
