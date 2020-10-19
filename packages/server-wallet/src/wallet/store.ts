@@ -50,8 +50,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
-import {OpenChannelObjective} from '../models/open-channel-objective';
-import {CloseChannelObjective} from '../models/close-channel-objective';
+import {Objective as ObjectiveModel} from '../models/objective';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -354,7 +353,7 @@ export class Store {
       };
 
       // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      await OpenChannelObjective.insert(objectiveToBeStored, tx);
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
@@ -365,7 +364,7 @@ export class Store {
       return objectiveToBeStored;
     } else if (objective.type === 'CloseChannel') {
       const {
-        data: {targetChannelId},
+        data: {targetChannelId, fundingStrategy},
       } = objective;
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(targetChannelId, tx);
@@ -380,10 +379,11 @@ export class Store {
         participants: [],
         data: {
           targetChannelId,
+          fundingStrategy,
         },
       };
       // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      await CloseChannelObjective.insert(objectiveToBeStored, tx);
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       return objectiveToBeStored;
     } else {
@@ -525,7 +525,7 @@ export class Store {
         status: 'approved',
       };
 
-      if (isOpenChannel(objective)) await OpenChannelObjective.insert(objectiveToBeStored, tx);
+      if (isOpenChannel(objective)) await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
     });
