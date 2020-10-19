@@ -146,6 +146,7 @@ export class Channel extends Model implements RequiredColumns {
     const {
       channelId,
       myIndex,
+      channelNonce,
       supported,
       latest,
       latestSignedByMe,
@@ -161,6 +162,7 @@ export class Channel extends Model implements RequiredColumns {
     };
     return {
       myIndex: myIndex as 0 | 1,
+      channelNonce,
       participants,
       channelId,
       supported,

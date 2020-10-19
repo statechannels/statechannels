@@ -6,6 +6,7 @@ import {alice, bob} from '../../../wallet/__test__/fixtures/participants';
 
 const defaultChannelState: ChannelStateWithSupported = {
   channelId: '0x1234',
+  channelNonce: 1,
   myIndex: 0,
   participants: [alice(), bob()],
   supported: stateWithHashSignedBy()({turnNum: 3}),
