@@ -744,11 +744,7 @@ async function recoverParticipantSignatures(
 }
 
 function validateStateFreshness(signedState: State, channel: Channel): void {
-  if (
-    channel.latestSignedByMe &&
-    channel.latestSignedByMe.turnNum >= signedState.turnNum &&
-    channel.latest.appDefinition !== '0x0000000000000000000000000000000000000000'
-  ) {
+  if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {
     throw new StoreError(StoreError.reasons.staleState);
   }
 }
