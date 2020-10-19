@@ -1,16 +1,35 @@
 {
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.workingDirectories": [
-    {"directory": "packages/iframe-channel-provider", "changeProcessCWD": true},
-    {"directory": "packages/devtools", "changeProcessCWD": true},
-    {"directory": "packages/hub", "changeProcessCWD": true},
-    {"directory": "packages/jest-gas-reporter", "changeProcessCWD": true},
-    {"directory": "packages/nitro-protocol", "changeProcessCWD": true},
-    {"directory": "packages/channel-client", "changeProcessCWD": true},
-    {"directory": "packages/rps", "changeProcessCWD": true},
-    {"directory": "packages/tic-tac-toe", "changeProcessCWD": true},
-    {"directory": "packages/xstate-wallet", "changeProcessCWD": true},
-    {"directory": "packages/wallet-core", "changeProcessCWD": true}
+    {"directory": "packages/benchmarking", "changeProcessCWD": true },
+    {"directory": "packages/channel-client", "changeProcessCWD": true },
+    {"directory": "packages/client-api-schema", "changeProcessCWD": true },
+    {"directory": "packages/devtools", "changeProcessCWD": true },
+    {"directory": "packages/docs-website", "changeProcessCWD": true },
+    {"directory": "packages/iframe-channel-provider", "changeProcessCWD": true },
+    {"directory": "packages/integration-tests", "changeProcessCWD": true },
+    {"directory": "packages/jest-gas-reporter", "changeProcessCWD": true },
+    {"directory": "packages/nitro-protocol", "changeProcessCWD": true },
+    {"directory": "packages/server-wallet", "changeProcessCWD": true },
+    {"directory": "packages/wallet-core", "changeProcessCWD": true },
+    {"directory": "packages/wire-format", "changeProcessCWD": true },
+    {"directory": "packages/xstate-wallet", "changeProcessCWD": true }
   ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.wordWrapColumn": 100,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
