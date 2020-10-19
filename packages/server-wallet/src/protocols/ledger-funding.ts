@@ -15,7 +15,7 @@ import {
   LedgerProtocolAction,
   MarkLedgerFundingRequestsAsComplete,
   noAction,
-  SignLedgerStateForRequests,
+  SignState,
   signState,
 } from './actions';
 
@@ -70,7 +70,7 @@ const computeNewOutcome = ({
     participants: {length: n},
   },
   channelsPendingRequest,
-}: ProtocolState): SignLedgerStateForRequests | false => {
+}: ProtocolState): SignState | false => {
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
@@ -116,16 +116,12 @@ const computeNewOutcome = ({
     }
   }
 
-  return {
-    ...signState({
-      channelId,
-      ...supported,
-      outcome: newOutcome,
-      turnNum: newTurnNum,
-    }),
-
-    type: 'SignLedgerStateForRequests',
-  };
+  return signState({
+    channelId,
+    ...supported,
+    outcome: newOutcome,
+    turnNum: newTurnNum,
+  });
 };
 
 const markRequestsAsComplete = ({

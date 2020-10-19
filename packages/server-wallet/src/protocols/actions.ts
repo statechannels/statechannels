@@ -25,10 +25,6 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
-export type SignLedgerStateForRequests = StateVariables & {
-  type: 'SignLedgerStateForRequests';
-  channelId: Bytes32;
-};
 export type MarkLedgerFundingRequestsAsComplete = {
   type: 'MarkLedgerFundingRequestsAsComplete';
   doneRequests: Bytes32[];
@@ -63,14 +59,13 @@ export type OpenChannelProtocolAction =
   | FundChannel
   | RequestLedgerFunding
   | CompleteObjective
-  | SignLedgerStateForRequests
   | MarkLedgerFundingRequestsAsComplete;
 
 export type CloseChannelProtocolAction = SignState | CompleteObjective;
 
 export type LedgerProtocolAction =
-  | SignLedgerStateForRequests
   | MarkLedgerFundingRequestsAsComplete
+  | SignState
   | CompleteObjective;
 
 export type ProtocolAction =

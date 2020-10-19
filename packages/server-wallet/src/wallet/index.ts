@@ -648,11 +648,22 @@ export class Wallet extends EventEmitter<WalletEvent>
           try {
             switch (action.type) {
               case 'SignState': {
-                const {myIndex, participants, channelId} = app;
-                const signedState = await this.store.signState(action.channelId, action, tx);
-                createOutboxFor(channelId, myIndex, participants, {
-                  signedStates: [signedState],
-                }).map(outgoing => outbox.push(outgoing));
+                const {myIndex, participants, channelId} =
+                  // NOTE: This may be effected in the future by other kinds of protocol state
+                  // fields, e.g., virtual, guarantor channel, etc. There is a design decision
+                  // around re-using SignState for each one or if we ought to simplify
+                  action.channelId === app.channelId
+                    ? app
+                    : /* eslint-disable-line */ protocolState.fundingChannel!;
+
+                const payload = {
+                  signedStates: [await this.store.signState(channelId, action, tx)],
+                };
+
+                const messages = createOutboxFor(channelId, myIndex, participants, payload);
+
+                messages.forEach(message => outbox.push(message));
+
                 return;
               }
               case 'FundChannel':
@@ -672,16 +683,6 @@ export class Wallet extends EventEmitter<WalletEvent>
                 return;
               case 'RequestLedgerFunding': {
                 await this.store.requestLedgerFunding(app, tx);
-                return;
-              }
-
-              case 'SignLedgerStateForRequests': {
-                // eslint-disable-next-line
-                const {myIndex, participants} = protocolState.fundingChannel!;
-                const signedState = await this.store.signState(action.channelId, action, tx);
-                createOutboxFor(action.channelId, myIndex, participants, {
-                  signedStates: [signedState],
-                }).map(outgoing => outbox.push(outgoing));
                 return;
               }
 
