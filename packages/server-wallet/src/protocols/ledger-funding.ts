@@ -96,8 +96,10 @@ const computeNewOutcome = ({
   // Avoid repeating action if awaiting response (for original proposal or counterproposal)
   if ((!receivedOriginal && sentOriginal) || (!receivedMerged && sentMerged)) return false;
 
-  // Expect the new outcome to be supported allocating _all_ pending requests
+  // The new outcome is the supported outcome, funding all pending ledger requests
   const myExpectedOutcome =
+    // If you already proposed an update though, re-use that,
+    // don't re-compute (set of pending requests may have changed)
     sentOriginal || sentMerged
       ? myLatestOutcome
       : foldAllocateToTarget(supportedOutcome, channelsPendingRequest);
