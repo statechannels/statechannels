@@ -23,6 +23,7 @@ import {
   isOpenChannel,
   convertToParticipant,
   SignedState,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -67,7 +68,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export type ObjectiveStoredInDB = Objective & {
-  objectiveId: number;
+  objectiveId: string;
   status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 };
 
@@ -342,7 +343,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
       const objectiveToBeStored: ObjectiveStoredInDB = {
-        objectiveId: channel.channelNonce /* TODO: (Stored Objectives) id strategy */,
+        objectiveId: objectiveId(objective),
         participants: [],
         status: 'pending',
         type: objective.type,
@@ -373,7 +374,7 @@ export class Store {
       }
 
       const objectiveToBeStored: ObjectiveStoredInDB = {
-        objectiveId: channel.channelNonce,
+        objectiveId: objectiveId(objective),
         status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
         type: objective.type,
         participants: [],
@@ -531,7 +532,7 @@ export class Store {
 
       const objectiveToBeStored: ObjectiveStoredInDB = {
         ...objective,
-        objectiveId: constants.channelNonce,
+        objectiveId: objectiveId(objective),
         status: 'approved',
       };
 
