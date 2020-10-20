@@ -1,5 +1,9 @@
 import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
 import _ from 'lodash';
+import {Transaction} from 'knex';
+
+import {Store} from '../wallet/store';
+import {Bytes32} from '../type-aliases';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
 import {
@@ -131,3 +135,24 @@ export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolRe
   fundChannel(ps) ||
   completeOpenChannel(ps) ||
   noAction;
+
+/**
+ * Helper method to retrieve scoped data needed for OpenChannel protocol.
+ */
+export const getOpenChannelProtocolState = async (
+  store: Store,
+  channelId: Bytes32,
+  tx: Transaction
+): Promise<ProtocolState> => {
+  const app = await store.getChannel(channelId, tx);
+  switch (app.fundingStrategy) {
+    case 'Direct':
+    case 'Unfunded':
+      return {app};
+    case 'Ledger':
+    case 'Unknown':
+    case 'Virtual':
+    default:
+      throw new Error('getOpenChannelProtocolState: Unimplemented funding strategy');
+  }
+};
