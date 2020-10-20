@@ -5,20 +5,12 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
-beforeEach(async () => {
+beforeAll(async () => {
   w = new Wallet(defaultTestConfig);
-  await new DBAdmin(w.knex).truncateDB();
+  await seedAlicesSigningWallet(w.knex);
 });
-
-afterEach(async () => {
-  await w.knex.destroy();
-  await w.manager.destroy();
-});
-
-beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
 afterAll(async () => {
   await w.destroy();
