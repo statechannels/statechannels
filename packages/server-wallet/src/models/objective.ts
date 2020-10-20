@@ -1,5 +1,12 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
-import {CloseLedger, FundGuarantor, FundLedger, VirtuallyFund} from '@statechannels/wallet-core';
+import {
+  CloseLedger,
+  FundGuarantor,
+  FundLedger,
+  objectiveId,
+  VirtuallyFund,
+  Objective as ObjectiveType,
+} from '@statechannels/wallet-core';
 import {CloseChannel, OpenChannel} from '@statechannels/wire-format';
 import {Model, TransactionOrKnex} from 'objection';
 
@@ -69,16 +76,18 @@ export class Objective extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: ObjectiveStoredInDB,
+    objectiveToBeStored: ObjectiveType & {
+      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+    },
     tx: TransactionOrKnex
   ): Promise<Objective> {
     switch (objectiveToBeStored.type) {
       case 'OpenChannel':
       case 'CloseChannel':
         return Objective.query(tx).insert({
-          objectiveId: objectiveToBeStored.objectiveId,
+          objectiveId: objectiveId(objectiveToBeStored),
           status: objectiveToBeStored.status,
-          type: 'CloseChannel',
+          type: objectiveToBeStored.type,
           targetChannelId: objectiveToBeStored.data.targetChannelId,
           fundingStrategy: objectiveToBeStored.data.fundingStrategy,
         });
@@ -109,18 +118,18 @@ export class Objective extends Model {
     return objectives.map(extract);
   }
 
-  static async forId(objectiveId: number, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
+  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
     const objective = await Objective.query(tx).findById(objectiveId);
     return extract(objective);
   }
 
-  static async approve(objectiveId: number, tx: TransactionOrKnex): Promise<void> {
+  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
     await Objective.query(tx)
       .findById(objectiveId)
       .patch({status: 'approved'});
   }
 
-  static async succeed(objectiveId: number, tx: TransactionOrKnex): Promise<void> {
+  static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
     await Objective.query(tx)
       .findById(objectiveId)
       .patch({status: 'succeeded'});
