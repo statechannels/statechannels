@@ -35,6 +35,7 @@ import {Outgoing} from '../protocols/actions';
 import {logger} from '../logger';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
+import * as LedgerProtocol from '../protocols/ledger-funding';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
@@ -321,14 +322,15 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
-    const results = await Promise.all(channelIds.map(channelId => this.joinChannel({channelId})));
+    const results = await Promise.all(
+      channelIds.map(channelId => this.joinChannel({channelId}, false))
+    );
 
-    const channelResults = results.map(r => r.channelResult);
-    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+    const {outbox: nextOutbox, channelResults} = await this.takeActions(channelIds);
 
     return {
+      outbox: mergeOutgoing(nextOutbox.concat(results.flatMap(r => r.outbox))),
       channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outgoing),
     };
   }
 
@@ -344,11 +346,13 @@ export class Wallet extends EventEmitter<WalletEvent>
     } else throw Error('[unimplemented] You may only approve a JoinChannel objective');
   }
 
-  async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+  async joinChannel({channelId}: JoinChannelParams, crank = true): Promise<SingleChannelOutput> {
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const {myIndex, participants} = channel;
 
       const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
+
+      // TODO: Don't sign at this point, sign as part of an objective
       const signedState = await this.store.signState(channelId, nextState, tx);
 
       return {
@@ -382,15 +386,21 @@ export class Wallet extends EventEmitter<WalletEvent>
       criticalCode,
       handleMissingChannel
     );
-    const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
-    const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
-    this.registerChannelWithChainService(nextChannelResult);
+    await this.registerChannelWithChainService(channelResult);
 
-    return {
-      outbox: mergeOutgoing(outbox.concat(nextOutbox)),
-      channelResult: nextChannelResult,
-    };
+    // We don't crank if this gets called as part of joinChannels API
+    if (crank) {
+      const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
+      const nextChannelResult =
+        channelResults.find(c => c.channelId === channelId) || channelResult;
+      return {
+        outbox: mergeOutgoing(outbox.concat(nextOutbox)),
+        channelResult: nextChannelResult,
+      };
+    }
+
+    return {outbox, channelResult};
   }
 
   async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
@@ -576,129 +586,205 @@ export class Wallet extends EventEmitter<WalletEvent>
     const channelResults: ChannelResult[] = [];
     let error: Error | undefined = undefined;
 
-    // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
-    const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
-    const channelsWithPendingReqs = (
-      await Promise.all(ledgers.map(ledger => this.store.getPendingLedgerRequests(ledger)))
-    )
-      .flat()
-      .map(x => x.fundingChannelId);
-
-    // FIXME: Only get objectives which are:
-    // 1. Approved but not executed yet
-    // 2. Related to one of the channels
-
-    const objectives = (
-      await ObjectiveModel.forTargetChannelIds(
-        channels.concat(channelsWithPendingReqs),
-        this.store.knex
+    const crankToCompletion = async () => {
+      // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
+      const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
+      const channelsWithPendingReqs = (
+        await Promise.all(ledgers.map(ledger => this.store.getPendingLedgerRequests(ledger)))
       )
-    )
-      .filter(x => x !== undefined)
-      .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
+        .flat()
+        .map(x => x.fundingChannelId);
 
-    while (objectives.length && !error) {
-      const objective = objectives[0];
+      const objectives = (
+        await ObjectiveModel.forTargetChannelIds(
+          channels.concat(channelsWithPendingReqs),
+          this.store.knex
+        )
+      )
+        .filter(x => x !== undefined)
+        .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
-      if (objective == undefined) throw new Error('Got an undefined objective '); // TODO Don't want to do this but it's a bit tricky getting type inference with Array.filter
+      while (objectives.length && !error) {
+        const objective = objectives[0];
 
-      if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
-        throw new Error('not implememnted');
+        if (objective == undefined) throw new Error('Got an undefined objective '); // TODO Don't want to do this but it's a bit tricky getting type inference with Array.filter
 
-      const channel = objective.data.targetChannelId;
+        if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
+          throw new Error('not implememnted');
 
-      await this.store.lockApp(channel, async tx => {
-        // For the moment, we are only considering directly funded app channels.
-        // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-        // In the future, we can have an App model which collects all the relevant channels for an app channel,
-        // and a Ledger model which stores ledger-specific data (eg. queued requests)
-        const app = await this.store.getChannel(channel, tx);
+        const channel = objective.data.targetChannelId;
 
-        if (!app) {
-          throw new Error('Channel not found');
-        }
+        await this.store.lockApp(channel, async tx => {
+          // For the moment, we are only considering directly funded app channels.
+          // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
+          // In the future, we can have an App model which collects all the relevant channels for an app channel,
+          // and a Ledger model which stores ledger-specific data (eg. queued requests)
+          const app = await this.store.getChannel(channel, tx);
 
-        const setError = async (e: Error): Promise<void> => {
-          error = e;
-          await tx.rollback(error);
-        };
-
-        const markObjectiveAsDone = (): void => {
-          objectives.shift();
-          channelResults.push(ChannelState.toChannelResult(app));
-        };
-
-        const fsm = {
-          OpenChannel: OpenChannelProtocol,
-          CloseChannel: CloseChannelProtocol,
-        }[objective.type];
-
-        const protocolState = {
-          OpenChannel: await this.store.getOpenChannelProtocolState(app, tx),
-          CloseChannel: await this.store.getOpenChannelProtocolState(app, tx),
-        }[objective.type];
-
-        const action = recordFunctionMetrics(
-          fsm.protocol(protocolState),
-          this.walletConfig.timingMetrics
-        );
-
-        if (!action) markObjectiveAsDone();
-        else {
-          try {
-            switch (action.type) {
-              case 'SignState': {
-                const {myIndex, participants, channelId} =
-                  // NOTE: This may be effected in the future by other kinds of protocol state
-                  // fields, e.g., virtual, guarantor channel, etc. There is a design decision
-                  // around re-using SignState for each one or if we ought to simplify
-                  action.channelId === app.channelId
-                    ? app
-                    : /* eslint-disable-line */ protocolState.fundingChannel!;
-
-                const payload = {
-                  signedStates: [await this.store.signState(channelId, action, tx)],
-                };
-
-                const messages = createOutboxFor(channelId, myIndex, participants, payload);
-
-                messages.forEach(message => outbox.push(message));
-
-                return;
-              }
-              case 'FundChannel':
-                await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-                await this.chainService.fundChannel({
-                  ...action,
-                  expectedHeld: BN.from(action.expectedHeld),
-                  amount: BN.from(action.amount),
-                });
-                return;
-              case 'CompleteObjective':
-                if (objective.type === 'OpenChannel')
-                  await ObjectiveModel.succeed(objective.objectiveId, tx);
-                if (objective.type === 'CloseChannel')
-                  await ObjectiveModel.succeed(objective.objectiveId, tx);
-                markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
-                return;
-              case 'RequestLedgerFunding': {
-                await this.store.requestLedgerFunding(app, tx);
-                return;
-              }
-
-              case 'MarkLedgerFundingRequestsAsComplete':
-                await this.store.markRequestsAsComplete(action.doneRequests, tx);
-                return;
-
-              default:
-                throw 'Unimplemented';
-            }
-          } catch (err) {
-            logger.error({err}, 'Error handling action');
-            await setError(err);
+          if (!app) {
+            throw new Error('Channel not found');
           }
-        }
-      });
+
+          const setError = async (e: Error): Promise<void> => {
+            error = e;
+            await tx.rollback(error);
+          };
+
+          const markObjectiveAsDone = (): void => {
+            objectives.shift();
+            channelResults.push(ChannelState.toChannelResult(app));
+          };
+
+          const fsm = {
+            OpenChannel: OpenChannelProtocol,
+            CloseChannel: CloseChannelProtocol,
+          }[objective.type];
+
+          const protocolState = {
+            OpenChannel: await this.store.getOpenChannelProtocolState(app, tx),
+            CloseChannel: await this.store.getOpenChannelProtocolState(app, tx),
+          }[objective.type];
+
+          const action = recordFunctionMetrics(
+            fsm.protocol(protocolState),
+            this.walletConfig.timingMetrics
+          );
+
+          if (!action) markObjectiveAsDone();
+          else {
+            try {
+              switch (action.type) {
+                case 'SignState': {
+                  const {myIndex, participants, channelId} =
+                    // NOTE: This may be effected in the future by other kinds of protocol state
+                    // fields, e.g., virtual, guarantor channel, etc. There is a design decision
+                    // around re-using SignState for each one or if we ought to simplify
+                    action.channelId === app.channelId
+                      ? app
+                      : /* eslint-disable-line */ protocolState.fundingChannel!;
+
+                  const payload = {
+                    signedStates: [await this.store.signState(channelId, action, tx)],
+                  };
+
+                  const messages = createOutboxFor(channelId, myIndex, participants, payload);
+
+                  messages.forEach(message => outbox.push(message));
+
+                  return;
+                }
+
+                case 'FundChannel':
+                  await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+                  await this.chainService.fundChannel({
+                    ...action,
+                    expectedHeld: BN.from(action.expectedHeld),
+                    amount: BN.from(action.amount),
+                  });
+                  return;
+
+                case 'CompleteObjective':
+                  if (objective.type === 'OpenChannel')
+                    await ObjectiveModel.succeed(objective.objectiveId, tx);
+                  if (objective.type === 'CloseChannel')
+                    await ObjectiveModel.succeed(objective.objectiveId, tx);
+                  // TODO: Awkward to use this for undefined and CompleteObjective
+                  markObjectiveAsDone();
+                  return;
+
+                case 'RequestLedgerFunding': {
+                  await this.store.requestLedgerFunding(app, tx);
+                  return;
+                }
+
+                case 'MarkLedgerFundingRequestsAsComplete':
+                  await this.store.markRequestsAsComplete(action.doneRequests, tx);
+                  return;
+
+                default:
+                  throw 'Unimplemented';
+              }
+            } catch (err) {
+              logger.error({err}, 'Error handling action');
+              await setError(err);
+            }
+          }
+        });
+      }
+    };
+
+    const processLedgerQueue = async (): Promise<boolean> => {
+      let didAnythingThatRequiresAnotherCrank = false;
+      const ledgersToProcess = Object.values(this.store.ledgers).filter(
+        async l => (await this.store.getPendingLedgerRequests(l.ledgerChannelId)).length > 0
+      );
+
+      while (ledgersToProcess.length && !error) {
+        const {ledgerChannelId} = ledgersToProcess[0];
+
+        await this.store.lockApp(ledgerChannelId, async tx => {
+          const ledger = await this.store.getChannel(ledgerChannelId, tx);
+
+          if (!ledger) {
+            throw new Error('Channel not found');
+          }
+
+          const setError = async (e: Error): Promise<void> => {
+            error = e;
+            await tx.rollback(error);
+          };
+
+          const markLedgerAsProcessed = (): void => {
+            ledgersToProcess.shift();
+            channelResults.push(ChannelState.toChannelResult(ledger));
+          };
+
+          const protocolState = await this.store.getLedgerProcessingProtocolState(ledger, tx);
+          const action = recordFunctionMetrics(
+            LedgerProtocol.protocol(protocolState),
+            this.walletConfig.timingMetrics
+          );
+
+          if (!action) markLedgerAsProcessed();
+          else {
+            try {
+              switch (action.type) {
+                case 'SignState': {
+                  const {myIndex, participants, channelId} = ledger;
+
+                  const payload = {
+                    signedStates: [await this.store.signState(channelId, action, tx)],
+                  };
+
+                  const messages = createOutboxFor(channelId, myIndex, participants, payload);
+
+                  messages.forEach(message => outbox.push(message));
+
+                  return;
+                }
+
+                case 'MarkLedgerFundingRequestsAsComplete':
+                  await this.store.markRequestsAsComplete(action.doneRequests, tx);
+                  didAnythingThatRequiresAnotherCrank = true;
+                  return;
+
+                default:
+                  throw 'Unimplemented';
+              }
+            } catch (err) {
+              logger.error({err}, 'Error handling action');
+              await setError(err);
+            }
+          }
+        });
+      }
+      return didAnythingThatRequiresAnotherCrank;
+    };
+
+    let needToCrank = true;
+    while (needToCrank) {
+      await crankToCompletion();
+      needToCrank = await processLedgerQueue();
     }
 
     return {outbox, error, channelResults};

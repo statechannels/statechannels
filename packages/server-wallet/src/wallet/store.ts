@@ -46,6 +46,7 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi, toChannelResult} from '../protocols/state';
 import {ProtocolState as OpenChannelProtocolState} from '../protocols/open-channel';
+import {ProtocolState as LedgerProtocolState} from '../protocols/ledger-funding';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -298,8 +299,11 @@ export class Store {
     return this.knex.transaction(async tx => {
       const channelResults: ChannelResult[] = [];
 
+      // Sorted to ensure channel nonces arrive in ascending order
+      const sortedSignedStates = (message.signedStates || []).sort();
+
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
-      for (const ss of message.signedStates || []) {
+      for (const ss of sortedSignedStates) {
         channelResults.push(
           (await this.addSignedState(ss.channelId, undefined, ss, tx)).channelResult
         );
@@ -411,9 +415,19 @@ export class Store {
         )
     );
 
+    maybeChannel =
+      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+
+    if (!maybeChannel) {
+      // TODO: Discuss where to put the code that bumps a channel nonce (is here ok?)
+      await Nonce.fromJson({
+        value: wireSignedState.channelNonce,
+        addresses: wireSignedState.participants.map(p => p.signingAddress),
+      }).use(tx);
+    }
+
     const channel =
       maybeChannel ||
-      (await timer('get channel', async () => getChannel(channelId, tx))) ||
       (await createChannel(
         {
           ...wireSignedState,
@@ -542,23 +556,10 @@ export class Store {
         const update = await this.ledgerRequests.getRequest(channel.channelId, tx);
         if (!update) return {app: channel, ledgerFundingRequested: false};
         else {
-          const requests = await this.ledgerRequests.getPendingRequests(update.ledgerChannelId, tx);
-
-          const getChannelsForRequests = async (
-            status: LedgerRequestStatus
-          ): Promise<ChannelState[]> =>
-            await Promise.all(
-              compose(
-                map((req: LedgerRequestType) => this.getChannel(req.fundingChannelId, tx)),
-                filter(['status', status])
-              )(requests)
-            );
-
           return {
             app: channel,
             ledgerFundingRequested: true,
             fundingChannel: await this.getChannel(update.ledgerChannelId, tx),
-            channelsPendingRequest: await getChannelsForRequests('pending'),
           };
         }
       }
@@ -568,6 +569,24 @@ export class Store {
         console.log(channel.fundingStrategy);
         throw new Error('getOpenChannelProtocolState: Unimplemented funding strategy');
     }
+  }
+
+  async getLedgerProcessingProtocolState(
+    ledger: ChannelState,
+    tx?: Transaction
+  ): Promise<LedgerProtocolState> {
+    const requests = await this.ledgerRequests.getPendingRequests(ledger.channelId, tx);
+    const getChannelsForRequests = async (status: LedgerRequestStatus): Promise<ChannelState[]> =>
+      await Promise.all(
+        compose(
+          map((req: LedgerRequestType) => this.getChannel(req.fundingChannelId, tx)),
+          filter(['status', status])
+        )(requests)
+      );
+    return {
+      fundingChannel: await this.getChannel(ledger.channelId, tx),
+      channelsPendingRequest: await getChannelsForRequests('pending'),
+    };
   }
 
   async createChannel(
@@ -687,16 +706,6 @@ async function createChannel(
     },
     ...CHANNEL_COLUMNS
   );
-
-  const nonce = await Nonce.query(txOrKnex)
-    .where('value', constants.channelNonce)
-    .first();
-
-  if (!nonce)
-    await Nonce.next(
-      txOrKnex,
-      constants.participants.map(p => p.signingAddress)
-    );
 
   const channel = Channel.fromJson(cols);
   return await Channel.query(txOrKnex)

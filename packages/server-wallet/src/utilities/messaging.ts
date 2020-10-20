@@ -57,7 +57,7 @@ function mergeProp<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
 }
 
 export function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
-  const sorted = _.orderBy(channelResults, ['channelNonce', 'turnNum'], ['asc', 'desc']);
+  const sorted = _.orderBy(channelResults, ['channelId', 'turnNum'], ['asc', 'desc']);
 
   return _.sortedUniqBy(sorted, a => a.channelId);
 }

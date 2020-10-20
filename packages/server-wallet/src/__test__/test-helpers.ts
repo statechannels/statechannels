@@ -1,4 +1,5 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {Payload, SignedState} from '@statechannels/wire-format';
 
 import {Outgoing} from '..';
 
@@ -19,4 +20,14 @@ export function getChannelResultFor(
   if (filteredChannelResults.length != 1)
     throw Error(`Expected exactly one channel result: found ${filteredChannelResults.length}`);
   return filteredChannelResults[0];
+}
+
+export function getSignedStateFor(channelId: string, outbox: Outgoing[]): SignedState {
+  // eslint-disable-next-line
+  const filteredSignedStates = (outbox[0]!.params.data as Payload).signedStates!.filter(
+    ss => ss.channelId === channelId
+  );
+  if (filteredSignedStates.length != 1)
+    throw Error(`Expected exactly one channel result: found ${filteredSignedStates.length}`);
+  return filteredSignedStates[0];
 }

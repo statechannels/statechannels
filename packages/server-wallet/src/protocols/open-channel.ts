@@ -14,18 +14,11 @@ import {
   OpenChannelProtocolAction,
   SignState,
 } from './actions';
-import {
-  protocol as ledgerFundingProtocol,
-  ProtocolState as LedgerFundingProtocolState,
-} from './ledger-funding';
 
 export type ProtocolState = {
-  // Direct channels only
   app: ChannelState;
-  // Ledger channels only
-  fundingChannel?: ChannelState;
   ledgerFundingRequested?: boolean;
-  channelsPendingRequest?: ChannelState[];
+  fundingChannel?: ChannelState;
 };
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
@@ -181,12 +174,4 @@ const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
 ): ProtocolResult<OpenChannelProtocolAction> =>
-  // TODO: Clean up this bizarre entrypoint into the ledger state machine
-  (ps.ledgerFundingRequested &&
-    !!ps.fundingChannel &&
-    !!ps.channelsPendingRequest &&
-    ledgerFundingProtocol(ps as LedgerFundingProtocolState)) ||
-  signPostFundSetup(ps) ||
-  fundChannel(ps) ||
-  completeOpenChannel(ps) ||
-  noAction;
+  signPostFundSetup(ps) || fundChannel(ps) || completeOpenChannel(ps) || noAction;

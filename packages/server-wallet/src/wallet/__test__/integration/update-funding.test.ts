@@ -10,6 +10,7 @@ import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
+import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 
 const {AddressZero} = ethers.constants;
 
@@ -67,7 +68,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     w.knex
   );
 
-  const result = await w.updateFundingForChannels(
+  const {outbox, channelResults} = await w.updateFundingForChannels(
     channelIds.map(cId => ({
       channelId: cId,
       token: '0x00',
@@ -83,22 +84,22 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     '0x04'
   );
 
-  expect(result).toMatchObject({
-    outbox: [
-      {
-        params: {
-          recipient: 'bob',
-          sender: 'alice',
-          data: {
-            signedStates: [
-              {turnNum: 2, channelNonce: 1},
-              {turnNum: 2, channelNonce: 2},
-            ],
-          },
-        },
-      },
-    ],
-    channelResults: channelIds.map(cId => ({channelId: cId, turnNum: 2})),
+  expect(getChannelResultFor(channelIds[0], channelResults)).toMatchObject({
+    turnNum: 2,
+  });
+
+  expect(getChannelResultFor(channelIds[1], channelResults)).toMatchObject({
+    turnNum: 2,
+  });
+
+  expect(getSignedStateFor(channelIds[0], outbox)).toMatchObject({
+    turnNum: 2,
+    channelNonce: 1,
+  });
+
+  expect(getSignedStateFor(channelIds[1], outbox)).toMatchObject({
+    turnNum: 2,
+    channelNonce: 2,
   });
 });
 

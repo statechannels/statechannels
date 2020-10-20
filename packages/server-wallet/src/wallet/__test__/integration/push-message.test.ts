@@ -6,6 +6,7 @@ import {
   makeDestination,
   SignedStateWithHash,
   SimpleAllocation,
+  serializeAllocation,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
@@ -23,6 +24,7 @@ import {stateVars} from '../fixtures/state-vars';
 import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 
 jest.setTimeout(100_000);
 
@@ -137,7 +139,7 @@ describe('channel results', () => {
 
     const p = wallet.pushMessage({signedStates: signedStates.map(s => serializeState(s))});
 
-    await expectResults(p, [{turnNum: six, appData: '0x0f00'}, {turnNum: five}]);
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
     const channelsAfter = await Channel.query(wallet.knex).select();
 
@@ -411,29 +413,19 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    const {
-      outbox: [
-        {
-          params: {data},
-        },
-      ],
-      channelResults: [appChannelResult],
-    } = await wallet.pushMessage({
+    const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
     });
 
-    // We then push in a fake message from Bob signging the prefund setup
-    expect(data).toMatchObject({
-      signedStates: [
-        // Serialized ledger update signed _only_ by Alice for wire message
-        serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
-      ],
-    });
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Serialized ledger update signed _only_ by Alice for wire message
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
 
-    expect(appChannelResult).toMatchObject({
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
       channelId: app.channelId,
       turnNum: 0,
-      // outcome: serializeOutcome(preFS.outcome), // TODO: (Liam) This is empty... not sure why
+      allocations: serializeAllocation(preFS.outcome),
       status: 'opening',
     });
 
@@ -451,35 +443,29 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    const {
-      outbox: [
-        {
-          params: {data},
-        },
-      ],
-      channelResults: [, appChannelResult],
-    } = await wallet.pushMessage({
+    const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [
         serializeState(stateWithHashSignedBy(bob())(latest)),
         serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState)),
       ],
     });
 
-    expect(data).toMatchObject({
-      signedStates: [
-        // Newly signed postfund setup of application channel
-        serializeState(
-          stateWithHashSignedBy(alice())({
-            ...latest,
-            turnNum: 2,
-          })
-        ),
-        // Countersigned ledger update
-        serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
-      ],
-    });
+    expect(getSignedStateFor(app.channelId, outbox)).toMatchObject(
+      // Newly signed postfund setup of application channel
+      serializeState(
+        stateWithHashSignedBy(alice())({
+          ...latest,
+          turnNum: 2,
+        })
+      )
+    );
 
-    expect(appChannelResult).toMatchObject({
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
       turnNum: 0,
       status: 'opening',
     });
@@ -497,32 +483,26 @@ describe('ledger funded app scenarios', () => {
       status: 'pending', // TODO: could this be approved?
     });
 
-    const {
-      outbox: [
-        {
-          params: {data},
-        },
-      ],
-      channelResults: [, appChannelResult],
-    } = await wallet.pushMessage({
+    const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState))],
     });
 
-    expect(data).toMatchObject({
-      signedStates: [
-        // Newly signed postfund setup of application channel
-        serializeState(
-          stateWithHashSignedBy(alice())({
-            ...latest,
-            turnNum: 2,
-          })
-        ),
-        // Countersigned ledger update
-        serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
-      ],
-    });
+    expect(getSignedStateFor(app.channelId, outbox)).toMatchObject(
+      // Newly signed postfund setup of application channel
+      serializeState(
+        stateWithHashSignedBy(alice())({
+          ...latest,
+          turnNum: 2,
+        })
+      )
+    );
 
-    expect(appChannelResult).toMatchObject({
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
       turnNum: 0,
       status: 'opening',
     });
@@ -541,25 +521,18 @@ describe('ledger funded app scenarios', () => {
     });
 
     const {
-      outbox: [
-        {
-          params: {data: payloadFromFirstPushMessage},
-        },
-      ],
-      channelResults: [appChannelResult1],
+      outbox: outboxFromFirstPushMessage,
+      channelResults: channelResults1,
     } = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
     });
 
-    // We then push in a fake message from Bob signging the prefund setup
-    expect(payloadFromFirstPushMessage).toMatchObject({
-      signedStates: [
-        // Serialized ledger update signed _only_ by Alice for wire message
-        serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState)),
-      ],
-    });
+    expect(getSignedStateFor(ledger.channelId, outboxFromFirstPushMessage)).toMatchObject(
+      // Serialized ledger update signed _only_ by Alice for wire message
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
 
-    expect(appChannelResult1).toMatchObject({
+    expect(getChannelResultFor(app.channelId, channelResults1)).toMatchObject({
       turnNum: 0,
       status: 'opening',
     });
@@ -580,12 +553,8 @@ describe('ledger funded app scenarios', () => {
     };
 
     const {
-      outbox: [
-        {
-          params: {data: payloadFromSecondPushMessage},
-        },
-      ],
-      channelResults: [, appChannelResult2],
+      outbox: outboxFromSecondPushMessage,
+      channelResults: channelResults2,
     } = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(conflictingUpdatedLedgerState))],
     });
@@ -595,14 +564,12 @@ describe('ledger funded app scenarios', () => {
       turnNum: 8,
     };
 
-    expect(payloadFromSecondPushMessage).toMatchObject({
-      signedStates: [
-        // Countersigned ledger update
-        serializeState(stateWithHashSignedBy(alice())(expectedResolvedUpdatedLedgerState)),
-      ],
-    });
+    expect(getSignedStateFor(ledger.channelId, outboxFromSecondPushMessage)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedResolvedUpdatedLedgerState))
+    );
 
-    expect(appChannelResult2).toMatchObject({
+    expect(getChannelResultFor(app.channelId, channelResults2)).toMatchObject({
       turnNum: 0,
       status: 'opening',
     });

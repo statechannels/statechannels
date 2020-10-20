@@ -18,6 +18,7 @@ import {alice as aliceP, bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {Objective as ObjectiveModel} from '../../../models/objective';
+import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -78,24 +79,20 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    const result = await w.joinChannels(channelIds);
-    expect(result).toMatchObject({
-      outbox: [
-        {
-          params: {
-            recipient: 'alice',
-            sender: 'bob',
-            data: {
-              signedStates: [
-                {...state1, turnNum: 1},
-                {...state2, turnNum: 1},
-              ],
-            },
-          },
-        },
-      ],
-      channelResults: [{channelId: c1.channelId}, {channelId: c2.channelId}],
+    const {outbox, channelResults} = await w.joinChannels(channelIds);
+
+    expect(getChannelResultFor(c1.channelId, channelResults)).toMatchObject({
+      channelId: c1.channelId,
+      turnNum: 1,
     });
+
+    expect(getChannelResultFor(c2.channelId, channelResults)).toMatchObject({
+      channelId: c2.channelId,
+      turnNum: 1,
+    });
+
+    expect(getSignedStateFor(c1.channelId, outbox)).toMatchObject({...state1, turnNum: 1});
+    expect(getSignedStateFor(c2.channelId, outbox)).toMatchObject({...state2, turnNum: 1});
 
     await Promise.all(
       channelIds.map(async c => {
@@ -272,9 +269,7 @@ describe('ledger funded app scenarios', () => {
   const putTestChannelInsideWallet = async (args: Objection.PartialModelObject<Channel>) => {
     const channel = await Channel.query(w.knex).insert(args);
 
-    // Add the objective into the wallets store (normally would have happened
-    // during createChannel or pushMessage call by the wallet)
-    await w.store.addObjective(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         participants: channel.participants,
@@ -282,13 +277,10 @@ describe('ledger funded app scenarios', () => {
           targetChannelId: channel.channelId,
           fundingStrategy: 'Ledger',
         },
+        status: 'approved',
       },
       w.knex
     );
-
-    // Approve the open channel request (normally would have happened
-    // during createChannel or joinChannel call by the wallet)
-    w.store.objectives[channel.channelNonce].status = 'approved';
 
     return channel;
   };

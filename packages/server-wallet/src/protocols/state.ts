@@ -85,7 +85,15 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
 
   const allocations = serializeAllocation(checkThat(outcome, isAllocation));
 
-  return {appData, appDefinition, channelId, participants, turnNum, allocations, status};
+  return {
+    appData,
+    appDefinition,
+    channelId,
+    participants,
+    turnNum,
+    allocations,
+    status,
+  };
 };
 
 /*

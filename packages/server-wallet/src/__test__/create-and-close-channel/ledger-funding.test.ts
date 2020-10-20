@@ -6,6 +6,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {BN, makeDestination} from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
+import {SignedState} from '@statechannels/wire-format';
 import {ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
@@ -17,6 +18,8 @@ const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 
 let participantA: Participant;
 let participantB: Participant;
+
+jest.setTimeout(100_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -50,10 +53,9 @@ afterAll(async () => {
  *
  * Note that this is just a simplification of the direct-funding test.
  */
-let ledgerChannelId: string;
-beforeEach(async () => {
-  const aDepositAmtETH = BN.from(5);
-  const bDepositAmtETH = BN.from(5);
+const createLedgerChannel = async (): Promise<string> => {
+  const aDepositAmtETH = BN.from(10);
+  const bDepositAmtETH = BN.from(10);
   const ledgerChannelArgs = {
     participants: [participantA, participantB],
     allocations: [
@@ -100,10 +102,11 @@ beforeEach(async () => {
   // FIXME: Should not need to do this
   a.__setLedger(channelId, ETH_ASSET_HOLDER_ADDRESS);
   b.__setLedger(channelId, ETH_ASSET_HOLDER_ADDRESS);
-  ledgerChannelId = channelId;
-});
 
-afterEach(async () => {
+  return channelId;
+};
+
+afterEach(() => {
   // TODO: Add to the truncate / dropDB method
   a.store.eraseLedgerDataFromMemory();
   b.store.eraseLedgerDataFromMemory();
@@ -114,8 +117,11 @@ describe('Funding a single channel', () => {
    * App channel used for the next three tests (open & close)
    */
   let channelId: string;
+  let ledgerChannelId: string;
 
   it('can fund a channel by ledger between two wallets ', async () => {
+    ledgerChannelId = await createLedgerChannel();
+
     // TODO: Play around with these numbers and test underflow scenarios
     const allocation: Allocation = {
       allocationItems: [
@@ -277,8 +283,109 @@ describe('Funding a single channel', () => {
   });
 });
 
-describe('Funding multiple channels concurrently', () => {
+describe('Funding multiple channels syncronously (in bulk)', () => {
+  const N = 10; // beforeEach creates a ledger channel with 10 ETH each
+
+  it(`can fund ${N} channels by ledger proposed by Alice`, async () => {
+    const ledgerChannelId = await createLedgerChannel();
+
+    // TODO: Play around with these numbers and test underflow scenarios
+    const allocation: Allocation = {
+      allocationItems: [
+        {
+          destination: participantA.destination,
+          amount: BN.from(1),
+        },
+        {
+          destination: participantB.destination,
+          amount: BN.from(1),
+        },
+      ],
+      token: ETH_ASSET_HOLDER_ADDRESS, // must be even length
+    };
+
+    const createChannelParams: CreateChannelParams = {
+      participants: [participantA, participantB],
+      allocations: [allocation],
+      appDefinition: ethers.constants.AddressZero,
+      appData: '0x00', // must be even length
+      fundingStrategy: 'Ledger',
+    };
+
+    // PreFund0A-1
+    // PreFund0A-2
+    const resultA0 = await a.createChannels(createChannelParams, N);
+
+    // FIXME: Sorting results by channelNonce (implied order of signed states)
+    // we should sort signedStates and channelResults in the same predictable way
+    // eslint-disable-next-line
+    const ss = (resultA0.outbox[0].params.data as any).signedStates as SignedState[];
+    const appChannels = resultA0.channelResults.sort(
+      (a, b) =>
+        ss.findIndex(s => s.channelId === a.channelId) -
+        ss.findIndex(s => s.channelId === b.channelId)
+    );
+
+    //    > PreFund0A-1
+    //    > PreFund0A-2
+    await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+
+    //           PreFund0B-1
+    //           PreFund0B-2
+    //     LedgerUpdateB-1+2
+    const resultB1 = await b.joinChannels(appChannels.map(c => c.channelId));
+
+    expect(resultB1.outbox[0].params.data).toMatchObject({
+      signedStates: [
+        {channelId: ledgerChannelId, turnNum: 5},
+        ...appChannels.map(({channelId}) => ({channelId, turnNum: 1})),
+      ],
+    });
+
+    //       PreFund0B-1 <
+    //       PreFund0B-2 <
+    // LedgerUpdateB-1+2 <
+    // LedgerUpdateA-1+2
+    // PostFundA-1
+    // PostFundA-2
+    const resultA1 = await a.pushMessage(
+      getPayloadFor(participantA.participantId, resultB1.outbox)
+    );
+
+    expect(resultA1.outbox[0].params.data).toMatchObject({
+      signedStates: [
+        {channelId: ledgerChannelId, turnNum: 5},
+        ...appChannels.map(({channelId}) => ({channelId, turnNum: 2})),
+      ],
+    });
+
+    //       > LedgerUpdateA-1+2
+    //       > PostFundA-1
+    //       > PostFundA-2
+    //       PostFundB-1
+    //       PostFundB-2
+    const resultB2 = await b.pushMessage(
+      getPayloadFor(participantB.participantId, resultA1.outbox)
+    );
+
+    expect(resultB2.outbox[0].params.data).toMatchObject({
+      signedStates: [...appChannels.map(({channelId}) => ({channelId, turnNum: 3}))],
+    });
+
+    //      < PostFundB-1
+    //      < PostFundB-2
+    const resultA3 = await a.pushMessage(
+      getPayloadFor(participantA.participantId, resultB2.outbox)
+    );
+
+    expect(resultA3.outbox).toMatchObject([]);
+  });
+});
+
+describe('Funding multiple channels concurrently (one sided)', () => {
   it('can fund 2 channels by ledger, both proposed by Alice', async () => {
+    const ledgerChannelId = await createLedgerChannel();
+
     // TODO: Play around with these numbers and test underflow scenarios
     const allocation: Allocation = {
       allocationItems: [
@@ -410,8 +517,12 @@ describe('Funding multiple channels concurrently', () => {
       ],
     });
   });
+});
 
+describe('Funding multiple channels concurrently (two sides)', () => {
   it('can fund 2 channels by ledger, different proposers for each', async () => {
+    const ledgerChannelId = await createLedgerChannel();
+
     // TODO: Play around with these numbers and test underflow scenarios
     const allocation: Allocation = {
       allocationItems: [
