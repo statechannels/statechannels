@@ -62,13 +62,16 @@ const addresses = {
 const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
+const oneHundredInternalTransfers = {ERC20: {}};
 
 for (let i = 0; i < 100; i++) {
   const destination = randomExternalDestination();
   addresses[i.toString()] = destination;
+  addresses['c' + i.toString()] = randomChannelId();
   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
+  if (i < 100) oneHundredInternalTransfers.ERC20['c' + i.toString()] = 1;
 }
 
 // Populate wallets and participants array
@@ -115,6 +118,7 @@ const accepts5 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
 const accepts6 = '10 TOK payouts';
 const accepts7 = '50 TOK payouts';
 const accepts8 = '100 TOK payouts';
+const accepts9 = '100 internal transfers';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
@@ -134,6 +138,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
     ${accepts6} | ${tenPayouts}                  | ${{ERC20: {c: 10}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${tenPayouts}                  | ${undefined}
     ${accepts7} | ${fiftyPayouts}                | ${{ERC20: {c: 50}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${fiftyPayouts}                | ${undefined}
     ${accepts8} | ${oneHundredPayouts}           | ${{ERC20: {c: 100}}}           | ${{ERC20: {c: 0}}}             | ${{}}      | ${oneHundredPayouts}           | ${undefined}
+    ${accepts9} | ${oneHundredInternalTransfers} | ${{ERC20: {c: 0}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{}}                          | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
