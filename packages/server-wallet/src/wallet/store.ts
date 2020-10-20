@@ -73,11 +73,6 @@ export type ObjectiveStoredInDB = Objective & {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  // FIXME: (Stored Objectives) Turn into a new DB table
-  public objectives: {
-    [objectiveId: number]: ObjectiveStoredInDB;
-  } = {};
-
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
