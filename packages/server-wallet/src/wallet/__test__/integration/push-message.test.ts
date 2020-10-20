@@ -10,7 +10,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
-import {OpenChannelObjective} from '../../../models/open-channel-objective';
+import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
@@ -182,7 +182,7 @@ describe('when the application protocol returns an action', () => {
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
 
-    await OpenChannelObjective.insert(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         objectiveId: 0,
