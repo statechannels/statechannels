@@ -11,11 +11,13 @@ import {
   noAction,
   fundChannel as requestFundChannel,
   FundChannel,
+  requestLedgerFunding as requestLedgerFundingAction,
+  RequestLedgerFunding,
   completeObjective,
   CompleteObjective,
 } from './actions';
 
-export type ProtocolState = {app: ChannelState};
+export type ProtocolState = {app: ChannelState; ledgerFundingRequested?: boolean};
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
@@ -28,17 +30,29 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 const isRunning = stageGuard('Running');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
-function isFunded({app: {funding, supported}}: ProtocolState): boolean {
-  if (!supported) return false;
+function isFunded({app: {funding, supported, fundingStrategy}}: ProtocolState): boolean {
+  switch (fundingStrategy) {
+    case 'Unfunded':
+      return true;
 
-  const allocation = checkThat(supported?.outcome, isSimpleAllocation);
+    case 'Direct': {
+      if (!supported) return false;
+      const allocation = checkThat(supported?.outcome, isSimpleAllocation);
+      const currentFunding = funding(allocation.assetHolderAddress);
+      const targetFunding = allocation.allocationItems
+        .map(a => a.amount)
+        .reduce(BN.add, BN.from(0));
+      const funded = BN.gte(currentFunding, targetFunding) ? true : false;
+      return funded;
+    }
 
-  const currentFunding = funding(allocation.assetHolderAddress);
+    case 'Ledger': {
+      return false;
+    }
 
-  const targetFunding = allocation.allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-  const funded = BN.gte(currentFunding, targetFunding) ? true : false;
-
-  return funded;
+    default:
+      throw new Error('isFunded: Undeterminable... unimplemented funding strategy');
+  }
 }
 
 // At the time of implementation, all particiapants sign turn 0 as prefund state
@@ -95,14 +109,24 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   });
 };
 
+const requestLedgerFunding = ({app}: ProtocolState): RequestLedgerFunding | false => {
+  if (!app.supported) return false;
+  const {assetHolderAddress} = checkThat(app.supported.outcome, isSimpleAllocation);
+  return requestLedgerFundingAction({
+    channelId: app.channelId,
+    assetHolderAddress,
+  });
+};
+
 const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
+const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
-  isDirectlyFunded(ps.app) &&
-  requestFundChannelIfMyTurn(ps);
+  ((isDirectlyFunded(ps.app) && requestFundChannelIfMyTurn(ps)) ||
+    (isLedgerFunded(ps.app) && !ps.ledgerFundingRequested && requestLedgerFunding(ps)));
 
 const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   !ps.app.latestSignedByMe &&
@@ -150,7 +174,12 @@ export const getOpenChannelProtocolState = async (
     case 'Direct':
     case 'Unfunded':
       return {app};
-    case 'Ledger':
+    case 'Ledger': {
+      return {
+        app,
+        ledgerFundingRequested: !!(await store.getPendingLedgerRequest(app.channelId, tx)),
+      };
+    }
     case 'Unknown':
     case 'Virtual':
     default:
