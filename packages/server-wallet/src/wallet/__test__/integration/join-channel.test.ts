@@ -61,7 +61,6 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
         },
         status: 'pending',
-        objectiveId: c1.channelNonce,
       },
       w.knex
     );
@@ -75,7 +74,6 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
         },
         status: 'pending',
-        objectiveId: c2.channelNonce,
       },
       w.knex
     );
@@ -129,7 +127,6 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
         },
         status: 'pending',
-        objectiveId: current.channelNonce,
       },
       w.knex
     );
@@ -168,7 +165,6 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
         },
         status: 'pending',
-        objectiveId: current.channelNonce,
       },
       w.knex
     );
