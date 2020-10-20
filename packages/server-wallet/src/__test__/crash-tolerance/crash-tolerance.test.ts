@@ -4,7 +4,7 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {calculateChannelId, makeDestination} from '@statechannels/wallet-core';
+import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultConfig as processEnvConfig} from '../../config';
