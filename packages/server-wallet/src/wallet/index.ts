@@ -23,6 +23,7 @@ import {
   assetHolderAddress as getAssetHolderAddress,
   Zero,
   Objective,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -467,7 +468,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       const objectiveToStore: ObjectiveStoredInDB = {
         ...objective,
         status: 'approved',
-        objectiveId: channel.latest.channelNonce,
+        objectiveId: objectiveId(objective),
       };
       await ObjectiveModel.insert(objectiveToStore, tx);
     };
