@@ -9,8 +9,14 @@ import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+<<<<<<< HEAD
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {OpenChannelObjective} from '../../../models/open-channel-objective';
+||||||| constructed merge base
+import {OpenChannelObjective} from '../../../models/open-channel-objective';
+=======
+import {Objective as ObjectiveModel} from '../../../models/objective';
+>>>>>>> refactor: remove unused model
 
 let w: Wallet;
 beforeEach(async () => {
@@ -46,7 +52,7 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c2);
     const channelIds = [c1, c2].map(c => c.channelId);
 
-    await OpenChannelObjective.insert(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         participants: c1.participants,
@@ -60,7 +66,7 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    await OpenChannelObjective.insert(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         participants: c2.participants,
@@ -114,7 +120,7 @@ describe('directly funded app', () => {
 
     expect(current.protocolState).toMatchObject({latest: preFS0, supported: undefined});
 
-    await OpenChannelObjective.insert(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         participants: current.participants,
@@ -153,7 +159,7 @@ describe('directly funded app', () => {
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS0);
 
-    await OpenChannelObjective.insert(
+    await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
         participants: current.participants,

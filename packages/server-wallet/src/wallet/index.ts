@@ -567,11 +567,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
 
-    const objectives = [
-      // Only supports these two
-      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
-      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
-    ]
+    const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
