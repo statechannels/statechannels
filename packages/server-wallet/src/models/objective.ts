@@ -70,7 +70,7 @@ export class Objective extends Model {
   readonly jointChannelId!: string;
   readonly guarantorId!: string;
 
-  static tableName = 'close-channel-objectives';
+  static tableName = 'objectives';
   static get idColumn(): string[] {
     return ['objectiveId'];
   }
