@@ -5,8 +5,8 @@ const tableName = 'objectives';
 export async function up(knex: Knex): Promise<any> {
   return knex.schema.createTable(tableName, function(table) {
     table.string('objective_id').primary();
-    table.string('status');
-    table.string('type');
+    table.string('status').notNullable();
+    table.string('type').notNullable();
     table.string('target_channel_id');
     table.string('funding_strategy');
     table.string('ledger_id');
