@@ -24,7 +24,11 @@ export class DBAdmin {
   }
 
   async migrateDB(): Promise<void> {
-    return this.knex.migrate.latest({directory: path.join(__dirname, '../db/migrations')});
+    const extensions = [path.extname(__filename)];
+    return this.knex.migrate.latest({
+      directory: path.join(__dirname, '../db/migrations'),
+      loadExtensions: extensions,
+    });
   }
 
   async truncateDB(
