@@ -12,6 +12,11 @@ export async function up(knex: Knex): Promise<any> {
     table.string('ledger_id');
     table.string('joint_channel_id');
     table.string('guarantor_id');
+
+    table.foreign('target_channel_id').references('channels.channel_id');
+    table.foreign('ledger_id').references('channels.channel_id');
+    table.foreign('joint_channel_id').references('channels.channel_id');
+    table.foreign('guarantor_id').references('channels.channel_id');
   });
 }
 
