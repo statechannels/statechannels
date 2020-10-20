@@ -7,12 +7,12 @@ import {
 import {makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
-import {defaultConfig as processEnvConfig} from '../../config';
+import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
-const a = new Wallet({...processEnvConfig, postgresDBName: 'TEST_A'});
-let b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
+const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
+let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;
@@ -84,7 +84,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
 
   // Destory Wallet b and restart Wallet b2
   await b.destroy();
-  b = new Wallet({...processEnvConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
+  b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
 
   //      PreFund0B
   const resultB1 = await b.joinChannel({channelId});
@@ -125,7 +125,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   const resultB2 = await b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-    status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
+    status: 'running', // Still opening because turnNum 3 is not supported yet, but is signed by A
     turnNum: 2,
   });
 
