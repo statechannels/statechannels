@@ -22,6 +22,10 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
+  Objective,
+  objectiveId,
+  checkThat,
+  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -593,8 +597,20 @@ export class Wallet extends EventEmitter<WalletEvent>
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
               // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              await this.chainService.concludeAndWithdraw([app.supported!]);
+              await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
               return;
+            case 'RequestLedgerFunding': {
+              const ledgerChannelId = await determineWhichLedgerToUse(
+                this.store,
+                protocolState.app
+              );
+              await this.store.requestLedgerFunding(
+                protocolState.app.channelId,
+                ledgerChannelId,
+                tx
+              );
+              return;
+            }
             default:
               throw 'Unimplemented';
           }
@@ -672,3 +688,24 @@ const createOutboxFor = (
       method: 'MessageQueued' as const,
       params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
     }));
+
+// TODO: Decide if we want to keep this functionality or change the OpenChannel
+// objective to include information about _which_ ledger is funding what
+const determineWhichLedgerToUse = async (
+  store: Store,
+  channel: ChannelState.ChannelState
+): Promise<Bytes32> => {
+  if (channel?.supported) {
+    const {assetHolderAddress} = checkThat(channel.supported.outcome, isSimpleAllocation);
+    const ledgerRecord = _.find(
+      Object.values(store.ledgers),
+      v => v.assetHolderAddress === assetHolderAddress
+    );
+    if (!ledgerRecord) {
+      throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
+    }
+    return ledgerRecord?.ledgerChannelId;
+  } else {
+    throw new Error('cannot fund unsupported app');
+  }
+};
