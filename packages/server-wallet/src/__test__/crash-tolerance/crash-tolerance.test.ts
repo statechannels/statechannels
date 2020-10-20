@@ -90,7 +90,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   const resultB1 = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
-    turnNum: 0,
+    turnNum: 1,
   });
 
   //  PreFund0B <
@@ -105,7 +105,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
 
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
     status: 'opening',
-    turnNum: 0,
+    turnNum: 1,
   });
 
   const depositByA = {channelId, token: '0x00', amount: BigNumber.from(1).toHexString()}; // A sends 1 ETH (1 total)
@@ -126,12 +126,12 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
-    turnNum: 0,
+    turnNum: 2,
   });
 
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by B
-    turnNum: 0,
+    turnNum: 1,
   });
 
   //  > PostFund3A
