@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@0.4.0...@statechannels/server-wallet@1.0.0) (2020-10-20)
+
+
+### Bug Fixes
+
+* add knex configuration to migrateDB ([4af7ade](https://github.com/statechannels/statechannels/commit/4af7ade2591a502db0d35a392485f817f20ed87f))
+* add skipEvm check ([f86e365](https://github.com/statechannels/statechannels/commit/f86e3659df613a1afea9b180c08dc0521269a8ae))
+* add support for 'Unfunded' funding strategy ([528e776](https://github.com/statechannels/statechannels/commit/528e77600ec54496f214f47406bdd6c22be4f82e))
+* bind registerAppDefintion ([348f321](https://github.com/statechannels/statechannels/commit/348f321cb33402bfc4a8478b323d1f43aa5a4338))
+* fix function name change ([69600bc](https://github.com/statechannels/statechannels/commit/69600bc0574c77cf78e4512eddb8a012beb69dd7))
+* get test passing ([cbf70f5](https://github.com/statechannels/statechannels/commit/cbf70f5b23dd5aebd41ad75b560b49f52c808996))
+* remove redundant destroy ([d7b0249](https://github.com/statechannels/statechannels/commit/d7b024957f3c72502f8d9e01dd1fdbe50da71f29))
+* remove unnecessary import of built javascript code ([0a42993](https://github.com/statechannels/statechannels/commit/0a42993dfb736b5e6f0a4d7a0f703d740f4d549c))
+* switch e2e to use test config ([02c0f28](https://github.com/statechannels/statechannels/commit/02c0f28b7cea392cda34f4995b5ad354d51146d2))
+* switch insert to upsert ([8f4db93](https://github.com/statechannels/statechannels/commit/8f4db931395a5a8d6c899b431d61c8866b793787))
+* update test to check for false ([8f28d32](https://github.com/statechannels/statechannels/commit/8f28d32f9aed6b1f940d6f3a9ea03cfb17c3ac32))
+* update test to use default test config ([b592c01](https://github.com/statechannels/statechannels/commit/b592c01d01f9a9c0422474f6b9dcf1e1a034ea8b))
+* use default test config in start.ts ([9034f49](https://github.com/statechannels/statechannels/commit/9034f49382b1d4d243f6f55d9a6f3af767577c71))
+
+
+### Code Refactoring
+
+* remove db-admin-connection.ts ([a4074a9](https://github.com/statechannels/statechannels/commit/a4074a984822ece0f8c6bca5184786a895888c07))
+
+
+### Features
+
+* Add Register App Definition ([18c34e0](https://github.com/statechannels/statechannels/commit/18c34e0a73a278226bca5e4b2ee371b9baea5a1f))
+* fail validation if no bytecode ([eb14b13](https://github.com/statechannels/statechannels/commit/eb14b13fc4dbb0caa41049977d166c5c62ff04f7))
+* increasing turn number for postfund setup ([9225c61](https://github.com/statechannels/statechannels/commit/9225c617ca83d99047a0f3d2ac8f77ec9f6a57dc)), closes [/www.notion.so/Server-wallet-application-Bob-Alice-communication-c0127c3196694e14bd0cf4858955fa96#032978ba91394e87a9774c94fb1222a0](https://github.com//www.notion.so/Server-wallet-application-Bob-Alice-communication-c0127c3196694e14bd0cf4858955fa96/issues/032978ba91394e87a9774c94fb1222a0)
+* prefund setup for b is now turn 1 ([660cce1](https://github.com/statechannels/statechannels/commit/660cce17d7794a913775dc3052d7ff868debb0ef))
+* unregisterChannel chain service api ([0b9b38d](https://github.com/statechannels/statechannels/commit/0b9b38d38e267610b7294419c549b8809068deb3))
+
+
+### BREAKING CHANGES
+
+* - Replicate node_env check in DBAdmin.truncateDB()
+- Use this ^ fn instead of truncate()
+- No longer use a separate "adminKnex"
+
+
+
+
+
 # 0.4.0 (2020-10-13)
 
 

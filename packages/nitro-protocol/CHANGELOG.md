@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.0...@statechannels/nitro-protocol@0.4.1) (2020-10-20)
+
+
+### Bug Fixes
+
+* use more robust check when converting address ([1351470](https://github.com/statechannels/monorepo/commit/1351470b5269356198e6fe5e6c4be517b0a94d26))
+
+
+
+
+
 # 0.4.0 (2020-10-13)
 
 
