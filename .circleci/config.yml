@@ -452,9 +452,9 @@ workflows:
           requires:
             - prepare
 
-      - server-wallet-profiling:
-          requires:
-            - prepare
+      # - server-wallet-profiling:
+      #     requires:
+      #       - prepare
       - server-wallet-stress-test:
           requires:
             - prepare
