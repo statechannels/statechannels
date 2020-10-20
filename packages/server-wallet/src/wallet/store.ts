@@ -638,7 +638,6 @@ class StoreError extends WalletError {
 
   static readonly reasons = {
     duplicateChannel: 'Expected the channel to NOT exist in the database',
-    duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
     invalidSignature: 'Invalid signature',
@@ -748,10 +747,6 @@ function validateInvariants(stateVars: SignedStateVarsWithHash[], myAddress: str
 
   const turnNums = _.map(stateVars, s => s.turnNum);
 
-  const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
-  if (duplicateTurnNums) {
-    throw new StoreError(StoreError.reasons.duplicateTurnNums);
-  }
   if (!isReverseSorted(turnNums)) {
     throw new StoreError(StoreError.reasons.notSorted);
   }
