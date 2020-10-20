@@ -333,7 +333,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
   }
 
-  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+  async approveObjective(objectiveId: string): Promise<SingleChannelOutput> {
     const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
 
     if (objective.type === 'OpenChannel') {
