@@ -86,7 +86,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   // after joinChannel, B signs PreFund1
   const bJoinChannelOutput = await b.approveObjective(
     // eslint-disable-next-line
-    bProposeChannelPushOutput.objectivesToApprove![0].objectiveId
+    bProposeChannelPushOutput.objectivesToApprove![0].objectiveId,
   );
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',

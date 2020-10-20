@@ -92,6 +92,7 @@ export type CloseChannel = _Objective<
   'CloseChannel',
   {
     targetChannelId: Bytes32;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<

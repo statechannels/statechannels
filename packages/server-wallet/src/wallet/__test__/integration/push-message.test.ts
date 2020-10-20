@@ -10,12 +10,17 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
+import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
 jest.setTimeout(20_000);
 
 const wallet = new Wallet(defaultTestConfig);
+
+beforeAll(async () => {
+  await wallet.dbAdmin().migrateDB();
+});
 
 afterAll(async () => {
   await wallet.destroy();
@@ -177,16 +182,18 @@ describe('when the application protocol returns an action', () => {
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
 
-    wallet.store.objectives[0] = {
-      type: 'OpenChannel',
-      objectiveId: 0,
-      status: 'approved',
-      participants: c.participants,
-      data: {
-        targetChannelId: c.channelId,
-        fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+    await ObjectiveModel.insert(
+      {
+        type: 'OpenChannel',
+        status: 'approved',
+        participants: c.participants,
+        data: {
+          targetChannelId: c.channelId,
+          fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+        },
       },
-    };
+      wallet.knex
+    );
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
     expect(c.supported).toBeUndefined();
@@ -223,6 +230,7 @@ describe('when the application protocol returns an action', () => {
           participants: [],
           data: {
             targetChannelId: channelId,
+            fundingStrategy: 'Direct',
           },
         },
       ],

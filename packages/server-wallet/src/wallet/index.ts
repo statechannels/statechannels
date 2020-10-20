@@ -23,6 +23,7 @@ import {
   assetHolderAddress as getAssetHolderAddress,
   Zero,
   Objective,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -37,7 +38,6 @@ import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
-import * as ApproveObjective from '../handlers/approve-objective';
 import * as ChannelState from '../protocols/state';
 import {isWalletError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
@@ -53,6 +53,7 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
+import {Objective as ObjectiveModel} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
@@ -331,29 +332,16 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
   }
 
-  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
-    const objective = this.store.objectives[objectiveId];
+  async approveObjective(objectiveId: string): Promise<SingleChannelOutput> {
+    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
 
-    if (!objective)
-      throw new ApproveObjective.ApproveObjectiveError(
-        ApproveObjective.ApproveObjectiveError.reasons.objectiveNotFound,
-        {objectiveId}
-      );
+    if (objective.type === 'OpenChannel') {
+      const {
+        data: {targetChannelId},
+      } = objective;
 
-    if (objective.type !== 'OpenChannel')
-      throw new ApproveObjective.ApproveObjectiveError(
-        ApproveObjective.ApproveObjectiveError.reasons.unimplemented,
-        {type: objective.type}
-      );
-
-    // FIXME: This should probably be done within the critical code of the joinChannel
-    this.store.objectives[objectiveId].status = 'approved';
-
-    const {
-      data: {targetChannelId},
-    } = objective;
-
-    return this.joinChannel({channelId: targetChannelId});
+      return this.joinChannel({channelId: targetChannelId});
+    } else throw Error('[unimplemented] You may only approve a JoinChannel objective');
   }
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
@@ -376,12 +364,12 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
-    /* eslint-disable-next-line */
-    const {objectiveId} = _.find(
-      this.store.objectives,
-      o => o.type === 'OpenChannel' && o.data.targetChannelId === channelId
-    )!;
-    this.store.objectives[objectiveId].status = 'approved';
+    const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+
+    if (objective === undefined)
+      throw new Error(`Could not find objective for channel ${channelId}`);
+
+    await ObjectiveModel.approve(objective.objectiveId, this.knex);
     // END FIXME
 
     const {outbox, channelResult} = await this.store.lockApp(
@@ -466,15 +454,16 @@ export class Wallet extends EventEmitter<WalletEvent>
 
       const objective: Objective = {
         type: 'CloseChannel',
-        data: {targetChannelId: channelId},
         participants: [],
+        data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
       };
 
-      this.store.objectives[channel.latest.channelNonce] = {
+      const objectiveToStore: ObjectiveStoredInDB = {
         ...objective,
         status: 'approved',
-        objectiveId: channel.latest.channelNonce,
+        objectiveId: objectiveId(objective),
       };
+      await ObjectiveModel.insert(objectiveToStore, tx);
     };
 
     await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
@@ -484,8 +473,8 @@ export class Wallet extends EventEmitter<WalletEvent>
     (outbox[0].params.data as Payload).objectives = [
       {
         type: 'CloseChannel',
-        data: {targetChannelId: channelId},
         participants: [],
+        data: {targetChannelId: channelId, fundingStrategy: 'Unknown'}, // TODO get this without another db tx
       },
     ];
 
@@ -571,19 +560,15 @@ export class Wallet extends EventEmitter<WalletEvent>
     // FIXME: Only get objectives which are:
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
-    const objectives = Object.values(this.store.objectives).filter(
-      objective =>
-        // Only supports these two
-        (objective.type === 'OpenChannel' || objective.type === 'CloseChannel') &&
-        // Only runs on those with relevant channels
-        _.includes(channels, objective.data.targetChannelId) &&
-        // Only runs on pending or approved
-        (objective.status === 'approved' || // Need approved b.c. next action to take
-          objective.status === 'pending') /* Need pending because you want new channel result */
-    );
+
+    const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
+      .filter(x => x !== undefined)
+      .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
     while (objectives.length && !error) {
       const objective = objectives[0];
+
+      if (objective == undefined) throw new Error('Got an undefined objective '); // TODO Don't want to do this but it's a bit tricky getting type inference with Array.filter
 
       if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
         throw new Error('not implememnted');
@@ -629,7 +614,10 @@ export class Wallet extends EventEmitter<WalletEvent>
               });
               return;
             case 'CompleteObjective':
-              this.store.objectives[objective.objectiveId].status = 'succeeded';
+              if (objective.type === 'OpenChannel')
+                await ObjectiveModel.succeed(objective.objectiveId, tx);
+              if (objective.type === 'CloseChannel')
+                await ObjectiveModel.succeed(objective.objectiveId, tx);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               return;
             default:

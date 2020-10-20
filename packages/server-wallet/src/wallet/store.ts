@@ -23,6 +23,7 @@ import {
   isOpenChannel,
   convertToParticipant,
   SignedState,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -50,6 +51,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
+import {Objective as ObjectiveModel} from '../models/objective';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -66,17 +68,12 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export type ObjectiveStoredInDB = Objective & {
-  objectiveId: number;
+  objectiveId: string;
   status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
-  // FIXME: (Stored Objectives) Turn into a new DB table
-  public objectives: {
-    [objectiveId: number]: ObjectiveStoredInDB;
-  } = {};
-
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
@@ -340,17 +337,19 @@ export class Store {
       if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[channel.channelNonce /* TODO: (Stored Objectives) id strategy */] = {
-        objectiveId: channel.channelNonce,
+      const objectiveToBeStored: ObjectiveStoredInDB = {
+        objectiveId: objectiveId(objective),
+        participants: [],
         status: 'pending',
         type: objective.type,
-        participants: channel.participants,
         data: {
           fundingStrategy,
           targetChannelId: channelId,
         },
       };
+
+      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
@@ -358,27 +357,31 @@ export class Store {
         .returning('*')
         .first();
 
-      return this.objectives[channel.channelNonce];
+      return objectiveToBeStored;
     } else if (objective.type === 'CloseChannel') {
       const {
-        data: {targetChannelId},
+        data: {targetChannelId, fundingStrategy},
       } = objective;
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(targetChannelId, tx);
       if (!channel) {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
       }
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
-      this.objectives[channel.channelNonce /* TODO: (Stored Objectives) id strategy */] = {
-        objectiveId: channel.channelNonce,
+
+      const objectiveToBeStored: ObjectiveStoredInDB = {
+        objectiveId: objectiveId(objective),
         status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
         type: objective.type,
-        participants: [], // TODO: (Stored Objectives) Unnecessary param ?
+        participants: [],
         data: {
           targetChannelId,
+          fundingStrategy,
         },
       };
-      return this.objectives[channel.channelNonce];
+      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
+
+      return objectiveToBeStored;
     } else {
       throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
@@ -492,8 +495,8 @@ export class Store {
        */
 
       const objective: Objective = {
-        participants: constants.participants,
         type: 'OpenChannel',
+        participants,
         data: {
           targetChannelId: channelId,
           fundingStrategy,
@@ -512,11 +515,13 @@ export class Store {
         params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
       }));
 
-      this.objectives[constants.channelNonce /* TODO: (Stored Objectives) id? */] = {
+      const objectiveToBeStored: ObjectiveStoredInDB = {
         ...objective,
-        objectiveId: constants.channelNonce,
+        objectiveId: objectiveId(objective),
         status: 'approved',
       };
+
+      if (isOpenChannel(objective)) await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
     });

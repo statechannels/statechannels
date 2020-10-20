@@ -103,6 +103,7 @@ export type CloseChannel = _Objective<
   'CloseChannel',
   {
     targetChannelId: string;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<
@@ -148,6 +149,20 @@ export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
 export const isCloseLedger = guard<CloseLedger>('CloseLedger');
+
+export function objectiveId(objective: Objective): string {
+  switch (objective.type) {
+    case 'OpenChannel':
+    case 'CloseChannel':
+    case 'VirtuallyFund':
+      return [objective.type, objective.data.targetChannelId].join('-');
+    case 'FundGuarantor':
+      return [objective.type, objective.data.guarantorId].join('-');
+    case 'FundLedger':
+    case 'CloseLedger':
+      return [objective.type, objective.data.ledgerId].join('-');
+  }
+}
 
 type GetChannel = {type: 'GetChannel'; channelId: string};
 export type ChannelRequest = GetChannel;
