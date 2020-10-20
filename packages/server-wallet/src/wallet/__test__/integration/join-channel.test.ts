@@ -6,6 +6,7 @@ import {bob, alice} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -40,24 +41,21 @@ describe('directly funded app', () => {
 
     await Channel.query(w.knex).insert(c2);
     const channelIds = [c1, c2].map(c => c.channelId);
-    const result = await w.joinChannels(channelIds);
-    expect(result).toMatchObject({
-      outbox: [
-        {
-          params: {
-            recipient: 'alice',
-            sender: 'bob',
-            data: {
-              signedStates: [
-                {...state1, turnNum: 1},
-                {...state2, turnNum: 1},
-              ],
-            },
-          },
-        },
-      ],
-      channelResults: [{channelId: c1.channelId}, {channelId: c2.channelId}],
+
+    const {outbox, channelResults} = await w.joinChannels(channelIds);
+
+    expect(getChannelResultFor(c1.channelId, channelResults)).toMatchObject({
+      channelId: c1.channelId,
+      turnNum: 1,
     });
+
+    expect(getChannelResultFor(c2.channelId, channelResults)).toMatchObject({
+      channelId: c2.channelId,
+      turnNum: 1,
+    });
+
+    expect(getSignedStateFor(c1.channelId, outbox)).toMatchObject({...state1, turnNum: 1});
+    expect(getSignedStateFor(c2.channelId, outbox)).toMatchObject({...state2, turnNum: 1});
 
     await Promise.all(
       channelIds.map(async c => {
