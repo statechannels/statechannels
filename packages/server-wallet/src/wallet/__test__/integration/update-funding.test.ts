@@ -54,7 +54,6 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
       },
       status: 'approved',
-      objectiveId: c1.channelNonce,
     },
     w.knex
   );
@@ -68,7 +67,6 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
       },
       status: 'approved',
-      objectiveId: c2.channelNonce,
     },
     w.knex
   );
@@ -127,7 +125,6 @@ it('sends the post fund setup when the funding event is provided', async () => {
         fundingStrategy: 'Direct',
       },
       status: 'approved',
-      objectiveId: c.channelNonce,
     },
     w.knex
   );

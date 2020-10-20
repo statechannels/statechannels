@@ -185,7 +185,6 @@ describe('when the application protocol returns an action', () => {
     await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
-        objectiveId: 0,
         status: 'approved',
         participants: c.participants,
         data: {
