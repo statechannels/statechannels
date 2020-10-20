@@ -493,52 +493,79 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
+    const {outbox, error, channelResults} = await this.crankToCompletion(channels);
+    return {outbox, error, channelResults};
+  };
+
+  private async crankToCompletion(channels: Bytes32[]): Promise<ExecutionResult> {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
+
     let error: Error | undefined = undefined;
 
-    // FIXME: Only get objectives which are:
-    // 1. Approved but not executed yet
-    // 2. Related to one of the channels
+    // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
+    const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
+    const channelsWithPendingReqs = (
+      await Promise.all(ledgers.map(ledger => this.store.getPendingLedgerRequests(ledger)))
+    )
+      .flat()
+      .map(x => x.fundingChannelId);
 
-    const objectives = (await this.store.getObjectives(channels))
+    const objectives = (await this.store.getObjectives(channels.concat(channelsWithPendingReqs)))
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved');
 
     while (objectives.length && !error) {
       const objective = objectives[0];
 
-      if (objective == undefined) throw new Error('Got an undefined objective '); // TODO Don't want to do this but it's a bit tricky getting type inference with Array.filter
+      // TODO: Don't want to do this but it's a bit tricky getting type inference with Array.filter
+      if (objective == undefined) throw new Error('Got an undefined objective ');
 
-      if (objective.type !== 'OpenChannel' && objective.type !== 'CloseChannel')
-        throw new Error('not implememnted');
+      let channelToLock;
 
-      const channel = objective.data.targetChannelId;
+      if (objective.type === 'OpenChannel' || objective.type === 'CloseChannel')
+        channelToLock = objective.data.targetChannelId;
+      else throw new Error('crankToCompletion: unsupported objective');
 
-      await this.store.lockApp(channel, async tx => {
-        // For the moment, we are only considering directly funded app channels.
-        // Thus, we can directly fetch the channel record, and immediately construct the protocol state from it.
-        // In the future, we can have an App model which collects all the relevant channels for an app channel,
-        // and a Ledger model which stores ledger-specific data (eg. queued requests)
-        const app = await this.store.getChannel(channel, tx);
-
-        if (!app) {
-          throw new Error('Channel not found');
-        }
-
+      await this.store.lockApp(channelToLock, async tx => {
         const setError = async (e: Error): Promise<void> => {
           error = e;
           await tx.rollback(error);
         };
+
         const markObjectiveAsDone = (): void => {
           objectives.shift();
-          channelResults.push(ChannelState.toChannelResult(app));
         };
+
+        const addChannelResult = (channel: ChannelState.ChannelState): void => {
+          channelResults.push(ChannelState.toChannelResult(channel));
+        };
+
+        let protocol;
+        let protocolState: OpenChannelProtocol.ProtocolState | CloseChannelProtocol.ProtocolState;
+
+        if (objective.type === 'OpenChannel') {
+          protocol = OpenChannelProtocol.protocol;
+          protocolState = await OpenChannelProtocol.getOpenChannelProtocolState(
+            this.store,
+            objective.data.targetChannelId,
+            tx
+          );
+        } else if (objective.type === 'CloseChannel') {
+          protocol = CloseChannelProtocol.protocol;
+          protocolState = await CloseChannelProtocol.getCloseChannelProtocolState(
+            this.store,
+            objective.data.targetChannelId,
+            tx
+          );
+        } else {
+          throw new Error('Unexpected objective');
+        }
 
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
             case 'SignState': {
-              const {myIndex, participants, channelId} = app;
+              const {myIndex, participants, channelId} = protocolState.app;
               const signedState = await this.store.signState(action.channelId, action, tx);
               createOutboxFor(channelId, myIndex, participants, {
                 signedStates: [signedState],
@@ -556,6 +583,7 @@ export class Wallet extends EventEmitter<WalletEvent>
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
+              addChannelResult(protocolState.app);
               return;
             case 'Withdraw':
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
@@ -568,17 +596,15 @@ export class Wallet extends EventEmitter<WalletEvent>
           }
         };
 
-        const fsm = {OpenChannel: OpenChannelProtocol, CloseChannel: CloseChannelProtocol}[
-          objective.type
-        ];
-
         const nextAction = recordFunctionMetrics(
-          fsm.protocol({app}),
+          protocol(protocolState),
           this.walletConfig.timingMetrics
         );
 
-        if (!nextAction) markObjectiveAsDone();
-        else {
+        if (!nextAction) {
+          markObjectiveAsDone();
+          addChannelResult(protocolState.app);
+        } else {
           try {
             await doAction(nextAction);
           } catch (err) {
@@ -590,7 +616,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     }
 
     return {outbox, error, channelResults};
-  };
+  }
 
   // ChainEventSubscriberInterface implementation
   holdingUpdated(arg: HoldingUpdatedArg): void {

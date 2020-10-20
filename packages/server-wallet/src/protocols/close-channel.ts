@@ -1,4 +1,8 @@
 import {State} from '@statechannels/wallet-core';
+import {Transaction} from 'knex';
+
+import {Store} from '../wallet/store';
+import {Bytes32} from '../type-aliases';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
 import {
@@ -45,3 +49,24 @@ function chainWithdraw(ps: ProtocolState): Withdraw | false {
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
   chainWithdraw(ps) || completeCloseChannel(ps) || signFinalState(ps) || noAction;
+
+/**
+ * Helper method to retrieve scoped data needed for CloseChannel protocol.
+ */
+export const getCloseChannelProtocolState = async (
+  store: Store,
+  channelId: Bytes32,
+  tx: Transaction
+): Promise<ProtocolState> => {
+  const app = await store.getChannel(channelId, tx);
+  switch (app.fundingStrategy) {
+    case 'Direct':
+    case 'Unfunded':
+      return {app};
+    case 'Ledger':
+    case 'Unknown':
+    case 'Virtual':
+    default:
+      throw new Error('getCloseChannelProtocolState: Unimplemented funding strategy');
+  }
+};
