@@ -341,9 +341,19 @@ export class Store {
         )
     );
 
+    maybeChannel =
+      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+
+    if (!maybeChannel) {
+      // TODO: Discuss where to put the code that bumps a channel nonce (is here ok?)
+      await Nonce.fromJson({
+        value: wireSignedState.channelNonce,
+        addresses: wireSignedState.participants.map(p => p.signingAddress),
+      }).use(tx);
+    }
+
     const channel =
       maybeChannel ||
-      (await timer('get channel', async () => getChannel(channelId, tx))) ||
       (await createChannel(
         {
           ...wireSignedState,
