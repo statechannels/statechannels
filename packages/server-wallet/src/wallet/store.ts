@@ -54,12 +54,8 @@ import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {ObjectiveModel, DBObjective} from '../models/objective';
 import {logger} from '../logger';
-<<<<<<< HEAD
 import {AppBytecode} from '../models/app-bytecode';
-||||||| constructed merge base
-=======
 import {LedgerRequests, LedgerRequestType} from '../models/ledger-requests';
->>>>>>> refactor: introduce LedgerRequests in-memory model and Store interface
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -441,7 +437,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
-      if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
+      if (!_.includes(['Ledger', 'Direct', 'Unfunded'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
       const objectiveToBeStored: DBObjective = {

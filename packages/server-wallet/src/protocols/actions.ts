@@ -21,6 +21,11 @@ export type CompleteObjective = {
   type: 'CompleteObjective';
   /* TODO: (Stored Objectives) put objective id here? */ channelId: Bytes32;
 };
+export type RequestLedgerFunding = {
+  type: 'RequestLedgerFunding';
+  channelId: Bytes32;
+  assetHolderAddress: Address;
+};
 
 /*
 Action creators
@@ -31,6 +36,7 @@ export const noAction = undefined;
 const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
   props: Omit<A, 'type'>
 ): A => ({...props, type} as A);
+export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
 export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const signState = actionConstructor<SignState>('SignState');
 export const completeObjective = actionConstructor<CompleteObjective>('CompleteObjective');
@@ -45,4 +51,9 @@ export const isFundChannel = guard<FundChannel>('FundChannel');
 
 export type Outgoing = Notice;
 
-export type ProtocolAction = SignState | FundChannel | Withdraw | CompleteObjective;
+export type ProtocolAction =
+  | SignState
+  | FundChannel
+  | Withdraw
+  | CompleteObjective
+  | RequestLedgerFunding;
