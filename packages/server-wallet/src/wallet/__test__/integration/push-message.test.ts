@@ -230,6 +230,7 @@ describe('when the application protocol returns an action', () => {
           participants: [],
           data: {
             targetChannelId: channelId,
+            fundingStrategy: 'Direct',
           },
         },
       ],
