@@ -54,7 +54,12 @@ import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {ObjectiveModel, DBObjective} from '../models/objective';
 import {logger} from '../logger';
+<<<<<<< HEAD
 import {AppBytecode} from '../models/app-bytecode';
+||||||| constructed merge base
+=======
+import {LedgerRequests, LedgerRequestType} from '../models/ledger-requests';
+>>>>>>> refactor: introduce LedgerRequests in-memory model and Store interface
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -96,6 +101,9 @@ export class Store {
 
   async destroy(): Promise<void> {
     await this.knex.destroy();
+    // FIXME: (SQL Ledger Models)
+    this.ledgerRequests = new LedgerRequests();
+    this.ledgers = {};
   }
 
   async getFirstParticipant(): Promise<Participant> {
@@ -575,6 +583,52 @@ export class Store {
     );
 
     return result;
+  }
+
+  // FIXME: (SQL Ledger Models)
+  public ledgerRequests = new LedgerRequests();
+  public ledgers: {
+    [ledgerChannelId: string]: {
+      ledgerChannelId: Bytes32;
+      assetHolderAddress: Address;
+    };
+  } = {};
+
+  async isLedger(channelId: Bytes32): Promise<boolean> {
+    return !!this.ledgers[channelId];
+  }
+
+  async getPendingLedgerRequests(
+    ledgerChannelId: Bytes32,
+    tx?: Transaction
+  ): Promise<LedgerRequestType[]> {
+    return await this.ledgerRequests.getPendingRequests(ledgerChannelId, tx);
+  }
+
+  async getPendingLedgerRequest(channelId: Bytes32, tx?: Transaction): Promise<LedgerRequestType> {
+    return await this.ledgerRequests.getRequest(channelId, tx);
+  }
+
+  async requestLedgerFunding(
+    channelId: Bytes32,
+    ledgerChannelId: Bytes32,
+    tx: Transaction
+  ): Promise<void> {
+    await this.ledgerRequests.setRequest(
+      channelId,
+      {
+        ledgerChannelId,
+        status: 'pending',
+        fundingChannelId: channelId,
+      },
+      tx
+    );
+  }
+
+  async markLedgerRequestsSuccessful(channelIds: Bytes32[], tx?: Transaction): Promise<void> {
+    for (const channelId of channelIds) {
+      await this.ledgerRequests.setRequestStatus(channelId, 'succeeded', tx);
+    }
   }
 
   async createChannel(
