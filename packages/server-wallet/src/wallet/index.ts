@@ -332,44 +332,16 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
   }
 
-  async approveObjective(
-    objectiveId: number,
-    type: Objective['type']
-  ): Promise<SingleChannelOutput> {
-    let objective: ObjectiveStoredInDB | undefined = undefined;
-    switch (type) {
-      case 'OpenChannel':
-        objective = await ObjectiveModel.forId(objectiveId, this.knex);
-        // FIXME: This should probably be done within the critical code of the joinChannel
-        await ObjectiveModel.approve(objectiveId, this.knex);
-        break;
-      case 'CloseChannel':
-        objective = await ObjectiveModel.forId(objectiveId, this.knex);
-        // FIXME: This should probably be done within the critical code of the joinChannel
-        await ObjectiveModel.approve(objectiveId, this.knex);
-        break;
-      default:
-        throw Error(`(Unimplemented) No DB table for objective type ${type}`);
-    }
+  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
 
-    // TODO these checks could live inside the relevant Model class(es)
-    if (!objective)
-      throw new ApproveObjective.ApproveObjectiveError(
-        ApproveObjective.ApproveObjectiveError.reasons.objectiveNotFound,
-        {objectiveId}
-      );
+    if (objective.type === 'OpenChannel') {
+      const {
+        data: {targetChannelId},
+      } = objective;
 
-    if (objective.type !== 'OpenChannel')
-      throw new ApproveObjective.ApproveObjectiveError(
-        ApproveObjective.ApproveObjectiveError.reasons.unimplemented,
-        {type: objective.type}
-      );
-
-    const {
-      data: {targetChannelId},
-    } = objective;
-
-    return this.joinChannel({channelId: targetChannelId});
+      return this.joinChannel({channelId: targetChannelId});
+    } else throw Error('[unimplemented] You may only approve a JoinChannel objective');
   }
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
@@ -589,11 +561,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
 
-    const objectives = [
-      // Only supports these two
-      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
-      ...(await ObjectiveModel.forTargetChannelIds(channels, this.store.knex)),
-    ]
+    const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
 
