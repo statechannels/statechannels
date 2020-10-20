@@ -8,7 +8,7 @@ import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
-import {OpenChannelObjective} from '../../../models/open-channel-objective';
+import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
@@ -45,7 +45,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   await Channel.query(w.knex).insert(c2);
   const channelIds = [c1, c2].map(c => c.channelId);
 
-  await OpenChannelObjective.insert(
+  await ObjectiveModel.insert(
     {
       type: 'OpenChannel',
       participants: c1.participants,
@@ -59,7 +59,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     w.knex
   );
 
-  await OpenChannelObjective.insert(
+  await ObjectiveModel.insert(
     {
       type: 'OpenChannel',
       participants: c2.participants,
@@ -118,7 +118,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
 
-  await OpenChannelObjective.insert(
+  await ObjectiveModel.insert(
     {
       type: 'OpenChannel',
       participants: c.participants,
