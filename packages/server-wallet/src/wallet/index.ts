@@ -330,9 +330,17 @@ export class Wallet extends EventEmitter<WalletEvent>
       channelIds
     );
 
+<<<<<<< HEAD
     const channelResults = mergeChannelResults(
       runLoopChannelResults.concat(results.map(result => result.channelResult))
     );
+||||||| constructed merge base
+  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
+    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
+=======
+  async approveObjective(objectiveId: string): Promise<SingleChannelOutput> {
+    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
+>>>>>>> refactor: switch to new id strategy
 
     const outbox = mergeOutgoing(
       runLoopOutbox.concat(
