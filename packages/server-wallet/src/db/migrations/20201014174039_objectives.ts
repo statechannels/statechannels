@@ -7,7 +7,6 @@ export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable(tableName, function(table) {
     table.string('objective_id').primary();
     table.string('status').notNullable();
-    table.jsonb('participants').notNullable();
     table.string('type').notNullable();
     table.jsonb('data').notNullable();
   });
