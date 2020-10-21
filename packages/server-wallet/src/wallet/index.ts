@@ -617,9 +617,6 @@ export class Wallet extends EventEmitter<WalletEvent>
     while (objectives.length && !error) {
       const objective = objectives[0];
 
-      // TODO: Don't want to do this but it's a bit tricky getting type inference with Array.filter
-      if (objective == undefined) throw new Error('Got an undefined objective ');
-
       let channelToLock;
 
       if (objective.type === 'OpenChannel' || objective.type === 'CloseChannel')
