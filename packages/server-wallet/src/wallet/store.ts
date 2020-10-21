@@ -265,26 +265,43 @@ export class Store {
 
     const toMoverIndex = toState.turnNum % toState.participants.length;
     const toMover = toState.participants[toMoverIndex].signingAddress;
-    // This is the basic validation from the force move contract
-    // that applies to all state transitions
-    const basicValidation =
-      toState.turnNum === fromState.turnNum + 1 &&
+
+    const turnNumCheck = toState.turnNum === fromState.turnNum + 1;
+    if (!turnNumCheck) {
+      const VALIDATION_ERROR = `Turn number check failed.`;
+      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+    }
+
+    const constantsCheck =
       toState.chainId === fromState.chainId &&
       toState.participants === fromState.participants &&
       toState.appDefinition === fromState.appDefinition &&
-      toState.challengeDuration === fromState.challengeDuration &&
+      toState.challengeDuration === fromState.challengeDuration;
+    if (!constantsCheck) {
+      const VALIDATION_ERROR = `Constants check failed.
+      )}
+      `;
+
+      logger.error(VALIDATION_ERROR, {
+        fromState,
+        toState,
+        error: Error(VALIDATION_ERROR),
+      });
+    }
+
+    const signatureValidation =
       fromState.signatures.some(s => s.signer === fromMover) &&
       toState.signatures.some(s => s.signer === toMover);
 
-    if (!basicValidation) {
-      const VALIDATION_ERROR = 'Basic ForceMove transition validation failed.';
+    if (!signatureValidation) {
+      const VALIDATION_ERROR = `Signature validation failed.`;
       logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
       return false;
     }
 
     // Final state specific validation
     if (toState.isFinal && fromState.outcome !== toState.outcome) {
-      const VALIDATION_ERROR = 'Outcome changed on a final state.';
+      const VALIDATION_ERROR = `Outcome changed on a final state.`;
       logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
       return false;
     }
@@ -297,8 +314,8 @@ export class Store {
       toState.appData === fromState.appData;
 
     if (isInFundingStage && !fundingStageValidation) {
-      const VALIDATION_ERROR =
-        'Invalid setup state transition. The outcome, appData have changed or the state is final';
+      const VALIDATION_ERROR = `Invalid setup state transition.`;
+
       logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
 
       return false;
