@@ -253,6 +253,8 @@ export class Store {
     )?.protocolState;
   }
 
+  // Port of the following solidity code
+  // https://github.com/statechannels/statechannels/blob/a3d21827e340c0cc086f1abad7685345885bf245/packages/nitro-protocol/contracts/ForceMove.sol#L492-L534
   async validateTransition(
     fromState: SignedState,
     toState: SignedState,
@@ -275,13 +277,15 @@ export class Store {
       toState.signatures.some(s => s.signer === toMover);
 
     if (!basicValidation) {
-      logger.error('Basic ForceMove transition validation failed.', {fromState, toState});
+      const VALIDATION_ERROR = 'Basic ForceMove transition validation failed.';
+      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
       return false;
     }
 
     // Final state specific validation
     if (toState.isFinal && fromState.outcome !== toState.outcome) {
-      logger.error('Outcome changed on a final state', {fromState, toState});
+      const VALIDATION_ERROR = 'Outcome changed on a final state.';
+      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
       return false;
     }
 
@@ -293,10 +297,10 @@ export class Store {
       toState.appData === fromState.appData;
 
     if (isInFundingStage && !fundingStageValidation) {
-      logger.error(
-        'Invalid setup state transition. The outcome, appData have changed or the state is final',
-        {fromState, toState}
-      );
+      const VALIDATION_ERROR =
+        'Invalid setup state transition. The outcome, appData have changed or the state is final';
+      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+
       return false;
     }
 
