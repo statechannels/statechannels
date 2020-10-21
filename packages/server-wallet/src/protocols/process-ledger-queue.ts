@@ -29,7 +29,7 @@ export type ProtocolState = {
   channelsPendingRequest: ChannelState[];
 };
 
-const foldAllocateToTarget = (
+const allocateFundsToChannels = (
   original: SimpleAllocation,
   allocationTargets: ChannelState[]
 ): SimpleAllocation =>
@@ -103,7 +103,7 @@ const computeNewOutcome = ({
     // don't re-compute (set of pending requests may have changed)
     sentOriginal || sentMerged
       ? myLatestOutcome
-      : foldAllocateToTarget(supportedOutcome, channelsPendingRequest);
+      : allocateFundsToChannels(supportedOutcome, channelsPendingRequest);
 
   let newOutcome: Outcome = myExpectedOutcome;
   let newTurnNum: number = supported.turnNum + n;
@@ -128,7 +128,7 @@ const computeNewOutcome = ({
         _.some(merged.allocationItems, ['destination', channelId])
       );
 
-      newOutcome = foldAllocateToTarget(supportedOutcome, intersectingChannels); // (2)
+      newOutcome = allocateFundsToChannels(supportedOutcome, intersectingChannels); // (2)
       newTurnNum = conflictingTurnNum + n; // (3)
     }
   }
