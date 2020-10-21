@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<any> {
     table.string('objective_id').primary();
     table.string('status').notNullable();
     table.string('type').notNullable();
-    table.jsonb('data');
+    table.jsonb('data').notNullable();
   });
 
   await knex.schema.createTable(associativeTableName, function(table) {
@@ -17,7 +17,7 @@ export async function up(knex: Knex): Promise<any> {
       .string('channel_id')
       .references('channels.channel_id')
       .notNullable();
-    table.primary(['objective_id,channel_id']);
+    table.primary(['objective_id', 'channel_id']);
   });
 }
 
