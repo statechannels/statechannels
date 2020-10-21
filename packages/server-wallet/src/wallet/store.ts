@@ -621,6 +621,12 @@ export class Store {
     );
   }
 
+  async markLedgerRequestsFailed(channelIds: Bytes32[], tx?: Transaction): Promise<void> {
+    for (const channelId of channelIds) {
+      await this.ledgerRequests.setRequestStatus(channelId, 'failed', tx);
+    }
+  }
+
   async markLedgerRequestsSuccessful(channelIds: Bytes32[], tx?: Transaction): Promise<void> {
     for (const channelId of channelIds) {
       await this.ledgerRequests.setRequestStatus(channelId, 'succeeded', tx);

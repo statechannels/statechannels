@@ -568,12 +568,14 @@ export class Wallet extends EventEmitter<WalletEvent>
         } else {
           try {
             switch (action.type) {
-              case 'SignState': {
+              case 'SignLedgerState': {
                 const {myIndex, participants, channelId} = protocolState.fundingChannel;
 
                 const payload = {
-                  signedStates: [await this.store.signState(channelId, action, tx)],
+                  signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
                 };
+
+                await this.store.markLedgerRequestsFailed(action.channelsNotFunded, tx);
 
                 const messages = createOutboxFor(channelId, myIndex, participants, payload);
 
