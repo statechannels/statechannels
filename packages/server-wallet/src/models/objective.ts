@@ -11,6 +11,9 @@ function extract(objective: Objective): ObjectiveStoredInDB {
   };
 }
 
+function isChannel(something: any): boolean {
+  return typeof something === 'string' && something.slice(0, 2) == '0x' && something.length === 66;
+}
 export class Objective extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly status!: ObjectiveStoredInDB['status'];
@@ -28,8 +31,15 @@ export class Objective extends Model {
     },
     tx: TransactionOrKnex
   ): Promise<Objective> {
+    const id: string = objectiveId(objectiveToBeStored);
+
+    for (const [, value] of Object.entries(objectiveToBeStored.data)) {
+      if (isChannel(value))
+        ObjectiveChannelAssociation.query(tx).insert({objectiveId: id, channelId: value});
+    }
+
     return Objective.query(tx).insert({
-      objectiveId: objectiveId(objectiveToBeStored),
+      objectiveId: id,
       status: objectiveToBeStored.status,
       type: objectiveToBeStored.type,
       data: objectiveToBeStored.data,
@@ -51,5 +61,15 @@ export class Objective extends Model {
     await Objective.query(tx)
       .findById(objectiveId)
       .patch({status: 'succeeded'});
+  }
+}
+
+export class ObjectiveChannelAssociation extends Model {
+  readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
+  readonly channelId!: string;
+
+  static tableName = 'objectives_channels';
+  static get idColumn(): string[] {
+    return ['objectiveId', 'channelId'];
   }
 }
