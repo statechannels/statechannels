@@ -347,7 +347,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       );
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
-    const objectives = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+    const objectives = await ObjectiveModel.forChannelId(channelId, this.knex);
 
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
@@ -543,7 +543,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
 
-    const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
+    const objectives = (await ObjectiveModel.forChannelIds(channels, this.store.knex))
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved');
 
