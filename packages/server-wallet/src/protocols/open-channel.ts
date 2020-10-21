@@ -17,7 +17,11 @@ import {
   CompleteObjective,
 } from './actions';
 
-export type ProtocolState = {app: ChannelState; ledgerFundingRequested?: boolean};
+export type ProtocolState = {
+  app: ChannelState;
+  ledgerFundingRequested?: boolean;
+  ledger?: ChannelState;
+};
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
@@ -30,7 +34,10 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 const isRunning = stageGuard('Running');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
-function isFunded({app: {funding, supported, fundingStrategy}}: ProtocolState): boolean {
+function isFunded({
+  app: {channelId, funding, supported, fundingStrategy},
+  ledger,
+}: ProtocolState): boolean {
   switch (fundingStrategy) {
     case 'Unfunded':
       return true;
@@ -47,7 +54,11 @@ function isFunded({app: {funding, supported, fundingStrategy}}: ProtocolState): 
     }
 
     case 'Ledger': {
-      return false;
+      if (!ledger) return false;
+      if (!ledger.supported) return false;
+      // if (!isFunded({app: fundingChannel})) return false; // TODO: Should we check this?
+      const {allocationItems} = checkThat(ledger.supported.outcome, isSimpleAllocation);
+      return _.some(allocationItems, ({destination}) => destination === channelId);
     }
 
     default:
@@ -175,9 +186,11 @@ export const getOpenChannelProtocolState = async (
     case 'Unfunded':
       return {app};
     case 'Ledger': {
+      const req = await store.getPendingLedgerRequest(app.channelId, tx);
       return {
         app,
-        ledgerFundingRequested: !!(await store.getPendingLedgerRequest(app.channelId, tx)),
+        ledgerFundingRequested: !!req,
+        ledger: req ? await store.getChannel(req.ledgerChannelId, tx) : undefined,
       };
     }
     case 'Unknown':

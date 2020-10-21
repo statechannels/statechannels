@@ -26,6 +26,10 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
+export type MarkLedgerFundingRequestsAsComplete = {
+  type: 'MarkLedgerFundingRequestsAsComplete';
+  doneRequests: Bytes32[];
+};
 
 /*
 Action creators
@@ -56,4 +60,5 @@ export type ProtocolAction =
   | FundChannel
   | Withdraw
   | CompleteObjective
-  | RequestLedgerFunding;
+  | RequestLedgerFunding
+  | MarkLedgerFundingRequestsAsComplete;
