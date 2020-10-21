@@ -19,6 +19,7 @@ import {WalletError, Values} from '../errors/wallet-error';
 
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
+import {ObjectiveChannel} from './objective';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -97,6 +98,18 @@ export class Channel extends Model implements RequiredColumns {
       join: {
         from: 'channels.channelId',
         to: 'funding.channelId',
+      },
+    },
+    objectiveChannels: {
+      relation: Model.ManyToManyRelation,
+      modelClass: ObjectiveChannel,
+      join: {
+        from: 'channels.channelId',
+        through: {
+          from: 'objectives_channels.channelId',
+          to: 'objectives_channels.objectiveId',
+        },
+        to: `objectives.objectiveId`,
       },
     },
   };
