@@ -7,8 +7,8 @@ import {Bytes32} from '../type-aliases';
 export type LedgerRequestStatus =
   | 'pending' // Request added to DB to be approved or rejected by queue
   // | 'rejected' // Rejected due to lack of available funds TODO: Implement
-  | 'succeeded'; // Ledger update became supported and thus request succeeded
-// | 'failed'; // Rejected for an unexpected reason (some error occurred) TODO: Implement
+  | 'succeeded' // Ledger update became supported and thus request succeeded
+  | 'failed'; // Rejected for an unexpected reason (some error occurred) TODO: Implement
 
 export type LedgerRequestType = {
   ledgerChannelId: Bytes32;
