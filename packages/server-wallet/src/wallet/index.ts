@@ -321,85 +321,51 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
-    const results = await Promise.all(
-      channelIds.map(channelId => this.joinChannel({channelId}, false))
+    await Promise.all(
+      channelIds.map(async channelId => {
+        const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+
+        if (objective === undefined)
+          throw new Error(`Could not find objective for channel ${channelId}`);
+
+        await ObjectiveModel.approve(objective.objectiveId, this.knex);
+      })
     );
 
-    const {outbox: runLoopOutbox, channelResults: runLoopChannelResults} = await this.takeActions(
-      channelIds
-    );
+    const {outbox, channelResults} = await this.takeActions(channelIds);
 
-<<<<<<< HEAD
-    const channelResults = mergeChannelResults(
-      runLoopChannelResults.concat(results.map(result => result.channelResult))
-    );
-||||||| constructed merge base
-  async approveObjective(objectiveId: number): Promise<SingleChannelOutput> {
-    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
-=======
-  async approveObjective(objectiveId: string): Promise<SingleChannelOutput> {
-    const objective: ObjectiveStoredInDB = await ObjectiveModel.forId(objectiveId, this.knex);
->>>>>>> refactor: switch to new id strategy
+    channelResults.map(this.registerChannelWithChainService);
 
-    const outbox = mergeOutgoing(
-      runLoopOutbox.concat(
-        results
-          .map(result => result.outbox)
-          .reduce((nextMessage, messages) => messages.concat(nextMessage))
-      )
-    );
-
-    return {channelResults, outbox};
+    return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
   }
 
-  async joinChannel(
-    {channelId}: JoinChannelParams,
-    enterRunLoopAfterJoining = true
-  ): Promise<SingleChannelOutput> {
-    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const {myIndex, participants} = channel;
+  async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+    if (!this.store.getChannel(channelId))
+      throw new JoinChannel.JoinChannelError(
+        JoinChannel.JoinChannelError.reasons.channelNotFound,
+        channelId
+      );
 
-      const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-      const signedState = await this.store.signState(channelId, nextState, tx);
-
-      return {
-        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
-        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
-      };
-    };
-
-    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
-      throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.channelNotFound, {
-        channelId,
-      });
-    };
-
-    // FIXME: This is just to get existing joinChannel API pattern to keep working
     const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
 
     if (objective === undefined)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
     await ObjectiveModel.approve(objective.objectiveId, this.knex);
-    // END FIXME
 
-    const {outbox, channelResult} = await this.store.lockApp(
-      channelId,
-      criticalCode,
-      handleMissingChannel
-    );
+    const {outbox, channelResults} = await this.takeActions([channelId]);
+
+    // There _must_ be a single channel result (note this will change post-ledger funding,
+    // where there may be multiple channel results after a joinChannel)
+    // eslint-disable-next-line
+    const channelResult = channelResults.find(c => c.channelId === channelId)!;
 
     this.registerChannelWithChainService(channelResult);
 
-    if (enterRunLoopAfterJoining) {
-      const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
-      return {
-        outbox: mergeOutgoing(outbox.concat(nextOutbox)),
-        channelResult: channelResults.find(c => c.channelId === channelId) || channelResult,
-      };
-    }
-
-    return {outbox, channelResult};
+    return {
+      outbox: mergeOutgoing(outbox),
+      channelResult,
+    };
   }
 
   async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
