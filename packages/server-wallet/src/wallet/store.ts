@@ -372,12 +372,12 @@ export class Store {
     channelResults: ChannelResult[];
   }> {
     return this.knex.transaction(async tx => {
+      const channelResults: ChannelResult[] = [];
+
       // Sorted to ensure channel nonces arrive in ascending order
       const sortedSignedStates = (message.signedStates || []).sort(
         (a, b) => a.channelNonce - b.channelNonce
       );
-
-      const channelResults: ChannelResult[] = [];
 
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
       for (const ss of sortedSignedStates || []) {
