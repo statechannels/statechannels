@@ -9,14 +9,8 @@ import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
-<<<<<<< HEAD
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
-import {OpenChannelObjective} from '../../../models/open-channel-objective';
-||||||| constructed merge base
-import {OpenChannelObjective} from '../../../models/open-channel-objective';
-=======
 import {Objective as ObjectiveModel} from '../../../models/objective';
->>>>>>> refactor: remove unused model
 
 let w: Wallet;
 beforeEach(async () => {
