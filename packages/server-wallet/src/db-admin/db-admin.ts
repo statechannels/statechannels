@@ -8,7 +8,7 @@ import Knex from 'knex';
 import {SigningWallet} from '../models/signing-wallet';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Objective} from '../models/objective';
+import {Objective, ObjectiveChannelAssociation} from '../models/objective';
 
 export class DBAdmin {
   knex: Knex;
@@ -33,7 +33,13 @@ export class DBAdmin {
   }
 
   async truncateDB(
-    tables = [SigningWallet.tableName, Channel.tableName, Nonce.tableName, Objective.tableName]
+    tables = [
+      SigningWallet.tableName,
+      Channel.tableName,
+      Nonce.tableName,
+      Objective.tableName,
+      ObjectiveChannelAssociation.tableName,
+    ]
   ): Promise<void> {
     // eslint-disable-next-line no-process-env
     if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
