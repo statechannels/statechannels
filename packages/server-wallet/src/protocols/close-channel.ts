@@ -11,28 +11,17 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
 const isFinal = stageGuard('Final');
 
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
-  ps.app.supported &&
-  // Either sign the first isFinal state if its my turn
-  (((ps.app.latest.turnNum + 1) % ps.app.latest.participants.length === ps.app.myIndex &&
-    !isFinal(ps.app.latest) &&
-    !isFinal(ps.app.latestSignedByMe) &&
-    signState({
-      channelId: ps.app.channelId,
-      ...ps.app.supported,
-      turnNum: ps.app.supported.turnNum + 1,
-      isFinal: true,
-    })) ||
-    // Or, countersign a given final state
-    (isFinal(ps.app.latest) &&
-      !isFinal(ps.app.latestSignedByMe) &&
-      signState({
-        channelId: ps.app.channelId,
-        ...ps.app.supported,
-        turnNum: ps.app.latest.turnNum,
-      })));
+  !!ps.app.supported &&
+  !isFinal(ps.app.latestSignedByMe) &&
+  signState({
+    channelId: ps.app.channelId,
+    ...ps.app.supported,
+    turnNum: ps.app.supported.turnNum + (isFinal(ps.app.supported) ? 0 : 1),
+    isFinal: true,
+  });
 
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
-  isFinal(ps.app.supported) &&
+  (ps.app.support || []).every(isFinal) &&
   isFinal(ps.app.latestSignedByMe) &&
   completeObjective({channelId: ps.app.channelId});
 
