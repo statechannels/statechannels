@@ -543,7 +543,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const objectives = (await ObjectiveModel.forTargetChannelIds(channels, this.store.knex))
       .filter(x => x !== undefined)
-      .filter(o => o?.status === 'approved' || o?.status === 'pending'); // TODO this filter could be a part of the db query
+      .filter(o => o?.status === 'approved');
 
     while (objectives.length && !error) {
       const objective = objectives[0];
