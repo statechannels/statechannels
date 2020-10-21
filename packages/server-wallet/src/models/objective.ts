@@ -11,8 +11,20 @@ function extract(objective: Objective): ObjectiveStoredInDB {
   };
 }
 
-function isChannel(something: any): boolean {
-  return typeof something === 'string' && something.slice(0, 2) == '0x' && something.length === 66;
+function extractReferencedChannels(objective: ObjectiveType): string[] {
+  switch (objective.type) {
+    case 'OpenChannel':
+    case 'CloseChannel':
+    case 'VirtuallyFund':
+      return [objective.data.targetChannelId];
+    case 'FundGuarantor':
+      return [objective.data.guarantorId];
+    case 'FundLedger':
+    case 'CloseLedger':
+      return [objective.data.ledgerId];
+    default:
+      return [];
+  }
 }
 
 export class ObjectiveChannel extends Model {
@@ -59,18 +71,20 @@ export class Objective extends Model {
   ): Promise<Objective> {
     const id: string = objectiveId(objectiveToBeStored);
 
-    // Associate the objective with any channel that it references
-    // By inserting an ObjectiveChannel row for each channel
-    for (const [, value] of Object.entries(objectiveToBeStored.data)) {
-      if (isChannel(value)) ObjectiveChannel.query(tx).insert({objectiveId: id, channelId: value});
-    }
-
-    return Objective.query(tx).insert({
+    const objective = await Objective.query(tx).insert({
       objectiveId: id,
       status: objectiveToBeStored.status,
       type: objectiveToBeStored.type,
       data: objectiveToBeStored.data,
     });
+
+    // Associate the objective with any channel that it references
+    // By inserting an ObjectiveChannel row for each channel
+    // Requires objective and channels to exist
+    extractReferencedChannels(objectiveToBeStored).map(
+      async value => await ObjectiveChannel.query(tx).insert({objectiveId: id, channelId: value})
+    );
+    return objective;
   }
 
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {

@@ -8,7 +8,7 @@ import Knex from 'knex';
 import {SigningWallet} from '../models/signing-wallet';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Objective, ObjectiveChannelAssociation} from '../models/objective';
+import {Objective, ObjectiveChannel} from '../models/objective';
 
 export class DBAdmin {
   knex: Knex;
@@ -38,7 +38,7 @@ export class DBAdmin {
       Channel.tableName,
       Nonce.tableName,
       Objective.tableName,
-      ObjectiveChannelAssociation.tableName,
+      ObjectiveChannel.tableName,
     ]
   ): Promise<void> {
     // eslint-disable-next-line no-process-env
