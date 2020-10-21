@@ -264,6 +264,14 @@ export class Wallet extends EventEmitter<WalletEvent>
     return await this.store.getOrCreateSigningAddress();
   }
 
+  // TODO: Discussion item --- how should an App tell the wallet a channel is a Ledger?
+  __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): void {
+    this.store.ledgers[ledgerChannelId] = {
+      ledgerChannelId,
+      assetHolderAddress,
+    };
+  }
+
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
     return this.createChannels(args, 1);
   }
