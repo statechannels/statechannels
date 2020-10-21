@@ -120,12 +120,22 @@ expect.extend({
     if (pass) {
       return {
         pass: true,
-        message: () => `expected ${received} not to be divisible by ${argument}`,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to not contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
       };
     } else {
       return {
         pass: false,
-        message: () => `expected ${received} to be divisible by ${argument}`,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
       };
     }
   },
