@@ -14,7 +14,6 @@ import {
   StateWithHash,
   deserializeObjective,
   wireStateToNitroState,
-  convertToNitroOutcome,
   toNitroState,
   deserializeOutcome,
   convertToInternalParticipant,
@@ -24,6 +23,7 @@ import {
   convertToParticipant,
   SignedState,
   objectiveId,
+  deserializeState,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -52,6 +52,7 @@ import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {Objective as ObjectiveModel} from '../models/objective';
+import {logger} from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -171,33 +172,6 @@ export class Store {
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
     const {supported} = channel;
-    if (supported) {
-      const supportedNitroState = {
-        turnNum: supported.turnNum,
-        isFinal: supported.isFinal,
-        channel: {
-          channelNonce: supported.channelNonce,
-          participants: supported.participants.map(s => s.signingAddress),
-          chainId: supported.chainId,
-        },
-        challengeDuration: supported.challengeDuration,
-        outcome: convertToNitroOutcome(supported.outcome),
-        appDefinition: supported.appDefinition,
-        appData: supported.appData,
-      };
-
-      if (
-        !this.skipEvmValidation &&
-        !(await timer('validating transition', async () =>
-          validateTransitionWithEVM(supportedNitroState, toNitroState(state), tx)
-        ))
-      ) {
-        throw new StoreError('Invalid state transition', {
-          from: channel.supported,
-          to: state,
-        });
-      }
-    }
 
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
@@ -205,6 +179,18 @@ export class Store {
       channel.signingWallet.signState(state)
     );
     const signedState = {...state, signatures: [signatureEntry]};
+
+    if (
+      supported &&
+      (await timer('validating transition', async () =>
+        this.validateTransition(supported, signedState, tx)
+      ))
+    ) {
+      throw new StoreError('Invalid state transition', {
+        from: channel.supported,
+        to: signedState,
+      });
+    }
 
     await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
@@ -267,6 +253,67 @@ export class Store {
     )?.protocolState;
   }
 
+  async validateTransition(
+    fromState: SignedState,
+    toState: SignedState,
+    tx: Transaction
+  ): Promise<boolean> {
+    const fromMoverIndex = fromState.turnNum % fromState.participants.length;
+    const fromMover = fromState.participants[fromMoverIndex].signingAddress;
+
+    const toMoverIndex = toState.turnNum % toState.participants.length;
+    const toMover = toState.participants[toMoverIndex].signingAddress;
+    // This is the basic validation from the force move contract
+    // that applies to all state transitions
+    const basicValidation =
+      toState.turnNum === fromState.turnNum + 1 &&
+      toState.chainId === fromState.chainId &&
+      toState.participants === fromState.participants &&
+      toState.appDefinition === fromState.appDefinition &&
+      toState.challengeDuration === fromState.challengeDuration &&
+      fromState.signatures.some(s => s.signer === fromMover) &&
+      toState.signatures.some(s => s.signer === toMover);
+
+    if (!basicValidation) {
+      logger.error('Basic ForceMove transition validation failed.', {fromState, toState});
+      return false;
+    }
+
+    // Final state specific validation
+    if (toState.isFinal && fromState.outcome !== toState.outcome) {
+      logger.error('Outcome changed on a final state', {fromState, toState});
+      return false;
+    }
+
+    // Funding stage specific validation
+    const fundingStageValidation =
+      fromState.isFinal === false &&
+      toState.outcome === fromState.outcome &&
+      toState.appData === fromState.appData;
+
+    if (toState.turnNum < 2 * toState.participants.length && !fundingStageValidation) {
+      logger.error(
+        'Invalid setup state transition. The outcome, appData have changed or the state is final',
+        {fromState, toState}
+      );
+      return false;
+    }
+
+    // Validates app specific rules by running the app rules contract in the EVM
+    if (!this.skipEvmValidation) {
+      const evmValidation = await validateTransitionWithEVM(
+        toNitroState(fromState),
+        toNitroState(fromState),
+        tx
+      );
+      if (!evmValidation) {
+        logger.error('EVM Validation failure', {fromState, toState});
+        return false;
+      }
+    }
+
+    return true;
+  }
   async getStates(
     channelId: Bytes32,
     tx?: Transaction
@@ -433,14 +480,13 @@ export class Store {
         tx
       ));
 
-    if (!this.skipEvmValidation && channel.supported) {
+    if (channel.supported) {
       const {supported} = channel;
 
-      const supportedNitroState = toNitroState(supported);
       if (
-        !(await timer('validating transition', async () =>
-          validateTransitionWithEVM(supportedNitroState, wireStateToNitroState(wireSignedState), tx)
-        ))
+        await timer('validating transition', async () =>
+          this.validateTransition(supported, deserializeState(wireSignedState), tx)
+        )
       ) {
         throw new StoreError('Invalid state transition', {
           from: channel.supported,

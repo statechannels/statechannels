@@ -44,7 +44,18 @@ export const validateTransitionWithEVM = async (
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),
     Uint8Array.from(Buffer.from(data ? data.toString().substr(2) : '0x00', 'hex'))
   );
-
   // We need to ensure the result is the correct length otherwise we might be interpreting a failed assertion
-  return result.length === 32 && (utils.defaultAbiCoder.decode(['bool'], result)[0] as boolean);
+  const transitionPassed =
+    result.length === 32 && (utils.defaultAbiCoder.decode(['bool'], result)[0] as boolean);
+
+  if (!transitionPassed) {
+    // TODO: Figure out the proper encoding.
+    // Right now the revert reason is readable but slightly garbled
+    logger.error(`Call to ValidTransition failed in the EVM`, {
+      result: new TextDecoder().decode(result),
+    });
+    return false;
+  }
+
+  return true;
 };
