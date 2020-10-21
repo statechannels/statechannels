@@ -2,13 +2,12 @@ import {compose, map, filter} from 'lodash/fp';
 import _ from 'lodash';
 import {
   allocateToTarget,
-  AllocationItem,
-  BN,
   checkThat,
   isSimpleAllocation,
   Outcome,
   SignedStateWithHash,
   SimpleAllocation,
+  areAllocationItemsEqual,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -29,9 +28,6 @@ export type ProtocolState = {
   fundingChannel: ChannelState;
   channelsPendingRequest: ChannelState[];
 };
-
-const allocationItemComparator = (a: AllocationItem, b: AllocationItem): boolean =>
-  a.destination === b.destination && BN.eq(a.amount, b.amount);
 
 const foldAllocateToTarget = (
   original: SimpleAllocation,
@@ -62,7 +58,7 @@ const mergedOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocati
   allocationItems: _.intersectionWith(
     a.allocationItems,
     b.allocationItems,
-    allocationItemComparator
+    areAllocationItemsEqual
   ),
 });
 
