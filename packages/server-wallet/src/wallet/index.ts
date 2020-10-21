@@ -323,7 +323,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
     await Promise.all(
       channelIds.map(async channelId => {
-        const objectives = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+        const objectives = await ObjectiveModel.forChannelIds([channelId], this.knex);
 
         if (objectives.length === 0)
           throw new Error(`Could not find objective for channel ${channelId}`);
