@@ -104,7 +104,7 @@ export class Objective extends Model {
       .patch({status: 'succeeded'});
   }
 
-  static async forTargetChannelId(
+  static async forChannelId(
     targetChannelId: string,
     tx: TransactionOrKnex
   ): Promise<ObjectiveStoredInDB[]> {
@@ -117,7 +117,7 @@ export class Objective extends Model {
     ).map(extract);
   }
 
-  static async forTargetChannelIds(
+  static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex
   ): Promise<ObjectiveStoredInDB[]> {
