@@ -6,6 +6,7 @@ import {ObjectiveStoredInDB} from '../wallet/store';
 function extract(objective: Objective): ObjectiveStoredInDB {
   return {
     ...objective,
+    participants: [],
     data: objective.data as any, // Here we will trust that the row respects our types
   };
 }
@@ -40,7 +41,6 @@ export class Objective extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly status!: ObjectiveStoredInDB['status'];
   readonly type!: ObjectiveStoredInDB['type'];
-  readonly participants!: ObjectiveStoredInDB['participants'];
   readonly data!: ObjectiveStoredInDB['data'];
 
   static tableName = 'objectives';
@@ -73,7 +73,9 @@ export class Objective extends Model {
 
     const objective = await Objective.query(tx).insert({
       objectiveId: id,
-      ...objectiveToBeStored,
+      status: objectiveToBeStored.status,
+      type: objectiveToBeStored.type,
+      data: objectiveToBeStored.data,
     });
 
     // Associate the objective with any channel that it references
