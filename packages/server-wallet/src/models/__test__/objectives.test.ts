@@ -21,7 +21,7 @@ beforeEach(async () => {
 });
 
 describe('Objective > insert', () => {
-  it.skip('fails to insert / associate an objective when it references a channel that does not exist', async () => {
+  it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
     await expect(Objective.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
 

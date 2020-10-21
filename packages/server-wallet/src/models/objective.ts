@@ -71,20 +71,24 @@ export class Objective extends Model {
   ): Promise<Objective> {
     const id: string = objectiveId(objectiveToBeStored);
 
-    const objective = await Objective.query(tx).insert({
-      objectiveId: id,
-      status: objectiveToBeStored.status,
-      type: objectiveToBeStored.type,
-      data: objectiveToBeStored.data,
-    });
+    return tx.transaction(async trx => {
+      const objective = await Objective.query(trx).insert({
+        objectiveId: id,
+        status: objectiveToBeStored.status,
+        type: objectiveToBeStored.type,
+        data: objectiveToBeStored.data,
+      });
 
-    // Associate the objective with any channel that it references
-    // By inserting an ObjectiveChannel row for each channel
-    // Requires objective and channels to exist
-    extractReferencedChannels(objectiveToBeStored).map(
-      async value => await ObjectiveChannel.query(tx).insert({objectiveId: id, channelId: value})
-    );
-    return objective;
+      // Associate the objective with any channel that it references
+      // By inserting an ObjectiveChannel row for each channel
+      // Requires objective and channels to exist
+      await Promise.all(
+        extractReferencedChannels(objectiveToBeStored).map(async value =>
+          ObjectiveChannel.query(trx).insert({objectiveId: id, channelId: value})
+        )
+      );
+      return objective;
+    });
   }
 
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
