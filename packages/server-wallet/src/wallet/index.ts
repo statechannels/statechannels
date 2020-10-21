@@ -310,7 +310,9 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
-    if (!this.store.getChannel(channelId))
+    const channel = await this.store.getChannel(channelId);
+
+    if (!channel)
       throw new JoinChannel.JoinChannelError(
         JoinChannel.JoinChannelError.reasons.channelNotFound,
         channelId
@@ -327,8 +329,6 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
 
-    // There _must_ be a single channel result (note this will change post-ledger funding,
-    // where there may be multiple channel results after a joinChannel)
     // eslint-disable-next-line
     const channelResult = channelResults.find(c => c.channelId === channelId)!;
 
