@@ -286,12 +286,13 @@ export class Store {
     }
 
     // Funding stage specific validation
+    const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
     const fundingStageValidation =
       fromState.isFinal === false &&
       toState.outcome === fromState.outcome &&
       toState.appData === fromState.appData;
 
-    if (toState.turnNum < 2 * toState.participants.length && !fundingStageValidation) {
+    if (isInFundingStage && !fundingStageValidation) {
       logger.error(
         'Invalid setup state transition. The outcome, appData have changed or the state is final',
         {fromState, toState}
@@ -300,7 +301,8 @@ export class Store {
     }
 
     // Validates app specific rules by running the app rules contract in the EVM
-    if (!this.skipEvmValidation) {
+    // We only want to run the validation for states not in the funding stage per the force move contract
+    if (!this.skipEvmValidation && !isInFundingStage) {
       const evmValidation = await validateTransitionWithEVM(
         toNitroState(fromState),
         toNitroState(fromState),
