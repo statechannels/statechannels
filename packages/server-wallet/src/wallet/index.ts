@@ -345,23 +345,11 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
-    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const {myIndex, participants} = channel;
-
-      const nextState = getOrThrow(JoinChannel.joinChannel({channelId}, channel));
-      const signedState = await this.store.signState(channelId, nextState, tx);
-
-      return {
-        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
-        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
-      };
-    };
-
-    const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
-      throw new JoinChannel.JoinChannelError(JoinChannel.JoinChannelError.reasons.channelNotFound, {
-        channelId,
-      });
-    };
+    if (!this.store.getChannel(channelId))
+      throw new JoinChannel.JoinChannelError(
+        JoinChannel.JoinChannelError.reasons.channelNotFound,
+        channelId
+      );
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
     const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
@@ -372,18 +360,17 @@ export class Wallet extends EventEmitter<WalletEvent>
     await ObjectiveModel.approve(objective.objectiveId, this.knex);
     // END FIXME
 
-    const {outbox, channelResult} = await this.store.lockApp(
-      channelId,
-      criticalCode,
-      handleMissingChannel
-    );
-    const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
-    const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
+    const {outbox, channelResults} = await this.takeActions([channelId]);
+
+    // There _must_ be a single channel result (note this will change post-ledger funding,
+    // where there may be multiple channel results after a joinChannel)
+    // eslint-disable-next-line
+    const nextChannelResult = channelResults.find(c => c.channelId === channelId)!;
 
     this.registerChannelWithChainService(nextChannelResult);
 
     return {
-      outbox: mergeOutgoing(outbox.concat(nextOutbox)),
+      outbox: mergeOutgoing(outbox),
       channelResult: nextChannelResult,
     };
   }

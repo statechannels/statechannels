@@ -100,6 +100,17 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isDirectlyFunded(ps.app) &&
   requestFundChannelIfMyTurn(ps);
 
+const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
+  !ps.app.latestSignedByMe &&
+  !!ps.app.latest &&
+  ps.app.latest.turnNum === 0 &&
+  ps.app.myIndex === 1 &&
+  signState({
+    ...ps.app.latest,
+    channelId: ps.app.channelId,
+    turnNum: 1,
+  });
+
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   myTurnToPostfund(ps) &&
   (isFunded(ps) || isUnfunded(ps.app)) &&
@@ -116,4 +127,8 @@ const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
   completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  signPostFundSetup(ps) || fundChannel(ps) || completeOpenChannel(ps) || noAction;
+  signPreFundSetup(ps) ||
+  signPostFundSetup(ps) ||
+  fundChannel(ps) ||
+  completeOpenChannel(ps) ||
+  noAction;
