@@ -49,11 +49,11 @@ export class Objective extends Model {
   }
 
   static relationMappings = {
-    objectiveChannels: {
+    objectivesChannels: {
       relation: Model.ManyToManyRelation,
       modelClass: ObjectiveChannel,
       join: {
-        from: `${Objective.tableName}.objectiveId`,
+        from: 'objectives.objectiveId',
         through: {
           from: 'objectives_channels.objectiveId',
           to: 'objectives_channels.channelId',

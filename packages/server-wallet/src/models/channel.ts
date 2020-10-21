@@ -100,7 +100,7 @@ export class Channel extends Model implements RequiredColumns {
         to: 'funding.channelId',
       },
     },
-    objectiveChannels: {
+    objectivesChannels: {
       relation: Model.ManyToManyRelation,
       modelClass: ObjectiveChannel,
       join: {
@@ -109,7 +109,7 @@ export class Channel extends Model implements RequiredColumns {
           from: 'objectives_channels.channelId',
           to: 'objectives_channels.objectiveId',
         },
-        to: `objectives.objectiveId`,
+        to: 'objectives.objectiveId',
       },
     },
   };
