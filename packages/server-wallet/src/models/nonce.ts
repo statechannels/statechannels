@@ -47,20 +47,16 @@ export class Nonce extends Model {
   }
 
   async use(knex: Knex): Promise<void> {
-    const {rows} = await knex.raw(
-      `
+    return await knex
+      .raw(
+        `
         ${knex('nonces').insert(this)}
         ON CONFLICT (addresses) DO UPDATE
-        SET value = EXCLUDED.value WHERE EXCLUDED.value > NONCES.value
-        RETURNING NONCES.value
+        SET value = GREATEST(EXCLUDED.value, nonces.value)
+        RETURNING value
       `
-    );
-
-    if (typeof rows[0]?.value === 'number') {
-      return rows[0].value;
-    } else {
-      throw new NonceError(NonceError.reasons.nonceTooLow);
-    }
+      )
+      .then(res => res.rows[0].value);
   }
 }
 

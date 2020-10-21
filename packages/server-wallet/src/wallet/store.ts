@@ -415,9 +415,19 @@ export class Store {
         )
     );
 
+    maybeChannel =
+      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+
+    if (!maybeChannel)
+      (
+        await Nonce.fromJson({
+          value: wireSignedState.channelNonce,
+          addresses: wireSignedState.participants.map(p => p.signingAddress),
+        })
+      ).use(tx);
+
     const channel =
       maybeChannel ||
-      (await timer('get channel', async () => getChannel(channelId, tx))) ||
       (await createChannel(
         {
           ...wireSignedState,
