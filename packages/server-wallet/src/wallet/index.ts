@@ -37,6 +37,7 @@ import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {logger} from '../logger';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
+import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
@@ -497,16 +498,100 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
-    const {outbox, error, channelResults} = await this.crankToCompletion(channels);
-    return {outbox, error, channelResults};
-  };
-
-  private async crankToCompletion(channels: Bytes32[]): Promise<ExecutionResult> {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
 
-    let error: Error | undefined = undefined;
+    const accumulator = {outbox, channelResults};
 
+    let needToCrank = true;
+    while (needToCrank) {
+      await this.crankToCompletion(channels, accumulator);
+      needToCrank = await this.processLedgerQueue(accumulator);
+    }
+
+    return accumulator;
+  };
+
+  private async processLedgerQueue({
+    outbox,
+    channelResults,
+    error,
+  }: ExecutionResult): Promise<boolean> {
+    let requiresAnotherCrankUponCompletion = false;
+
+    const ledgersToProcess = Object.values(this.store.ledgers).filter(
+      async l => (await this.store.getPendingLedgerRequests(l.ledgerChannelId)).length > 0
+    );
+
+    while (ledgersToProcess.length && !error) {
+      const {ledgerChannelId} = ledgersToProcess[0];
+
+      await this.store.lockApp(ledgerChannelId, async tx => {
+        const setError = async (e: Error): Promise<void> => {
+          error = e;
+          await tx.rollback(error);
+        };
+
+        const markLedgerAsProcessed = (): void => {
+          ledgersToProcess.shift();
+        };
+
+        const addChannelResult = (channel: ChannelState.ChannelState): void => {
+          channelResults.push(ChannelState.toChannelResult(channel));
+        };
+
+        const protocolState = await ProcessLedgerQueue.getProcessLedgerQueueProtocolState(
+          this.store,
+          ledgerChannelId,
+          tx
+        );
+        const action = recordFunctionMetrics(
+          ProcessLedgerQueue.protocol(protocolState),
+          this.walletConfig.timingMetrics
+        );
+
+        if (!action) {
+          markLedgerAsProcessed();
+          addChannelResult(protocolState.fundingChannel);
+        } else {
+          try {
+            switch (action.type) {
+              case 'SignState': {
+                const {myIndex, participants, channelId} = protocolState.fundingChannel;
+
+                const payload = {
+                  signedStates: [await this.store.signState(channelId, action, tx)],
+                };
+
+                const messages = createOutboxFor(channelId, myIndex, participants, payload);
+
+                messages.forEach(message => outbox.push(message));
+
+                return;
+              }
+
+              case 'MarkLedgerFundingRequestsAsComplete':
+                await this.store.markLedgerRequestsSuccessful(action.doneRequests, tx);
+                requiresAnotherCrankUponCompletion = true;
+                return;
+
+              default:
+                throw 'Unimplemented';
+            }
+          } catch (err) {
+            logger.error({err}, 'Error handling action');
+            await setError(err);
+          }
+        }
+      });
+    }
+    return requiresAnotherCrankUponCompletion;
+  }
+
+  private async crankToCompletion(
+    channels: Bytes32[],
+    {outbox, channelResults, error}: ExecutionResult
+  ): Promise<void> {
     // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
     const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
     const channelsWithPendingReqs = (
@@ -630,8 +715,6 @@ export class Wallet extends EventEmitter<WalletEvent>
         }
       });
     }
-
-    return {outbox, error, channelResults};
   }
 
   // ChainEventSubscriberInterface implementation
