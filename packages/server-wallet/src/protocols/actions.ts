@@ -25,6 +25,10 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
+export type MarkLedgerFundingRequestsAsComplete = {
+  type: 'MarkLedgerFundingRequestsAsComplete';
+  doneRequests: Bytes32[];
+};
 
 /*
 Action creators
@@ -49,4 +53,9 @@ export const isFundChannel = guard<FundChannel>('FundChannel');
 
 export type Outgoing = Notice;
 
-export type ProtocolAction = SignState | FundChannel | CompleteObjective | RequestLedgerFunding;
+export type ProtocolAction =
+  | SignState
+  | FundChannel
+  | CompleteObjective
+  | RequestLedgerFunding
+  | MarkLedgerFundingRequestsAsComplete;
