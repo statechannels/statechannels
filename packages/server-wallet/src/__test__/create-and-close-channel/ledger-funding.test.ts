@@ -255,14 +255,10 @@ describe('Funding a single channel', () => {
   });
 });
 
-describe('Funding multiple channels syncronously (in bulk)', () => {
-  const N = 10; // beforeEach creates a ledger channel with 10 ETH each
-
-  it(`can fund ${N} channels by ledger proposed by Alice`, async () => {
-    const ledgerChannelId = await createLedgerChannel();
-
-    // TODO: Play around with these numbers and test underflow scenarios
-    const allocation: Allocation = {
+const testCreateChannelParams = (): CreateChannelParams => ({
+  participants: [participantA, participantB],
+  allocations: [
+    {
       allocationItems: [
         {
           destination: participantA.destination,
@@ -274,73 +270,68 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
         },
       ],
       token: ETH_ASSET_HOLDER_ADDRESS, // must be even length
-    };
+    },
+  ],
+  appDefinition: ethers.constants.AddressZero,
+  appData: '0x00', // must be even length
+  fundingStrategy: 'Ledger',
+});
 
-    const createChannelParams: CreateChannelParams = {
-      participants: [participantA, participantB],
-      allocations: [allocation],
-      appDefinition: ethers.constants.AddressZero,
-      appData: '0x00', // must be even length
-      fundingStrategy: 'Ledger',
-    };
+async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {
+  while (aToB.length + bToA.length > 0) {
+    const nextMessageFromB = bToA.shift();
+    const nextMessageFromA = aToB.shift();
 
-    // PreFund0A-1
-    // PreFund0A-2
-    const resultA0 = await a.createChannels(createChannelParams, N);
+    const newFromA =
+      nextMessageFromB &&
+      (await a.pushMessage(getPayloadFor(participantA.participantId, nextMessageFromB)));
 
-    const appChannels = resultA0.channelResults;
+    const newFromB =
+      nextMessageFromA &&
+      (await b.pushMessage(getPayloadFor(participantB.participantId, nextMessageFromA)));
 
-    //    > PreFund0A-1
-    //    > PreFund0A-2
+    newFromB?.outbox.length && bToA.push(newFromB.outbox);
+    newFromA?.outbox.length && aToB.push(newFromA.outbox);
+  }
+}
+
+describe('Funding multiple channels syncronously (in bulk)', () => {
+  const N = 10; // beforeEach creates a ledger channel with 10 ETH each
+
+  it(`can fund ${N} channels created in bulk by Alice`, async () => {
+    const ledgerChannelId = await createLedgerChannel();
+
+    const resultA0 = await a.createChannels(testCreateChannelParams(), N);
+    const channelIds = resultA0.channelResults.map(c => c.channelId);
     await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+    const resultB1 = await b.joinChannels(channelIds);
 
-    //           PreFund0B-1
-    //           PreFund0B-2
-    //     LedgerUpdateB-1+2
-    const resultB1 = await b.joinChannels(appChannels.map(c => c.channelId));
+    await exchangeMessagesBetweenAandB([resultB1.outbox], []);
 
-    expect(getSignedStateFor(ledgerChannelId, resultB1.outbox)).toMatchObject({turnNum: 5});
+    const {channelResults: channelResultsA} = await a.getChannels();
+    const {channelResults: channelResultsB} = await b.getChannels();
 
-    for (const channel of appChannels) {
-      expect(getSignedStateFor(channel.channelId, resultB1.outbox)).toMatchObject({turnNum: 1});
+    const {
+      allocations: [{allocationItems: ledgerAllocationsA}],
+    } = getChannelResultFor(ledgerChannelId, channelResultsA);
+
+    const {
+      allocations: [{allocationItems: ledgerAllocationsB}],
+    } = getChannelResultFor(ledgerChannelId, channelResultsB);
+
+    for (const channelId of channelIds) {
+      const running = {turnNum: 3, status: 'running'};
+      expect(getChannelResultFor(channelId, channelResultsA)).toMatchObject(running);
+      expect(getChannelResultFor(channelId, channelResultsB)).toMatchObject(running);
+      expect(ledgerAllocationsA).toContainAllocationItem({
+        destination: makeDestination(channelId),
+        amount: BN.from(2),
+      });
+      expect(ledgerAllocationsB).toContainAllocationItem({
+        destination: makeDestination(channelId),
+        amount: BN.from(2),
+      });
     }
-
-    //       PreFund0B-1 <
-    //       PreFund0B-2 <
-    // LedgerUpdateB-1+2 <
-    // LedgerUpdateA-1+2
-    // PostFundA-1
-    // PostFundA-2
-    const resultA1 = await a.pushMessage(
-      getPayloadFor(participantA.participantId, resultB1.outbox)
-    );
-
-    expect(getSignedStateFor(ledgerChannelId, resultA1.outbox)).toMatchObject({turnNum: 5});
-
-    for (const channel of appChannels) {
-      expect(getSignedStateFor(channel.channelId, resultA1.outbox)).toMatchObject({turnNum: 2});
-    }
-
-    //       > LedgerUpdateA-1+2
-    //       > PostFundA-1
-    //       > PostFundA-2
-    //       PostFundB-1
-    //       PostFundB-2
-    const resultB2 = await b.pushMessage(
-      getPayloadFor(participantB.participantId, resultA1.outbox)
-    );
-
-    for (const channel of appChannels) {
-      expect(getSignedStateFor(channel.channelId, resultB2.outbox)).toMatchObject({turnNum: 3});
-    }
-
-    //      < PostFundB-1
-    //      < PostFundB-2
-    const resultA3 = await a.pushMessage(
-      getPayloadFor(participantA.participantId, resultB2.outbox)
-    );
-
-    expect(resultA3.outbox).toMatchObject([]);
   });
 });
 
@@ -623,46 +614,6 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
     expect(resultA5.outbox).toMatchObject([]);
   });
-
-  const testCreateChannelParams = (): CreateChannelParams => ({
-    participants: [participantA, participantB],
-    allocations: [
-      {
-        allocationItems: [
-          {
-            destination: participantA.destination,
-            amount: BN.from(1),
-          },
-          {
-            destination: participantB.destination,
-            amount: BN.from(1),
-          },
-        ],
-        token: ETH_ASSET_HOLDER_ADDRESS, // must be even length
-      },
-    ],
-    appDefinition: ethers.constants.AddressZero,
-    appData: '0x00', // must be even length
-    fundingStrategy: 'Ledger',
-  });
-
-  async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {
-    while (aToB.length + bToA.length > 0) {
-      const nextMessageFromB = bToA.shift();
-      const nextMessageFromA = aToB.shift();
-
-      const newFromA =
-        nextMessageFromB &&
-        (await a.pushMessage(getPayloadFor(participantA.participantId, nextMessageFromB)));
-
-      const newFromB =
-        nextMessageFromA &&
-        (await b.pushMessage(getPayloadFor(participantB.participantId, nextMessageFromA)));
-
-      newFromB?.outbox.length && bToA.push(newFromB.outbox);
-      newFromA?.outbox.length && aToB.push(newFromA.outbox);
-    }
-  }
 
   async function proposeMultipleChannelsToEachother(
     createChannelParams: CreateChannelParams,
