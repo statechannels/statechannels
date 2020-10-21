@@ -30,6 +30,12 @@ export type MarkLedgerFundingRequestsAsComplete = {
   type: 'MarkLedgerFundingRequestsAsComplete';
   doneRequests: Bytes32[];
 };
+export type SignLedgerState = {
+  type: 'SignLedgerState';
+  channelId: Bytes32;
+  stateToSign: StateVariables;
+  channelsNotFunded: Bytes32[];
+};
 
 /*
 Action creators
@@ -57,6 +63,7 @@ export type Outgoing = Notice;
 
 export type ProtocolAction =
   | SignState
+  | SignLedgerState
   | FundChannel
   | Withdraw
   | CompleteObjective
