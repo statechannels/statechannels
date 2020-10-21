@@ -42,7 +42,7 @@ describe('using a given nonce', () => {
 
   it('rejects when the value does not exceed the existing nonce', async () => {
     await expect(nonce({value: 3}).use(knex)).resolves.toEqual(3);
-    await expect(nonce({value: 1}).use(knex)).rejects.toThrow('Nonce too low');
+    await expect(nonce({value: 1}).use(knex)).resolves.toEqual(3);
     await expect(nonce({value: 4}).use(knex)).resolves.toEqual(4);
   });
 });
