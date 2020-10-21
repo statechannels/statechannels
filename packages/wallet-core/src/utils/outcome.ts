@@ -59,6 +59,9 @@ export enum Errors {
   InvalidOutcomeType = 'Invalid outcome type'
 }
 
+export const areAllocationItemsEqual = (a: AllocationItem, b: AllocationItem): boolean =>
+  a.destination === b.destination && BN.eq(a.amount, b.amount);
+
 export function allocateToTarget(
   currentOutcome: Outcome,
   deductions: readonly AllocationItem[],
