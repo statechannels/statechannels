@@ -6,7 +6,7 @@
 <h4 align="center">Simple off-chain applications framework for Ethereum.</h4>
 
 <p align="center">
-  <a href="https://circleci.com/gh/statechannels/monorepo"><img src="https://circleci.com/gh/statechannels/monorepo.svg?style=shield" alt="circleci"></a>
+  <a href="https://circleci.com/gh/statechannels/statechannels/tree/master"><img src="https://circleci.com/gh/statechannels/statechannels/tree/master.svg?style=shield" alt="circleci"></a>
   <a href="https://lernajs.io/"><img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg"/></a>
   <a href="https://research.statechannels.org/"><img src="https://img.shields.io/badge/Forums-Chat-blue"/></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
