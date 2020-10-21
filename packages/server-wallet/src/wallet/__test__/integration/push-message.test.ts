@@ -1,5 +1,16 @@
-import {calculateChannelId, simpleEthAllocation, serializeState} from '@statechannels/wallet-core';
+import {
+  calculateChannelId,
+  simpleEthAllocation,
+  serializeState,
+  BN,
+  makeDestination,
+  SignedStateWithHash,
+  SimpleAllocation,
+  serializeAllocation,
+} from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
+import {PartialModelObject} from 'objection';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -7,12 +18,14 @@ import {addHash} from '../../../state-utils';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateSignedBy} from '../fixtures/states';
+import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
+import {LedgerRequests} from '../../../models/ledger-requests';
 
 jest.setTimeout(20_000);
 
@@ -356,6 +369,248 @@ describe('when there is a request provided', () => {
           params: {data: {signedStates}},
         },
       ],
+    });
+  });
+});
+
+describe('ledger funded app scenarios', () => {
+  let ledger: Channel;
+  let app: Channel;
+  let expectedUpdatedLedgerState: SignedStateWithHash;
+
+  const preFS = {
+    turnNum: 0,
+    outcome: simpleEthAllocation([{destination: aliceP().destination, amount: BN.from(5)}]),
+  };
+
+  beforeEach(async () => {
+    // FIXME: SQL-ize ledgers and do test cleanup as needed
+    wallet.store.ledgers = {};
+    wallet.store.ledgerRequests = new LedgerRequests();
+
+    const someNonConflictingChannelNonce = 23364518;
+
+    // NOTE: Put a ledger Channel in the DB
+    ledger = await Channel.query(wallet.knex).insert(
+      channel({
+        channelNonce: someNonConflictingChannelNonce,
+        vars: [
+          stateWithHashSignedBy(
+            alice(),
+            bob()
+          )({
+            appDefinition: '0x0000000000000000000000000000000000000000',
+            channelNonce: someNonConflictingChannelNonce,
+            turnNum: 4,
+            outcome: simpleEthAllocation([{destination: aliceP().destination, amount: BN.from(5)}]),
+          }),
+        ],
+      })
+    );
+
+    // Update the in-memory Ledgers table
+    wallet.__setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS);
+
+    // Generate application channel
+    app = channel({
+      fundingStrategy: 'Ledger',
+    });
+
+    // Construct expected ledger update state
+    expectedUpdatedLedgerState = {
+      // eslint-disable-next-line
+      ...ledger.latest!,
+      turnNum: 6,
+      outcome: {
+        type: 'SimpleAllocation' as const,
+        // TODO: Avoid hardcoded response
+        assetHolderAddress: '0x0000000000000000000000000000000000000000',
+        allocationItems: [
+          {
+            destination: makeDestination(app.channelId), // Funds allocated to channel
+            amount: BN.from(5), // As per channel outcome
+          },
+        ],
+      },
+    };
+  });
+
+  const putTestChannelInsideWallet = async (args: PartialModelObject<Channel>) => {
+    const channel = await Channel.query(wallet.knex).insert(args);
+
+    // Add the objective into the wallets store (normally would have happened
+    // during createChannel or pushMessage call by the wallet)
+    await ObjectiveModel.insert(
+      {
+        type: 'OpenChannel',
+        status: 'approved',
+        participants: channel.participants,
+        data: {
+          targetChannelId: channel.channelId,
+          fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+        },
+      },
+      wallet.knex
+    );
+
+    return channel;
+  };
+
+  it('countersigns a prefund setup and automatically creates a ledger update', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice())(preFS)],
+    });
+
+    const {outbox, channelResults} = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
+    });
+
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Serialized ledger update signed _only_ by Alice for wire message
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
+      channelId: app.channelId,
+      turnNum: 0,
+      allocations: serializeAllocation(preFS.outcome),
+      status: 'opening',
+    });
+
+    const {protocolState} = await Channel.forId(ledger.channelId, wallet.knex);
+
+    expect(protocolState).toMatchObject({
+      latest: stateWithHashSignedBy(alice())(expectedUpdatedLedgerState),
+      supported: ledger.latest, // The original b/c Bob has not signed yet
+    });
+  });
+
+  it('countersigns ledger update received _with_ prefund setup in pushMessage call', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice())(preFS)],
+    });
+
+    const {outbox, channelResults} = await wallet.pushMessage({
+      signedStates: [
+        serializeState(stateWithHashSignedBy(bob())(latest)),
+        serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState)),
+      ],
+    });
+
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
+    });
+  });
+
+  it('countersigns standalone ledger update when it already has a prefund setup in store', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice(), bob())(preFS)],
+    });
+
+    wallet.store.ledgerRequests.setRequest(app.channelId, {
+      ledgerChannelId: ledger.channelId,
+      fundingChannelId: app.channelId,
+      status: 'pending', // TODO: could this be approved?
+    });
+
+    const {outbox, channelResults} = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState))],
+    });
+
+    expect(getSignedStateFor(app.channelId, outbox)).toMatchObject(
+      // Newly signed postfund setup of application channel
+      serializeState(
+        stateWithHashSignedBy(alice())({
+          ...latest,
+          turnNum: 2,
+        })
+      )
+    );
+
+    expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults)).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
+    });
+  });
+
+  it('proposes intersection of a ledger update it received', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice())(preFS)],
+    });
+
+    wallet.store.ledgerRequests.setRequest(app.channelId, {
+      ledgerChannelId: ledger.channelId,
+      fundingChannelId: app.channelId,
+      status: 'pending', // TODO: could this be approved?
+    });
+
+    const {
+      outbox: outboxFromFirstPushMessage,
+      channelResults: channelResults1,
+    } = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
+    });
+
+    expect(getSignedStateFor(ledger.channelId, outboxFromFirstPushMessage)).toMatchObject(
+      // Serialized ledger update signed _only_ by Alice for wire message
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults1)).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
+    });
+
+    // Using spread syntax to do a deep copy essentially
+    const conflictingUpdatedLedgerState = {
+      ...expectedUpdatedLedgerState,
+      outcome: {
+        ...expectedUpdatedLedgerState.outcome,
+        allocationItems: [
+          ...(expectedUpdatedLedgerState.outcome as SimpleAllocation).allocationItems,
+          {
+            destination: bobP().destination,
+            amount: BN.from(0),
+          },
+        ],
+      },
+    };
+
+    const {
+      outbox: outboxFromSecondPushMessage,
+      channelResults: channelResults2,
+    } = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(conflictingUpdatedLedgerState))],
+    });
+
+    const expectedResolvedUpdatedLedgerState = {
+      ...expectedUpdatedLedgerState,
+      turnNum: 8,
+    };
+
+    expect(getSignedStateFor(ledger.channelId, outboxFromSecondPushMessage)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedResolvedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(app.channelId, channelResults2)).toMatchObject({
+      turnNum: 0,
+      status: 'opening',
     });
   });
 });
