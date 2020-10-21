@@ -39,10 +39,9 @@ beforeAll(async () => {
   };
 });
 afterAll(async () => {
-  // Don't destroy b here, it get's destroyed midway through test
   await Promise.all([a.destroy(), b.destroy()]);
   await a.dbAdmin().dropDB();
-  await b.dbAdmin().dropDB(); // Only need to drop the db once as it is shared with b
+  await b.dbAdmin().dropDB();
 });
 
 it('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
