@@ -323,12 +323,12 @@ export class Wallet extends EventEmitter<WalletEvent>
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
     await Promise.all(
       channelIds.map(async channelId => {
-        const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+        const objectives = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
 
-        if (objective === undefined)
+        if (objectives.length === 0)
           throw new Error(`Could not find objective for channel ${channelId}`);
 
-        await ObjectiveModel.approve(objective.objectiveId, this.knex);
+        await ObjectiveModel.approve(objectives[0].objectiveId, this.knex); // TODO deal with > 1 objective
       })
     );
 
@@ -346,12 +346,14 @@ export class Wallet extends EventEmitter<WalletEvent>
         channelId
       );
 
-    const objective = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
+    // FIXME: This is just to get existing joinChannel API pattern to keep working
+    const objectives = await ObjectiveModel.forTargetChannelId(channelId, this.knex);
 
-    if (objective === undefined)
+    if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    await ObjectiveModel.approve(objective.objectiveId, this.knex);
+    await ObjectiveModel.approve(objectives[0].objectiveId, this.knex); // TODO deal with > 1 objective
+    // END FIXME
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
 
