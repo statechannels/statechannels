@@ -104,29 +104,17 @@ export class Objective extends Model {
       .patch({status: 'succeeded'});
   }
 
-  static async forChannelId(
-    targetChannelId: string,
-    tx: TransactionOrKnex
-  ): Promise<ObjectiveStoredInDB[]> {
-    return (
-      await Objective.query(tx).select(
-        Objective.relatedQuery('objectivesChannels')
-          .select()
-          .where({channelId: targetChannelId})
-      )
-    ).map(extract);
-  }
-
   static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex
   ): Promise<ObjectiveStoredInDB[]> {
-    return (
-      await Objective.query(tx).select(
-        Objective.relatedQuery('objectivesChannels')
-          .select()
-          .whereIn('channelId', targetChannelIds)
-      )
-    ).map(extract);
+    const objectiveIds = (
+      await ObjectiveChannel.query(tx)
+        .column('objectiveId')
+        .select()
+        .whereIn('channelId', targetChannelIds)
+    ).map(oc => oc.objectiveId);
+
+    return (await Objective.query(tx).findByIds(objectiveIds)).map(extract);
   }
 }
