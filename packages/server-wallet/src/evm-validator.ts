@@ -49,13 +49,17 @@ export const validateTransitionWithEVM = async (
     result.length === 32 && (utils.defaultAbiCoder.decode(['bool'], result)[0] as boolean);
 
   if (!transitionPassed) {
-    // TODO: Figure out the proper encoding.
-    // Right now the revert reason is readable but slightly garbled
-    logger.error(`Call to ValidTransition failed in the EVM`, {
-      result: new TextDecoder().decode(result),
+    logger.error(`Call to ValidTransition failed in the EVM ${parseRevertReason(result)}`, {
+      result: parseRevertReason(result),
     });
     return false;
   }
 
   return true;
 };
+
+function parseRevertReason(result: Uint8Array) {
+  // TODO: Figure out the proper encoding.
+  // Right now the revert reason is readable but slightly garbled
+  return new TextDecoder().decode(result.filter(r => r !== 0));
+}
