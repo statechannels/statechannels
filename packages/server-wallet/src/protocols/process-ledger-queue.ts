@@ -20,8 +20,7 @@ import {
   MarkLedgerFundingRequestsAsComplete,
   noAction,
   ProtocolAction,
-  SignState,
-  signState,
+  SignLedgerState,
 } from './actions';
 
 export type ProtocolState = {
@@ -32,15 +31,16 @@ export type ProtocolState = {
 const allocateFundsToChannels = (
   original: SimpleAllocation,
   allocationTargets: ChannelState[]
-): SimpleAllocation =>
+): {
+  allocated: SimpleAllocation;
+  insufficientFunds: Bytes32[];
+} => {
   // This could fail at some point if there is no longer space to fund stuff
   // TODO: Handle that case
-  // } catch (e) {
-  //   if (e.toString() === 'Insufficient funds in fundingChannel channel')
-  // }
-  allocationTargets.reduce(
-    (outcome, {channelId, supported}) =>
-      checkThat(
+  const insufficientFunds: Bytes32[] = [];
+  const allocated = allocationTargets.reduce((outcome, {channelId, supported}) => {
+    try {
+      return checkThat(
         allocateToTarget(
           outcome,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -48,9 +48,21 @@ const allocateFundsToChannels = (
           channelId
         ),
         isSimpleAllocation
-      ),
-    original
-  );
+      );
+    } catch (e) {
+      if (
+        // A proposed channel wants more funds than are available from a participant
+        e.message.toString() === 'Insufficient funds in fundingChannel channel' ||
+        // There is no participant balance at all (exactly 0 left)
+        e.message.toString() === 'Destination missing from ledger channel'
+      )
+        insufficientFunds.push(channelId);
+      return outcome;
+    }
+  }, original);
+
+  return {allocated, insufficientFunds};
+};
 
 const mergedOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
   type: 'SimpleAllocation',
@@ -71,7 +83,7 @@ const computeNewOutcome = ({
     participants: {length: n},
   },
   channelsPendingRequest,
-}: ProtocolState): SignState | false => {
+}: ProtocolState): SignLedgerState | false => {
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
@@ -98,12 +110,19 @@ const computeNewOutcome = ({
   if ((!receivedOriginal && sentOriginal) || (!receivedMerged && sentMerged)) return false;
 
   // The new outcome is the supported outcome, funding all pending ledger requests
-  const myExpectedOutcome =
-    // If you already proposed an update though, re-use that,
-    // don't re-compute (set of pending requests may have changed)
-    sentOriginal || sentMerged
-      ? myLatestOutcome
-      : allocateFundsToChannels(supportedOutcome, channelsPendingRequest);
+  let myExpectedOutcome: Outcome;
+
+  // Any channels which the algorithm decides cannot be funded (thus must be rejected)
+  let insufficientFundsFor: Bytes32[] = [];
+
+  // If you already proposed an update though, re-use that,
+  // don't re-compute (set of pending requests may have changed)
+  if (sentOriginal || sentMerged) myExpectedOutcome = myLatestOutcome;
+  else
+    ({
+      allocated: myExpectedOutcome,
+      insufficientFunds: insufficientFundsFor,
+    } = allocateFundsToChannels(supportedOutcome, channelsPendingRequest));
 
   let newOutcome: Outcome = myExpectedOutcome;
   let newTurnNum: number = supported.turnNum + n;
@@ -128,17 +147,24 @@ const computeNewOutcome = ({
         _.some(merged.allocationItems, ['destination', channelId])
       );
 
-      newOutcome = allocateFundsToChannels(supportedOutcome, intersectingChannels); // (2)
+      const computedMergedOutcome = allocateFundsToChannels(supportedOutcome, intersectingChannels);
+
+      newOutcome = computedMergedOutcome.allocated; // (2)
       newTurnNum = conflictingTurnNum + n; // (3)
+      insufficientFundsFor = insufficientFundsFor.concat(computedMergedOutcome.insufficientFunds);
     }
   }
 
-  return signState({
+  return {
+    type: 'SignLedgerState',
     channelId,
-    ...supported,
-    outcome: newOutcome,
-    turnNum: newTurnNum,
-  });
+    stateToSign: {
+      ...supported,
+      outcome: newOutcome,
+      turnNum: newTurnNum,
+    },
+    channelsNotFunded: insufficientFundsFor,
+  };
 };
 
 const markRequestsAsComplete = ({

@@ -238,16 +238,65 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
 
     const {
-      allocations: [{allocationItems: ledgerAllocationsA}],
+      allocations: [{allocationItems}],
     } = getChannelResultFor(ledgerChannelId, channelResults);
+
+    expect(allocationItems).toHaveLength(N);
 
     for (const channelId of channelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
         turnNum: 3,
         status: 'running',
       });
-      expect(ledgerAllocationsA).toContainAllocationItem({
+      expect(allocationItems).toContainAllocationItem({
         destination: channelId,
+        amount: BN.from(2),
+      });
+    }
+  });
+
+  it(`can fund ${N} channels created in bulk by Alice, rejecting those with no funds`, async () => {
+    const ledgerChannelId = await createLedgerChannel(10, 10);
+    const params = testCreateChannelParams(1, 1);
+
+    const resultA0 = await a.createChannels(params, N + 2); // 2 channels will be unfunded
+    const channelIds = resultA0.channelResults.map(c => c.channelId);
+    await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+    const resultB1 = await b.joinChannels(channelIds);
+
+    await exchangeMessagesBetweenAandB([resultB1.outbox], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const {
+      allocations: [{allocationItems}],
+    } = getChannelResultFor(ledgerChannelId, channelResults);
+
+    expect(allocationItems).toHaveLength(N);
+
+    const unfundedChannels = channelResults.filter(c => c.status === 'opening');
+
+    expect(unfundedChannels).toMatchObject([
+      {
+        turnNum: 1,
+        status: 'opening',
+      },
+      {
+        turnNum: 1,
+        status: 'opening',
+      },
+    ]);
+
+    for (const channelId of channelIds) {
+      if (unfundedChannels.some(c => c.channelId === channelId)) continue;
+      expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+        turnNum: 3,
+        status: 'running',
+      });
+      expect(allocationItems).toContainAllocationItem({
+        destination: makeDestination(channelId),
         amount: BN.from(2),
       });
     }
