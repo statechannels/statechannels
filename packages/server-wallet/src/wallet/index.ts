@@ -309,18 +309,33 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
-    const results = await Promise.all(channelIds.map(channelId => this.joinChannel({channelId})));
+    const results = await Promise.all(
+      channelIds.map(channelId => this.joinChannel({channelId}, false))
+    );
 
-    const channelResults = results.map(r => r.channelResult);
-    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+    const {outbox: runLoopOutbox, channelResults: runLoopChannelResults} = await this.takeActions(
+      channelIds
+    );
 
-    return {
-      channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outgoing),
-    };
+    const channelResults = mergeChannelResults(
+      runLoopChannelResults.concat(results.map(result => result.channelResult))
+    );
+
+    const outbox = mergeOutgoing(
+      runLoopOutbox.concat(
+        results
+          .map(result => result.outbox)
+          .reduce((nextMessage, messages) => messages.concat(nextMessage))
+      )
+    );
+
+    return {channelResults, outbox};
   }
 
-  async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+  async joinChannel(
+    {channelId}: JoinChannelParams,
+    enterRunLoopAfterJoining = true
+  ): Promise<SingleChannelOutput> {
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const {myIndex, participants} = channel;
 
@@ -344,15 +359,18 @@ export class Wallet extends EventEmitter<WalletEvent>
       criticalCode,
       handleMissingChannel
     );
-    const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
-    const nextChannelResult = channelResults.find(c => c.channelId === channelId) || channelResult;
 
-    this.registerChannelWithChainService(nextChannelResult);
+    this.registerChannelWithChainService(channelResult);
 
-    return {
-      outbox: mergeOutgoing(outbox.concat(nextOutbox)),
-      channelResult: nextChannelResult,
-    };
+    if (enterRunLoopAfterJoining) {
+      const {outbox: nextOutbox, channelResults} = await this.takeActions([channelId]);
+      return {
+        outbox: mergeOutgoing(outbox.concat(nextOutbox)),
+        channelResult: channelResults.find(c => c.channelId === channelId) || channelResult,
+      };
+    }
+
+    return {outbox, channelResult};
   }
 
   async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
