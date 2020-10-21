@@ -278,8 +278,13 @@ export class Store {
 
   async pushMessage(message: WirePayload): Promise<Bytes32[]> {
     return this.knex.transaction(async tx => {
+      // Sorted to ensure channel nonces arrive in ascending order
+      const sortedSignedStates = (message.signedStates || []).sort(
+        (a, b) => a.channelNonce - b.channelNonce
+      );
+
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
-      for (const ss of message.signedStates || []) {
+      for (const ss of sortedSignedStates || []) {
         await this.addSignedState(ss.channelId, undefined, ss, tx);
       }
 
