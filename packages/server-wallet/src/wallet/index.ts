@@ -352,7 +352,8 @@ export class Wallet extends EventEmitter<WalletEvent>
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    await ObjectiveModel.approve(objectives[0].objectiveId, this.knex); // TODO deal with > 1 objective
+    if (objectives[0].type === 'OpenChannel')
+      await ObjectiveModel.approve(objectives[0].objectiveId, this.knex);
     // END FIXME
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
