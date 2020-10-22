@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.0.0...@statechannels/server-wallet@1.1.0) (2020-10-22)
+
+
+### Bug Fixes
+
+* add missing CloseChannel objective outbound from wallet ([be8bb9a](https://github.com/statechannels/statechannels/commit/be8bb9acf5bcd2fbb7c4be8cb9ffb277ceda397f))
+* add missing property ([08a6ff0](https://github.com/statechannels/statechannels/commit/08a6ff0937df773a04547fddd8a6d03b0aefbb75))
+* add Objectives table to truncate() ([b77e04c](https://github.com/statechannels/statechannels/commit/b77e04c5a0ef6ad3d27db10fe4d1e909770a9ec1))
+* assertion on turn number ([60b3b0a](https://github.com/statechannels/statechannels/commit/60b3b0a0e831055f6ca6f69dfaa9a0f2f6dc7de9))
+* bandaid solution to push maximum nonce upwards on receipt of a new channel ([c3ee0ee](https://github.com/statechannels/statechannels/commit/c3ee0ee0deb1fe8868410d019912b30aa576de00))
+* check objective type before approving ([236448e](https://github.com/statechannels/statechannels/commit/236448e7bc40ed515cbf1328e0f53c00f9898fbf))
+* commit objective and associations in a db trx ([f1c05a2](https://github.com/statechannels/statechannels/commit/f1c05a2d4556d62034394c5af1d1bf379253c0f2))
+* don't run the run loop for pending objectives ([dfde5b5](https://github.com/statechannels/statechannels/commit/dfde5b5c8a6e32f6b12f286a373e288490c73140))
+* ensure Nonce gets bumped on reception of new signed states ([9d5bf6a](https://github.com/statechannels/statechannels/commit/9d5bf6ab457544a8b44b21f8df2845865a4c8dfa))
+* ensure received states are processed in order of channelNonce ([171284b](https://github.com/statechannels/statechannels/commit/171284b4893859512f9c7cf7ea9ee640feaca136))
+* enter run loop once for joinChannels API call ([dba768f](https://github.com/statechannels/statechannels/commit/dba768f1606d0963d0d66b247155271df82f6d15))
+* extract first objective from array ([b5b4e8e](https://github.com/statechannels/statechannels/commit/b5b4e8e66945e3c276a63d965d5cf5b336e0d1e0))
+* fix relation mappings to get e2e test to pass ([b364ec7](https://github.com/statechannels/statechannels/commit/b364ec792d973c26db73530ea22e6ab6a98f7efc))
+* improved inference of referenced channels ([9a453b8](https://github.com/statechannels/statechannels/commit/9a453b8c263c210ce3801337f02cdb7ff2b8637f))
+* join all channels ([fbb4e29](https://github.com/statechannels/statechannels/commit/fbb4e29e154ae167ddf0faef953d2766b0adae2d))
+* prevent require loop ([e1ad490](https://github.com/statechannels/statechannels/commit/e1ad490aba699a0eff8003c67bd8382c340958f4))
+* sign prefund setup regardless of previously signed states ([55d2aee](https://github.com/statechannels/statechannels/commit/55d2aeedac85faf7fd7bed77db845bd1bc210291))
+* typo ([39d1805](https://github.com/statechannels/statechannels/commit/39d1805325113731489bc9e6467bc20cddde0275))
+* typo ([2848deb](https://github.com/statechannels/statechannels/commit/2848deb0f070ac83a6e77a423d92aeb3ecff23c7))
+* typos ([cc1443a](https://github.com/statechannels/statechannels/commit/cc1443a48ba2f4d19211e9395098760d096b9ac8))
+* typos ([7e6a749](https://github.com/statechannels/statechannels/commit/7e6a749211a0fef0a2c0240f15e79fd832f2726e))
+* use defaultTestConfig in test ([0296b50](https://github.com/statechannels/statechannels/commit/0296b5052df38abd8fe571e6a7c3e7fcbb469ada))
+* use placeholder in fundingStrategy (for now) ([f7556fd](https://github.com/statechannels/statechannels/commit/f7556fd1fa0bac20cf872796c132ec8d83b30cfd))
+* use symbol import instead of path ([12a4774](https://github.com/statechannels/statechannels/commit/12a4774cd7acdfc13b552b392cea26355b9baae9))
+* use two queries ([2fa6617](https://github.com/statechannels/statechannels/commit/2fa6617182e1f624874c0993a5a63924fbc500a7))
+
+
+### Features
+
+* add stored objectives and approveObjective API method ([37ed94c](https://github.com/statechannels/statechannels/commit/37ed94c85ce984fdf583eef92e1250625c591565))
+* some objective columns are foreign keys ([c8af6ef](https://github.com/statechannels/statechannels/commit/c8af6ef45578560c7077fe6225c9afc3b377d82e))
+
+
+### Reverts
+
+* Revert "refactor: add participants column" ([b456aee](https://github.com/statechannels/statechannels/commit/b456aeeedea10cc70a3212b639cbd7109948fa82))
+
+
+
+
+
 # [1.0.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@0.4.0...@statechannels/server-wallet@1.0.0) (2020-10-20)
 
 

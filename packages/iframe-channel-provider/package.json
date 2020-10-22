@@ -1,6 +1,6 @@
 {
   "name": "@statechannels/iframe-channel-provider",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "browser": "dist/iframe-channel-provider.js",
   "browserslist": {
     "production": [

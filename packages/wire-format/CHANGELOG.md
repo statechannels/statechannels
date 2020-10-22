@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.4.0...@statechannels/wire-format@0.5.0) (2020-10-22)
+
+
+### Features
+
+* add stored objectives and approveObjective API method ([37ed94c](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/37ed94c85ce984fdf583eef92e1250625c591565))
+
+
+
+
+
 # 0.4.0 (2020-10-13)
 
 
