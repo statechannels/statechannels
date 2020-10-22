@@ -3,6 +3,8 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
 
+import {Channel} from './channel';
+
 function extract(objective: Objective): ObjectiveStoredInDB {
   return {
     ...objective,
@@ -51,7 +53,7 @@ export class Objective extends Model {
   static relationMappings = {
     objectivesChannels: {
       relation: Model.ManyToManyRelation,
-      modelClass: __dirname + '/Channel',
+      modelClass: Channel,
       join: {
         from: 'objectives.objectiveId',
         through: {
