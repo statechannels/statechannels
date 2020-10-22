@@ -266,17 +266,18 @@ export class Store {
     const toMoverIndex = toState.turnNum % toState.participants.length;
     const toMover = toState.participants[toMoverIndex].signingAddress;
 
-    const turnNumCheck = toState.turnNum === fromState.turnNum + 1;
+    const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
     if (!turnNumCheck) {
       const VALIDATION_ERROR = `Turn number check failed.`;
       logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
     }
 
     const constantsCheck =
-      toState.chainId === fromState.chainId &&
-      toState.participants === fromState.participants &&
-      toState.appDefinition === fromState.appDefinition &&
-      toState.challengeDuration === fromState.challengeDuration;
+      _.isEqual(toState.chainId, fromState.chainId) &&
+      _.isEqual(toState.participants, fromState.participants) &&
+      _.isEqual(toState.appDefinition, fromState.appDefinition) &&
+      _.isEqual(toState.challengeDuration, fromState.challengeDuration);
+
     if (!constantsCheck) {
       const VALIDATION_ERROR = `Constants check failed.
       )}
@@ -300,7 +301,7 @@ export class Store {
     }
 
     // Final state specific validation
-    if (toState.isFinal && fromState.outcome !== toState.outcome) {
+    if (toState.isFinal && !_.isEqual(fromState.outcome, toState.outcome)) {
       const VALIDATION_ERROR = `Outcome changed on a final state.`;
       logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
       return false;
@@ -309,9 +310,9 @@ export class Store {
     // Funding stage specific validation
     const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
     const fundingStageValidation =
-      fromState.isFinal === false &&
-      toState.outcome === fromState.outcome &&
-      toState.appData === fromState.appData;
+      _.isEqual(fromState.isFinal, false) &&
+      _.isEqual(toState.outcome, fromState.outcome) &&
+      _.isEqual(toState.appData, fromState.appData);
 
     if (isInFundingStage && !fundingStageValidation) {
       const VALIDATION_ERROR = `Invalid setup state transition.`;
