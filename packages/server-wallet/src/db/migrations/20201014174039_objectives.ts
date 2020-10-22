@@ -12,10 +12,15 @@ export async function up(knex: Knex): Promise<any> {
   });
 
   await knex.schema.createTable(associativeTableName, function(table) {
-    table.string('objective_id').references(tableName + '.objective_id').notNullable;
+    table
+      .string('objective_id')
+      .references('objective_id')
+      .inTable(tableName)
+      .notNullable();
     table
       .string('channel_id')
-      .references('channels.channel_id')
+      .references('channel_id')
+      .inTable('channels')
       .notNullable();
     table.primary(['objective_id', 'channel_id']);
   });
