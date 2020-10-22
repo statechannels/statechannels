@@ -259,19 +259,14 @@ describe('Funding multiple channels concurrently (one sided)', () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1);
 
-    const {
-      channelResults: [{channelId: channelId1}],
-      outbox: outbox1,
-    } = await a.createChannel(params);
+    const create1 = await a.createChannel(params);
+    await b.pushMessage(getPayloadFor(participantB.participantId, create1.outbox));
 
-    await b.pushMessage(getPayloadFor(participantB.participantId, outbox1));
+    const create2 = await a.createChannel(params);
+    await b.pushMessage(getPayloadFor(participantB.participantId, create2.outbox));
 
-    const {
-      channelResults: [{channelId: channelId2}],
-      outbox: outbox2,
-    } = await a.createChannel(params);
-
-    await b.pushMessage(getPayloadFor(participantB.participantId, outbox2));
+    const channelId1 = create1.channelResults[0].channelId;
+    const channelId2 = create2.channelResults[0].channelId;
 
     const {outbox: join1} = await b.joinChannel({channelId: channelId1});
     const {outbox: join2} = await b.joinChannel({channelId: channelId2});
@@ -299,24 +294,32 @@ describe('Funding multiple channels concurrently (one sided)', () => {
   });
 });
 
+async function proposeMultipleChannelsToEachother(
+  params: CreateChannelParams,
+  N = 2 // Total number of channels = 2 * N
+): Promise<{aToJoin: Bytes32[]; bToJoin: Bytes32[]}> {
+  const aToJoin = [];
+  const bToJoin = [];
+  for (let i = 0; i < N; i++) {
+    const createA = await a.createChannel(params);
+    await b.pushMessage(getPayloadFor(participantB.participantId, createA.outbox));
+    const createB = await b.createChannel(params);
+    await a.pushMessage(getPayloadFor(participantA.participantId, createB.outbox));
+    aToJoin.push(createB.channelResults[0].channelId);
+    bToJoin.push(createA.channelResults[0].channelId);
+  }
+  return {aToJoin, bToJoin};
+}
+
 describe('Funding multiple channels concurrently (two sides)', () => {
   it('can fund 2 channels by ledger each proposed by the other', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1);
 
     const {
-      channelResults: [{channelId: channelId1}],
-      outbox: outboxA,
-    } = await a.createChannel(params);
-
-    await b.pushMessage(getPayloadFor(participantB.participantId, outboxA));
-
-    const {
-      channelResults: [{channelId: channelId2}],
-      outbox: outboxB,
-    } = await b.createChannel(params);
-
-    await a.pushMessage(getPayloadFor(participantA.participantId, outboxB));
+      bToJoin: [channelId1],
+      aToJoin: [channelId2],
+    } = await proposeMultipleChannelsToEachother(params, 1);
 
     const {outbox: joinB} = await b.joinChannel({channelId: channelId1});
     const {outbox: joinA} = await a.joinChannel({channelId: channelId2});
@@ -342,26 +345,6 @@ describe('Funding multiple channels concurrently (two sides)', () => {
       });
     }
   });
-
-  async function proposeMultipleChannelsToEachother(
-    createChannelParams: CreateChannelParams,
-    N = 2 // Total number of channels = 2 * N
-  ): Promise<{
-    aToJoin: Bytes32[];
-    bToJoin: Bytes32[];
-  }> {
-    const aToJoin = [];
-    const bToJoin = [];
-    for (let i = 0; i < N; i++) {
-      const createA1 = await a.createChannel(createChannelParams);
-      await b.pushMessage(getPayloadFor(participantB.participantId, createA1.outbox));
-      const createB2 = await b.createChannel(createChannelParams);
-      await a.pushMessage(getPayloadFor(participantA.participantId, createB2.outbox));
-      aToJoin.push(createB2.channelResults[0].channelId);
-      bToJoin.push(createA1.channelResults[0].channelId);
-    }
-    return {aToJoin, bToJoin};
-  }
 
   it('can fund 4 channels by ledger, 2 created concurrently at a time', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
