@@ -182,7 +182,7 @@ export class Store {
 
     if (
       supported &&
-      (await timer('validating transition', async () =>
+      !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
       ))
     ) {
@@ -508,9 +508,9 @@ export class Store {
       const {supported} = channel;
 
       if (
-        await timer('validating transition', async () =>
+        !(await timer('validating transition', async () =>
           this.validateTransition(supported, deserializeState(wireSignedState), tx)
-        )
+        ))
       ) {
         throw new StoreError('Invalid state transition', {
           from: channel.supported,
