@@ -136,7 +136,6 @@ export class Wallet extends EventEmitter<WalletEvent>
     this.getSigningAddress = this.getSigningAddress.bind(this);
 
     this.createChannels = this.createChannels.bind(this);
-    this.createChannelInternal = this.createChannelInternal.bind(this);
 
     this.joinChannels = this.joinChannels.bind(this);
     this.updateChannel = this.updateChannel.bind(this);
@@ -305,30 +304,6 @@ export class Wallet extends EventEmitter<WalletEvent>
       channelResults: mergeChannelResults(channelResults),
       outbox: mergeOutgoing(outgoing),
     };
-  }
-
-  async createChannelInternal(
-    args: CreateChannelParams,
-    channelNonce: number
-  ): Promise<SingleChannelOutput> {
-    const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
-    const outcome: Outcome = deserializeAllocations(allocations);
-
-    const constants: ChannelConstants = {
-      channelNonce,
-      participants: participants.map(convertToParticipant),
-      chainId: this.walletConfig.chainNetworkID,
-      challengeDuration: 9001,
-      appDefinition,
-    };
-
-    const {outgoing, channelResult} = await this.store.createChannel(
-      constants,
-      appData,
-      outcome,
-      fundingStrategy
-    );
-    return {outbox: mergeOutgoing(outgoing), channelResult};
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
