@@ -183,7 +183,7 @@ jobs:
       - log_stats:
           file: prepare-stats
       - <<: *restore_dep
-      - run: yarn --frozen-lockfile --cache-folder ~.cache/yarn
+      - run: yarn --cache-folder ~.cache/yarn
       - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock or api-reports)
       - run: yarn lint:check
       - <<: *save_dep
