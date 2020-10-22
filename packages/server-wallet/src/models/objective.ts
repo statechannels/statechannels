@@ -3,8 +3,6 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
 
-import {Channel} from './channel';
-
 function extract(objective: Objective): ObjectiveStoredInDB {
   return {
     ...objective,
@@ -50,20 +48,28 @@ export class Objective extends Model {
     return ['objectiveId'];
   }
 
-  static relationMappings = {
-    objectivesChannels: {
-      relation: Model.ManyToManyRelation,
-      modelClass: Channel,
-      join: {
-        from: 'objectives.objectiveId',
-        through: {
-          from: 'objectives_channels.objectiveId',
-          to: 'objectives_channels.channelId',
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  static get relationMappings() {
+    // Prevent a require loop
+    // https://vincit.github.io/objection.js/guide/relations.html#require-loops
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const {Channel} = require('./channel');
+
+    return {
+      objectivesChannels: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Channel,
+        join: {
+          from: 'objectives.objectiveId',
+          through: {
+            from: 'objectives_channels.objectiveId',
+            to: 'objectives_channels.channelId',
+          },
+          to: 'channels.channelId',
         },
-        to: 'channels.channelId',
       },
-    },
-  };
+    };
+  }
 
   static async insert(
     objectiveToBeStored: ObjectiveType & {
