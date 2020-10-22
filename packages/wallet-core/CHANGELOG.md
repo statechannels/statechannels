@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.4.1...@statechannels/wallet-core@0.5.0) (2020-10-22)
+
+
+### Features
+
+* add stored objectives and approveObjective API method ([37ed94c](https://github.com/statechannels/statechannels/commit/37ed94c85ce984fdf583eef92e1250625c591565))
+
+
+
+
+
 ## [0.4.1](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.4.0...@statechannels/wallet-core@0.4.1) (2020-10-20)
 
 **Note:** Version bump only for package @statechannels/wallet-core
