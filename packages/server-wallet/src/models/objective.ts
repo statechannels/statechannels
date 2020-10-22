@@ -51,7 +51,7 @@ export class Objective extends Model {
   static relationMappings = {
     objectivesChannels: {
       relation: Model.ManyToManyRelation,
-      modelClass: ObjectiveChannel,
+      modelClass: __dirname + '/Channel',
       join: {
         from: 'objectives.objectiveId',
         through: {
