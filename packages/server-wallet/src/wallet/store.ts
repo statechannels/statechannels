@@ -24,6 +24,7 @@ import {
   SignedState,
   objectiveId,
   deserializeState,
+  statesEqual,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -182,6 +183,8 @@ export class Store {
 
     if (
       supported &&
+      // If the state is the same as the support state then its not a transition just adding signatures
+      !statesEqual(supported, state) &&
       !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
       ))
@@ -504,12 +507,17 @@ export class Store {
         tx
       ));
 
-    if (channel.supported) {
+    const incomingState = deserializeState(wireSignedState);
+    if (
+      channel.supported &&
+      // If the state is the same as the support state then its not a transition just adding signatures
+      !statesEqual(channel.supported, incomingState)
+    ) {
       const {supported} = channel;
 
       if (
         !(await timer('validating transition', async () =>
-          this.validateTransition(supported, deserializeState(wireSignedState), tx)
+          this.validateTransition(supported, incomingState, tx)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
