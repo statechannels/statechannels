@@ -13,7 +13,7 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-request';
+import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
@@ -186,9 +186,9 @@ export const getProcessLedgerQueueProtocolState = async (
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
     channelsPendingRequest: await Promise.all(
       compose(
-        map(({fundingChannelId}: LedgerRequestType) => store.getChannel(fundingChannelId, tx)),
+        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
         filter(['status', 'pending'])
-      )(await store.getPendingLedgerRequests(ledgerChannelId, tx))
+      )(await LedgerRequest.getPendingRequests(ledgerChannelId, tx))
     ),
   };
 };

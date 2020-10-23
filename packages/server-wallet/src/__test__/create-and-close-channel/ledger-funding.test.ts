@@ -113,8 +113,8 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
 };
 
 afterEach(() => {
-  a.store.ledgers = {};
-  b.store.ledgers = {};
+  a.dbAdmin().truncateDB(['ledgers']);
+  b.dbAdmin().truncateDB(['ledgers']);
 });
 
 expect.extend({
