@@ -40,7 +40,7 @@ export type FundChannelArg = {
 };
 
 export interface ChainEventSubscriberInterface {
-  onHoldingUpdated(arg: HoldingUpdatedArg): void;
+  holdingUpdated(arg: HoldingUpdatedArg): void;
   onAssetTransferred(arg: AssetTransferredArg): void;
 }
 
@@ -237,7 +237,7 @@ export class ChainService implements ChainServiceInterface {
         next: event => {
           switch (event.type) {
             case Deposited:
-              subscriber.onHoldingUpdated(event);
+              subscriber.holdingUpdated(event);
               break;
             case AssetTransferred:
               subscriber.onAssetTransferred(event);

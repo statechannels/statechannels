@@ -645,7 +645,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   };
 
   // ChainEventSubscriberInterface implementation
-  onHoldingUpdated(arg: HoldingUpdatedArg): void {
+  holdingUpdated(arg: HoldingUpdatedArg): void {
     const channelUpdate: WalletEventName = 'channelUpdate';
     this.updateChannelFundingForAssetHolder(arg).then(singleChannelOutput =>
       this.emit(channelUpdate, singleChannelOutput)
