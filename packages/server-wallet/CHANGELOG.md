@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.1.0...@statechannels/server-wallet@1.2.0) (2020-10-23)
+
+
+### Bug Fixes
+
+* call evm validation with correct states ([1638834](https://github.com/statechannels/statechannels/commit/16388343273bfaf9a4fd992e023ad0bddce0b14a))
+* clean up garbled text ([32734a7](https://github.com/statechannels/statechannels/commit/32734a79920aa805926d94d397e63bdbb46d24af))
+* db-admin truncates all tables by default ([aee8e1e](https://github.com/statechannels/statechannels/commit/aee8e1e5d9b98827b5cc6cae6d4122c8811482d3))
+* log correctly ([16ccc8b](https://github.com/statechannels/statechannels/commit/16ccc8b2fd18a8ad16f7dcf3de6b935ce5b78308))
+* log error on invalid state transition of received state instead of throwing ([e69aaee](https://github.com/statechannels/statechannels/commit/e69aaeedf843f45b265639780bbd231f4b724592))
+* only use evm for non funding states ([4c33fa0](https://github.com/statechannels/statechannels/commit/4c33fa00e93299da7f9533f0382c2d45eecc5fb8))
+* only validate transition when not same state ([4487d3f](https://github.com/statechannels/statechannels/commit/4487d3f20f77a3a908d0f0668831e5e25f5bbb4c))
+* pr feedback ([0662633](https://github.com/statechannels/statechannels/commit/0662633c553aed4bb83ea52d73242ac7f0450b0f))
+* throw error when invalid not valid ([e055a30](https://github.com/statechannels/statechannels/commit/e055a307808dd367579176c861b27363c43171dc))
+* use isequal for comparison ([388ae94](https://github.com/statechannels/statechannels/commit/388ae941f314874222a4be43e46de3c688fdcf69))
+
+
+### Features
+
+* validate force move rules in typescript ([b463eb7](https://github.com/statechannels/statechannels/commit/b463eb7ceb6b251900ab500d0c378d236ed0a8bb))
+
+
+
+
+
 # [1.1.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.0.0...@statechannels/server-wallet@1.1.0) (2020-10-22)
 
 
