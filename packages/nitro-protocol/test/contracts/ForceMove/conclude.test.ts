@@ -6,7 +6,7 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
+import {getFixedPart, State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
@@ -32,8 +32,9 @@ const assetHolderAddress = Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocationItems: []}];
 let appDefinition;
 
+const nParticipants = 3;
 // Populate wallets and participants array
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < nParticipants; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
@@ -81,7 +82,7 @@ const turnNumRecord = 5;
 const channelOpen = clearedChallengeHash(turnNumRecord);
 const challengeOngoing = ongoingChallengeHash(turnNumRecord);
 const finalized = finalizedOutcomeHash(turnNumRecord);
-const nParticipants = participants.length;
+
 let channelNonce = 400;
 describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
@@ -147,4 +148,29 @@ describe('conclude', () => {
       }
     }
   );
+
+  it('Reverts to prevent an underflow', async () => {
+    const channel: Channel = {chainId, participants, channelNonce};
+
+    const tx = ForceMove.conclude(
+      2,
+      getFixedPart({
+        isFinal: true,
+        channel,
+        outcome,
+        appDefinition,
+        appData: '0x00',
+        challengeDuration,
+        turnNum: 99,
+      }),
+      ethers.constants.HashZero,
+      ethers.constants.HashZero,
+      4,
+      [],
+      []
+    );
+    await expect(() => tx).rejects.toThrow(
+      'largestTurnNum + 1 must be greater than or equal to numStates'
+    );
+  });
 });
