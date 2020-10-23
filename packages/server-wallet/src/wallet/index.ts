@@ -431,7 +431,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       },
     ];
 
-    return {outbox, channelResult: channelResults[0]};
+    return {outbox: mergeOutgoing(outbox), channelResult: channelResults[0]};
   }
 
   async getChannels(): Promise<MultipleChannelOutput> {
@@ -692,9 +692,23 @@ export class Wallet extends EventEmitter<WalletEvent>
                 this.store,
                 protocolState.app
               );
-              await this.store.requestLedgerFunding(
+              await this.store.createLedgerRequest(
                 protocolState.app.channelId,
                 ledgerChannelId,
+                'fund',
+                tx
+              );
+              return;
+            }
+            case 'RequestLedgerDefunding': {
+              const ledgerChannelId = await determineWhichLedgerToUse(
+                this.store,
+                protocolState.app
+              );
+              await this.store.createLedgerRequest(
+                protocolState.app.channelId,
+                ledgerChannelId,
+                'defund',
                 tx
               );
               return;
