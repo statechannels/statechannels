@@ -54,7 +54,6 @@ import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {Objective as ObjectiveModel} from '../models/objective';
 import {logger} from '../logger';
-import {LedgerRequests, LedgerRequestType} from '../models/ledger-requests';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -100,9 +99,6 @@ export class Store {
 
   async destroy(): Promise<void> {
     await this.knex.destroy();
-    // FIXME: (SQL Ledger Models)
-    this.ledgerRequests = new LedgerRequests();
-    this.ledgers = {};
   }
 
   async getFirstParticipant(): Promise<Participant> {
@@ -565,19 +561,6 @@ export class Store {
     );
 
     return result;
-  }
-
-  // FIXME: (SQL Ledger Models)
-  public ledgerRequests = new LedgerRequests();
-  public ledgers: {
-    [ledgerChannelId: string]: {
-      ledgerChannelId: Bytes32;
-      assetHolderAddress: Address;
-    };
-  } = {};
-
-  async isLedger(channelId: Bytes32): Promise<boolean> {
-    return !!this.ledgers[channelId];
   }
 
   async createChannel(
