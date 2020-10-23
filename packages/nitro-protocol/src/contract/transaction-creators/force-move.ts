@@ -48,7 +48,7 @@ export function createChallengeTransaction(
   }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
-  const data = ForceMoveContractInterface.encodeFunctionData('forceMove', [
+  const data = ForceMoveContractInterface.encodeFunctionData('challenge', [
     fixedPart,
     largestTurnNum,
     variableParts,
