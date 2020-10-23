@@ -1,64 +1,92 @@
 import _ from 'lodash';
-import {Transaction} from 'objection';
+import {Model, Transaction} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 
 // TODO: Is this the same as an objective?
+// GK: there is a one to many relation from ledgers to channels we may not need this model at all
 export type LedgerRequestStatus =
   | 'pending' // Request added to DB to be approved or rejected by queue
   // | 'rejected' // Rejected due to lack of available funds TODO: Implement
   | 'succeeded'; // Ledger update became supported and thus request succeeded
 // | 'failed'; // Rejected for an unexpected reason (some error occurred) TODO: Implement
 
-export type LedgerRequestType = {
+export interface LedgerRequestType {
   ledgerChannelId: Bytes32;
-  fundingChannelId: Bytes32;
+  channelToBeFunded: Bytes32;
   status: LedgerRequestStatus;
-};
+}
 
-// FIXME: (SQL Ledger Models)
-export class LedgerRequests {
-  // Store requests for the ledger's funds
-  private requests: {
-    [fundingChannelId: string]: LedgerRequestType;
-  } = {};
+export class LedgerRequest extends Model implements LedgerRequestType {
+  channelToBeFunded!: LedgerRequestType['channelToBeFunded'];
+  ledgerChannelId!: LedgerRequestType['ledgerChannelId'];
+  status!: LedgerRequestType['status'];
 
-  async getRequest(
-    channelId: Bytes32,
+  static tableName = 'ledger_requests';
+  static get idColumn(): string[] {
+    return ['channelToBeFunded'];
+  }
+
+  static async getRequest(
+    channelToBeFunded: Bytes32,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<LedgerRequestType> {
-    return this.requests[channelId];
+    return LedgerRequest.query(tx).findById(channelToBeFunded);
   }
 
-  async setRequest(
-    channelId: Bytes32,
+  static async setRequest(
     request: LedgerRequestType,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<void> {
-    if (this.requests[channelId])
-      throw new Error('LedgerRequest:setRequest channelId already has pending request');
-    this.requests[channelId] = request;
+    await LedgerRequest.query(tx).insert(request); // should throw error if it already exists
   }
 
-  async setRequestStatus(
-    channelId: Bytes32,
+  static async setRequestStatus(
+    channelToBeFunded: Bytes32,
     status: LedgerRequestStatus,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<void> {
-    this.requests[channelId].status = status;
+    await LedgerRequest.query(tx)
+      .findById(channelToBeFunded)
+      .patch({status});
   }
 
-  async getPendingRequests(
-    ledgerChannelId: Bytes32,
+  // unused?
+  static async getPendingRequests(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<LedgerRequestType[]> {
-    return _.chain(this.requests)
-      .mapValues()
-      .filter(['ledgerChannelId', ledgerChannelId])
-      .value();
+    return LedgerRequest.query(tx)
+      .select()
+      .where({status: 'pending'});
+  }
+
+  static async requestLedgerFunding(
+    channelToBeFunded: Bytes32,
+    ledgerChannelId: Bytes32,
+    tx: Transaction
+  ): Promise<void> {
+    await this.setRequest(
+      {
+        ledgerChannelId,
+        status: 'pending',
+        channelToBeFunded,
+      },
+      tx
+    );
+  }
+
+  static async markLedgerRequestsSuccessful(
+    channelsToBeFunded: Bytes32[],
+    tx?: Transaction
+  ): Promise<void> {
+    await Promise.all(
+      channelsToBeFunded.map(channelToBeFunded =>
+        LedgerRequest.setRequestStatus(channelToBeFunded, 'succeeded', tx)
+      )
+    );
   }
 }

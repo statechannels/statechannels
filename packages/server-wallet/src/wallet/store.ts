@@ -575,39 +575,6 @@ export class Store {
     return !!this.ledgers[channelId];
   }
 
-  async getPendingLedgerRequests(
-    ledgerChannelId: Bytes32,
-    tx?: Transaction
-  ): Promise<LedgerRequestType[]> {
-    return await this.ledgerRequests.getPendingRequests(ledgerChannelId, tx);
-  }
-
-  async getPendingLedgerRequest(channelId: Bytes32, tx?: Transaction): Promise<LedgerRequestType> {
-    return await this.ledgerRequests.getRequest(channelId, tx);
-  }
-
-  async requestLedgerFunding(
-    channelId: Bytes32,
-    ledgerChannelId: Bytes32,
-    tx: Transaction
-  ): Promise<void> {
-    await this.ledgerRequests.setRequest(
-      channelId,
-      {
-        ledgerChannelId,
-        status: 'pending',
-        fundingChannelId: channelId,
-      },
-      tx
-    );
-  }
-
-  async markLedgerRequestsSuccessful(channelIds: Bytes32[], tx?: Transaction): Promise<void> {
-    for (const channelId of channelIds) {
-      await this.ledgerRequests.setRequestStatus(channelId, 'succeeded', tx);
-    }
-  }
-
   async createChannel(
     constants: ChannelConstants,
     appData: Bytes,
