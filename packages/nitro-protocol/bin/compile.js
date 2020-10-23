@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Compilation with js config
-const {compileAndSave, compile} = require('@ethereum-waffle/compiler');
+const {compileAndSave} = require('@ethereum-waffle/compiler');
 
 async function main() {
   let compilerType = 'solcjs';
