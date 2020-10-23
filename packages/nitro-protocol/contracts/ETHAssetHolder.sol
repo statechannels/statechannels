@@ -50,10 +50,14 @@ contract ETHAssetHolder is AssetHolder {
 
         amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
-        // refund whatever wasn't deposited.
-        msg.sender.transfer(amount.sub(amountDeposited));
+
         holdings[destination] = holdings[destination].add(amountDeposited);
         emit Deposited(destination, amountDeposited, holdings[destination]);
+
+        // refund whatever wasn't deposited.
+        uint256 refund = amount.sub(amountDeposited);
+        (bool success, ) = msg.sender.call.value(refund)("");
+        require(success, "Could not refund excess funds");
     }
 
     /**
@@ -63,6 +67,7 @@ contract ETHAssetHolder is AssetHolder {
      * @param amount Quantity of wei to be transferred.
      */
     function _transferAsset(address payable destination, uint256 amount) internal override {
-        destination.transfer(amount);
+        (bool success, ) = destination.call.value(amount)("");
+        require(success, "Could not transfer asset");
     }
 }
