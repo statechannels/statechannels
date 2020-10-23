@@ -520,7 +520,7 @@ export class Store {
           this.validateTransition(supported, incomingState, tx)
         ))
       ) {
-        throw new StoreError('Invalid state transition', {
+        logger.error('Invalid state transition — state is stored but not supported', {
           from: channel.supported,
           to: wireSignedState,
         });
