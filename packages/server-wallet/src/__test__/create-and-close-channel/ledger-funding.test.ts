@@ -22,7 +22,7 @@ const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 let participantA: Participant;
 let participantB: Participant;
 
-jest.setTimeout(20_000);
+jest.setTimeout(30_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -108,11 +108,6 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   return channelId;
 };
 
-afterEach(() => {
-  a.store.ledgers = {};
-  b.store.ledgers = {};
-});
-
 expect.extend({
   toContainAllocationItem(received: AllocationItem[], argument: AllocationItem) {
     const pass = received.some(areAllocationItemsEqual.bind(null, argument));
@@ -138,42 +133,6 @@ expect.extend({
       };
     }
   },
-});
-
-describe('Funding a single channel', () => {
-  it('can fund a channel by ledger between two wallets ', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
-
-    const {
-      channelResults: [{channelId}],
-      outbox: outbox,
-    } = await a.createChannel(params);
-
-    await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
-
-    const {outbox: join} = await b.joinChannel({channelId});
-
-    await exchangeMessagesBetweenAandB([join], []);
-
-    const {channelResults} = await a.getChannels();
-
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
-
-    const {
-      allocations: [{allocationItems}],
-    } = getChannelResultFor(ledgerChannelId, channelResults);
-
-    expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
-      turnNum: 3,
-      status: 'running',
-    });
-
-    expect(allocationItems).toContainAllocationItem({
-      destination: channelId,
-      amount: BN.from(2),
-    });
-  });
 });
 
 const testCreateChannelParams = (
@@ -219,27 +178,231 @@ async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[]
   }
 }
 
-describe('Funding multiple channels syncronously (in bulk)', () => {
-  const N = 10; // beforeEach creates a ledger channel with 10 ETH each
+describe('Funding a single channel with 100% of available ledger funds', () => {
+  let ledgerChannelId: Bytes32;
+  let appChannelId: Bytes32;
 
-  it(`can fund ${N} channels created in bulk by Alice`, async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+  afterAll(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
 
-    const resultA0 = await a.createChannels(params, N);
-    const channelIds = resultA0.channelResults.map(c => c.channelId);
-    await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
-    const resultB1 = await b.joinChannels(channelIds);
+  it('can fund a channel by ledger between two wallets ', async () => {
+    ledgerChannelId = await createLedgerChannel(10, 10);
+    const params = testCreateChannelParams(10, 10);
 
-    await exchangeMessagesBetweenAandB([resultB1.outbox], []);
+    const {
+      channelResults: [{channelId}],
+      outbox,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
+
+    const {outbox: join} = await b.joinChannel({channelId});
+
+    await exchangeMessagesBetweenAandB([join], []);
 
     const {channelResults} = await a.getChannels();
 
     await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
 
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
     const {
       allocations: [{allocationItems}],
-    } = getChannelResultFor(ledgerChannelId, channelResults);
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 5,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId,
+      amount: BN.from(20),
+    });
+
+    appChannelId = channelId;
+  });
+
+  it('closing said channel', async () => {
+    const {outbox: close} = await a.closeChannel({channelId: appChannelId});
+
+    await exchangeMessagesBetweenAandB([], [close]);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 7,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
+      turnNum: 4,
+      status: 'closed',
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantA.destination,
+      amount: BN.from(10),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantB.destination,
+      amount: BN.from(10),
+    });
+  });
+});
+
+describe('Funding a single channel with 50% of ledger funds', () => {
+  let ledgerChannelId: Bytes32;
+  let appChannelId: Bytes32;
+
+  afterAll(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
+
+  it('can fund a channel by ledger between two wallets ', async () => {
+    ledgerChannelId = await createLedgerChannel(10, 10);
+    const params = testCreateChannelParams(5, 5);
+
+    const {
+      channelResults: [{channelId}],
+      outbox,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
+
+    const {outbox: join} = await b.joinChannel({channelId});
+
+    await exchangeMessagesBetweenAandB([join], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 5,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId,
+      amount: BN.from(10),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantA.destination,
+      amount: BN.from(5),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantB.destination,
+      amount: BN.from(5),
+    });
+
+    appChannelId = channelId;
+  });
+
+  it('closing said channel', async () => {
+    const {outbox: close} = await a.closeChannel({channelId: appChannelId});
+
+    await exchangeMessagesBetweenAandB([], [close]);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 7,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
+      turnNum: 4,
+      status: 'closed',
+    });
+
+    expect(allocationItems).not.toContainEqual({destination: appChannelId});
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantA.destination,
+      amount: BN.from(10),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantB.destination,
+      amount: BN.from(10),
+    });
+  });
+});
+
+describe('Funding multiple channels syncronously (in bulk)', () => {
+  const N = 4;
+  let ledgerChannelId: Bytes32;
+  let appChannelIds: Bytes32[];
+
+  afterAll(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
+
+  it(`can fund ${N} channels created in bulk by Alice`, async () => {
+    ledgerChannelId = await createLedgerChannel(4, 4);
+    const params = testCreateChannelParams(1, 1);
+
+    const resultA = await a.createChannels(params, N);
+    const channelIds = resultA.channelResults.map(c => c.channelId);
+    await b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
+    const resultB = await b.joinChannels(channelIds);
+
+    await exchangeMessagesBetweenAandB([resultB.outbox], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 5,
+      status: 'running',
+    });
 
     expect(allocationItems).toHaveLength(N);
 
@@ -253,13 +416,66 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
         amount: BN.from(2),
       });
     }
+
+    appChannelIds = channelIds;
   });
 
-  it(`can fund ${N} channels created in bulk by Alice, rejecting those with no funds`, async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
+  it('can close them all (concurrently!)', async () => {
+    // ⚠️ This results in several messages back and forth
+    await exchangeMessagesBetweenAandB(
+      [],
+      await Promise.all(
+        appChannelIds.map(async channelId => (await a.closeChannel({channelId})).outbox)
+      )
+    );
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      // 11 because there is a conflicting back-and-forth due to concurrent messages
+      turnNum: 11,
+      status: 'running',
+    });
+
+    for (const channelId of appChannelIds) {
+      expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+        turnNum: 4,
+        status: 'closed',
+      });
+      expect(allocationItems).not.toContainEqual({destination: channelId});
+    }
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantA.destination,
+      amount: BN.from(4),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantB.destination,
+      amount: BN.from(4),
+    });
+  });
+});
+
+describe('Funding multiple channels syncronously without enough funds', () => {
+  afterAll(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
+
+  it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
+    const ledgerChannelId = await createLedgerChannel(2, 2);
     const params = testCreateChannelParams(1, 1);
 
-    const resultA0 = await a.createChannels(params, N + 2); // 2 channels will be unfunded
+    const resultA0 = await a.createChannels(params, 4); // 2 channels will be unfunded
     const channelIds = resultA0.channelResults.map(c => c.channelId);
     await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
     const resultB1 = await b.joinChannels(channelIds);
@@ -274,7 +490,7 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
       allocations: [{allocationItems}],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
-    expect(allocationItems).toHaveLength(N);
+    expect(allocationItems).toHaveLength(2);
 
     const unfundedChannels = channelResults.filter(c => c.status === 'opening');
 
@@ -304,6 +520,11 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 });
 
 describe('Funding multiple channels concurrently (one sided)', () => {
+  afterAll(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
+
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1);
@@ -361,6 +582,11 @@ async function proposeMultipleChannelsToEachother(
 }
 
 describe('Funding multiple channels concurrently (two sides)', () => {
+  afterEach(() => {
+    a.store.ledgers = {};
+    b.store.ledgers = {};
+  });
+
   it('can fund 2 channels by ledger each proposed by the other', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1);

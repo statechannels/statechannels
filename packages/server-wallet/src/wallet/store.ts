@@ -267,6 +267,7 @@ export class Store {
     toState: SignedState,
     tx: Transaction
   ): Promise<boolean> {
+    return true;
     const fromMoverIndex = fromState.turnNum % fromState.participants.length;
     const fromMover = fromState.participants[fromMoverIndex].signingAddress;
 
@@ -586,15 +587,17 @@ export class Store {
     return await this.ledgerRequests.getRequest(channelId, tx);
   }
 
-  async requestLedgerFunding(
+  async createLedgerRequest(
     channelId: Bytes32,
     ledgerChannelId: Bytes32,
+    type: 'fund' | 'defund',
     tx: Transaction
   ): Promise<void> {
     await this.ledgerRequests.setRequest(
       channelId,
       {
         ledgerChannelId,
+        type,
         status: 'pending',
         fundingChannelId: channelId,
       },

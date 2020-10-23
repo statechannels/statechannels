@@ -14,6 +14,7 @@ export type LedgerRequestType = {
   ledgerChannelId: Bytes32;
   fundingChannelId: Bytes32;
   status: LedgerRequestStatus;
+  type: 'fund' | 'defund';
 };
 
 // FIXME: (SQL Ledger Models)
@@ -37,7 +38,7 @@ export class LedgerRequests {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx?: Transaction
   ): Promise<void> {
-    if (this.requests[channelId])
+    if (this.requests[channelId] && this.requests[channelId].type === request.type)
       throw new Error('LedgerRequest:setRequest channelId already has pending request');
     this.requests[channelId] = request;
   }

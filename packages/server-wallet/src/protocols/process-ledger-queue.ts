@@ -8,6 +8,7 @@ import {
   SignedStateWithHash,
   SimpleAllocation,
   areAllocationItemsEqual,
+  BN,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -25,8 +26,32 @@ import {
 
 export type ProtocolState = {
   fundingChannel: ChannelState;
-  channelsPendingRequest: ChannelState[];
+  channelsRequestingFunds: ChannelState[];
+  channelsReturningFunds: ChannelState[];
 };
+
+const retrieveFundsFromClosedChannels = (
+  original: SimpleAllocation,
+  channelsReturningFunds: ChannelState[]
+): SimpleAllocation => ({
+  ...original,
+  allocationItems: channelsReturningFunds.reduce(
+    (allocationItems, channel) =>
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (channel.supported!.outcome as SimpleAllocation).allocationItems
+        .reduce((allocationItems, {destination, amount}) => {
+          const idx = allocationItems.findIndex(to => destination === to.destination);
+          return idx > -1
+            ? _.update(allocationItems, idx, to => ({
+                destination,
+                amount: BN.add(amount, to.amount),
+              }))
+            : [...allocationItems, {destination, amount}];
+        }, allocationItems)
+        .filter(item => item.destination !== channel.channelId),
+    original.allocationItems
+  ),
+});
 
 const allocateFundsToChannels = (
   original: SimpleAllocation,
@@ -40,15 +65,12 @@ const allocateFundsToChannels = (
   const insufficientFunds: Bytes32[] = [];
   const allocated = allocationTargets.reduce((outcome, {channelId, supported}) => {
     try {
-      return checkThat(
-        allocateToTarget(
-          outcome,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          checkThat(supported!.outcome, isSimpleAllocation).allocationItems,
-          channelId
-        ),
-        isSimpleAllocation
-      );
+      return allocateToTarget(
+        outcome,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (supported!.outcome as SimpleAllocation).allocationItems,
+        channelId
+      ) as SimpleAllocation;
     } catch (e) {
       if (
         // A proposed channel wants more funds than are available from a participant
@@ -64,7 +86,7 @@ const allocateFundsToChannels = (
   return {allocated, insufficientFunds};
 };
 
-const mergedOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
+const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
   type: 'SimpleAllocation',
   assetHolderAddress: b.assetHolderAddress,
   allocationItems: _.intersectionWith(
@@ -72,6 +94,12 @@ const mergedOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocati
     b.allocationItems,
     areAllocationItemsEqual
   ),
+});
+
+const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
+  type: 'SimpleAllocation',
+  assetHolderAddress: b.assetHolderAddress,
+  allocationItems: _.xorWith(a.allocationItems, b.allocationItems, areAllocationItemsEqual),
 });
 
 const computeNewOutcome = ({
@@ -82,7 +110,8 @@ const computeNewOutcome = ({
     channelId,
     participants: {length: n},
   },
-  channelsPendingRequest,
+  channelsRequestingFunds,
+  channelsReturningFunds,
 }: ProtocolState): SignLedgerState | false => {
   // Sanity-checks
   if (!supported) return false;
@@ -92,10 +121,13 @@ const computeNewOutcome = ({
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Nothing left to do, no actions to take
-  if (channelsPendingRequest.length === 0) return false;
+  if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
 
   // TODO: Sort should be somewhere else
-  channelsPendingRequest = channelsPendingRequest.sort(
+  channelsRequestingFunds = channelsRequestingFunds.sort(
+    (a, b) => a.latest.channelNonce - b.latest.channelNonce
+  );
+  channelsReturningFunds = channelsReturningFunds.sort(
     (a, b) => a.latest.channelNonce - b.latest.channelNonce
   );
 
@@ -107,7 +139,7 @@ const computeNewOutcome = ({
   const sentMerged = latestSignedByMe.turnNum === supported.turnNum + 2 * n;
 
   // Avoid repeating action if awaiting response (for original proposal or counterproposal)
-  if ((!receivedOriginal && sentOriginal) || (!receivedMerged && sentMerged)) return false;
+  if (!receivedMerged && ((!receivedOriginal && sentOriginal) || sentMerged)) return false;
 
   // The new outcome is the supported outcome, funding all pending ledger requests
   let myExpectedOutcome: Outcome;
@@ -122,7 +154,11 @@ const computeNewOutcome = ({
     ({
       allocated: myExpectedOutcome,
       insufficientFunds: insufficientFundsFor,
-    } = allocateFundsToChannels(supportedOutcome, channelsPendingRequest));
+    } = allocateFundsToChannels(
+      // Defunding happens before funding new requests
+      retrieveFundsFromClosedChannels(supportedOutcome, channelsReturningFunds),
+      channelsRequestingFunds
+    ));
 
   let newOutcome: Outcome = myExpectedOutcome;
   let newTurnNum: number = supported.turnNum + n;
@@ -133,25 +169,30 @@ const computeNewOutcome = ({
    * but otherwise just continue as normal (my signature will create a support)
    */
   if (receivedOriginal || receivedMerged) {
-    const {
-      outcome: conflictingOutcome,
-      turnNum: conflictingTurnNum,
-    } = latestNotSignedByMe as SignedStateWithHash;
+    const {outcome: conflictingOutcome} = latestNotSignedByMe as SignedStateWithHash;
 
     const theirLatestOutcome = checkThat(conflictingOutcome, isSimpleAllocation);
 
     if (!_.isEqual(theirLatestOutcome, myExpectedOutcome) /* (1) */) {
-      const merged = mergedOutcome(myExpectedOutcome, theirLatestOutcome);
+      const merged = intersectOutcome(myExpectedOutcome, theirLatestOutcome);
+      const xor = xorOutcome(myExpectedOutcome, theirLatestOutcome);
 
-      const intersectingChannels = channelsPendingRequest.filter(({channelId}) =>
+      const bothFunding = channelsRequestingFunds.filter(({channelId}) =>
         _.some(merged.allocationItems, ['destination', channelId])
       );
 
-      const computedMergedOutcome = allocateFundsToChannels(supportedOutcome, intersectingChannels);
+      const bothDefunding = channelsReturningFunds.filter(
+        ({channelId}) => !_.some(xor.allocationItems, ['destination', channelId])
+      );
 
-      newOutcome = computedMergedOutcome.allocated; // (2)
-      newTurnNum = conflictingTurnNum + n; // (3)
-      insufficientFundsFor = insufficientFundsFor.concat(computedMergedOutcome.insufficientFunds);
+      const agredUponOutcome = allocateFundsToChannels(
+        retrieveFundsFromClosedChannels(supportedOutcome, bothDefunding),
+        bothFunding
+      ); // (2)
+
+      newOutcome = agredUponOutcome.allocated; // (2)
+      newTurnNum = supported.turnNum + 2 * n; // (3)
+      insufficientFundsFor = insufficientFundsFor.concat(agredUponOutcome.insufficientFunds);
     }
   }
 
@@ -169,23 +210,34 @@ const computeNewOutcome = ({
 
 const markRequestsAsComplete = ({
   fundingChannel: {supported},
-  channelsPendingRequest,
+  channelsRequestingFunds,
+  channelsReturningFunds,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
   if (!supported) return false;
-  if (channelsPendingRequest.length === 0) return false;
+  if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
 
-  const doneRequests = channelsPendingRequest.filter(({channelId}) =>
+  const fundedChannels = channelsRequestingFunds.filter(({channelId}) =>
     _.some(
       checkThat(supported.outcome, isSimpleAllocation).allocationItems,
       allocationItem => allocationItem.destination === channelId
     )
   );
 
-  if (doneRequests.length === 0) return false;
+  const defundedChannels = channelsReturningFunds.filter(
+    ({channelId}) =>
+      !_.some(
+        checkThat(supported.outcome, isSimpleAllocation).allocationItems,
+        allocationItem => allocationItem.destination === channelId
+      )
+  );
+
+  if (fundedChannels.length === 0 && defundedChannels.length === 0) return false;
 
   return {
     type: 'MarkLedgerFundingRequestsAsComplete',
-    doneRequests: doneRequests.map(channel => channel.channelId),
+    doneRequests: fundedChannels
+      .map(channel => channel.channelId)
+      .concat(defundedChannels.map(channel => channel.channelId)),
   };
 };
 
@@ -208,13 +260,22 @@ export const getProcessLedgerQueueProtocolState = async (
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
+  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
-    channelsPendingRequest: await Promise.all(
+    channelsRequestingFunds: await Promise.all(
       compose(
         map(({fundingChannelId}: LedgerRequestType) => store.getChannel(fundingChannelId, tx)),
-        filter(['status', 'pending'])
-      )(await store.getPendingLedgerRequests(ledgerChannelId, tx))
+        filter(['status', 'pending']),
+        filter(['type', 'fund'])
+      )(ledgerRequests)
+    ),
+    channelsReturningFunds: await Promise.all(
+      compose(
+        map(({fundingChannelId}: LedgerRequestType) => store.getChannel(fundingChannelId, tx)),
+        filter(['status', 'pending']),
+        filter(['type', 'defund'])
+      )(ledgerRequests)
     ),
   };
 };
