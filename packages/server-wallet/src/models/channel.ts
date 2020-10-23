@@ -20,6 +20,8 @@ import {WalletError, Values} from '../errors/wallet-error';
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 import {Objective} from './objective';
+import {Ledger} from './ledger';
+import {LedgerRequest} from './ledger-request';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -122,6 +124,28 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .first();
+  }
+
+  static allLedgerChannels(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
+    return txOrKnex.transaction(async trx => {
+      return Channel.query(trx)
+        .select()
+        .whereIn(
+          'channelId',
+          (await Ledger.all(trx)).map(l => l.ledgerChannelId)
+        );
+    });
+  }
+
+  static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
+    return txOrKnex.transaction(async trx => {
+      return Channel.query(trx)
+        .select()
+        .whereIn(
+          'channelId',
+          (await LedgerRequest.getAllPendingRequests(trx)).map(l => l.channelToBeFunded)
+        );
+    });
   }
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
