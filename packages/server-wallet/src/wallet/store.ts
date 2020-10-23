@@ -186,6 +186,7 @@ export class Store {
       supported &&
       // If the state is the same as the support state then its not a transition just adding signatures
       !statesEqual(supported, state) &&
+      !(await this.isLedger(channelId)) &&
       !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
       ))
@@ -548,7 +549,7 @@ export class Store {
     });
 
     const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === sswh.stateHash);
-    if (channel.supported && !alreadyHaveState) {
+    if (channel.supported && !alreadyHaveState && !(await this.isLedger(channelId))) {
       const {supported} = channel;
 
       if (
@@ -556,7 +557,7 @@ export class Store {
           this.validateTransition(supported, incomingState, tx)
         ))
       ) {
-        logger.error('Invalid state transition — state is stored but not supported', {
+        throw new StoreError('Invalid state transition', {
           from: channel.supported,
           to: wireSignedState,
         });
