@@ -369,12 +369,11 @@ contract ForceMove is IForceMove {
             whoSignedWhat.length == nParticipants,
             '_validSignatures: whoSignedWhat must be the same length as participants'
         );
-        require(nStates > 0, 'At least one stateHash is required');
         for (uint256 i = 0; i < nParticipants; i++) {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
             // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
             // the additional nParticipants in the dividend ensures offset always positive
-            if (whoSignedWhat[i] + offset  < nStates - 1) {
+            if (whoSignedWhat[i] + offset + 1 < nStates) {
                 return false;
             }
         }
