@@ -1,14 +1,13 @@
 import {utils} from 'ethers';
 import {toNitroState} from '@statechannels/wallet-core';
 
-import {appBytecode} from '../models/__test__/fixtures/app-bytecode';
+import {appBytecode, COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
 import {AppBytecode} from '../models/app-bytecode';
 import {createState} from '../wallet/__test__/fixtures/states';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {defaultConfig} from '../config';
 import {testKnex as knex} from '../../jest/knex-setup-teardown';
 
-const COUNTING_APP_DEFINITION = '0xfffffffffffffffffffffffffffffffffffffffff';
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
 
 beforeEach(async () => {
