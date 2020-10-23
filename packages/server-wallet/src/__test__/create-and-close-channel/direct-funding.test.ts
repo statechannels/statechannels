@@ -185,7 +185,7 @@ it('Closes the channel', async () => {
   // B pushed isFinal4, generated countersigned isFinal4
   expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
     status: 'closed',
-    turnNum: 4,
+    turnNum: 5,
   });
 
   // A pushed the countersigned isFinal4
@@ -195,6 +195,6 @@ it('Closes the channel', async () => {
 
   expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
     status: 'closed',
-    turnNum: 4,
+    turnNum: 5,
   });
 });

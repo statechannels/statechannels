@@ -1,7 +1,7 @@
 import {State} from '@statechannels/wallet-core';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, CompleteObjective, completeObjective} from './actions';
+import {signState, noAction, CompleteObjective, completeObjective, SignState} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -10,14 +10,17 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
 
 const isFinal = stageGuard('Final');
 
-const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
+const signFinalState = (ps: ProtocolState): SignState | false =>
   !!ps.app.supported &&
-  !isFinal(ps.app.latestSignedByMe) &&
+  !!ps.app.latestSignedByMe &&
+  !ps.app.latestSignedByMe?.isFinal &&
   signState({
-    channelId: ps.app.channelId,
     ...ps.app.supported,
-    turnNum: ps.app.supported.turnNum + (isFinal(ps.app.supported) ? 0 : 1),
+    channelId: ps.app.channelId,
     isFinal: true,
+    turnNum: ps.app.supported.isFinal
+      ? ps.app.latestSignedByMe.turnNum + ps.app.participants.length
+      : ps.app.supported.turnNum + 1,
   });
 
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>

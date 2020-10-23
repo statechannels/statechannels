@@ -240,15 +240,15 @@ describe('when the application protocol returns an action', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates: [{turnNum: turnNum + 1, isFinal: true}]}},
+          params: {data: {signedStates: [{turnNum: turnNum + 2, isFinal: true}]}},
         },
       ],
     });
 
     const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
-      latestSignedByMe: {turnNum: turnNum + 1},
-      supported: {turnNum: turnNum + 1},
+      latestSignedByMe: {turnNum: turnNum + 2},
+      supported: {turnNum: turnNum + 2},
     });
   });
 });
