@@ -6,4 +6,5 @@ export async function up(knex: Knex): Promise<any> {
   });
 }
 
-export async function down(knex: Knex): Promise<any> {}
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export async function down(_knex: Knex): Promise<any> {}
