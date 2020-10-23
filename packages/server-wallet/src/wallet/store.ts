@@ -330,7 +330,7 @@ export class Store {
     if (!this.skipEvmValidation && !isInFundingStage) {
       const evmValidation = await validateTransitionWithEVM(
         toNitroState(fromState),
-        toNitroState(fromState),
+        toNitroState(toState),
         tx
       );
       if (!evmValidation) {
