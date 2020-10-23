@@ -187,8 +187,8 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
   let appChannelId: Bytes32;
 
   afterAll(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -276,8 +276,8 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   let appChannelId: Bytes32;
 
   afterAll(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -378,8 +378,8 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
   let appChannelIds: Bytes32[];
 
   afterAll(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it(`can fund ${N} channels created in bulk by Alice`, async () => {
@@ -471,8 +471,8 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 
 describe('Funding multiple channels syncronously without enough funds', () => {
   afterAll(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
@@ -525,8 +525,8 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
 describe('Funding multiple channels concurrently (one sided)', () => {
   afterAll(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
@@ -587,8 +587,8 @@ async function proposeMultipleChannelsToEachother(
 
 describe('Funding multiple channels concurrently (two sides)', () => {
   afterEach(() => {
-    a.store.ledgers = {};
-    b.store.ledgers = {};
+    a.dbAdmin().truncateDB(['ledgers']);
+    b.dbAdmin().truncateDB(['ledgers']);
   });
 
   it('can fund 2 channels by ledger each proposed by the other', async () => {

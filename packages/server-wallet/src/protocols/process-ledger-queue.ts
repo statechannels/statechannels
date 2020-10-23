@@ -14,7 +14,7 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-request';
+import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
@@ -260,19 +260,19 @@ export const getProcessLedgerQueueProtocolState = async (
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
+  const ledgerRequests = await LedgerRequest.getPendingRequests(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
     channelsRequestingFunds: await Promise.all(
       compose(
-        map(({fundingChannelId}: LedgerRequestType) => store.getChannel(fundingChannelId, tx)),
+        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
         filter(['status', 'pending']),
         filter(['type', 'fund'])
       )(ledgerRequests)
     ),
     channelsReturningFunds: await Promise.all(
       compose(
-        map(({fundingChannelId}: LedgerRequestType) => store.getChannel(fundingChannelId, tx)),
+        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
         filter(['status', 'pending']),
         filter(['type', 'defund'])
       )(ledgerRequests)

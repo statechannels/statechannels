@@ -25,7 +25,7 @@ import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
-import {LedgerRequests} from '../../../models/ledger-requests';
+import {LedgerRequest} from '../../../models/ledger-request';
 
 jest.setTimeout(20_000);
 
@@ -338,8 +338,6 @@ describe('ledger funded app scenarios', () => {
 
   beforeEach(async () => {
     // FIXME: SQL-ize ledgers and do test cleanup as needed
-    wallet.store.ledgers = {};
-    wallet.store.ledgerRequests = new LedgerRequests();
 
     const someNonConflictingChannelNonce = 23364518;
 
@@ -479,9 +477,9 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice(), bob())(preFS)],
     });
 
-    wallet.store.ledgerRequests.setRequest(app.channelId, {
+    LedgerRequest.setRequest({
       ledgerChannelId: ledger.channelId,
-      fundingChannelId: app.channelId,
+      channelToBeFunded: app.channelId,
       status: 'pending', // TODO: could this be approved?
       type: 'fund',
     });
@@ -517,9 +515,9 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    wallet.store.ledgerRequests.setRequest(app.channelId, {
+    LedgerRequest.setRequest({
       ledgerChannelId: ledger.channelId,
-      fundingChannelId: app.channelId,
+      channelToBeFunded: app.channelId,
       status: 'pending', // TODO: could this be approved?
       type: 'fund',
     });
