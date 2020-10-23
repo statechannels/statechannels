@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {Model, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
