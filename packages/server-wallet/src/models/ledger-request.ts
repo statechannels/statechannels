@@ -3,7 +3,7 @@ import {Model, Transaction, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 
-import {Ledger} from './ledger';
+import {Channel} from './channel';
 
 // TODO: Is this the same as an objective?
 // GK: there is a one to many relation from ledgers to channels we may not need this model at all
@@ -71,7 +71,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async getAllPendingRequests(tx: TransactionOrKnex): Promise<LedgerRequestType[]> {
     return tx.transaction(async trx => {
       return LedgerRequest.query(trx).findByIds(
-        (await Ledger.query(trx).select('ledgerChannelId')).map(l => l.ledgerChannelId)
+        (await Channel.query(trx).select('channelId')).map(l => l.channelId)
       );
     });
   }
