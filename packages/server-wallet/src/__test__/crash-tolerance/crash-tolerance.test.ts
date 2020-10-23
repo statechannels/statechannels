@@ -9,7 +9,7 @@ import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
 
 const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
@@ -18,11 +18,6 @@ let channelId: string;
 let participantA: Participant;
 let participantB: Participant;
 
-async function crashAndRestart(wallet: Wallet) {
-  const dbName = wallet.dbAdmin().dbName;
-  await wallet.destroy();
-  return new Wallet({...processEnvConfig, postgresDBName: dbName}); // Wallet that will "restart" (same db)
-}
 beforeAll(async () => {
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
