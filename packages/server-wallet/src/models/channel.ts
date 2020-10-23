@@ -20,7 +20,6 @@ import {WalletError, Values} from '../errors/wallet-error';
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 import {Objective} from './objective';
-import {Ledger} from './ledger';
 import {LedgerRequest} from './ledger-request';
 
 export const REQUIRED_COLUMNS = [
@@ -70,6 +69,8 @@ export class Channel extends Model implements RequiredColumns {
   readonly funding!: Funding[];
   readonly chainServiceRequests!: ChainServiceRequests;
   readonly fundingStrategy!: FundingStrategy;
+
+  readonly assetHolderAddress: string | undefined; // only Ledger channels have this
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -126,15 +127,20 @@ export class Channel extends Model implements RequiredColumns {
       .first();
   }
 
+  static async setLedger(
+    channelId: Bytes32,
+    assetHolderAddress: Address,
+    txOrKnex: TransactionOrKnex
+  ): Promise<void> {
+    await Channel.query(txOrKnex)
+      .findById(channelId)
+      .patch({assetHolderAddress});
+  }
+
   static allLedgerChannels(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
-    return txOrKnex.transaction(async trx => {
-      return Channel.query(trx)
-        .select()
-        .whereIn(
-          'channelId',
-          (await Ledger.all(trx)).map(l => l.ledgerChannelId)
-        );
-    });
+    return Channel.query(txOrKnex)
+      .select()
+      .whereNotNull('assetHolderAddress');
   }
 
   static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
@@ -302,6 +308,10 @@ export class Channel extends Model implements RequiredColumns {
 
   public get signedStates(): Array<SignedStateWithHash> {
     return this.vars.map(s => ({...this.channelConstants, ...s}));
+  }
+
+  public get isLedger(): boolean {
+    return !!this.assetHolderAddress;
   }
 
   private mySignature(signatures: SignatureEntry[]): boolean {

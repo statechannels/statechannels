@@ -59,7 +59,6 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {Objective as ObjectiveModel} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
-import {Ledger} from '../models/ledger';
 import {LedgerRequest} from '../models/ledger-request';
 import {Channel} from '../models/channel';
 
@@ -273,7 +272,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   // TODO: Discussion item --- how should an App tell the wallet a channel is a Ledger?
   async __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): Promise<void> {
-    await Ledger.query(this.knex).insert({ledgerChannelId, assetHolderAddress});
+    await Channel.setLedger(ledgerChannelId, assetHolderAddress, this.knex);
   }
 
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
@@ -792,11 +791,11 @@ const determineWhichLedgerToUse = async (
     //   v => v.assetHolderAddress === assetHolderAddress
     // );
 
-    const ledgerRecord = await Ledger.query(txOrKnex).findOne({assetHolderAddress});
+    const ledgerRecord = await Channel.query(txOrKnex).findOne({assetHolderAddress});
     if (!ledgerRecord) {
       throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
     }
-    return ledgerRecord?.ledgerChannelId;
+    return ledgerRecord?.channelId;
   } else {
     throw new Error('cannot fund unsupported app');
   }
