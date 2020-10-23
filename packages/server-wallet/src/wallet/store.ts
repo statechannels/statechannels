@@ -272,7 +272,7 @@ export class Store {
     const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
     if (!turnNumCheck) {
       const VALIDATION_ERROR = `Turn number check failed.`;
-      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
     }
 
     const constantsCheck =
@@ -286,11 +286,14 @@ export class Store {
       )}
       `;
 
-      logger.error(VALIDATION_ERROR, {
-        fromState,
-        toState,
-        error: Error(VALIDATION_ERROR),
-      });
+      logger.error(
+        {
+          fromState,
+          toState,
+          error: Error(VALIDATION_ERROR),
+        },
+        VALIDATION_ERROR
+      );
     }
 
     const signatureValidation =
@@ -299,14 +302,14 @@ export class Store {
 
     if (!signatureValidation) {
       const VALIDATION_ERROR = `Signature validation failed.`;
-      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
       return false;
     }
 
     // Final state specific validation
     if (toState.isFinal && !_.isEqual(fromState.outcome, toState.outcome)) {
       const VALIDATION_ERROR = `Outcome changed on a final state.`;
-      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
       return false;
     }
 
@@ -320,7 +323,7 @@ export class Store {
     if (isInFundingStage && !fundingStageValidation) {
       const VALIDATION_ERROR = `Invalid setup state transition.`;
 
-      logger.error(VALIDATION_ERROR, {fromState, toState, error: Error(VALIDATION_ERROR)});
+      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
 
       return false;
     }
@@ -334,7 +337,7 @@ export class Store {
         tx
       );
       if (!evmValidation) {
-        logger.error('EVM Validation failure', {fromState, toState});
+        logger.error({fromState, toState}, 'EVM Validation failure');
         return false;
       }
     }
