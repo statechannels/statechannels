@@ -236,7 +236,10 @@ contract ForceMove is IForceMove {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
-        require(largestTurnNum + 1 >= numStates, "largestTurnNum + 1 must be greater than or equal to numStates");
+        require(
+            largestTurnNum + 1 >= numStates,
+            'largestTurnNum + 1 must be greater than or equal to numStates'
+        );
         // ^^ SW-C101: prevent underflow
 
         // By construction, the following states form a valid transition

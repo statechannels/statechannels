@@ -56,8 +56,8 @@ contract ETHAssetHolder is AssetHolder {
 
         // refund whatever wasn't deposited.
         uint256 refund = amount.sub(amountDeposited);
-        (bool success, ) = msg.sender.call{value: refund}("");
-        require(success, "Could not refund excess funds");
+        (bool success, ) = msg.sender.call{value: refund}('');
+        require(success, 'Could not refund excess funds');
     }
 
     /**
@@ -67,7 +67,7 @@ contract ETHAssetHolder is AssetHolder {
      * @param amount Quantity of wei to be transferred.
      */
     function _transferAsset(address payable destination, uint256 amount) internal override {
-        (bool success, ) = destination.call{value: amount}("");
-        require(success, "Could not transfer asset");
+        (bool success, ) = destination.call{value: amount}('');
+        require(success, 'Could not transfer asset');
     }
 }
