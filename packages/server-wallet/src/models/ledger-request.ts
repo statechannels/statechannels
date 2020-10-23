@@ -1,7 +1,9 @@
 import _ from 'lodash';
-import {Model, Transaction} from 'objection';
+import {Model, Transaction, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
+
+import {Ledger} from './ledger';
 
 // TODO: Is this the same as an objective?
 // GK: there is a one to many relation from ledgers to channels we may not need this model at all
@@ -54,14 +56,22 @@ export class LedgerRequest extends Model implements LedgerRequestType {
       .patch({status});
   }
 
-  // unused?
   static async getPendingRequests(
+    ledgerChannelId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: Transaction
+    tx?: TransactionOrKnex
   ): Promise<LedgerRequestType[]> {
     return LedgerRequest.query(tx)
       .select()
-      .where({status: 'pending'});
+      .where({ledgerChannelId, status: 'pending'});
+  }
+
+  static async getAllPendingRequests(tx: TransactionOrKnex): Promise<LedgerRequestType[]> {
+    return tx.transaction(async trx => {
+      return LedgerRequest.query(trx).findByIds(
+        (await Ledger.query(trx).select('ledgerChannelId')).map(l => l.ledgerChannelId)
+      );
+    });
   }
 
   static async requestLedgerFunding(
