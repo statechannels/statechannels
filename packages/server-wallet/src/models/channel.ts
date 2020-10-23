@@ -133,7 +133,7 @@ export class Channel extends Model implements RequiredColumns {
     txOrKnex: TransactionOrKnex
   ): Promise<void> {
     await Channel.query(txOrKnex)
-      .findById(channelId)
+      .findOne({channelId})
       .patch({assetHolderAddress});
   }
 
