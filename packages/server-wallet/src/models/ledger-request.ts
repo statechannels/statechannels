@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {Model, Transaction, TransactionOrKnex} from 'objection';
+import {Model, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 
@@ -32,7 +32,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async getRequest(
     channelToBeFunded: Bytes32,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: Transaction
+    tx: TransactionOrKnex
   ): Promise<LedgerRequestType> {
     return LedgerRequest.query(tx).findById(channelToBeFunded);
   }
@@ -40,7 +40,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async setRequest(
     request: LedgerRequestType,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: Transaction
+    tx: TransactionOrKnex
   ): Promise<void> {
     await LedgerRequest.query(tx).insert(request); // should throw error if it already exists
   }
@@ -49,7 +49,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     channelToBeFunded: Bytes32,
     status: LedgerRequestStatus,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: Transaction
+    tx: TransactionOrKnex
   ): Promise<void> {
     await LedgerRequest.query(tx)
       .findById(channelToBeFunded)
@@ -59,7 +59,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async getPendingRequests(
     ledgerChannelId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx?: TransactionOrKnex
+    tx: TransactionOrKnex
   ): Promise<LedgerRequestType[]> {
     return LedgerRequest.query(tx)
       .select()
@@ -77,7 +77,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async requestLedgerFunding(
     channelToBeFunded: Bytes32,
     ledgerChannelId: Bytes32,
-    tx: Transaction
+    tx: TransactionOrKnex
   ): Promise<void> {
     await this.setRequest(
       {
@@ -91,7 +91,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
 
   static async markLedgerRequestsSuccessful(
     channelsToBeFunded: Bytes32[],
-    tx?: Transaction
+    tx: TransactionOrKnex
   ): Promise<void> {
     await Promise.all(
       channelsToBeFunded.map(channelToBeFunded =>

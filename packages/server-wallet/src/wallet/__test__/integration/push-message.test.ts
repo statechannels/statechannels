@@ -477,11 +477,14 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice(), bob())(preFS)],
     });
 
-    LedgerRequest.setRequest({
-      ledgerChannelId: ledger.channelId,
-      channelToBeFunded: app.channelId,
-      status: 'pending', // TODO: could this be approved?
-    });
+    LedgerRequest.setRequest(
+      {
+        ledgerChannelId: ledger.channelId,
+        channelToBeFunded: app.channelId,
+        status: 'pending', // TODO: could this be approved?
+      },
+      wallet.knex
+    );
 
     const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState))],
@@ -514,11 +517,14 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    LedgerRequest.setRequest({
-      ledgerChannelId: ledger.channelId,
-      channelToBeFunded: app.channelId,
-      status: 'pending', // TODO: could this be approved?
-    });
+    LedgerRequest.setRequest(
+      {
+        ledgerChannelId: ledger.channelId,
+        channelToBeFunded: app.channelId,
+        status: 'pending', // TODO: could this be approved?
+      },
+      wallet.knex
+    );
 
     const {
       outbox: outboxFromFirstPushMessage,
