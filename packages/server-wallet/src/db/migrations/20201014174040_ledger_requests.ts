@@ -10,10 +10,10 @@ export async function up(knex: Knex): Promise<any> {
       .references('channel_id')
       .inTable('channels'); // or in ledgers?
     table
-      .string('funding_channel_id')
+      .string('channel_to_be_funded')
       .notNullable()
       .references('channel_id')
-      .inTable('channels'); // or in ledgers?
+      .inTable('channels');
     table.string('status').notNullable();
   });
 }

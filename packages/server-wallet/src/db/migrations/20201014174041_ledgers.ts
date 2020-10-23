@@ -10,7 +10,6 @@ export async function up(knex: Knex): Promise<any> {
       .references('channel_id')
       .inTable('channels');
     table.string('asset_holder_address').notNullable();
-    table.string('status').notNullable();
   });
 }
 
