@@ -150,7 +150,7 @@ describe('registerChannel', () => {
     let resolve: () => void;
     const p = new Promise(r => (resolve = r));
 
-    const onHoldingUpdated = (arg: HoldingUpdatedArg): void => {
+    const holdingUpdated = (arg: HoldingUpdatedArg): void => {
       switch (counter) {
         case 0:
           expect(arg).toMatchObject({
@@ -178,7 +178,7 @@ describe('registerChannel', () => {
     };
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-      onHoldingUpdated,
+      holdingUpdated,
       onAssetTransferred: _.noop,
     });
     await p;
@@ -190,7 +190,7 @@ describe('registerChannel', () => {
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        onHoldingUpdated: arg => {
+        holdingUpdated: arg => {
           expect(arg).toMatchObject({
             channelId,
             assetHolderAddress: ethAssetHolderAddress,
@@ -217,7 +217,7 @@ describe('registerChannel', () => {
       )
     );
 
-    const onHoldingUpdated = (arg: HoldingUpdatedArg): void => {
+    const holdingUpdated = (arg: HoldingUpdatedArg): void => {
       const index = objectsToMatch.findIndex(
         predicate =>
           predicate.channelId === arg.channelId &&
@@ -230,7 +230,7 @@ describe('registerChannel', () => {
       if (!objectsToMatch.length) resolve();
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
-      onHoldingUpdated,
+      holdingUpdated,
       onAssetTransferred: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
@@ -246,7 +246,7 @@ describe('concludeAndWithdraw', () => {
     let counter = 0;
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        onHoldingUpdated: _.noop,
+        holdingUpdated: _.noop,
         onAssetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
@@ -285,7 +285,7 @@ describe('concludeAndWithdraw', () => {
     let counter = 0;
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
-        onHoldingUpdated: _.noop,
+        holdingUpdated: _.noop,
         onAssetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
