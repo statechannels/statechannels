@@ -483,6 +483,7 @@ describe('ledger funded app scenarios', () => {
       ledgerChannelId: ledger.channelId,
       fundingChannelId: app.channelId,
       status: 'pending', // TODO: could this be approved?
+      type: 'fund',
     });
 
     const {outbox, channelResults} = await wallet.pushMessage({
@@ -520,6 +521,7 @@ describe('ledger funded app scenarios', () => {
       ledgerChannelId: ledger.channelId,
       fundingChannelId: app.channelId,
       status: 'pending', // TODO: could this be approved?
+      type: 'fund',
     });
 
     const {

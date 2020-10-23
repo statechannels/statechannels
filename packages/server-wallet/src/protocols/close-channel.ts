@@ -1,13 +1,26 @@
-import {State} from '@statechannels/wallet-core';
+import {checkThat, isSimpleAllocation, State} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
+import {LedgerRequestType} from '../models/ledger-requests';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, CompleteObjective, completeObjective} from './actions';
+import {
+  signState,
+  noAction,
+  CompleteObjective,
+  completeObjective,
+  RequestLedgerDefunding,
+  requestLedgerDefunding,
+} from './actions';
 
-export type ProtocolState = {app: ChannelState};
+export type ProtocolState = {
+  app: ChannelState;
+  ledgerDefundingRequested?: boolean;
+  ledgerDefundingSucceeded?: boolean;
+  ledgerChannelId?: Bytes32;
+};
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
@@ -24,13 +37,27 @@ const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
     isFinal: true,
   });
 
+const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
+  isLedgerFunded(ps.app) &&
+  !ps.ledgerDefundingRequested &&
+  !ps.ledgerDefundingSucceeded &&
+  !!ps.app.supported &&
+  ps.app.supported.isFinal &&
+  requestLedgerDefunding({
+    channelId: ps.app.channelId,
+    assetHolderAddress: checkThat(ps.app.latest.outcome, isSimpleAllocation).assetHolderAddress,
+  });
+
+const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
+
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
   (ps.app.support || []).every(isFinal) &&
   isFinal(ps.app.latestSignedByMe) &&
+  ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
   completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  completeCloseChannel(ps) || signFinalState(ps) || noAction;
+  completeCloseChannel(ps) || defundIntoLedger(ps) || signFinalState(ps) || noAction;
 
 /**
  * Helper method to retrieve scoped data needed for CloseChannel protocol.
@@ -45,7 +72,20 @@ export const getCloseChannelProtocolState = async (
     case 'Direct':
     case 'Unfunded':
       return {app};
-    case 'Ledger':
+    case 'Ledger': {
+      /* TODO: Delete 'fund' requests from the Store */
+      let req: LedgerRequestType | undefined = await store.getPendingLedgerRequest(
+        app.channelId,
+        tx
+      );
+      req = req.type === 'defund' ? req : undefined;
+      return {
+        app,
+        ledgerDefundingRequested: !!req,
+        ledgerDefundingSucceeded: req ? req.status === 'succeeded' : false,
+        ledgerChannelId: req ? req.ledgerChannelId : undefined,
+      };
+    }
     case 'Unknown':
     case 'Virtual':
     default:

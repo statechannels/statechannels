@@ -25,6 +25,11 @@ export type RequestLedgerFunding = {
   channelId: Bytes32;
   assetHolderAddress: Address;
 };
+export type RequestLedgerDefunding = {
+  type: 'RequestLedgerDefunding';
+  channelId: Bytes32;
+  assetHolderAddress: Address;
+};
 export type MarkLedgerFundingRequestsAsComplete = {
   type: 'MarkLedgerFundingRequestsAsComplete';
   doneRequests: Bytes32[];
@@ -46,6 +51,9 @@ const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['t
   props: Omit<A, 'type'>
 ): A => ({...props, type} as A);
 export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
+export const requestLedgerDefunding = actionConstructor<RequestLedgerDefunding>(
+  'RequestLedgerDefunding'
+);
 export const fundChannel = actionConstructor<FundChannel>('FundChannel');
 export const signState = actionConstructor<SignState>('SignState');
 export const completeObjective = actionConstructor<CompleteObjective>('CompleteObjective');
@@ -65,4 +73,5 @@ export type ProtocolAction =
   | FundChannel
   | CompleteObjective
   | RequestLedgerFunding
+  | RequestLedgerDefunding
   | MarkLedgerFundingRequestsAsComplete;
