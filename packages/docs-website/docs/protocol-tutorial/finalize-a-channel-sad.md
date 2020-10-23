@@ -66,11 +66,11 @@ const challengeSignedState: SignedState = signState(
 );
 const challengeSignature = signChallengeMessage([challengeSignedState], challenger.privateKey);
 
-/* Submit the forceMove transaction */
+/* Submit the challenge transaction */
 const variableParts = states.map(state => getVariablePart(state));
 const fixedPart = getFixedPart(states[0]);
 
-const tx = NitroAdjudicator.forceMove(
+const tx = NitroAdjudicator.challenge(
   fixedPart,
   largestTurnNum,
   variableParts,

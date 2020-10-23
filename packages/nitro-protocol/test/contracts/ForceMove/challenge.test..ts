@@ -176,7 +176,7 @@ describe('forceMove', () => {
       // Set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
-      const tx = ForceMove.forceMove(
+      const tx = ForceMove.challenge(
         fixedPart,
         largestTurnNum,
         variableParts,
@@ -189,7 +189,7 @@ describe('forceMove', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('./forceMove.gas.md', description, receipt.gasUsed);
+        await writeGasConsumption('./challenge.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         // Catch ForceMove event

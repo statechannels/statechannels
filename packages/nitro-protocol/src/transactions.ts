@@ -20,7 +20,7 @@ export function createForceMoveTransaction(
 ): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
-  return forceMoveTrans.createForceMoveTransaction(
+  return forceMoveTrans.createChallengeTransaction(
     states,
     signatures,
     whoSignedWhat,

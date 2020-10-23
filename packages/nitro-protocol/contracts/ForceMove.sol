@@ -44,7 +44,7 @@ contract ForceMove is IForceMove {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
      */
-    function forceMove(
+    function challenge(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
