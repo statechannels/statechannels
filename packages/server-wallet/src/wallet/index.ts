@@ -72,7 +72,9 @@ export type MultipleChannelOutput = {
   objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
-type WalletEvent = {singleChannelOutput: SingleChannelOutput};
+
+export type WalletEventName = 'channelUpdate';
+type WalletEvent = {[key in WalletEventName]: SingleChannelOutput};
 
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
@@ -633,8 +635,11 @@ export class Wallet extends EventEmitter<WalletEvent>
   };
 
   // ChainEventSubscriberInterface implementation
-  onHoldingUpdated(arg: HoldingUpdatedArg): void {
-    this.updateChannelFundingForAssetHolder(arg).then(arg => this.emit('singleChannelOutput', arg));
+  holdingUpdated(arg: HoldingUpdatedArg): void {
+    const channelUpdate: WalletEventName = 'channelUpdate';
+    this.updateChannelFundingForAssetHolder(arg).then(singleChannelOutput =>
+      this.emit(channelUpdate, singleChannelOutput)
+    );
   }
 
   onAssetTransferred(_arg: AssetTransferredArg): void {
