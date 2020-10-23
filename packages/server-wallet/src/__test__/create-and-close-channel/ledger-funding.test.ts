@@ -12,12 +12,12 @@ import {Outgoing} from '../..';
 import {defaultTestConfig} from '../../config';
 import {Bytes32} from '../../type-aliases';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const ETH_ASSET_HOLDER_ADDRESS = ethers.constants.AddressZero;
 
 const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
-const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
+let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 
 let participantA: Participant;
 let participantB: Participant;
@@ -83,6 +83,10 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   const resultA0 = await a.createChannel(ledgerChannelArgs);
   const channelId = resultA0.channelResults[0].channelId;
   await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+
+  // B CRASHES
+  b = await crashAndRestart(b);
+
   const resultB1 = await b.joinChannel({channelId});
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
   const fundingPostADeposit = {
