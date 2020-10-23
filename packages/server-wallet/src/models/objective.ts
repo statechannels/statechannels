@@ -120,6 +120,7 @@ export class Objective extends Model {
     targetChannelIds: string[],
     tx: TransactionOrKnex
   ): Promise<ObjectiveStoredInDB[]> {
+    // TODO this should at least be in a transaction
     const objectiveIds = (
       await ObjectiveChannel.query(tx)
         .column('objectiveId')

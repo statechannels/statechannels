@@ -13,7 +13,7 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-requests';
+import {LedgerRequestType} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
