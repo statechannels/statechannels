@@ -406,6 +406,24 @@ export class Wallet extends EventEmitter<WalletEvent>
           this.walletConfig.timingMetrics
         )
       );
+
+      if (
+        channel.supported &&
+        nextState.turnNum > channel.supported.turnNum &&
+        !(await timer('validating transition', async () =>
+          // eslint-disable-next-line
+          this.store.validateTransition(channel.supported!, signedState, tx)
+        ))
+      ) {
+        throw new UpdateChannel.UpdateChannelError(
+          UpdateChannel.UpdateChannelError.reasons.invalidTransition,
+          {
+            from: channel.supported,
+            to: nextState,
+          }
+        );
+      }
+
       const signedState = await timer('signing state', () =>
         this.store.signState(channelId, nextState, tx)
       );

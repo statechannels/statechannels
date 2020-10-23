@@ -24,6 +24,7 @@ export class UpdateChannelError extends WalletError {
   static readonly reasons = {
     channelNotFound: 'channel not found',
     invalidLatestState: 'must have latest state',
+    invalidTransition: 'provided updated is an invalid transition',
     notInRunningStage: 'channel must be in running state',
     notMyTurn: 'it is not my turn',
   } as const;

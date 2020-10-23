@@ -172,28 +172,12 @@ export class Store {
 
     const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
 
-    const {supported} = channel;
-
     await timer('validating freshness', async () => validateStateFreshness(state, channel));
 
     const signatureEntry = await timer('signing', async () =>
       channel.signingWallet.signState(state)
     );
     const signedState = {...state, signatures: [signatureEntry]};
-
-    if (
-      supported &&
-      // If the state is the same as the support state then its not a transition just adding signatures
-      !statesEqual(supported, state) &&
-      !(await timer('validating transition', async () =>
-        this.validateTransition(supported, signedState, tx)
-      ))
-    ) {
-      throw new StoreError('Invalid state transition', {
-        from: channel.supported,
-        to: signedState,
-      });
-    }
 
     await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
 
