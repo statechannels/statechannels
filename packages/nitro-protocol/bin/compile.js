@@ -15,7 +15,7 @@ async function main() {
 
   const config = {
     compilerType,
-    compilerVersion: '0.6.2',
+    compilerVersion: '0.6.12',
     sourceDirectory: './contracts',
     outputDirectory: './build/contracts',
     outputType: 'multiple',
