@@ -122,7 +122,8 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   });
 
 const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
-  (isRunning(ps.app.supported) || ps.app.supported.turnNum === ps.app.participants.length * 2 - 1) &&
+  (ps.app.supported?.turnNum === ps.app.participants.length * 2 - 1 ||
+    isRunning(ps.app.supported)) &&
   completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
