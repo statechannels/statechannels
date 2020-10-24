@@ -20,7 +20,7 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 
 // These are currently unused, but will be used
 // const isRunning = stageGuard('Running');
-const isPostfundSetup = stageGuard('PostfundSetup');
+// const isPostfundSetup = stageGuard('PostfundSetup');
 const isRunning = stageGuard('Running');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
@@ -122,7 +122,7 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   });
 
 const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
-  (isRunning(ps.app.supported) || isPostfundSetup(ps.app.supported)) &&
+  (isRunning(ps.app.supported) || ps.app.supported === ps.app.participants.length * 2 - 1) &&
   completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
