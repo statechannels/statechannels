@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.2.0...@statechannels/server-wallet@1.2.1) (2020-10-24)
+
+
+### Bug Fixes
+
+* completeOpenChannel uses turn number ([d573e5a](https://github.com/statechannels/statechannels/commit/d573e5abfcce077e4ae81a0b85eac485e00e2e09))
+* type error ([2e12698](https://github.com/statechannels/statechannels/commit/2e12698ea7c2cf645e55853593b296f7155a2699))
+
+
+
+
+
 # [1.2.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.1.0...@statechannels/server-wallet@1.2.0) (2020-10-23)
 
 
