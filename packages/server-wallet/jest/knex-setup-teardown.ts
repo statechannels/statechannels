@@ -13,7 +13,6 @@ beforeAll(async () => {
   await new DBAdmin(testKnex).truncateDB();
 });
 
-afterEach(async () => {});
 afterAll(async () => {
   // We need to close the db connection after the test suite has run.
   // Otherwise, jest will not exit within the required one second after the test
