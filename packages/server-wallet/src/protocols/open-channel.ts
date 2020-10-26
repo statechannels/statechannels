@@ -186,7 +186,7 @@ export const getOpenChannelProtocolState = async (
     case 'Unfunded':
       return {app};
     case 'Ledger': {
-      const req = await store.getPendingLedgerRequest(app.channelId, tx);
+      const req = await store.getLedgerRequest(app.channelId, 'fund', tx);
       return {
         app,
         ledgerFundingRequested: !!req,

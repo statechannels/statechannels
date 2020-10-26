@@ -32,7 +32,8 @@ export type RequestLedgerDefunding = {
 };
 export type MarkLedgerFundingRequestsAsComplete = {
   type: 'MarkLedgerFundingRequestsAsComplete';
-  doneRequests: Bytes32[];
+  fundedChannels: Bytes32[];
+  defundedChannels: Bytes32[];
 };
 export type SignLedgerState = {
   type: 'SignLedgerState';

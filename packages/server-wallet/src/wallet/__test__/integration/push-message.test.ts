@@ -25,7 +25,7 @@ import {Objective as ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
-import {LedgerRequests} from '../../../models/ledger-requests';
+import {LedgerRequest} from '../../../models/ledger-request';
 
 jest.setTimeout(20_000);
 
@@ -338,8 +338,6 @@ describe('ledger funded app scenarios', () => {
 
   beforeEach(async () => {
     // FIXME: SQL-ize ledgers and do test cleanup as needed
-    wallet.store.ledgers = {};
-    wallet.store.ledgerRequests = new LedgerRequests();
 
     const someNonConflictingChannelNonce = 23364518;
 
@@ -474,31 +472,24 @@ describe('ledger funded app scenarios', () => {
   });
 
   it('countersigns standalone ledger update when it already has a prefund setup in store', async () => {
-    const {latest} = await putTestChannelInsideWallet({
+    await putTestChannelInsideWallet({
       ...app,
       vars: [stateWithHashSignedBy(alice(), bob())(preFS)],
     });
 
-    wallet.store.ledgerRequests.setRequest(app.channelId, {
-      ledgerChannelId: ledger.channelId,
-      fundingChannelId: app.channelId,
-      status: 'pending', // TODO: could this be approved?
-      type: 'fund',
-    });
+    await LedgerRequest.setRequest(
+      {
+        ledgerChannelId: ledger.channelId,
+        channelToBeFunded: app.channelId,
+        status: 'pending', // TODO: could this be approved?
+        type: 'fund',
+      },
+      wallet.knex
+    );
 
     const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState))],
     });
-
-    expect(getSignedStateFor(app.channelId, outbox)).toMatchObject(
-      // Newly signed postfund setup of application channel
-      serializeState(
-        stateWithHashSignedBy(alice())({
-          ...latest,
-          turnNum: 2,
-        })
-      )
-    );
 
     expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
       // Countersigned ledger update
@@ -517,12 +508,15 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    wallet.store.ledgerRequests.setRequest(app.channelId, {
-      ledgerChannelId: ledger.channelId,
-      fundingChannelId: app.channelId,
-      status: 'pending', // TODO: could this be approved?
-      type: 'fund',
-    });
+    await LedgerRequest.setRequest(
+      {
+        ledgerChannelId: ledger.channelId,
+        channelToBeFunded: app.channelId,
+        status: 'pending', // TODO: could this be approved?
+        type: 'fund',
+      },
+      wallet.knex
+    );
 
     const {
       outbox: outboxFromFirstPushMessage,

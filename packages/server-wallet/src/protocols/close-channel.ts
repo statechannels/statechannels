@@ -3,7 +3,6 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-requests';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
 import {
@@ -73,12 +72,7 @@ export const getCloseChannelProtocolState = async (
     case 'Unfunded':
       return {app};
     case 'Ledger': {
-      /* TODO: Delete 'fund' requests from the Store */
-      let req: LedgerRequestType | undefined = await store.getPendingLedgerRequest(
-        app.channelId,
-        tx
-      );
-      req = req.type === 'defund' ? req : undefined;
+      const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
       return {
         app,
         ledgerDefundingRequested: !!req,
