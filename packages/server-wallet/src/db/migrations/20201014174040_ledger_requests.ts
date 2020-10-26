@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<any> {
     table
       .string('ledger_channel_id')
       .references('channel_id')
-      .inTable('channels'); // or in ledgers?
+      .inTable('channels');
     table
       .string('channel_to_be_funded')
       .notNullable()

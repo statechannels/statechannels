@@ -2,8 +2,6 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 
-// TODO: Is this the same as an objective?
-// GK: there is a one to many relation from ledgers to channels we may not need this model at all
 export type LedgerRequestStatus =
   | 'pending' // Request added to DB to be approved or rejected by queue
   // | 'rejected' // Rejected due to lack of available funds TODO: Implement
@@ -31,17 +29,12 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async getRequest(
     channelToBeFunded: Bytes32,
     type: 'fund' | 'defund',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<LedgerRequestType> {
     return LedgerRequest.query(tx).findById([channelToBeFunded, type]);
   }
 
-  static async setRequest(
-    request: LedgerRequestType,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tx: TransactionOrKnex
-  ): Promise<void> {
+  static async setRequest(request: LedgerRequestType, tx: TransactionOrKnex): Promise<void> {
     await LedgerRequest.query(tx).insert(request);
   }
 
@@ -49,7 +42,6 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     channelToBeFunded: Bytes32,
     type: 'fund' | 'defund',
     status: LedgerRequestStatus,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<void> {
     await LedgerRequest.query(tx)
@@ -59,7 +51,6 @@ export class LedgerRequest extends Model implements LedgerRequestType {
 
   static async getPendingRequests(
     ledgerChannelId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<LedgerRequestType[]> {
     return LedgerRequest.query(tx)

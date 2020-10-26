@@ -472,12 +472,12 @@ describe('ledger funded app scenarios', () => {
   });
 
   it('countersigns standalone ledger update when it already has a prefund setup in store', async () => {
-    const {latest} = await putTestChannelInsideWallet({
+    await putTestChannelInsideWallet({
       ...app,
       vars: [stateWithHashSignedBy(alice(), bob())(preFS)],
     });
 
-    LedgerRequest.setRequest(
+    await LedgerRequest.setRequest(
       {
         ledgerChannelId: ledger.channelId,
         channelToBeFunded: app.channelId,
@@ -490,16 +490,6 @@ describe('ledger funded app scenarios', () => {
     const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState))],
     });
-
-    expect(getSignedStateFor(app.channelId, outbox)).toMatchObject(
-      // Newly signed postfund setup of application channel
-      serializeState(
-        stateWithHashSignedBy(alice())({
-          ...latest,
-          turnNum: 2,
-        })
-      )
-    );
 
     expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
       // Countersigned ledger update
@@ -518,7 +508,7 @@ describe('ledger funded app scenarios', () => {
       vars: [stateWithHashSignedBy(alice())(preFS)],
     });
 
-    LedgerRequest.setRequest(
+    await LedgerRequest.setRequest(
       {
         ledgerChannelId: ledger.channelId,
         channelToBeFunded: app.channelId,
