@@ -1,6 +1,6 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
-import {makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers} from 'ethers';
+import {BN, makeDestination} from '@statechannels/wallet-core';
+import {BigNumber, ethers, providers} from 'ethers';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
@@ -8,34 +8,44 @@ import {defaultTestConfig} from '../config';
 import {SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
+if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = defaultTestConfig.rpcEndpoint;
+let provider: providers.JsonRpcProvider;
+
 const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 
+const aAddress = '0x0000000000000000000000000000000000000001';
+const bAddress = '0x0000000000000000000000000000000000000002';
+
+async function getBalance(address: string): Promise<BigNumber> {
+  return await provider.getBalance(address);
+}
+
 beforeAll(async () => {
+  provider = new providers.JsonRpcProvider(rpcEndpoint);
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
   await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
 });
+
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
   await a.dbAdmin().dropDB();
   await b.dbAdmin().dropDB();
+  provider.polling = false;
 });
 
 it('Create a directly funded channel between two wallets ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
-    destination: makeDestination(
-      '0xaaaa000000000000000000000000000000000000000000000000000000000001'
-    ),
+    destination: makeDestination(aAddress),
   };
   const participantB: Participant = {
     signingAddress: await b.getSigningAddress(),
     participantId: 'b',
-    destination: makeDestination(
-      '0xbbbb000000000000000000000000000000000000000000000000000000000002'
-    ),
+    destination: makeDestination(bAddress),
   };
 
   const allocation: Allocation = {
@@ -76,6 +86,9 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   // TODO compute the channelId for a better test
   const channelId = preFundA.channelResults[0].channelId;
+
+  const aBalanceInit = await getBalance(aAddress);
+  const bBalanceInit = await getBalance(bAddress);
 
   expect(getChannelResultFor(channelId, preFundA.channelResults)).toMatchObject({
     status: 'opening',
@@ -122,4 +135,27 @@ it('Create a directly funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
+
+  const closeA = await a.closeChannel({channelId});
+  expect(closeA.channelResult).toMatchObject({
+    status: 'closing',
+    turnNum: 4,
+  });
+
+  const closeB = await b.pushMessage(getPayloadFor(participantB.participantId, closeA.outbox));
+  expect(getChannelResultFor(channelId, closeB.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+  });
+
+  const close2A = await a.pushMessage(getPayloadFor(participantA.participantId, closeB.outbox));
+  expect(getChannelResultFor(channelId, close2A.channelResults)).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+  });
+
+  const aBalanceFinal = await getBalance(aAddress);
+  const bBalanceFinal = await getBalance(bAddress);
+  expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual('0x01');
+  expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual('0x00');
 }, 10_000);
