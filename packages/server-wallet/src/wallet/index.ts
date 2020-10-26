@@ -561,9 +561,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               return;
             case 'Withdraw':
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
-              await this.chainService.concludeAndWithdraw(
-                app.support && app.supported ? app.support.concat(app.supported) : []
-              );
+              await this.chainService.concludeAndWithdraw(app.supported ? [app.supported] : []);
               return;
             default:
               throw 'Unimplemented';

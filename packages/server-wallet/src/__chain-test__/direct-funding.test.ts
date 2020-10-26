@@ -1,6 +1,6 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {BN, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers, providers} from 'ethers';
+import {BigNumber, constants, ethers, providers} from 'ethers';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
@@ -11,12 +11,11 @@ import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 let provider: providers.JsonRpcProvider;
-
 const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 
-const aAddress = '0x0000000000000000000000000000000000000001';
-const bAddress = '0x0000000000000000000000000000000000000002';
+const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
+const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
 
 async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
@@ -66,7 +65,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     participants: [participantA, participantB],
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
-    appData: '0x00', // must be even length
+    appData: constants.HashZero,
     fundingStrategy: 'Direct',
   };
 
