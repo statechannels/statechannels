@@ -63,9 +63,9 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
   };
 }
 
-function serializeRequest(request: ChannelRequest): ChannelRequestWire {
+export function serializeRequest(request: ChannelRequest): ChannelRequestWire {
   if (request.type === 'ProposeLedger') {
-    return {...request, outcome: serializeSimpleAllocation(request.outcome)};
+    return {...request, outcome: serializeOutcome(request.outcome)};
   }
   return request;
 }

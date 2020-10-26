@@ -120,7 +120,12 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = ['vars', 'participants'];
+  static jsonAttributes = [
+    'vars',
+    'participants',
+    'myUnsignedCommitment',
+    'theirUnsignedCommitment',
+  ];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)

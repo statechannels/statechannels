@@ -1,5 +1,5 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {Payload, SignedState} from '@statechannels/wire-format';
+import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
 import {Wallet} from '../wallet';
 
@@ -38,4 +38,13 @@ export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
   const config = wallet.walletConfig;
   await wallet.destroy();
   return new Wallet(config); // Wallet that will "restart"
+}
+
+export function getRequestFor(channelId: string, outbox: Outgoing[]): ChannelRequest {
+  // eslint-disable-next-line
+  const requests = (outbox[0]!.params.data as Payload).requests!.filter(
+    req => req.channelId === channelId
+  );
+  if (requests.length != 1) throw Error(`Expected exactly one request found ${requests.length}`);
+  return requests[0];
 }

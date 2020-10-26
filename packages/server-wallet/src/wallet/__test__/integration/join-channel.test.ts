@@ -6,6 +6,7 @@ import {
   makeDestination,
   SignedStateWithHash,
   serializeOutcome,
+  serializeRequest,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
@@ -269,7 +270,7 @@ describe('ledger funded app scenarios', () => {
     return channel;
   };
 
-  it('countersigns a prefund setup and automatically creates a ledger update', async () => {
+  it('countersigns a prefund setup and automatically proposes a ledger update', async () => {
     const outcome = simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]);
     const preFS0 = {turnNum: 0, outcome};
     const preFS1 = {turnNum: 1, outcome};
@@ -290,9 +291,13 @@ describe('ledger funded app scenarios', () => {
             recipient: 'alice',
             sender: 'bob',
             data: {
-              signedStates: [
-                serializeState(stateWithHashSignedBy(bob())(signedPreFS1)),
-                serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState)),
+              signedStates: [serializeState(stateWithHashSignedBy(bob())(signedPreFS1))],
+              requests: [
+                serializeRequest({
+                  type: 'ProposeLedger',
+                  channelId: ledger.channelId,
+                  outcome: expectedUpdatedLedgerState.outcome,
+                }),
               ],
             },
           },

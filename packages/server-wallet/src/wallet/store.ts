@@ -521,14 +521,15 @@ export class Store {
   ): Promise<{mine?: Outcome; theirs?: Outcome}> {
     const channel = await Channel.forId(ledgerChannelId, tx);
     return {
-      mine: channel.myUnsignedCommitment,
-      theirs: channel.theirUnsignedCommitment,
+      mine: channel.myUnsignedCommitment ?? undefined,
+      theirs: channel.theirUnsignedCommitment ?? undefined,
     };
   }
 
-  async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx: Transaction): Promise<void> {
-    await Channel.query(tx)
+  async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx?: Transaction): Promise<void> {
+    await Channel.query(tx || this.knex)
       .where({channelId})
+      .whereNull('myUnsignedCommitment')
       .patch({myUnsignedCommitment: outcome});
   }
 
@@ -539,19 +540,22 @@ export class Store {
   ): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
+      .whereNull('theirUnsignedCommitment')
       .patch({theirUnsignedCommitment: outcome});
   }
 
   async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
-      .patch({myUnsignedCommitment: undefined});
+      .whereNotNull('myUnsignedCommitment')
+      .patch({myUnsignedCommitment: null});
   }
 
   async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
-      .patch({theirUnsignedCommitment: undefined});
+      .whereNotNull('theirUnsignedCommitment')
+      .patch({theirUnsignedCommitment: null});
   }
 
   async addSignedState(

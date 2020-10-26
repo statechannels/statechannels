@@ -141,7 +141,7 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 
 // channel requests
 type GetChannel = {type: 'GetChannel'; channelId: string};
-type ProposeLedger = {type: 'ProposeLedger'; channelId: string; outcome: Allocation};
+type ProposeLedger = {type: 'ProposeLedger'; channelId: string; outcome: Outcome};
 export type ChannelRequest = GetChannel | ProposeLedger;
 
 export interface Payload {
