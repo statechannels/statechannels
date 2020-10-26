@@ -101,20 +101,13 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
 
 export function deserializeRequest(request: ChannelRequestWire): ChannelRequest {
-  if (request.type === 'GetChannel') return request;
   if (request.type === 'ProposeLedger')
     return {
       ...request,
-      outcome: {
-        ...request.outcome,
-        type: 'SimpleAllocation',
-        allocationItems: request.outcome.allocationItems.map(item => ({
-          amount: BN.from(item.amount),
-          destination: makeDestination(item.destination)
-        }))
-      }
+      outcome: deserializeOutcome(request.outcome)
     };
-  throw new Error(`unreachable: unknown channel request ${request}`);
+
+  return request;
 }
 
 export function deserializeOutcome(outcome: OutcomeWire): Outcome {

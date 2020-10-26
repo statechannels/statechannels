@@ -485,7 +485,7 @@ export class Wallet extends EventEmitter<WalletEvent>
             outbox.push(outgoing)
           );
         } else if (req.type === 'ProposeLedger') {
-          await store.storeTheirLedgerCommit(channelId, req.outcome);
+          await store.storeTheirLedgerCommit(channelId, checkThat(req.outcome, isSimpleAllocation));
         }
       };
     }
