@@ -1,6 +1,8 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {Payload, SignedState} from '@statechannels/wire-format';
 
+import {Wallet} from '../wallet';
+
 import {Outgoing} from '..';
 
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
@@ -30,4 +32,10 @@ export function getSignedStateFor(channelId: string, outbox: Outgoing[]): Signed
   if (filteredSignedStates.length != 1)
     throw Error(`Expected exactly one channel result: found ${filteredSignedStates.length}`);
   return filteredSignedStates[0];
+}
+
+export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
+  const config = wallet.walletConfig;
+  await wallet.destroy();
+  return new Wallet(config); // Wallet that will "restart"
 }
