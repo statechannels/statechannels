@@ -58,21 +58,46 @@
       "type": "string"
     },
     "ChannelRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "channelId": {
-          "$ref": "#/definitions/Bytes32"
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "type": "string"
+            },
+            "type": {
+              "const": "GetChannel",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "channelId"
+          ],
+          "type": "object"
         },
-        "type": {
-          "const": "GetChannel",
-          "type": "string"
+        {
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "type": "string"
+            },
+            "outcome": {
+              "$ref": "#/definitions/Allocation"
+            },
+            "type": {
+              "const": "ProposeLedger",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "channelId",
+            "outcome"
+          ],
+          "type": "object"
         }
-      },
-      "required": [
-        "type",
-        "channelId"
-      ],
-      "type": "object"
+      ]
     },
     "CloseChannel": {
       "additionalProperties": false,
