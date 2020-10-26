@@ -51,7 +51,6 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {AppBytecode} from '../models/app-bytecode';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
 
@@ -171,12 +170,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       throw Error(`Could not fetch bytecode for ${appDefinition}`);
     }
 
-    await AppBytecode.upsertBytecode(
-      this.walletConfig.chainNetworkID,
-      appDefinition,
-      bytecode,
-      this.knex
-    );
+    await this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
