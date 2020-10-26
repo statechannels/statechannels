@@ -22,8 +22,6 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
-  Objective,
-  objectiveId,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -53,7 +51,6 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Objective as ObjectiveModel} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 
 import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
@@ -298,12 +295,11 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
-    const objectives = await ObjectiveModel.forChannelIds(channelIds, this.knex);
+    const objectives = await this.store.getObjectives(channelIds);
     await Promise.all(
       objectives
         .map(objective => {
-          if (objective.type === 'OpenChannel')
-            return ObjectiveModel.approve(objective.objectiveId, this.knex);
+          if (objective.type === 'OpenChannel') return this.store.approveObjective(objective);
           else return;
         })
         .filter(x => x !== undefined)
@@ -324,13 +320,12 @@ export class Wallet extends EventEmitter<WalletEvent>
       );
 
     // FIXME: This is just to get existing joinChannel API pattern to keep working
-    const objectives = await ObjectiveModel.forChannelIds([channelId], this.knex);
+    const objectives = await this.store.getObjectives([channelId]);
 
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    if (objectives[0].type === 'OpenChannel')
-      await ObjectiveModel.approve(objectives[0].objectiveId, this.knex);
+    if (objectives[0].type === 'OpenChannel') await this.store.approveObjective(objectives[0]);
     // END FIXME
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
@@ -409,21 +404,14 @@ export class Wallet extends EventEmitter<WalletEvent>
       // and check if its our turn and throw an error as existing tests expect
       getOrThrow(CloseChannel.closeChannel(channel));
 
-      // const {outgoing, channelResult} = await this.store.signState(channelId, nextState, tx);
-      // return {outbox: outgoing.map(n => n.notice), channelResult};
-
-      const objective: Objective = {
-        type: 'CloseChannel',
-        participants: [],
-        data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
-      };
-
-      const objectiveToStore: ObjectiveStoredInDB = {
-        ...objective,
-        status: 'approved',
-        objectiveId: objectiveId(objective),
-      };
-      await ObjectiveModel.insert(objectiveToStore, tx);
+      await this.store.addObjective(
+        {
+          type: 'CloseChannel',
+          participants: [],
+          data: {targetChannelId: channelId, fundingStrategy: 'Unknown'},
+        },
+        tx
+      );
     };
 
     await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
@@ -521,7 +509,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     // 1. Approved but not executed yet
     // 2. Related to one of the channels
 
-    const objectives = (await ObjectiveModel.forChannelIds(channels, this.store.knex))
+    const objectives = (await this.store.getObjectives(channels))
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved');
 
@@ -574,10 +562,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               });
               return;
             case 'CompleteObjective':
-              if (objective.type === 'OpenChannel')
-                await ObjectiveModel.succeed(objective.objectiveId, tx);
-              if (objective.type === 'CloseChannel')
-                await ObjectiveModel.succeed(objective.objectiveId, tx);
+              await this.store.markObjectiveAsSucceeded(objective);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               return;
             default:
