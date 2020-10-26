@@ -22,8 +22,6 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
-  Objective,
-  objectiveId,
   checkThat,
   isSimpleAllocation,
 } from '@statechannels/wallet-core';
@@ -31,6 +29,7 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
+import {TransactionOrKnex} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
@@ -57,6 +56,8 @@ import {
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {DBObjective} from '../models/objective';
+import {LedgerRequest} from '../models/ledger-request';
+import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -265,11 +266,8 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   // TODO: Discussion item --- how should an App tell the wallet a channel is a Ledger?
-  __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): void {
-    this.store.ledgers[ledgerChannelId] = {
-      ledgerChannelId,
-      assetHolderAddress,
-    };
+  async __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): Promise<void> {
+    await Channel.setLedger(ledgerChannelId, assetHolderAddress, this.knex);
   }
 
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
@@ -531,8 +529,9 @@ export class Wallet extends EventEmitter<WalletEvent>
   }: ExecutionResult): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
-    const ledgersToProcess = Object.values(this.store.ledgers).filter(
-      async l => (await this.store.getPendingLedgerRequests(l.ledgerChannelId)).length > 0
+    const ledgersToProcess = _.uniqBy(
+      await this.store.getAllPendingLedgerRequests(),
+      'ledgerChannelId'
     );
 
     while (ledgersToProcess.length && !error) {
@@ -575,7 +574,11 @@ export class Wallet extends EventEmitter<WalletEvent>
                   signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
                 };
 
-                await this.store.markLedgerRequestsFailed(action.channelsNotFunded, tx);
+                await Promise.all(
+                  action.channelsNotFunded.map(
+                    async c => await LedgerRequest.setRequestStatus(c, 'fund', 'failed', tx)
+                  )
+                );
 
                 const messages = createOutboxFor(channelId, myIndex, participants, payload);
 
@@ -585,7 +588,12 @@ export class Wallet extends EventEmitter<WalletEvent>
               }
 
               case 'MarkLedgerFundingRequestsAsComplete':
-                await this.store.markLedgerRequestsSuccessful(action.doneRequests, tx);
+                await LedgerRequest.markLedgerRequestsSuccessful(action.fundedChannels, 'fund', tx);
+                await LedgerRequest.markLedgerRequestsSuccessful(
+                  action.defundedChannels,
+                  'defund',
+                  tx
+                );
                 requiresAnotherCrankUponCompletion = true;
                 return;
 
@@ -606,13 +614,9 @@ export class Wallet extends EventEmitter<WalletEvent>
     channels: Bytes32[],
     {outbox, channelResults, error}: ExecutionResult
   ): Promise<void> {
-    // NOTE: This weird query could be avoided by adding ledgerChannelId to OpenChannel objective
-    const ledgers = channels.filter(async channel => await this.store.isLedger(channel));
-    const channelsWithPendingReqs = (
-      await Promise.all(ledgers.map(ledger => this.store.getPendingLedgerRequests(ledger)))
-    )
-      .flat()
-      .map(x => x.fundingChannelId);
+    const channelsWithPendingReqs = (await LedgerRequest.getAllPendingRequests(this.knex)).map(
+      l => l.channelToBeFunded
+    );
 
     const objectives = (await this.store.getObjectives(channels.concat(channelsWithPendingReqs)))
       .filter(x => x !== undefined)
@@ -692,27 +696,19 @@ export class Wallet extends EventEmitter<WalletEvent>
               await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
               return;
             case 'RequestLedgerFunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(
-                this.store,
-                protocolState.app
-              );
-              await this.store.createLedgerRequest(
+              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, this.knex);
+              await LedgerRequest.requestLedgerFunding(
                 protocolState.app.channelId,
                 ledgerChannelId,
-                'fund',
                 tx
               );
               return;
             }
             case 'RequestLedgerDefunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(
-                this.store,
-                protocolState.app
-              );
-              await this.store.createLedgerRequest(
+              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, this.knex);
+              await LedgerRequest.requestLedgerDefunding(
                 protocolState.app.channelId,
                 ledgerChannelId,
-                'defund',
                 tx
               );
               return;
@@ -796,19 +792,17 @@ const createOutboxFor = (
 // TODO: Decide if we want to keep this functionality or change the OpenChannel
 // objective to include information about _which_ ledger is funding what
 const determineWhichLedgerToUse = async (
-  store: Store,
-  channel: ChannelState.ChannelState
+  channel: ChannelState.ChannelState,
+  txOrKnex: TransactionOrKnex
 ): Promise<Bytes32> => {
   if (channel?.supported) {
     const {assetHolderAddress} = checkThat(channel.supported.outcome, isSimpleAllocation);
-    const ledgerRecord = _.find(
-      Object.values(store.ledgers),
-      v => v.assetHolderAddress === assetHolderAddress
-    );
+
+    const ledgerRecord = await Channel.query(txOrKnex).findOne({assetHolderAddress});
     if (!ledgerRecord) {
       throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
     }
-    return ledgerRecord?.ledgerChannelId;
+    return ledgerRecord?.channelId;
   } else {
     throw new Error('cannot fund unsupported app');
   }

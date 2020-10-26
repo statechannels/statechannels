@@ -9,7 +9,7 @@ import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
 
 const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
@@ -17,6 +17,8 @@ let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet 
 let channelId: string;
 let participantA: Participant;
 let participantB: Participant;
+
+jest.setTimeout(10_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -81,9 +83,8 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
     turnNum: 0,
   });
 
-  // Destory Wallet b and restart Wallet b2
-  await b.destroy();
-  b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "restart" (same db)
+  // Destory Wallet b and restart
+  b = await crashAndRestart(b);
 
   //      PreFund0B
   const resultB1 = await b.joinChannel({channelId});

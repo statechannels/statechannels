@@ -21,7 +21,6 @@ import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
-import {LedgerRequests} from '../../../models/ledger-requests';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -203,10 +202,6 @@ describe('ledger funded app scenarios', () => {
   let expectedUpdatedLedgerState: SignedStateWithHash;
 
   beforeEach(async () => {
-    // FIXME: SQL-ize ledgers and do test cleanup as needed
-    w.store.ledgers = {};
-    w.store.ledgerRequests = new LedgerRequests();
-
     const someNonConflictingChannelNonce = 23364518;
 
     // NOTE: Put a ledger Channel in the DB
@@ -228,7 +223,7 @@ describe('ledger funded app scenarios', () => {
       })
     );
 
-    // Update the in-memory Ledgers table
+    // Update the Ledgers table
     w.__setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS);
 
     // Generate application channel

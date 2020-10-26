@@ -11,6 +11,7 @@ import {Nonce} from '../models/nonce';
 import {ObjectiveModel, ObjectiveChannelModel} from '../models/objective';
 import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
+import {LedgerRequest} from '../models/ledger-request';
 
 export class DBAdmin {
   knex: Knex;
@@ -43,6 +44,7 @@ export class DBAdmin {
       ObjectiveChannelModel.tableName,
       Funding.tableName,
       AppBytecode.tableName,
+      LedgerRequest.tableName,
     ]
   ): Promise<void> {
     // eslint-disable-next-line no-process-env
