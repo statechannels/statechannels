@@ -63,6 +63,7 @@ export const defaultConfig: ServerWalletConfig = {
 export const defaultTestConfig = {
   ...defaultConfig,
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
+  postgresPoolSize: {max: 1, min: 0},
 };
 
 export function extractDBConfigFromServerWalletConfig(
