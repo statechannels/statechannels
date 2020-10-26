@@ -548,14 +548,14 @@ export class Store {
     await Channel.query(tx)
       .where({channelId})
       .whereNotNull('myUnsignedCommitment')
-      .patch({myUnsignedCommitment: null});
+      .patch({myUnsignedCommitment: this.knex.raw('NULL')});
   }
 
   async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
       .whereNotNull('theirUnsignedCommitment')
-      .patch({theirUnsignedCommitment: null});
+      .patch({theirUnsignedCommitment: this.knex.raw('NULL')});
   }
 
   async addSignedState(
