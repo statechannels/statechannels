@@ -545,7 +545,10 @@ export class Wallet extends EventEmitter<WalletEvent>
   }: ExecutionResult): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
-    const ledgersToProcess = await LedgerRequest.getAllPendingRequests(this.knex);
+    const ledgersToProcess = _.uniqBy(
+      await LedgerRequest.getAllPendingRequests(this.knex),
+      'ledgerChannelId'
+    );
 
     while (ledgersToProcess.length && !error) {
       const {ledgerChannelId} = ledgersToProcess[0];
@@ -588,8 +591,8 @@ export class Wallet extends EventEmitter<WalletEvent>
                 };
 
                 await Promise.all(
-                  action.channelsNotFunded.map(c =>
-                    LedgerRequest.setRequestStatus(c, 'defund', 'failed', tx)
+                  action.channelsNotFunded.map(
+                    async c => await LedgerRequest.setRequestStatus(c, 'fund', 'failed', tx)
                   )
                 );
 
