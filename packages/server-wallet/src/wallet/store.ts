@@ -54,6 +54,7 @@ import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {Objective as ObjectiveModel} from '../models/objective';
 import {logger} from '../logger';
+import {AppBytecode} from '../models/app-bytecode';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -414,6 +415,14 @@ export class Store {
 
   async markObjectiveAsSucceeded(objective: ObjectiveStoredInDB, tx?: Transaction): Promise<void> {
     await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
+  }
+
+  async upsertBytecode(
+    chainNetworkId: string,
+    appDefinition: Address,
+    bytecode: Bytes
+  ): Promise<void> {
+    await AppBytecode.upsertBytecode(chainNetworkId, appDefinition, bytecode, this.knex);
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<ObjectiveStoredInDB> {
