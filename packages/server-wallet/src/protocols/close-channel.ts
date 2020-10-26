@@ -1,7 +1,14 @@
 import {State} from '@statechannels/wallet-core';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
-import {signState, noAction, CompleteObjective, completeObjective, Withdraw} from './actions';
+import {
+  signState,
+  noAction,
+  CompleteObjective,
+  completeObjective,
+  Withdraw,
+  withdraw,
+} from './actions';
 
 export type ProtocolState = {app: ChannelState};
 
@@ -27,14 +34,14 @@ const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
   everyoneSignedFinalState(ps) && completeObjective({channelId: ps.app.channelId});
 
-function withdraw(ps: ProtocolState): Withdraw | false {
+function chainWithdraw(ps: ProtocolState): Withdraw | false {
   return (
     everyoneSignedFinalState(ps) &&
     ps.app.fundingStrategy === 'Direct' &&
     ps.app.chainServiceRequests.indexOf('withdraw') === -1 &&
-    withdraw(ps)
+    withdraw(ps.app)
   );
 }
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  completeCloseChannel(ps) || signFinalState(ps) || withdraw(ps) || noAction;
+  chainWithdraw(ps) || completeCloseChannel(ps) || signFinalState(ps) || noAction;
