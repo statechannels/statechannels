@@ -562,7 +562,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               });
               return;
             case 'CompleteObjective':
-              await this.store.markObjectiveAsSucceeded(objective);
+              await this.store.markObjectiveAsSucceeded(objective, tx);
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               return;
             default:
