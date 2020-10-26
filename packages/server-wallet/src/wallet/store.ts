@@ -526,6 +526,45 @@ export class Store {
     );
   }
 
+  async getLedgerProposals(
+    ledgerChannelId: Bytes32,
+    tx: Transaction
+  ): Promise<{mine?: Outcome; theirs?: Outcome}> {
+    const channel = await Channel.forId(ledgerChannelId, tx);
+    return {
+      mine: channel.myUnsignedCommitment,
+      theirs: channel.theirUnsignedCommitment,
+    };
+  }
+
+  async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({myUnsignedCommitment: outcome});
+  }
+
+  async storeTheirLedgerCommit(
+    channelId: Bytes32,
+    outcome: Outcome,
+    tx?: Transaction
+  ): Promise<void> {
+    await Channel.query(tx || this.knex)
+      .where({channelId})
+      .patch({theirUnsignedCommitment: outcome});
+  }
+
+  async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({myUnsignedCommitment: undefined});
+  }
+
+  async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({theirUnsignedCommitment: undefined});
+  }
+
   /**
    * Add a new state into the database.
    *
@@ -669,6 +708,7 @@ class StoreError extends WalletError {
 
   static readonly reasons = {
     duplicateChannel: 'Expected the channel to NOT exist in the database',
+    duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
     invalidSignature: 'Invalid signature',
@@ -754,6 +794,14 @@ function ensureReverseSortedOrderOfStates(states: SignedStateVarsWithHash[]): vo
     throw new StoreError(StoreError.reasons.notSorted);
 }
 
+function ensureNoDuplicateTurnNums(states: SignedStateVarsWithHash[]): void {
+  const turnNums = _.map(states, 'turnNum');
+  const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
+  if (duplicateTurnNums) {
+    throw new StoreError(StoreError.reasons.duplicateTurnNums);
+  }
+}
+
 /**
  * There are currently two invariants being checked:
  *
@@ -762,5 +810,6 @@ function ensureReverseSortedOrderOfStates(states: SignedStateVarsWithHash[]): vo
  */
 function validateInvariants(states: SignedStateVarsWithHash[], mySigningAddress: string): void {
   ensureSingleSignedState(states, mySigningAddress);
+  ensureNoDuplicateTurnNums(states);
   ensureReverseSortedOrderOfStates(states);
 }

@@ -19,6 +19,9 @@ import {
   Address as CoreAddress,
   PrivateKey,
   makeDestination,
+  deserializeRequest,
+  checkThat,
+  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -529,21 +532,44 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
     const store = this.store;
 
-    const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
+    const {
+      channelIds: channelIdsFromStates,
+      channelResults: fromStoring,
+    } = await this.store.pushMessage(wirePayload);
+
+    const channelIdsFromRequests: Bytes32[] = [];
+    const requests = (wirePayload.requests || []).map(deserializeRequest);
+
+    for (const request of requests) {
+      const {channelId} = request;
+
+      channelIdsFromRequests.push(channelId);
+
+      switch (request.type) {
+        case 'GetChannel': {
+          const {states: signedStates, channelState} = await store.getStates(channelId);
+
+          // add signed states to response
+          signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
+          continue;
+        }
+        case 'ProposeLedger':
+          await store.storeTheirLedgerCommit(
+            channelId,
+            checkThat(request.outcome, isSimpleAllocation)
+          );
+          continue;
+        default:
+          continue;
+      }
+    }
 
     // add channelResults to response
     fromStoring.forEach(cr => response.queueChannelResult(cr));
 
+    const channelIds = _.uniq(channelIdsFromStates.concat(channelIdsFromRequests));
+
     await this.takeActions(channelIds, response);
-
-    for (const request of wirePayload.requests || []) {
-      const channelId = request.channelId;
-
-      const {states: signedStates, channelState} = await store.getStates(channelId);
-
-      // add signed states to response
-      signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
-    }
   }
 
   private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
@@ -602,6 +628,21 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 const signedState = await this.store.signState(channel, action.stateToSign, tx);
 
                 response.queueState(signedState, myIndex, channelId);
+
+                await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
+
+                await this.store.removeMyLedgerCommit(action.channelId, tx);
+                await this.store.removeTheirLedgerCommit(action.channelId, tx);
+
+                return;
+              }
+
+              case 'ProposeLedgerState': {
+                const {myIndex, participants, channelId} = protocolState.fundingChannel;
+
+                response.queueProposeLedger(channelId, myIndex, participants, action.outcome);
+
+                await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
 
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
 

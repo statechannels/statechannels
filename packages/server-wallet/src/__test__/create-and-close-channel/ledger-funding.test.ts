@@ -488,8 +488,9 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     } = ledger;
 
     expect(ledger).toMatchObject({
-      // 13 because there is a conflicting back-and-forth due to concurrent messages
-      turnNum: 13,
+      // The ordering of the concurrent messages leads to closing one
+      // channel on turn 7 then the remaining N - 1 others on turn 9
+      turnNum: 9,
       status: 'running',
     });
 
@@ -586,10 +587,6 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      status: 'running',
-    });
 
     for (const channelId of appChannelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
