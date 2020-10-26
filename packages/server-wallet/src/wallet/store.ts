@@ -269,7 +269,6 @@ export class Store {
     toState: SignedState,
     tx: Transaction
   ): Promise<boolean> {
-    return true;
     const fromMoverIndex = fromState.turnNum % fromState.participants.length;
     const fromMover = fromState.participants[fromMoverIndex].signingAddress;
 
