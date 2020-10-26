@@ -15,7 +15,7 @@ export async function up(knex: Knex): Promise<any> {
       .inTable('channels');
     table.string('status').notNullable();
     table.string('type').notNullable();
-    table.primary(['channelToBeFunded', 'type']);
+    table.primary(['channel_to_be_funded', 'type']);
   });
 }
 
