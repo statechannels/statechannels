@@ -2,6 +2,7 @@ import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
   Objective as ObjectiveWire,
+  ChannelRequest as ChannelRequestWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Message as WireMessage,
@@ -17,6 +18,7 @@ import {
   SimpleAllocation,
   Payload,
   Objective,
+  ChannelRequest,
   Participant
 } from '../../types';
 import {BN} from '../../bignumber';
@@ -41,7 +43,7 @@ export function validatePayload(rawPayload: unknown): WirePayload {
 export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
-  const requests = message?.data?.requests;
+  const requests = message?.data?.requests?.map(req => deserializeRequest(req));
 
   return {
     signedStates,
@@ -97,6 +99,23 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
+
+export function deserializeRequest(request: ChannelRequestWire): ChannelRequest {
+  if (request.type === 'GetChannel') return request;
+  if (request.type === 'ProposeLedger')
+    return {
+      ...request,
+      outcome: {
+        ...request.outcome,
+        type: 'SimpleAllocation',
+        allocationItems: request.outcome.allocationItems.map(item => ({
+          amount: BN.from(item.amount),
+          destination: makeDestination(item.destination)
+        }))
+      }
+    };
+  throw new Error(`unreachable: unknown channel request ${request}`);
+}
 
 export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {

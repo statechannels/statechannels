@@ -1,6 +1,7 @@
 import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
+  ChannelRequest as ChannelRequestWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Guarantee as GuaranteeWire,
@@ -13,7 +14,8 @@ import {
   AllocationItem,
   SimpleAllocation,
   Payload,
-  SimpleGuarantee
+  SimpleGuarantee,
+  ChannelRequest
 } from '../../types';
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
@@ -26,7 +28,7 @@ export function serializeMessage(
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
   const objectives = message.objectives;
-  const {requests} = message;
+  const requests = message.requests?.map(serializeRequest);
   return {
     recipient,
     sender,
@@ -59,6 +61,13 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
     channelId: channelId || calculateChannelId(state),
     signatures: state.signatures.map(s => s.signature)
   };
+}
+
+function serializeRequest(request: ChannelRequest): ChannelRequestWire {
+  if (request.type === 'ProposeLedger') {
+    return {...request, outcome: serializeSimpleAllocation(request.outcome)};
+  }
+  return request;
 }
 
 export function serializeOutcome(outcome: Outcome): OutcomeWire {
