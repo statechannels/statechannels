@@ -187,7 +187,7 @@ export class Store {
       supported &&
       // If the state is the same as the support state then its not a transition just adding signatures
       !statesEqual(supported, state) &&
-      !(await this.isLedger(channelId)) &&
+      !(await this.isLedger(channelId, tx)) &&
       !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
       ))
@@ -561,7 +561,7 @@ export class Store {
       channel.supported &&
       // If the state is the same as the support state then its not a transition just adding signatures
       !statesEqual(channel.supported, incomingState) &&
-      !(await this.isLedger(channelId))
+      !(await this.isLedger(channelId, tx))
     ) {
       const {supported} = channel;
 

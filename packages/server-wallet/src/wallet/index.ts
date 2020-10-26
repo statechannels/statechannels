@@ -688,7 +688,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               addChannelResult(protocolState.app);
               return;
             case 'RequestLedgerFunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, this.knex);
+              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
               await LedgerRequest.requestLedgerFunding(
                 protocolState.app.channelId,
                 ledgerChannelId,
@@ -697,7 +697,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               return;
             }
             case 'RequestLedgerDefunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, this.knex);
+              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
               await LedgerRequest.requestLedgerDefunding(
                 protocolState.app.channelId,
                 ledgerChannelId,
