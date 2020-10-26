@@ -17,6 +17,9 @@ const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
 
+const aFunding = BigNumber.from(1).toHexString();
+const bFunding = BigNumber.from(0).toHexString();
+
 async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
 }
@@ -51,11 +54,11 @@ it('Create a directly funded channel between two wallets ', async () => {
     allocationItems: [
       {
         destination: participantA.destination,
-        amount: BigNumber.from(1).toHexString(),
+        amount: aFunding,
       },
       {
         destination: participantB.destination,
-        amount: BigNumber.from(0).toHexString(),
+        amount: bFunding,
       },
     ],
     token: '0x00', // must be even length
@@ -155,6 +158,10 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
-  expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual('0x01');
-  expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual('0x00');
+
+  // A fragile way to wait for the conclude and withdraw to complete
+  await new Promise(r => setTimeout(r, 1_000));
+
+  expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
+  expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
 }, 10_000);
