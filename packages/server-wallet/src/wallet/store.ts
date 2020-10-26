@@ -404,6 +404,18 @@ export class Store {
     });
   }
 
+  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<ObjectiveStoredInDB[]> {
+    return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
+  }
+
+  async approveObjective(objective: ObjectiveStoredInDB, tx?: Transaction): Promise<void> {
+    await ObjectiveModel.approve(objective.objectiveId, tx || this.knex);
+  }
+
+  async markObjectiveAsSucceeded(objective: ObjectiveStoredInDB, tx?: Transaction): Promise<void> {
+    await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
+  }
+
   async addObjective(objective: Objective, tx: Transaction): Promise<ObjectiveStoredInDB> {
     if (isOpenChannel(objective)) {
       const {
