@@ -183,7 +183,7 @@ export class Store {
       supported &&
       // If the state is the same as the support state then its not a transition just adding signatures
       !statesEqual(supported, state) &&
-      !(await this.isLedger(channelId)) &&
+      !(await this.isLedger(channelId, tx)) &&
       !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
       ))
@@ -568,7 +568,7 @@ export class Store {
     });
 
     const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === sswh.stateHash);
-    if (channel.supported && !alreadyHaveState && !(await this.isLedger(channelId))) {
+    if (channel.supported && !alreadyHaveState && !(await this.isLedger(channelId, tx))) {
       const {supported} = channel;
 
       if (
