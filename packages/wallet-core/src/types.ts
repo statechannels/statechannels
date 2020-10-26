@@ -165,7 +165,8 @@ export function objectiveId(objective: Objective): string {
 }
 
 type GetChannel = {type: 'GetChannel'; channelId: string};
-export type ChannelRequest = GetChannel;
+type ProposeLedger = {type: 'ProposeLedger'; channelId: string; outcome: SimpleAllocation};
+export type ChannelRequest = GetChannel | ProposeLedger;
 
 export interface Payload {
   signedStates?: SignedState[];

@@ -11,6 +11,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
+  deserializeRequest,
   validatePayload,
   ChannelRequest,
   Outcome,
@@ -472,14 +473,20 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
-      return async ({channelId}: ChannelRequest): Promise<void> => {
-        const {states: signedStates, channelState} = await store.getStates(channelId);
+      return async (req: ChannelRequest): Promise<void> => {
+        const {channelId} = req;
 
-        const {participants, myIndex} = channelState;
+        if (req.type === 'GetChannel') {
+          const {states: signedStates, channelState} = await store.getStates(channelId);
 
-        createOutboxFor(channelId, myIndex, participants, {signedStates}).map(outgoing =>
-          outbox.push(outgoing)
-        );
+          const {participants, myIndex} = channelState;
+
+          createOutboxFor(channelId, myIndex, participants, {signedStates}).map(outgoing =>
+            outbox.push(outgoing)
+          );
+        } else if (req.type === 'ProposeLedger') {
+          await store.storeTheirLedgerCommit(channelId, req.outcome);
+        }
       };
     }
 
@@ -487,16 +494,22 @@ export class Wallet extends EventEmitter<WalletEvent>
       wirePayload
     );
 
-    const {channelResults, outbox} = await this.takeActions(channelIds);
+    let outbox: Outgoing[] = [];
+
+    if (wirePayload.requests && wirePayload.requests.length > 0)
+      // Modifies outbox, may append new messages
+      await Promise.all(wirePayload.requests.map(deserializeRequest).map(handleRequest(outbox)));
+
+    const runLoopResult = await this.takeActions(channelIds);
+
+    const {channelResults} = runLoopResult;
+
+    outbox = outbox.concat(runLoopResult.outbox);
 
     for (const channel of fromStoring) {
       if (!_.some(channelResults, c => c.channelId === channel.channelId))
         channelResults.push(channel);
     }
-
-    if (wirePayload.requests && wirePayload.requests.length > 0)
-      // Modifies outbox, may append new messages
-      await Promise.all(wirePayload.requests.map(handleRequest(outbox)));
 
     return {
       outbox: mergeOutgoing(outbox),
@@ -571,6 +584,31 @@ export class Wallet extends EventEmitter<WalletEvent>
                 const payload = {
                   signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
                 };
+
+                await Promise.all(
+                  action.channelsNotFunded.map(
+                    async c => await LedgerRequest.setRequestStatus(c, 'fund', 'failed', tx)
+                  )
+                );
+
+                await this.store.removeMyLedgerCommit(action.channelId, tx);
+                await this.store.removeTheirLedgerCommit(action.channelId, tx);
+
+                const messages = createOutboxFor(channelId, myIndex, participants, payload);
+
+                messages.forEach(message => outbox.push(message));
+
+                return;
+              }
+
+              case 'ProposeLedgerState': {
+                const {myIndex, participants, channelId} = protocolState.fundingChannel;
+
+                const payload = {
+                  requests: [{type: 'ProposeLedger' as const, channelId, outcome: action.outcome}],
+                };
+
+                await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
 
                 await Promise.all(
                   action.channelsNotFunded.map(

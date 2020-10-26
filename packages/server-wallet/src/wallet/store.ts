@@ -515,6 +515,45 @@ export class Store {
     return LedgerRequest.getPendingRequests(ledgerChannelId, tx || this.knex);
   }
 
+  async getLedgerProposals(
+    ledgerChannelId: Bytes32,
+    tx: Transaction
+  ): Promise<{mine?: Outcome; theirs?: Outcome}> {
+    const channel = await Channel.forId(ledgerChannelId, tx);
+    return {
+      mine: channel.myUnsignedCommitment,
+      theirs: channel.theirUnsignedCommitment,
+    };
+  }
+
+  async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({myUnsignedCommitment: outcome});
+  }
+
+  async storeTheirLedgerCommit(
+    channelId: Bytes32,
+    outcome: Outcome,
+    tx?: Transaction
+  ): Promise<void> {
+    await Channel.query(tx || this.knex)
+      .where({channelId})
+      .patch({theirUnsignedCommitment: outcome});
+  }
+
+  async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({myUnsignedCommitment: undefined});
+  }
+
+  async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await Channel.query(tx)
+      .where({channelId})
+      .patch({theirUnsignedCommitment: undefined});
+  }
+
   async addSignedState(
     channelId: string,
     maybeChannel: Channel | undefined,
@@ -688,6 +727,7 @@ class StoreError extends WalletError {
 
   static readonly reasons = {
     duplicateChannel: 'Expected the channel to NOT exist in the database',
+    duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
     invalidSignature: 'Invalid signature',
@@ -796,6 +836,11 @@ function validateInvariants(stateVars: SignedStateVarsWithHash[], myAddress: str
   }
 
   const turnNums = _.map(stateVars, s => s.turnNum);
+
+  const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
+  if (duplicateTurnNums) {
+    throw new StoreError(StoreError.reasons.duplicateTurnNums);
+  }
 
   if (!isReverseSorted(turnNums)) {
     throw new StoreError(StoreError.reasons.notSorted);

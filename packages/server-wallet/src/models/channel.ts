@@ -9,6 +9,7 @@ import {
   hashState,
   outcomesEqual,
   Zero,
+  Outcome,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -71,6 +72,8 @@ export class Channel extends Model implements RequiredColumns {
   readonly fundingStrategy!: FundingStrategy;
 
   readonly assetHolderAddress: string | undefined; // only Ledger channels have this
+  readonly myUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
+  readonly theirUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -198,7 +201,6 @@ export class Channel extends Model implements RequiredColumns {
       supported,
       latest,
       latestSignedByMe,
-      latestNotSignedByMe,
       support,
       participants,
       chainServiceRequests,
@@ -216,7 +218,6 @@ export class Channel extends Model implements RequiredColumns {
       support,
       latest,
       latestSignedByMe,
-      latestNotSignedByMe,
       funding,
       chainServiceRequests,
       fundingStrategy,
@@ -291,12 +292,6 @@ export class Channel extends Model implements RequiredColumns {
 
   get latest(): SignedStateWithHash {
     return {...this.channelConstants, ...this.signedStates[0]};
-  }
-
-  get latestNotSignedByMe(): SignedStateWithHash | undefined {
-    const signed = this.signedStates.find(s => !this.mySignature(s.signatures));
-    if (!signed) return undefined;
-    return {...this.channelConstants, ...signed};
   }
 
   private get _supported(): SignedStateWithHash | undefined {
