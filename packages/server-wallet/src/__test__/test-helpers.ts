@@ -1,6 +1,6 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {Payload, SignedState} from '@statechannels/wire-format';
 import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-core';
+import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
 import {Wallet} from '../wallet';
 import {Outgoing} from '..';
@@ -78,3 +78,12 @@ expect.extend({
     }
   },
 });
+
+export function getRequestFor(channelId: string, outbox: Outgoing[]): ChannelRequest {
+  // eslint-disable-next-line
+  const requests = (outbox[0]!.params.data as Payload).requests!.filter(
+    req => req.channelId === channelId
+  );
+  if (requests.length != 1) throw Error(`Expected exactly one request found ${requests.length}`);
+  return requests[0];
+}
