@@ -6,7 +6,6 @@ export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable(tableName, function(table) {
     table
       .string('ledger_channel_id')
-      .primary()
       .references('channel_id')
       .inTable('channels'); // or in ledgers?
     table
@@ -15,6 +14,8 @@ export async function up(knex: Knex): Promise<any> {
       .references('channel_id')
       .inTable('channels');
     table.string('status').notNullable();
+    table.string('type').notNullable();
+    table.primary(['channelToBeFunded', 'type']);
   });
 }
 

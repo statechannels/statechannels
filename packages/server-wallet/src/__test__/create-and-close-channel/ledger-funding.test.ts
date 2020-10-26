@@ -22,7 +22,7 @@ let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 let participantA: Participant;
 let participantB: Participant;
 
-jest.setTimeout(30_000);
+jest.setTimeout(100_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -186,9 +186,9 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
   let ledgerChannelId: Bytes32;
   let appChannelId: Bytes32;
 
-  afterAll(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -275,9 +275,9 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   let ledgerChannelId: Bytes32;
   let appChannelId: Bytes32;
 
-  afterAll(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -377,9 +377,9 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
   let ledgerChannelId: Bytes32;
   let appChannelIds: Bytes32[];
 
-  afterAll(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it(`can fund ${N} channels created in bulk by Alice`, async () => {
@@ -470,9 +470,9 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 });
 
 describe('Funding multiple channels syncronously without enough funds', () => {
-  afterAll(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
@@ -524,9 +524,9 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 });
 
 describe('Funding multiple channels concurrently (one sided)', () => {
-  afterAll(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
@@ -586,9 +586,9 @@ async function proposeMultipleChannelsToEachother(
 }
 
 describe('Funding multiple channels concurrently (two sides)', () => {
-  afterEach(() => {
-    a.dbAdmin().truncateDB(['ledgers']);
-    b.dbAdmin().truncateDB(['ledgers']);
+  afterEach(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
   });
 
   it('can fund 2 channels by ledger each proposed by the other', async () => {

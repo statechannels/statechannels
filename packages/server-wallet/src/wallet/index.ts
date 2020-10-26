@@ -587,7 +587,11 @@ export class Wallet extends EventEmitter<WalletEvent>
                   signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
                 };
 
-                await this.store.markLedgerRequestsFailed(action.channelsNotFunded, tx);
+                await Promise.all(
+                  action.channelsNotFunded.map(c =>
+                    LedgerRequest.setRequestStatus(c, 'defund', 'failed', tx)
+                  )
+                );
 
                 const messages = createOutboxFor(channelId, myIndex, participants, payload);
 
@@ -597,7 +601,12 @@ export class Wallet extends EventEmitter<WalletEvent>
               }
 
               case 'MarkLedgerFundingRequestsAsComplete':
-                await LedgerRequest.markLedgerRequestsSuccessful(action.doneRequests, tx);
+                await LedgerRequest.markLedgerRequestsSuccessful(action.fundedChannels, 'fund', tx);
+                await LedgerRequest.markLedgerRequestsSuccessful(
+                  action.defundedChannels,
+                  'defund',
+                  tx
+                );
                 requiresAnotherCrankUponCompletion = true;
                 return;
 

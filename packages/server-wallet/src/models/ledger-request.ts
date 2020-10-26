@@ -2,8 +2,6 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 
-import {Channel} from './channel';
-
 // TODO: Is this the same as an objective?
 // GK: there is a one to many relation from ledgers to channels we may not need this model at all
 export type LedgerRequestStatus =
@@ -27,15 +25,16 @@ export class LedgerRequest extends Model implements LedgerRequestType {
 
   static tableName = 'ledger_requests';
   static get idColumn(): string[] {
-    return ['channelToBeFunded'];
+    return ['channelToBeFunded', 'type'];
   }
 
   static async getRequest(
     channelToBeFunded: Bytes32,
+    type: 'fund' | 'defund',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<LedgerRequestType> {
-    return LedgerRequest.query(tx).findById(channelToBeFunded);
+    return LedgerRequest.query(tx).findById([channelToBeFunded, type]);
   }
 
   static async setRequest(
@@ -43,17 +42,18 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<void> {
-    await LedgerRequest.query(tx).insert(request); // should throw error if it already exists
+    await LedgerRequest.query(tx).insert(request);
   }
 
   static async setRequestStatus(
     channelToBeFunded: Bytes32,
+    type: 'fund' | 'defund',
     status: LedgerRequestStatus,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tx: TransactionOrKnex
   ): Promise<void> {
     await LedgerRequest.query(tx)
-      .findById(channelToBeFunded)
+      .findById([channelToBeFunded, type])
       .patch({status});
   }
 
@@ -68,11 +68,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   }
 
   static async getAllPendingRequests(tx: TransactionOrKnex): Promise<LedgerRequestType[]> {
-    return tx.transaction(async trx => {
-      return LedgerRequest.query(trx).findByIds(
-        (await Channel.query(trx).select('channelId')).map(l => l.channelId)
-      );
-    });
+    return LedgerRequest.query(tx).where({status: 'pending'});
   }
 
   static async requestLedgerFunding(
@@ -94,7 +90,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   static async requestLedgerDefunding(
     channelToBeFunded: Bytes32,
     ledgerChannelId: Bytes32,
-    tx: Transaction
+    tx: TransactionOrKnex
   ): Promise<void> {
     await this.setRequest(
       {
@@ -108,13 +104,12 @@ export class LedgerRequest extends Model implements LedgerRequestType {
   }
 
   static async markLedgerRequestsSuccessful(
-    channelsToBeFunded: Bytes32[],
+    requests: Bytes32[],
+    type: 'fund' | 'defund',
     tx: TransactionOrKnex
   ): Promise<void> {
     await Promise.all(
-      channelsToBeFunded.map(channelToBeFunded =>
-        LedgerRequest.setRequestStatus(channelToBeFunded, 'succeeded', tx)
-      )
+      requests.map(req => LedgerRequest.setRequestStatus(req, type, 'succeeded', tx))
     );
   }
 }

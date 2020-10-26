@@ -470,6 +470,10 @@ export class Store {
     }
   }
 
+  async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
+    return Channel.isLedger(channelId, tx || this.knex);
+  }
+
   async addSignedState(
     channelId: string,
     maybeChannel: Channel | undefined,

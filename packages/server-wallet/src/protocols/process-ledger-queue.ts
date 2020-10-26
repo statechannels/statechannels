@@ -235,9 +235,8 @@ const markRequestsAsComplete = ({
 
   return {
     type: 'MarkLedgerFundingRequestsAsComplete',
-    doneRequests: fundedChannels
-      .map(channel => channel.channelId)
-      .concat(defundedChannels.map(channel => channel.channelId)),
+    fundedChannels: fundedChannels.map(channel => channel.channelId),
+    defundedChannels: defundedChannels.map(channel => channel.channelId),
   };
 };
 
