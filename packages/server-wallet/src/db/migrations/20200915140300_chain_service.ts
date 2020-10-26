@@ -22,7 +22,7 @@ export async function up(knex: Knex): Promise<any> {
     ALTER TABLE ${channels}
     ADD CONSTRAINT valid_chain_service_requests
     CHECK (
-      ${chainServiceRequests} <@ ARRAY['fund']
+      ${chainServiceRequests} <@ ARRAY['fund', 'withdraw']
     )
   `);
 }
