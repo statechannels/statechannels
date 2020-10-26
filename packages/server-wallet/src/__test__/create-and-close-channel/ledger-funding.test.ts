@@ -16,7 +16,7 @@ import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpe
 
 const ETH_ASSET_HOLDER_ADDRESS = ethers.constants.AddressZero;
 
-const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
+let a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
 
 let participantA: Participant;
@@ -81,9 +81,6 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   const channelId = resultA0.channelResult.channelId;
   await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
 
-  // B CRASHES
-  b = await crashAndRestart(b);
-
   const resultB1 = await b.joinChannel({channelId});
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
   const fundingPostADeposit = {
@@ -102,6 +99,10 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   await b.updateFundingForChannels([fundingPostBDeposit]);
   const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+
+  // both wallets crash
+  a = await crashAndRestart(a);
+  b = await crashAndRestart(b);
 
   return channelId;
 };
