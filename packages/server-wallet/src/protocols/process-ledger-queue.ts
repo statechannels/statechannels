@@ -14,7 +14,7 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
+import {LedgerRequestType} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
@@ -259,7 +259,7 @@ export const getProcessLedgerQueueProtocolState = async (
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const ledgerRequests = await LedgerRequest.getPendingRequests(ledgerChannelId, tx);
+  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
     channelsRequestingFunds: await Promise.all(

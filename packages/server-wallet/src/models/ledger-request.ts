@@ -30,7 +30,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     channelToBeFunded: Bytes32,
     type: 'fund' | 'defund',
     tx: TransactionOrKnex
-  ): Promise<LedgerRequestType> {
+  ): Promise<LedgerRequestType | undefined> {
     return LedgerRequest.query(tx).findById([channelToBeFunded, type]);
   }
 

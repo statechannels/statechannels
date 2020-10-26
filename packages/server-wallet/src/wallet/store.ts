@@ -54,6 +54,7 @@ import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
 import {Objective as ObjectiveModel} from '../models/objective';
 import {logger} from '../logger';
+import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -472,6 +473,21 @@ export class Store {
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
     return Channel.isLedger(channelId, tx || this.knex);
+  }
+
+  async getLedgerRequest(
+    channelId: Bytes32,
+    type: 'fund' | 'defund',
+    tx?: Transaction
+  ): Promise<LedgerRequestType | undefined> {
+    return LedgerRequest.getRequest(channelId, type, tx || this.knex);
+  }
+
+  async getPendingLedgerRequests(
+    ledgerChannelId: Bytes32,
+    tx?: Transaction
+  ): Promise<LedgerRequestType[] | undefined> {
+    return LedgerRequest.getPendingRequests(ledgerChannelId, tx || this.knex);
   }
 
   async addSignedState(

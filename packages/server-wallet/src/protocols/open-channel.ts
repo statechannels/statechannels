@@ -4,7 +4,6 @@ import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
-import {LedgerRequest} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
 import {
@@ -187,7 +186,7 @@ export const getOpenChannelProtocolState = async (
     case 'Unfunded':
       return {app};
     case 'Ledger': {
-      const req = await LedgerRequest.getRequest(app.channelId, 'fund', tx);
+      const req = await store.getLedgerRequest(app.channelId, 'fund', tx);
       return {
         app,
         ledgerFundingRequested: !!req,
