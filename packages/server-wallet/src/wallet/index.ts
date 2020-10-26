@@ -445,6 +445,44 @@ export class Wallet extends EventEmitter<WalletEvent>
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
+  async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
+    for (const channelId of channelIds) {
+      await this.store.lockApp(
+        channelId,
+        async (tx, channel) => {
+          // TODO: (Objectives Rewrite) Keeping this here b/c we need to do input validation
+          // and check if its our turn and throw an error as existing tests expect
+          getOrThrow(CloseChannel.closeChannel(channel));
+
+          await this.store.addObjective(
+            {
+              type: 'CloseChannel',
+              participants: [],
+              data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
+            },
+            tx
+          );
+        },
+        () => {
+          throw new CloseChannel.CloseChannelError(
+            CloseChannel.CloseChannelError.reasons.channelMissing,
+            {channelId}
+          );
+        }
+      );
+    }
+
+    const {channelResults, outbox} = await this.takeActions(channelIds);
+
+    (outbox[0].params.data as Payload).objectives = channelIds.map(channelId => ({
+      type: 'CloseChannel',
+      participants: [],
+      data: {targetChannelId: channelId, fundingStrategy: 'Unknown'},
+    }));
+
+    return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
+  }
+
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
     const handleMissingChannel: MissingAppHandler<void> = () => {
       throw new CloseChannel.CloseChannelError(
