@@ -5,6 +5,7 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
+import {Bytes32} from '../../../type-aliases';
 
 let w: Wallet;
 beforeAll(async () => {
@@ -56,4 +57,29 @@ it("reject when it's not my turn", async () => {
 
   const updated = await Channel.forId(channelId, w.knex);
   expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
+});
+
+it("signs a final state when it's my turn for many channels at once", async () => {
+  const appData = '0x0f00';
+  const turnNum = 7;
+  const runningState = {turnNum, appData};
+
+  const channelIds: Bytes32[] = [];
+
+  for (let i = 3; i < 7; i++) {
+    const c = channel({
+      channelNonce: i,
+      vars: [stateWithHashSignedBy(alice(), bob())(runningState)],
+    });
+    await Channel.query(w.knex).insert(c);
+    channelIds.push(c.channelId);
+  }
+
+  await expect(w.closeChannels(channelIds)).resolves.toMatchObject({
+    channelResults: channelIds.map(_ => ({
+      status: 'closing',
+      turnNum: turnNum + 1,
+      appData,
+    })),
+  });
 });
