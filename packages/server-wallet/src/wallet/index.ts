@@ -627,7 +627,6 @@ export class Wallet extends EventEmitter<WalletEvent>
     channels: Bytes32[],
     {outbox, channelResults, error}: ExecutionResult
   ): Promise<void> {
-    // const channelsWithPendingReqs = await Channel.allChannelsWithPendingLedgerRequests(this.knex);
     const channelsWithPendingReqs = (await LedgerRequest.getAllPendingRequests(this.knex)).map(
       l => l.channelToBeFunded
     );
@@ -811,10 +810,6 @@ const determineWhichLedgerToUse = async (
 ): Promise<Bytes32> => {
   if (channel?.supported) {
     const {assetHolderAddress} = checkThat(channel.supported.outcome, isSimpleAllocation);
-    // const ledgerRecord = _.find(
-    //   Object.values(store.ledgers),
-    //   v => v.assetHolderAddress === assetHolderAddress
-    // );
 
     const ledgerRecord = await Channel.query(txOrKnex).findOne({assetHolderAddress});
     if (!ledgerRecord) {

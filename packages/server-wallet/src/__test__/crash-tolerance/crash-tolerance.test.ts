@@ -18,6 +18,8 @@ let channelId: string;
 let participantA: Participant;
 let participantB: Participant;
 
+jest.setTimeout(10_000);
+
 beforeAll(async () => {
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
