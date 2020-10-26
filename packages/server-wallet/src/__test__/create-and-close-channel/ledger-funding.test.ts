@@ -69,7 +69,7 @@ let b = Wallet.create(
 let participantA: Participant;
 let participantB: Participant;
 
-jest.setTimeout(100_000);
+jest.setTimeout(15_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
