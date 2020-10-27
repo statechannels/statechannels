@@ -1,4 +1,5 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
+import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {BN, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers, providers} from 'ethers';
 import {fromEvent} from 'rxjs';
@@ -12,7 +13,11 @@ if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be define
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 let provider: providers.JsonRpcProvider;
 const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
-const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
+const a = new Wallet({
+  ...defaultTestConfig,
+  postgresDBName: 'TEST_A',
+  serverPrivateKey: ETHERLIME_ACCOUNTS[1].privateKey,
+});
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
@@ -156,11 +161,11 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 4,
   });
 
-  const aBalanceFinal = await getBalance(aAddress);
-  const bBalanceFinal = await getBalance(bAddress);
-
   // A fragile way to wait for the conclude and withdraw to complete
   await new Promise(r => setTimeout(r, 1_000));
+
+  const aBalanceFinal = await getBalance(aAddress);
+  const bBalanceFinal = await getBalance(bAddress);
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);

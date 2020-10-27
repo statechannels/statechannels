@@ -1,5 +1,5 @@
 /* eslint-disable no-process-env */
-import {GanacheServer} from '@statechannels/devtools';
+import {ETHERLIME_ACCOUNTS, GanacheServer} from '@statechannels/devtools';
 import {utils} from 'ethers';
 
 import {defaultConfig} from '../src/config';
@@ -13,14 +13,15 @@ export default async function setup(): Promise<void> {
     'RPC_ENDPOINT'
   ] = `http://${process.env['GANACHE_HOST']}:${process.env['GANACHE_PORT']}`;
 
-  const account = {
-    privateKey: defaultConfig.serverPrivateKey,
+  const accounts = ETHERLIME_ACCOUNTS.map(account => ({
+    ...account,
     amount: utils.parseEther('100').toString(),
-  };
+  }));
+
   if (!process.env.GANACHE_PORT) {
     throw new Error('process.env.GANACHE_PORT must be defined');
   }
-  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), 1337, [account]);
+  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), 1337, accounts);
   await ganacheServer.ready();
 
   const deployedArtifacts = await deploy();

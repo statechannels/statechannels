@@ -272,7 +272,9 @@ describe('concludeAndWithdraw', () => {
       })
     );
 
-    await (await chainService.concludeAndWithdraw([{...state, signatures}])).wait();
+    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    if (!transactionResponse) throw 'Expected transaction response';
+    await transactionResponse.wait();
 
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
@@ -311,7 +313,9 @@ describe('concludeAndWithdraw', () => {
       })
     );
 
-    await (await chainService.concludeAndWithdraw([{...state, signatures}])).wait();
+    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    if (!transactionResponse) throw 'Expected transaction response';
+    await transactionResponse.wait();
 
     const erc20Contract: Contract = new Contract(
       erc20Address,
