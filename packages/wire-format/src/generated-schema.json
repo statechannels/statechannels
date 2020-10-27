@@ -325,8 +325,7 @@
           },
           "required": [
             "targetChannelId",
-            "fundingStrategy",
-            "role"
+            "fundingStrategy"
           ],
           "type": "object"
         },
