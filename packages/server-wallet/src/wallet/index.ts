@@ -551,7 +551,8 @@ export class Wallet extends EventEmitter<WalletEvent>
             }
             case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              await this.chainService.fundChannel({
+              // Note, this returns a promise. We are NOT waiting on the promise
+              this.chainService.fundChannel({
                 ...action,
                 expectedHeld: BN.from(action.expectedHeld),
                 amount: BN.from(action.amount),
@@ -563,7 +564,8 @@ export class Wallet extends EventEmitter<WalletEvent>
               return;
             case 'Withdraw':
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
-              await this.chainService.concludeAndWithdraw(app.supported ? [app.supported] : []);
+              // Note, this returns a promise. We are NOT waiting on the promise
+              this.chainService.concludeAndWithdraw(app.supported ? [app.supported] : []);
               return;
             default:
               throw 'Unimplemented';
