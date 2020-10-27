@@ -2,7 +2,6 @@
 import {ETHERLIME_ACCOUNTS, GanacheServer} from '@statechannels/devtools';
 import {utils} from 'ethers';
 
-import {defaultConfig} from '../src/config';
 import {deploy} from '../deployment/deploy';
 
 export default async function setup(): Promise<void> {
