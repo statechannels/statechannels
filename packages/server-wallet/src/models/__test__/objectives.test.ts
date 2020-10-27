@@ -3,7 +3,7 @@ import {OpenChannel} from '@statechannels/wallet-core';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../channel';
-import {Objective, ObjectiveChannel} from '../objective';
+import {ObjectiveModel, ObjectiveChannel} from '../objective';
 
 import {channel} from './fixtures/channel';
 
@@ -23,9 +23,9 @@ beforeEach(async () => {
 describe('Objective > insert', () => {
   it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
-    await expect(Objective.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
+    await expect(ObjectiveModel.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
 
-    expect(await Objective.query(knex).select()).toMatchObject([]);
+    expect(await ObjectiveModel.query(knex).select()).toMatchObject([]);
 
     expect(await ObjectiveChannel.query(knex).select()).toMatchObject([]);
   });
@@ -35,9 +35,9 @@ describe('Objective > insert', () => {
       .withGraphFetched('signingWallet')
       .insert(c);
 
-    await Objective.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 
-    expect(await Objective.query(knex).select()).toMatchObject([
+    expect(await ObjectiveModel.query(knex).select()).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},
     ]);
 
@@ -53,9 +53,9 @@ describe('Objective > forChannelIds', () => {
       .withGraphFetched('signingWallet')
       .insert(c);
 
-    await Objective.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 
-    expect(await Objective.forChannelIds([c.channelId], knex)).toMatchObject([
+    expect(await ObjectiveModel.forChannelIds([c.channelId], knex)).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},
     ]);
   });
