@@ -103,7 +103,7 @@ const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
 const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   !ps.app.latestSignedByMe &&
   !!ps.app.latest &&
-  ps.app.latest.turnNum < ps.app.participants.length - 1 &&
+  ps.app.latest.turnNum < ps.app.participants.length &&
   signState({
     ...ps.app.latest,
     channelId: ps.app.channelId,
