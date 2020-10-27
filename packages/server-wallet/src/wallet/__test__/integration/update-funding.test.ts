@@ -52,6 +52,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
       data: {
         targetChannelId: c1.channelId,
         fundingStrategy: 'Direct',
+        role: 'app',
       },
       status: 'approved',
     },
@@ -65,6 +66,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
       data: {
         targetChannelId: c2.channelId,
         fundingStrategy: 'Direct',
+        role: 'app',
       },
       status: 'approved',
     },
@@ -123,6 +125,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
       data: {
         targetChannelId: c.channelId,
         fundingStrategy: 'Direct',
+        role: 'app',
       },
       status: 'approved',
     },

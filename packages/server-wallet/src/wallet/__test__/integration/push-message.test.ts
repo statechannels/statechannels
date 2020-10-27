@@ -250,6 +250,7 @@ describe('when the application protocol returns an action', () => {
         data: {
           targetChannelId: c.channelId,
           fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+          role: 'app',
         },
       },
       wallet.knex
@@ -406,8 +407,7 @@ describe('ledger funded app scenarios', () => {
       })
     );
 
-    // Update the in-memory Ledgers table
-    wallet.__setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS);
+    await Channel.setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS, wallet.knex);
 
     // Generate application channel
     app = channel({
@@ -445,7 +445,8 @@ describe('ledger funded app scenarios', () => {
         participants: channel.participants,
         data: {
           targetChannelId: channel.channelId,
-          fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+          fundingStrategy: 'Ledger',
+          role: 'app',
         },
       },
       wallet.knex

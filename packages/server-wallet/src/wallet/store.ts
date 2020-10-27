@@ -25,6 +25,8 @@ import {
   objectiveId,
   deserializeState,
   statesEqual,
+  isSimpleAllocation,
+  checkThat,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import {State as NitroState} from '@statechannels/nitro-protocol';
@@ -426,7 +428,7 @@ export class Store {
   async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     if (isOpenChannel(objective)) {
       const {
-        data: {targetChannelId: channelId, fundingStrategy},
+        data: {targetChannelId: channelId, fundingStrategy, role},
       } = objective;
 
       // fetch the channel to make sure the channel exists
@@ -446,8 +448,16 @@ export class Store {
         data: {
           fundingStrategy,
           targetChannelId: channelId,
+          role,
         },
       };
+
+      if (role === 'ledger')
+        await Channel.setLedger(
+          channelId,
+          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+          tx
+        );
 
       // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
       await ObjectiveModel.insert(objectiveToBeStored, tx);
@@ -606,7 +616,8 @@ export class Store {
     constants: ChannelConstants,
     appData: Bytes,
     outcome: Outcome,
-    fundingStrategy: FundingStrategy
+    fundingStrategy: FundingStrategy,
+    role: 'app' | 'ledger' = 'app'
   ): Promise<{outgoing: Outgoing[]; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
       const {channelId, myIndex, participants} = await createChannel(
@@ -637,6 +648,7 @@ export class Store {
         data: {
           targetChannelId: channelId,
           fundingStrategy,
+          role,
         },
       };
 
@@ -657,6 +669,13 @@ export class Store {
         objectiveId: objectiveId(objective),
         status: 'approved',
       };
+
+      if (role === 'ledger')
+        await Channel.setLedger(
+          channelId,
+          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
+          tx
+        );
 
       if (isOpenChannel(objective)) await ObjectiveModel.insert(objectiveToBeStored, tx);
 

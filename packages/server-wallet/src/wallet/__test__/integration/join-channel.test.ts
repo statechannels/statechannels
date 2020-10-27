@@ -63,6 +63,7 @@ describe('directly funded app', () => {
         data: {
           targetChannelId: c1.channelId,
           fundingStrategy: 'Direct',
+          role: 'app',
         },
         status: 'pending',
       },
@@ -76,6 +77,7 @@ describe('directly funded app', () => {
         data: {
           targetChannelId: c2.channelId,
           fundingStrategy: 'Direct',
+          role: 'app',
         },
         status: 'pending',
       },
@@ -129,6 +131,7 @@ describe('directly funded app', () => {
         data: {
           targetChannelId: current.channelId,
           fundingStrategy: 'Direct',
+          role: 'app',
         },
         status: 'pending',
       },
@@ -167,6 +170,7 @@ describe('directly funded app', () => {
         data: {
           targetChannelId: current.channelId,
           fundingStrategy: 'Direct',
+          role: 'app',
         },
         status: 'pending',
       },
@@ -223,8 +227,7 @@ describe('ledger funded app scenarios', () => {
       })
     );
 
-    // Update the Ledgers table
-    w.__setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS);
+    await Channel.setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS, w.knex);
 
     // Generate application channel
     app = channel({
@@ -260,6 +263,7 @@ describe('ledger funded app scenarios', () => {
         data: {
           targetChannelId: channel.channelId,
           fundingStrategy: 'Ledger',
+          role: 'app',
         },
         status: 'approved',
       },

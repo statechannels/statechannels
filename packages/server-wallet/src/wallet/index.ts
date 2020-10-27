@@ -30,6 +30,7 @@ import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {TransactionOrKnex} from 'objection';
+import {ethers} from 'ethers';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
@@ -261,9 +262,32 @@ export class Wallet extends EventEmitter<WalletEvent>
     return await this.store.getOrCreateSigningAddress();
   }
 
-  // TODO: Discussion item --- how should an App tell the wallet a channel is a Ledger?
-  async __setLedger(ledgerChannelId: Bytes32, assetHolderAddress: Address): Promise<void> {
-    await Channel.setLedger(ledgerChannelId, assetHolderAddress, this.knex);
+  async createLedgerChannel(
+    args: Pick<CreateChannelParams, 'participants' | 'allocations'>
+  ): Promise<SingleChannelOutput> {
+    const {participants, allocations} = args;
+
+    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
+
+    const constants: ChannelConstants = {
+      channelNonce,
+      participants: participants.map(convertToParticipant),
+      chainId: this.walletConfig.chainNetworkID,
+      challengeDuration: 9001,
+      appDefinition: ethers.constants.AddressZero,
+    };
+
+    const ret = await this.store.createChannel(
+      constants,
+      '0x00', // appData,
+      deserializeAllocations(allocations), // outcome
+      'Direct', // fundingStrategy,
+      'ledger' // role
+    );
+
+    this.registerChannelWithChainService(ret.channelResult);
+
+    return {outbox: ret.outgoing, channelResult: ret.channelResult};
   }
 
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
