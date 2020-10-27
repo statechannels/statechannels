@@ -80,7 +80,8 @@ export class Store {
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
-    readonly skipEvmValidation: boolean
+    readonly skipEvmValidation: boolean,
+    readonly chainNetworkID: string
   ) {
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);

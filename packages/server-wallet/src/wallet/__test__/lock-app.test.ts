@@ -15,7 +15,12 @@ jest.setTimeout(10_000);
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultTestConfig.timingMetrics, defaultTestConfig.skipEvmValidation);
+  store = new Store(
+    knex,
+    defaultTestConfig.timingMetrics,
+    defaultTestConfig.skipEvmValidation,
+    '0'
+  );
 });
 
 it('works', async () => {
