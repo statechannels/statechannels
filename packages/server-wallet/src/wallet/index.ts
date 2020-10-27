@@ -551,8 +551,7 @@ export class Wallet extends EventEmitter<WalletEvent>
             }
             case 'FundChannel':
               await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              // Note, this returns a promise. We are NOT waiting on the promise
-              this.chainService.fundChannel({
+              await this.chainService.fundChannel({
                 ...action,
                 expectedHeld: BN.from(action.expectedHeld),
                 amount: BN.from(action.amount),
@@ -564,9 +563,9 @@ export class Wallet extends EventEmitter<WalletEvent>
               return;
             case 'Withdraw':
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
-              // Note, this returns a promise. We are NOT waiting on the promise
               // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-              this.chainService.concludeAndWithdraw([app.supported!]);
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              await this.chainService.concludeAndWithdraw([app.supported!]);
               return;
             default:
               throw 'Unimplemented';
