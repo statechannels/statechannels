@@ -566,7 +566,7 @@ export class Wallet extends EventEmitter<WalletEvent>
               await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
               // Note, this returns a promise. We are NOT waiting on the promise
               // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-              this.chainService.concludeAndWithdraw(app.supported ? [app.supported] : []);
+              this.chainService.concludeAndWithdraw([app.supported!]);
               return;
             default:
               throw 'Unimplemented';
