@@ -17,8 +17,8 @@ const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
 
-const aFunding = BigNumber.from(1).toHexString();
-const bFunding = BigNumber.from(0).toHexString();
+const aFunding = BN.from(1);
+const bFunding = BN.from(0);
 
 async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
