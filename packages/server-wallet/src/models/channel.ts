@@ -70,7 +70,8 @@ export class Channel extends Model implements RequiredColumns {
   readonly chainServiceRequests!: ChainServiceRequests;
   readonly fundingStrategy!: FundingStrategy;
 
-  readonly assetHolderAddress: string | undefined; // only Ledger channels have this
+  readonly assetHolderAddress!: string; // only Ledger channels have this
+  readonly fundingLedgerChannelId!: Address; // only App channels funded by Ledger have this
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -203,6 +204,7 @@ export class Channel extends Model implements RequiredColumns {
       participants,
       chainServiceRequests,
       fundingStrategy,
+      fundingLedgerChannelId,
     } = this;
     const funding = (assetHolder: Address): string => {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
@@ -220,6 +222,7 @@ export class Channel extends Model implements RequiredColumns {
       funding,
       chainServiceRequests,
       fundingStrategy,
+      fundingLedgerChannelId,
     };
   }
 

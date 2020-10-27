@@ -22,8 +22,6 @@ import {
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
-  checkThat,
-  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -301,7 +299,14 @@ export class Wallet extends EventEmitter<WalletEvent>
     args: CreateChannelParams,
     amountOfChannels: number
   ): Promise<MultipleChannelOutput> {
-    const {participants, appDefinition, appData, allocations, fundingStrategy} = args;
+    const {
+      participants,
+      appDefinition,
+      appData,
+      allocations,
+      fundingStrategy,
+      fundingLedgerChannelId,
+    } = args;
     const outcome: Outcome = deserializeAllocations(allocations);
     const results = await Promise.all(
       _.range(amountOfChannels).map(async () => {
@@ -313,7 +318,14 @@ export class Wallet extends EventEmitter<WalletEvent>
           challengeDuration: 9001,
           appDefinition,
         };
-        return this.store.createChannel(constants, appData, outcome, fundingStrategy);
+        return this.store.createChannel(
+          constants,
+          appData,
+          outcome,
+          fundingStrategy,
+          'app',
+          fundingLedgerChannelId
+        );
       })
     );
     const channelResults = results.map(r => r.channelResult);
@@ -815,20 +827,24 @@ const createOutboxFor = (
       params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
     }));
 
-// TODO: Decide if we want to keep this functionality or change the OpenChannel
-// objective to include information about _which_ ledger is funding what
 const determineWhichLedgerToUse = async (
   channel: ChannelState.ChannelState,
   txOrKnex: TransactionOrKnex
 ): Promise<Bytes32> => {
   if (channel?.supported) {
-    const {assetHolderAddress} = checkThat(channel.supported.outcome, isSimpleAllocation);
-
-    const ledgerRecord = await Channel.query(txOrKnex).findOne({assetHolderAddress});
-    if (!ledgerRecord) {
-      throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
+    if (channel.fundingStrategy === 'Ledger') {
+      if (channel.fundingLedgerChannelId) {
+        const ledgerChannelId = channel.fundingLedgerChannelId;
+        // TODO: remove this check? should be preventable / never need to happen
+        const ledgerRecord = await Channel.forId(ledgerChannelId, txOrKnex);
+        if (!ledgerRecord) {
+          throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
+        }
+        return ledgerChannelId;
+      }
+      throw new Error('ledger funded app has no fundingLedgerChannelId');
     }
-    return ledgerRecord?.channelId;
+    throw new Error('cannot fund app that is not ledger funded');
   } else {
     throw new Error('cannot fund unsupported app');
   }

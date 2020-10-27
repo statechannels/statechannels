@@ -1,10 +1,9 @@
 import * as Knex from 'knex';
-import {FundingStrategy} from '@statechannels/client-api-schema';
 
 const channels = 'channels';
 const chainServiceRequests = 'chain_service_requests';
 const fundingStrategy = 'funding_strategy';
-const defaultFundingStrategy: FundingStrategy = 'Unknown';
+const defaultFundingStrategy = 'Unknown';
 const chainServiceRequestsConstraint = `valid_chain_service_requests`;
 
 export async function addValidChainServiceRequests(knex: Knex, columns: string): Promise<any> {
