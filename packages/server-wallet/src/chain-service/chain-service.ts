@@ -57,7 +57,9 @@ interface ChainEventEmitterInterface {
 interface ChainModifierInterface {
   // todo: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
-  concludeAndWithdraw(finalizationProof: SignedState[]): Promise<providers.TransactionResponse>;
+  concludeAndWithdraw(
+    finalizationProof: SignedState[]
+  ): Promise<providers.TransactionResponse | void>;
   fetchBytecode(address: string): Promise<string>;
 }
 
@@ -200,7 +202,7 @@ export class ChainService implements ChainServiceInterface {
 
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
-  ): Promise<providers.TransactionResponse> {
+  ): Promise<providers.TransactionResponse | void> {
     const transactionRequest = {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
@@ -208,7 +210,21 @@ export class ChainService implements ChainServiceInterface {
       to: nitroAdjudicatorAddress,
     };
 
-    return this.sendTransaction(transactionRequest);
+    const captureExpectedErrors = (reason: any) => {
+      if (!reason.error.message.includes('revert Channel finalized')) throw reason;
+    };
+    const transactionResponse = this.sendTransaction(transactionRequest).catch(
+      captureExpectedErrors
+    );
+
+    transactionResponse
+      .then(receipt => {
+        if (receipt) return receipt.wait();
+        return;
+      })
+      .catch(captureExpectedErrors);
+
+    return transactionResponse;
   }
 
   registerChannel(
