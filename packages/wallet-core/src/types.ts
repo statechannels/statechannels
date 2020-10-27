@@ -97,7 +97,7 @@ export type OpenChannel = _Objective<
   {
     targetChannelId: string;
     fundingStrategy: FundingStrategy;
-    role: 'app' | 'ledger';
+    role?: 'app' | 'ledger'; // Default should be app
   }
 >;
 export type CloseChannel = _Objective<
