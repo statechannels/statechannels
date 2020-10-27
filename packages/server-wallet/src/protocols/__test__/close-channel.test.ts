@@ -31,13 +31,21 @@ test.each`
   expect(protocol(ps)).toMatchObject(action);
 });
 
-// todo: add the following test case once https://github.com/statechannels/the-graph/issues/80 is resolved
-//
-test.each`
-  supported       | latestSignedByMe | latest          | cond
-  ${closingState} | ${closingState}  | ${closingState} | ${'when I have signed a final state'}
-`('takes no action $cond', ({supported, latest, latestSignedByMe}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe}});
+test('when I have signed a final state, direct funding', () => {
+  const ps = applicationProtocolState({
+    app: {supported: closingState, latest: closingState, latestSignedByMe: closingState},
+  });
+  expect(protocol(ps)).toMatchObject({
+    type: 'Withdraw',
+    channelId: ps.app.channelId,
+  });
+});
+
+test('when I have signed a final state, unfunded', () => {
+  const ps = applicationProtocolState({
+    app: {supported: closingState, latest: closingState, latestSignedByMe: closingState},
+  });
+  ps.app.fundingStrategy = 'Unfunded';
   expect(protocol(ps)).toMatchObject({
     type: 'CompleteObjective',
     channelId: ps.app.channelId,
