@@ -121,7 +121,8 @@ export class Wallet extends EventEmitter<WalletEvent>
     this.store = new Store(
       this.knex,
       this.walletConfig.timingMetrics,
-      this.walletConfig.skipEvmValidation
+      this.walletConfig.skipEvmValidation,
+      this.walletConfig.chainNetworkID
     );
 
     // Bind methods to class instance
