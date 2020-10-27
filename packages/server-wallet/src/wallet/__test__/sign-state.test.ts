@@ -16,7 +16,12 @@ let tx: Objection.Transaction;
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultTestConfig.timingMetrics, defaultTestConfig.skipEvmValidation);
+  store = new Store(
+    knex,
+    defaultTestConfig.timingMetrics,
+    defaultTestConfig.skipEvmValidation,
+    '0'
+  );
 });
 
 beforeEach(async () => {

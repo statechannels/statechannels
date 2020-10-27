@@ -9,7 +9,12 @@ import {defaultTestConfig} from '../../config';
 let store: Store;
 
 beforeAll(async () => {
-  store = new Store(knex, defaultTestConfig.timingMetrics, defaultTestConfig.skipEvmValidation);
+  store = new Store(
+    knex,
+    defaultTestConfig.timingMetrics,
+    defaultTestConfig.skipEvmValidation,
+    '0'
+  );
 });
 
 describe('addSignedState', () => {
