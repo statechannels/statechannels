@@ -116,6 +116,7 @@ const computeNewOutcome = ({
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
+  if (supported.turnNum < n) return false;
 
   const myLatestOutcome = checkThat(latestSignedByMe.outcome, isSimpleAllocation);
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
