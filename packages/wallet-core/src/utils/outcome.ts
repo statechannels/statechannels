@@ -73,17 +73,19 @@ export function allocateToTarget(
   let total = Zero;
   let currentItems = currentOutcome.allocationItems;
 
-  deductions.forEach(targetItem => {
-    const ledgerItem = currentItems.find(i => i.destination === targetItem.destination);
-    if (!ledgerItem) {
-      throw new Error(Errors.DestinationMissing);
-    }
+  deductions
+    .filter(i => BN.gt(i.amount, 0))
+    .forEach(targetItem => {
+      const ledgerItem = currentItems.find(i => i.destination === targetItem.destination);
+      if (!ledgerItem) {
+        throw new Error(Errors.DestinationMissing);
+      }
 
-    total = BN.add(total, targetItem.amount);
-    ledgerItem.amount = BN.sub(ledgerItem.amount, targetItem.amount);
+      total = BN.add(total, targetItem.amount);
+      ledgerItem.amount = BN.sub(ledgerItem.amount, targetItem.amount);
 
-    if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
-  });
+      if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
+    });
 
   currentItems.push({destination: makeDestination(targetChannelId), amount: total});
   currentItems = currentItems.filter(i => BN.gt(i.amount, 0));
