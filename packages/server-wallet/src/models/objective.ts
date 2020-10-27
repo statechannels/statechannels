@@ -3,7 +3,7 @@ import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
 
-function extract(objective: Objective): ObjectiveStoredInDB {
+function extract(objective: ObjectiveModel): ObjectiveStoredInDB {
   return {
     ...objective,
     participants: [],
@@ -37,7 +37,7 @@ export class ObjectiveChannel extends Model {
   }
 }
 
-export class Objective extends Model {
+export class ObjectiveModel extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly status!: ObjectiveStoredInDB['status'];
   readonly type!: ObjectiveStoredInDB['type'];
@@ -76,11 +76,11 @@ export class Objective extends Model {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
-  ): Promise<Objective> {
+  ): Promise<ObjectiveModel> {
     const id: string = objectiveId(objectiveToBeStored);
 
     return tx.transaction(async trx => {
-      const objective = await Objective.query(trx).insert({
+      const objective = await ObjectiveModel.query(trx).insert({
         objectiveId: id,
         status: objectiveToBeStored.status,
         type: objectiveToBeStored.type,
@@ -100,18 +100,18 @@ export class Objective extends Model {
   }
 
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
-    const objective = await Objective.query(tx).findById(objectiveId);
+    const objective = await ObjectiveModel.query(tx).findById(objectiveId);
     return extract(objective);
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await Objective.query(tx)
+    await ObjectiveModel.query(tx)
       .findById(objectiveId)
       .patch({status: 'approved'});
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await Objective.query(tx)
+    await ObjectiveModel.query(tx)
       .findById(objectiveId)
       .patch({status: 'succeeded'});
   }
@@ -127,6 +127,6 @@ export class Objective extends Model {
         .whereIn('channelId', targetChannelIds)
     ).map(oc => oc.objectiveId);
 
-    return (await Objective.query(tx).findByIds(objectiveIds)).map(extract);
+    return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(extract);
   }
 }

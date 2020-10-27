@@ -8,7 +8,7 @@ import Knex from 'knex';
 import {SigningWallet} from '../models/signing-wallet';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {Objective, ObjectiveChannel} from '../models/objective';
+import {ObjectiveModel, ObjectiveChannel} from '../models/objective';
 import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
 
@@ -39,7 +39,7 @@ export class DBAdmin {
       SigningWallet.tableName,
       Channel.tableName,
       Nonce.tableName,
-      Objective.tableName,
+      ObjectiveModel.tableName,
       ObjectiveChannel.tableName,
       Funding.tableName,
       AppBytecode.tableName,

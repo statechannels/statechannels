@@ -10,7 +10,7 @@ import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
-import {Objective as ObjectiveModel} from '../../../models/objective';
+import {ObjectiveModel} from '../../../models/objective';
 
 let w: Wallet;
 beforeEach(async () => {

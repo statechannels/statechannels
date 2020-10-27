@@ -52,7 +52,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
-import {Objective as ObjectiveModel} from '../models/objective';
+import {ObjectiveModel} from '../models/objective';
 import {logger} from '../logger';
 import {AppBytecode} from '../models/app-bytecode';
 
