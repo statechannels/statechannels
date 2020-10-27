@@ -76,12 +76,9 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
         token: ETH_ASSET_HOLDER_ADDRESS,
       },
     ],
-    appDefinition: ethers.constants.AddressZero,
-    appData: '0x00',
-    fundingStrategy: 'Direct' as const,
   };
-  const resultA0 = await a.createChannel(ledgerChannelArgs);
-  const channelId = resultA0.channelResults[0].channelId;
+  const resultA0 = await a.createLedgerChannel(ledgerChannelArgs);
+  const channelId = resultA0.channelResult.channelId;
   await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
 
   // B CRASHES
@@ -105,9 +102,6 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   await b.updateFundingForChannels([fundingPostBDeposit]);
   const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
-
-  a.__setLedger(channelId, ETH_ASSET_HOLDER_ADDRESS);
-  b.__setLedger(channelId, ETH_ASSET_HOLDER_ADDRESS);
 
   return channelId;
 };

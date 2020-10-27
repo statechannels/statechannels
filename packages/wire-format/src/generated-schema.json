@@ -312,13 +312,21 @@
               ],
               "type": "string"
             },
+            "role": {
+              "enum": [
+                "app",
+                "ledger"
+              ],
+              "type": "string"
+            },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
             }
           },
           "required": [
             "targetChannelId",
-            "fundingStrategy"
+            "fundingStrategy",
+            "role"
           ],
           "type": "object"
         },

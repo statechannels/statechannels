@@ -14,6 +14,7 @@ const objective: OpenChannel = {
   data: {
     targetChannelId: c.channelId,
     fundingStrategy: 'Direct',
+    role: 'app',
   },
 };
 beforeEach(async () => {
