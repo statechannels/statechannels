@@ -385,8 +385,6 @@ describe('ledger funded app scenarios', () => {
   };
 
   beforeEach(async () => {
-    // FIXME: SQL-ize ledgers and do test cleanup as needed
-
     const someNonConflictingChannelNonce = 23364518;
 
     // NOTE: Put a ledger Channel in the DB
