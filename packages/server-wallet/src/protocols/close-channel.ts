@@ -39,7 +39,6 @@ function chainWithdraw(ps: ProtocolState): Withdraw | false {
     everyoneSignedFinalState(ps) &&
     ps.app.fundingStrategy === 'Direct' &&
     ps.app.chainServiceRequests.indexOf('withdraw') === -1 &&
-    ps.app.myIndex === 0 &&
     withdraw(ps.app)
   );
 }
