@@ -37,6 +37,7 @@ export type ChannelState = {
   funding: (address: Address) => Uint256;
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
+  fundingLedgerChannelId?: Address; // only present if funding strategy is Ledger
 };
 
 type WithSupported = {supported: SignedStateWithHash};

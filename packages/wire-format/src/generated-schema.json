@@ -302,6 +302,9 @@
         "data": {
           "additionalProperties": false,
           "properties": {
+            "fundingLedgerChannelId": {
+              "$ref": "#/definitions/Address"
+            },
             "fundingStrategy": {
               "enum": [
                 "Direct",
