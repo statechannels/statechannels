@@ -269,6 +269,10 @@ export class Wallet extends EventEmitter<WalletEvent>
     await Channel.setLedger(ledgerChannelId, assetHolderAddress, this.knex);
   }
 
+  async openLedgerAndBulkFund(args: CreateChannelParams, N = 10) {
+    // TODO: create an 'OpenChannelAndBulkFund' protocol
+  }
+
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
     return this.createChannels(args, 1);
   }
@@ -668,6 +672,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       else throw new Error('crankToCompletion: unsupported objective');
 
       await this.store.lockApp(channelToLock, async tx => {
+        // TODO:  lockApp is either not needed here or we might need a lockApps(array) method
         const setError = async (e: Error): Promise<void> => {
           error = e;
           await tx.rollback(error);
@@ -698,6 +703,14 @@ export class Wallet extends EventEmitter<WalletEvent>
             objective.data.targetChannelId,
             tx
           );
+        } else if (objective.type === 'OpenLedgerAndBulkFund') {
+          protocol = OpenLedgerAndBulkFund.protocol;
+          protocolState = await OpenLedgerAndBulkFund.getOpenLedgerAndBulkFund(
+            this.store,
+            objective.data.ledgerChannelId,
+            objective.data.channelsToFund,
+            tx
+          );
         } else {
           throw new Error('Unexpected objective');
         }
@@ -725,6 +738,12 @@ export class Wallet extends EventEmitter<WalletEvent>
               markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
               addChannelResult(protocolState.app);
               return;
+            case 'RequestBulkLedgerFunding': {
+              // TODO: tell the store to store LedgerRequest<
+              // fund all in this list of channelIds or none of them
+              // >
+              return;
+            }
             case 'RequestLedgerFunding': {
               const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
               await LedgerRequest.requestLedgerFunding(

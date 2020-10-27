@@ -219,6 +219,9 @@ const exchangeCommits = ({
     channelsRequestingFunds
   ));
 
+  // TODO: do some check that if a channelId is in insufficientFunds that was meant to be funded //
+  // all-or-none then abort this entire thing and reject the objective
+
   if (counterpartyLedgerCommit && !_.isEqual(counterpartyLedgerCommit, outcome)) {
     const mergedLedgerUpdate = mergeProposedLedgerUpdates(
       outcome,
@@ -289,7 +292,7 @@ export const getProcessLedgerQueueProtocolState = async (
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
+  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx); // TODO: Enhance this object to return some kind of ledger request which says "fund _all_ of these channels or none at all"
   const {mine, theirs} = await store.getLedgerProposals(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
