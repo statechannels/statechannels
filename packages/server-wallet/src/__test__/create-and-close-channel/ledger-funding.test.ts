@@ -135,7 +135,8 @@ expect.extend({
 
 const testCreateChannelParams = (
   aAllocation: number,
-  bAllocation: number
+  bAllocation: number,
+  ledgerChannelId: string
 ): CreateChannelParams => ({
   participants: [participantA, participantB],
   allocations: [
@@ -156,6 +157,7 @@ const testCreateChannelParams = (
   appDefinition: ethers.constants.AddressZero,
   appData: '0x00', // must be even length
   fundingStrategy: 'Ledger',
+  fundingLedgerChannelId: ledgerChannelId,
 });
 
 async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {
@@ -193,7 +195,7 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
 
   it('can fund a channel by ledger between two wallets ', async () => {
     ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(10, 10);
+    const params = testCreateChannelParams(10, 10, ledgerChannelId);
 
     const {
       channelResults: [{channelId}],
@@ -282,7 +284,7 @@ describe('Funding a single channel with 50% of ledger funds', () => {
 
   it('can fund a channel by ledger between two wallets ', async () => {
     ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(5, 5);
+    const params = testCreateChannelParams(5, 5, ledgerChannelId);
 
     const {
       channelResults: [{channelId}],
@@ -384,7 +386,7 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 
   it(`can fund ${N} channels created in bulk by Alice`, async () => {
     ledgerChannelId = await createLedgerChannel(4, 4);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const resultA = await a.createChannels(params, N);
     const channelIds = resultA.channelResults.map(c => c.channelId);
@@ -481,7 +483,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
   it(`can fund ${N * 2} channels created in bulk by Alice`, async () => {
     ledgerChannelId = await createLedgerChannel(N * 2, N * 2);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const createMessageAndJoinBatch = async (): Promise<Bytes32[]> => {
       const {outbox, channelResults} = await a.createChannels(params, N);
@@ -588,7 +590,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
   it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
     const ledgerChannelId = await createLedgerChannel(2, 2);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const resultA0 = await a.createChannels(params, 4); // 2 channels will be unfunded
     const channelIds = resultA0.channelResults.map(c => c.channelId);
@@ -642,7 +644,7 @@ describe('Funding multiple channels concurrently (one sided)', () => {
 
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const create1 = await a.createChannel(params);
     await b.pushMessage(getPayloadFor(participantB.participantId, create1.outbox));
@@ -704,7 +706,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
   it('can fund 2 channels by ledger each proposed by the other', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {
       bToJoin: [channelId1],
@@ -738,7 +740,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
   it('can fund 4 channels by ledger, 2 created concurrently at a time', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {
       channelResults: [{channelId: channelId1}],
@@ -795,7 +797,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
   it('can fund 4 channels by ledger, 1 created at a time, using joinChannel', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
 
@@ -843,7 +845,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
   it('can fund 4 channels by ledger, 1 created at a time, using joinChannels', async () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
 

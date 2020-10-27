@@ -426,7 +426,7 @@ export class Store {
   async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     if (isOpenChannel(objective)) {
       const {
-        data: {targetChannelId: channelId, fundingStrategy, role},
+        data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
       } = objective;
 
       // fetch the channel to make sure the channel exists
@@ -445,6 +445,7 @@ export class Store {
         type: objective.type,
         data: {
           fundingStrategy,
+          fundingLedgerChannelId,
           targetChannelId: channelId,
           role,
         },
@@ -462,7 +463,7 @@ export class Store {
 
       await Channel.query(tx)
         .where({channelId: channel.channelId})
-        .patch({fundingStrategy})
+        .patch({fundingStrategy, fundingLedgerChannelId})
         .returning('*')
         .first();
 
@@ -557,6 +558,7 @@ export class Store {
           participants: wireSignedState.participants.map(convertToParticipant),
         },
         'Unknown',
+        undefined,
         tx
       ));
 
@@ -615,12 +617,14 @@ export class Store {
     appData: Bytes,
     outcome: Outcome,
     fundingStrategy: FundingStrategy,
-    role: 'app' | 'ledger' = 'app'
+    role: 'app' | 'ledger' = 'app',
+    fundingLedgerChannelId?: Address
   ): Promise<{outgoing: Outgoing[]; channelResult: ChannelResult}> {
     return await this.knex.transaction(async tx => {
       const {channelId, myIndex, participants} = await createChannel(
         constants,
         fundingStrategy,
+        fundingLedgerChannelId,
         tx
       );
       const signedState = await this.signState(
@@ -646,6 +650,7 @@ export class Store {
         data: {
           targetChannelId: channelId,
           fundingStrategy,
+          fundingLedgerChannelId,
           role,
         },
       };
@@ -718,6 +723,7 @@ class StoreError extends WalletError {
 async function createChannel(
   constants: ChannelConstants,
   fundingStrategy: FundingStrategy,
+  fundingLedgerChannelId: Address | undefined,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   const channelId = calculateChannelId(constants);
@@ -735,7 +741,7 @@ async function createChannel(
     },
     ...CHANNEL_COLUMNS
   );
-  const channel = Channel.fromJson(cols);
+  const channel = Channel.fromJson({...cols, fundingLedgerChannelId});
   return await Channel.query(txOrKnex)
     .insert(channel)
     .returning('*')

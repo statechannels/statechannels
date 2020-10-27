@@ -410,6 +410,7 @@ describe('ledger funded app scenarios', () => {
     // Generate application channel
     app = channel({
       fundingStrategy: 'Ledger',
+      fundingLedgerChannelId: ledger.channelId,
     });
 
     // Construct expected ledger update state
@@ -444,6 +445,7 @@ describe('ledger funded app scenarios', () => {
         data: {
           targetChannelId: channel.channelId,
           fundingStrategy: 'Ledger',
+          fundingLedgerChannelId: ledger.channelId,
           role: 'app',
         },
       },

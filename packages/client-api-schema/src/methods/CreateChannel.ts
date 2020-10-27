@@ -3,12 +3,14 @@ import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-t
 import {ErrorCodes as AllErrors} from '../error-codes';
 
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded' | 'Unknown';
+
 export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];
   appDefinition: Address;
   appData: string;
   fundingStrategy: FundingStrategy;
+  fundingLedgerChannelId?: Address;
 }
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
