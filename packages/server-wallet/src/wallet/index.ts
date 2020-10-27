@@ -51,8 +51,9 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
+import {DBObjective} from '../models/objective';
 
-import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store';
+import {Store, AppHandler, MissingAppHandler} from './store';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -60,12 +61,12 @@ import {Store, AppHandler, MissingAppHandler, ObjectiveStoredInDB} from './store
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
-  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+  objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
-  objectivesToApprove?: Omit<ObjectiveStoredInDB, 'status'>[];
+  objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
 
