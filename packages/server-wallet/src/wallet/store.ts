@@ -52,7 +52,7 @@ import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {Outgoing} from '../protocols/actions';
-import {ObjectiveModel} from '../models/objective';
+import {ObjectiveModel, DBObjective} from '../models/objective';
 import {logger} from '../logger';
 import {AppBytecode} from '../models/app-bytecode';
 
@@ -68,11 +68,6 @@ function isUniqueViolationError(error: any): error is UniqueViolationError {
 
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
-};
-
-export type ObjectiveStoredInDB = Objective & {
-  objectiveId: string;
-  status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -366,7 +361,7 @@ export class Store {
     message: WirePayload
   ): Promise<{
     channelIds: Bytes32[];
-    objectives: ObjectiveStoredInDB[];
+    objectives: DBObjective[];
     channelResults: ChannelResult[];
   }> {
     return this.knex.transaction(async tx => {
@@ -406,15 +401,15 @@ export class Store {
     });
   }
 
-  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<ObjectiveStoredInDB[]> {
+  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<DBObjective[]> {
     return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
   }
 
-  async approveObjective(objective: ObjectiveStoredInDB, tx?: Transaction): Promise<void> {
+  async approveObjective(objective: DBObjective, tx?: Transaction): Promise<void> {
     await ObjectiveModel.approve(objective.objectiveId, tx || this.knex);
   }
 
-  async markObjectiveAsSucceeded(objective: ObjectiveStoredInDB, tx?: Transaction): Promise<void> {
+  async markObjectiveAsSucceeded(objective: DBObjective, tx?: Transaction): Promise<void> {
     await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
   }
 
@@ -426,7 +421,7 @@ export class Store {
     await AppBytecode.upsertBytecode(chainNetworkId, appDefinition, bytecode, this.knex);
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<ObjectiveStoredInDB> {
+  async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     if (isOpenChannel(objective)) {
       const {
         data: {targetChannelId: channelId, fundingStrategy},
@@ -441,7 +436,7 @@ export class Store {
       if (!_.includes(['Direct', 'Unfunded'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-      const objectiveToBeStored: ObjectiveStoredInDB = {
+      const objectiveToBeStored: DBObjective = {
         objectiveId: objectiveId(objective),
         participants: [],
         status: 'pending',
@@ -472,7 +467,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
       }
 
-      const objectiveToBeStored: ObjectiveStoredInDB = {
+      const objectiveToBeStored: DBObjective = {
         objectiveId: objectiveId(objective),
         status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
         type: objective.type,
@@ -633,7 +628,7 @@ export class Store {
         params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
       }));
 
-      const objectiveToBeStored: ObjectiveStoredInDB = {
+      const objectiveToBeStored: DBObjective = {
         ...objective,
         objectiveId: objectiveId(objective),
         status: 'approved',

@@ -1,8 +1,6 @@
 import {objectiveId, Objective} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 
-import {ObjectiveStoredInDB} from '../wallet/store';
-
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
     case 'OpenChannel':
@@ -19,8 +17,16 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
+/*
+  A DBObjective is a wire objective with a status and an objectiveId
+*/
+export type DBObjective = Objective & {
+  objectiveId: string;
+  status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+};
+
 export class ObjectiveChannelModel extends Model {
-  readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
+  readonly objectiveId!: DBObjective['objectiveId'];
   readonly channelId!: string;
 
   static tableName = 'objectives_channels';
@@ -30,10 +36,10 @@ export class ObjectiveChannelModel extends Model {
 }
 
 export class ObjectiveModel extends Model {
-  readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
-  readonly status!: ObjectiveStoredInDB['status'];
-  readonly type!: ObjectiveStoredInDB['type'];
-  readonly data!: ObjectiveStoredInDB['data'];
+  readonly objectiveId!: DBObjective['objectiveId'];
+  readonly status!: DBObjective['status'];
+  readonly type!: DBObjective['type'];
+  readonly data!: DBObjective['data'];
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -91,7 +97,7 @@ export class ObjectiveModel extends Model {
     });
   }
 
-  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
+  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
     const model = await ObjectiveModel.query(tx).findById(objectiveId);
     return model.toObjective();
   }
@@ -111,7 +117,7 @@ export class ObjectiveModel extends Model {
   static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex
-  ): Promise<ObjectiveStoredInDB[]> {
+  ): Promise<DBObjective[]> {
     const objectiveIds = (
       await ObjectiveChannelModel.query(tx)
         .column('objectiveId')
@@ -122,7 +128,7 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective(): ObjectiveStoredInDB {
+  toObjective(): DBObjective {
     return {
       ...this,
       participants: [],
