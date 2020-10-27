@@ -5,6 +5,24 @@ const channels = 'channels';
 const chainServiceRequests = 'chain_service_requests';
 const fundingStrategy = 'funding_strategy';
 const defaultFundingStrategy: FundingStrategy = 'Unknown';
+const chainServiceRequestsConstraint = `valid_chain_service_requests`;
+
+export async function addValidChainServiceRequests(knex: Knex, columns: string): Promise<any> {
+  await knex.raw(`\
+    ALTER TABLE ${channels}
+    ADD CONSTRAINT ${chainServiceRequestsConstraint}
+    CHECK (
+      ${chainServiceRequests} <@ ARRAY[${columns}]
+    )
+  `);
+}
+
+export async function dropValidChainServiceRequests(knex: Knex): Promise<any> {
+  await knex.raw(`\
+    ALTER TABLE ${channels}
+    DROP CONSTRAINT ${chainServiceRequestsConstraint}
+  `);
+}
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => {
@@ -18,13 +36,7 @@ export async function up(knex: Knex): Promise<any> {
       .defaultTo(defaultFundingStrategy);
   });
 
-  await knex.raw(`\
-    ALTER TABLE ${channels}
-    ADD CONSTRAINT valid_chain_service_requests
-    CHECK (
-      ${chainServiceRequests} <@ ARRAY['fund']
-    )
-  `);
+  await addValidChainServiceRequests(knex, "'fund'");
 }
 
 export async function down(knex: Knex): Promise<any> {
