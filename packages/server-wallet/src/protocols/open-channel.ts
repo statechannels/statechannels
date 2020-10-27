@@ -56,7 +56,7 @@ function isFunded({
     case 'Ledger': {
       if (!ledger) return false;
       if (!ledger.supported) return false;
-      // if (!isFunded({app: fundingChannel})) return false; // TODO: Should we check this?
+      if (!isFunded({app: ledger})) return false; // TODO: in the future check "funding table"
       const {allocationItems} = checkThat(ledger.supported.outcome, isSimpleAllocation);
       return _.some(allocationItems, ({destination}) => destination === channelId);
     }
