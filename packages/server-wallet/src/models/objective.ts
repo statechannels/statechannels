@@ -27,7 +27,7 @@ function extractReferencedChannels(objective: ObjectiveType): string[] {
   }
 }
 
-export class ObjectiveChannel extends Model {
+export class ObjectiveChannelModel extends Model {
   readonly objectiveId!: ObjectiveStoredInDB['objectiveId'];
   readonly channelId!: string;
 
@@ -92,7 +92,7 @@ export class ObjectiveModel extends Model {
       // Requires objective and channels to exist
       await Promise.all(
         extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannel.query(trx).insert({objectiveId: id, channelId: value})
+          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
         )
       );
       return objective;
@@ -121,7 +121,7 @@ export class ObjectiveModel extends Model {
     tx: TransactionOrKnex
   ): Promise<ObjectiveStoredInDB[]> {
     const objectiveIds = (
-      await ObjectiveChannel.query(tx)
+      await ObjectiveChannelModel.query(tx)
         .column('objectiveId')
         .select()
         .whereIn('channelId', targetChannelIds)
