@@ -1,17 +1,9 @@
-import {objectiveId, Objective as ObjectiveType} from '@statechannels/wallet-core';
+import {objectiveId, Objective} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 
 import {ObjectiveStoredInDB} from '../wallet/store';
 
-function extract(objective: ObjectiveModel): ObjectiveStoredInDB {
-  return {
-    ...objective,
-    participants: [],
-    data: objective.data as any, // Here we will trust that the row respects our types
-  };
-}
-
-function extractReferencedChannels(objective: ObjectiveType): string[] {
+function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
     case 'OpenChannel':
     case 'CloseChannel':
@@ -72,7 +64,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: ObjectiveType & {
+    objectiveToBeStored: Objective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
@@ -100,8 +92,8 @@ export class ObjectiveModel extends Model {
   }
 
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveStoredInDB> {
-    const objective = await ObjectiveModel.query(tx).findById(objectiveId);
-    return extract(objective);
+    const model = await ObjectiveModel.query(tx).findById(objectiveId);
+    return model.toObjective();
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
@@ -127,6 +119,14 @@ export class ObjectiveModel extends Model {
         .whereIn('channelId', targetChannelIds)
     ).map(oc => oc.objectiveId);
 
-    return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(extract);
+    return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
+  }
+
+  toObjective(): ObjectiveStoredInDB {
+    return {
+      ...this,
+      participants: [],
+      data: this.data as any, // Here we will trust that the row respects our types
+    };
   }
 }
