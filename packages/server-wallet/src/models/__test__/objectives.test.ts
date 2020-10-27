@@ -3,7 +3,7 @@ import {OpenChannel} from '@statechannels/wallet-core';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../channel';
-import {ObjectiveModel, ObjectiveChannel} from '../objective';
+import {ObjectiveModel, ObjectiveChannelModel} from '../objective';
 
 import {channel} from './fixtures/channel';
 
@@ -27,7 +27,7 @@ describe('Objective > insert', () => {
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([]);
 
-    expect(await ObjectiveChannel.query(knex).select()).toMatchObject([]);
+    expect(await ObjectiveChannelModel.query(knex).select()).toMatchObject([]);
   });
 
   it('inserts and associates an objective with all channels that it references (channels exist)', async () => {
@@ -41,7 +41,7 @@ describe('Objective > insert', () => {
       {objectiveId: `OpenChannel-${c.channelId}`},
     ]);
 
-    expect(await ObjectiveChannel.query(knex).select()).toMatchObject([
+    expect(await ObjectiveChannelModel.query(knex).select()).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`, channelId: c.channelId},
     ]);
   });
