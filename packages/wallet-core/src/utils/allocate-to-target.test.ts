@@ -9,6 +9,7 @@ import {
   makeDestination
 } from '.';
 
+const zero = BN.from(0);
 const one = BN.from(1);
 const two = BN.from(2);
 const three = BN.from(3);
@@ -72,12 +73,21 @@ describe('allocateToTarget with valid input', () => {
     {destination: right, amount: one},
     {destination: targetChannelId, amount: three}
   ];
+
+  const target5: Allocation = [
+    {destination: left, amount: one},
+    {destination: right, amount: zero}
+  ];
+  const ledger5: Allocation = [{destination: left, amount: one}];
+  const expected5: Allocation = [{destination: targetChannelId, amount: one}];
+
   it.each`
     description | deductions | ledgerAllocation | expectedAllocation
     ${'one'}    | ${target1} | ${ledger1}       | ${expected1}
     ${'two'}    | ${target2} | ${ledger2}       | ${expected2}
     ${'three'}  | ${target3} | ${ledger3}       | ${expected3}
     ${'four'}   | ${target4} | ${ledger4}       | ${expected4}
+    ${'five'}   | ${target5} | ${ledger5}       | ${expected5}
   `('Test $description', ({deductions, ledgerAllocation, expectedAllocation}) => {
     expect(
       allocateToTarget(simpleEthAllocation(ledgerAllocation), deductions, targetChannelId)
