@@ -196,6 +196,8 @@ export interface CreateChannelParams {
     // (undocumented)
     appDefinition: Address;
     // (undocumented)
+    fundingLedgerChannelId?: Address;
+    // (undocumented)
     fundingStrategy: FundingStrategy;
     // (undocumented)
     participants: Participant[];
