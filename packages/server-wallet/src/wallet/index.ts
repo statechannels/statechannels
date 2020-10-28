@@ -265,7 +265,8 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async createLedgerChannel(
-    args: Pick<CreateChannelParams, 'participants' | 'allocations'>
+    args: Pick<CreateChannelParams, 'participants' | 'allocations'>,
+    fundingStrategy: 'Direct' | 'Unfunded' = 'Direct'
   ): Promise<SingleChannelOutput> {
     const {participants, allocations} = args;
 
@@ -283,7 +284,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       constants,
       '0x00', // appData,
       deserializeAllocations(allocations), // outcome
-      'Direct', // fundingStrategy,
+      fundingStrategy, // fundingStrategy,
       'ledger' // role
     );
 
