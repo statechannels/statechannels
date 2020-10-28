@@ -163,6 +163,12 @@ async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[]
     const nextMessageFromB = bToA.shift();
     const nextMessageFromA = aToB.shift();
 
+    // Helpful for debugging:
+    // nextMessageFromA &&
+    //   console.log(`A to B: ${JSON.stringify(nextMessageFromA[0].params.data, null, 2)}`);
+    // nextMessageFromB &&
+    //   console.log(`B to A: ${JSON.stringify(nextMessageFromB[0].params.data, null, 2)}`);
+
     const newFromA =
       nextMessageFromB &&
       (await a.pushMessage(getPayloadFor(participantA.participantId, nextMessageFromB)));
@@ -403,6 +409,117 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     });
 
     expect(allocationItems).toHaveLength(N);
+
+    for (const channelId of channelIds) {
+      expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+        turnNum: 3,
+        status: 'running',
+      });
+      expect(allocationItems).toContainAllocationItem({
+        destination: channelId,
+        amount: BN.from(2),
+      });
+    }
+
+    appChannelIds = channelIds;
+  });
+
+  it('can close them all (concurrently!)', async () => {
+    // ⚠️ This results in several messages back and forth
+    await exchangeMessagesBetweenAandB(
+      [],
+      await Promise.all(
+        appChannelIds.map(async channelId => (await a.closeChannel({channelId})).outbox)
+      )
+    );
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      // 11 because there is a conflicting back-and-forth due to concurrent messages
+      turnNum: 11,
+      status: 'running',
+    });
+
+    for (const channelId of appChannelIds) {
+      expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
+        turnNum: 4,
+        status: 'closed',
+      });
+      expect(allocationItems).not.toContainEqual({destination: channelId});
+    }
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantA.destination,
+      amount: BN.from(4),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: participantB.destination,
+      amount: BN.from(4),
+    });
+  });
+});
+
+describe('Funding multiple channels concurrently (in bulk)', () => {
+  const N = 2;
+  let ledgerChannelId: Bytes32;
+  let appChannelIds: Bytes32[];
+
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+  });
+
+  it(`can fund ${N * 2} channels created in bulk by Alice`, async () => {
+    ledgerChannelId = await createLedgerChannel(N * 2, N * 2);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+
+    const createMessageAndJoinBatch = async (): Promise<Bytes32[]> => {
+      const {outbox, channelResults} = await a.createChannels(params, N);
+      const channelIds = channelResults.map(c => c.channelId);
+      await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
+      const joinResults = await b.joinChannels(channelIds);
+      await exchangeMessagesBetweenAandB([joinResults.outbox], []);
+      return channelIds;
+    };
+
+    const results = await Promise.all([createMessageAndJoinBatch(), createMessageAndJoinBatch()]);
+
+    const channelIds = results.flat();
+
+    // If parties sign post-funds in order, this must be done:
+    await exchangeMessagesBetweenAandB(
+      await Promise.all(
+        channelIds.map(async channelId => (await b.syncChannel({channelId})).outbox)
+      ),
+      []
+    );
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(ledger).toMatchObject({
+      turnNum: 5,
+      status: 'running',
+    });
+
+    expect(allocationItems).toHaveLength(N * 2);
 
     for (const channelId of channelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
