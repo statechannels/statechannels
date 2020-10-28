@@ -1,3 +1,4 @@
+import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
@@ -19,16 +20,17 @@ const ethWallet = new Wallet(defaultTestConfig.serverPrivateKey, provider);
 let chainService: ChainService;
 
 beforeEach(() => {
-  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey);
+  // Try to use a different private key for every chain service instantiation to avoid nonce errors
+  chainService = new ChainService(rpcEndpoint, ETHERLIME_ACCOUNTS[3].privateKey);
 });
 
 afterEach(() => chainService.destructor());
 
+const iterations = 100;
 // Do not run by default as it takes several minutes
 describe('fundChannel', () => {
-  it.skip('100 simultaneous deposits', async () => {
+  it.skip(`${iterations} simultaneous deposits`, async () => {
     const depositAmount = 5;
-    const iterations = 100;
     const contract: Contract = new Contract(
       erc20Address,
       ContractArtifacts.TokenArtifact.abi,

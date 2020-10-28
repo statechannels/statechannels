@@ -1,3 +1,4 @@
+import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
 import {
   BN,
@@ -32,7 +33,11 @@ let chainService: ChainService;
 let channelNonce = 0;
 
 beforeAll(() => {
-  chainService = new ChainService(rpcEndpoint, defaultTestConfig.serverPrivateKey);
+  // Try to use a different private key for every chain service instantiation to avoid nonce errors
+  // Using the first account here as that is the one that:
+  // - Deploys the token contract.
+  // - And therefore has tokens allocated to it.
+  chainService = new ChainService(rpcEndpoint, ETHERLIME_ACCOUNTS[0].privateKey);
 });
 
 afterAll(() => chainService.destructor());

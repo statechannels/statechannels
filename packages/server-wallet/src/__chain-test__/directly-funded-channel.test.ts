@@ -12,11 +12,15 @@ import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 let provider: providers.JsonRpcProvider;
-const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const b = new Wallet({
+  ...defaultTestConfig,
+  postgresDBName: 'TEST_B',
+  serverPrivateKey: ETHERLIME_ACCOUNTS[1].privateKey,
+});
 const a = new Wallet({
   ...defaultTestConfig,
   postgresDBName: 'TEST_A',
-  serverPrivateKey: ETHERLIME_ACCOUNTS[1].privateKey,
+  serverPrivateKey: ETHERLIME_ACCOUNTS[2].privateKey,
 });
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
