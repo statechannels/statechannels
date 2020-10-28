@@ -57,6 +57,53 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
 });
 
+it('ignores duplicate states', async () => {
+  const channelsBefore = await Channel.query(wallet.knex).select();
+  expect(channelsBefore).toHaveLength(0);
+
+  const signedStates = [
+    stateSignedBy([alice()])({turnNum: five}),
+    stateSignedBy([alice(), bob()])({turnNum: four}),
+  ];
+  // First call should add the states
+  await wallet.pushMessage({
+    signedStates: signedStates.map(s => serializeState(s)),
+  });
+  // Second call should be ignored
+  await wallet.pushMessage({
+    signedStates: signedStates.map(s => serializeState(s)),
+  });
+  const channelsAfter = await Channel.query(wallet.knex).select();
+
+  expect(channelsAfter).toHaveLength(1);
+  expect(channelsAfter[0].vars).toHaveLength(2);
+
+  // The Channel model adds the state hash before persisting
+  expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
+});
+
+it('adds signatures to existing states', async () => {
+  const channelsBefore = await Channel.query(wallet.knex).select();
+  expect(channelsBefore).toHaveLength(0);
+  const signedByAlice = stateSignedBy([alice()])({turnNum: five});
+  const signedByBob = stateSignedBy([bob()])({turnNum: five});
+
+  await wallet.pushMessage({
+    signedStates: [serializeState(signedByAlice)],
+  });
+
+  await wallet.pushMessage({
+    signedStates: [serializeState(signedByBob)],
+  });
+  const channelsAfter = await Channel.query(wallet.knex).select();
+
+  expect(channelsAfter).toHaveLength(1);
+  expect(channelsAfter[0].vars).toHaveLength(1);
+  const signatures = channelsAfter[0].supported?.signatures.map(s => s.signer);
+  expect(signatures).toContain(alice().address);
+  expect(signatures).toContain(bob().address);
+});
+
 const expectResults = async (
   p: Promise<{channelResults: ChannelResult[]}>,
   channelResults: Partial<ChannelResult>[]

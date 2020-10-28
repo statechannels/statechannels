@@ -528,11 +528,22 @@ export class Store {
       ));
 
     const incomingState = deserializeState(wireSignedState);
-    if (
-      channel.supported &&
-      // If the state is the same as the support state then its not a transition just adding signatures
-      !statesEqual(channel.supported, incomingState)
-    ) {
+
+    const sswh: SignedStateWithHash = addHash({
+      chainId: wireSignedState.chainId,
+      channelNonce: wireSignedState.channelNonce,
+      appDefinition: wireSignedState.appDefinition,
+      appData: wireSignedState.appData,
+      turnNum: wireSignedState.turnNum,
+      isFinal: wireSignedState.isFinal,
+      challengeDuration: wireSignedState.challengeDuration,
+      outcome: deserializeOutcome(wireSignedState.outcome),
+      participants: wireSignedState.participants.map(convertToInternalParticipant),
+      signatures,
+    });
+
+    const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === sswh.stateHash);
+    if (channel.supported && !alreadyHaveState) {
       const {supported} = channel;
 
       if (
@@ -547,18 +558,6 @@ export class Store {
       }
     }
 
-    const sswh: SignedStateWithHash = addHash({
-      chainId: wireSignedState.chainId,
-      channelNonce: wireSignedState.channelNonce,
-      appDefinition: wireSignedState.appDefinition,
-      appData: wireSignedState.appData,
-      turnNum: wireSignedState.turnNum,
-      isFinal: wireSignedState.isFinal,
-      challengeDuration: wireSignedState.challengeDuration,
-      outcome: deserializeOutcome(wireSignedState.outcome),
-      participants: wireSignedState.participants.map(convertToInternalParticipant),
-      signatures,
-    });
     channel.vars = await timer('adding state', async () => addState(channel.vars, sswh));
 
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
