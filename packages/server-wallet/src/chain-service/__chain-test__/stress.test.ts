@@ -15,13 +15,14 @@ const erc20Address = process.env.ERC20_ADDRESS!;
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-const ethWallet = new Wallet(defaultTestConfig.serverPrivateKey, provider);
+const privateKey = ETHERLIME_ACCOUNTS[3].privateKey;
+const ethWallet = new Wallet(privateKey, provider);
 
 let chainService: ChainService;
 
 beforeEach(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
-  chainService = new ChainService(rpcEndpoint, ETHERLIME_ACCOUNTS[3].privateKey);
+  chainService = new ChainService(rpcEndpoint, privateKey);
 });
 
 afterEach(() => chainService.destructor());
