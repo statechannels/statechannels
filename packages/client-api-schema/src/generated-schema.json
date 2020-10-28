@@ -281,6 +281,9 @@
         "appDefinition": {
           "$ref": "#/definitions/Address"
         },
+        "fundingLedgerChannelId": {
+          "$ref": "#/definitions/Address"
+        },
         "fundingStrategy": {
           "$ref": "#/definitions/FundingStrategy"
         },
