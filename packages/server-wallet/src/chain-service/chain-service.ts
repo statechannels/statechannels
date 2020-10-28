@@ -9,6 +9,7 @@ import {Contract, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
+import PQueue from 'p-queue';
 
 import {Address, Bytes32} from '../type-aliases';
 
@@ -65,11 +66,6 @@ interface ChainModifierInterface {
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
 
-type TransactionQueueEntry = {
-  request: providers.TransactionRequest;
-  resolve: (response: providers.TransactionResponse) => void;
-};
-
 const Deposited = 'Deposited' as const;
 const AssetTransferred = 'AssetTransferred' as const;
 type DepositedEvent = {type: 'Deposited'} & HoldingUpdatedArg;
@@ -80,10 +76,6 @@ function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
 }
 
-function isError(e: any): e is Error {
-  return !!e.error;
-}
-
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
@@ -91,8 +83,7 @@ export class ChainService implements ChainServiceInterface {
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
 
-  // todo: the custom FIFO promise queue can be replaced by https://www.npmjs.com/package/p-queue
-  private transactionQueue: TransactionQueueEntry[] = [];
+  private transactionQueue = new PQueue({concurrency: 1});
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);
@@ -133,40 +124,20 @@ export class ChainService implements ChainServiceInterface {
     return obs;
   }
 
-  private async transactionQueueLoop(): Promise<void> {
-    while (this.transactionQueue.length) {
-      try {
-        const response = await this.ethWallet.sendTransaction(this.transactionQueue[0].request);
-        this.transactionQueue[0].resolve(response);
-      } catch (e) {
-        // https://github.com/ethers-io/ethers.js/issues/972
-        this.ethWallet.incrementTransactionCount(-1);
-        this.transactionQueue[0].resolve(e);
-      }
-      this.transactionQueue.splice(0, 1);
-    }
-  }
-
-  private async addToTransactionQueue(entry: TransactionQueueEntry): Promise<void> {
-    this.transactionQueue.push(entry);
-    // If there is one element in the queue, we have pushed this element. We need to trigger queue loop.
-    // If there are two or more elements in the queue, whoever pushed the first element on the queue already triggered the queue loop
-    if (this.transactionQueue.length === 1) {
-      this.transactionQueueLoop();
-    }
-  }
-
-  private async sendTransaction(
-    request: providers.TransactionRequest
+  private async attemptToSendTransaction(
+    transactionRequest: providers.TransactionRequest
   ): Promise<providers.TransactionResponse> {
-    const response = await new Promise<providers.TransactionResponse | Error>(resolve => {
-      this.addToTransactionQueue({
-        request,
-        resolve,
-      });
-    });
-    if (isError(response)) throw response;
-    return response;
+    try {
+      return await this.ethWallet.sendTransaction(transactionRequest);
+    } catch (e) {
+      // https://github.com/ethers-io/ethers.js/issues/972
+      this.ethWallet.incrementTransactionCount(-1);
+      throw e;
+    }
+  }
+
+  private async addToTransactionQueue(transactionRequest: providers.TransactionRequest) {
+    return this.transactionQueue.add(() => this.attemptToSendTransaction(transactionRequest));
   }
 
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
@@ -189,7 +160,7 @@ export class ChainService implements ChainServiceInterface {
         to: tokenAddress,
       };
 
-      await (await this.sendTransaction(increaseAllowanceRequest)).wait();
+      await (await this.addToTransactionQueue(increaseAllowanceRequest)).wait();
     }
 
     const depositRequest = {
@@ -197,7 +168,7 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return this.sendTransaction(depositRequest);
+    return this.addToTransactionQueue(depositRequest);
   }
 
   async concludeAndWithdraw(
@@ -213,7 +184,7 @@ export class ChainService implements ChainServiceInterface {
     const captureExpectedErrors = (reason: any) => {
       if (!reason.error.message.includes('revert Channel finalized')) throw reason;
     };
-    const transactionResponse = this.sendTransaction(transactionRequest).catch(
+    const transactionResponse = this.addToTransactionQueue(transactionRequest).catch(
       captureExpectedErrors
     );
 
