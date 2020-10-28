@@ -124,20 +124,16 @@ export class ChainService implements ChainServiceInterface {
     return obs;
   }
 
-  private async attemptToSendTransaction(
-    transactionRequest: providers.TransactionRequest
-  ): Promise<providers.TransactionResponse> {
-    try {
-      return await this.ethWallet.sendTransaction(transactionRequest);
-    } catch (e) {
-      // https://github.com/ethers-io/ethers.js/issues/972
-      this.ethWallet.incrementTransactionCount(-1);
-      throw e;
-    }
-  }
-
-  private async addToTransactionQueue(transactionRequest: providers.TransactionRequest) {
-    return this.transactionQueue.add(() => this.attemptToSendTransaction(transactionRequest));
+  private async sendTransaction(transactionRequest: providers.TransactionRequest) {
+    return this.transactionQueue.add(async () => {
+      try {
+        return await this.ethWallet.sendTransaction(transactionRequest);
+      } catch (e) {
+        // https://github.com/ethers-io/ethers.js/issues/972
+        this.ethWallet.incrementTransactionCount(-1);
+        throw e;
+      }
+    });
   }
 
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
@@ -160,7 +156,7 @@ export class ChainService implements ChainServiceInterface {
         to: tokenAddress,
       };
 
-      await (await this.addToTransactionQueue(increaseAllowanceRequest)).wait();
+      await (await this.sendTransaction(increaseAllowanceRequest)).wait();
     }
 
     const depositRequest = {
@@ -168,7 +164,7 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return this.addToTransactionQueue(depositRequest);
+    return this.sendTransaction(depositRequest);
   }
 
   async concludeAndWithdraw(
@@ -184,7 +180,7 @@ export class ChainService implements ChainServiceInterface {
     const captureExpectedErrors = (reason: any) => {
       if (!reason.error.message.includes('revert Channel finalized')) throw reason;
     };
-    const transactionResponse = this.addToTransactionQueue(transactionRequest).catch(
+    const transactionResponse = this.sendTransaction(transactionRequest).catch(
       captureExpectedErrors
     );
 
