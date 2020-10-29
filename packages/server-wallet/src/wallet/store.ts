@@ -361,8 +361,12 @@ export class Store {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
-  async getLedgerChannels(): Promise<ChannelState[]> {
-    return (await Channel.allLedgerChannels(this.knex)).map(c => c.protocolState);
+  async getLedgerChannels(
+    addressHolderAddress: string,
+    participants: Participant[]
+  ): Promise<ChannelState[]> {
+    const ledgers = await Channel.getLedgerChannels(addressHolderAddress, participants, this.knex);
+    return ledgers.map(c => c.protocolState);
   }
 
   async pushMessage(
