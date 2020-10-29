@@ -60,8 +60,6 @@ const allocateFundsToChannels = (
   allocated: SimpleAllocation;
   insufficientFunds: Bytes32[];
 } => {
-  // This could fail at some point if there is no longer space to fund stuff
-  // TODO: Handle that case
   const insufficientFunds: Bytes32[] = [];
   const allocated = allocationTargets.reduce((outcome, {channelId, supported}) => {
     try {
