@@ -8,7 +8,10 @@ import {
 import {ProtocolState} from '../../close-channel';
 import {stateVars} from '../../../wallet/__test__/fixtures/state-vars';
 
-export const applicationProtocolState = fixture({app: channel().protocolState});
+export const applicationProtocolState = fixture({
+  type: 'DirectFundingProtocolState' as const,
+  app: channel().protocolState,
+});
 export const withSupportedState = (vars: Partial<StateVariables>): Fixture<ProtocolState> =>
   fixture(
     applicationProtocolState({

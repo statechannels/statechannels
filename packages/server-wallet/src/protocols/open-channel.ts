@@ -17,11 +17,21 @@ import {
   CompleteObjective,
 } from './actions';
 
-export type ProtocolState = {
+export type AppState = {
   app: ChannelState;
-  ledgerFundingRequested?: boolean;
-  ledger?: ChannelState;
 };
+
+export type DirectlyFundedAppState = AppState & {
+  type: 'DirectFundingProtocolState';
+};
+
+export type LedgerFundedAppState = AppState & {
+  type: 'LedgerFundingProtocolState';
+  ledgerFundingRequested: boolean;
+  ledger: ChannelState | undefined;
+};
+
+export type ProtocolState = DirectlyFundedAppState | LedgerFundedAppState;
 
 const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
   !!s && stage(s) === guardStage;
@@ -48,8 +58,8 @@ function ledgerFundedThisChannel(ledger: ChannelState, app: ChannelState): boole
   );
 }
 
-function isFunded({app, ledger}: ProtocolState): boolean {
-  const {funding, supported, fundingStrategy} = app;
+function isFunded(ps: ProtocolState): boolean {
+  const {funding, supported, fundingStrategy} = ps.app;
 
   switch (fundingStrategy) {
     case 'Unfunded':
@@ -67,9 +77,11 @@ function isFunded({app, ledger}: ProtocolState): boolean {
     }
 
     case 'Ledger': {
-      if (!ledger) return false;
-      if (!isFunded({app: ledger})) return false; // TODO: in the future check "funding table"
-      return ledgerFundedThisChannel(ledger, app);
+      if (ps.type !== 'LedgerFundingProtocolState') return false;
+      if (!ps.ledger) return false;
+      // TODO: in the future check "funding table"
+      if (!isFunded({type: 'DirectFundingProtocolState', app: ps.ledger})) return false;
+      return ledgerFundedThisChannel(ps.ledger, ps.app);
     }
 
     default:
@@ -79,7 +91,9 @@ function isFunded({app, ledger}: ProtocolState): boolean {
 
 // At the time of implementation, all particiapants sign turn 0 as prefund state
 // This function should also work with prefund state with increasing turn numbers.
-function myTurnToPostfund({app}: ProtocolState): boolean {
+function myTurnToPostfund(ps: ProtocolState): boolean {
+  const {app} = ps;
+
   // I am the first participant
   if (isPrefundSetup(app.supported) && isPrefundSetup(app.latestSignedByMe) && app.myIndex === 0) {
     return true;
@@ -89,7 +103,7 @@ function myTurnToPostfund({app}: ProtocolState): boolean {
   // todo: this is not correct when there are more than 2 participants as we do not check that EVERY participant
   //  before us has signed the postfund state.
   //  A correct implementation is non-trivial when all participants sign turn 0 prefund states but increasing turn number postfund states.
-  return app.latest?.turnNum === myPostfundTurnNumber({app}) - 1;
+  return app.latest?.turnNum === myPostfundTurnNumber(ps) - 1;
 }
 
 function myPostfundTurnNumber({app}: ProtocolState): number {
@@ -144,11 +158,27 @@ const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
+const fundDirectly = (ps: ProtocolState): FundChannel | false => {
+  return (
+    ps.type === 'DirectFundingProtocolState' &&
+    isDirectlyFunded(ps.app) &&
+    requestFundChannelIfMyTurn(ps)
+  );
+};
+
+const fundViaLedger = (ps: ProtocolState): RequestLedgerFunding | false => {
+  return (
+    ps.type === 'LedgerFundingProtocolState' &&
+    isLedgerFunded(ps.app) &&
+    !ps.ledgerFundingRequested &&
+    requestLedgerFunding(ps)
+  );
+};
+
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
-  ((isDirectlyFunded(ps.app) && requestFundChannelIfMyTurn(ps)) ||
-    (isLedgerFunded(ps.app) && !ps.ledgerFundingRequested && requestLedgerFunding(ps)));
+  (fundDirectly(ps) || fundViaLedger(ps));
 
 const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   !ps.app.latestSignedByMe &&
@@ -195,10 +225,11 @@ export const getOpenChannelProtocolState = async (
   switch (app.fundingStrategy) {
     case 'Direct':
     case 'Unfunded':
-      return {app};
+      return {type: 'DirectFundingProtocolState', app};
     case 'Ledger': {
       const req = await store.getLedgerRequest(app.channelId, 'fund', tx);
       return {
+        type: 'LedgerFundingProtocolState',
         app,
         ledgerFundingRequested: !!req,
         ledger: req ? await store.getChannel(req.ledgerChannelId, tx) : undefined,
