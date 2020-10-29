@@ -86,21 +86,29 @@ const allocateFundsToChannels = (
   return {allocated, insufficientFunds};
 };
 
-const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
-  type: 'SimpleAllocation',
-  assetHolderAddress: b.assetHolderAddress,
-  allocationItems: _.intersectionWith(
-    a.allocationItems,
-    b.allocationItems,
-    areAllocationItemsEqual
-  ),
-});
+const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
+  if (a.assetHolderAddress !== b.assetHolderAddress)
+    throw new Error('intersectOutcome: assetHolderAddresses not equal');
+  return {
+    type: 'SimpleAllocation',
+    assetHolderAddress: b.assetHolderAddress,
+    allocationItems: _.intersectionWith(
+      a.allocationItems,
+      b.allocationItems,
+      areAllocationItemsEqual
+    ),
+  };
+};
 
-const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => ({
-  type: 'SimpleAllocation',
-  assetHolderAddress: b.assetHolderAddress,
-  allocationItems: _.xorWith(a.allocationItems, b.allocationItems, areAllocationItemsEqual),
-});
+const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
+  if (a.assetHolderAddress !== b.assetHolderAddress)
+    throw new Error('xorOutcome: assetHolderAddresses not equal');
+  return {
+    type: 'SimpleAllocation',
+    assetHolderAddress: b.assetHolderAddress,
+    allocationItems: _.xorWith(a.allocationItems, b.allocationItems, areAllocationItemsEqual),
+  };
+};
 
 const computeNewOutcome = ({
   fundingChannel: {
