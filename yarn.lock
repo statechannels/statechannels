@@ -1663,6 +1663,11 @@
   resolved "https://registry.npmjs.org/@commitlint/types/-/types-11.0.0.tgz#719cf05fcc1abb6533610a2e0f5dd1e61eac14fe"
   integrity sha512-VoNqai1vR5anRF5Tuh/+SWDFk7xi7oMwHrHrbm1BprYXjB2RJsWLhUrStMssDxEl5lW/z3EUdg8RvH/IUBccSQ==
 
+"@connext/pure-evm-wasm@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@connext/pure-evm-wasm/-/pure-evm-wasm-0.1.4.tgz#5cdca4463aaa649ea7740ebbe67ed05b8443ad0e"
+  integrity sha512-BeNU9oH83vXKpnFEltr5D82nfmbd26uX/gp0jMR58H5FCGnXlZS/XyoU4yXsxytVU4wc56fQwirE0xYNiqs3vw==
+
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
@@ -25005,11 +25010,6 @@ pure-color@^1.2.0:
   version "1.3.0"
   resolved "https://registry.npmjs.org/pure-color/-/pure-color-1.3.0.tgz#1fe064fb0ac851f0de61320a8bf796836422f33e"
   integrity sha1-H+Bk+wrIUfDeYTIKi/eWg2Qi8z4=
-
-pure-evm@0.1.3:
-  version "0.1.3"
-  resolved "https://registry.npmjs.org/pure-evm/-/pure-evm-0.1.3.tgz#8bfd23aa906fba9c69ea6fc1e26851315b1e2806"
-  integrity sha512-H0BODiSLpNzFdasISVPhPopcijIvRKbAJIzKDCZvj9aEJ13icnFPn7C9UAonpsf6Y5CL1zTx6sB7hMihOGiWKw==
 
 q@^1.1.2, q@^1.5.1:
   version "1.5.1"
