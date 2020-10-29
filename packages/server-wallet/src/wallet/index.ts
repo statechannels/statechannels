@@ -85,7 +85,7 @@ export interface UpdateChannelFundingParams {
 export type WalletInterface = {
   // App utilities
   getParticipant(): Promise<Participant | undefined>;
-  registerAppDefintion(appDefinition: string): Promise<void>;
+  registerAppDefinition(appDefinition: string): Promise<void>;
   // App channel management
   createChannels(
     args: CreateChannelParams,
@@ -146,7 +146,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     this.mergeMessages = this.mergeMessages.bind(this);
     this.registerChannelWithChainService = this.registerChannelWithChainService.bind(this);
     this.destroy = this.destroy.bind(this);
-    this.registerAppDefintion = this.registerAppDefintion.bind(this);
+    this.registerAppDefinition = this.registerAppDefinition.bind(this);
 
     // set up timing metrics
     if (this.walletConfig.timingMetrics) {
@@ -166,7 +166,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     }
   }
 
-  public async registerAppDefintion(appDefinition: string): Promise<void> {
+  public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
   }
