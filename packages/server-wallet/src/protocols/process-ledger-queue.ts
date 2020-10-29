@@ -47,7 +47,7 @@ function removeChannelFromAllocation(
   if (removed.length !== 1) throw new Error('Expected to find exactly one item');
 
   if (removed[0].amount !== channelAllocations.map(x => x.amount).reduce(BN.add, BN.from(0)))
-    throw 'Bookkeeping error';
+    throw new Error('Expected outcome allocations to add up to the allocation in ledger');
 
   return channelAllocations.reduce((remainingItems, {destination, amount}) => {
     const idx = remainingItems.findIndex(to => destination === to.destination);
