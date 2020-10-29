@@ -110,6 +110,30 @@ const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation 
   };
 };
 
+/**
+ * Follows an algorithm to guarantee that an agreed upon ledger update will be signed by
+ * 2 participants in at most 2 round trips. Either can propose a state at any time and either
+ * can counterpropose a state at any time. However, if they follow the algorithm below they
+ * should always be able to compute the expected outcome by the second round trip.
+ *
+ * Algorithm:
+ *
+ * IF there are any pending ledger updates (to fund OR defund a channel)
+ *
+ *   i. Check if I already signed a new ledger update O₁. If I did, then use that. [1]
+ *      Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
+ *      to each request, call this O₁.
+ *
+ *  ii. Check if there is a conflicting ledger update, O₂.
+ *
+ *      a. If O₁ ⋂ O₂ ≠ O₁ sign an outcome for O₁ ⋂ O₂ with turn number 2
+ *         higher than the one corresponding to O₂.
+ *
+ *      b. If O₁ ⋂ O₂ = O₁ = O then sign O with turn number 2 corresponding to O₂.
+ *
+ * [1] If you sign O₁, a new request may come in to your wallet — we ignore those new
+ *     requests until either O₁ or O₂ is signed, to avoid an endless loop.
+ */
 const computeNewOutcome = ({
   fundingChannel: {
     supported,
@@ -198,6 +222,22 @@ const computeNewOutcome = ({
       newOutcome = agreedUponOutcome.allocated; // (2)
       newTurnNum = supported.turnNum + 2 * n; // (3)
       insufficientFundsFor = insufficientFundsFor.concat(agreedUponOutcome.insufficientFunds);
+    } else {
+      // The "your counter proposal is equal to my original proposal!" scenario.
+      //
+      // This scenario is quite nuanced:
+      //   a. I sent a state
+      //   b. The counterparty sent a conflicting state (before receiving mine)
+      //   c. The counterparty received my original state and signed the merged outcome
+      //      and this merged outcome was equal to my original state.
+      //   d. Before receiving the conflicting state (b) I receive the merged state (c)
+      //   e. Thus I have a received a merged state (turnNum = S + 2 * n), and NOT an original
+      //      state (which would have had turnNum = S + n) which is EQUAL to my original state
+      //      (which had turnNum = S + n).
+      //
+      // In this case, I must sign the same state I signed before, but 2 turnNums higher.
+      //
+      if (receivedMerged && sentOriginal) newTurnNum = supported.turnNum + 2 * n;
     }
   }
 

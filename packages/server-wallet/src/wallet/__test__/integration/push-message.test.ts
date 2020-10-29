@@ -608,4 +608,52 @@ describe('ledger funded app scenarios', () => {
       status: 'opening',
     });
   });
+
+  it('handles counterproposal equal to my original proposal', async () => {
+    const {latest} = await putTestChannelInsideWallet({
+      ...app,
+      vars: [stateWithHashSignedBy(alice())(preFS)],
+    });
+
+    await LedgerRequest.setRequest(
+      {
+        ledgerChannelId: ledger.channelId,
+        channelToBeFunded: app.channelId,
+        status: 'pending', // TODO: could this be approved?
+        type: 'fund',
+      },
+      wallet.knex
+    );
+
+    const {outbox: outboxFromFirstPushMessage} = await wallet.pushMessage({
+      signedStates: [serializeState(stateWithHashSignedBy(bob())(latest))],
+    });
+
+    expect(getSignedStateFor(ledger.channelId, outboxFromFirstPushMessage)).toMatchObject(
+      // Serialized ledger update signed _only_ by Alice for wire message
+      serializeState(stateWithHashSignedBy(alice())(expectedUpdatedLedgerState))
+    );
+
+    // Using spread syntax to do a deep copy essentially
+    const expectedResolvedUpdatedLedgerState = {
+      ...expectedUpdatedLedgerState,
+      turnNum: expectedUpdatedLedgerState.turnNum + 2,
+    };
+
+    const {outbox: outboxFromSecondPushMessage, channelResults} = await wallet.pushMessage({
+      signedStates: [
+        serializeState(stateWithHashSignedBy(bob())(expectedResolvedUpdatedLedgerState)),
+      ],
+    });
+
+    expect(getSignedStateFor(ledger.channelId, outboxFromSecondPushMessage)).toMatchObject(
+      // Countersigned ledger update
+      serializeState(stateWithHashSignedBy(alice())(expectedResolvedUpdatedLedgerState))
+    );
+
+    expect(getChannelResultFor(ledger.channelId, channelResults)).toMatchObject({
+      turnNum: 8,
+      status: 'running',
+    });
+  });
 });
