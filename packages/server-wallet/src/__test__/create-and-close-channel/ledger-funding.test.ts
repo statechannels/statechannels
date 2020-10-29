@@ -481,7 +481,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
   it(`can fund ${N * 2} channels created in bulk by Alice`, async () => {
     ledgerChannelId = await createLedgerChannel(N * 2, N * 2);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const params = testCreateChannelParams(1, 1);
 
     const createMessageAndJoinBatch = async (): Promise<Bytes32[]> => {
       const {outbox, channelResults} = await a.createChannels(params, N);
