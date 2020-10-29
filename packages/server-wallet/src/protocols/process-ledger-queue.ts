@@ -44,7 +44,7 @@ function removeChannelFromAllocation(
 
   const [removed, remaining] = _.partition(allocationItems, ['destination', channel.channelId]);
 
-  if (removed.length !== 1) throw 'Expected to find exactly one item';
+  if (removed.length !== 1) throw new Error('Expected to find exactly one item');
 
   if (removed[0].amount !== channelAllocations.map(x => x.amount).reduce(BN.add, BN.from(0)))
     throw 'Bookkeeping error';
