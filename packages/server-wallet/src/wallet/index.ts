@@ -669,23 +669,25 @@ export class Wallet extends EventEmitter<WalletEvent>
           channelResults.push(ChannelState.toChannelResult(channel));
         };
 
-        let protocol;
+        let executeProtocol: () => ChannelState.ProtocolResult;
         let protocolState: OpenChannelProtocol.ProtocolState | CloseChannelProtocol.ProtocolState;
 
         if (objective.type === 'OpenChannel') {
-          protocol = OpenChannelProtocol.protocol;
           protocolState = await OpenChannelProtocol.getOpenChannelProtocolState(
             this.store,
             objective.data.targetChannelId,
             tx
           );
+          executeProtocol = () =>
+            OpenChannelProtocol.protocol(protocolState as OpenChannelProtocol.ProtocolState);
         } else if (objective.type === 'CloseChannel') {
-          protocol = CloseChannelProtocol.protocol;
           protocolState = await CloseChannelProtocol.getCloseChannelProtocolState(
             this.store,
             objective.data.targetChannelId,
             tx
           );
+          executeProtocol = () =>
+            CloseChannelProtocol.protocol(protocolState as CloseChannelProtocol.ProtocolState);
         } else {
           throw new Error('Unexpected objective');
         }
@@ -743,7 +745,7 @@ export class Wallet extends EventEmitter<WalletEvent>
         };
 
         const nextAction = recordFunctionMetrics(
-          protocol(protocolState),
+          executeProtocol(),
           this.walletConfig.timingMetrics
         );
 
