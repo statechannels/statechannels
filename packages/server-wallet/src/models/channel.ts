@@ -144,10 +144,14 @@ export class Channel extends Model implements RequiredColumns {
       .findOne({channelId}));
   }
 
-  static allLedgerChannels(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
+  static getLedgerChannels(
+    assetHolderAddress: string,
+    participants: Participant[],
+    txOrKnex: TransactionOrKnex
+  ): Promise<Channel[]> {
     return Channel.query(txOrKnex)
       .select()
-      .whereNotNull('assetHolderAddress');
+      .where({assetHolderAddress, participants});
   }
 
   static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
