@@ -32,7 +32,7 @@ jobs:
         # skip the prepare step here, as lerna publish will run prepare before publishing
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          SKIP_PREPARE=true yarn install
+          SKIP_PREPARE=true yarn install && git diff --exit-code
 
       - name: Configure CI Git User
         run: |
