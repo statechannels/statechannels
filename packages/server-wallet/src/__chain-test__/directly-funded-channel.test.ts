@@ -169,4 +169,4 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
-}, 10_000);
+}, 20_000);
