@@ -34,10 +34,23 @@ const isPrefundSetup = stageGuard('PrefundSetup');
 const isRunning = stageGuard('Running');
 // const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
 
-function isFunded({
-  app: {channelId, funding, supported, fundingStrategy},
-  ledger,
-}: ProtocolState): boolean {
+function ledgerFundedThisChannel(ledger: ChannelState, app: ChannelState): boolean {
+  if (!ledger.supported) return false;
+  if (!app.supported) return false;
+
+  const {allocationItems: ledgerFunding} = checkThat(ledger.supported.outcome, isSimpleAllocation);
+  const {allocationItems: appFunding} = checkThat(app.supported.outcome, isSimpleAllocation);
+  const targetFunding = appFunding.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+  return _.some(
+    ledgerFunding,
+    ({destination, amount}) => destination === app.channelId && amount === targetFunding
+  );
+}
+
+function isFunded({app, ledger}: ProtocolState): boolean {
+  const {funding, supported, fundingStrategy} = app;
+
   switch (fundingStrategy) {
     case 'Unfunded':
       return true;
@@ -55,10 +68,8 @@ function isFunded({
 
     case 'Ledger': {
       if (!ledger) return false;
-      if (!ledger.supported) return false;
       if (!isFunded({app: ledger})) return false; // TODO: in the future check "funding table"
-      const {allocationItems} = checkThat(ledger.supported.outcome, isSimpleAllocation);
-      return _.some(allocationItems, ({destination}) => destination === channelId);
+      return ledgerFundedThisChannel(ledger, app);
     }
 
     default:
