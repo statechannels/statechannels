@@ -334,4 +334,10 @@ describe('getBytecode', () => {
     const bytecode = await chainService.fetchBytecode(ethAssetHolderAddress);
     expect(bytecode).toMatch(/^0x[A-Fa-f0-9]{64,}$/);
   });
+
+  it('rejects when there is no bytecode deployed at the address', async () => {
+    await expect(chainService.fetchBytecode(constants.AddressZero)).rejects.toThrow(
+      'Bytecode missing'
+    );
+  });
 });

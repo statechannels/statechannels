@@ -309,7 +309,17 @@ export class ChainService implements ChainServiceInterface {
     return obs.pipe(share());
   }
 
+  /**
+   *
+   * @param appDefinition Address of state channels app
+   *
+   * Rejects with 'Bytecode missint' if there is no contract deployed at `appDefinition`.
+   */
   public async fetchBytecode(appDefinition: string): Promise<string> {
-    return this.provider.getCode(appDefinition);
+    const result = await this.provider.getCode(appDefinition);
+
+    if (result === '0x') throw new Error('Bytecode missing');
+
+    return result;
   }
 }
