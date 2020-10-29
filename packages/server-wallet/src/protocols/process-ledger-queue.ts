@@ -1,3 +1,29 @@
+/**
+ * Follows an algorithm to guarantee that an agreed upon ledger update will be signed by
+ * 2 participants in at most 2 round trips. Either can propose a state at any time and either
+ * can counterpropose a state at any time. However, if they follow the algorithm below they
+ * should always be able to compute the expected outcome by the second round trip.
+ *
+ * Algorithm:
+ *
+ * IF there are any pending ledger updates (to fund OR defund a channel)
+ *
+ *   i. Check if I already proposed a new ledger update O₁. Otherwise, iteratively allocate funds
+ *      from the supported state's (i.e., S) outcome to each request, call this O₁.
+ *
+ *  ii. Check if there is an existing proposal for a ledger update, O₂.
+ *
+ * iii. Compute O₁ ⋂ O₂ (NOTE: O₂ might be NULL i.e., not received yet)
+ *
+ *      a. If I haven't sent my proposal yet, propose O₁ ⋂ O₂.
+ *
+ *      b. If I have sent my proposal and received theirs sign O₁ ⋂ O₂ at
+ *         the turn number 2 higher than the most recently supported one.
+ *
+ *      c. If O₂ is NULL (not received a proposal), wait for the counterparty.
+ *
+ */
+
 import {compose, map, filter} from 'lodash/fp';
 import _ from 'lodash';
 import {
