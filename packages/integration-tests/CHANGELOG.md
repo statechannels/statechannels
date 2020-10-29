@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.14](http://statechannels/monorepo/blob/master/packages/integration-tests/compare/@statechannels/integration-tests@0.3.13...@statechannels/integration-tests@0.3.14) (2020-10-29)
+
+**Note:** Version bump only for package @statechannels/integration-tests
+
+
+
+
+
 ## [0.3.13](http://statechannels/monorepo/blob/master/packages/integration-tests/compare/@statechannels/integration-tests@0.3.12...@statechannels/integration-tests@0.3.13) (2020-10-22)
 
 **Note:** Version bump only for package @statechannels/integration-tests
