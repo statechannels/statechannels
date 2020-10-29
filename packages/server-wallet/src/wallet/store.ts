@@ -361,6 +361,12 @@ export class Store {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
+  async getLedgerChannels(): Promise<ChannelState[]> {
+    return (await Channel.query(this.knex).whereNotNull('assetHolderAddress')).map(
+      channel => channel.protocolState
+    );
+  }
+
   async pushMessage(
     message: WirePayload
   ): Promise<{
