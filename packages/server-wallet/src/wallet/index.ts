@@ -473,6 +473,17 @@ export class Wallet extends EventEmitter<WalletEvent>
     return {outbox: mergeOutgoing(outbox), channelResult: channelResults[0]};
   }
 
+  async getLedgerChannels(
+    assetHolderAddress: string,
+    participants: Participant[]
+  ): Promise<MultipleChannelOutput> {
+    const channelStates = await this.store.getLedgerChannels(assetHolderAddress, participants);
+    return {
+      channelResults: mergeChannelResults(channelStates.map(ChannelState.toChannelResult)),
+      outbox: [],
+    };
+  }
+
   async getChannels(): Promise<MultipleChannelOutput> {
     const channelStates = await this.store.getChannels();
     return {
