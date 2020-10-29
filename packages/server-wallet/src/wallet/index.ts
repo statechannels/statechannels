@@ -94,7 +94,7 @@ export type WalletInterface = {
   // App channel management
   createChannels(
     args: CreateChannelParams,
-    amountOfChannels: number
+    numberOfChannels: number
   ): Promise<MultipleChannelOutput>;
 
   joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
@@ -294,7 +294,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
   async createChannels(
     args: CreateChannelParams,
-    amountOfChannels: number
+    numberOfChannels: number
   ): Promise<MultipleChannelOutput> {
     const {
       participants,
@@ -306,7 +306,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     } = args;
     const outcome: Outcome = deserializeAllocations(allocations);
     const results = await Promise.all(
-      _.range(amountOfChannels).map(async () => {
+      _.range(numberOfChannels).map(async () => {
         const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
         const constants: ChannelConstants = {
           channelNonce,
