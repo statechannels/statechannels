@@ -168,10 +168,6 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   public async registerAppDefintion(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
-    if (!bytecode) {
-      throw Error(`Could not fetch bytecode for ${appDefinition}`);
-    }
-
     await this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
   }
 
