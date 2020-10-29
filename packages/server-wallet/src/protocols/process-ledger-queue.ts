@@ -299,12 +299,6 @@ const markRequestsAsComplete = ({
   };
 };
 
-// NOTE: Deciding _not_ to care about turn taking
-// const myTurnToDoLedgerStuff = ({
-//   fundingChannel: {supported, participants, myIndex},
-// }: ProtocolState): boolean =>
-//   !!supported && (supported.turnNum + 1) % participants.length === myIndex;
-
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
 ): ProtocolResult<ProtocolAction> =>
