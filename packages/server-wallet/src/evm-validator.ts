@@ -1,5 +1,5 @@
 import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
-import * as PureEVM from 'pure-evm';
+import * as PureEVM from '@connext/pure-evm-wasm';
 import {utils} from 'ethers';
 import {Transaction} from 'objection';
 
