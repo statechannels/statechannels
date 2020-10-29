@@ -190,14 +190,14 @@ const computeNewOutcome = ({
         ({channelId}) => !_.some(xor.allocationItems, ['destination', channelId])
       );
 
-      const agredUponOutcome = allocateFundsToChannels(
+      const agreedUponOutcome = allocateFundsToChannels(
         retrieveFundsFromClosedChannels(supportedOutcome, bothDefunding),
         bothFunding
       ); // (2)
 
-      newOutcome = agredUponOutcome.allocated; // (2)
+      newOutcome = agreedUponOutcome.allocated; // (2)
       newTurnNum = supported.turnNum + 2 * n; // (3)
-      insufficientFundsFor = insufficientFundsFor.concat(agredUponOutcome.insufficientFunds);
+      insufficientFundsFor = insufficientFundsFor.concat(agreedUponOutcome.insufficientFunds);
     }
   }
 
