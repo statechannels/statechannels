@@ -444,8 +444,8 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     } = ledger;
 
     expect(ledger).toMatchObject({
-      // 11 because there is a conflicting back-and-forth due to concurrent messages
-      turnNum: 11,
+      // 13 because there is a conflicting back-and-forth due to concurrent messages
+      turnNum: 13,
       status: 'running',
     });
 
@@ -555,8 +555,8 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     } = ledger;
 
     expect(ledger).toMatchObject({
-      // 11 because there is a conflicting back-and-forth due to concurrent messages
-      turnNum: 11,
+      // 13 because there is a conflicting back-and-forth due to concurrent messages
+      turnNum: 13,
       status: 'running',
     });
 

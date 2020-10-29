@@ -47,7 +47,7 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
   !ps.ledgerDefundingRequested &&
   !ps.ledgerDefundingSucceeded &&
   !!ps.app.supported &&
-  ps.app.supported.isFinal &&
+  everyoneSignedFinalState(ps) &&
   requestLedgerDefunding({
     channelId: ps.app.channelId,
     assetHolderAddress: checkThat(ps.app.latest.outcome, isSimpleAllocation).assetHolderAddress,
