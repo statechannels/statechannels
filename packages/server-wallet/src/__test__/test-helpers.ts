@@ -1,5 +1,6 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {Payload, SignedState} from '@statechannels/wire-format';
+import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-core';
 
 import {Wallet} from '../wallet';
 
@@ -39,3 +40,30 @@ export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
   await wallet.destroy();
   return new Wallet(config); // Wallet that will "restart"
 }
+
+expect.extend({
+  toContainAllocationItem(received: AllocationItem[], argument: AllocationItem) {
+    const pass = received.some(areAllocationItemsEqual.bind(null, argument));
+    if (pass) {
+      return {
+        pass: true,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to not contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
+      };
+    } else {
+      return {
+        pass: false,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
+      };
+    }
+  },
+});

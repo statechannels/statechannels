@@ -1,11 +1,5 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {
-  AllocationItem,
-  areAllocationItemsEqual,
-  BN,
-  makeDestination,
-  Participant,
-} from '@statechannels/wallet-core';
+import {BN, makeDestination, Participant} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Outgoing} from '../..';
@@ -106,33 +100,6 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
 
   return channelId;
 };
-
-expect.extend({
-  toContainAllocationItem(received: AllocationItem[], argument: AllocationItem) {
-    const pass = received.some(areAllocationItemsEqual.bind(null, argument));
-    if (pass) {
-      return {
-        pass: true,
-        message: () =>
-          `expected ${JSON.stringify(received, null, 2)} to not contain ${JSON.stringify(
-            argument,
-            null,
-            2
-          )}`,
-      };
-    } else {
-      return {
-        pass: false,
-        message: () =>
-          `expected ${JSON.stringify(received, null, 2)} to contain ${JSON.stringify(
-            argument,
-            null,
-            2
-          )}`,
-      };
-    }
-  },
-});
 
 const testCreateChannelParams = (
   aAllocation: number,
