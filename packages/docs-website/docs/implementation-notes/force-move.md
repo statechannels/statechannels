@@ -323,9 +323,9 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
 
 - **Open** if and only if `finalizesAt` is null
   - implies that `stateHash` and `challengerAddress` are also null
-- **Challenge** if and only if `finalizesAt < currentTime`
+- **Challenge** if and only if `finalizesAt >= currentTime`
   - implies that all other fields are not null
-- **Finalized** if and only if `finalizesAt >= currentTime`
+- **Finalized** if and only if `finalizesAt < currentTime`
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
