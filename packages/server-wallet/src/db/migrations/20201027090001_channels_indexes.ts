@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-const COLUMNS = ['assetHolderAddress', 'participants'];
+const COLUMNS = ['asset_holder_address', 'participants'];
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable('channels', function(t) {
