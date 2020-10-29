@@ -15,6 +15,10 @@ const erc20Address = process.env.ERC20_ADDRESS!;
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
+// This is the private key for which ERC20 tokens are allocated on contract creation
+const ethWalletWithTokens = new Wallet(defaultTestConfig.serverPrivateKey, provider);
+
+// Try to use a different private key for every chain service instantiation to avoid nonce errors
 const privateKey = ETHERLIME_ACCOUNTS[3].privateKey;
 const ethWallet = new Wallet(privateKey, provider);
 
@@ -32,23 +36,31 @@ const iterations = 100;
 describe('fundChannel', () => {
   it.skip(`${iterations} simultaneous deposits`, async () => {
     const depositAmount = 5;
-    const contract: Contract = new Contract(
-      erc20Address,
-      ContractArtifacts.TokenArtifact.abi,
-      ethWallet
-    );
-    await (await contract.increaseAllowance(erc20AssetHolderAddress, BN.from(500))).wait();
+    const totalTransferAmount = iterations * depositAmount;
+    const contract: Contract = new Contract(erc20Address, ContractArtifacts.TokenArtifact.abi);
+    await (
+      await contract
+        .connect(ethWalletWithTokens)
+        .transfer(ethWallet.address, BN.from(totalTransferAmount))
+    ).wait();
+    await (
+      await contract
+        .connect(ethWallet)
+        .increaseAllowance(erc20AssetHolderAddress, BN.from(totalTransferAmount))
+    ).wait();
 
     const promises = _.range(0, iterations).map(() =>
-      chainService.fundChannel({
-        channelId: randomChannelId(),
-        assetHolderAddress: erc20AssetHolderAddress,
-        expectedHeld: BN.from(0),
-        amount: BN.from(depositAmount),
-        allowanceAlreadyIncreased: true,
-      })
+      chainService
+        .fundChannel({
+          channelId: randomChannelId(),
+          assetHolderAddress: erc20AssetHolderAddress,
+          expectedHeld: BN.from(0),
+          amount: BN.from(depositAmount),
+          allowanceAlreadyIncreased: true,
+        })
+        .then(response => response.wait())
     );
 
-    Promise.all(promises);
+    return Promise.all(promises);
   }, 200_000);
 });
