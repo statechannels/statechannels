@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.2.1...@statechannels/server-wallet@1.3.0) (2020-10-29)
+
+
+### Bug Fixes
+
+* Add non-null assertion for app.supported ([e4c78c4](https://github.com/statechannels/statechannels/commit/e4c78c4750f759692fbcfe0accdb72950654f0b5))
+* add withdraw as a valid chain requests column value ([a1431d1](https://github.com/statechannels/statechannels/commit/a1431d1535dc0f4737c577b440bd614507f2f0af))
+* all participants attempt to submit a conclude and withdraw transacton ([6085fc4](https://github.com/statechannels/statechannels/commit/6085fc4811c5c60e9216e977c5e4a05aa43335f4))
+* await chain service api calls that return a transaction response ([0ae8b84](https://github.com/statechannels/statechannels/commit/0ae8b84cf538b6c461bdf2788f12b754a9f682b2))
+* capture expected errors on concludeAndWithdraw ([7d5bebc](https://github.com/statechannels/statechannels/commit/7d5bebc5b90d52bcd430eb754813f9afeb5fe8e2))
+* chain service constraint down migration fully reverses up migration ([1d8e6f7](https://github.com/statechannels/statechannels/commit/1d8e6f7b81c5a1b5bc76bd0fb325e91605c41cf4))
+* do not modify chain service migration ([d07c5ab](https://github.com/statechannels/statechannels/commit/d07c5ab608221aef04b123148b6f08dca8a23473))
+* during runloop, do not wait for chain service network requests ([3c470ab](https://github.com/statechannels/statechannels/commit/3c470ab58e89c7c5f14d36c6bed880c91da541cc))
+* eliminate infinite loop in the close channels protocol ([a0fdff0](https://github.com/statechannels/statechannels/commit/a0fdff008ca59ea91b8c73ea0a0d0353a73ade7e))
+* ensure prefund setup is signed if turnNum < participants.length ([7b19ae3](https://github.com/statechannels/statechannels/commit/7b19ae3ae4f898cca34c2b8cdd0fb08cdfa54aca))
+* Fix  https://github.com/statechannels/statechannels/issues/2748 ([79261cd](https://github.com/statechannels/statechannels/commit/79261cd148da26591d71ebb0861484663b4025c7))
+* only the first participant submits the withdraw transaction ([f4b487d](https://github.com/statechannels/statechannels/commit/f4b487ddcb0a804ed39c483c6e7e14411a4c5133))
+* only validate new states ([aca257b](https://github.com/statechannels/statechannels/commit/aca257b25cbed261efa3ca309ce9bdb2ed3a9a15))
+* remove unused import ([4863611](https://github.com/statechannels/statechannels/commit/48636117383dcd3de3a23c50c99ecbddd57752ed))
+
+
+### Features
+
+* wallet requests the chain service to withdraw once final conclude state is signed ([53b387d](https://github.com/statechannels/statechannels/commit/53b387dbc76b1bbf4439c96531c5a93c17c99b17))
+
+
+
+
+
 ## [1.2.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.2.0...@statechannels/server-wallet@1.2.1) (2020-10-24)
 
 

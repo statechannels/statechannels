@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.5.0...@statechannels/wallet-core@0.5.1) (2020-10-29)
+
+
+### Bug Fixes
+
+* fix bug in allocateToTarget preventing funding with amount 0x00 ([f0b8363](https://github.com/statechannels/statechannels/commit/f0b8363b1645e0169c110fef5f61b4922338a7aa))
+
+
+
+
+
 # [0.5.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.4.1...@statechannels/wallet-core@0.5.0) (2020-10-22)
 
 
