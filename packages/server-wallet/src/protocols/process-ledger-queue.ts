@@ -9,6 +9,7 @@ import {
   SimpleAllocation,
   areAllocationItemsEqual,
   BN,
+  AllocationItem,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -30,27 +31,42 @@ export type ProtocolState = {
   channelsReturningFunds: ChannelState[];
 };
 
+function removeChannelFromAllocation(
+  allocationItems: AllocationItem[],
+  channel: ChannelState
+): AllocationItem[] {
+  if (!channel.supported) throw new Error('state is unsupported');
+
+  const {allocationItems: channelAllocations} = checkThat(
+    channel.supported.outcome,
+    isSimpleAllocation
+  );
+
+  const [removed, remaining] = _.partition(allocationItems, ['destination', channel.channelId]);
+
+  if (removed.length !== 1) throw new Error('Expected to find exactly one item');
+
+  if (removed[0].amount !== channelAllocations.map(x => x.amount).reduce(BN.add, BN.from(0)))
+    throw new Error('Expected outcome allocations to add up to the allocation in ledger');
+
+  return channelAllocations.reduce((remainingItems, {destination, amount}) => {
+    const idx = remainingItems.findIndex(to => destination === to.destination);
+    return idx > -1
+      ? _.update(remainingItems, idx, to => ({
+          destination,
+          amount: BN.add(amount, to.amount),
+        }))
+      : [...remainingItems, {destination, amount}];
+  }, remaining);
+}
+
 const retrieveFundsFromClosedChannels = (
-  original: SimpleAllocation,
+  {assetHolderAddress, allocationItems}: SimpleAllocation,
   channelsReturningFunds: ChannelState[]
 ): SimpleAllocation => ({
-  ...original,
-  allocationItems: channelsReturningFunds.reduce(
-    (allocationItems, channel) =>
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (channel.supported!.outcome as SimpleAllocation).allocationItems
-        .reduce((allocationItems, {destination, amount}) => {
-          const idx = allocationItems.findIndex(to => destination === to.destination);
-          return idx > -1
-            ? _.update(allocationItems, idx, to => ({
-                destination,
-                amount: BN.add(amount, to.amount),
-              }))
-            : [...allocationItems, {destination, amount}];
-        }, allocationItems)
-        .filter(item => item.destination !== channel.channelId),
-    original.allocationItems
-  ),
+  type: 'SimpleAllocation',
+  assetHolderAddress: assetHolderAddress,
+  allocationItems: channelsReturningFunds.reduce(removeChannelFromAllocation, allocationItems),
 });
 
 const allocateFundsToChannels = (
