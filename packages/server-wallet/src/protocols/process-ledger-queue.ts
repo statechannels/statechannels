@@ -133,12 +133,8 @@ const computeNewOutcome = ({
   if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
 
   // TODO: Sort should be somewhere else
-  channelsRequestingFunds = channelsRequestingFunds.sort(
-    (a, b) => a.latest.channelNonce - b.latest.channelNonce
-  );
-  channelsReturningFunds = channelsReturningFunds.sort(
-    (a, b) => a.latest.channelNonce - b.latest.channelNonce
-  );
+  channelsRequestingFunds = _.sortBy(channelsRequestingFunds, a => a.latest.channelNonce);
+  channelsReturningFunds = _.sortBy(channelsReturningFunds, a => a.latest.channelNonce);
 
   const receivedOriginal =
     latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2;

@@ -372,9 +372,7 @@ export class Store {
       const channelResults: ChannelResult[] = [];
 
       // Sorted to ensure channel nonces arrive in ascending order
-      const sortedSignedStates = (message.signedStates || []).sort(
-        (a, b) => a.channelNonce - b.channelNonce
-      );
+      const sortedSignedStates = _.sortBy(message.signedStates || [], a => a.channelNonce);
 
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
       for (const ss of sortedSignedStates || []) {
