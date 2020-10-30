@@ -14,19 +14,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 
-interface ObjectiveManagerParams {
-  store: Store;
-  logger: Logger;
-  chainService: ChainServiceInterface;
-  timingMetrics: boolean;
-}
-
-// todo: currently duplicated in wallet/index.ts
-type ExecutionResult = {
-  outbox: Outgoing[];
-  channelResults: ChannelResult[];
-  error?: any;
-};
+import {ObjectiveManagerParams, ExecutionResult} from './types';
 
 export class ObjectiveManager {
   private store: Store;
