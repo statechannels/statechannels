@@ -46,7 +46,7 @@ afterAll(async () => {
   await b.dbAdmin().dropDB();
 });
 
-it('Create a fake-funded channel between two wallets, of which one crashes midway through ', async () => {
+it('Create a directly-funded channel between two wallets, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
@@ -130,7 +130,8 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   });
 
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-    status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by B
+    // Still opening because turnNum 3 is not supported yet (2 is not in the wallet)
+    status: 'opening',
     turnNum: 1,
   });
 
@@ -142,7 +143,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   });
 
   //  PostFund3B <
-  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
   expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,

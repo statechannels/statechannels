@@ -83,7 +83,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  // after joinChannel, B signs PreFund1
+  // after joinChannel, B signs PreFund1 and PostFund3
   const bJoinChannelOutput = await b.joinChannel({channelId});
 
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
@@ -91,7 +91,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 1,
   });
 
-  // B sends signed PreFund1 to A
+  // B sends signed PreFund1 and PostFund3 to A
   const aPushJoinChannelOutput = await a.pushMessage(
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
@@ -100,20 +100,11 @@ it('Create a fake-funded channel between two wallets ', async () => {
     turnNum: 2,
   });
 
-  // A sends PostFund3 to B
+  // A sends PostFund2 to B
   const bPushPostFundOutput = await b.pushMessage(
     getPayloadFor(participantB.participantId, aPushJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
-    status: 'running',
-    turnNum: 3,
-  });
-
-  // B sends PostFund3 to A
-  const aPushPostFundOutput = await a.pushMessage(
-    getPayloadFor(participantA.participantId, bPushPostFundOutput.outbox)
-  );
-  expect(getChannelResultFor(channelId, aPushPostFundOutput.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });

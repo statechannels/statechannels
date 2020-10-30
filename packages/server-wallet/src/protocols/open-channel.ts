@@ -89,23 +89,6 @@ function isFunded(ps: ProtocolState): boolean {
   }
 }
 
-// At the time of implementation, all particiapants sign turn 0 as prefund state
-// This function should also work with prefund state with increasing turn numbers.
-function myTurnToPostfund(ps: ProtocolState): boolean {
-  const {app} = ps;
-
-  // I am the first participant
-  if (isPrefundSetup(app.supported) && isPrefundSetup(app.latestSignedByMe) && app.myIndex === 0) {
-    return true;
-  }
-
-  // I am NOT the first participant
-  // todo: this is not correct when there are more than 2 participants as we do not check that EVERY participant
-  //  before us has signed the postfund state.
-  //  A correct implementation is non-trivial when all participants sign turn 0 prefund states but increasing turn number postfund states.
-  return app.latest?.turnNum === myPostfundTurnNumber(ps) - 1;
-}
-
 function myPostfundTurnNumber({app}: ProtocolState): number {
   return app.participants.length + app.myIndex;
 }
@@ -191,10 +174,9 @@ const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   });
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
-  myTurnToPostfund(ps) &&
-  (isFunded(ps) || isFakeFunded(ps.app)) &&
   ps.app.latestSignedByMe &&
-  ps.app.supported &&
+  ps.app.latestSignedByMe.turnNum < ps.app.participants.length &&
+  (isFunded(ps) || isFakeFunded(ps.app)) &&
   signState({
     ...ps.app.latestSignedByMe,
     channelId: ps.app.channelId,
