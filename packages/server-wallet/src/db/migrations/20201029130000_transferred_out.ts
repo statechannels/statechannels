@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 
 const funding = 'funding';
-const transferredOut = 'transferredOut';
+const transferredOut = 'transferred_out';
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(funding, table => {
     table
