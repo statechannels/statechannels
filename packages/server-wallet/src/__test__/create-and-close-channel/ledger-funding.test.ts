@@ -90,8 +90,8 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
     amount: BN.add(aDepositAmtETH, bDepositAmtETH),
   };
   const resultA2 = await a.updateFundingForChannels([fundingPostBDeposit]);
-  await b.updateFundingForChannels([fundingPostBDeposit]);
-  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
+  const resultB3 = await b.updateFundingForChannels([fundingPostBDeposit]);
+  await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
 
   // both wallets crash
@@ -465,14 +465,6 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     const results = await Promise.all([createMessageAndJoinBatch(), createMessageAndJoinBatch()]);
 
     const channelIds = results.flat();
-
-    // If parties sign post-funds in order, this must be done:
-    await exchangeMessagesBetweenAandB(
-      await Promise.all(
-        channelIds.map(async channelId => (await b.syncChannel({channelId})).outbox)
-      ),
-      []
-    );
 
     const {channelResults} = await a.getChannels();
 

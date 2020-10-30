@@ -147,7 +147,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 
   //  PostFund3B <
-  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
+  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
   expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
