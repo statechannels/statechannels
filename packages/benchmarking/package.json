@@ -8,10 +8,10 @@
     "@statechannels/iframe-channel-provider": "0.3.14",
     "@statechannels/nitro-protocol": "0.4.1",
     "@types/http-server": "0.10.0",
-    "@types/webpack": "4.41.12",
+    "@types/webpack": "4.41.22",
     "ethers": "5.0.12",
     "http-server": "0.12.3",
-    "webpack": "4.41.5"
+    "webpack": "4.44.2"
   },
   "license": "MIT",
   "main": "index.js",

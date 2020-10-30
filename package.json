@@ -3,10 +3,10 @@
     "patch-package": "6.2.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
+    "@commitlint/cli": "11.0.0",
+    "@commitlint/config-conventional": "11.0.0",
     "@types/prettier": "1.19.0",
-    "eslint-plugin-import": "2.20.0",
+    "eslint-plugin-import": "2.22.1",
     "husky": "3.0.7",
     "lerna": "3.16.4",
     "netlify-cli": "2.30.0",
@@ -30,8 +30,8 @@
   ],
   "private": true,
   "resolutions": {
-    "@types/webgl2": "0.0.5",
-    "@types/react": "16.9.19"
+    "@types/react": "16.9.19",
+    "@types/webgl2": "0.0.5"
   },
   "scripts": {
     "build": "lerna run build",
