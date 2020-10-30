@@ -27,14 +27,11 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {TransactionOrKnex} from 'objection';
 import {ethers} from 'ethers';
 
 import {Bytes32, Uint256} from '../type-aliases';
-import {Outgoing, ProtocolAction} from '../protocols/actions';
+import {Outgoing} from '../protocols/actions';
 import {logger} from '../logger';
-import * as OpenChannelProtocol from '../protocols/open-channel';
-import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
@@ -56,7 +53,7 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {DBObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
-import {Channel} from '../models/channel';
+import {ObjectiveManager} from '../objectives';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -117,6 +114,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
+  objectiveManager: ObjectiveManager;
 
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
@@ -147,6 +145,13 @@ export class Wallet extends EventEmitter<WalletEvent>
       );
       this.chainService = new MockChainService();
     }
+
+    this.objectiveManager = ObjectiveManager.create({
+      store: this.store,
+      chainService: this.chainService,
+      logger,
+      timingMetrics: !!walletConfig?.timingMetrics,
+    });
   }
 
   public async registerAppDefinition(appDefinition: string): Promise<void> {
@@ -634,6 +639,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     return requiresAnotherCrankUponCompletion;
   }
 
+  // todo(tom): change function to return a value instead of mutating input args
   private async crankToCompletion(
     channels: Bytes32[],
     {outbox, channelResults, error}: ExecutionResult
@@ -646,121 +652,25 @@ export class Wallet extends EventEmitter<WalletEvent>
       .filter(x => x !== undefined)
       .filter(o => o?.status === 'approved');
 
+    // todo(tom): why isn't this just a for loop?
     while (objectives.length && !error) {
       const objective = objectives[0];
 
-      let channelToLock;
+      const {
+        channelResults: newChannelResults,
+        outbox: newOutbox,
+        error: newError,
+      } = await this.objectiveManager.crank(objective.objectiveId);
 
-      if (objective.type === 'OpenChannel' || objective.type === 'CloseChannel')
-        channelToLock = objective.data.targetChannelId;
-      else throw new Error('crankToCompletion: unsupported objective');
+      // add channel result
+      channelResults.push(...newChannelResults);
+      outbox.push(...newOutbox);
 
-      await this.store.lockApp(channelToLock, async tx => {
-        const setError = async (e: Error): Promise<void> => {
-          error = e;
-          await tx.rollback(error);
-        };
+      // todo(tom): this how the code behaved previously. Is it actually what we want?
+      error = newError;
 
-        const markObjectiveAsDone = (): void => {
-          objectives.shift();
-        };
-
-        const addChannelResult = (channel: ChannelState.ChannelState): void => {
-          channelResults.push(ChannelState.toChannelResult(channel));
-        };
-
-        let executeProtocol: () => ChannelState.ProtocolResult;
-        let protocolState: OpenChannelProtocol.ProtocolState | CloseChannelProtocol.ProtocolState;
-
-        if (objective.type === 'OpenChannel') {
-          protocolState = await OpenChannelProtocol.getOpenChannelProtocolState(
-            this.store,
-            objective.data.targetChannelId,
-            tx
-          );
-          executeProtocol = () =>
-            OpenChannelProtocol.protocol(protocolState as OpenChannelProtocol.ProtocolState);
-        } else if (objective.type === 'CloseChannel') {
-          protocolState = await CloseChannelProtocol.getCloseChannelProtocolState(
-            this.store,
-            objective.data.targetChannelId,
-            tx
-          );
-          executeProtocol = () =>
-            CloseChannelProtocol.protocol(protocolState as CloseChannelProtocol.ProtocolState);
-        } else {
-          throw new Error('Unexpected objective');
-        }
-
-        const doAction = async (action: ProtocolAction): Promise<any> => {
-          switch (action.type) {
-            case 'SignState': {
-              const {myIndex, participants, channelId} = protocolState.app;
-              const signedState = await this.store.signState(action.channelId, action, tx);
-              createOutboxFor(channelId, myIndex, participants, {
-                signedStates: [signedState],
-              }).map(outgoing => outbox.push(outgoing));
-              return;
-            }
-            case 'FundChannel':
-              await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              await this.chainService.fundChannel({
-                ...action,
-                expectedHeld: BN.from(action.expectedHeld),
-                amount: BN.from(action.amount),
-              });
-              return;
-            case 'CompleteObjective':
-              await this.store.markObjectiveAsSucceeded(objective, tx);
-              markObjectiveAsDone(); // TODO: Awkward to use this for undefined and CompleteObjective
-              addChannelResult(protocolState.app);
-              return;
-            case 'Withdraw':
-              await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
-              // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
-              return;
-            case 'RequestLedgerFunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
-              await LedgerRequest.requestLedgerFunding(
-                protocolState.app.channelId,
-                ledgerChannelId,
-                tx
-              );
-              return;
-            }
-            case 'RequestLedgerDefunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
-              await LedgerRequest.requestLedgerDefunding(
-                protocolState.app.channelId,
-                ledgerChannelId,
-                tx
-              );
-              return;
-            }
-            default:
-              throw 'Unimplemented';
-          }
-        };
-
-        const nextAction = recordFunctionMetrics(
-          executeProtocol(),
-          this.walletConfig.timingMetrics
-        );
-
-        if (!nextAction) {
-          markObjectiveAsDone();
-          addChannelResult(protocolState.app);
-        } else {
-          try {
-            await doAction(nextAction);
-          } catch (err) {
-            logger.error({err}, 'Error handling action');
-            await setError(err);
-          }
-        }
-      });
+      // remove objective from list
+      objectives.shift();
     }
   }
 
@@ -814,26 +724,3 @@ const createOutboxFor = (
       method: 'MessageQueued' as const,
       params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
     }));
-
-const determineWhichLedgerToUse = async (
-  channel: ChannelState.ChannelState,
-  txOrKnex: TransactionOrKnex
-): Promise<Bytes32> => {
-  if (channel?.supported) {
-    if (channel.fundingStrategy === 'Ledger') {
-      if (channel.fundingLedgerChannelId) {
-        const ledgerChannelId = channel.fundingLedgerChannelId;
-        // TODO: remove this check? should be preventable / never need to happen
-        const ledgerRecord = await Channel.forId(ledgerChannelId, txOrKnex);
-        if (!ledgerRecord) {
-          throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
-        }
-        return ledgerChannelId;
-      }
-      throw new Error('ledger funded app has no fundingLedgerChannelId');
-    }
-    throw new Error('cannot fund app that is not ledger funded');
-  } else {
-    throw new Error('cannot fund unsupported app');
-  }
-};

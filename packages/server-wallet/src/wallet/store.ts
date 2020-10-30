@@ -431,6 +431,11 @@ export class Store {
     await AppBytecode.upsertBytecode(chainNetworkId, appDefinition, bytecode, this.knex);
   }
 
+  async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<DBObjective> {
+    tx = tx || this.knex; // todo: make tx required
+    return await ObjectiveModel.forId(objectiveId, tx);
+  }
+
   async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     if (isOpenChannel(objective)) {
       const {
