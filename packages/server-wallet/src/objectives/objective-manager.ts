@@ -44,7 +44,7 @@ export class ObjectiveManager {
 
     if (objective.type === 'OpenChannel' || objective.type === 'CloseChannel')
       channelToLock = objective.data.targetChannelId;
-    else throw new Error('crankToCompletion: unsupported objective');
+    else throw new Error('ObjectiveManager.crank(): unsupported objective');
 
     let attemptAnotherProtocolStep = true;
 
