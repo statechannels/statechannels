@@ -24,7 +24,7 @@ import {
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
-import {CHAIN_NETWORK_ID, HUB} from '../config';
+import {CHAIN_NETWORK_ID, HUB, WALLET_VERSION} from '../config';
 import {checkThat, recordToArray} from '../utils';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';
@@ -325,7 +325,11 @@ export class Store {
     if (this.backend.transactionOngoing) throw Error(Errors.emittingDuringTransaction);
 
     this._eventEmitter.emit('channelUpdated', entry);
-    if (signedState) this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
+    if (signedState)
+      this._eventEmitter.emit('addToOutbox', {
+        walletVersion: WALLET_VERSION,
+        signedStates: [signedState]
+      });
 
     return entry;
   }
@@ -378,7 +382,11 @@ export class Store {
     const objectives = this.objectives;
     if (!_.find(objectives, o => _.isEqual(o, objective))) {
       this.objectives.push(objective);
-      addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+      addToOutbox &&
+        this._eventEmitter.emit('addToOutbox', {
+          walletVersion: WALLET_VERSION,
+          objectives: [objective]
+        });
       this._eventEmitter.emit('newObjective', objective);
     }
   }

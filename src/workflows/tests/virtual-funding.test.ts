@@ -14,6 +14,7 @@ import {
 } from '@statechannels/wallet-core';
 import {constants} from 'ethers';
 
+import {WALLET_VERSION} from '../../config';
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
@@ -263,6 +264,7 @@ test('invalid joint state', async () => {
   };
 
   await store.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: [
       {
         ...invalidState,

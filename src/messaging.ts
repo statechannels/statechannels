@@ -42,7 +42,8 @@ import {
   CHAIN_NETWORK_ID,
   HUB_PARTICIPANT_ID,
   HUB_ADDRESS,
-  HUB_DESTINATION
+  HUB_DESTINATION,
+  WALLET_VERSION
 } from './config';
 import {Store} from './store';
 
@@ -160,7 +161,7 @@ export class MessagingService implements MessagingServiceInterface {
       const notification: StateChannelsNotification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
-        params: validateMessage(serializeMessage(message, recipient, sender))
+        params: validateMessage(serializeMessage(WALLET_VERSION, message, recipient, sender))
       };
       this.eventEmitter.emit('SendMessage', notification);
     });
