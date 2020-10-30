@@ -1,4 +1,4 @@
-import {Model} from 'objection';
+import {JSONSchema, Model} from 'objection';
 import {Zero} from '@statechannels/wallet-core';
 import Knex from 'knex';
 
@@ -7,12 +7,7 @@ import {logger} from '../logger';
 
 type TransferredOutEntry = {toAddress: Address; amount: Uint256};
 
-export const REQUIRED_COLUMNS = {
-  channelId: 'channelId',
-  amount: 'amount',
-  assetHolder: 'assetHolder',
-  transferredOut: 'transferredOut',
-};
+export const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
 export interface RequiredColumns {
   readonly channelId: Bytes32;
   readonly amount: Uint256;
@@ -29,6 +24,19 @@ export class Funding extends Model implements RequiredColumns {
   readonly amount!: Uint256;
   readonly assetHolder!: Address;
   readonly transferredOut!: TransferredOutEntry[];
+
+  static get jsonSchema(): JSONSchema {
+    return {
+      type: 'object',
+      required: [...REQUIRED_COLUMNS],
+      properties: {
+        transferredOut: {
+          type: 'array',
+          items: {type: 'object'},
+        },
+      },
+    };
+  }
 
   static async getFundingAmount(
     knex: Knex,
@@ -53,7 +61,7 @@ export class Funding extends Model implements RequiredColumns {
       .first();
 
     if (!existing) {
-      return await Funding.query(knex).insert({channelId, amount, assetHolder});
+      return await Funding.query(knex).insert({channelId, amount, assetHolder, transferredOut: []});
     } else {
       return await Funding.query(knex)
         .patch({channelId, amount, assetHolder})
