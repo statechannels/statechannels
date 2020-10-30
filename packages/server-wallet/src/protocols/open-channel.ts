@@ -62,7 +62,7 @@ function isFunded(ps: ProtocolState): boolean {
   const {funding, supported, fundingStrategy} = ps.app;
 
   switch (fundingStrategy) {
-    case 'Unfunded':
+    case 'Fake':
       return true;
 
     case 'Direct': {
@@ -154,7 +154,7 @@ const requestLedgerFunding = ({app}: ProtocolState): RequestLedgerFunding | fals
   });
 };
 
-const isUnfunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Unfunded';
+const isFakeFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Fake';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
@@ -192,7 +192,7 @@ const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   myTurnToPostfund(ps) &&
-  (isFunded(ps) || isUnfunded(ps.app)) &&
+  (isFunded(ps) || isFakeFunded(ps.app)) &&
   ps.app.latestSignedByMe &&
   ps.app.supported &&
   signState({
@@ -224,7 +224,7 @@ export const getOpenChannelProtocolState = async (
   const app = await store.getChannel(channelId, tx);
   switch (app.fundingStrategy) {
     case 'Direct':
-    case 'Unfunded':
+    case 'Fake':
       return {type: 'DirectFundingProtocolState', app};
     case 'Ledger': {
       const req = await store.getLedgerRequest(app.channelId, 'fund', tx);

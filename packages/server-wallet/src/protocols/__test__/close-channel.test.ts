@@ -45,7 +45,7 @@ test('when I have signed a final state, unfunded', () => {
   const ps = applicationProtocolState({
     app: {supported: closingState, latest: closingState, latestSignedByMe: closingState},
   });
-  ps.app.fundingStrategy = 'Unfunded';
+  ps.app.fundingStrategy = 'Fake';
   expect(protocol(ps)).toMatchObject({
     type: 'CompleteObjective',
     channelId: ps.app.channelId,

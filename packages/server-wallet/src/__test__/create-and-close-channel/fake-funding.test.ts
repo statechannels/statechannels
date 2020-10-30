@@ -58,7 +58,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
-    fundingStrategy: 'Unfunded',
+    fundingStrategy: 'Fake',
   };
 
   //        A <> B
