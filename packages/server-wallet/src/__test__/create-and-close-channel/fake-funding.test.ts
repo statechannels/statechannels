@@ -96,8 +96,8 @@ it('Create a fake-funded channel between two wallets ', async () => {
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 2,
+    status: 'running',
+    turnNum: 3,
   });
 
   // A sends PostFund2 to B
