@@ -110,7 +110,7 @@ export type WalletInterface = {
 
 export class Wallet extends EventEmitter<WalletEvent>
   implements WalletInterface, ChainEventSubscriberInterface {
-  manager: WorkerManager;
+  workerManager: WorkerManager;
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
@@ -120,7 +120,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   constructor(walletConfig?: ServerWalletConfig) {
     super();
     this.walletConfig = walletConfig || defaultConfig;
-    this.manager = new WorkerManager(this.walletConfig);
+    this.workerManager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.store = new Store(
       this.knex,
@@ -193,7 +193,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   public async destroy(): Promise<void> {
-    await this.manager.destroy();
+    await this.workerManager.destroy();
     await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
     this.chainService.destructor();
   }
@@ -390,7 +390,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
     if (this.walletConfig.workerThreadAmount > 0) {
-      return this.manager.updateChannel(args);
+      return this.workerManager.updateChannel(args);
     } else {
       return this.updateChannelInternal(args);
     }
@@ -509,7 +509,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     if (this.walletConfig.workerThreadAmount > 0) {
-      return this.manager.pushMessage(rawPayload);
+      return this.workerManager.pushMessage(rawPayload);
     } else {
       return this.pushMessageInternal(rawPayload);
     }
