@@ -32,6 +32,10 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
   return (ps.app.support || []).every(isFinal) && isFinal(ps.app.latestSignedByMe);
 }
 
+function successfulWithdraw(_ps: ProtocolState): boolean {
+  return true;
+}
+
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   !!ps.app.supported &&
   !isFinal(ps.app.latestSignedByMe) &&
@@ -58,6 +62,7 @@ const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStra
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
   everyoneSignedFinalState(ps) &&
   ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
+  successfulWithdraw(ps) &&
   completeObjective({channelId: ps.app.channelId});
 
 function chainWithdraw(ps: ProtocolState): Withdraw | false {

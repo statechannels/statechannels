@@ -404,7 +404,9 @@ export class Store {
       // fetch the channel to make sure the channel exists
       const channel = await Channel.forId(targetChannelId, tx);
       if (!channel) {
-        throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
+        throw new StoreError(StoreError.reasons.channelMissing, {
+          channelId: targetChannelId,
+        });
       }
 
       const objectiveToBeStored: DBObjective = {
@@ -573,6 +575,15 @@ export class Store {
     assetHolderAddress: Address
   ): Promise<void> {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
+  }
+
+  async updateTransferredOut(
+    channelId: string,
+    assetHolder: Address,
+    toAddress: Address,
+    amount: Uint256
+  ): Promise<void> {
+    await Funding.updateTransferredOut(this.knex, channelId, assetHolder, toAddress, amount);
   }
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {
