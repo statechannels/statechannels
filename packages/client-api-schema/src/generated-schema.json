@@ -346,7 +346,7 @@
         "Direct",
         "Ledger",
         "Virtual",
-        "Unfunded",
+        "Fake",
         "Unknown"
       ],
       "type": "string"

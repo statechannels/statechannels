@@ -249,7 +249,7 @@ describe('when the application protocol returns an action', () => {
         participants: c.participants,
         data: {
           targetChannelId: c.channelId,
-          fundingStrategy: 'Unfunded', // Could also be Direct, funding is empty
+          fundingStrategy: 'Fake', // Could also be Direct, funding is empty
           role: 'app',
         },
       },

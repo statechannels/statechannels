@@ -443,7 +443,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId});
       }
 
-      if (!_.includes(['Ledger', 'Direct', 'Unfunded'], objective.data.fundingStrategy))
+      if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
       const objectiveToBeStored: DBObjective = {

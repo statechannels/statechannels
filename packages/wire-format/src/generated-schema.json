@@ -85,7 +85,7 @@
                 "Direct",
                 "Ledger",
                 "Virtual",
-                "Unfunded",
+                "Fake",
                 "Unknown"
               ],
               "type": "string"
@@ -310,7 +310,7 @@
                 "Direct",
                 "Ledger",
                 "Virtual",
-                "Unfunded",
+                "Fake",
                 "Unknown"
               ],
               "type": "string"

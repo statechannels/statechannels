@@ -288,7 +288,7 @@ export type ErrorCodes = {
 export type ExternalDestination = string;
 
 // @public (undocumented)
-export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unfunded' | 'Unknown';
+export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Fake' | 'Unknown';
 
 // @public (undocumented)
 export interface Funds {

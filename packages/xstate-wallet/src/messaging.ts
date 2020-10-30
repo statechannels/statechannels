@@ -356,9 +356,9 @@ async function convertToInternalEvent(
   }
 }
 
-export type SupportedFundingStrategy = Exclude<FundingStrategy, 'Unknown' | 'Unfunded'>;
+export type SupportedFundingStrategy = Exclude<FundingStrategy, 'Unknown' | 'Fake'>;
 function isSupportedFundingStrategy(fs: FundingStrategy): fs is SupportedFundingStrategy {
-  return fs !== 'Unfunded' && fs !== 'Unknown';
+  return fs !== 'Fake' && fs !== 'Unknown';
 }
 export function supportedFundingStrategyOrThrow(fs: FundingStrategy): SupportedFundingStrategy {
   if (!isSupportedFundingStrategy(fs)) {

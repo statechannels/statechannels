@@ -262,7 +262,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   async createLedgerChannel(
     args: Pick<CreateChannelParams, 'participants' | 'allocations'>,
-    fundingStrategy: 'Direct' | 'Unfunded' = 'Direct'
+    fundingStrategy: 'Direct' | 'Fake' = 'Direct'
   ): Promise<SingleChannelOutput> {
     const {participants, allocations} = args;
 

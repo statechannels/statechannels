@@ -87,7 +87,7 @@ export const getCloseChannelProtocolState = async (
   const app = await store.getChannel(channelId, tx);
   switch (app.fundingStrategy) {
     case 'Direct':
-    case 'Unfunded':
+    case 'Fake':
       return {app};
     case 'Ledger': {
       const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
