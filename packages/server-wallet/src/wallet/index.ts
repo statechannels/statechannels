@@ -755,8 +755,13 @@ export class Wallet extends EventEmitter<WalletEvent>
     );
   }
 
-  onAssetTransferred(_arg: AssetTransferredArg): void {
-    // todo: implement me
+  async assetTransferred(arg: AssetTransferredArg): Promise<void> {
+    await this.store.updateTransferredOut(
+      arg.channelId,
+      arg.assetHolderAddress,
+      arg.to,
+      arg.amount
+    );
   }
 
   private registerChannelWithChainService(cr: ChannelResult): void {

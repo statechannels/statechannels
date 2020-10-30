@@ -42,7 +42,7 @@ export type FundChannelArg = {
 
 export interface ChainEventSubscriberInterface {
   holdingUpdated(arg: HoldingUpdatedArg): void;
-  onAssetTransferred(arg: AssetTransferredArg): void;
+  assetTransferred(arg: AssetTransferredArg): void;
 }
 
 interface ChainEventEmitterInterface {
@@ -223,7 +223,7 @@ export class ChainService implements ChainServiceInterface {
               subscriber.holdingUpdated(event);
               break;
             case AssetTransferred:
-              subscriber.onAssetTransferred(event);
+              subscriber.assetTransferred(event);
               break;
             default:
               throw new Error('Unexpected event from contract observable');

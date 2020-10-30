@@ -184,7 +184,7 @@ describe('registerChannel', () => {
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       holdingUpdated,
-      onAssetTransferred: _.noop,
+      assetTransferred: _.noop,
     });
     await p;
   });
@@ -203,7 +203,7 @@ describe('registerChannel', () => {
           });
           resolve();
         },
-        onAssetTransferred: _.noop,
+        assetTransferred: _.noop,
       })
     );
   });
@@ -236,7 +236,7 @@ describe('registerChannel', () => {
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
-      onAssetTransferred: _.noop,
+      assetTransferred: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
@@ -252,7 +252,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        onAssetTransferred: (arg: AssetTransferredArg) => {
+        assetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
               expect(arg).toMatchObject({
@@ -293,7 +293,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
-        onAssetTransferred: (arg: AssetTransferredArg) => {
+        assetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
               expect(arg).toMatchObject({
