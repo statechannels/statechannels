@@ -80,9 +80,9 @@ export class Funding extends Model implements RequiredColumns {
         logger.error(errorMessage, {channelId, assetHolder, toAddress, amount});
         throw new Error(errorMessage);
       } else {
-        existing.transferredOut;
+        const transferredOut = existing.transferredOut.concat({toAddress, amount});
         return await Funding.query(tx)
-          .patch({transferredOut: existing.transferredOut.concat({toAddress, amount})})
+          .patch({transferredOut})
           .where({channelId, assetHolder})
           .returning('*')
           .first();

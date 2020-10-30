@@ -1,4 +1,4 @@
-import {checkThat, isSimpleAllocation, State} from '@statechannels/wallet-core';
+import {BN, checkThat, isSimpleAllocation, State} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
@@ -32,8 +32,21 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
   return (ps.app.support || []).every(isFinal) && isFinal(ps.app.latestSignedByMe);
 }
 
-function successfulWithdraw(_ps: ProtocolState): boolean {
-  return true;
+function successfulWithdraw({app}: ProtocolState): boolean {
+  if (!app.supported) return false;
+  const {allocationItems, assetHolderAddress} = checkThat(
+    app.supported.outcome,
+    isSimpleAllocation
+  );
+  const myDestination = app.participants[app.myIndex].destination;
+  const amountOwedToMe = allocationItems
+    .filter(ai => ai.destination === myDestination)
+    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+  const amountTransferredToMe = app
+    .funding(assetHolderAddress)
+    .transferredOut.filter(tf => tf.toAddress === myDestination)
+    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+  return BN.eq(amountOwedToMe, amountTransferredToMe);
 }
 
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
