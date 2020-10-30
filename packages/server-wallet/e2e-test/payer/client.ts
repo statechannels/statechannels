@@ -137,6 +137,7 @@ export default class PayerClient {
 
   public emptyMessage(): Promise<unknown> {
     return this.messageReceiverAndExpectReply({
+      walletVersion: '',
       signedStates: [],
       objectives: [],
     });

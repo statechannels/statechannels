@@ -15,9 +15,9 @@ import {
   Outcome,
   AllocationItem,
   SimpleAllocation,
-  Payload,
   Objective,
-  Participant
+  Participant,
+  Payload
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
@@ -39,11 +39,13 @@ export function validatePayload(rawPayload: unknown): WirePayload {
 }
 
 export function deserializeMessage(message: WireMessage): Payload {
-  const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
-  const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
-  const requests = message?.data?.requests;
+  const signedStates = message.data.signedStates?.map(ss => deserializeState(ss));
+  const objectives = message.data.objectives?.map(objective => deserializeObjective(objective));
+  const requests = message.data.requests;
+  const walletVersion = message.data.walletVersion;
 
   return {
+    walletVersion,
     signedStates,
     objectives,
     requests

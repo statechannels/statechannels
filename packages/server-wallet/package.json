@@ -84,7 +84,7 @@
     "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts}\" --fix",
     "precommit": "lint-staged --quiet",
-    "prepare": "rm -rf lib; tsc -b .",
+    "prepare": "rm -rf lib; tsc -b . && node ./scripts/inject-wallet-version.js",
     "prestart": "yarn prepare && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",

@@ -11,7 +11,7 @@ import {Wallet} from 'ethers';
 
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
-import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
+import {CHAIN_NETWORK_ID, CHALLENGE_DURATION, WALLET_VERSION} from '../../config';
 import {Errors} from '..';
 
 import {Store} from './../store';
@@ -72,7 +72,7 @@ describe('channelUpdatedFeed', () => {
     store.channelUpdatedFeed(channelId).subscribe(x => {
       outputs.push(x);
     });
-    await store.pushMessage({signedStates});
+    await store.pushMessage({walletVersion: WALLET_VERSION, signedStates});
 
     expect(outputs[0].latest).toMatchObject(state);
   });
@@ -82,7 +82,7 @@ describe('channelUpdatedFeed', () => {
 
     const outputs: ChannelStoreEntry[] = [];
     store.channelUpdatedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
-    await store.pushMessage({signedStates});
+    await store.pushMessage({walletVersion: WALLET_VERSION, signedStates});
 
     expect(outputs).toEqual([]);
   });
@@ -100,11 +100,11 @@ test('newObjectiveFeed', async () => {
   const outputs: Objective[] = [];
   store.objectiveFeed.subscribe(x => outputs.push(x));
 
-  await store.pushMessage({objectives: [objective]});
+  await store.pushMessage({walletVersion: WALLET_VERSION, objectives: [objective]});
   expect(outputs).toEqual([objective]);
 
   // doing it twice doesn't change anything
-  await store.pushMessage({objectives: [objective]});
+  await store.pushMessage({walletVersion: WALLET_VERSION, objectives: [objective]});
   expect(outputs).toEqual([objective]);
 });
 
@@ -152,6 +152,7 @@ describe('pushMessage', () => {
 
     const nextState = {...state, turnNum: state.turnNum + 2};
     await store.pushMessage({
+      walletVersion: WALLET_VERSION,
       signedStates: [{...nextState, signatures: [createSignatureEntry(nextState, bPrivateKey)]}]
     });
     expect((await store.getEntry(channelId)).latest).toMatchObject(nextState);
@@ -159,7 +160,7 @@ describe('pushMessage', () => {
 
   it('creates a channel if it receives states for a new channel', async () => {
     const store = await aStore();
-    await store.pushMessage({signedStates});
+    await store.pushMessage({walletVersion: WALLET_VERSION, signedStates});
     expect(await store.getEntry(channelId)).not.toBeUndefined();
   });
 });

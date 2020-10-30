@@ -146,6 +146,7 @@ type GetChannel = {type: 'GetChannel'; channelId: Bytes32};
 export type ChannelRequest = GetChannel;
 
 export interface Payload {
+  walletVersion: string; // e.g. @statechannels/server-wallet@1.4.0
   signedStates?: SignedState[];
   objectives?: Objective[];
   requests?: ChannelRequest[];

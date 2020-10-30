@@ -5,6 +5,8 @@ import {Payload, SignedState} from '../../types';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
+export const walletVersion = 'someWalletVersion';
+
 export const wireStateFormat: WireState = {
   participants: [
     {
@@ -125,6 +127,7 @@ export const wireMessageFormat: WireMessage = {
   recipient: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
   sender: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
   data: {
+    walletVersion,
     signedStates: [wireStateFormat, wireStateFormat2],
     objectives: [
       {
@@ -158,6 +161,7 @@ export const wireMessageFormat: WireMessage = {
 };
 
 export const internalMessageFormat: Payload = {
+  walletVersion,
   signedStates: [internalStateFormat, internalStateFormat2],
   objectives: [
     {

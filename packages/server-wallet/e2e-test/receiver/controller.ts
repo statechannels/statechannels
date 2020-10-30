@@ -6,6 +6,7 @@ import {Wallet, Message as Payload} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
+import {WALLET_VERSION} from '../../src/version';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
@@ -29,6 +30,7 @@ export default class ReceiverController {
 
   public async acceptMessageAndReturnReplies(message: unknown): Promise<unknown> {
     const reply: Payload = {
+      walletVersion: WALLET_VERSION,
       signedStates: [],
       objectives: [],
     };
