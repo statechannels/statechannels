@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.3.0...@statechannels/server-wallet@1.5.0) (2020-10-30)
+
+
+### Bug Fixes
+
+* add missing tx objects in db queries ([00f9a60](https://github.com/statechannels/statechannels/commit/00f9a604f786061c93491467736d4b2a0c4fea2a))
+* allow funding strategy optional param on createLedgerChannel ([2fbb0e8](https://github.com/statechannels/statechannels/commit/2fbb0e8436518b71151bdd40b88a2a21a4392c0c))
+* check funding amount is correct in ledger outcome for funded app ([5142f00](https://github.com/statechannels/statechannels/commit/5142f007306c74464759726cd7d6f034affcd0ff))
+* disable validTransition check for ledger channels ([c3aba79](https://github.com/statechannels/statechannels/commit/c3aba7948686acb4de973076579b66a91c7d18b5))
+* do not evm validate final states ([8e0feb9](https://github.com/statechannels/statechannels/commit/8e0feb9ed97075f9d7dd19bfbec4497f511727c1))
+* do nothing for ledger if it is not 'running' yet ([dca98f4](https://github.com/statechannels/statechannels/commit/dca98f473deae56c6d2efc6568f45b391cf66d2c))
+* ensure channel is fully finalized before requesting defunding ([c66c485](https://github.com/statechannels/statechannels/commit/c66c48571d508eb039bef8c4d5f9c4ca0edc8e97))
+* ensure ledger is funded before continuing with open channel protocol ([f0ec55e](https://github.com/statechannels/statechannels/commit/f0ec55ebd8c29b15d83c8b9efe746e2c6d42cb7a))
+* ensure received states are processed in order of channelNonce ([4561e3b](https://github.com/statechannels/statechannels/commit/4561e3b5ee9b6af859be7ab91e0ccb33d04f26fa))
+* enter run loop once for joinChannels API call ([a7ce919](https://github.com/statechannels/statechannels/commit/a7ce9198cda85e6781ce441d4678643310eb609a))
+* fetchBytecode rejects when bytecode is missing ([fe76cbb](https://github.com/statechannels/statechannels/commit/fe76cbb913f1612824a6b3326e8749ee25fad42b))
+* typo ([465e9db](https://github.com/statechannels/statechannels/commit/465e9dbcebe8dd572ff294dc4c61d9f86fe332c8))
+* use connext version of pure evm ([754570f](https://github.com/statechannels/statechannels/commit/754570f93686a401066f986f2851bd46ea8725db))
+
+
+### Features
+
+* add defunding of channel funded via ledger upon close ([4edd44a](https://github.com/statechannels/statechannels/commit/4edd44a5361034b8d310feab536832ebdade9d70))
+* add getLedgerChannels API ([c1d7dc7](https://github.com/statechannels/statechannels/commit/c1d7dc783f5befa8d8dd1be726c805893e01e389))
+* enhanced getLedgerChannels API with assetHolder and participants query args ([e7030dc](https://github.com/statechannels/statechannels/commit/e7030dc9f494bb4092e5e9315ad34c71785d67dd))
+
+
+
+
+
 # [1.4.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.3.0...@statechannels/server-wallet@1.4.0) (2020-10-29)
 
 
