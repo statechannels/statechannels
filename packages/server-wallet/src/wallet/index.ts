@@ -131,28 +131,6 @@ export class Wallet extends EventEmitter<WalletEvent>
       this.walletConfig.chainNetworkID
     );
 
-    // Bind methods to class instance
-    this.getParticipant = this.getParticipant.bind(this);
-    this.updateChannelFunding = this.updateChannelFunding.bind(this);
-    this.updateFundingForChannels = this.updateFundingForChannels.bind(this);
-    this.getSigningAddress = this.getSigningAddress.bind(this);
-
-    this.createChannels = this.createChannels.bind(this);
-
-    this.joinChannels = this.joinChannels.bind(this);
-    this.updateChannel = this.updateChannel.bind(this);
-    this.updateChannelInternal = this.updateChannelInternal.bind(this);
-    this.pushMessageInternal = this.pushMessageInternal.bind(this);
-    this.closeChannel = this.closeChannel.bind(this);
-    this.getChannels = this.getChannels.bind(this);
-    this.getState = this.getState.bind(this);
-    this.pushMessage = this.pushMessage.bind(this);
-    this.takeActions = this.takeActions.bind(this);
-    this.mergeMessages = this.mergeMessages.bind(this);
-    this.registerChannelWithChainService = this.registerChannelWithChainService.bind(this);
-    this.destroy = this.destroy.bind(this);
-    this.registerAppDefinition = this.registerAppDefinition.bind(this);
-
     // set up timing metrics
     if (this.walletConfig.timingMetrics) {
       if (!this.walletConfig.metricsOutputFile) {
@@ -310,7 +288,7 @@ export class Wallet extends EventEmitter<WalletEvent>
         const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
         const constants: ChannelConstants = {
           channelNonce,
-          participants: participants.map(convertToParticipant),
+          participants: participants.map(p => convertToParticipant(p)),
           chainId: this.walletConfig.chainNetworkID,
           challengeDuration: 9001,
           appDefinition,
@@ -327,7 +305,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     );
     const channelResults = results.map(r => r.channelResult);
     const outgoing = results.map(r => r.outgoing).reduce((p, c) => p.concat(c));
-    channelResults.map(this.registerChannelWithChainService);
+    channelResults.map(cR => this.registerChannelWithChainService(cR));
     return {
       channelResults: mergeChannelResults(channelResults),
       outbox: mergeOutgoing(outgoing),
@@ -347,7 +325,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const {outbox, channelResults} = await this.takeActions(channelIds);
 
-    channelResults.map(this.registerChannelWithChainService);
+    channelResults.map(cR => this.registerChannelWithChainService(cR));
 
     return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
   }
@@ -483,7 +461,9 @@ export class Wallet extends EventEmitter<WalletEvent>
   async getChannels(): Promise<MultipleChannelOutput> {
     const channelStates = await this.store.getChannels();
     return {
-      channelResults: mergeChannelResults(channelStates.map(ChannelState.toChannelResult)),
+      channelResults: mergeChannelResults(
+        channelStates.map(cS => ChannelState.toChannelResult(cS))
+      ),
       outbox: [],
     };
   }
@@ -542,7 +522,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     if (wirePayload.requests && wirePayload.requests.length > 0)
       // Modifies outbox, may append new messages
-      await Promise.all(wirePayload.requests.map(handleRequest(outbox)));
+      await Promise.all(wirePayload.requests.map(wP => handleRequest(outbox)(wP)));
 
     return {
       outbox: mergeOutgoing(outbox),
