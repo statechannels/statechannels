@@ -1,4 +1,4 @@
-import {simpleEthAllocation, BN, Uint256, State} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
 import {ethers} from 'ethers';
 
@@ -28,8 +28,10 @@ const altPrefundState0 = {outcome: outcome2, turnNum: 0, participants};
 const reversedPFState0 = {outcome, turnNum: 0, participants: [bob(), alice()]};
 const reversedPFState1 = {outcome, turnNum: 1, participants: [bob(), alice()]};
 
-const funded = (): Uint256 => BN.from(5);
-const notFunded = (): Uint256 => BN.from(0);
+const funded = () => ({
+  amount: BN.from(5),
+});
+const notFunded = () => ({amount: BN.from(0)});
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
 const fundChannelAction1 = fundChannel({

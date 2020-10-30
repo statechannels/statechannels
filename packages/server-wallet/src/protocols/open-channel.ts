@@ -68,7 +68,7 @@ function isFunded(ps: ProtocolState): boolean {
     case 'Direct': {
       if (!supported) return false;
       const allocation = checkThat(supported?.outcome, isSimpleAllocation);
-      const currentFunding = funding(allocation.assetHolderAddress);
+      const currentFunding = funding(allocation.assetHolderAddress).amount;
       const targetFunding = allocation.allocationItems
         .map(a => a.amount)
         .reduce(BN.add, BN.from(0));
@@ -109,7 +109,7 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
    *  2. We only care about a single destination.
    * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
    */
-  const currentFunding = app.funding(assetHolderAddress);
+  const currentFunding = app.funding(assetHolderAddress).amount;
   const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
   const targetFunding = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
   if (BN.lt(currentFunding, targetFunding)) return false;
