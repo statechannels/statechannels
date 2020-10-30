@@ -544,7 +544,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     let needToCrank = true;
     while (needToCrank) {
-      await this.crankToCompletion(channels, accumulator);
+      await this.crankUntilIdle(channels, accumulator);
       needToCrank = await this.processLedgerQueue(accumulator);
     }
 
@@ -640,7 +640,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   // todo(tom): change function to return a value instead of mutating input args
-  private async crankToCompletion(
+  private async crankUntilIdle(
     channels: Bytes32[],
     {outbox, channelResults, error}: ExecutionResult
   ): Promise<void> {
