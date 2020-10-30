@@ -23,7 +23,7 @@ export default class PayerClient {
     );
   }
   public async warmup(): Promise<void> {
-    await this.wallet.manager.warmUpThreads();
+    await this.wallet.workerManager.warmUpThreads();
   }
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
