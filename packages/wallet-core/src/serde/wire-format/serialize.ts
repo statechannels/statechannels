@@ -19,6 +19,7 @@ import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
 
 export function serializeMessage(
+  walletVersion: string,
   message: Payload,
   recipient: string,
   sender: string,
@@ -30,7 +31,7 @@ export function serializeMessage(
   return {
     recipient,
     sender,
-    data: {signedStates, objectives, requests}
+    data: {walletVersion, signedStates, objectives, requests}
   };
 }
 

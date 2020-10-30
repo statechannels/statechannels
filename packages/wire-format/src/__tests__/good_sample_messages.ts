@@ -2,6 +2,7 @@ export const goodMessage = {
   recipient: 'Alice',
   sender: 'Bob',
   data: {
+    walletVersion: 'someWalletVersion',
     signedStates: [
       {
         participants: [
@@ -51,11 +52,12 @@ export const undefinedObjectives1 = {
   recipient: 'alice',
   sender: 'bob',
   data: {
+    walletVersion: 'someWalletVersion',
     objectives: undefined
   }
 };
 export const undefinedObjectives2 = {
   recipient: 'alice',
   sender: 'bob',
-  data: {}
+  data: {walletVersion: 'someWalletVersion'}
 };

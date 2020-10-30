@@ -170,6 +170,7 @@ type GetChannel = {type: 'GetChannel'; channelId: string};
 export type ChannelRequest = GetChannel;
 
 export interface Payload {
+  walletVersion: string;
   signedStates?: SignedState[];
   objectives?: Objective[];
   requests?: ChannelRequest[];

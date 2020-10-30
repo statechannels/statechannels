@@ -400,8 +400,14 @@
             "$ref": "#/definitions/SignedState"
           },
           "type": "array"
+        },
+        "walletVersion": {
+          "type": "string"
         }
       },
+      "required": [
+        "walletVersion"
+      ],
       "type": "object"
     },
     "SignedState": {

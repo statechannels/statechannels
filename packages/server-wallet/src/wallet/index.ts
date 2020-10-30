@@ -54,6 +54,7 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {DBObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
+import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
@@ -190,6 +191,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     return {
       outbox: createOutboxFor(channelId, myIndex, participants, {
+        walletVersion: WALLET_VERSION,
         signedStates: states,
         requests: [{type: 'GetChannel', channelId}],
       }),
@@ -350,6 +352,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     return {
       channelResult: ChannelState.toChannelResult(channel),
       outbox: createOutboxFor(channel.channelId, channel.myIndex, participants, {
+        walletVersion: WALLET_VERSION,
         signedStates: [signedState],
         objectives: [objective],
       }),
@@ -443,7 +446,10 @@ export class Wallet extends EventEmitter<WalletEvent>
       );
 
       return {
-        outbox: createOutboxFor(channelId, myIndex, participants, {signedStates: [signedState]}),
+        outbox: createOutboxFor(channelId, myIndex, participants, {
+          walletVersion: WALLET_VERSION,
+          signedStates: [signedState],
+        }),
         channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
       };
     };
@@ -549,6 +555,11 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const wirePayload = validatePayload(rawPayload);
 
+    if (wirePayload.walletVersion !== WALLET_VERSION)
+      throw Error(
+        `Mismatch in wallet versions: this wallet is a ${WALLET_VERSION} but received a message from a ${wirePayload.walletVersion}`
+      );
+
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
       return async ({channelId}: ChannelRequest): Promise<void> => {
@@ -556,9 +567,10 @@ export class Wallet extends EventEmitter<WalletEvent>
 
         const {participants, myIndex} = channelState;
 
-        createOutboxFor(channelId, myIndex, participants, {signedStates}).map(outgoing =>
-          outbox.push(outgoing)
-        );
+        createOutboxFor(channelId, myIndex, participants, {
+          walletVersion: WALLET_VERSION,
+          signedStates,
+        }).map(outgoing => outbox.push(outgoing));
       };
     }
 
@@ -654,7 +666,8 @@ export class Wallet extends EventEmitter<WalletEvent>
               case 'SignLedgerState': {
                 const {myIndex, participants, channelId} = protocolState.fundingChannel;
 
-                const payload = {
+                const payload: Payload = {
+                  walletVersion: WALLET_VERSION,
                   signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
                 };
 
@@ -777,5 +790,11 @@ const createOutboxFor = (
     .filter((_p, i: number): boolean => i !== myIndex)
     .map(({participantId: recipient}) => ({
       method: 'MessageQueued' as const,
-      params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
+      params: serializeMessage(
+        WALLET_VERSION,
+        data,
+        recipient,
+        participants[myIndex].participantId,
+        channelId
+      ),
     }));

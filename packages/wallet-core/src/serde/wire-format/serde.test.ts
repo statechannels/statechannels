@@ -5,7 +5,8 @@ import {
   wireStateFormat,
   internalStateFormat,
   internalMessageFormat,
-  wireMessageFormat
+  wireMessageFormat,
+  walletVersion
 } from './example';
 import {serializeState, serializeMessage} from './serialize';
 import {deserializeState, deserializeMessage} from './deserialize';
@@ -17,7 +18,9 @@ it('works for states', () => {
 
 it('works for a message', () => {
   const {recipient, sender} = wireMessageFormat;
-  expect(serializeMessage(internalMessageFormat, recipient, sender)).toEqual(wireMessageFormat);
+  expect(serializeMessage(walletVersion, internalMessageFormat, recipient, sender)).toEqual(
+    wireMessageFormat
+  );
   expect(deserializeMessage(wireMessageFormat)).toEqual(internalMessageFormat);
 });
 

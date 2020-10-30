@@ -26,6 +26,7 @@ import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {LedgerRequest} from '../../../models/ledger-request';
+import {WALLET_VERSION} from '../../../version';
 
 jest.setTimeout(20_000);
 
@@ -41,7 +42,7 @@ afterAll(async () => {
 beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 
 it("doesn't throw on an empty message", () => {
-  return expect(wallet.pushMessage({})).resolves.not.toThrow();
+  return expect(wallet.pushMessage({walletVersion: WALLET_VERSION})).resolves.not.toThrow();
 });
 
 const zero = 0;
@@ -58,6 +59,7 @@ it('stores states contained in the message, in a single channel model', async ()
     stateSignedBy([alice(), bob()])({turnNum: four}),
   ];
   await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: signedStates.map(s => serializeState(s)),
   });
 
@@ -80,10 +82,12 @@ it('ignores duplicate states', async () => {
   ];
   // First call should add the states
   await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: signedStates.map(s => serializeState(s)),
   });
   // Second call should be ignored
   await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: signedStates.map(s => serializeState(s)),
   });
   const channelsAfter = await Channel.query(wallet.knex).select();
@@ -102,10 +106,12 @@ it('adds signatures to existing states', async () => {
   const signedByBob = stateSignedBy([bob()])({turnNum: five});
 
   await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: [serializeState(signedByAlice)],
   });
 
   await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
     signedStates: [serializeState(signedByBob)],
   });
   const channelsAfter = await Channel.query(wallet.knex).select();
@@ -132,7 +138,9 @@ describe('channel results', () => {
 
     const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
 
-    await expectResults(wallet.pushMessage({signedStates}), [{turnNum: zero, status: 'proposed'}]);
+    await expectResults(wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates}), [
+      {turnNum: zero, status: 'proposed'},
+    ]);
   });
 
   it("returns a 'running' channel result when receiving a state in a channel that is now running", async () => {
@@ -143,7 +151,10 @@ describe('channel results', () => {
     );
 
     return expectResults(
-      wallet.pushMessage({signedStates: [serializeState(stateSignedBy([bob()])({turnNum: 9}))]}),
+      wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        signedStates: [serializeState(stateSignedBy([bob()])({turnNum: 9}))],
+      }),
       [{channelId, turnNum: 9, status: 'running'}]
     );
   });
@@ -159,7 +170,10 @@ describe('channel results', () => {
 
     const signedStates = [stateSignedBy([bob()])({turnNum: 10, isFinal: true, participants})];
     return expectResults(
-      wallet.pushMessage({signedStates: signedStates.map(ss => serializeState(ss))}),
+      wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        signedStates: signedStates.map(ss => serializeState(ss)),
+      }),
       [{channelId, turnNum: 10, status: 'closing'}]
     );
   });
@@ -171,7 +185,7 @@ describe('channel results', () => {
     const signedStates = [
       serializeState(stateSignedBy([alice(), bob()])({turnNum: 9, isFinal: true})),
     ];
-    const result = wallet.pushMessage({signedStates});
+    const result = wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates});
 
     return expectResults(result, [{turnNum: 9, status: 'closed'}]);
   });
@@ -185,7 +199,10 @@ describe('channel results', () => {
       stateSignedBy([alice(), bob()])({turnNum: six, channelNonce: 567, appData: '0x0f00'}),
     ];
 
-    const p = wallet.pushMessage({signedStates: signedStates.map(s => serializeState(s))});
+    const p = wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
+      signedStates: signedStates.map(s => serializeState(s)),
+    });
 
     await expectResults(p, [{turnNum: six, appData: '0x0f00'}, {turnNum: five}]);
 
@@ -208,7 +225,10 @@ it("Doesn't store stale states", async () => {
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
-  await wallet.pushMessage({signedStates});
+  await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates,
+  });
 
   const afterFirst = await Channel.query(wallet.knex).select();
 
@@ -217,12 +237,18 @@ it("Doesn't store stale states", async () => {
   expect(afterFirst[0].supported).toBeTruthy();
   expect(afterFirst[0].supported?.turnNum).toEqual(five);
 
-  await wallet.pushMessage({signedStates: [serializeState(stateSignedBy()({turnNum: four}))]});
+  await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates: [serializeState(stateSignedBy()({turnNum: four}))],
+  });
   const afterSecond = await Channel.query(wallet.knex).select();
   expect(afterSecond[0].vars).toHaveLength(1);
   expect(afterSecond).toMatchObject(afterFirst);
 
-  await wallet.pushMessage({signedStates: [serializeState(stateSignedBy()({turnNum: six}))]});
+  await wallet.pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates: [serializeState(stateSignedBy()({turnNum: six}))],
+  });
 
   const afterThird = await Channel.query(wallet.knex).select();
   expect(afterThird[0].vars).toHaveLength(2);
@@ -232,7 +258,9 @@ it("doesn't store states for unknown signing addresses", async () => {
   await new DBAdmin(wallet.knex).truncateDB(['signing_wallets']);
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
-  return expect(wallet.pushMessage({signedStates})).rejects.toThrow(Error('Not in channel'));
+  return expect(wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates})).rejects.toThrow(
+    Error('Not in channel')
+  );
 });
 
 describe('when the application protocol returns an action', () => {
@@ -260,7 +288,10 @@ describe('when the application protocol returns an action', () => {
     expect(c.supported).toBeUndefined();
     const {channelId} = c;
 
-    const p = wallet.pushMessage({signedStates: [serializeState(stateSignedBy([bob()])(state))]});
+    const p = wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
+      signedStates: [serializeState(stateSignedBy([bob()])(state))],
+    });
     await expectResults(p, [{channelId, status: 'opening'}]);
     await expect(p).resolves.toMatchObject({
       outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 2}]}}}],
@@ -284,6 +315,7 @@ describe('when the application protocol returns an action', () => {
 
     const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
     const p = wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
       signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
       objectives: [
         {
@@ -316,7 +348,9 @@ describe('when the application protocol returns an action', () => {
 
 describe('when there is a request provided', () => {
   it('has nothing in the outbox if there is no request added', async () => {
-    await expect(wallet.pushMessage({requests: []})).resolves.toMatchObject({
+    await expect(
+      wallet.pushMessage({walletVersion: WALLET_VERSION, requests: []})
+    ).resolves.toMatchObject({
       outbox: [],
     });
   });
@@ -326,14 +360,17 @@ describe('when there is a request provided', () => {
     const channelsBefore = await Channel.query(wallet.knex).select();
     expect(channelsBefore).toHaveLength(0);
     const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
-    await wallet.pushMessage({signedStates});
+    await wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates});
 
     // Get the channelId of that which was added
     const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
-      wallet.pushMessage({requests: [{type: 'GetChannel', channelId}]})
+      wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        requests: [{type: 'GetChannel', channelId}],
+      })
     ).resolves.toMatchObject({
       outbox: [
         {
@@ -353,16 +390,17 @@ describe('when there is a request provided', () => {
       stateSignedBy([alice(), bob()])({turnNum: four}),
     ].map(s => serializeState(s));
 
-    await wallet.pushMessage({
-      signedStates,
-    });
+    await wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates});
 
     // Get the channelId of that which was added
     const [{channelId}] = await Channel.query(wallet.knex).select();
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
-      wallet.pushMessage({requests: [{type: 'GetChannel', channelId}]})
+      wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        requests: [{type: 'GetChannel', channelId}],
+      })
     ).resolves.toMatchObject({
       outbox: [
         {
@@ -459,6 +497,7 @@ describe('ledger funded app scenarios', () => {
 
     const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy([bob()])(latest))],
+      walletVersion: WALLET_VERSION,
     });
 
     expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
@@ -488,6 +527,7 @@ describe('ledger funded app scenarios', () => {
     });
 
     const {outbox, channelResults} = await wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
       signedStates: [
         serializeState(stateWithHashSignedBy([bob()])(latest)),
         serializeState(stateWithHashSignedBy([bob()])(expectedUpdatedLedgerState)),
@@ -523,6 +563,7 @@ describe('ledger funded app scenarios', () => {
 
     const {outbox, channelResults} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy([bob()])(expectedUpdatedLedgerState))],
+      walletVersion: WALLET_VERSION,
     });
 
     expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
@@ -557,6 +598,7 @@ describe('ledger funded app scenarios', () => {
       channelResults: channelResults1,
     } = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy([bob()])(latest))],
+      walletVersion: WALLET_VERSION,
     });
 
     expect(getSignedStateFor(ledger.channelId, outboxFromFirstPushMessage)).toMatchObject(
@@ -589,6 +631,7 @@ describe('ledger funded app scenarios', () => {
       channelResults: channelResults2,
     } = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy([bob()])(conflictingUpdatedLedgerState))],
+      walletVersion: WALLET_VERSION,
     });
 
     const expectedResolvedUpdatedLedgerState = {
@@ -625,6 +668,7 @@ describe('ledger funded app scenarios', () => {
 
     const {outbox: outboxFromFirstPushMessage} = await wallet.pushMessage({
       signedStates: [serializeState(stateWithHashSignedBy([bob()])(latest))],
+      walletVersion: WALLET_VERSION,
     });
 
     expect(getSignedStateFor(ledger.channelId, outboxFromFirstPushMessage)).toMatchObject(
@@ -639,6 +683,7 @@ describe('ledger funded app scenarios', () => {
     };
 
     const {outbox: outboxFromSecondPushMessage, channelResults} = await wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
       signedStates: [
         serializeState(stateWithHashSignedBy([bob()])(expectedResolvedUpdatedLedgerState)),
       ],

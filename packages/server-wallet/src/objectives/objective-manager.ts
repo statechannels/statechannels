@@ -11,6 +11,7 @@ import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
+import {WALLET_VERSION} from '../version';
 
 import {ObjectiveManagerParams, ExecutionResult} from './types';
 
@@ -77,6 +78,7 @@ export class ObjectiveManager {
               const {myIndex, participants, channelId} = protocolState.app;
               const signedState = await this.store.signState(action.channelId, action, tx);
               createOutboxFor(channelId, myIndex, participants, {
+                walletVersion: WALLET_VERSION,
                 signedStates: [signedState],
               }).map(outgoing => outbox.push(outgoing));
               return;
@@ -154,5 +156,11 @@ const createOutboxFor = (
     .filter((_p, i: number): boolean => i !== myIndex)
     .map(({participantId: recipient}) => ({
       method: 'MessageQueued' as const,
-      params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
+      params: serializeMessage(
+        WALLET_VERSION,
+        data,
+        recipient,
+        participants[myIndex].participantId,
+        channelId
+      ),
     }));
