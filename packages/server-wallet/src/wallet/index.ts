@@ -172,7 +172,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       store: this.store,
       chainService: this.chainService,
       logger,
-      timingMetrics: !!walletConfig?.timingMetrics,
+      timingMetrics: this.walletConfig.timingMetrics,
     });
   }
 
