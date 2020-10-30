@@ -145,7 +145,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     // (undocumented)
     destinationAddress?: string;
     // (undocumented)
-    protected events: EventEmitter<EventType>;
+    protected events: EventEmitter<EventType, any>;
     // (undocumented)
     findChannel(channelId: string): ChannelResult;
     // (undocumented)

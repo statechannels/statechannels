@@ -7,7 +7,7 @@
   "dependencies": {
     "@docusaurus/core": "2.0.0-alpha.64",
     "@docusaurus/preset-classic": "2.0.0-alpha.64",
-    "@mdx-js/react": "^1.6.18",
+    "@mdx-js/react": "1.6.18",
     "@microsoft/api-documenter": "7.8.21",
     "@statechannels/channel-client": "0.4.3",
     "@statechannels/iframe-channel-provider": "0.3.14",
@@ -16,19 +16,19 @@
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "mermaid": "8.8.0",
-    "prism-react-renderer": "^1.1.1",
+    "prism-react-renderer": "1.1.1",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "remarkable-admonitions": "0.2.1"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.1",
+    "@types/fs-extra": "9.0.1",
     "@types/highlight.js": "9.12.4",
-    "@types/mdx-js__react": "^1.5.3",
+    "@types/mdx-js__react": "1.5.3",
     "@types/mermaid": "8.2.1",
     "@types/react": "16.9.48",
     "@types/react-dom": "16.9.8",
-    "fs-extra": "^9.0.1"
+    "fs-extra": "9.0.1"
   },
   "private": true,
   "scripts": {
