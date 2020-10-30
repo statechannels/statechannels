@@ -21,6 +21,10 @@ export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
  * - challenge: the value is the state with which challenge is called.
  */
 export type ChainServiceRequests = ChainServiceApi[];
+export type ChannelStateFunding = {
+  amount: Uint256;
+  transferredOut: {toAddress: Address; amount: Uint256}[];
+};
 
 /*
 The ChannelState type is the data that protocols need about a given channel to decide what to do next.
@@ -34,7 +38,7 @@ export type ChannelState = {
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
   latestNotSignedByMe?: SignedStateWithHash;
-  funding: (address: Address) => Uint256;
+  funding: (address: Address) => ChannelStateFunding;
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Address; // only present if funding strategy is Ledger

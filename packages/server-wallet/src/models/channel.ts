@@ -14,7 +14,12 @@ import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} 
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Address, Bytes32, Uint48} from '../type-aliases';
-import {ChannelState, toChannelResult, ChainServiceRequests} from '../protocols/state';
+import {
+  ChannelState,
+  toChannelResult,
+  ChainServiceRequests,
+  ChannelStateFunding,
+} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 
 import {SigningWallet} from './signing-wallet';
@@ -211,9 +216,11 @@ export class Channel extends Model implements RequiredColumns {
       fundingStrategy,
       fundingLedgerChannelId,
     } = this;
-    const funding = (assetHolder: Address): string => {
+    const funding = (assetHolder: Address): ChannelStateFunding => {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
-      return result ? result.amount : Zero;
+      return result
+        ? {amount: result.amount, transferredOut: result.transferredOut}
+        : {amount: Zero, transferredOut: []};
     };
     return {
       myIndex: myIndex as 0 | 1,
