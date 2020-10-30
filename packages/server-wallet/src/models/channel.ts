@@ -217,10 +217,10 @@ export class Channel extends Model implements RequiredColumns {
       fundingLedgerChannelId,
     } = this;
     const funding = (assetHolder: Address): ChannelStateFunding => {
+      const noFunding = {amount: Zero, transferredOut: []};
+      if (!this.funding) return noFunding;
       const result = this.funding.find(f => f.assetHolder === assetHolder);
-      return result
-        ? {amount: result.amount, transferredOut: result.transferredOut}
-        : {amount: Zero, transferredOut: []};
+      return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
     return {
       myIndex: myIndex as 0 | 1,
