@@ -174,7 +174,6 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   // A fragile way to wait for the conclude and withdraw to complete
   await new Promise(r => setTimeout(r, 1_000));
-
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
 
