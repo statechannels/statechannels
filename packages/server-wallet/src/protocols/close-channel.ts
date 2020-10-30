@@ -33,7 +33,9 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
 }
 
 function successfulWithdraw({app}: ProtocolState): boolean {
+  if (app.fundingStrategy !== 'Direct') return true;
   if (!app.supported) return false;
+
   const {allocationItems, assetHolderAddress} = checkThat(
     app.supported.outcome,
     isSimpleAllocation
