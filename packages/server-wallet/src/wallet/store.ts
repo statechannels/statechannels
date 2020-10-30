@@ -24,7 +24,6 @@ import {
   SignedState,
   objectiveId,
   deserializeState,
-  statesEqual,
   isSimpleAllocation,
   checkThat,
 } from '@statechannels/wallet-core';
@@ -180,11 +179,10 @@ export class Store {
       channel.signingWallet.signState(state)
     );
     const signedState = {...state, signatures: [signatureEntry]};
-
+    const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === state.stateHash);
     if (
       supported &&
-      // If the state is the same as the support state then its not a transition just adding signatures
-      !statesEqual(supported, state) &&
+      !alreadyHaveState &&
       !(await this.isLedger(channelId, tx)) &&
       !(await timer('validating transition', async () =>
         this.validateTransition(supported, signedState, tx)
