@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.5.0...@statechannels/server-wallet@1.5.1) (2020-10-30)
+
+
+### Bug Fixes
+
+* perform same alreadyhavestate check ([c2d24d9](https://github.com/statechannels/statechannels/commit/c2d24d910b7b41ba70466a502be3f4f319a5d6a6))
+
+
+
+
+
 # [1.5.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.3.0...@statechannels/server-wallet@1.5.0) (2020-10-30)
 
 
