@@ -87,7 +87,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     .pipe(take(2))
     .toPromise();
 
-  const channelFundedBPromise = fromEvent<SingleChannelOutput>(b as any, 'channelUpdate')
+  const postFundBPromise = fromEvent<SingleChannelOutput>(b as any, 'channelUpdate')
     .pipe(take(2))
     .toPromise();
 
@@ -126,22 +126,28 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 
   const postFundA = await postFundAPromise;
-  await channelFundedBPromise;
-  expect(getChannelResultFor(channelId, [postFundA.channelResult])).toMatchObject({
+  const postFundB = await postFundBPromise;
+
+  expect(postFundA.channelResult).toMatchObject({
     status: 'opening',
     turnNum: 2,
   });
 
-  const postFundB = await b.pushMessage(
-    getPayloadFor(participantB.participantId, postFundA.outbox)
-  );
-  expect(getChannelResultFor(channelId, postFundB.channelResults)).toMatchObject({
+  expect(postFundB.channelResult).toMatchObject({
+    status: 'opening',
+    turnNum: 1,
+  });
+
+  await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
+
+  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, postFundB.outbox));
+  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
-  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, postFundB.outbox));
-  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
+  const resultB1 = await a.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
+  expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
