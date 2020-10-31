@@ -268,10 +268,13 @@ export class Store {
     const toMoverIndex = toState.turnNum % toState.participants.length;
     const toMover = toState.participants[toMoverIndex].signingAddress;
 
-    const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
-    if (!turnNumCheck) {
-      const VALIDATION_ERROR = `Turn number check failed.`;
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+    if (fromState.appDefinition !== constants.AddressZero) {
+      // turn numbers not relevant for the null app
+      const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
+      if (!turnNumCheck) {
+        const VALIDATION_ERROR = `Turn number check failed.`;
+        logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+      }
     }
 
     const constantsCheck =
