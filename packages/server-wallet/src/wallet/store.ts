@@ -469,7 +469,6 @@ export class Store {
           tx
         );
 
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
       await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       await Channel.query(tx)
@@ -491,7 +490,7 @@ export class Store {
 
       const objectiveToBeStored: DBObjective = {
         objectiveId: objectiveId(objective),
-        status: 'approved', // TODO: (Stored Objectives) Awkward that it 'auto-approves'... :S
+        status: 'approved',
         type: objective.type,
         participants: [],
         data: {
@@ -499,7 +498,7 @@ export class Store {
           fundingStrategy,
         },
       };
-      // TODO: (Stored Objectives) Does it make sense to do the INSERT here?
+
       await ObjectiveModel.insert(objectiveToBeStored, tx);
 
       return objectiveToBeStored;
