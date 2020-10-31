@@ -20,10 +20,9 @@ const closingState2 = {outcome, turnNum: 8, isFinal: true, participants};
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
 
-// TODO: (Stored Objectives) write a test to confirm it signs a new isFinal state if you tell it to
-
 test.each`
   supported        | latestSignedByMe | latest           | action                      | cond                                                                  | result
+  ${postFundState} | ${postFundState} | ${postFundState} | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
   ${closingState}  | ${postFundState} | ${closingState}  | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
   ${closingState2} | ${runningState}  | ${closingState2} | ${signState(closingState2)} | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
 `('$result $cond', ({supported, latest, latestSignedByMe, action}) => {
