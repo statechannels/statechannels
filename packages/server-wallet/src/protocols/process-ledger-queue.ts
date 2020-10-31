@@ -138,12 +138,9 @@ const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation 
  *      Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
  *      to each request, call this O₁.
  *
- *  ii. Check if there is a conflicting ledger update, O₂.
- *
- *      a. If O₁ ⋂ O₂ ≠ O₁ sign an outcome for O₁ ⋂ O₂ with turn number 2
- *         higher than the one corresponding to O₂.
- *
- *      b. If O₁ ⋂ O₂ = O₁ = O then sign O with turn number 2 corresponding to O₂.
+ *  ii. If there is a conflicting ledger update, call that O₂. Sign O₁ ⋂ O₂ with the higher turn
+ *      number between 2 higher than the latest I signed and the turn number of what was
+ *      received from the counterparty, O₂.
  *
  * [1] If you sign O₁, a new request may come in to your wallet — we ignore those new
  *     requests until either O₁ or O₂ is signed, to avoid an endless loop.
@@ -175,7 +172,7 @@ const computeNewOutcome = ({
   channelsReturningFunds = _.sortBy(channelsReturningFunds, a => a.latest.channelNonce);
 
   const receivedOriginal =
-    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2;
+    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + n;
   const receivedMerged =
     latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2 * n;
   const sentOriginal = latestSignedByMe.turnNum === supported.turnNum + n;
@@ -212,7 +209,10 @@ const computeNewOutcome = ({
    * but otherwise just continue as normal (my signature will create a support)
    */
   if (receivedOriginal || receivedMerged) {
-    const {outcome: conflictingOutcome} = latestNotSignedByMe as SignedStateWithHash;
+    const {
+      outcome: conflictingOutcome,
+      turnNum: conflictingTurnNum,
+    } = latestNotSignedByMe as SignedStateWithHash;
 
     const theirLatestOutcome = checkThat(conflictingOutcome, isSimpleAllocation);
 
@@ -234,25 +234,10 @@ const computeNewOutcome = ({
       ); // (2)
 
       newOutcome = agreedUponOutcome.allocated; // (2)
-      newTurnNum = supported.turnNum + 2 * n; // (3)
       insufficientFundsFor = insufficientFundsFor.concat(agreedUponOutcome.insufficientFunds);
-    } else {
-      // The "your counter proposal is equal to my original proposal!" scenario.
-      //
-      // This scenario is quite nuanced:
-      //   a. I sent a state
-      //   b. The counterparty sent a conflicting state (before receiving mine)
-      //   c. The counterparty received my original state and signed the merged outcome
-      //      and this merged outcome was equal to my original state.
-      //   d. Before receiving the conflicting state (b) I receive the merged state (c)
-      //   e. Thus I have a received a merged state (turnNum = S + 2 * n), and NOT an original
-      //      state (which would have had turnNum = S + n) which is EQUAL to my original state
-      //      (which had turnNum = S + n).
-      //
-      // In this case, I must sign the same state I signed before, but 2 turnNums higher.
-      //
-      if (receivedMerged && sentOriginal) newTurnNum = supported.turnNum + 2 * n;
     }
+
+    newTurnNum = Math.max(latestSignedByMe.turnNum + n, conflictingTurnNum); // (3)
   }
 
   return {
