@@ -420,7 +420,6 @@ describe('ledger funded app scenarios', () => {
       turnNum: 6,
       outcome: {
         type: 'SimpleAllocation' as const,
-        // TODO: Avoid hardcoded response
         assetHolderAddress: '0x0000000000000000000000000000000000000000',
         allocationItems: [
           {
