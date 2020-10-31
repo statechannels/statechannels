@@ -167,10 +167,6 @@ const computeNewOutcome = ({
   // Nothing left to do, no actions to take
   if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
 
-  // TODO: Sort should be somewhere else
-  channelsRequestingFunds = _.sortBy(channelsRequestingFunds, a => a.latest.channelNonce);
-  channelsReturningFunds = _.sortBy(channelsReturningFunds, a => a.latest.channelNonce);
-
   const conflict = latestNotSignedByMe && latestNotSignedByMe.turnNum > supported.turnNum;
 
   // If I have signed the newest thing, take no further action
@@ -292,19 +288,25 @@ export const getProcessLedgerQueueProtocolState = async (
   const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
-    channelsRequestingFunds: await Promise.all(
-      compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
-        filter(['status', 'pending']),
-        filter(['type', 'fund'])
-      )(ledgerRequests)
+    channelsRequestingFunds: _.sortBy(
+      await Promise.all(
+        compose(
+          map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+          filter(['status', 'pending']),
+          filter(['type', 'fund'])
+        )(ledgerRequests)
+      ),
+      a => a.latest.channelNonce
     ),
-    channelsReturningFunds: await Promise.all(
-      compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
-        filter(['status', 'pending']),
-        filter(['type', 'defund'])
-      )(ledgerRequests)
+    channelsReturningFunds: _.sortBy(
+      await Promise.all(
+        compose(
+          map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+          filter(['status', 'pending']),
+          filter(['type', 'defund'])
+        )(ledgerRequests)
+      ),
+      a => a.latest.channelNonce
     ),
   };
 };
