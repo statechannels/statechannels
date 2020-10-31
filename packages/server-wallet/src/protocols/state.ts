@@ -76,6 +76,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
       case 'PrefundSetup':
         return latestSignedByMe ? 'opening' : 'proposed';
       case 'PostfundSetup':
+        return (supported?.turnNum || 0) < participants.length * 2 - 1 ? 'opening' : 'running';
       case 'Running':
         return 'running';
       case 'Final':
