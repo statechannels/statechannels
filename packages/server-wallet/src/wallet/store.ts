@@ -650,11 +650,6 @@ export class Store {
         tx
       );
 
-      /** todo:
-       * What happens if Bob is adding his signature to prefund0 from Alice?
-       * In this case Bob will send an objective to Alice
-       */
-
       const objective: Objective = {
         type: 'OpenChannel',
         participants,
