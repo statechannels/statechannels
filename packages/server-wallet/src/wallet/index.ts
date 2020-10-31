@@ -54,6 +54,7 @@ import {DBAdmin} from '../db-admin/db-admin';
 import {DBObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
 import {ObjectiveManager} from '../objectives';
+import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 
@@ -423,9 +424,8 @@ export class Wallet extends EventEmitter<WalletEvent>
     };
 
     const criticalCode: AppHandler<void> = async (tx, channel) => {
-      // TODO: (Objectives Rewrite) Keeping this here b/c we need to do input validation
-      // and check if its our turn and throw an error as existing tests expect
-      getOrThrow(CloseChannel.closeChannel(channel));
+      if (hasSupportedState(channel) && !isMyTurn(channel))
+        throw new CloseChannel.CloseChannelError(CloseChannel.CloseChannelError.reasons.notMyTurn);
 
       await this.store.addObjective(
         {
