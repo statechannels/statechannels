@@ -134,7 +134,7 @@ const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation 
  *
  * IF there are any pending ledger updates (to fund OR defund a channel)
  *
- *   i. Check if I already signed a new ledger update O₁. If I did, then use that. [1]
+ *   i. Check if I already signed a new ledger update. If I did, then call this O₁. [1]
  *      Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
  *      to each request, call this O₁.
  *
@@ -171,15 +171,11 @@ const computeNewOutcome = ({
   channelsRequestingFunds = _.sortBy(channelsRequestingFunds, a => a.latest.channelNonce);
   channelsReturningFunds = _.sortBy(channelsReturningFunds, a => a.latest.channelNonce);
 
-  const receivedOriginal =
-    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + n;
-  const receivedMerged =
-    latestNotSignedByMe && latestNotSignedByMe.turnNum === supported.turnNum + 2 * n;
-  const sentOriginal = latestSignedByMe.turnNum === supported.turnNum + n;
-  const sentMerged = latestSignedByMe.turnNum === supported.turnNum + 2 * n;
+  const conflict = latestNotSignedByMe && latestNotSignedByMe.turnNum > supported.turnNum;
 
-  // Avoid repeating action if awaiting response (for original proposal or counterproposal)
-  if (!receivedMerged && ((!receivedOriginal && sentOriginal) || sentMerged)) return false;
+  // If I have signed the newest thing, take no further action
+  if (latestSignedByMe.turnNum > Math.max(supported.turnNum, latestNotSignedByMe?.turnNum || 0))
+    return false;
 
   // The new outcome is the supported outcome, funding all pending ledger requests
   let myExpectedOutcome: Outcome;
@@ -187,15 +183,14 @@ const computeNewOutcome = ({
   // Any channels which the algorithm decides cannot be funded (thus must be rejected)
   let insufficientFundsFor: Bytes32[] = [];
 
-  // If you already proposed an update though, re-use that,
-  // don't re-compute (set of pending requests may have changed)
-  if (sentOriginal || sentMerged) myExpectedOutcome = myLatestOutcome;
+  // Check if I already signed a new ledger update, if so continue with that
+  if (latestSignedByMe.turnNum > supported.turnNum) myExpectedOutcome = myLatestOutcome;
+  // Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
   else
     ({
       allocated: myExpectedOutcome,
       insufficientFunds: insufficientFundsFor,
     } = allocateFundsToChannels(
-      // Defunding happens before funding new requests
       retrieveFundsFromClosedChannels(supportedOutcome, channelsReturningFunds),
       channelsRequestingFunds
     ));
@@ -203,12 +198,8 @@ const computeNewOutcome = ({
   let newOutcome: Outcome = myExpectedOutcome;
   let newTurnNum: number = supported.turnNum + n;
 
-  /**
-   * If I already received a proposal then (1) check if it is conflicting and
-   * if it is, then (2) sign the intersection (3) with an increased turn number,
-   * but otherwise just continue as normal (my signature will create a support)
-   */
-  if (receivedOriginal || receivedMerged) {
+  // If there is a conflicting ledger update, sign the intersection
+  if (conflict) {
     const {
       outcome: conflictingOutcome,
       turnNum: conflictingTurnNum,
@@ -237,6 +228,7 @@ const computeNewOutcome = ({
       insufficientFundsFor = insufficientFundsFor.concat(agreedUponOutcome.insufficientFunds);
     }
 
+    // Bump the turn number to indicate conflict resolution
     newTurnNum = Math.max(latestSignedByMe.turnNum + n, conflictingTurnNum); // (3)
   }
 
