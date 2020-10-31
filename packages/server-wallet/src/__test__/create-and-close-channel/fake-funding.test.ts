@@ -65,7 +65,6 @@ it('Create a fake-funded channel between two wallets ', async () => {
   // PreFund0
   const aCreateChannelOutput = await a.createChannel(channelParams);
 
-  // TODO compute the channelId for a better test
   channelId = aCreateChannelOutput.channelResults[0].channelId;
 
   expect(getChannelResultFor(channelId, aCreateChannelOutput.channelResults)).toMatchObject({

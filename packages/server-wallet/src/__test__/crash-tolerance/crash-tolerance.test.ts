@@ -67,7 +67,6 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   // PreFund0
   const resultA0 = await a.createChannel(createChannelParams);
 
-  // TODO compute the channelId for a better test
   channelId = resultA0.channelResults[0].channelId;
 
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({

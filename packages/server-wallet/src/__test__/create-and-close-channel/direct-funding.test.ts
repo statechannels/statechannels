@@ -71,7 +71,6 @@ it('Create a directly funded channel between two wallets ', async () => {
   // PreFund0
   const resultA0 = await a.createChannel(createChannelParams);
 
-  // TODO compute the channelId for a better test
   channelId = resultA0.channelResults[0].channelId;
 
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
