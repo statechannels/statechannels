@@ -284,10 +284,7 @@ export class Store {
       _.isEqual(toState.challengeDuration, fromState.challengeDuration);
 
     if (!constantsCheck) {
-      const VALIDATION_ERROR = `Constants check failed.
-      )}
-      `;
-
+      const VALIDATION_ERROR = `Constants check failed.`;
       logger.error(
         {
           fromState,
