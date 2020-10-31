@@ -174,6 +174,7 @@ const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   });
 
 const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
+  ps.app.supported &&
   ps.app.latestSignedByMe &&
   ps.app.latestSignedByMe.turnNum < ps.app.participants.length &&
   (isFunded(ps) || isFakeFunded(ps.app)) &&
