@@ -3,10 +3,9 @@ import {Model, TransactionOrKnex} from 'objection';
 import {Bytes32} from '../type-aliases';
 
 export type LedgerRequestStatus =
-  | 'pending' // Request added to DB to be approved or rejected by queue
-  // | 'rejected' // Rejected due to lack of available funds TODO: Implement
+  | 'pending' // Request added to DB to be handled by ProcessLedgerQueue
   | 'succeeded' // Ledger update became supported and thus request succeeded
-  | 'failed'; // Rejected for an unexpected reason (some error occurred) TODO: Implement
+  | 'failed'; // Failed for any reason e.g., lack of available funds
 
 export interface LedgerRequestType {
   ledgerChannelId: Bytes32;
