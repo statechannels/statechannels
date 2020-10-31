@@ -519,7 +519,7 @@ describe('ledger funded app scenarios', () => {
       {
         ledgerChannelId: ledger.channelId,
         channelToBeFunded: app.channelId,
-        status: 'pending', // TODO: could this be approved?
+        status: 'pending',
         type: 'fund',
       },
       wallet.knex
@@ -550,7 +550,7 @@ describe('ledger funded app scenarios', () => {
       {
         ledgerChannelId: ledger.channelId,
         channelToBeFunded: app.channelId,
-        status: 'pending', // TODO: could this be approved?
+        status: 'pending',
         type: 'fund',
       },
       wallet.knex
@@ -621,7 +621,7 @@ describe('ledger funded app scenarios', () => {
       {
         ledgerChannelId: ledger.channelId,
         channelToBeFunded: app.channelId,
-        status: 'pending', // TODO: could this be approved?
+        status: 'pending',
         type: 'fund',
       },
       wallet.knex
