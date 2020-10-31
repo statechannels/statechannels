@@ -184,7 +184,7 @@ const computeNewOutcome = ({
   let insufficientFundsFor: Bytes32[] = [];
 
   // Check if I already signed a new ledger update, if so continue with that
-  if (latestSignedByMe.turnNum > supported.turnNum) myExpectedOutcome = myLatestOutcome;
+  if (latestSignedByMe.turnNum === supported.turnNum + n) myExpectedOutcome = myLatestOutcome;
   // Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
   else
     ({
