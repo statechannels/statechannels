@@ -345,14 +345,12 @@ export class Wallet extends EventEmitter<WalletEvent>
         channelId
       );
 
-    // FIXME: This is just to get existing joinChannel API pattern to keep working
     const objectives = await this.store.getObjectives([channelId]);
 
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
     if (objectives[0].type === 'OpenChannel') await this.store.approveObjective(objectives[0]);
-    // END FIXME
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
 
@@ -483,7 +481,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       };
     } catch (err) {
       logger.error({err}, 'Could not get channel');
-      throw err; // FIXME: Wallet shoudl return ChannelNotFound
+      throw err;
     }
   }
 
