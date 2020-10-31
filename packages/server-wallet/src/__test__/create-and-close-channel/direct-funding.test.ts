@@ -131,7 +131,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   const resultB2 = await b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-    status: 'running',
+    status: 'opening',
     turnNum: 2,
   });
 

@@ -96,7 +96,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
-    status: 'running',
+    status: 'opening',
     turnNum: 2,
   });
 

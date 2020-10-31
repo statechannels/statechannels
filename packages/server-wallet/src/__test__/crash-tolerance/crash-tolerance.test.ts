@@ -125,7 +125,7 @@ it('Create a fake-funded channel between two wallets, of which one crashes midwa
   const resultB2 = await b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-    status: 'running', // Still opening because turnNum 3 is not supported yet, but is signed by A
+    status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
     turnNum: 2,
   });
 
