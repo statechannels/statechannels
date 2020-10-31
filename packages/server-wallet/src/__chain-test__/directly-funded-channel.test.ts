@@ -129,11 +129,13 @@ it('Create a directly funded channel between two wallets ', async () => {
   const postFundB = await postFundBPromise;
 
   expect(postFundA.channelResult).toMatchObject({
+    channelId,
     status: 'opening',
     turnNum: 2,
   });
 
   expect(postFundB.channelResult).toMatchObject({
+    channelId,
     status: 'opening',
     turnNum: 1,
   });
@@ -146,7 +148,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 3,
   });
 
-  const resultB1 = await a.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
+  const resultB1 = await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
   expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
