@@ -1,6 +1,5 @@
 import {Logger} from 'pino';
 import {serializeMessage, Participant, BN, Payload} from '@statechannels/wallet-core';
-import {TransactionOrKnex} from 'objection';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
 import {Bytes32} from '../type-aliases';
@@ -8,7 +7,6 @@ import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
-import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
@@ -103,19 +101,17 @@ export class ObjectiveManager {
               await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
               return;
             case 'RequestLedgerFunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
               await LedgerRequest.requestLedgerFunding(
                 protocolState.app.channelId,
-                ledgerChannelId,
+                protocolState.app.fundingLedgerChannelId as string,
                 tx
               );
               return;
             }
             case 'RequestLedgerDefunding': {
-              const ledgerChannelId = await determineWhichLedgerToUse(protocolState.app, tx);
               await LedgerRequest.requestLedgerDefunding(
                 protocolState.app.channelId,
-                ledgerChannelId,
+                protocolState.app.fundingLedgerChannelId as string,
                 tx
               );
               return;
@@ -160,26 +156,3 @@ const createOutboxFor = (
       method: 'MessageQueued' as const,
       params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
     }));
-
-const determineWhichLedgerToUse = async (
-  channel: ChannelState.ChannelState,
-  txOrKnex: TransactionOrKnex
-): Promise<Bytes32> => {
-  if (channel?.supported) {
-    if (channel.fundingStrategy === 'Ledger') {
-      if (channel.fundingLedgerChannelId) {
-        const ledgerChannelId = channel.fundingLedgerChannelId;
-        // TODO: remove this check? should be preventable / never need to happen
-        const ledgerRecord = await Channel.forId(ledgerChannelId, txOrKnex);
-        if (!ledgerRecord) {
-          throw new Error('cannot fund app, no ledger channel w/ that asset. abort');
-        }
-        return ledgerChannelId;
-      }
-      throw new Error('ledger funded app has no fundingLedgerChannelId');
-    }
-    throw new Error('cannot fund app that is not ledger funded');
-  } else {
-    throw new Error('cannot fund unsupported app');
-  }
-};
