@@ -288,25 +288,23 @@ export const getProcessLedgerQueueProtocolState = async (
   const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
-    channelsRequestingFunds: _.sortBy(
-      await Promise.all(
-        compose(
-          map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
-          filter(['status', 'pending']),
-          filter(['type', 'fund'])
-        )(ledgerRequests)
-      ),
-      a => a.latest.channelNonce
-    ),
-    channelsReturningFunds: _.sortBy(
-      await Promise.all(
-        compose(
-          map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
-          filter(['status', 'pending']),
-          filter(['type', 'defund'])
-        )(ledgerRequests)
-      ),
-      a => a.latest.channelNonce
-    ),
+    channelsRequestingFunds: await Promise.all<ChannelState>(
+      compose(
+        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        filter(['status', 'pending']),
+        filter(['type', 'fund'])
+      )(ledgerRequests)
+    ).then(sortByNonce),
+
+    channelsReturningFunds: await Promise.all<ChannelState>(
+      compose(
+        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        filter(['status', 'pending']),
+        filter(['type', 'defund'])
+      )(ledgerRequests)
+    ).then(sortByNonce),
   };
 };
+
+const sortByNonce = (channelStates: ChannelState[]): ChannelState[] =>
+  _.sortBy(channelStates, ({latest: {channelNonce}}) => channelNonce);
