@@ -12,10 +12,9 @@ import {Wallet} from 'ethers';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
 import {CHAIN_NETWORK_ID, CHALLENGE_DURATION} from '../../config';
+import {Errors} from '..';
 
 import {Store} from './../store';
-
-import {Errors} from '..';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'

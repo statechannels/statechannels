@@ -13,10 +13,9 @@ import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {Store} from '../../store';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
+import {Application} from '..';
 
 import {participants, wallet1} from './data';
-
-import {Application} from '..';
 
 jest.setTimeout(10000);
 

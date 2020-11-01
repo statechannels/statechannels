@@ -19,6 +19,7 @@ import {TestStore} from '../../test-store';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../config';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 
 import {
   wallet1,
@@ -29,8 +30,6 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 import {SimpleHub} from './simple-hub';
-
-import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 
 jest.setTimeout(20000);
 const {add} = BN;

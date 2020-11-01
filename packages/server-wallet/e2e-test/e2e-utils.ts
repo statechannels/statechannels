@@ -1,7 +1,6 @@
 import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_process';
 
 import kill = require('tree-kill');
-
 import Knex = require('knex');
 import {Participant, makeDestination} from '@statechannels/wallet-core';
 import {Wallet} from 'ethers';

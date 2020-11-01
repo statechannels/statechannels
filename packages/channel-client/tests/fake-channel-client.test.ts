@@ -1,6 +1,5 @@
 import log = require('loglevel');
 import EventEmitter = require('eventemitter3');
-
 import {Message, ChannelResult} from '@statechannels/client-api-schema';
 
 import {ChannelClient} from '../src';
