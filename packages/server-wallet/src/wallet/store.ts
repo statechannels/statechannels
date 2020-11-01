@@ -47,7 +47,7 @@ import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
-import {ObjectiveModel, DBObjective} from '../models/objective';
+import {ObjectiveModel, InternalObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {validateTransition} from '../utilities/validate-transition';
@@ -284,7 +284,7 @@ export class Store {
     message: WirePayload
   ): Promise<{
     channelIds: Bytes32[];
-    objectives: DBObjective[];
+    objectives: InternalObjective[];
     channelResults: ChannelResult[];
   }> {
     return this.knex.transaction(async tx => {
@@ -322,7 +322,7 @@ export class Store {
     });
   }
 
-  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<DBObjective[]> {
+  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<InternalObjective[]> {
     return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
   }
 
@@ -330,7 +330,7 @@ export class Store {
     await ObjectiveModel.approve(objectiveId, tx || this.knex);
   }
 
-  async markObjectiveAsSucceeded(objective: DBObjective, tx?: Transaction): Promise<void> {
+  async markObjectiveAsSucceeded(objective: InternalObjective, tx?: Transaction): Promise<void> {
     await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
   }
 
@@ -354,12 +354,12 @@ export class Store {
     await AppBytecode.upsertBytecode(chainNetworkId, appDefinition, bytecode, this.knex);
   }
 
-  async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<DBObjective> {
+  async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<InternalObjective> {
     tx = tx || this.knex; // todo: make tx required
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
+  async addObjective(objective: Objective, tx: Transaction): Promise<InternalObjective> {
     if (isOpenChannel(objective)) {
       const {
         data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
@@ -374,7 +374,7 @@ export class Store {
       if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
         throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-      const objectiveToBeStored: DBObjective = {
+      const objectiveToBeStored: InternalObjective = {
         objectiveId: objectiveId(objective),
         participants: [],
         status: 'pending',
@@ -413,7 +413,7 @@ export class Store {
         throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
       }
 
-      const objectiveToBeStored: DBObjective = {
+      const objectiveToBeStored: InternalObjective = {
         objectiveId: objectiveId(objective),
         status: 'approved',
         type: objective.type,

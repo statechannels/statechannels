@@ -51,7 +51,7 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {DBObjective} from '../models/objective';
+import {InternalObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
 import {ObjectiveManager} from '../objectives';
 import {hasSupportedState, isMyTurn} from '../handlers/helpers';
@@ -64,12 +64,12 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
-  objectivesToApprove?: Omit<DBObjective, 'status'>[];
+  objectivesToApprove?: Omit<InternalObjective, 'status'>[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
-  objectivesToApprove?: Omit<DBObjective, 'status'>[];
+  objectivesToApprove?: Omit<InternalObjective, 'status'>[];
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
 

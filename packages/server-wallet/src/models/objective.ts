@@ -18,15 +18,15 @@ function extractReferencedChannels(objective: Objective): string[] {
 }
 
 /*
-  A DBObjective is a wire objective with a status and an objectiveId
+  A InternalObjective is a wire objective with a status and an objectiveId
 */
-export type DBObjective = Objective & {
+export type InternalObjective = Objective & {
   objectiveId: string;
   status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 };
 
 export class ObjectiveChannelModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
+  readonly objectiveId!: InternalObjective['objectiveId'];
   readonly channelId!: string;
 
   static tableName = 'objectives_channels';
@@ -36,10 +36,10 @@ export class ObjectiveChannelModel extends Model {
 }
 
 export class ObjectiveModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
-  readonly status!: DBObjective['status'];
-  readonly type!: DBObjective['type'];
-  readonly data!: DBObjective['data'];
+  readonly objectiveId!: InternalObjective['objectiveId'];
+  readonly status!: InternalObjective['status'];
+  readonly type!: InternalObjective['type'];
+  readonly data!: InternalObjective['data'];
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -97,7 +97,7 @@ export class ObjectiveModel extends Model {
     });
   }
 
-  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<InternalObjective> {
     const model = await ObjectiveModel.query(tx).findById(objectiveId);
     return model.toObjective();
   }
@@ -117,7 +117,7 @@ export class ObjectiveModel extends Model {
   static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex
-  ): Promise<DBObjective[]> {
+  ): Promise<InternalObjective[]> {
     const objectiveIds = (
       await ObjectiveChannelModel.query(tx)
         .column('objectiveId')
@@ -128,7 +128,7 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective(): DBObjective {
+  toObjective(): InternalObjective {
     return {
       ...this,
       participants: [],
