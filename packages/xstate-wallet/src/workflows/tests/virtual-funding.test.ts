@@ -17,6 +17,7 @@ import {constants} from 'ethers';
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
+import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
 
 import {
   wallet1,
@@ -32,7 +33,6 @@ import {
 import {subscribeToMessages} from './message-service';
 import {SimpleHub} from './simple-hub';
 
-import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
 const {add, sub: subtract} = BN;
 
 jest.setTimeout(20000);

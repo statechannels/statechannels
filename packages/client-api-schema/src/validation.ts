@@ -1,6 +1,7 @@
 // need to use this syntax, because ajv uses export= style exports
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
+
 import {
   StateChannelsRequest,
   StateChannelsResponse,
