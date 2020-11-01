@@ -134,13 +134,13 @@ const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation 
  *
  * IF there are any pending ledger updates (to fund OR defund a channel)
  *
- *   i. Check if I already signed a new ledger update. If I did, then call this O₁. [1]
+ *   i. Check if I already signed a new ledger update. If I did, then call its outcome O₁. [1]
  *      Otherwise, iteratively allocate funds from the supported state's (i.e., S) outcome
  *      to each request, call this O₁.
  *
- *  ii. If there is a conflicting ledger update, call that O₂. Sign O₁ ⋂ O₂ with the higher turn
- *      number between 2 higher than the latest I signed and the turn number of what was
- *      received from the counterparty, O₂.
+ *  ii. If there is a conflicting ledger update, call its outcome O₂. Sign O₁ ⋂ O₂ with the
+ *      higher turn number between 2 higher than the latest I signed and the turn number
+ *      of what was received from the counterparty, O₂.
  *
  * [1] If you sign O₁, a new request may come in to your wallet — we ignore those new
  *     requests until either O₁ or O₂ is signed, to avoid an endless loop.
