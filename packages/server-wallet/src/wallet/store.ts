@@ -23,7 +23,6 @@ import {
   convertToParticipant,
   SignedState,
   objectiveId,
-  deserializeState,
   isSimpleAllocation,
   checkThat,
 } from '@statechannels/wallet-core';
@@ -572,8 +571,6 @@ export class Store {
         tx
       ));
 
-    const incomingState = deserializeState(wireSignedState);
-
     const sswh: SignedStateWithHash = addHash({
       chainId: wireSignedState.chainId,
       channelNonce: wireSignedState.channelNonce,
@@ -593,7 +590,7 @@ export class Store {
 
       if (
         !(await timer('validating transition', async () =>
-          this.validateTransition(supported, incomingState, tx)
+          this.validateTransition(supported, sswh, tx)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
