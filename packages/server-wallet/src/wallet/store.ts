@@ -27,7 +27,7 @@ import {Payload as WirePayload, SignedState as WireSignedState} from '@statechan
 import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
-import {ethers, constants} from 'ethers';
+import {ethers} from 'ethers';
 import Knex from 'knex';
 
 import {
@@ -99,7 +99,7 @@ export class Store {
     return {
       participantId: signingAddress,
       signingAddress,
-      destination: makeDestination(constants.HashZero),
+      destination: makeDestination(signingAddress),
     };
   }
 
