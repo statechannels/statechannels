@@ -4,39 +4,28 @@ import {
   Outcome,
   SignedStateWithHash,
   SignedStateVarsWithHash,
-  State,
   calculateChannelId,
   StateVariables,
   ChannelConstants,
   Participant,
   makeDestination,
-  StateWithHash,
   deserializeObjective,
   wireStateToNitroState,
   deserializeOutcome,
   convertToInternalParticipant,
-  SignatureEntry,
   isOpenChannel,
-  convertToParticipant,
   SignedState,
   objectiveId,
   isSimpleAllocation,
   checkThat,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
-import {State as NitroState} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
 
-import {
-  Channel,
-  RequiredColumns,
-  ChannelError,
-  CHANNEL_COLUMNS,
-  isChannelMissingError,
-} from '../models/channel';
+import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
@@ -55,6 +44,7 @@ import {logger} from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
+
 class UniqueViolationError extends Error {
   columns: string[] = [];
 }
@@ -125,13 +115,14 @@ export class Store {
   }
 
   /**
+   * Ensure a channel is only update-able by some criticable code within a transaction.
    *
    * @param channelId application channel Id
    * @param cb critical code to be executed while holding a lock on channelId
    *
-   * This excutes `cb` within the context of a SQL transaction, after first acquiring a row-level lock
-   * on a single row in the Channels table. This guarantees that at most one `cb` can be executing
-   * concurrently across all wallets.
+   * This excutes `cb` within the context of a SQL transaction, after first acquiring a row-level
+   * lock on a single row in the Channels table. This guarantees that at most one `cb` can be
+   * executing concurrently across all wallets.
    */
   async lockApp<T>(
     channelId: Bytes32,
@@ -140,13 +131,11 @@ export class Store {
   ): Promise<T> {
     return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
-      const channel = await timer(
-        'getting channel',
-        async () =>
-          await Channel.query(tx)
-            .where({channelId})
-            .forUpdate()
-            .first()
+      const channel = await timer('getting channel', () =>
+        Channel.query(tx)
+          .where({channelId})
+          .forUpdate()
+          .first()
       );
 
       if (!channel) return onChannelMissing(channelId);
@@ -163,11 +152,13 @@ export class Store {
 
     const channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
 
-    const state: StateWithHash = addHash({...channel.channelConstants, ...vars});
+    const state = addHash({...channel.channelConstants, ...vars});
 
-    const {supported} = channel;
+    const {supported, latestSignedByMe} = channel;
 
-    await timer('validating freshness', async () => validateStateFreshness(state, channel));
+    if (latestSignedByMe && latestSignedByMe.turnNum >= state.turnNum)
+      // Don't sign a new state with lower turnNum than already signed by you
+      throw new StoreError(StoreError.reasons.staleState);
 
     const signatureEntry = await timer('signing', async () =>
       channel.signingWallet.signState(state)
@@ -294,9 +285,8 @@ export class Store {
 
       const stateChannelIds = message.signedStates?.map(ss => ss.channelId) || [];
       for (const ss of sortedSignedStates || []) {
-        channelResults.push(
-          (await this.addSignedState(ss.channelId, undefined, ss, tx)).channelResult
-        );
+        const channel = await this.addSignedState(ss.channelId, ss, tx);
+        channelResults.push(channel.channelResult);
       }
 
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
@@ -454,65 +444,41 @@ export class Store {
     return LedgerRequest.getPendingRequests(ledgerChannelId, tx || this.knex);
   }
 
+  /**
+   * Add a new state into the database.
+   *
+   * @param channelId - the channel ID the state refers to
+   * @param state - the new signed state to be added
+   * @param tx - an existing database transaction context
+   *
+   * This function serves as both a data validator (ensure the state is valid) and
+   * an efficient operator on the database.
+   */
   async addSignedState(
     channelId: string,
-    maybeChannel: Channel | undefined,
-    wireSignedState: WireSignedState,
+    wireState: WireSignedState,
     tx: Transaction
   ): Promise<Channel> {
     const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
-    const signatures = await timer(
-      'validating signatures',
-      async () =>
-        await recoverParticipantSignatures(
-          wireSignedState.signatures,
-          wireSignedState.participants.map(p => p.signingAddress),
-          channelId,
-          wireStateToNitroState(wireSignedState)
-        )
+    // Deserialize (and validate signatures in the process)
+    const deserializedState = await timer('validating signatures', async () =>
+      fastDeserializeState(channelId, wireState)
     );
 
-    maybeChannel =
-      maybeChannel || (await timer('get channel', async () => getChannel(channelId, tx)));
+    // Compute the stateHash for the new state
+    const state = addHash(deserializedState);
 
-    if (!maybeChannel)
-      (
-        await Nonce.fromJson({
-          value: wireSignedState.channelNonce,
-          addresses: wireSignedState.participants.map(p => p.signingAddress),
-        })
-      ).use(tx);
-
+    // Get the Channel row from the database (create if needed)
     const channel =
-      maybeChannel ||
-      (await createChannel(
-        {
-          ...wireSignedState,
-          participants: wireSignedState.participants.map(convertToParticipant),
-        },
-        'Unknown',
-        undefined,
-        tx
-      ));
+      (await Channel.forId(channelId, tx)) ||
+      (await createChannel(state, 'Unknown', undefined, tx));
 
-    const sswh: SignedStateWithHash = addHash({
-      chainId: wireSignedState.chainId,
-      channelNonce: wireSignedState.channelNonce,
-      appDefinition: wireSignedState.appDefinition,
-      appData: wireSignedState.appData,
-      turnNum: wireSignedState.turnNum,
-      isFinal: wireSignedState.isFinal,
-      challengeDuration: wireSignedState.challengeDuration,
-      outcome: deserializeOutcome(wireSignedState.outcome),
-      participants: wireSignedState.participants.map(convertToInternalParticipant),
-      signatures,
-    });
-
-    const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === sswh.stateHash);
-    if (channel.supported && !alreadyHaveState && !(await this.isLedger(channelId, tx))) {
-      const {supported} = channel;
-
+    // Validate the transition rules are obeyed by the new state from the prior states
+    const alreadyHaveState = _.some(channel.sortedStates, ['stateHash', state.stateHash]);
+    const isLedger = await this.isLedger(channelId, tx);
+    const {supported} = channel;
+    if (supported && !alreadyHaveState && !isLedger) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
@@ -520,35 +486,37 @@ export class Store {
           error: new Error(`No byte code for ${supported.appDefinition}`),
         });
 
-      if (
-        !(await timer('validating transition', async () =>
-          validateTransition(supported, sswh, bytecode, this.skipEvmValidation)
-        ))
-      ) {
+      const isValidTransition = await timer('validating transition', async () =>
+        validateTransition(supported, state, bytecode, this.skipEvmValidation)
+      );
+
+      if (!isValidTransition) {
         throw new StoreError('Invalid state transition', {
-          from: channel.supported,
-          to: wireSignedState,
+          from: supported,
+          to: state,
         });
       }
     }
 
-    channel.vars = await timer('adding state', async () => addState(channel.vars, sswh));
+    // Create the new Channel object by adding the new state
+    channel.vars = await timer('adding state', async () => addState(channel.vars, state));
 
+    // Do 'garbage collection' by removing unnecessary / stale states
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
 
+    // Do checks on the Channel object before inserting into the database
     await timer('validating invariants', async () =>
       validateInvariants(channel.vars, channel.myAddress)
     );
 
-    const result = await timer('updating', async () =>
+    // Insert into the DB
+    return await timer('updating', () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
         .patch({vars: channel.vars})
         .returning('*')
         .first()
     );
-
-    return result;
   }
 
   async createChannel(
@@ -631,103 +599,75 @@ class StoreError extends WalletError {
   }
 }
 
+/**
+ * Construct a new Channel and insert it into the database, ensuring that the Nonce
+ * provided for this new channel is also the newest we have ever seen.
+ */
 async function createChannel(
   constants: ChannelConstants,
   fundingStrategy: FundingStrategy,
   fundingLedgerChannelId: Address | undefined,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
-  const channelId = calculateChannelId(constants);
+  const addresses = constants.participants.map(p => p.signingAddress);
 
-  const {address: signingAddress} = await getSigningWallet(constants, txOrKnex);
+  const signingWallet = await SigningWallet.query(txOrKnex)
+    .whereIn('address', addresses)
+    .first();
 
-  const cols: RequiredColumns = pick(
-    {
-      ...constants,
-      channelId,
-      vars: [],
-      chainServiceRequests: [],
-      signingAddress,
-      fundingStrategy,
-    },
-    ...CHANNEL_COLUMNS
+  if (!signingWallet) throw new StoreError(StoreError.reasons.notInChannel);
+
+  await Nonce.ensureLatest(constants.channelNonce, addresses, txOrKnex);
+
+  const channel = Channel.fromJson(
+    pick(
+      {
+        ...constants,
+        assetHolderAddress: undefined,
+        chainServiceRequests: [],
+        channelId: calculateChannelId(constants),
+        fundingLedgerChannelId,
+        fundingStrategy,
+        signingAddress: signingWallet.address,
+        vars: [],
+      },
+      ...CHANNEL_COLUMNS
+    )
   );
-  const channel = Channel.fromJson({...cols, fundingLedgerChannelId});
+
   return await Channel.query(txOrKnex)
     .insert(channel)
     .returning('*')
     .first();
 }
-async function getChannel(
-  channelId: string,
-  txOrKnex: TransactionOrKnex
-): Promise<Channel | undefined> {
-  try {
-    return await Channel.forId(channelId, txOrKnex);
-  } catch (err) {
-    if (!isChannelMissingError) throw err;
-    return undefined;
-  }
+
+function ensureSingleSignedState(
+  states: SignedStateVarsWithHash[],
+  mySigningAddress: string
+): void {
+  const multipleSignedByMe = _.chain(states)
+    .filter(state => _.some(state.signatures, ['signer', mySigningAddress]))
+    .groupBy('turnNum')
+    .some(states => states.length > 1)
+    .value();
+
+  if (multipleSignedByMe) throw new StoreError(StoreError.reasons.multipleSignedStates);
 }
 
-async function getSigningWallet(
-  channel: ChannelConstants,
-  txOrKnex: TransactionOrKnex
-): Promise<SigningWallet> {
-  const addresses = channel.participants.map(p => p.signingAddress);
-  const signingWallet = await SigningWallet.query(txOrKnex)
-    .whereIn('address', addresses)
-    .first();
-
-  if (!signingWallet) {
-    throw new StoreError(StoreError.reasons.notInChannel);
-  }
-  return signingWallet;
-}
-/*
- * Validator functions
- */
-
-async function recoverParticipantSignatures(
-  signatures: string[],
-  participants: string[],
-  channelId: string,
-  nitroState: NitroState
-): Promise<SignatureEntry[]> {
-  return Promise.all(
-    signatures.map(async sig => {
-      const recoveredAddress = await recoverAddress(sig, nitroState);
-
-      if (participants.indexOf(recoveredAddress) < 0) {
-        throw new Error(
-          `Recovered address ${recoveredAddress} is not a participant in channel ${channelId}`
-        );
-      }
-      return {signature: sig, signer: recoveredAddress};
-    })
-  );
-}
-
-function validateStateFreshness(signedState: State, channel: Channel): void {
-  if (channel.latestSignedByMe && channel.latestSignedByMe.turnNum >= signedState.turnNum) {
-    throw new StoreError(StoreError.reasons.staleState);
-  }
-}
-
-function validateInvariants(stateVars: SignedStateVarsWithHash[], myAddress: string): void {
-  const signedByMe = stateVars.filter(s => s.signatures.some(sig => sig.signer === myAddress));
-  const groupedByTurnNum = _.groupBy(signedByMe, s => s.turnNum.toString());
-  const multipleSignedByMe = _.map(groupedByTurnNum, s => s.length)?.find(num => num > 1);
-
-  if (multipleSignedByMe) {
-    throw new StoreError(StoreError.reasons.multipleSignedStates);
-  }
-
-  const turnNums = _.map(stateVars, s => s.turnNum);
-
-  if (!isReverseSorted(turnNums)) {
+function ensureReverseSortedOrderOfStates(states: SignedStateVarsWithHash[]): void {
+  if (!isReverseSorted(_.map(states, 'turnNum')))
     throw new StoreError(StoreError.reasons.notSorted);
-  }
+}
+
+/**
+ * There are currently two invariants being checked:
+ *
+ * 1. Only signed a single state for any given turn number.
+ * 2. Storing states in reverse sorted order.
+ */
+function validateInvariants(states: SignedStateVarsWithHash[], mySigningAddress: string): void {
+  ensureSingleSignedState(states, mySigningAddress);
+  ensureReverseSortedOrderOfStates(states);
 }
 
 function isReverseSorted(arr: number[]): boolean {
@@ -741,43 +681,88 @@ function isReverseSorted(arr: number[]): boolean {
 }
 
 /**
- * State variable modifiers
+ * Fold a new signed state into an existing list of signed states (variable parts only).
+ *
+ * @param vars - list of signed states
+ * @param signedState - new signed state
+ *
+ * A signed state _may_ be a new signature on an existing signed state, in which case
+ * we want to "fold" it in by adding a signature to the existing signed state object.
+ *
+ * In the other case, it represents a brand new state, so we simply push it to the end
+ * of the list of existing signed states.
  */
 function addState(
   vars: SignedStateVarsWithHash[],
   signedState: SignedStateWithHash
 ): SignedStateVarsWithHash[] {
-  const clonedVariables = _.cloneDeep(vars);
-  const {stateHash} = signedState;
-  const existingStateIndex = clonedVariables.findIndex(v => v.stateHash === stateHash);
-  if (existingStateIndex > -1) {
-    const mergedSignatures = _.uniqBy(
-      signedState.signatures.concat(clonedVariables[existingStateIndex].signatures),
-      sig => sig.signature
-    );
+  const {stateHash, signatures} = signedState;
 
-    clonedVariables[existingStateIndex].signatures = mergedSignatures;
-    return clonedVariables;
+  const ret = _.cloneDeep(vars);
+
+  const existing = _.find(ret, ['stateHash', stateHash]);
+
+  if (existing) {
+    existing.signatures = _.uniqBy([...existing.signatures, ...signatures], 'signature');
   } else {
-    return clonedVariables.concat({...signedState, stateHash});
+    ret.push(signedState);
   }
+
+  return ret;
 }
 
+/**
+ * Retrieve a list of states that must be stored to ensure future secure protocol execution.
+ *
+ * @param signedStates - list of signed states of arbitrary length
+ * @param support - a support (list of signed states)
+ *
+ * Should remove states in signedStates which are not a part of the support.
+ */
 function clearOldStates(
   signedStates: SignedStateVarsWithHash[],
   support: SignedStateWithHash[] | undefined
 ): SignedStateVarsWithHash[] {
-  const sorted = _.reverse(_.sortBy(signedStates, s => s.turnNum));
+  let sorted = _.reverse(_.sortBy(signedStates, s => s.turnNum));
+
   // If we don't have a supported state we don't clean anything out
   if (support && support.length > 0) {
-    // The support is returned in descending turn number so we need to grab the last element to find the earliest state
+    // The support is returned in descending turn number so we need to grab
+    // the last element to find the earliest state
     const {stateHash: firstSupportStateHash} = support[support.length - 1];
 
     // Find where the first support state is in our current state array
     const supportIndex = sorted.findIndex(sv => sv.stateHash === firstSupportStateHash);
+
     // Take everything before that
-    return sorted.slice(0, supportIndex + 1);
-  } else {
-    return sorted;
+    sorted = sorted.slice(0, supportIndex + 1);
   }
+
+  return sorted;
+}
+
+/**
+ * Deserializes a state but uses the wasm utility method local to the server-wallet
+ * package. This, as opposed to the JS implementation inside wallet-core.
+ */
+function fastDeserializeState(channelId: Bytes32, state: WireSignedState): SignedState {
+  const {outcome, participants, signatures} = state;
+
+  const nitroState = wireStateToNitroState(state);
+
+  const signatureEntries = signatures.map(signature => {
+    const signer = recoverAddress(signature, nitroState);
+
+    if (!_.includes(nitroState.channel.participants, signer))
+      throw new Error(`Recovered address ${signer} is not a participant in channel ${channelId}`);
+
+    return {signature, signer};
+  });
+
+  return {
+    ...state,
+    outcome: deserializeOutcome(outcome),
+    participants: participants.map(convertToInternalParticipant),
+    signatures: signatureEntries,
+  };
 }

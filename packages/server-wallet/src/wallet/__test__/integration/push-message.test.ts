@@ -67,7 +67,7 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(channelsAfter[0].vars).toHaveLength(2);
 
   // The Channel model adds the state hash before persisting
-  expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
+  expect(channelsAfter[0].vars).toMatchObject(signedStates);
 });
 
 it('ignores duplicate states', async () => {
@@ -92,7 +92,7 @@ it('ignores duplicate states', async () => {
   expect(channelsAfter[0].vars).toHaveLength(2);
 
   // The Channel model adds the state hash before persisting
-  expect(signedStates.map(addHash)).toMatchObject(channelsAfter[0].vars);
+  expect(channelsAfter[0].vars).toMatchObject(signedStates);
 });
 
 it('adds signatures to existing states', async () => {
@@ -196,10 +196,10 @@ describe('channel results', () => {
 
     // The Channel model adds the state hash before persisting
 
-    const stateVar = signedStates.map(addHash)[1];
+    const stateVar = signedStates[1];
     const record = await Channel.forId(calculateChannelId(stateVar), wallet.knex);
 
-    expect(stateVar).toMatchObject(record.vars[0]);
+    expect(record.vars[0]).toMatchObject(stateVar);
   });
 });
 

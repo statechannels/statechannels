@@ -46,6 +46,10 @@ export class Nonce extends Model {
       .then(res => res.rows[0].value);
   }
 
+  static async ensureLatest(value: Uint48, addresses: Address[], knex: Knex): Promise<void> {
+    await Nonce.fromJson({value, addresses}).use(knex);
+  }
+
   async use(knex: Knex): Promise<void> {
     return await knex
       .raw(
