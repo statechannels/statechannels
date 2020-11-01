@@ -32,9 +32,10 @@ export const REQUIRED_COLUMNS = [
   'chainServiceRequests',
   'fundingStrategy',
 ] as const;
-
+export const OPTIONAL_COLUMNS = ['assetHolderAddress', 'fundingLedgerChannelId'] as const;
 export const COMPUTED_COLUMNS = ['channelId', 'signingAddress'] as const;
-export const CHANNEL_COLUMNS = [...REQUIRED_COLUMNS, ...COMPUTED_COLUMNS];
+
+export const CHANNEL_COLUMNS = [...REQUIRED_COLUMNS, ...COMPUTED_COLUMNS, ...OPTIONAL_COLUMNS];
 
 export interface RequiredColumns {
   readonly chainId: Bytes32;

@@ -52,8 +52,8 @@ describe('addSignedState', () => {
       signatures: [BOB_SIGNATURE],
     };
 
-    await expect(
-      store.addSignedState(channelId, undefined, signedState, knex as any)
-    ).rejects.toThrow(/is not a participant/);
+    await expect(store.addSignedState(channelId, signedState, knex as any)).rejects.toThrow(
+      /is not a participant/
+    );
   });
 });
