@@ -6,7 +6,7 @@ import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {channel} from '../../models/__test__/fixtures/channel';
 
-import {stateWithHashSignedBy2} from './fixtures/states';
+import {stateWithHashSignedBy} from './fixtures/states';
 import {alice, bob} from './fixtures/signing-wallets';
 
 let store: Store;
@@ -30,7 +30,7 @@ describe('addSignedState', () => {
   });
 
   it('throws when the signer is not me', async () => {
-    const stateSignedByBob = stateWithHashSignedBy2([bob()])();
+    const stateSignedByBob = stateWithHashSignedBy([bob()])();
     const channelWithAliceAsSigner = channel();
     await expect(
       store.addMyState(channelWithAliceAsSigner, stateSignedByBob, knex as any)
@@ -39,7 +39,7 @@ describe('addSignedState', () => {
 
   it('throws when there are multiple signers (me and someone else)', async () => {
     // This is bad since the other person's signature will not be validated
-    const stateSignedByBob = stateWithHashSignedBy2([bob(), alice()])();
+    const stateSignedByBob = stateWithHashSignedBy([bob(), alice()])();
     const channelWithAliceAsSigner = channel();
     await expect(
       store.addMyState(channelWithAliceAsSigner, stateSignedByBob, knex as any)
@@ -47,7 +47,7 @@ describe('addSignedState', () => {
   });
 
   it('does not throw when the signer is me', async () => {
-    const stateSignedByAlice = stateWithHashSignedBy2([alice()])();
+    const stateSignedByAlice = stateWithHashSignedBy([alice()])();
     const channelWithAliceAsSigner = channel();
     await expect(
       store.addMyState(channelWithAliceAsSigner, stateSignedByAlice, knex as any)

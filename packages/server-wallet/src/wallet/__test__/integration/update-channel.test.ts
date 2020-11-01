@@ -33,10 +33,7 @@ beforeEach(async () => {
 it('updates a channel', async () => {
   const c = channel({
     vars: [
-      stateWithHashSignedBy(
-        alice(),
-        bob()
-      )({
+      stateWithHashSignedBy([alice(), bob()])({
         turnNum: 5,
         appDefinition: COUNTING_APP_DEFINITION,
         appData: appData1,
@@ -68,7 +65,7 @@ it('updates a channel', async () => {
 
 describe('error cases', () => {
   it('throws when it is not my turn', async () => {
-    const c = channel({vars: [stateWithHashSignedBy(alice(), bob())({turnNum: 4})]});
+    const c = channel({vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 4})]});
     await Channel.query(w.knex).insert(c);
 
     await expect(w.updateChannel(updateChannelArgs())).rejects.toMatchObject(
@@ -85,10 +82,7 @@ describe('error cases', () => {
   it('throws when it is an invalid app transition', async () => {
     const c = channel({
       vars: [
-        stateWithHashSignedBy(
-          alice(),
-          bob()
-        )({
+        stateWithHashSignedBy([alice(), bob()])({
           turnNum: 5,
           appDefinition: COUNTING_APP_DEFINITION,
           appData: appData2,
