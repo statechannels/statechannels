@@ -252,7 +252,7 @@ export const options = (
 ): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
   const actions: Record<Actions, any> = {
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
-      store.addObjective(data),
+      store.addInternalObjective(data),
     [Actions.assignDeductions]: assign(
       (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({...ctx, ...data})
     ),

@@ -245,7 +245,7 @@ const createLedger = (store: Store) => async (context: Initial): Promise<LedgerI
   await store.setFunding(entry.channelId, {type: 'Direct'});
   await store.setLedger(entry.channelId);
   await store.setapplicationDomain(ledgerId, context.budget.domain);
-  await store.addObjective({
+  await store.addInternalObjective({
     type: 'FundLedger',
     participants: participants,
     data: {ledgerId}

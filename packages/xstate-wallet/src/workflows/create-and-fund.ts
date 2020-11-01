@@ -83,7 +83,7 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
     stateVars
   );
 
-  store.addObjective({
+  store.addInternalObjective({
     type: 'VirtuallyFund',
     participants,
     data: {jointChannelId, targetChannelId: ctx.channelId}

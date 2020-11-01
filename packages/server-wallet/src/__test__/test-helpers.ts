@@ -3,6 +3,7 @@ import {Payload, SignedState} from '@statechannels/wire-format';
 import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-core';
 
 import {Wallet} from '../wallet';
+
 import {Outgoing} from '..';
 
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {

@@ -83,7 +83,7 @@ export class Store {
       this.getChannel = recordFunctionMetrics(this.getChannel);
       this.getStates = recordFunctionMetrics(this.getStates);
       this.getChannels = recordFunctionMetrics(this.getChannels);
-      this.addObjective = recordFunctionMetrics(this.addObjective);
+      this.addInternalObjective = recordFunctionMetrics(this.addInternalObjective);
       this.pushMessage = recordFunctionMetrics(this.pushMessage);
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
@@ -303,7 +303,7 @@ export class Store {
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
       const storedObjectives = [];
       for (const o of deserializedObjectives) {
-        storedObjectives.push(await this.addObjective(o, tx));
+        storedObjectives.push(await this.addInternalObjective(o, tx));
       }
 
       function isDefined(s: string | undefined): s is string {
@@ -359,7 +359,7 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<InternalObjective> {
+  async addInternalObjective(objective: Objective, tx: Transaction): Promise<InternalObjective> {
     if (isOpenChannel(objective)) {
       const {
         data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},

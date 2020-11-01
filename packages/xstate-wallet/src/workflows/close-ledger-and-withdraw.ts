@@ -208,7 +208,7 @@ const createObjective = (store: Store) => async context => {
     participants: [context.player, context.opponent],
     data: {ledgerId: ledgerEntry.channelId}
   };
-  await store.addObjective(objective);
+  await store.addInternalObjective(objective);
   return objective;
 };
 const observeFundsWithdrawal = (store: Store) => ({ledgerId}: LedgerExists) =>

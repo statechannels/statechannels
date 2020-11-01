@@ -374,7 +374,7 @@ export class Store {
       }
     );
 
-  async addObjective(objective: Objective, addToOutbox = true) {
+  async addInternalObjective(objective: Objective, addToOutbox = true) {
     const objectives = this.objectives;
     if (!_.find(objectives, o => _.isEqual(o, objective))) {
       this.objectives.push(objective);
@@ -407,7 +407,7 @@ export class Store {
 
   async pushMessage(message: Payload) {
     await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
-    message.objectives?.map(o => this.addObjective(o, false));
+    message.objectives?.map(o => this.addInternalObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {

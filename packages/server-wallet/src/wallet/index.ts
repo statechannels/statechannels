@@ -454,7 +454,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       if (hasSupportedState(channel) && !isMyTurn(channel))
         throw new CloseChannel.CloseChannelError(CloseChannel.CloseChannelError.reasons.notMyTurn);
 
-      await this.store.addObjective(
+      await this.store.addInternalObjective(
         {
           type: 'CloseChannel',
           participants: [],

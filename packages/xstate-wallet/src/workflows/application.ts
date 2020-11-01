@@ -414,7 +414,7 @@ export const workflow = (
       );
 
       // Create a open channel objective so we can coordinate with all participants
-      await store.addObjective({
+      await store.addInternalObjective({
         type: 'OpenChannel',
         data: {targetChannelId, fundingStrategy},
         participants: [participants[1]]

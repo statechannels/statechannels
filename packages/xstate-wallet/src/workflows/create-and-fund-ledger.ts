@@ -117,7 +117,7 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
     participants: context.participants,
     data: {ledgerId: context.ledgerId}
   };
-  return store.addObjective(objective);
+  return store.addInternalObjective(objective);
 };
 const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => async context => {
   const {latestState} = await store.getEntry(context.ledgerId);
