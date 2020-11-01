@@ -67,7 +67,6 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export class Store {
   constructor(
     public readonly knex: Knex,
