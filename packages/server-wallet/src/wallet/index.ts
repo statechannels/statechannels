@@ -51,7 +51,6 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {InternalObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
 import {ObjectiveManager} from '../objectives';
 import {hasSupportedState, isMyTurn} from '../handlers/helpers';
@@ -64,12 +63,10 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
-  objectivesToApprove?: Omit<InternalObjective, 'status'>[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
-  objectivesToApprove?: Omit<InternalObjective, 'status'>[];
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
 
@@ -544,9 +541,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       };
     }
 
-    const {channelIds, objectives, channelResults: fromStoring} = await this.store.pushMessage(
-      wirePayload
-    );
+    const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
@@ -562,7 +557,6 @@ export class Wallet extends EventEmitter<WalletEvent>
     return {
       outbox: mergeOutgoing(outbox),
       channelResults: mergeChannelResults(channelResults),
-      objectivesToApprove: objectives,
     };
   }
 
