@@ -203,7 +203,7 @@ const computeNewOutcome = ({
 
     const theirLatestOutcome = checkThat(conflictingOutcome, isSimpleAllocation);
 
-    if (!_.isEqual(theirLatestOutcome, myExpectedOutcome) /* (1) */) {
+    if (!_.isEqual(theirLatestOutcome, myExpectedOutcome)) {
       const merged = intersectOutcome(myExpectedOutcome, theirLatestOutcome);
       const xor = xorOutcome(myExpectedOutcome, theirLatestOutcome);
 
@@ -218,14 +218,14 @@ const computeNewOutcome = ({
       const agreedUponOutcome = allocateFundsToChannels(
         retrieveFundsFromClosedChannels(supportedOutcome, bothDefunding),
         bothFunding
-      ); // (2)
+      );
 
-      newOutcome = agreedUponOutcome.allocated; // (2)
+      newOutcome = agreedUponOutcome.allocated;
       insufficientFundsFor = insufficientFundsFor.concat(agreedUponOutcome.insufficientFunds);
     }
 
     // Bump the turn number to indicate conflict resolution
-    newTurnNum = Math.max(latestSignedByMe.turnNum + n, conflictingTurnNum); // (3)
+    newTurnNum = Math.max(latestSignedByMe.turnNum + n, conflictingTurnNum);
   }
 
   return {
