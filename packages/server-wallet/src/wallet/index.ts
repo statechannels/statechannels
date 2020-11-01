@@ -446,31 +446,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
-    for (const channelId of channelIds) {
-      await this.store.lockApp(
-        channelId,
-        async (tx, channel) => {
-          // TODO: (Objectives Rewrite) Keeping this here b/c we need to do input validation
-          // and check if its our turn and throw an error as existing tests expect
-          getOrThrow(CloseChannel.closeChannel(channel));
-
-          await this.store.addObjective(
-            {
-              type: 'CloseChannel',
-              participants: [],
-              data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
-            },
-            tx
-          );
-        },
-        () => {
-          throw new CloseChannel.CloseChannelError(
-            CloseChannel.CloseChannelError.reasons.channelMissing,
-            {channelId}
-          );
-        }
-      );
-    }
+    for (const channelId of channelIds) await this.closeChannelInternal(channelId);
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
@@ -484,40 +460,35 @@ export class Wallet extends EventEmitter<WalletEvent>
   }
 
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
-    const handleMissingChannel: MissingAppHandler<void> = () => {
-      throw new CloseChannel.CloseChannelError(
-        CloseChannel.CloseChannelError.reasons.channelMissing,
-        {channelId}
-      );
-    };
+    const {outbox, channelResults} = await this.closeChannels([channelId]);
+    return {outbox, channelResult: channelResults[0]};
+  }
 
-    const criticalCode: AppHandler<void> = async (tx, channel) => {
-      if (hasSupportedState(channel) && !isMyTurn(channel))
-        throw new CloseChannel.CloseChannelError(CloseChannel.CloseChannelError.reasons.notMyTurn);
+  private async closeChannelInternal(channelId: Bytes32): Promise<void> {
+    await this.store.lockApp(
+      channelId,
+      async (tx, channel) => {
+        if (hasSupportedState(channel) && !isMyTurn(channel))
+          throw new CloseChannel.CloseChannelError(
+            CloseChannel.CloseChannelError.reasons.notMyTurn
+          );
 
-      await this.store.addObjective(
-        {
-          type: 'CloseChannel',
-          participants: [],
-          data: {targetChannelId: channelId, fundingStrategy: 'Unknown'},
-        },
-        tx
-      );
-    };
-
-    await this.store.lockApp(channelId, criticalCode, handleMissingChannel);
-
-    const {channelResults, outbox} = await this.takeActions([channelId]);
-
-    (outbox[0].params.data as Payload).objectives = [
-      {
-        type: 'CloseChannel',
-        participants: [],
-        data: {targetChannelId: channelId, fundingStrategy: 'Unknown'},
+        await this.store.addObjective(
+          {
+            type: 'CloseChannel',
+            participants: [],
+            data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
+          },
+          tx
+        );
       },
-    ];
-
-    return {outbox: mergeOutgoing(outbox), channelResult: channelResults[0]};
+      () => {
+        throw new CloseChannel.CloseChannelError(
+          CloseChannel.CloseChannelError.reasons.channelMissing,
+          {channelId}
+        );
+      }
+    );
   }
 
   async getLedgerChannels(
