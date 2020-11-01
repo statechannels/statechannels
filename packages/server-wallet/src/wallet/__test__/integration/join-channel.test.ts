@@ -43,14 +43,14 @@ describe('directly funded app', () => {
     const c1 = channel({
       signingAddress: bob().address,
       channelNonce: 1,
-      vars: [stateWithHashSignedBy(alice())(state1)],
+      vars: [stateWithHashSignedBy([alice()])(state1)],
     });
 
     await Channel.query(w.knex).insert(c1);
     const c2 = channel({
       signingAddress: bob().address,
       channelNonce: 2,
-      vars: [stateWithHashSignedBy(alice())(state2)],
+      vars: [stateWithHashSignedBy([alice()])(state2)],
     });
 
     await Channel.query(w.knex).insert(c2);
@@ -116,7 +116,7 @@ describe('directly funded app', () => {
     const preFS1 = {turnNum: 1, appData};
     const c = channel({
       signingAddress: bob().address,
-      vars: [stateWithHashSignedBy(alice())(preFS0)],
+      vars: [stateWithHashSignedBy([alice()])(preFS0)],
     });
     await Channel.query(w.knex).insert(c);
     const {channelId} = c;
@@ -155,7 +155,7 @@ describe('directly funded app', () => {
 
     const c = channel({
       signingAddress: bob().address,
-      vars: [stateWithHashSignedBy(alice())(preFS0)],
+      vars: [stateWithHashSignedBy([alice()])(preFS0)],
     });
 
     await Channel.query(w.knex).insert(c);
@@ -214,10 +214,7 @@ describe('ledger funded app scenarios', () => {
         signingAddress: bob().address,
         channelNonce: someNonConflictingChannelNonce,
         vars: [
-          stateWithHashSignedBy(
-            alice(),
-            bob()
-          )({
+          stateWithHashSignedBy([alice(), bob()])({
             appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,
@@ -282,10 +279,10 @@ describe('ledger funded app scenarios', () => {
     const {channelId} = await putTestChannelInsideWallet({
       ...app,
       signingAddress: bob().address,
-      vars: [stateWithHashSignedBy(alice())(preFS0)],
+      vars: [stateWithHashSignedBy([alice()])(preFS0)],
     });
 
-    const signedPreFS1 = stateWithHashSignedBy(bob())(preFS1);
+    const signedPreFS1 = stateWithHashSignedBy([bob()])(preFS1);
 
     await expect(w.joinChannel({channelId})).resolves.toMatchObject({
       outbox: [
@@ -296,8 +293,8 @@ describe('ledger funded app scenarios', () => {
             sender: 'bob',
             data: {
               signedStates: [
-                serializeState(stateWithHashSignedBy(bob())(signedPreFS1)),
-                serializeState(stateWithHashSignedBy(bob())(expectedUpdatedLedgerState)),
+                serializeState(stateWithHashSignedBy([bob()])(signedPreFS1)),
+                serializeState(stateWithHashSignedBy([bob()])(expectedUpdatedLedgerState)),
               ],
             },
           },

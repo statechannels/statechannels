@@ -39,8 +39,8 @@ it('returns an outgoing message with the latest state', async () => {
   const c = channel({
     participants,
     vars: [
-      stateWithHashSignedBy(alice(), bob(), charlie())(runningState),
-      stateWithHashSignedBy(alice())(nextState),
+      stateWithHashSignedBy([alice(), bob(), charlie()])(runningState),
+      stateWithHashSignedBy([alice()])(nextState),
     ],
   });
 

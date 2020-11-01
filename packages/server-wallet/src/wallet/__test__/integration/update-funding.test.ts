@@ -30,15 +30,15 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   const c1 = channel({
     channelNonce: 1,
     vars: [
-      stateWithHashSignedBy(alice())({turnNum: 0, channelNonce: 1}),
-      stateWithHashSignedBy(bob())({turnNum: 1, channelNonce: 1}),
+      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 1}),
+      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 1}),
     ],
   });
   const c2 = channel({
     channelNonce: 2,
     vars: [
-      stateWithHashSignedBy(alice())({turnNum: 0, channelNonce: 2}),
-      stateWithHashSignedBy(bob())({turnNum: 1, channelNonce: 2}),
+      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 2}),
+      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 2}),
     ],
   });
   await Channel.query(w.knex).insert(c1);
@@ -111,8 +111,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
 it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({
     vars: [
-      stateWithHashSignedBy(alice())({turnNum: 0}),
-      stateWithHashSignedBy(bob())({turnNum: 1}),
+      stateWithHashSignedBy([alice()])({turnNum: 0}),
+      stateWithHashSignedBy([bob()])({turnNum: 1}),
     ],
   });
   await Channel.query(w.knex).insert(c);

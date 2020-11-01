@@ -21,7 +21,10 @@ it("signs a final state when it's my turn", async () => {
   const turnNum = 7;
   const runningState = {turnNum, appData};
   const closingState = {...runningState, isFinal: true, turnNum: turnNum + 1};
-  const c = channel({channelNonce: 1, vars: [stateWithHashSignedBy(alice(), bob())(runningState)]});
+  const c = channel({
+    channelNonce: 1,
+    vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
+  });
   await Channel.query(w.knex).insert(c);
 
   const channelId = c.channelId;
@@ -41,7 +44,10 @@ it("reject when it's not my turn", async () => {
   const appData = '0x0f00';
   const turnNum = 8;
   const runningState = {turnNum, appData};
-  const c = channel({channelNonce: 2, vars: [stateWithHashSignedBy(alice(), bob())(runningState)]});
+  const c = channel({
+    channelNonce: 2,
+    vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
+  });
   await Channel.query(w.knex).insert(c);
 
   const channelId = c.channelId;

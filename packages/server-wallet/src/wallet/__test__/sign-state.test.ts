@@ -37,7 +37,7 @@ describe('signState', () => {
   let c: Channel;
 
   beforeEach(async () => {
-    c = await Channel.query(knex).insert(channel({vars: [stateWithHashSignedBy(bob())()]}));
+    c = await Channel.query(knex).insert(channel({vars: [stateWithHashSignedBy([bob()])()]}));
   });
 
   it('signs the state, returning the signed state', async () => {
