@@ -42,15 +42,18 @@ const fundChannelAction1 = fundChannel({
 const fundChannelAction2 = {...fundChannelAction1, expectedHeld: BN.from(5)};
 
 test.each`
-  supported           | latestSignedByMe    | latest              | funding      | action                         | cond                                                                     | result
-  ${undefined}        | ${undefined}        | ${prefundState1}    | ${notFunded} | ${signState(prefundState0)}    | ${'when the prefund state is not supported, and I am index 0'}           | ${'signs the prefund state'}
-  ${undefined}        | ${undefined}        | ${reversedPFState1} | ${notFunded} | ${signState(reversedPFState0)} | ${'when the prefund state is not supported, and I am index 1'}           | ${'signs the prefund state'}
-  ${prefundState0}    | ${prefundState0}    | ${prefundState0}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the prefund state'}
-  ${prefundState0}    | ${prefundState0}    | ${prefundState0}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
-  ${prefundState0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
-  ${altPrefundState0} | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
-`('$result $cond', ({supported, latest, latestSignedByMe, funding, action}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
+  supported           | myIndex | latestSignedByMe    | latest              | funding      | action                         | cond                                                                     | result
+  ${undefined}        | ${0}    | ${undefined}        | ${prefundState1}    | ${notFunded} | ${signState(prefundState0)}    | ${'when the prefund state is not supported, and I am index 0'}           | ${'signs the prefund state'}
+  ${undefined}        | ${0}    | ${undefined}        | ${reversedPFState1} | ${notFunded} | ${signState(reversedPFState0)} | ${'when the prefund state is not supported, and I am index 1'}           | ${'signs the prefund state'}
+  ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the prefund state'}
+  ${prefundState1}    | ${0}    | ${prefundState0}    | ${prefundState1}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
+  ${prefundState1}    | ${1}    | ${prefundState1}    | ${prefundState1}    | ${funded}    | ${signState(postfundState3)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
+  ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
+  ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
+`('$result $cond', ({supported, latest, latestSignedByMe, funding, action, myIndex}) => {
+  const ps = applicationProtocolState({
+    app: {supported, latest, latestSignedByMe, funding, myIndex},
+  });
   expect(protocol(ps)).toMatchObject(action);
 });
 
