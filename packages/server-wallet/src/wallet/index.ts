@@ -90,6 +90,7 @@ export type WalletInterface = {
   // App utilities
   getParticipant(): Promise<Participant | undefined>;
   registerAppDefinition(appDefinition: string): Promise<void>;
+  registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
   // App channel management
   createChannels(
     args: CreateChannelParams,
@@ -159,6 +160,10 @@ export class Wallet extends EventEmitter<WalletEvent>
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
+  }
+
+  public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
+    return this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
