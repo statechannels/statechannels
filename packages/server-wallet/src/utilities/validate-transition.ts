@@ -45,11 +45,12 @@ export async function validateTransition(
       },
       VALIDATION_ERROR
     );
+    return false;
   }
 
   const signatureValidation =
-    fromState.signatures.some(s => s.signer === fromMover) &&
-    toState.signatures.some(s => s.signer === toMover);
+    (fromState.signatures || []).some(s => s.signer === fromMover) &&
+    (toState.signatures || []).some(s => s.signer === toMover);
 
   if (!signatureValidation) {
     const VALIDATION_ERROR = `Signature validation failed.`;
