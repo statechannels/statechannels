@@ -1,24 +1,19 @@
 import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
 import * as PureEVM from '@connext/pure-evm-wasm';
 import {utils} from 'ethers';
-import {Transaction} from 'objection';
 
-import {AppBytecode} from './models/app-bytecode';
 import {logger} from './logger';
-import {defaultConfig} from './config';
-
-const MISSING = '0x';
-const bytecodeCache: Record<string, string | undefined> = {};
+import {Bytes} from './type-aliases';
 
 /**
- * Takes two states and runs the validateTransition in an evm (pureevm) if the bytecode exists in the DB.
- * Returns a promise that resolves to true if the validateTransition returns true false otherwise
+ * Takes two states and runs the validateTransition in an evm (pureevm).
+ * Returns a promise that resolves to true if the validateTransition
+ * returns true false otherwise
  */
 export const validateTransitionWithEVM = async (
   from: NitroState,
   to: NitroState,
-  tx: Transaction // Insist on running inside a transaction
-  // Tests may pass "knex as any" or ("undefined as any" if knex is globally bound) to sidestep the TS error
+  bytecode: Bytes
 ): Promise<boolean | undefined> => {
   if (from.appDefinition !== to.appDefinition) {
     logger.error('Invalid transition', {
@@ -26,17 +21,8 @@ export const validateTransitionWithEVM = async (
     });
     return false;
   }
-  const bytecode =
-    bytecodeCache[from.appDefinition] ??
-    (bytecodeCache[from.appDefinition] =
-      (await AppBytecode.getBytecode(defaultConfig.chainNetworkID, from.appDefinition, tx)) ||
-      MISSING);
-  if (bytecode === MISSING) {
-    logger.error('Missing bytecode', {
-      error: new Error(`No byte code for ${from.appDefinition}`),
-    });
-    return false;
-  }
+
+  if (bytecode === '0x') return false;
 
   const {data} = createValidTransitionTransaction(from, to);
 
