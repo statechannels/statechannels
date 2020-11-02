@@ -39,7 +39,7 @@ import {recoverAddress} from '../utilities/signatures';
 import {ObjectiveModel, DBObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
-import {validateTransition} from '../utilities/validate-transition';
+import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {logger} from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
@@ -164,8 +164,8 @@ export class Store {
       channel.signingWallet.signState(state)
     );
     const signedState = {...state, signatures: [signatureEntry]};
-    const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === state.stateHash);
-    if (supported && !alreadyHaveState && !(await this.isLedger(channelId, tx))) {
+
+    if (supported && shouldValidateTransition(state, channel, tx)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
@@ -474,11 +474,8 @@ export class Store {
       (await Channel.forId(channelId, tx)) ||
       (await createChannel(state, 'Unknown', undefined, tx));
 
-    // Validate the transition rules are obeyed by the new state from the prior states
-    const alreadyHaveState = _.some(channel.sortedStates, ['stateHash', state.stateHash]);
-    const isLedger = await this.isLedger(channelId, tx);
     const {supported} = channel;
-    if (supported && !alreadyHaveState && !isLedger) {
+    if (supported && shouldValidateTransition(state, channel, tx)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)

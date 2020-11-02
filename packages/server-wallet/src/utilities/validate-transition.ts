@@ -1,11 +1,32 @@
 import _ from 'lodash';
-import {SignedState, toNitroState} from '@statechannels/wallet-core';
+import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
+import {Transaction} from 'knex';
 
 import {logger} from '../logger';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
+import {Channel} from '../models/channel';
 
+export async function shouldValidateTransition(
+  incomingState: StateWithHash,
+  channel: Channel,
+  tx: Transaction
+): Promise<boolean> {
+  const {channelId} = channel;
+
+  // If we already have the state we should of already validated it
+  const alreadyHaveState = _.some(channel.sortedStates, ['stateHash', incomingState.stateHash]);
+
+  const {supported} = channel;
+
+  // Ignore older states that may be added via syncing
+  const isOldState = incomingState.turnNum < (supported?.turnNum || 0);
+
+  const isLedger = await Channel.isLedger(channelId, tx);
+
+  return !!supported && !isOldState && !alreadyHaveState && !isLedger;
+}
 // Port of the following solidity code
 // https://github.com/statechannels/statechannels/blob/a3d21827e340c0cc086f1abad7685345885bf245/packages/nitro-protocol/contracts/ForceMove.sol#L492-L534
 export async function validateTransition(
