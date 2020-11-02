@@ -33,6 +33,7 @@ contract AssetHolder is IAssetHolder {
         uint256 residualAllocationAmount;
         uint256 _amount;
         uint256 i;
+        bool deleteHash = false;
 
         // loop over allocations and decrease balance until we hit the specified destination
         for (i = 0; i < allocation.length; i++) {
@@ -60,13 +61,13 @@ contract AssetHolder is IAssetHolder {
         }
 
         // effects
-        holdings[fromChannelId] = balance;
+        holdings[fromChannelId] = holdings[fromChannelId] -= affordsForDestination;
 
         // construct new outcome
 
         bytes memory encodedAllocation; 
 
-        if (affordsForDestination > 0 && residualAllocationAmount > 0) {
+        if (residualAllocationAmount > 0) {
             // new allocation identical save for a single entry 
             Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
                 allocation.length
@@ -80,8 +81,6 @@ contract AssetHolder is IAssetHolder {
             encodedAllocation = abi.encode(newAllocation);
         }
 
-     
-
         if (residualAllocationAmount == 0) {
             Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
                 allocation.length - 1
@@ -90,14 +89,19 @@ contract AssetHolder is IAssetHolder {
             for (uint256 k = 0; k < i; k++) {
                 splicedAllocation[k] = allocation[k];
             }
-            for (uint256 k = i + 1; k < allocation.length - 1; k++) {
-                splicedAllocation[k] = allocation[k + 1];
+            for (uint256 k = i + 1; k < allocation.length; k++) {
+                splicedAllocation[k - 1] = allocation[k];
+            }
+            if (splicedAllocation.length == 0) {
+                deleteHash = true;
             }
             encodedAllocation = abi.encode(splicedAllocation);
         }
 
-        if (i > 0) {
-            // store hash
+        // replace or delete hash
+        if (deleteHash) {
+            delete assetOutcomeHashes[fromChannelId];
+        } else {
             assetOutcomeHashes[fromChannelId] = keccak256(
                 abi.encode(
                     Outcome.AssetOutcome(
@@ -106,10 +110,9 @@ contract AssetHolder is IAssetHolder {
                     )
                 )
             );
-        } else {
-            delete assetOutcomeHashes[fromChannelId];
-        }
-        // holdings updated BEFORE asset transferred (prevent reentrancy)
+        } 
+
+        // storage updated BEFORE asset transferred (prevent reentrancy)
 
         if (_isExternalDestination(destination)) {
             _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
