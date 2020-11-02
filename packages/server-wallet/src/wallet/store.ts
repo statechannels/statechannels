@@ -165,7 +165,7 @@ export class Store {
     );
     const signedState = {...state, signatures: [signatureEntry]};
 
-    if (supported && shouldValidateTransition(state, channel, tx)) {
+    if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
@@ -475,7 +475,7 @@ export class Store {
       (await createChannel(state, 'Unknown', undefined, tx));
 
     const {supported} = channel;
-    if (supported && shouldValidateTransition(state, channel, tx)) {
+    if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
