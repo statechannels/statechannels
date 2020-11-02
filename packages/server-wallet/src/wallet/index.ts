@@ -7,6 +7,7 @@ import {
   ChannelResult,
   GetStateParams,
   Address,
+  Participant as APIParticipant,
   ChannelId,
   FundingStrategy,
 } from '@statechannels/client-api-schema';
@@ -493,9 +494,12 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   async getLedgerChannels(
     assetHolderAddress: string,
-    participants: Participant[]
+    participants: APIParticipant[]
   ): Promise<MultipleChannelOutput> {
-    const channelStates = await this.store.getLedgerChannels(assetHolderAddress, participants);
+    const channelStates = await this.store.getLedgerChannels(
+      assetHolderAddress,
+      participants.map(convertToParticipant)
+    );
     return {
       channelResults: mergeChannelResults(channelStates.map(ChannelState.toChannelResult)),
       outbox: [],
