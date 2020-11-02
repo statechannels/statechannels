@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/statechannels/monorepo/compare/@statechannels/jest-gas-reporter@0.4.0...@statechannels/jest-gas-reporter@0.4.1) (2020-11-02)
+
+**Note:** Version bump only for package @statechannels/jest-gas-reporter
+
+
+
+
+
 # 0.4.0 (2020-10-13)
 
 
