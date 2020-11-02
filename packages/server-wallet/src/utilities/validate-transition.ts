@@ -7,12 +7,8 @@ import {validateTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
 import {Channel} from '../models/channel';
 
-export async function shouldValidateTransition(
-  incomingState: StateWithHash,
-  channel: Channel
-): Promise<boolean> {
+export function shouldValidateTransition(incomingState: StateWithHash, channel: Channel): boolean {
   const {supported, isLedger} = channel;
-
   // If we already have the state we should of already validated it
   const alreadyHaveState = _.some(channel.sortedStates, ['stateHash', incomingState.stateHash]);
 
