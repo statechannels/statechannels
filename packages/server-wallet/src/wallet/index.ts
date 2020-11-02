@@ -78,20 +78,26 @@ export type MultipleChannelOutput = {
 type Message = SingleChannelOutput | MultipleChannelOutput;
 
 type ChannelUpdateEventName = 'channelUpdate';
-type ChannelUpdateEvent = {
-  [key in ChannelUpdateEventName]: SingleChannelOutput;
-};
 type ObjectiveSucceededEventName = 'objectiveSucceeded';
+type ChannelUpdateEvent = {
+  type: ChannelUpdateEventName;
+  value: SingleChannelOutput;
+};
 type ObjectiveSucceededEvent = {
-  [key in ObjectiveSucceededEventName]: {
+  type: ObjectiveSucceededEventName;
+  value: {
     channelId: string;
     objectiveType: 'OpenChannel' | 'CloseChannel';
   };
 };
 export type WalletEvent = ChannelUpdateEvent | ObjectiveSucceededEvent;
-function isChannelUpdateEvent(e: WalletEvent): e is ChannelUpdateEvent {
-  return _.keys(e).includes('channelUpdate');
-}
+type EventEmitterType =
+  | {
+      [key in ChannelUpdateEvent['type']]: ChannelUpdateEvent['value'];
+    }
+  | {
+      [key in ObjectiveSucceededEvent['type']]: ObjectiveSucceededEvent['value'];
+    };
 
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
@@ -127,7 +133,7 @@ export type WalletInterface = {
   mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
 
-export class Wallet extends EventEmitter<WalletEvent>
+export class Wallet extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
   workerManager: WorkerManager;
   knex: Knex;
@@ -725,17 +731,6 @@ export class Wallet extends EventEmitter<WalletEvent>
     return requiresAnotherCrankUponCompletion;
   }
 
-  private emitEvents(events?: WalletEvent[]) {
-    if (!events) return;
-    events.map(e => {
-      if (isChannelUpdateEvent(e)) {
-        this.emit('channelUpdate', e.channelUpdate);
-      } else {
-        this.emit('objectiveSucceeded', e.objectiveSucceeded);
-      }
-    });
-  }
-
   // todo(tom): change function to return a value instead of mutating input args
   private async crankUntilIdle(
     channels: Bytes32[],
@@ -764,7 +759,7 @@ export class Wallet extends EventEmitter<WalletEvent>
       channelResults.push(...newChannelResults);
       outbox.push(...newOutbox);
 
-      this.emitEvents(events);
+      events?.map(e => this.emit(e.type, e.value));
 
       // todo(tom): this how the code behaved previously. Is it actually what we want?
       error = newError;
