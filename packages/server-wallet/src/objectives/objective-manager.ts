@@ -98,7 +98,8 @@ export class ObjectiveManager {
               await this.store.markObjectiveAsSucceeded(objective, tx);
               channelResults.push(ChannelState.toChannelResult(protocolState.app));
               eventsToEmit.concat({
-                objectiveSucceeded: {
+                type: 'objectiveSucceeded',
+                value: {
                   channelId: objective.data.targetChannelId,
                   objectiveType: objective.type,
                 },
