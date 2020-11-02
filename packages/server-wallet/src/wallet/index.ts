@@ -83,12 +83,13 @@ type ChannelUpdateEvent = {
   type: ChannelUpdateEventName;
   value: SingleChannelOutput;
 };
+export type ObjectiveSucceededValue = {
+  channelId: string;
+  objectiveType: 'OpenChannel' | 'CloseChannel';
+};
 type ObjectiveSucceededEvent = {
   type: ObjectiveSucceededEventName;
-  value: {
-    channelId: string;
-    objectiveType: 'OpenChannel' | 'CloseChannel';
-  };
+  value: ObjectiveSucceededValue;
 };
 export type WalletEvent = ChannelUpdateEvent | ObjectiveSucceededEvent;
 type EventEmitterType =

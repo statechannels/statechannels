@@ -6,7 +6,7 @@ import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
 import {defaultTestConfig} from '../config';
-import {SingleChannelOutput, Wallet} from '../wallet';
+import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
@@ -91,6 +91,14 @@ it('Create a directly funded channel between two wallets ', async () => {
     .pipe(take(2))
     .toPromise();
 
+  const closeCompletedA = fromEvent<ObjectiveSucceededValue>(a as any, 'objectiveSucceeded')
+    .pipe(take(1))
+    .toPromise();
+
+  const closeCompletedB = fromEvent<ObjectiveSucceededValue>(b as any, 'objectiveSucceeded')
+    .pipe(take(1))
+    .toPromise();
+
   //        A <> B
   // PreFund0
   const preFundA = await a.createChannel(channelParams);
@@ -172,8 +180,9 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 4,
   });
 
-  // A fragile way to wait for the conclude and withdraw to complete
-  await new Promise(r => setTimeout(r, 1_000));
+  await closeCompletedA;
+  await closeCompletedB;
+
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
 
