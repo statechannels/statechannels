@@ -92,11 +92,11 @@ it('Create a directly funded channel between two wallets ', async () => {
     .toPromise();
 
   const closeCompletedA = fromEvent<ObjectiveSucceededValue>(a as any, 'objectiveSucceeded')
-    .pipe(take(1))
+    .pipe(take(2))
     .toPromise();
 
   const closeCompletedB = fromEvent<ObjectiveSucceededValue>(b as any, 'objectiveSucceeded')
-    .pipe(take(1))
+    .pipe(take(2))
     .toPromise();
 
   //        A <> B
@@ -180,8 +180,8 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 4,
   });
 
-  await closeCompletedA;
-  await closeCompletedB;
+  expect(await closeCompletedA).toMatchObject({channelId, objectiveType: 'CloseChannel'});
+  expect(await closeCompletedB).toMatchObject({channelId, objectiveType: 'CloseChannel'});
 
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);

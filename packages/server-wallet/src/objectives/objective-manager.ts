@@ -37,7 +37,7 @@ export class ObjectiveManager {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
     let maybeError: any = undefined;
-    const eventsToEmit: WalletEvent[] = [];
+    let eventsToEmit: WalletEvent[] = [];
 
     const objective = await this.store.getObjective(objectiveId);
 
@@ -97,7 +97,7 @@ export class ObjectiveManager {
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
               channelResults.push(ChannelState.toChannelResult(protocolState.app));
-              eventsToEmit.concat({
+              eventsToEmit = eventsToEmit.concat({
                 type: 'objectiveSucceeded',
                 value: {
                   channelId: objective.data.targetChannelId,
