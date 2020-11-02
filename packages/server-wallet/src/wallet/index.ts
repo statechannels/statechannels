@@ -77,8 +77,21 @@ export type MultipleChannelOutput = {
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
 
-export type WalletEventName = 'channelUpdate';
-type WalletEvent = {[key in WalletEventName]: SingleChannelOutput};
+type ChannelUpdateEventName = 'channelUpdate';
+type ChannelUpdateEvent = {
+  [key in ChannelUpdateEventName]: SingleChannelOutput;
+};
+type ObjectiveSucceededEventName = 'objectiveSucceeded';
+type ObjectiveSucceededEvent = {
+  [key in ObjectiveSucceededEventName]: {
+    channelId: string;
+    objectiveType: 'OpenChannel' | 'CloseChannel';
+  };
+};
+export type WalletEvent = ChannelUpdateEvent | ObjectiveSucceededEvent;
+function isChannelUpdateEvent(e: WalletEvent): e is ChannelUpdateEvent {
+  return _.keys(e).includes('channelUpdate');
+}
 
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
@@ -712,6 +725,17 @@ export class Wallet extends EventEmitter<WalletEvent>
     return requiresAnotherCrankUponCompletion;
   }
 
+  private emitEvents(events?: WalletEvent[]) {
+    if (!events) return;
+    events.map(e => {
+      if (isChannelUpdateEvent(e)) {
+        this.emit('channelUpdate', e.channelUpdate);
+      } else {
+        this.emit('objectiveSucceeded', e.objectiveSucceeded);
+      }
+    });
+  }
+
   // todo(tom): change function to return a value instead of mutating input args
   private async crankUntilIdle(
     channels: Bytes32[],
@@ -732,12 +756,15 @@ export class Wallet extends EventEmitter<WalletEvent>
       const {
         channelResults: newChannelResults,
         outbox: newOutbox,
+        events,
         error: newError,
       } = await this.objectiveManager.crank(objective.objectiveId);
 
       // add channel result
       channelResults.push(...newChannelResults);
       outbox.push(...newOutbox);
+
+      this.emitEvents(events);
 
       // todo(tom): this how the code behaved previously. Is it actually what we want?
       error = newError;
@@ -749,7 +776,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
   // ChainEventSubscriberInterface implementation
   holdingUpdated(arg: HoldingUpdatedArg): void {
-    const channelUpdate: WalletEventName = 'channelUpdate';
+    const channelUpdate: ChannelUpdateEventName = 'channelUpdate';
     this.updateChannelFundingForAssetHolder(arg).then(singleChannelOutput =>
       this.emit(channelUpdate, singleChannelOutput)
     );
