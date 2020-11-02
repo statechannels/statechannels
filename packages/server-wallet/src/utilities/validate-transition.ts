@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
-import {Transaction} from 'knex';
 
 import {logger} from '../logger';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -10,20 +9,15 @@ import {Channel} from '../models/channel';
 
 export async function shouldValidateTransition(
   incomingState: StateWithHash,
-  channel: Channel,
-  tx: Transaction
+  channel: Channel
 ): Promise<boolean> {
-  const {channelId} = channel;
+  const {supported, isLedger} = channel;
 
   // If we already have the state we should of already validated it
   const alreadyHaveState = _.some(channel.sortedStates, ['stateHash', incomingState.stateHash]);
 
-  const {supported} = channel;
-
   // Ignore older states that may be added via syncing
   const isOldState = incomingState.turnNum < (supported?.turnNum || 0);
-
-  const isLedger = await Channel.isLedger(channelId, tx);
 
   return !!supported && !isOldState && !alreadyHaveState && !isLedger;
 }
