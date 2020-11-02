@@ -69,7 +69,7 @@ it("signs a final state when it's my turn for many channels at once", async () =
   for (let i = 3; i < 7; i++) {
     const c = channel({
       channelNonce: i,
-      vars: [stateWithHashSignedBy(alice(), bob())(runningState)],
+      vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
     });
     await Channel.query(w.knex).insert(c);
     channelIds.push(c.channelId);
