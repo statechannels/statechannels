@@ -13,7 +13,6 @@ import {
   StateWithHash,
   deserializeObjective,
   wireStateToNitroState,
-  toNitroState,
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
@@ -43,16 +42,16 @@ import {addHash} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
-import {validateTransitionWithEVM} from '../evm-validator';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
 import {ObjectiveModel, DBObjective} from '../models/objective';
-import {logger} from '../logger';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
+import {validateTransition} from '../utilities/validate-transition';
+import {logger} from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -176,18 +175,24 @@ export class Store {
     );
     const signedState = {...state, signatures: [signatureEntry]};
     const alreadyHaveState = channel.sortedStates.some(s => s.stateHash === state.stateHash);
-    if (
-      supported &&
-      !alreadyHaveState &&
-      !(await this.isLedger(channelId, tx)) &&
-      !(await timer('validating transition', async () =>
-        this.validateTransition(supported, signedState, tx)
-      ))
-    ) {
-      throw new StoreError('Invalid state transition', {
-        from: channel.supported,
-        to: signedState,
-      });
+    if (supported && !alreadyHaveState && !(await this.isLedger(channelId, tx))) {
+      const bytecode = await this.getBytecode(supported.appDefinition, tx);
+
+      if (!this.skipEvmValidation && !bytecode)
+        logger.error('Missing bytecode', {
+          error: new Error(`No byte code for ${supported.appDefinition}`),
+        });
+
+      if (
+        !(await timer('validating transition', async () =>
+          validateTransition(supported, signedState, bytecode, this.skipEvmValidation)
+        ))
+      ) {
+        throw new StoreError('Invalid state transition', {
+          from: channel.supported,
+          to: signedState,
+        });
+      }
     }
 
     await timer('adding MY state', async () => this.addMyState(channel, signedState, tx));
@@ -251,94 +256,6 @@ export class Store {
     )?.protocolState;
   }
 
-  // Port of the following solidity code
-  // https://github.com/statechannels/statechannels/blob/a3d21827e340c0cc086f1abad7685345885bf245/packages/nitro-protocol/contracts/ForceMove.sol#L492-L534
-  async validateTransition(
-    fromState: SignedState,
-    toState: SignedState,
-    tx: Transaction
-  ): Promise<boolean> {
-    const fromMoverIndex = fromState.turnNum % fromState.participants.length;
-    const fromMover = fromState.participants[fromMoverIndex].signingAddress;
-
-    const toMoverIndex = toState.turnNum % toState.participants.length;
-    const toMover = toState.participants[toMoverIndex].signingAddress;
-
-    if (fromState.appDefinition !== constants.AddressZero) {
-      // turn numbers not relevant for the null app
-      const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
-      if (!turnNumCheck) {
-        const VALIDATION_ERROR = `Turn number check failed.`;
-        logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-      }
-    }
-
-    const constantsCheck =
-      _.isEqual(toState.chainId, fromState.chainId) &&
-      _.isEqual(toState.participants, fromState.participants) &&
-      _.isEqual(toState.appDefinition, fromState.appDefinition) &&
-      _.isEqual(toState.challengeDuration, fromState.challengeDuration);
-
-    if (!constantsCheck) {
-      const VALIDATION_ERROR = `Constants check failed.`;
-      logger.error(
-        {
-          fromState,
-          toState,
-          error: Error(VALIDATION_ERROR),
-        },
-        VALIDATION_ERROR
-      );
-    }
-
-    const signatureValidation =
-      fromState.signatures.some(s => s.signer === fromMover) &&
-      toState.signatures.some(s => s.signer === toMover);
-
-    if (!signatureValidation) {
-      const VALIDATION_ERROR = `Signature validation failed.`;
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-      return false;
-    }
-
-    // Final state specific validation
-    if (toState.isFinal && !_.isEqual(fromState.outcome, toState.outcome)) {
-      const VALIDATION_ERROR = `Outcome changed on a final state.`;
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-      return false;
-    }
-
-    // Funding stage specific validation
-    const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
-    const fundingStageValidation =
-      _.isEqual(fromState.isFinal, false) &&
-      _.isEqual(toState.outcome, fromState.outcome) &&
-      _.isEqual(toState.appData, fromState.appData);
-
-    if (isInFundingStage && !fundingStageValidation) {
-      const VALIDATION_ERROR = `Invalid setup state transition.`;
-
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-
-      return false;
-    }
-
-    // Validates app specific rules by running the app rules contract in the EVM
-    // We only want to run the validation for states not in a funding or final stage per the force move contract
-    if (!this.skipEvmValidation && !isInFundingStage && !toState.isFinal) {
-      const evmValidation = await validateTransitionWithEVM(
-        toNitroState(fromState),
-        toNitroState(toState),
-        tx
-      );
-      if (!evmValidation) {
-        logger.error({fromState, toState}, 'EVM Validation failure');
-        return false;
-      }
-    }
-
-    return true;
-  }
   async getStates(
     channelId: Bytes32,
     tx?: Transaction
@@ -415,6 +332,18 @@ export class Store {
 
   async markObjectiveAsSucceeded(objective: DBObjective, tx?: Transaction): Promise<void> {
     await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
+  }
+
+  private bytecodeCache: Record<string, string | undefined> = {};
+  async getBytecode(appDefinition: Address, tx: Transaction): Promise<Bytes | undefined> {
+    return (
+      this.bytecodeCache[appDefinition] ??
+      (this.bytecodeCache[appDefinition] = await AppBytecode.getBytecode(
+        this.chainNetworkID,
+        appDefinition,
+        tx
+      ))
+    );
   }
 
   async upsertBytecode(
@@ -530,7 +459,7 @@ export class Store {
     channelId: string,
     maybeChannel: Channel | undefined,
     wireSignedState: WireSignedState,
-    tx: Transaction // Insist on a transaction because validateTransitionWIthEVM requires it
+    tx: Transaction
   ): Promise<Channel> {
     const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
@@ -585,9 +514,16 @@ export class Store {
     if (channel.supported && !alreadyHaveState && !(await this.isLedger(channelId, tx))) {
       const {supported} = channel;
 
+      const bytecode = await this.getBytecode(supported.appDefinition, tx);
+
+      if (!this.skipEvmValidation && !bytecode)
+        logger.error('Missing bytecode', {
+          error: new Error(`No byte code for ${supported.appDefinition}`),
+        });
+
       if (
         !(await timer('validating transition', async () =>
-          this.validateTransition(supported, sswh, tx)
+          validateTransition(supported, sswh, bytecode, this.skipEvmValidation)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
