@@ -12,7 +12,7 @@ const defaultVars: CreateChannelParams = {
   fundingStrategy: 'Direct',
   allocations: [
     {
-      token: '0x00',
+      token: constants.AddressZero,
       allocationItems: [
         {destination: alice().destination, amount: BN.from(1)},
         {destination: bob().destination, amount: BN.from(3)},

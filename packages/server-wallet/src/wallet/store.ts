@@ -263,10 +263,10 @@ export class Store {
   }
 
   async getLedgerChannels(
-    addressHolderAddress: string,
+    assetHolderAddress: string,
     participants: Participant[]
   ): Promise<ChannelState[]> {
-    const ledgers = await Channel.getLedgerChannels(addressHolderAddress, participants, this.knex);
+    const ledgers = await Channel.getLedgerChannels(assetHolderAddress, participants, this.knex);
     return ledgers.map(c => c.protocolState);
   }
 
