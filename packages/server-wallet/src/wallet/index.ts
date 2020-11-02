@@ -563,7 +563,7 @@ export class Wallet extends EventEmitter<WalletEvent>
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
-    for (const channel of fromStoring) {
+    for (const channel of mergeChannelResults(fromStoring)) {
       if (!_.some(channelResults, c => c.channelId === channel.channelId))
         channelResults.push(channel);
     }
