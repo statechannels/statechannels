@@ -3,7 +3,6 @@ import {Zero} from '@statechannels/wallet-core';
 import Knex from 'knex';
 
 import {Uint256, Bytes32, Address} from '../type-aliases';
-import {logger} from '../logger';
 
 type TransferredOutEntry = {toAddress: Address; amount: Uint256};
 
@@ -79,22 +78,21 @@ export class Funding extends Model implements RequiredColumns {
     amount: Address
   ): Promise<Funding> {
     return knex.transaction(async tx => {
+      const errorMessage = `Expected for funding row to exists with channelId ${channelId}, assetHolder ${assetHolder}`;
       const existing = await Funding.query(tx)
         .where({channelId, assetHolder})
-        .first();
+        .first()
+        .throwIfNotFound({
+          message: errorMessage,
+          data: {channelId, assetHolder, toAddress, amount},
+        });
 
-      if (!existing) {
-        const errorMessage = `Expected for funding row to exists with channelId ${channelId}, assetHolder ${assetHolder}`;
-        logger.error(errorMessage, {channelId, assetHolder, toAddress, amount});
-        throw new Error(errorMessage);
-      } else {
-        const transferredOut = existing.transferredOut.concat({toAddress, amount});
-        return await Funding.query(tx)
-          .patch({transferredOut})
-          .where({channelId, assetHolder})
-          .returning('*')
-          .first();
-      }
+      const transferredOut = existing.transferredOut.concat({toAddress, amount});
+      return await Funding.query(tx)
+        .patch({transferredOut})
+        .where({channelId, assetHolder})
+        .returning('*')
+        .first();
     });
   }
 }
