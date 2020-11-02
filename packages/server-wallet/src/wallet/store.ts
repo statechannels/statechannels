@@ -10,7 +10,6 @@ import {
   ChannelConstants,
   Participant,
   makeDestination,
-  serializeMessage,
   StateWithHash,
   deserializeObjective,
   wireStateToNitroState,
@@ -18,7 +17,6 @@ import {
   deserializeOutcome,
   convertToInternalParticipant,
   SignatureEntry,
-  Payload,
   isOpenChannel,
   convertToParticipant,
   SignedState,
@@ -42,7 +40,7 @@ import {
 } from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash} from '../state-utils';
-import {ChannelState, ChainServiceApi, toChannelResult} from '../protocols/state';
+import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {validateTransitionWithEVM} from '../evm-validator';
@@ -51,7 +49,6 @@ import {pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {recoverAddress} from '../utilities/signatures';
-import {Outgoing} from '../protocols/actions';
 import {ObjectiveModel, DBObjective} from '../models/objective';
 import {logger} from '../logger';
 import {AppBytecode} from '../models/app-bytecode';
@@ -412,8 +409,8 @@ export class Store {
     return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
   }
 
-  async approveObjective(objective: DBObjective, tx?: Transaction): Promise<void> {
-    await ObjectiveModel.approve(objective.objectiveId, tx || this.knex);
+  async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
+    await ObjectiveModel.approve(objectiveId, tx || this.knex);
   }
 
   async markObjectiveAsSucceeded(objective: DBObjective, tx?: Transaction): Promise<void> {
@@ -626,15 +623,16 @@ export class Store {
     fundingStrategy: FundingStrategy,
     role: 'app' | 'ledger' = 'app',
     fundingLedgerChannelId?: Address
-  ): Promise<{outgoing: Outgoing[]; channelResult: ChannelResult}> {
+  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: Objective}> {
     return await this.knex.transaction(async tx => {
-      const {channelId, myIndex, participants} = await createChannel(
+      const {channelId, participants} = await createChannel(
         constants,
         fundingStrategy,
         fundingLedgerChannelId,
         tx
       );
-      const signedState = await this.signState(
+
+      const firstSignedState = await this.signState(
         channelId,
         {
           ...constants,
@@ -646,8 +644,8 @@ export class Store {
         tx
       );
 
-      const objective: Objective = {
-        type: 'OpenChannel',
+      const objective = {
+        type: 'OpenChannel' as const,
         participants,
         data: {
           targetChannelId: channelId,
@@ -657,34 +655,10 @@ export class Store {
         },
       };
 
-      const data: Payload = {
-        signedStates: [signedState],
-        objectives: [objective],
-      };
+      const {objectiveId} = await this.addObjective(objective, tx);
+      await this.approveObjective(objectiveId, tx);
 
-      const notMe = (_p: any, i: number): boolean => i !== myIndex;
-
-      const outgoing = participants.filter(notMe).map(({participantId: recipient}) => ({
-        method: 'MessageQueued' as const,
-        params: serializeMessage(data, recipient, participants[myIndex].participantId, channelId),
-      }));
-
-      const objectiveToBeStored: DBObjective = {
-        ...objective,
-        objectiveId: objectiveId(objective),
-        status: 'approved',
-      };
-
-      if (role === 'ledger')
-        await Channel.setLedger(
-          channelId,
-          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
-          tx
-        );
-
-      if (isOpenChannel(objective)) await ObjectiveModel.insert(objectiveToBeStored, tx);
-
-      return {outgoing, channelResult: toChannelResult(await this.getChannel(channelId, tx))};
+      return {channel: await this.getChannel(channelId, tx), firstSignedState, objective};
     });
   }
 

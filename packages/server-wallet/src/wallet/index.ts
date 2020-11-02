@@ -8,6 +8,7 @@ import {
   GetStateParams,
   Address,
   ChannelId,
+  FundingStrategy,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
@@ -18,7 +19,6 @@ import {
   Participant,
   BN,
   serializeMessage,
-  ChannelConstants,
   Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
@@ -29,7 +29,7 @@ import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {ethers} from 'ethers';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import {Bytes, Bytes32, Uint256} from '../type-aliases';
 import {Outgoing} from '../protocols/actions';
 import {logger} from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
@@ -248,85 +248,116 @@ export class Wallet extends EventEmitter<WalletEvent>
     args: Pick<CreateChannelParams, 'participants' | 'allocations'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
   ): Promise<SingleChannelOutput> {
-    const {participants, allocations} = args;
+    const {participants: serializedParticipants, allocations} = args;
 
-    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
+    const participants = serializedParticipants.map(convertToParticipant);
+    const outcome = deserializeAllocations(allocations);
 
-    const constants: ChannelConstants = {
-      channelNonce,
-      participants: participants.map(convertToParticipant),
-      chainId: this.walletConfig.chainNetworkID,
-      challengeDuration: 9001,
-      appDefinition: ethers.constants.AddressZero,
-    };
-
-    const ret = await this.store.createChannel(
-      constants,
+    const {channelResult, outbox} = await this.createChannelInternal(
+      ethers.constants.AddressZero, // appDefinition
       '0x00', // appData,
-      deserializeAllocations(allocations), // outcome
+      participants,
+      outcome, // outcome
       fundingStrategy, // fundingStrategy,
+      undefined, // fundingLedgerChannelId
       'ledger' // role
     );
 
-    this.registerChannelWithChainService(ret.channelResult);
+    this.registerChannelWithChainService(channelResult);
 
-    return {outbox: ret.outgoing, channelResult: ret.channelResult};
+    return {channelResult, outbox};
   }
 
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
     return this.createChannels(args, 1);
   }
+
   async createChannels(
     args: CreateChannelParams,
     numberOfChannels: number
   ): Promise<MultipleChannelOutput> {
     const {
-      participants,
+      participants: serializedParticipants,
       appDefinition,
       appData,
       allocations,
       fundingStrategy,
       fundingLedgerChannelId,
     } = args;
+
+    const participants = serializedParticipants.map(convertToParticipant);
     const outcome: Outcome = deserializeAllocations(allocations);
+
     const results = await Promise.all(
-      _.range(numberOfChannels).map(async () => {
-        const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
-        const constants: ChannelConstants = {
-          channelNonce,
-          participants: participants.map(p => convertToParticipant(p)),
-          chainId: this.walletConfig.chainNetworkID,
-          challengeDuration: 9001,
+      _.range(numberOfChannels).map(() =>
+        this.createChannelInternal(
           appDefinition,
-        };
-        return this.store.createChannel(
-          constants,
           appData,
+          participants,
           outcome,
           fundingStrategy,
-          'app',
-          fundingLedgerChannelId
-        );
-      })
+          fundingLedgerChannelId,
+          'app'
+        )
+      )
     );
+
     const channelResults = results.map(r => r.channelResult);
-    const outgoing = results.map(r => r.outgoing).reduce((p, c) => p.concat(c));
+    const outbox = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+
     channelResults.map(cR => this.registerChannelWithChainService(cR));
+
     return {
       channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outgoing),
+      outbox: mergeOutgoing(outbox),
+    };
+  }
+
+  private async createChannelInternal(
+    appDefinition: Address,
+    appData: Bytes,
+    participants: Participant[],
+    outcome: Outcome,
+    fundingStrategy: FundingStrategy,
+    fundingLedgerChannelId?: Bytes32,
+    role: 'app' | 'ledger' = 'app'
+  ): Promise<SingleChannelOutput> {
+    const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
+
+    const constants = {
+      appDefinition,
+      chainId: this.walletConfig.chainNetworkID,
+      challengeDuration: 9001,
+      channelNonce,
+      participants,
+    };
+
+    const {channel, firstSignedState: signedState, objective} = await this.store.createChannel(
+      constants,
+      appData,
+      outcome,
+      fundingStrategy,
+      role,
+      fundingLedgerChannelId
+    );
+
+    return {
+      channelResult: ChannelState.toChannelResult(channel),
+      outbox: createOutboxFor(channel.channelId, channel.myIndex, participants, {
+        signedStates: [signedState],
+        objectives: [objective],
+      }),
     };
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
     const objectives = await this.store.getObjectives(channelIds);
+
     await Promise.all(
-      objectives
-        .map(objective => {
-          if (objective.type === 'OpenChannel') return this.store.approveObjective(objective);
-          else return;
-        })
-        .filter(x => x !== undefined)
+      objectives.map(
+        async ({type, objectiveId}) =>
+          type === 'OpenChannel' && (await this.store.approveObjective(objectiveId))
+      )
     );
 
     const {outbox, channelResults} = await this.takeActions(channelIds);
@@ -350,7 +381,8 @@ export class Wallet extends EventEmitter<WalletEvent>
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    if (objectives[0].type === 'OpenChannel') await this.store.approveObjective(objectives[0]);
+    if (objectives[0].type === 'OpenChannel')
+      await this.store.approveObjective(objectives[0].objectiveId);
 
     const {outbox, channelResults} = await this.takeActions([channelId]);
 
