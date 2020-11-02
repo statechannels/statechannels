@@ -152,7 +152,10 @@ export class Channel extends Model implements RequiredColumns {
   ): Promise<Channel[]> {
     return Channel.query(txOrKnex)
       .select()
-      .where({assetHolderAddress, participants: JSON.stringify(participants)});
+      .whereComposite(
+        ['assetHolderAddress', 'participants'],
+        [assetHolderAddress, JSON.stringify(participants)]
+      );
   }
 
   static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
