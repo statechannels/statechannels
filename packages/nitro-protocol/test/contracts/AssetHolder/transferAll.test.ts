@@ -36,7 +36,7 @@ beforeAll(async () => {
 
 const reason0 = 'transferAll | submitted data does not match stored assetOutcomeHash';
 
-// C is the channel we are transferring from.
+// c is the channel we are transferring from.
 describe('transferAll', () => {
   it.each`
     name                              | heldBefore | setOutcome      | newOutcome | heldAfter             | payouts         | reason

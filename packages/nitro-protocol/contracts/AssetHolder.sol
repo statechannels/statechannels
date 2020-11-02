@@ -17,6 +17,110 @@ contract AssetHolder is IAssetHolder {
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
     /**
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param destination External destination or channel to transfer funds *to*.
+     */
+    function _transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) internal {
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+            allocationBytes,
+            (Outcome.AllocationItem[])
+        );
+        uint256 balance = holdings[fromChannelId];
+        uint256 affordsForDestination;
+        uint256 residualAllocationAmount;
+        uint256 _amount;
+        uint256 i;
+
+        // loop over allocations and decrease balance until we hit the specified destination
+        for (i = 0; i < allocation.length; i++) {
+            if (balance == 0) {
+                revert('_transfer | fromChannel affords 0 for destination');
+            }
+            _amount = allocation[i].amount;
+            if (allocation[i].destination == destination) {
+                 if (balance < _amount) {
+                    affordsForDestination = balance;
+                    residualAllocationAmount = _amount - balance;
+                    balance = 0;
+                } else {
+                    affordsForDestination = _amount;
+                    residualAllocationAmount = 0;
+                    balance = balance.sub(_amount);
+                }
+            break; // means that i holds the index of the destination that may need to be altered or removed
+            }
+            if (balance < _amount) {
+                balance = 0;
+            } else {
+                balance = balance.sub(_amount);
+            }
+        }
+
+        // effects
+        holdings[fromChannelId] = balance;
+
+        // construct new outcome
+
+        bytes memory encodedAllocation; 
+
+        if (affordsForDestination > 0 && residualAllocationAmount > 0) {
+            // new allocation identical save for a single entry 
+            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
+                allocation.length
+            );
+            for (uint256 k = 0; k < allocation.length; k++) {
+                newAllocation[k] = allocation[k];
+                if (allocation[k].destination == destination) {
+                    newAllocation[k].amount = residualAllocationAmount;
+                }
+            }
+            encodedAllocation = abi.encode(newAllocation);
+        }
+
+     
+
+        if (residualAllocationAmount == 0) {
+            Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
+                allocation.length - 1
+            );
+            // full payout so we want to splice a shorter outcome
+            for (uint256 k = 0; k < i; k++) {
+                splicedAllocation[k] = allocation[k];
+            }
+            for (uint256 k = i + 1; k < allocation.length - 1; k++) {
+                splicedAllocation[k] = allocation[k + 1];
+            }
+            encodedAllocation = abi.encode(splicedAllocation);
+        }
+
+        if (i > 0) {
+            // store hash
+            assetOutcomeHashes[fromChannelId] = keccak256(
+                abi.encode(
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        encodedAllocation
+                    )
+                )
+            );
+        } else {
+            delete assetOutcomeHashes[fromChannelId];
+        }
+        // holdings updated BEFORE asset transferred (prevent reentrancy)
+
+        if (_isExternalDestination(destination)) {
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
+            emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+        } else {
+            holdings[destination] += affordsForDestination;
+        }
+        
+    }
+
+    /**
      * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
      * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
      * @param channelId Unique identifier for a state channel.
@@ -101,9 +205,35 @@ contract AssetHolder is IAssetHolder {
         }
     }
 
+
+
     // **************
     // Public methods
     // **************
+
+    /**
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param destination External destination or channel to transfer funds *to*.
+     */
+    function transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) public {
+        // checks
+        require(
+            assetOutcomeHashes[fromChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'transfer | submitted data does not match stored assetOutcomeHash'
+        );
+        _transfer(fromChannelId, allocationBytes, destination);
+    }
 
     /**
      * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
