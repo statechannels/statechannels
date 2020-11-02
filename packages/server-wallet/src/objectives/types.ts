@@ -4,6 +4,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {Outgoing} from '../protocols/actions';
+import {WalletEvent} from '../wallet';
 
 export interface ObjectiveManagerParams {
   store: Store;
@@ -16,5 +17,6 @@ export interface ObjectiveManagerParams {
 export type ExecutionResult = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
+  events?: WalletEvent[];
   error?: any;
 };

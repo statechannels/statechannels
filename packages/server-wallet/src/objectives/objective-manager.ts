@@ -12,6 +12,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WALLET_VERSION} from '../version';
+import {WalletEvent} from '../wallet';
 
 import {ObjectiveManagerParams, ExecutionResult} from './types';
 
@@ -36,6 +37,7 @@ export class ObjectiveManager {
     const outbox: Outgoing[] = [];
     const channelResults: ChannelResult[] = [];
     let maybeError: any = undefined;
+    const eventsToEmit: WalletEvent[] = [];
 
     const objective = await this.store.getObjective(objectiveId);
 
@@ -95,6 +97,12 @@ export class ObjectiveManager {
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
               channelResults.push(ChannelState.toChannelResult(protocolState.app));
+              eventsToEmit.concat({
+                objectiveSucceeded: {
+                  channelId: objective.data.targetChannelId,
+                  objectiveType: objective.type,
+                },
+              });
               attemptAnotherProtocolStep = false;
               return;
             case 'Withdraw':
@@ -143,7 +151,7 @@ export class ObjectiveManager {
       });
     }
 
-    return {channelResults, outbox, error: maybeError};
+    return {channelResults, outbox, events: eventsToEmit, error: maybeError};
   }
 }
 
