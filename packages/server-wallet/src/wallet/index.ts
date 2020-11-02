@@ -760,7 +760,11 @@ export class Wallet extends EventEmitter<EventEmitterType>
       channelResults.push(...newChannelResults);
       outbox.push(...newOutbox);
 
-      events?.map(e => this.emit(e.type, e.value));
+      try {
+        events?.map(event => this.emit(event.type, event.value));
+      } catch (error) {
+        logger.error('Unable to emit events', {error, events});
+      }
 
       // todo(tom): this how the code behaved previously. Is it actually what we want?
       error = newError;
@@ -785,6 +789,7 @@ export class Wallet extends EventEmitter<EventEmitterType>
       arg.to,
       arg.amount
     );
+    await this.takeActions([arg.channelId]);
   }
 
   private registerChannelWithChainService(cr: ChannelResult): void {
