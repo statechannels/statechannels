@@ -783,6 +783,7 @@ export class Wallet extends EventEmitter<EventEmitterType>
   }
 
   async assetTransferred(arg: AssetTransferredArg): Promise<void> {
+    // todo: make sure that arg.to is checksummed
     await this.store.updateTransferredOut(
       arg.channelId,
       arg.assetHolderAddress,
