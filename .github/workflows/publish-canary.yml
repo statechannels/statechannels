@@ -17,13 +17,6 @@ jobs:
         with:
           node-version: 12.16.3
 
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-cache-v1-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-cache-v1-
-
       - name: yarn install 
         # skip the prepare step here, as lerna publish will run prepare before publishing
         run: |
