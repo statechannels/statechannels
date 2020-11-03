@@ -17,17 +17,24 @@ const outcome2: SimpleAllocation = {
 };
 describe('validate transition', () => {
   test.each`
-    fromState                                                                           | toState                                                                           | expectedResult | description
-    ${stateWithHashSignedBy([alice()])({turnNum: 0})}                                   | ${stateWithHashSignedBy([bob()])({turnNum: 1})}                                   | ${true}        | ${'valid prefund state transition'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 0, appData: '0x00'})}                  | ${stateWithHashSignedBy([bob()])({turnNum: 1, appData: '0x11'})}                  | ${false}       | ${'prefund whereappdata changes'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 0})}                                   | ${stateWithHashSignedBy([alice()])({turnNum: 1})}                                 | ${false}       | ${'incorrect signer'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 0, challengeDuration: 1})}             | ${stateWithHashSignedBy([bob()])({turnNum: 1, challengeDuration: 2})}             | ${false}       | ${'constants change'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 0, outcome: outcome1})}                | ${stateWithHashSignedBy([bob()])({turnNum: 1, outcome: outcome2})}                | ${false}       | ${'outcome changes'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 4})}                                   | ${stateWithHashSignedBy([bob()])({turnNum: 5})}                                   | ${true}        | ${'valid regular transition'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 4})}                                   | ${stateWithHashSignedBy([bob()])({turnNum: 6})}                                   | ${false}       | ${'invalid turn number'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 4})}                                   | ${stateWithHashSignedBy([alice()])({turnNum: 5})}                                 | ${false}       | ${'invalid signer'}
-    ${stateWithHashSignedBy([alice()])({turnNum: 4, isFinal: true, outcome: outcome1})} | ${stateWithHashSignedBy([bob()])({turnNum: 5, isFinal: true, outcome: outcome2})} | ${false}       | ${'final state and outcome changed'}
-  `('$description', async ({fromState, toState, expectedResult}) => {
-    expect(await validateTransition(fromState, toState, undefined, true)).toEqual(expectedResult);
+    fromSigner | fromState                                         | toSigner   | toState                                           | expectedResult | description
+    ${alice()} | ${{turnNum: 0}}                                   | ${bob()}   | ${{turnNum: 1}}                                   | ${true}        | ${'valid prefund state transition'}
+    ${alice()} | ${{turnNum: 0, appData: '0x00'}}                  | ${bob()}   | ${{turnNum: 1, appData: '0x11'}}                  | ${false}       | ${'prefund whereappdata changes'}
+    ${alice()} | ${{turnNum: 0}}                                   | ${alice()} | ${{turnNum: 1}}                                   | ${false}       | ${'incorrect signer'}
+    ${alice()} | ${{turnNum: 0, challengeDuration: 1}}             | ${bob()}   | ${{turnNum: 1, challengeDuration: 2}}             | ${false}       | ${'constants change'}
+    ${alice()} | ${{turnNum: 0, outcome: outcome1}}                | ${bob()}   | ${{turnNum: 1, outcome: outcome2}}                | ${false}       | ${'outcome changes'}
+    ${alice()} | ${{turnNum: 4}}                                   | ${bob()}   | ${{turnNum: 5}}                                   | ${true}        | ${'valid regular transition'}
+    ${alice()} | ${{turnNum: 4}}                                   | ${bob()}   | ${{turnNum: 6}}                                   | ${false}       | ${'invalid turn number'}
+    ${alice()} | ${{turnNum: 4}}                                   | ${alice()} | ${{turnNum: 5}}                                   | ${false}       | ${'invalid signer'}
+    ${alice()} | ${{turnNum: 4, isFinal: true, outcome: outcome1}} | ${bob()}   | ${{turnNum: 5, isFinal: true, outcome: outcome2}} | ${false}       | ${'final state and outcome changed'}
+  `('$description', async ({fromSigner, fromState, toSigner, toState, expectedResult}) => {
+    expect(
+      await validateTransition(
+        stateWithHashSignedBy([fromSigner])(fromState),
+        stateWithHashSignedBy([toSigner])(toState),
+        undefined,
+        true
+      )
+    ).toEqual(expectedResult);
   });
 });
