@@ -29,10 +29,11 @@ import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {ethers} from 'ethers';
+import {Logger} from 'pino';
 
 import {Bytes, Bytes32, Uint256} from '../type-aliases';
 import {Outgoing} from '../protocols/actions';
-import {logger} from '../logger';
+import {createLogger} from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
@@ -119,6 +120,7 @@ export class Wallet extends EventEmitter<WalletEvent>
   store: Store;
   chainService: ChainServiceInterface;
   objectiveManager: ObjectiveManager;
+  logger: Logger;
 
   readonly walletConfig: ServerWalletConfig;
   constructor(walletConfig?: ServerWalletConfig) {
@@ -126,11 +128,13 @@ export class Wallet extends EventEmitter<WalletEvent>
     this.walletConfig = walletConfig || defaultConfig;
     this.workerManager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
+    this.logger = createLogger({...this.walletConfig});
     this.store = new Store(
       this.knex,
       this.walletConfig.timingMetrics,
       this.walletConfig.skipEvmValidation,
-      this.walletConfig.chainNetworkID
+      this.walletConfig.chainNetworkID,
+      this.logger
     );
 
     // set up timing metrics
@@ -144,7 +148,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     if (walletConfig?.rpcEndpoint && walletConfig.serverPrivateKey) {
       this.chainService = new ChainService(walletConfig.rpcEndpoint, walletConfig.serverPrivateKey);
     } else {
-      logger.debug(
+      this.logger.debug(
         'rpcEndpoint and serverPrivateKey must be defined for the wallet to use chain service'
       );
       this.chainService = new MockChainService();
@@ -153,7 +157,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,
       chainService: this.chainService,
-      logger,
+      logger: this.logger,
       timingMetrics: this.walletConfig.timingMetrics,
     });
   }
@@ -205,7 +209,7 @@ export class Wallet extends EventEmitter<WalletEvent>
     try {
       participant = await this.store.getFirstParticipant();
     } catch (e) {
-      if (isWalletError(e)) logger.error('Wallet failed to get a participant', e);
+      if (isWalletError(e)) this.logger.error('Wallet failed to get a participant', e);
       else throw e;
     }
 
@@ -536,7 +540,7 @@ export class Wallet extends EventEmitter<WalletEvent>
         outbox: [],
       };
     } catch (err) {
-      logger.error({err}, 'Could not get channel');
+      this.logger.error({err}, 'Could not get channel');
       throw err;
     }
   }
@@ -698,7 +702,7 @@ export class Wallet extends EventEmitter<WalletEvent>
                 throw 'Unimplemented';
             }
           } catch (err) {
-            logger.error({err}, 'Error handling action');
+            this.logger.error({err}, 'Error handling action');
             await setError(err);
           }
         }
