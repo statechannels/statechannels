@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.5.4...@statechannels/wire-format@0.7.0) (2020-11-03)
+
+
+### Features
+
+* add walletVersion to Message type ([16c205c](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/16c205c72483a7b9b3445163065c74ff88fa55f5))
+
+
+
+
+
 # [0.6.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.5.4...@statechannels/wire-format@0.6.0) (2020-11-03)
 
 
