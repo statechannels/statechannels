@@ -9,6 +9,7 @@ export abstract class WalletError extends Error {
     NonceError: 'NonceError',
     StoreError: 'StoreError',
     OnchainError: 'OnchainError',
+    PushMessageError: 'PushMessageError',
   } as const;
 
   abstract readonly type: Values<typeof WalletError.errors>;
@@ -34,4 +35,19 @@ export function isWalletError(error: any): error is WalletError {
   if (!error?.type) return false;
   if (!(typeof error.type === 'string' || error.type instanceof String)) return false;
   return hasOwnProperty(WalletError.errors, error.type);
+}
+
+export class PushMessageError extends WalletError {
+  readonly type = WalletError.errors.PushMessageError;
+
+  static readonly reasons = {
+    objectiveNotFound: 'Error during pushMessage',
+  } as const;
+
+  constructor(
+    reason: Values<typeof PushMessageError.reasons>,
+    public readonly data: {thisWalletVersion: string; payloadWalletVersion: string; cause: Error}
+  ) {
+    super(reason);
+  }
 }
