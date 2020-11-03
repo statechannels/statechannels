@@ -593,23 +593,30 @@ export class Wallet extends EventEmitter<WalletEvent>
     let needToCrank = true;
     while (needToCrank) {
       await this.crankUntilIdle(channels, accumulator);
-      needToCrank = await this.processLedgerQueue(accumulator);
+      needToCrank = await this.processLedgerQueue(channels, accumulator);
     }
 
     return accumulator;
   };
 
-  private async processLedgerQueue({
-    outbox,
-    channelResults,
-    error,
-  }: ExecutionResult): Promise<boolean> {
+  private async processLedgerQueue(
+    channels: Bytes32[],
+    {outbox, channelResults, error}: ExecutionResult
+  ): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
-    const ledgersToProcess = _.uniqBy(
-      await this.store.getAllPendingLedgerRequests(),
-      'ledgerChannelId'
-    );
+    // Fetch ledger channels related to the channels argument where related means, either:
+    // - The ledger channel is in the channels array
+    // - The ledger channel is funding one of the channels in the channels array
+    const ledgersToProcess = _.chain(await this.store.getAllPendingLedgerRequests())
+      .filter(({channelToBeFunded, ledgerChannelId}) =>
+        _.some(
+          channels,
+          channelId => channelId === channelToBeFunded || channelId === ledgerChannelId
+        )
+      )
+      .uniqBy('ledgerChannelId')
+      .value();
 
     while (ledgersToProcess.length && !error) {
       const {ledgerChannelId} = ledgersToProcess[0];
