@@ -108,9 +108,9 @@ You may have noticed that to respond, the challenge state itself must be (re)sub
 ```typescript
 // In lesson10.test.ts
 
-// Prepare a forceMove transaction as above, and store the transaction receipt
+// Prepare a challenge transaction as above, and store the transaction receipt
 const receipt = await(
-  await NitroAdjudicator.forceMove(
+  await NitroAdjudicator.challenge(
     fixedPart,
     largestTurnNum,
     variableParts,
@@ -121,7 +121,7 @@ const receipt = await(
   )
 ).wait();
 
-// Extract the information out of the ForceMove event
+// Extract the information out of the ChallengeRegistered event
 const event = receipt.events.pop();
 const {
   channelId: eventChannelId,

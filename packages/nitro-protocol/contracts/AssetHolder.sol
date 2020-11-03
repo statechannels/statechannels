@@ -1,4 +1,5 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
@@ -142,7 +143,7 @@ contract AssetHolder is IAssetHolder {
         uint256 finalPayoutAmount;
         uint256 firstNewAllocationItemAmount;
 
-        for (uint256 i = 0; i < allocation.length; i++) {
+        for (uint256 i = 0; i < allocation.length; i = i.add(1)) {
             if (balance == 0) {
                 // if funds are completely depleted, keep the allocationItem and do not pay out
             } else {
@@ -150,15 +151,15 @@ contract AssetHolder is IAssetHolder {
                 if (balance < _amount) {
                     // if funds still exist but are insufficient for this allocationItem, payout what's available and keep the allocationItem (but reduce the amount allocated)
                     // this block is never executed more than once
-                    numPayouts++;
+                    numPayouts = numPayouts.add(1);
                     overlap = true;
                     finalPayoutAmount = balance;
-                    firstNewAllocationItemAmount = _amount - balance;
+                    firstNewAllocationItemAmount = _amount.sub(balance);
                     balance = 0;
                 } else {
                     // if ample funds still exist, pay them out and discard the allocationItem
-                    numPayouts++;
-                    numNewAllocationItems--;
+                    numPayouts = numPayouts.add(1);
+                    numNewAllocationItems = numNewAllocationItems.sub(1);
                     balance = balance.sub(_amount);
                 }
             }
@@ -172,8 +173,8 @@ contract AssetHolder is IAssetHolder {
             Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
                 numNewAllocationItems
             );
-            for (uint256 k = 0; k < numNewAllocationItems; k++) {
-                newAllocation[k] = allocation[allocation.length - numNewAllocationItems + k];
+            for (uint256 k = 0; k < numNewAllocationItems; k = k.add(1)) {
+                newAllocation[k] = allocation[allocation.length.sub(numNewAllocationItems).add(k)];
                 if (overlap && k == 0) {
                     newAllocation[k].amount = firstNewAllocationItemAmount;
                 }
@@ -193,8 +194,8 @@ contract AssetHolder is IAssetHolder {
         }
         // holdings updated BEFORE asset transferred (prevent reentrancy)
         uint256 payoutAmount;
-        for (uint256 m = 0; m < numPayouts; m++) {
-            if (overlap && m == numPayouts - 1) {
+        for (uint256 m = 0; m < numPayouts; m = m.add(1)) {
+            if (overlap && m == numPayouts.sub(1)) {
                 payoutAmount = finalPayoutAmount;
             } else {
                 payoutAmount = allocation[m].amount;
@@ -203,7 +204,7 @@ contract AssetHolder is IAssetHolder {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
                 emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
             } else {
-                holdings[allocation[m].destination] += payoutAmount;
+                holdings[allocation[m].destination] = holdings[allocation[m].destination].add(payoutAmount);
             }
         }
     }
@@ -328,10 +329,10 @@ contract AssetHolder is IAssetHolder {
         uint256 newAllocationLength = allocation.length;
 
         // first increase payouts according to guarantee
-        for (uint256 i = 0; i < guarantee.destinations.length; i++) {
+        for (uint256 i = 0; i < guarantee.destinations.length; i = i.add(1)) {
             // for each destination in the guarantee
             bytes32 _destination = guarantee.destinations[i];
-            for (uint256 j = 0; j < allocation.length; j++) {
+            for (uint256 j = 0; j < allocation.length; j = j.add(1)) {
                 if (balance == 0) {
                     break;
                 }
@@ -340,14 +341,14 @@ contract AssetHolder is IAssetHolder {
                     uint256 _amount = allocation[j].amount;
                     if (_amount > 0) {
                         if (balance >= _amount) {
-                            balance -= _amount;
+                            balance = balance.sub(_amount);
                             allocation[j].amount = 0; // subtract _amount;
-                            newAllocationLength--;
-                            payouts[j] += _amount;
+                            newAllocationLength = newAllocationLength.sub(1);
+                            payouts[j] = payouts[j].add(_amount);
                             break;
                         } else {
-                            allocation[j].amount = _amount - balance;
-                            payouts[j] += balance;
+                            allocation[j].amount = _amount.sub(balance);
+                            payouts[j] = payouts[j].add(balance);
                             balance = 0;
                             break;
                         }
@@ -358,7 +359,7 @@ contract AssetHolder is IAssetHolder {
 
         // next, increase payouts according to original allocation order
         // this block only has an effect if balance > 0
-        for (uint256 j = 0; j < allocation.length; j++) {
+        for (uint256 j = 0; j < allocation.length; j = j.add(1)) {
             // for each entry in the target channel's outcome
             if (balance == 0) {
                 break;
@@ -366,13 +367,13 @@ contract AssetHolder is IAssetHolder {
             uint256 _amount = allocation[j].amount;
             if (_amount > 0) {
                 if (balance >= _amount) {
-                    balance -= _amount;
+                    balance = balance.sub(_amount);
                     allocation[j].amount = 0; // subtract _amount;
-                    newAllocationLength--;
-                    payouts[j] += _amount;
+                    newAllocationLength = newAllocationLength.sub(1);
+                    payouts[j]  = payouts[j].add(_amount);
                 } else {
-                    allocation[j].amount = _amount - balance;
-                    payouts[j] += balance;
+                    allocation[j].amount = _amount.sub(balance);
+                    payouts[j] = payouts[j].add(balance);
                     balance = 0;
                 }
             }
@@ -389,11 +390,11 @@ contract AssetHolder is IAssetHolder {
         }
 
         uint256 k = 0;
-        for (uint256 j = 0; j < allocation.length; j++) {
+        for (uint256 j = 0; j < allocation.length; j = j.add(1)) {
             // for each destination in the target channel's allocation
             if (allocation[j].amount > 0) {
                 newAllocation[k] = allocation[j];
-                k++;
+                k = k.add(1);
             }
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
@@ -404,7 +405,7 @@ contract AssetHolder is IAssetHolder {
                         payouts[j]
                     );
                 } else {
-                    holdings[allocation[j].destination] += payouts[j];
+                    holdings[allocation[j].destination] = holdings[allocation[j].destination].add(payouts[j]);
                 }
             }
         }

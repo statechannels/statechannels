@@ -1,4 +1,5 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/IForceMove.sol';
@@ -43,7 +44,7 @@ contract ForceMove is IForceMove {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
      */
-    function forceMove(
+    function challenge(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -235,6 +236,12 @@ contract ForceMove is IForceMove {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
+        require(
+            largestTurnNum + 1 >= numStates,
+            'largestTurnNum + 1 must be greater than or equal to numStates'
+        );
+        // ^^ SW-C101: prevent underflow
+
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
         for (uint48 i = 0; i < numStates; i++) {
@@ -242,6 +249,8 @@ contract ForceMove is IForceMove {
                 abi.encode(
                     State(
                         largestTurnNum + (i + 1) - numStates, // turnNum
+                        // ^^ SW-C101: It is not easy to use SafeMath here, since we are not using uint256s
+                        // Instead, we are protected by the require statement above
                         true, // isFinal
                         channelId,
                         appPartHash,
@@ -367,7 +376,7 @@ contract ForceMove is IForceMove {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
             // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
             // the additional nParticipants in the dividend ensures offset always positive
-            if (whoSignedWhat[i] + offset < nStates - 1) {
+            if (whoSignedWhat[i] + offset + 1 < nStates) {
                 return false;
             }
         }

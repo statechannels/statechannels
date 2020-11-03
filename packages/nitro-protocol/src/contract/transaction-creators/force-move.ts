@@ -15,7 +15,7 @@ interface CheckpointData {
   whoSignedWhat: number[];
 }
 
-export function createForceMoveTransaction(
+export function createChallengeTransaction(
   states: State[], // in turnNum order [..,state-with-largestTurnNum]
   signatures: Signature[], // in participant order: [sig-from-p0, sig-from-p1, ...]
   whoSignedWhat: number[],
@@ -48,7 +48,7 @@ export function createForceMoveTransaction(
   }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
-  const data = ForceMoveContractInterface.encodeFunctionData('forceMove', [
+  const data = ForceMoveContractInterface.encodeFunctionData('challenge', [
     fixedPart,
     largestTurnNum,
     variableParts,

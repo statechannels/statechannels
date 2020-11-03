@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Compilation with js config
-const {compileAndSave, compile} = require('@ethereum-waffle/compiler');
+const {compileAndSave} = require('@ethereum-waffle/compiler');
 
 async function main() {
   let compilerType = 'solcjs';
@@ -15,7 +15,7 @@ async function main() {
 
   const config = {
     compilerType,
-    compilerVersion: '0.6.2',
+    compilerVersion: '0.6.12',
     sourceDirectory: './contracts',
     outputDirectory: './build/contracts',
     outputType: 'multiple',
