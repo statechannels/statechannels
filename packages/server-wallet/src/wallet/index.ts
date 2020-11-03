@@ -20,9 +20,9 @@ import {
   Participant,
   BN,
   serializeMessage,
-  Payload,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
+  Payload,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -30,6 +30,7 @@ import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {ethers} from 'ethers';
 import {Logger} from 'pino';
+import {Payload as WirePayload} from '@statechannels/wire-format';
 
 import {Bytes, Bytes32, Uint256} from '../type-aliases';
 import {Outgoing} from '../protocols/actions';
@@ -39,7 +40,7 @@ import * as UpdateChannel from '../handlers/update-channel';
 import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
-import {isWalletError} from '../errors/wallet-error';
+import {isWalletError, PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
@@ -549,20 +550,20 @@ export class Wallet extends EventEmitter<WalletEvent>
     if (this.walletConfig.workerThreadAmount > 0) {
       return this.workerManager.pushMessage(rawPayload);
     } else {
-      return this.pushMessageInternal(rawPayload);
+      const wirePayload = validatePayload(rawPayload);
+      return this.pushMessageInternal(wirePayload).catch(e => {
+        throw new PushMessageError('Error during pushMessage', {
+          thisWalletVersion: WALLET_VERSION,
+          payloadWalletVersion: wirePayload.walletVersion,
+          cause: e,
+        });
+      });
     }
   }
 
   // The internal implementation of pushMessage responsible for actually pushing the message into the wallet
-  async pushMessageInternal(rawPayload: unknown): Promise<MultipleChannelOutput> {
+  async pushMessageInternal(wirePayload: WirePayload): Promise<MultipleChannelOutput> {
     const store = this.store;
-
-    const wirePayload = validatePayload(rawPayload);
-
-    if (wirePayload.walletVersion !== WALLET_VERSION)
-      throw Error(
-        `Mismatch in wallet versions: this wallet is a ${WALLET_VERSION} but received a message from a ${wirePayload.walletVersion}`
-      );
 
     // TODO: Move into utility somewhere?
     function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
