@@ -41,7 +41,7 @@ export class PushMessageError extends WalletError {
   readonly type = WalletError.errors.PushMessageError;
 
   static readonly reasons = {
-    objectiveNotFound: 'Error during pushMessage',
+    genericPushMessageError: 'Error during pushMessage',
   } as const;
 
   constructor(
