@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.5.1...@statechannels/server-wallet@1.7.0) (2020-11-03)
+
+
+### Bug Fixes
+
+* add simple check for re-use of previous signed outcome ([96f102d](https://github.com/statechannels/statechannels/commit/96f102dc6bbb3832f6df50fc458b029f2518a74c))
+* avoid turn number checking for null app channels ([2c7d9e7](https://github.com/statechannels/statechannels/commit/2c7d9e7c84ca2a0a8931105a03d6d8ce692c4dae))
+* change status of unsupported postfund to 'opening' ([31ff797](https://github.com/statechannels/statechannels/commit/31ff79775376044f3fa95f312f40f763b5328267))
+* ensure pushMessage returns latest channelResults ([146e295](https://github.com/statechannels/statechannels/commit/146e295ae23f67d45c6f6aaddeab71772f9bb2d4))
+* fix broken query on ledger channels in DB ([8e81d4c](https://github.com/statechannels/statechannels/commit/8e81d4ce94f7fc03def09d0a417dee67a0dc1e70))
+* pull request review comment changes ([355e967](https://github.com/statechannels/statechannels/commit/355e967d9ae36640fe31e9fa0b4f3c26225d0de5))
+* remove forced turn taking requirment on post-fund setup state ([fd87502](https://github.com/statechannels/statechannels/commit/fd87502296d4e159ba455784d3d08e21d7597f66))
+* remove subtely introduced additional JS ecrecover call (via deserialization fn) ([9fd9e26](https://github.com/statechannels/statechannels/commit/9fd9e26a9d75abfebe7b1b37f9f1690a5c8c57f5))
+* use client-api-schema Participant for public API method ([02ed25e](https://github.com/statechannels/statechannels/commit/02ed25e17586f3c52d4561efd6f28fa1af6646f8))
+
+
+### Features
+
+* add closeChannels API to server wallet ([c996dbb](https://github.com/statechannels/statechannels/commit/c996dbbcb4beb7a03528f454ce484cae3b655918))
+* add register byte code method ([ce6e5b7](https://github.com/statechannels/statechannels/commit/ce6e5b72d4bf1f6791ae906912a3f812db78e4dd))
+
+
+
+
+
 # [1.6.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.5.1...@statechannels/server-wallet@1.6.0) (2020-11-02)
 
 
