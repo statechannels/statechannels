@@ -71,7 +71,6 @@
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",
     "lint:write": "eslint \"*/**/*.ts\" --fix && yarn prettier:write",
-    "postinstall": "yarn --cwd ../.. patch-package",
     "precommit": "lint-staged --quiet",
     "prepare": "run-s contract:compile build:typescript docgen",
     "prettier:check": "prettier --check './contracts/**/*.sol'",
