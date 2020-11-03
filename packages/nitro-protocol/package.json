@@ -7,8 +7,7 @@
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@openzeppelin/contracts": "3.0.1",
-    "ethers": "5.0.12",
-    "solidity-bytes-utils": "^0.1.1"
+    "ethers": "5.0.12"
   },
   "devDependencies": {
     "@ethereum-waffle/compiler": "3.1.0",
