@@ -24,6 +24,7 @@ import _ from 'lodash';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
+import {Logger} from 'pino';
 
 import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -40,7 +41,7 @@ import {ObjectiveModel, DBObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
-import {logger} from '../logger';
+import {logger as defaultLogger} from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -58,11 +59,14 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export class Store {
+  readonly logger: Logger = defaultLogger;
+
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
     readonly skipEvmValidation: boolean,
-    readonly chainNetworkID: string
+    readonly chainNetworkID: string,
+    logger?: Logger
   ) {
     if (timingMetrics) {
       this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
@@ -77,6 +81,7 @@ export class Store {
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
       setupDBMetrics(this.knex);
+      if (logger) this.logger = logger;
     }
   }
 
@@ -169,7 +174,7 @@ export class Store {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
-        logger.error('Missing bytecode', {
+        this.logger.error('Missing bytecode', {
           error: new Error(`No byte code for ${supported.appDefinition}`),
         });
 
@@ -479,7 +484,7 @@ export class Store {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
       if (!this.skipEvmValidation && !bytecode)
-        logger.error('Missing bytecode', {
+        this.logger.error('Missing bytecode', {
           error: new Error(`No byte code for ${supported.appDefinition}`),
         });
 
