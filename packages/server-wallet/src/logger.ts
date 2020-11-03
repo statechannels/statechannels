@@ -9,15 +9,13 @@ export function createLogger(config: ServerWalletConfig): pino.Logger {
     config.logDestination && config.logDestination.toLocaleLowerCase() !== 'console'
       ? pino.destination(config.logDestination)
       : undefined;
-  return destination
-    ? pino({level: config.logLevel}, destination).child({
-        dbName: config.postgresDBName,
-        walletVersion: WALLET_VERSION,
-      })
-    : pino({level: config.logLevel}).child({
-        dbName: config.postgresDBName,
-        walletVersion: WALLET_VERSION,
-      });
+  return (destination
+    ? pino({level: config.logLevel}, destination)
+    : pino({level: config.logLevel})
+  ).child({
+    dbName: config.postgresDBName,
+    walletVersion: WALLET_VERSION,
+  });
 }
 
 export const logger = createLogger(defaultConfig);
