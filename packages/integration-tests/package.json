@@ -1,13 +1,13 @@
 {
   "name": "@statechannels/integration-tests",
   "description": "Tests that integrate various @statechannels/ pakages",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "author": "George Knee",
   "devDependencies": {
-    "@statechannels/channel-client": "0.4.4",
-    "@statechannels/client-api-schema": "0.4.3",
-    "@statechannels/iframe-channel-provider": "0.3.15",
-    "@statechannels/nitro-protocol": "0.4.2",
+    "@statechannels/channel-client": "0.4.5",
+    "@statechannels/client-api-schema": "0.4.4",
+    "@statechannels/iframe-channel-provider": "0.3.16",
+    "@statechannels/nitro-protocol": "0.4.3",
     "@types/jest": "26.0.14",
     "@types/node": "14.11.2",
     "@types/wait-on": "4.0.0",
