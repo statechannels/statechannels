@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import './interfaces/IForceMove.sol';
 import './interfaces/ForceMoveApp.sol';
+import "solidity-bytes-utils/contracts/BytesLib.sol";
 
 /**
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
@@ -501,7 +502,7 @@ contract ForceMove is IForceMove {
         // and that the b.turnNum = a.turnNum + 1
         if (isFinalAB[1]) {
             require(
-                _bytesEqual(ab[1].outcome, ab[0].outcome),
+                BytesLib.equal(ab[1].outcome, ab[0].outcome),
                 'InvalidTransitionError: Cannot move to a final state with a different default outcome'
             );
         } else {
@@ -511,11 +512,11 @@ contract ForceMove is IForceMove {
             );
             if (turnNumB < 2 * nParticipants) {
                 require(
-                    _bytesEqual(ab[1].outcome, ab[0].outcome),
+                    BytesLib.equal(ab[1].outcome, ab[0].outcome),
                     'InvalidTransitionError: Cannot change the default outcome during setup phase'
                 );
                 require(
-                    keccak256(ab[1].appData) == keccak256(ab[0].appData),
+                    BytesLib.equal(ab[1].appData, ab[0].appData),
                     'InvalidTransitionError: Cannot change the appData during setup phase'
                 );
             } else {
@@ -531,17 +532,6 @@ contract ForceMove is IForceMove {
             }
         }
         return true;
-    }
-
-    /**
-     * @notice Check for equality of two byte strings
-     * @dev Check for equality of two byte strings
-     * @param left One bytes string
-     * @param right The other bytes string
-     * @return true if the bytes are identical, false otherwise.
-     */
-    function _bytesEqual(bytes memory left, bytes memory right) internal pure returns (bool) {
-        return keccak256(left) == keccak256(right);
     }
 
     /**
