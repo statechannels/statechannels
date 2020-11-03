@@ -258,7 +258,7 @@ describe('concludeAndWithdraw', () => {
               expect(arg).toMatchObject({
                 amount: BN.from(1),
                 assetHolderAddress: ethAssetHolderAddress,
-                to: makeDestination(aAddress).toLocaleLowerCase(),
+                to: makeDestination(aAddress).toLowerCase(),
                 channelId,
               });
               counter++;
@@ -267,7 +267,7 @@ describe('concludeAndWithdraw', () => {
               expect(arg).toMatchObject({
                 amount: BN.from(3),
                 assetHolderAddress: ethAssetHolderAddress,
-                to: makeDestination(bAddress).toLocaleLowerCase(),
+                to: makeDestination(bAddress).toLowerCase(),
                 channelId,
               });
               resolve();
@@ -299,7 +299,7 @@ describe('concludeAndWithdraw', () => {
               expect(arg).toMatchObject({
                 amount: BN.from(1),
                 assetHolderAddress: erc20AssetHolderAddress,
-                to: makeDestination(aAddress).toLocaleLowerCase(),
+                to: makeDestination(aAddress).toLowerCase(),
                 channelId,
               });
               counter++;
@@ -308,7 +308,7 @@ describe('concludeAndWithdraw', () => {
               expect(arg).toMatchObject({
                 amount: BN.from(3),
                 assetHolderAddress: erc20AssetHolderAddress,
-                to: makeDestination(bAddress).toLocaleLowerCase(),
+                to: makeDestination(bAddress).toLowerCase(),
                 channelId,
               });
               resolve();
