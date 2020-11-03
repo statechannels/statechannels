@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.8.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.7.0...@statechannels/server-wallet@1.8.0) (2020-11-03)
+
+
+### Bug Fixes
+
+* ignore older states when validating ([7993a5b](https://github.com/statechannels/statechannels/commit/7993a5ba2ff67474517559ceff4b53f5bdbe49fe))
+* shouldValidate should not be async ([c5b614e](https://github.com/statechannels/statechannels/commit/c5b614ebcaf6b45e51d0163eab5516b21a84cfd2))
+* typo ([675ceb5](https://github.com/statechannels/statechannels/commit/675ceb54fb566295c7036be0b9e360e7ffbe7328))
+* use isLedger from channel ([b232ec9](https://github.com/statechannels/statechannels/commit/b232ec948a84eb06e071c560e66c5f45fb610c44))
+
+
+### Features
+
+* add walletVersion to Message type ([16c205c](https://github.com/statechannels/statechannels/commit/16c205c72483a7b9b3445163065c74ff88fa55f5))
+* errors during pushMessage have version ([dc23ac1](https://github.com/statechannels/statechannels/commit/dc23ac17e1a60399f1f46cf798708e53856f6034))
+* wallets own their own child logger ([73e6bfe](https://github.com/statechannels/statechannels/commit/73e6bfede7cebfa407eed1026fa42d7f60c3ee1e))
+
+
+
+
+
 # [1.7.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.5.1...@statechannels/server-wallet@1.7.0) (2020-11-03)
 
 
