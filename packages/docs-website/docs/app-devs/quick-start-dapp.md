@@ -7,6 +7,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 By using our reference state channels wallet implementation, you will be able to rapidly develop a statechannels-powered Dapp that does not need to manage keys, interface with an ethereum provider or understand nitro-protocol at all. Instead, it only needs to target our channel-client API.
 
+:::note
+This section is for developers building browser-based Dapps that require a browser-based state channels wallet.
+Server-based applications should use a state channel wallet library (coming soon).
+:::
+
 ## Installing
 
 You will want to add both `@statechannels/channel-client` and `@statechannels/iframe-channel-provider` to your project:
