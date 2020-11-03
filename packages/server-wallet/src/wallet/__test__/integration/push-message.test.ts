@@ -27,6 +27,7 @@ import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
+import {PushMessageError} from '../../../errors/wallet-error';
 
 jest.setTimeout(20_000);
 
@@ -259,7 +260,7 @@ it("doesn't store states for unknown signing addresses", async () => {
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
   return expect(wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates})).rejects.toThrow(
-    Error('Not in channel')
+    PushMessageError
   );
 });
 
