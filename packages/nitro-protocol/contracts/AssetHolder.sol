@@ -61,7 +61,7 @@ contract AssetHolder is IAssetHolder {
         }
 
         // effects
-        holdings[fromChannelId] = holdings[fromChannelId] -= affordsForDestination;
+        holdings[fromChannelId] -= affordsForDestination;
 
         // construct new outcome
 
