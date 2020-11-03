@@ -52,7 +52,7 @@ const sixEachStatePreFS: State = {
   ],
   appDefinition: AddressZero,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: 1
 };
 
@@ -124,7 +124,7 @@ const threeEachStatePreFS: State = {
   ],
   appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: 1
 };
 
@@ -183,7 +183,7 @@ const threeEachAndSixForTheApp: State = {
   ],
   appDefinition: AddressZero,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: 4
 };
 
@@ -240,7 +240,7 @@ const sixForMe: State = {
   ],
   appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: 100
 };
 
@@ -289,7 +289,7 @@ const nineForMeThreeForTheHub: State = {
   ],
   appDefinition: AddressZero,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: 5
 };
 

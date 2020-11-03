@@ -53,7 +53,7 @@ const state: State = {
   outcome: [],
   appDefinition: AddressZero,
   appData: HashZero,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   turnNum: largestTurnNum
 };
 
