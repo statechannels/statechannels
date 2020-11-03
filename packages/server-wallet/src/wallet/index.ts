@@ -77,10 +77,10 @@ export type MultipleChannelOutput = {
 };
 type Message = SingleChannelOutput | MultipleChannelOutput;
 
-type ChannelUpdateEventName = 'channelUpdate';
+type ChannelUpdatedEventName = 'channelUpdated';
 type ObjectiveSucceededEventName = 'objectiveSucceeded';
-type ChannelUpdateEvent = {
-  type: ChannelUpdateEventName;
+type ChannelUpdatedEvent = {
+  type: ChannelUpdatedEventName;
   value: SingleChannelOutput;
 };
 export type ObjectiveSucceededValue = {
@@ -91,10 +91,10 @@ type ObjectiveSucceededEvent = {
   type: ObjectiveSucceededEventName;
   value: ObjectiveSucceededValue;
 };
-export type WalletEvent = ChannelUpdateEvent | ObjectiveSucceededEvent;
+export type WalletEvent = ChannelUpdatedEvent | ObjectiveSucceededEvent;
 type EventEmitterType =
   | {
-      [key in ChannelUpdateEvent['type']]: ChannelUpdateEvent['value'];
+      [key in ChannelUpdatedEvent['type']]: ChannelUpdatedEvent['value'];
     }
   | {
       [key in ObjectiveSucceededEvent['type']]: ObjectiveSucceededEvent['value'];
@@ -776,9 +776,9 @@ export class Wallet extends EventEmitter<EventEmitterType>
 
   // ChainEventSubscriberInterface implementation
   holdingUpdated(arg: HoldingUpdatedArg): void {
-    const channelUpdate: ChannelUpdateEventName = 'channelUpdate';
+    const channelUpdated: ChannelUpdatedEventName = 'channelUpdated';
     this.updateChannelFundingForAssetHolder(arg).then(singleChannelOutput =>
-      this.emit(channelUpdate, singleChannelOutput)
+      this.emit(channelUpdated, singleChannelOutput)
     );
   }
 
