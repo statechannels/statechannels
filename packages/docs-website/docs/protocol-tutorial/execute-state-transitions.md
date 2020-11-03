@@ -38,10 +38,10 @@ const chainId = '0x1234';
 const channelNonce = 0;
 
 /* 
-    Define the challengeDuration 
+    Define the challengeDuration (in seconds)
     :~ how long should participants get to respond to challenges?
   */
-const challengeDuration = 1;
+const challengeDuration = 86400; // 1 day
 
 /* 
     Mock out the appDefinition and appData.
@@ -147,7 +147,7 @@ const fromState: State = {
   outcome: [],
   turnNum: 0,
   isFinal: false,
-  challengeDuration: 0x0,
+  challengeDuration: 86400, // 1 day
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
   appData: '0x00'
 };
@@ -286,7 +286,7 @@ const state: State = {
   isFinal: false,
   appData: '0x00',
   appDefinition: AddressZero,
-  challengeDuration: 0x5
+  challengeDuration: 86400 // 1 day
 };
 
 const signedState: SignedState = signState(state, wallet.privateKey);
@@ -321,7 +321,7 @@ for (let i = 1; i <= numStates; i++) {
     outcome: [],
     appDefinition: AddressZero,
     appData: HashZero,
-    challengeDuration: 1,
+    challengeDuration: 86400, // 1 day
     turnNum: largestTurnNum + i - numStates
   });
 }

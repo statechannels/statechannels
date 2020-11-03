@@ -49,7 +49,7 @@ const states: State[] = appDatas.map((data, idx) => ({
   turnNum: largestTurnNum - appDatas.length + 1 + idx,
   isFinal: idx > appDatas.length - isFinalCount,
   channel,
-  challengeDuration: 1,
+  challengeDuration: 86400, // 1 day
   outcome: [],
   appDefinition: process.env.TRIVIAL_APP_ADDRESS,
   appData: HashZero
