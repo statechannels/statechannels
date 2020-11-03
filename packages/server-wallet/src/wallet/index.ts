@@ -763,7 +763,7 @@ export class Wallet extends EventEmitter<EventEmitterType>
       try {
         events?.map(event => this.emit(event.type, event.value));
       } catch (error) {
-        logger.error('Unable to emit events', {error, events});
+        this.logger.error('Unable to emit events', {error, events});
       }
 
       // todo(tom): this how the code behaved previously. Is it actually what we want?
