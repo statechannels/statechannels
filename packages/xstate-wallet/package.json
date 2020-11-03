@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/xstate-wallet",
   "description": "State channel wallet using xstate.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Alex Gap",
   "babel": {
     "presets": [
@@ -26,9 +26,9 @@
     "@rimble/utils": "1.2.3",
     "@sentry/browser": "5.15.5",
     "@statechannels/client-api-schema": "0.4.4",
-    "@statechannels/nitro-protocol": "0.5.0",
-    "@statechannels/wallet-core": "0.6.0",
-    "@statechannels/wire-format": "0.6.0",
+    "@statechannels/nitro-protocol": "0.6.0",
+    "@statechannels/wallet-core": "0.7.0",
+    "@statechannels/wire-format": "0.7.0",
     "@types/jest": "26.0.14",
     "@xstate/react": "1.0.1",
     "async-lock": "1.2.2",
