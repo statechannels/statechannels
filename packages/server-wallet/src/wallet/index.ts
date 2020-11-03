@@ -737,13 +737,17 @@ export class Wallet extends EventEmitter<EventEmitterType>
     channels: Bytes32[],
     {outbox, channelResults, error}: ExecutionResult
   ): Promise<void> {
-    const channelsWithPendingReqs = (await LedgerRequest.getAllPendingRequests(this.knex)).map(
-      l => l.channelToBeFunded
-    );
+    // Fetch channels related to the channels argument where related means, either:
+    // - The channel is in the channels array
+    // - The channel is being funded by one of the channels in the channels array
+    const ledgerRequests = await LedgerRequest.getAllPendingRequests(this.knex);
+    const channelsWithRelevantPendingReqs = ledgerRequests
+      .filter(req => channels.includes(req.ledgerChannelId))
+      .map(req => req.channelToBeFunded);
 
-    const objectives = (await this.store.getObjectives(channels.concat(channelsWithPendingReqs)))
-      .filter(x => x !== undefined)
-      .filter(o => o?.status === 'approved');
+    const objectives = (
+      await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs))
+    ).filter(objective => objective.status === 'approved');
 
     // todo(tom): why isn't this just a for loop?
     while (objectives.length && !error) {
