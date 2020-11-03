@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/statechannels/statechannels/compare/@statechannels/xstate-wallet@0.4.7...@statechannels/xstate-wallet@0.5.0) (2020-11-03)
+
+
+### Features
+
+* add walletVersion to Message type ([16c205c](https://github.com/statechannels/statechannels/commit/16c205c72483a7b9b3445163065c74ff88fa55f5))
+
+
+
+
+
 ## [0.4.7](https://github.com/statechannels/statechannels/compare/@statechannels/xstate-wallet@0.4.5...@statechannels/xstate-wallet@0.4.7) (2020-11-03)
 
 **Note:** Version bump only for package @statechannels/xstate-wallet

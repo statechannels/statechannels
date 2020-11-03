@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.3...@statechannels/nitro-protocol@0.5.0) (2020-11-03)
+
+
+### Bug Fixes
+
+* typo ([227c4e0](https://github.com/statechannels/monorepo/commit/227c4e0b75461723de42ac20f0c6e0c4fd84ebca))
+
+
+### Features
+
+* add transfer method to AssetHolder ([6cd5c97](https://github.com/statechannels/monorepo/commit/6cd5c97ba1e95065a0e1e6366d6f0ff41595fecb))
+
+
+
+
+
 ## [0.4.3](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.1...@statechannels/nitro-protocol@0.4.3) (2020-11-03)
 
 **Note:** Version bump only for package @statechannels/nitro-protocol
