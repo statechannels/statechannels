@@ -19,3 +19,5 @@ tsconfig.tsbuildinfo
 
 .clinic
 profiling-data
+
+temp
