@@ -58,8 +58,7 @@ contract ETHAssetHolder is AssetHolder {
 
         // refund whatever wasn't deposited.
         uint256 refund = amount.sub(amountDeposited);
-        (bool success, ) = msg.sender.call{value: refund}('');
-        require(success, 'Could not refund excess funds');
+        msg.sender.call{value: refund}(''); // We do not require success here, to block a griefing vector
     }
 
     /**
