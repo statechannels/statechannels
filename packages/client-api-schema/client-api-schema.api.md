@@ -543,7 +543,9 @@ export type StateChannelsNotification = ChannelProposedNotification | ChannelUpd
 //
 // @public (undocumented)
 export type StateChannelsNotificationType = {
-    [T in StateChannelsNotification['method']]: [FilterByMethod<StateChannelsNotification, T>['params']];
+    [T in StateChannelsNotification['method']]: [
+        FilterByMethod<StateChannelsNotification, T>['params']
+    ];
 };
 
 // @public (undocumented)
