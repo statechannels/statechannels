@@ -1,0 +1,19 @@
+diff --git a/node_modules/@microsoft/api-extractor/lib/analyzer/ExportAnalyzer.js b/node_modules/@microsoft/api-extractor/lib/analyzer/ExportAnalyzer.js
+index 63d49ef..9e4928d 100644
+--- a/node_modules/@microsoft/api-extractor/lib/analyzer/ExportAnalyzer.js
++++ b/node_modules/@microsoft/api-extractor/lib/analyzer/ExportAnalyzer.js
+@@ -477,10 +477,10 @@ class ExportAnalyzer {
+             }
+         }
+         const importTypeNode = TypeScriptHelpers_1.TypeScriptHelpers.findFirstChildNode(declaration, ts.SyntaxKind.ImportType);
+-        if (importTypeNode) {
+-            throw new Error('The expression contains an import() type, which is not yet supported by API Extractor:\n' +
+-                SourceFileLocationFormatter_1.SourceFileLocationFormatter.formatDeclaration(importTypeNode));
+-        }
++        // if (importTypeNode) {
++        //     throw new Error('The expression contains an import() type, which is not yet supported by API Extractor:\n' +
++        //         SourceFileLocationFormatter_1.SourceFileLocationFormatter.formatDeclaration(importTypeNode));
++        // }
+         return undefined;
+     }
+     static _getIsTypeOnly(importDeclaration) {
