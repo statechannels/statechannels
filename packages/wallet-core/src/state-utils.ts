@@ -97,7 +97,7 @@ export function getSignerAddress(state: State, signature: string): string {
   return getNitroSignerAddress({state: nitroState, signature: utils.splitSignature(signature)});
 }
 
-export function statesEqual(left: State, right: State) {
+export function statesEqual(left: State, right: State): boolean {
   return hashState(left) === hashState(right);
 }
 
@@ -114,7 +114,7 @@ function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation)
   );
 }
 
-export function outcomesEqual(left: Outcome, right?: Outcome) {
+export function outcomesEqual(left: Outcome, right?: Outcome): boolean {
   if (left.type === 'SimpleAllocation' && right?.type === 'SimpleAllocation') {
     return simpleAllocationsEqual(left, right);
   }
@@ -220,7 +220,7 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
   };
 }
 
-export function nextState(state: State, outcome: Outcome) {
+export function nextState(state: State, outcome: Outcome): State {
   if (state.outcome.type !== outcome.type) {
     throw new Error('Attempting to change outcome type');
   }

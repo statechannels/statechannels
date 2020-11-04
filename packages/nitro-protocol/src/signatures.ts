@@ -37,7 +37,7 @@ export function signState(state: State, privateKey: string): SignedState {
   return {state, signature};
 }
 
-export async function sign(wallet: Wallet, msgHash: string | Uint8Array) {
+export async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature> {
   // MsgHash is a hex string
   // Returns an object with v, r, and s properties.
   return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));

@@ -31,7 +31,7 @@ export interface ChallengeRegisteredStruct {
   sigs: Signature[];
   whoSignedWhat: Uint8[];
 }
-export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEvent {
+export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegisteredEvent {
   const {
     turnNumRecord,
     finalizesAt,
@@ -92,7 +92,7 @@ export interface RespondTransactionArguments {
 }
 export function getChallengeClearedEvent(
   tx: ethers.Transaction,
-  eventResult
+  eventResult: any[]
 ): ChallengeClearedEvent {
   const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
 

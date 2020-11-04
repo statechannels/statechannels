@@ -50,7 +50,8 @@ export class BN {
   static toHexString = unaryOperator('toHexString');
 
   static from = (n: BigNumberish | BN): Uint256 => EthersBigNumber.from(n).toHexString() as Uint256;
-  static isUint256 = (val: any) => typeof val === 'string' && !!val.match(/^0x[0-9A-Fa-f]{0,64}$/);
+  static isUint256 = (val: unknown): val is Uint256 =>
+    typeof val === 'string' && !!val.match(/^0x[0-9A-Fa-f]{0,64}$/);
 }
 
 export const Zero = BN.from(0);

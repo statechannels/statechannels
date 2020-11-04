@@ -1,7 +1,18 @@
 import fs from 'fs';
 
-import {Contract, ethers, BigNumberish, BigNumber, constants, providers, utils} from 'ethers';
+import {
+  Contract,
+  ethers,
+  BigNumberish,
+  BigNumber,
+  constants,
+  providers,
+  utils,
+  Event,
+} from 'ethers';
 
+import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
+import {Bytes} from '../src/contract/types';
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
   AllocationAssetOutcome,
@@ -13,6 +24,7 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
+import {AssetTransferredEvent, Bytes32, DepositedEvent} from '../src';
 
 // Interfaces
 
@@ -31,7 +43,7 @@ export interface AddressesLookup {
 }
 
 // Functions
-export const getTestProvider = () => {
+export const getTestProvider = (): ethers.providers.JsonRpcProvider => {
   if (!process.env.GANACHE_PORT) {
     throw new Error('Missing environment variable GANACHE_PORT required');
   }
@@ -40,9 +52,9 @@ export const getTestProvider = () => {
 
 export async function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
-  artifact,
+  artifact: {abi: ethers.ContractInterface},
   address: string
-) {
+): Promise<ethers.Contract> {
   const signer = provider.getSigner(0);
   // TODO: We should be use the address env variables instead of the address on the artifact
   const contract = new ethers.Contract(address, artifact.abi, signer);
@@ -55,13 +67,13 @@ export function getPlaceHolderContractAddress(): string {
 
 export const nonParticipant = ethers.Wallet.createRandom();
 
-export const clearedChallengeHash = (turnNumRecord = 5) =>
+export const clearedChallengeHash = (turnNumRecord = 5): Bytes32 =>
   channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt: 0,
   });
 
-export const ongoingChallengeHash = (turnNumRecord = 5) =>
+export const ongoingChallengeHash = (turnNumRecord = 5): Bytes32 =>
   channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt: 1e12,
@@ -75,7 +87,7 @@ export const finalizedOutcomeHash = (
   outcome: Outcome = [],
   state = undefined,
   challengerAddress = undefined
-) =>
+): Bytes32 =>
   channelDataToChannelStorageHash({
     turnNumRecord,
     finalizesAt,
@@ -84,7 +96,10 @@ export const finalizedOutcomeHash = (
     challengerAddress,
   });
 
-export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId: string) => {
+export const newChallengeRegisteredEvent = (
+  contract: ethers.Contract,
+  channelId: string
+): Promise<ChallengeRegisteredStruct[keyof ChallengeRegisteredStruct]> => {
   const filter = contract.filters.ChallengeRegistered(channelId);
   return new Promise((resolve, reject) => {
     contract.on(
@@ -114,7 +129,10 @@ export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId
   });
 };
 
-export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: string) => {
+export const newChallengeClearedEvent = (
+  contract: ethers.Contract,
+  channelId: string
+): Promise<ChallengeClearedEvent[keyof ChallengeClearedEvent]> => {
   const filter = contract.filters.ChallengeCleared(channelId);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventChannelId, eventTurnNumRecord, event) => {
@@ -125,7 +143,10 @@ export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: s
   });
 };
 
-export const newConcludedEvent = (contract: ethers.Contract, channelId: string) => {
+export const newConcludedEvent = (
+  contract: ethers.Contract,
+  channelId: string
+): Promise<[Bytes32]> => {
   const filter = contract.filters.Concluded(channelId);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventChannelId, event) => {
@@ -136,18 +157,27 @@ export const newConcludedEvent = (contract: ethers.Contract, channelId: string) 
   });
 };
 
-export const newDepositedEvent = (contract: ethers.Contract, destination: string) => {
+export const newDepositedEvent = (
+  contract: ethers.Contract,
+  destination: string
+): Promise<[string, BigNumber, BigNumber]> => {
   const filter = contract.filters.Deposited(destination);
   return new Promise((resolve, reject) => {
-    contract.on(filter, (eventDestination, amountDeposited, amountHeld, event) => {
-      // Match event for this destination only
-      contract.removeAllListeners(filter);
-      resolve([eventDestination, amountDeposited, amountHeld]);
-    });
+    contract.on(
+      filter,
+      (eventDestination: string, amountDeposited: BigNumber, amountHeld: BigNumber, event) => {
+        // Match event for this destination only
+        contract.removeAllListeners(filter);
+        resolve([eventDestination, amountDeposited, amountHeld]);
+      }
+    );
   });
 };
 
-export const newTransferEvent = (contract: ethers.Contract, to: string) => {
+export const newTransferEvent = (
+  contract: ethers.Contract,
+  to: string
+): Promise<AssetTransferredEvent[keyof AssetTransferredEvent]> => {
   const filter = contract.filters.Transfer(null, to);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventFrom, eventTo, amountTransferred, event) => {
@@ -158,12 +188,16 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   });
 };
 
-export const newAssetTransferredEvent = (destination: string, payout: number) => ({
+export const newAssetTransferredEvent = (
+  destination: string,
+  payout: number
+): AssetTransferredEvent => ({
+  channelId: destination,
   destination: destination.toLowerCase(),
-  amount: payout,
+  amount: BigNumber.from(payout),
 });
 
-export function randomChannelId(channelNonce = 0) {
+export function randomChannelId(channelNonce = 0): Bytes32 {
   // Populate participants array (every test run targets a unique channel)
   const participants = [];
   for (let i = 0; i < 3; i++) {
@@ -179,7 +213,7 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
-export const randomExternalDestination = () =>
+export const randomExternalDestination = (): string =>
   '0x' +
   ethers.Wallet.createRandom()
     .address.slice(2, 42)
@@ -196,7 +230,7 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function allocationToParams(allocation: AllocationItem[]) {
+export function allocationToParams(allocation: AllocationItem[]): [Bytes, Bytes32] {
   const allocationBytes = encodeAllocation(allocation);
   let assetOutcomeHash;
   if (allocation.length === 0) {
@@ -207,7 +241,7 @@ export function allocationToParams(allocation: AllocationItem[]) {
   return [allocationBytes, assetOutcomeHash];
 }
 
-export function guaranteeToParams(guarantee: Guarantee) {
+export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
   const guaranteeBytes = encodeGuarantee(guarantee);
 
   const assetOutcomeHash = hashAssetOutcome(guarantee);
@@ -237,7 +271,7 @@ export function replaceAddressesAndBigNumberify(
 export function resetMultipleHoldings(
   multipleHoldings: OutcomeShortHand,
   contractsArray: Contract[]
-) {
+): void {
   Object.keys(multipleHoldings).forEach(assetHolder => {
     const holdings = multipleHoldings[assetHolder];
     Object.keys(holdings).forEach(async destination => {
@@ -256,7 +290,7 @@ export function resetMultipleHoldings(
 export function checkMultipleHoldings(
   multipleHoldings: OutcomeShortHand,
   contractsArray: Contract[]
-) {
+): void {
   Object.keys(multipleHoldings).forEach(assetHolder => {
     const holdings = multipleHoldings[assetHolder];
     Object.keys(holdings).forEach(async destination => {
@@ -275,7 +309,7 @@ export function checkMultipleAssetOutcomeHashes(
   channelId: string,
   outcome: OutcomeShortHand,
   contractsArray: Contract[]
-) {
+): void {
   Object.keys(outcome).forEach(assetHolder => {
     const assetOutcome = outcome[assetHolder];
     const allocationAfter = [];
@@ -316,7 +350,7 @@ export function assetTransferredEventsFromPayouts(
   channelId: string,
   singleAssetPayouts: AssetOutcomeShortHand,
   assetHolder: string
-) {
+): AssetTransferredEvent[] {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
     if (singleAssetPayouts[destination] && BigNumber.from(singleAssetPayouts[destination]).gt(0)) {
@@ -330,7 +364,7 @@ export function assetTransferredEventsFromPayouts(
   return assetTransferredEvents;
 }
 
-export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
+export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): Event[] {
   const events = [];
   logs.forEach(log => {
     contractsArray.forEach(contract => {

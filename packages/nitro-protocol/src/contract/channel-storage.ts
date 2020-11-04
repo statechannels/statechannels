@@ -11,6 +11,13 @@ export interface ChannelData {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
+interface CompactChannelData {
+  turnNumRecord: Uint48;
+  finalizesAt: Uint48;
+  stateHash: Bytes32;
+  challengerAddress: Address;
+  outcomeHash: Bytes32;
+}
 const CHANNEL_DATA_TYPE = `tuple(
   uint256 turnNumRecord,
   uint256 finalizesAt,
@@ -24,6 +31,12 @@ export interface ChannelDataLite {
   state: State;
   challengerAddress: Address;
   outcome: Outcome;
+}
+interface CompactChannelDataLite {
+  finalizesAt: Uint48;
+  stateHash: Bytes32;
+  challengerAddress: Address;
+  outcomeHash: Bytes32;
 }
 const CHANNEL_DATA_LITE_TYPE = `tuple(
   uint256 finalizesAt,
@@ -71,7 +84,7 @@ export function channelDataStruct({
   challengerAddress,
   turnNumRecord,
   outcome,
-}: ChannelData) {
+}: ChannelData): CompactChannelData {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -102,7 +115,7 @@ export function channelDataLiteStruct({
   challengerAddress,
   state,
   outcome,
-}: ChannelDataLite) {
+}: ChannelDataLite): CompactChannelDataLite {
   return {
     finalizesAt,
     challengerAddress,

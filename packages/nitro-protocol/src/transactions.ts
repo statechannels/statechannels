@@ -1,11 +1,16 @@
 import {Contract, providers, Signature} from 'ethers';
 
+import {Uint256} from './contract/types';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress, SignedState} from './signatures';
 
-export async function getChannelStorage(provider, contractAddress: string, channelId: string) {
+export async function getChannelStorage(
+  provider: providers.Provider,
+  contractAddress: string,
+  channelId: string
+): Promise<[Uint256, Uint256, Uint256]> {
   const forceMove = new Contract(
     contractAddress,
     forceMoveTrans.ForceMoveContractInterface,
