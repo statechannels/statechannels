@@ -125,6 +125,8 @@ export type WalletInterface = {
   closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
   getChannels(): Promise<MultipleChannelOutput>;
   getState(args: GetStateParams): Promise<SingleChannelOutput>;
+
+  syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
   syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
 
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
@@ -207,6 +209,14 @@ export class Wallet extends EventEmitter<EventEmitterType>
     await this.workerManager.destroy();
     await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
     this.chainService.destructor();
+  }
+
+  public async syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
+    const results = await Promise.all(channelIds.map(channelId => this.syncChannel({channelId})));
+    return {
+      outbox: mergeOutgoing(results.flatMap(r => r.outbox)),
+      channelResults: mergeChannelResults(results.flatMap(r => r.channelResult)),
+    };
   }
 
   public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
