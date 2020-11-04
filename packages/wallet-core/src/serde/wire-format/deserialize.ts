@@ -67,7 +67,7 @@ export function wireStateToNitroState(state: SignedStateWire): NitroState {
     appData: state.appData
   };
 }
-export function hashWireState(state: SignedStateWire) {
+export function hashWireState(state: SignedStateWire): string {
   return hashState(wireStateToNitroState(state));
 }
 

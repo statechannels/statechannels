@@ -11,7 +11,7 @@ export function subHex(a: string, b: string): string {
     .toHexString();
 }
 
-export function eqHex(a: string, b: string) {
+export function eqHex(a: string, b: string): boolean {
   return BigNumber.from(a).eq(b);
 }
 

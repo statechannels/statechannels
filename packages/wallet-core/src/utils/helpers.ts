@@ -2,7 +2,7 @@ import {utils} from 'ethers';
 
 import {BN} from '../bignumber';
 import {Uint256} from '../types';
-export function unreachable(x: never) {
+export function unreachable(x: never): never {
   return x;
 }
 
