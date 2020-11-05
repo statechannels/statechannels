@@ -34,7 +34,7 @@ async function setup(n = NUM_UPDATES): Promise<Channel[]> {
 async function benchmark(): Promise<void> {
   await knex.migrate.rollback();
   await knex.migrate.latest();
-  const wallet = new Wallet(defaultConfig);
+  const wallet = Wallet.create(defaultConfig);
 
   // Warm up each worker thread.
   // eslint-disable-next-line no-process-env

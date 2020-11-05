@@ -13,7 +13,7 @@ let w: Wallet;
 beforeEach(async () => {
   await new DBAdmin(knex).truncateDB();
 
-  w = new Wallet(defaultTestConfig);
+  w = Wallet.create(defaultTestConfig);
 });
 
 afterEach(async () => {

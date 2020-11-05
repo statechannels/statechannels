@@ -9,7 +9,7 @@ import {Bytes32} from '../../../type-aliases';
 
 let w: Wallet;
 beforeAll(async () => {
-  w = new Wallet(defaultTestConfig);
+  w = Wallet.create(defaultTestConfig);
   await seedAlicesSigningWallet(w.knex);
 });
 

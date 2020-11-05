@@ -31,7 +31,7 @@ import {PushMessageError} from '../../../errors/wallet-error';
 
 jest.setTimeout(20_000);
 
-const wallet = new Wallet(defaultTestConfig);
+const wallet = Wallet.create(defaultTestConfig);
 
 beforeAll(async () => {
   await wallet.dbAdmin().migrateDB();

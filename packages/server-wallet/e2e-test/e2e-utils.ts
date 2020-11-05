@@ -147,7 +147,7 @@ export async function seedTestChannels(
 }
 
 export function getParticipant(participantId: string, privateKey: string): Participant {
-  const signingAddress = new Wallet(privateKey).address;
+  const signingAddress = Wallet.create(privateKey).address;
   return {
     signingAddress,
     participantId,

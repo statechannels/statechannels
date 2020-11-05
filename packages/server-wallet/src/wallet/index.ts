@@ -144,7 +144,13 @@ export class Wallet extends EventEmitter<EventEmitterType>
   logger: Logger;
 
   readonly walletConfig: ServerWalletConfig;
-  constructor(walletConfig?: ServerWalletConfig) {
+
+  public static create(walletConfig?: ServerWalletConfig): Wallet {
+    return new Wallet(walletConfig);
+  }
+
+  // private constructor to force consumers to initialize wallet via Wallet.create(..)
+  private constructor(walletConfig?: ServerWalletConfig) {
     super();
     this.walletConfig = walletConfig || defaultConfig;
     this.workerManager = new WorkerManager(this.walletConfig);

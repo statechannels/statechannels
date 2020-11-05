@@ -10,7 +10,7 @@ import {WALLET_VERSION} from '../../src/version';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
-    new Wallet(receiverConfig),
+    Wallet.create(receiverConfig),
     defaultConfig.timingMetrics
   );
 

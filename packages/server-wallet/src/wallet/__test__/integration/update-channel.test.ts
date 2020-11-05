@@ -22,7 +22,7 @@ afterEach(async () => {
 const appData1 = utils.defaultAbiCoder.encode(['uint256'], [1]);
 const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
-  w = new Wallet({...defaultTestConfig, skipEvmValidation: false});
+  w = Wallet.create({...defaultTestConfig, skipEvmValidation: false});
 
   await new DBAdmin(knex).truncateDB();
   await seedAlicesSigningWallet(knex);
