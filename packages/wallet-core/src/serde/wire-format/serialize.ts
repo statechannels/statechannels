@@ -22,7 +22,7 @@ export function serializeMessage(
   walletVersion: string,
   message: Payload,
   recipient: string,
-  sender: string,
+  sender?: string,
   channelId?: string
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
