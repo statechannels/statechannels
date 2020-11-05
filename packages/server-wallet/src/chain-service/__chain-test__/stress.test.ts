@@ -16,11 +16,11 @@ if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be define
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 // This is the private key for which ERC20 tokens are allocated on contract creation
-const ethWalletWithTokens = new Wallet(defaultTestConfig.serverPrivateKey, provider);
+const ethWalletWithTokens = Wallet.create(defaultTestConfig.serverPrivateKey, provider);
 
 // Try to use a different private key for every chain service instantiation to avoid nonce errors
 const privateKey = ETHERLIME_ACCOUNTS[3].privateKey;
-const ethWallet = new Wallet(privateKey, provider);
+const ethWallet = Wallet.create(privateKey, provider);
 
 let chainService: ChainService;
 

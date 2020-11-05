@@ -11,8 +11,8 @@ import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
 
-const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
-let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
+const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
+let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;

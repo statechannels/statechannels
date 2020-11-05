@@ -11,8 +11,8 @@ import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
-const a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
-const b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
+const b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
 
 let channelId: string;
 let participantA: Participant;

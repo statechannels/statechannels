@@ -29,7 +29,7 @@ async function benchmark(): Promise<void> {
   const c = withSupportedState()({vars: [stateVars()]});
   await Channel.query(knex).insert(c);
 
-  const wallet = new Wallet(defaultConfig);
+  const wallet = Wallet.create(defaultConfig);
 
   const iter = _.range(NUM_CALLS);
   const key = `getChannel x ${NUM_CALLS}`;
