@@ -48,8 +48,7 @@ function successfulWithdraw({app}: ProtocolState): boolean {
     .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
   const amountTransferredToMe = app
     .funding(assetHolderAddress)
-    // todo: figure out why destination in emitted events are lower case
-    .transferredOut.filter(tf => tf.toAddress === myDestination.toLowerCase())
+    .transferredOut.filter(tf => tf.toAddress === myDestination)
     .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
   return BN.eq(amountOwedToMe, amountTransferredToMe);
 }
