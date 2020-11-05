@@ -478,7 +478,7 @@ contract AssetHolder is IAssetHolder {
      * @param amount Quantity of assets to be transferred.
      * @return True if the asset was successfully transferred, false otherwise.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal virtual returns (bool) {}
+    function _transferAsset(address payable destination, uint256 amount) internal virtual returns (bool) {return true;}
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
