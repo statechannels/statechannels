@@ -61,7 +61,7 @@ it('getSignerAddress vs fastRecover', async () => {
 
     const signedState = await wasmSignState(addHash(state), privateKey);
     try {
-      const recovered = getSignerAddress(signedState.state, signedState.signature);
+      const recovered = makeAddress(getSignerAddress(signedState.state, signedState.signature));
       const wasmRecovered = recoverAddress(signedState.signature, toNitroState(signedState.state));
       expect(recovered).toEqual(wasmRecovered);
     } catch (error) {
