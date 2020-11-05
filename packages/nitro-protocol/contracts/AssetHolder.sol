@@ -381,6 +381,7 @@ contract AssetHolder is IAssetHolder {
 
         // EFFECTS
         holdings[guarantorChannelId] = balance;
+       
 
         // at this point have payouts array of uint256s, each corresponding to original destinations
         // and allocations has some zero amounts which we want to prune
@@ -410,6 +411,7 @@ contract AssetHolder is IAssetHolder {
                 )
             );
         } else {
+            delete assetOutcomeHashes[guarantorChannelId];
             delete assetOutcomeHashes[guarantee.targetChannelId];
         }
 
