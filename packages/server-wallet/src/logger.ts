@@ -4,7 +4,6 @@ import {defaultConfig, ServerWalletConfig} from './config';
 import {WALLET_VERSION} from './version';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
-  // eslint-disable-next-line no-process-env
   const destination =
     config.logDestination && config.logDestination.toLocaleLowerCase() !== 'console'
       ? pino.destination(config.logDestination)

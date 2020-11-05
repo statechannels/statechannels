@@ -451,8 +451,7 @@ describe('ledger funded app scenarios', () => {
 
     // Construct expected ledger update state
     expectedUpdatedLedgerState = {
-      // eslint-disable-next-line
-      ...ledger.latest!,
+      ...ledger.latest,
       turnNum: 6,
       outcome: {
         type: 'SimpleAllocation' as const,
