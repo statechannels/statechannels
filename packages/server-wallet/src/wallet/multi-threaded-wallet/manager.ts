@@ -7,11 +7,12 @@ import {Either} from 'fp-ts/lib/Either';
 import {isLeft} from 'fp-ts/lib/These';
 import _ from 'lodash';
 
-import {MultipleChannelOutput, SingleChannelOutput} from '../../wallet';
 import {ServerWalletConfig} from '../../config';
 import {logger as parentLogger} from '../../logger';
+import {MultipleChannelOutput, SingleChannelOutput} from '../wallet';
 
 import {StateChannelWorkerData} from './worker-data';
+
 const ONE_DAY = 86400000;
 
 const logger = parentLogger.child({module: 'Worker-Manager'});

@@ -42,7 +42,6 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError, PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {WorkerManager} from '../utilities/workers/manager';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
 import {
@@ -61,6 +60,7 @@ import {ObjectiveManager} from '../objectives';
 import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
+import {WalletInterface} from './types';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -75,7 +75,7 @@ export type MultipleChannelOutput = {
   channelResults: ChannelResult[];
   objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
-type Message = SingleChannelOutput | MultipleChannelOutput;
+export type Message = SingleChannelOutput | MultipleChannelOutput;
 
 type ChannelUpdatedEventName = 'channelUpdated';
 type ObjectiveSucceededEventName = 'objectiveSucceeded';
@@ -109,36 +109,8 @@ export interface UpdateChannelFundingParams {
   amount: Uint256;
 }
 
-export type WalletInterface = {
-  // App utilities
-  getParticipant(): Promise<Participant | undefined>;
-  registerAppDefinition(appDefinition: string): Promise<void>;
-  registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-  // App channel management
-  createChannels(
-    args: CreateChannelParams,
-    numberOfChannels: number
-  ): Promise<MultipleChannelOutput>;
-
-  joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
-  updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
-  closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
-  getChannels(): Promise<MultipleChannelOutput>;
-  getState(args: GetStateParams): Promise<SingleChannelOutput>;
-
-  syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-  syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
-
-  updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
-  // Wallet <-> Wallet communication
-  pushMessage(m: unknown): Promise<MultipleChannelOutput>;
-
-  mergeMessages(messages: Message[]): MultipleChannelOutput;
-};
-
-export class Wallet extends EventEmitter<EventEmitterType>
+export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
-  workerManager: WorkerManager;
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
@@ -147,15 +119,14 @@ export class Wallet extends EventEmitter<EventEmitterType>
 
   readonly walletConfig: ServerWalletConfig;
 
-  public static create(walletConfig?: ServerWalletConfig): Wallet {
-    return new Wallet(walletConfig);
+  public static create(walletConfig?: ServerWalletConfig): SingleThreadedWallet {
+    return new SingleThreadedWallet(walletConfig);
   }
 
-  // private constructor to force consumers to initialize wallet via Wallet.create(..)
-  private constructor(walletConfig?: ServerWalletConfig) {
+  // protected constructor to force consumers to initialize wallet via Wallet.create(..)
+  protected constructor(walletConfig?: ServerWalletConfig) {
     super();
     this.walletConfig = walletConfig || defaultConfig;
-    this.workerManager = new WorkerManager(this.walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.logger = createLogger({...this.walletConfig});
     this.store = new Store(
@@ -212,7 +183,6 @@ export class Wallet extends EventEmitter<EventEmitterType>
   }
 
   public async destroy(): Promise<void> {
-    await this.workerManager.destroy();
     await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
     this.chainService.destructor();
   }
@@ -447,16 +417,7 @@ export class Wallet extends EventEmitter<EventEmitterType>
     };
   }
 
-  async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
-    if (this.walletConfig.workerThreadAmount > 0) {
-      return this.workerManager.updateChannel(args);
-    } else {
-      return this.updateChannelInternal(args);
-    }
-  }
-
-  // The internal implementation of updateChannel responsible for actually updating the channel
-  async updateChannelInternal({
+  async updateChannel({
     channelId,
     allocations,
     appData,
@@ -583,22 +544,17 @@ export class Wallet extends EventEmitter<EventEmitterType>
   }
 
   async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
-    if (this.walletConfig.workerThreadAmount > 0) {
-      return this.workerManager.pushMessage(rawPayload);
-    } else {
-      const wirePayload = validatePayload(rawPayload);
-      return this.pushMessageInternal(wirePayload).catch(e => {
-        throw new PushMessageError('Error during pushMessage', {
-          thisWalletVersion: WALLET_VERSION,
-          payloadWalletVersion: wirePayload.walletVersion,
-          cause: e,
-        });
+    const wirePayload = validatePayload(rawPayload);
+    return this._pushMessage(wirePayload).catch(e => {
+      throw new PushMessageError('Error during pushMessage', {
+        thisWalletVersion: WALLET_VERSION,
+        payloadWalletVersion: wirePayload.walletVersion,
+        cause: e,
       });
-    }
+    });
   }
 
-  // The internal implementation of pushMessage responsible for actually pushing the message into the wallet
-  async pushMessageInternal(wirePayload: WirePayload): Promise<MultipleChannelOutput> {
+  async _pushMessage(wirePayload: WirePayload): Promise<MultipleChannelOutput> {
     const store = this.store;
 
     // TODO: Move into utility somewhere?
