@@ -5,7 +5,7 @@ const TS_WORKER_PATH = path.resolve(__dirname, './worker.ts');
 const JS_WORKER_PATH = path.resolve(__dirname, './worker.js');
 const BUILT_JS_WORKER_PATH = path.resolve(
   __dirname,
-  '../../../lib/src/utilities/workers/worker.js'
+  '../../../lib/src/wallet/multi-threaded-wallet/worker.js'
 );
 // Responsible for loading the code for the worker thread
 // We always try to load a js file as loading ts-node is slow and negates the performance improvements
