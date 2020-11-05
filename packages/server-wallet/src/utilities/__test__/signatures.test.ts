@@ -15,7 +15,7 @@ import {logger} from '../../logger';
 import {addHash} from '../../state-utils';
 
 it('sign vs wasmSign', async () => {
-  _.range(5).map(async channelNonce => {
+  const promises = _.range(5).map(async channelNonce => {
     const {address: ethAddress, privateKey} = Wallet.createRandom();
     const address = makeAddress(ethAddress);
     const state: State = {
@@ -39,10 +39,11 @@ it('sign vs wasmSign', async () => {
       throw error;
     }
   });
+  await Promise.all(promises);
 });
 
 it('getSignerAddress vs fastRecover', async () => {
-  _.range(5).map(async channelNonce => {
+  const promises = _.range(5).map(async channelNonce => {
     const {address: ethAddress, privateKey} = Wallet.createRandom();
     const address = makeAddress(ethAddress);
 
@@ -68,4 +69,5 @@ it('getSignerAddress vs fastRecover', async () => {
       throw error;
     }
   });
+  await Promise.all(promises);
 });
