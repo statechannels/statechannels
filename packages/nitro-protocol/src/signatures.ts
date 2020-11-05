@@ -15,7 +15,7 @@ export function getStateSignerAddress(signedState: SignedState): string {
   const {channel} = signedState.state;
   const {participants} = channel;
 
-  if (participants.indexOf(recoveredAddress) < 0) {
+  if (participants.map(p => p.toLowerCase()).indexOf(recoveredAddress.toLowerCase()) < 0) {
     throw new Error(
       `Recovered address ${recoveredAddress} is not a participant in channel ${getChannelId(
         channel
@@ -27,7 +27,11 @@ export function getStateSignerAddress(signedState: SignedState): string {
 
 export function signState(state: State, privateKey: string): SignedState {
   const wallet = new Wallet(privateKey);
-  if (state.channel.participants.indexOf(wallet.address) < 0) {
+  if (
+    state.channel.participants
+      .map(address => address.toLowerCase())
+      .indexOf(wallet.address.toLowerCase()) < 0
+  ) {
     throw new Error("The state must be signed with a participant's private key");
   }
 
