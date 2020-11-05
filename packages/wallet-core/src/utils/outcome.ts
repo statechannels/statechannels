@@ -100,11 +100,11 @@ export function allocateToTarget(
 export function makeDestination(addressOrDestination: string): Destination {
   if (addressOrDestination.length === 42) {
     return ethers.utils.hexZeroPad(
-      ethers.utils.getAddress(addressOrDestination),
+      ethers.utils.getAddress(addressOrDestination).toLowerCase(),
       32
     ) as Destination;
   } else if (addressOrDestination.length === 66) {
-    return addressOrDestination as Destination;
+    return addressOrDestination.toLowerCase() as Destination;
   } else {
     throw new Error('Invalid input');
   }
