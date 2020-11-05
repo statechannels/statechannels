@@ -229,3 +229,20 @@ export function isGuarantee(funding?: Funding): funding is Guarantee {
 export function isGuarantees(funding?: Funding): funding is Guarantees {
   return funding?.type === 'Guarantees';
 }
+
+function makeBytes<T extends string>(length: number, bytes: string) {
+  const bytesRegex = new RegExp(`^0x[0-9a-fA-F]{${length}}$`);
+  if (!bytesRegex.test(bytes)) {
+    throw new Error(`Invalid byte string ${bytes}`);
+  }
+  return bytes.toLowerCase() as T;
+}
+const makeBytesCurried: <T extends string>(length: number) => (bytes: string) => T = (
+  length: number
+) => (bytes: string) => makeBytes(length, bytes);
+
+export type PrivateKey = string & {_isPrivateKey: void};
+export const makePrivateKey: (input: string) => PrivateKey = makeBytesCurried<PrivateKey>(64);
+
+export type Address = string & {_isAddressKey: void};
+export const makeAddress: (input: string) => Address = makeBytesCurried<Address>(40);

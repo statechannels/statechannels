@@ -18,6 +18,8 @@ import {
   checkThat,
   CloseChannel,
   OpenChannel,
+  makePrivateKey,
+  makeAddress,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -105,8 +107,8 @@ export class Store {
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
       const signingWallet = await SigningWallet.query(this.knex)
         .insert({
-          privateKey: randomWallet.privateKey,
-          address: randomWallet.address,
+          privateKey: makePrivateKey(randomWallet.privateKey),
+          address: makeAddress(randomWallet.address),
         })
         .returning('*');
       return signingWallet.address;
