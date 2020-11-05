@@ -777,6 +777,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   dbAdmin(): DBAdmin {
     return new DBAdmin(this.knex);
   }
+
+  async warmUpThreads(): Promise<void> {
+    // no-op for single-threaded-wallet
+  }
 }
 
 type ExecutionResult = {

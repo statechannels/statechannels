@@ -18,12 +18,12 @@ export default class PayerClient {
     readonly config?: ServerWalletConfig
   ) {
     this.wallet = recordFunctionMetrics(
-      new ServerWallet(this.config || payerConfig),
+      ServerWallet.create(this.config || payerConfig),
       payerConfig.timingMetrics
     );
   }
   public async warmup(): Promise<void> {
-    await this.wallet.workerManager.warmUpThreads();
+    await this.wallet.warmUpThreads();
   }
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
@@ -33,7 +33,7 @@ export default class PayerClient {
   public readonly participantId = 'payer';
 
   public get address(): Address {
-    return Wallet.create(this.pk).address;
+    return new Wallet(this.pk).address;
   }
 
   public get destination(): Address {

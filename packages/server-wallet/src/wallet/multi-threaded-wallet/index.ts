@@ -29,4 +29,8 @@ export class MultiThreadedWallet extends SingleThreadedWallet {
     await this.workerManager.destroy();
     await super.destroy();
   }
+
+  public async warmUpThreads(): Promise<void> {
+    return this.workerManager.warmUpThreads();
+  }
 }
