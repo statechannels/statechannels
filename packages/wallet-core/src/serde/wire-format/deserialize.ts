@@ -89,7 +89,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
 }
 
 export function deserializeObjective(objective: ObjectiveWire): Objective {
-  const participants = objective.participants.map(p => ({
+  const participants = objective.participants?.map(p => ({
     ...p,
     destination: makeDestination(p.destination)
   }));

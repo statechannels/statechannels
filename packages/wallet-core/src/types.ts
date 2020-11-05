@@ -88,7 +88,7 @@ export type SignedStateVariables = StateVariables & Signed;
 export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
 type _Objective<Name, Data> = {
-  participants: Participant[];
+  participants?: Participant[];
   type: Name;
   data: Data;
 };

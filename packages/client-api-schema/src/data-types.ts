@@ -137,7 +137,7 @@ export interface Message {
   /**
    * Identifier of user that the message is from
    */
-  sender: string;
+  sender?: string;
   /**
    * Message payload. Format defined by wallet and opaque to app.
    */

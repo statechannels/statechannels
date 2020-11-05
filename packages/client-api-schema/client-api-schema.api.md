@@ -468,7 +468,7 @@ export interface JsonRpcResponse<ResponseType = object> {
 export interface Message {
     data: unknown;
     recipient: string;
-    sender: string;
+    sender?: string;
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "MessageQueuedNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta
@@ -543,7 +543,9 @@ export type StateChannelsNotification = ChannelProposedNotification | ChannelUpd
 //
 // @public (undocumented)
 export type StateChannelsNotificationType = {
-    [T in StateChannelsNotification['method']]: [FilterByMethod<StateChannelsNotification, T>['params']];
+    [T in StateChannelsNotification['method']]: [
+        FilterByMethod<StateChannelsNotification, T>['params']
+    ];
 };
 
 // @public (undocumented)
