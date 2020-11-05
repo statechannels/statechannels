@@ -91,7 +91,7 @@ export class ChainService implements ChainServiceInterface {
       pollingInterval = pollingInterval ?? 50;
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
-    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
+    this.ethWallet = new NonceManager(Wallet.create(pk, new providers.JsonRpcProvider(provider)));
   }
 
   // Only used for unit tests

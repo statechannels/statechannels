@@ -37,7 +37,7 @@ export function getSignedStateFor(channelId: string, outbox: Outgoing[]): Signed
 export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
   const config = wallet.walletConfig;
   await wallet.destroy();
-  return new Wallet(config); // Wallet that will "restart"
+  return Wallet.create(config); // Wallet that will "restart"
 }
 
 expect.extend({

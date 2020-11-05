@@ -33,7 +33,7 @@ export default class PayerClient {
   public readonly participantId = 'payer';
 
   public get address(): Address {
-    return new Wallet(this.pk).address;
+    return Wallet.create(this.pk).address;
   }
 
   public get destination(): Address {

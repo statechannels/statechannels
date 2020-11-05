@@ -10,8 +10,8 @@ import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpe
 
 const ETH_ASSET_HOLDER_ADDRESS = ethers.constants.AddressZero;
 
-let a = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_A'});
-let b = new Wallet({...defaultTestConfig, postgresDBName: 'TEST_B'});
+let a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
+let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
 
 let participantA: Participant;
 let participantB: Participant;

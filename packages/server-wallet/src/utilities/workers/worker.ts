@@ -18,7 +18,7 @@ const walletConfig: ServerWalletConfig = {
 const logger = createLogger(walletConfig);
 
 logger.debug(`Worker %o starting`, threadId);
-const wallet = new Wallet(walletConfig);
+const wallet = Wallet.create(walletConfig);
 parentPort?.on('message', async (message: any) => {
   if (isMainThread) {
     parentPort?.postMessage(
