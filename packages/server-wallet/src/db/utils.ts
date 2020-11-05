@@ -46,3 +46,10 @@ export function addBytes32Check(knex: Knex, table: string, column: string): Knex
     ADD CONSTRAINT ${column}_is_bytes32 CHECK (${column} ~ '^0x[0-9a-f]{64}$')
   `);
 }
+
+export function dropConstraint(knex: Knex, table: string, constraint: string): Knex.Raw {
+  return knex.raw(`\
+    ALTER TABLE ${table}
+    DROP CONSTRAINT ${constraint}
+  `);
+}

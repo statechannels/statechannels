@@ -1,5 +1,7 @@
 import * as Knex from 'knex';
 
+import {dropConstraint} from '../utils';
+
 const channels = 'channels';
 const chainServiceRequests = 'chain_service_requests';
 const fundingStrategy = 'funding_strategy';
@@ -17,10 +19,7 @@ export async function addValidChainServiceRequests(knex: Knex, columns: string):
 }
 
 export async function dropValidChainServiceRequests(knex: Knex): Promise<any> {
-  await knex.raw(`\
-    ALTER TABLE ${channels}
-    DROP CONSTRAINT ${chainServiceRequestsConstraint}
-  `);
+  await dropConstraint(knex, channels, chainServiceRequestsConstraint);
 }
 
 export async function up(knex: Knex): Promise<any> {
