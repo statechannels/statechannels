@@ -319,28 +319,6 @@ One example of this is a transaction including a single state signed by all `n` 
 
 Note that a new `validTransition` `m`-chain may be implied by a single, signed state that is a validTransition from a state already supported on-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
 
-### Channel Modes
-
-- **Open** if and only if `finalizesAt` is null
-  - implies that `stateHash` and `challengerAddress` are also null
-- **Challenge** if and only if `finalizesAt >= currentTime`
-  - implies that all other fields are not null
-- **Finalized** if and only if `finalizesAt < currentTime`
-  - implies that all other fields are not null
-
-These states can be represented in the following state machine:
-<Mermaid chart='
-graph LR
-linkStyle default interpolate basis
-Open -->|forceMove| Challenge
-Open -->|checkpoint| Open
-Open-->|conclude| Finalized
-Challenge-->|forceMove| Challenge
-Challenge-->|respond| Open
-Challenge-->|checkpoint| Open
-Challenge-->|conclude| Finalized
-Challenge-->|timeout| Finalized' />
-
 Storage costs on-chain are high and tend to dwarf other gas fees. The implementation therefore minimizes on-chain storage as much as possible.
 
 ForceMove requires certain data to be available on-chain.

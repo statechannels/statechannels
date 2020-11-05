@@ -66,13 +66,22 @@ One example of this is a transaction including a single state signed by all `n` 
 Note that a new `validTransition` `m`-chain may be implied by a single, signed state that is a validTransition from a state already supported on-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
 
 ### Channel Modes
+The `finalizesAt` part of the storage, together with block timestamp, imply a channel is in one or the other of three modes: 
+```solidity
+    function _mode(bytes32 channelId) internal view returns (ChannelMode) {
+        // Note that _getChannelStorage(someRandomChannelId) returns (0,0,0), which is
+        // correct when nobody has written to storage yet.
 
-- **Open** if and only if `finalizesAt` is null
-  - implies that `stateHash` and `challengerAddress` are also null
-- **Challenge** if and only if `finalizesAt >= currentTime`
-  - implies that all other fields are not null
-- **Finalized** if and only if `finalizesAt < currentTime`
-  - implies that all other fields are not null
+        (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
+        if (finalizesAt == 0) {
+            return ChannelMode.Open;
+        } else if (finalizesAt <= now) {
+            return ChannelMode.Finalized;
+        } else {
+            return ChannelMode.Challenge;
+        }
+    }
+```
 
 These states can be represented in the following state machine:
 <Mermaid chart='
