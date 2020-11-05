@@ -1,4 +1,4 @@
-import {objectiveId, Objective} from '@statechannels/wallet-core';
+import {objectiveId, Objective, OpenChannel, CloseChannel} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 
 function extractReferencedChannels(objective: Objective): string[] {
@@ -17,12 +17,20 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
-/*
-  A DBObjective is a wire objective with a status and an objectiveId
-*/
-export type DBObjective = Objective & {
+type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+/**
+ * Objectives that are currently supported by the server wallet (wire format)
+ */
+export type SupportedWireObjective = OpenChannel | CloseChannel;
+/**
+ * A DBObjective is a wire objective with a status and an objectiveId
+ *
+ * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
+ * that are currently supported by the server wallet
+ */
+export type DBObjective = SupportedWireObjective & {
   objectiveId: string;
-  status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+  status: ObjectiveStatus;
 };
 
 export class ObjectiveChannelModel extends Model {
@@ -70,7 +78,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: Objective & {
+    objectiveToBeStored: SupportedWireObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
