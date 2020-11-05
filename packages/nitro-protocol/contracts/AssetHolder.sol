@@ -116,8 +116,7 @@ contract AssetHolder is IAssetHolder {
         // storage updated BEFORE asset transferred (prevent reentrancy)
 
         if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
-            emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+            _transferAssetAndEmitIfSuccessful(fromChannelId, _bytes32ToAddress(destination), affordsForDestination);
         } else {
             holdings[destination] += affordsForDestination;
         }
@@ -201,8 +200,7 @@ contract AssetHolder is IAssetHolder {
                 payoutAmount = allocation[m].amount;
             }
             if (_isExternalDestination(allocation[m].destination)) {
-                _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
-                emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
+                _transferAssetAndEmitIfSuccessful(channelId, _bytes32ToAddress(allocation[m].destination), payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
@@ -398,12 +396,7 @@ contract AssetHolder is IAssetHolder {
             }
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
-                    _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(
-                        guarantorChannelId,
-                        allocation[j].destination,
-                        payouts[j]
-                    );
+                    _transferAssetAndEmitIfSuccessful(guarantorChannelId, _bytes32ToAddress(allocation[j].destination), payouts[j]);
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
@@ -466,12 +459,26 @@ contract AssetHolder is IAssetHolder {
     // **************
 
     /**
+     * @notice Attempts to ransfersthe given amount of this AssetHolders's asset type to a supplied ethereum address, and emits an event if successful.
+     * @dev Attempts to ransfersthe given amount of this AssetHolders's asset type to a supplied ethereum address, and emits an event if successful.
+     * @param destination ethereum address to be credited.
+     * @param amount Quantity of assets to be transferred.
+     * @return True if the asset was successfully transferred, false otherwise.
+     */
+    function _transferAssetAndEmitIfSuccessful(bytes32 channelId, address payable destination, uint256 amount) internal virtual returns (bool) {
+        if (_transferAsset(destination, amount)) {
+            emit AssetTransferred(channelId, destination, amount);
+        }
+    }
+
+    /**
      * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
      * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
      * @param destination ethereum address to be credited.
      * @param amount Quantity of assets to be transferred.
+     * @return True if the asset was successfully transferred, false otherwise.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal virtual {}
+    function _transferAsset(address payable destination, uint256 amount) internal virtual returns (bool) {}
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.

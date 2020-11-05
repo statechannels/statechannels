@@ -56,7 +56,7 @@ contract ETHAssetHolder is AssetHolder {
 
         // refund whatever wasn't deposited.
         uint256 refund = amount.sub(amountDeposited);
-        msg.sender.send(refund); // forwards a stipend of only 2300 gas, will not revert on failure 
+        msg.sender.send(refund); // forwards a stipend of only 2300 gas, will not revert on failure
         // We do not require success here, to block a griefing vector
     }
 
@@ -66,8 +66,12 @@ contract ETHAssetHolder is AssetHolder {
      * @param destination Ethereum address to be credited.
      * @param amount Quantity of wei to be transferred.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal override {
-        destination.send(amount); // forwards a stipend of only 2300 gas, will not revert on failure
+    function _transferAsset(address payable destination, uint256 amount)
+        internal
+        override
+        returns (bool)
+    {
+        return destination.send(amount); // forwards a stipend of only 2300 gas, will not revert on failure
         // We do not require success here, to block a griefing vector
     }
 }

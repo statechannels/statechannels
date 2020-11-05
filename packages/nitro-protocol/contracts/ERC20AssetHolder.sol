@@ -68,7 +68,11 @@ contract ERC20AssetHolder is AssetHolder {
      * @param destination Ethereum address to be credited.
      * @param amount Quantity of tokens to be transferred.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal override {
-        Token.transfer(destination, amount);
+    function _transferAsset(address payable destination, uint256 amount)
+        internal
+        override
+        returns (bool)
+    {
+        return Token.transfer(destination, amount);
     }
 }
