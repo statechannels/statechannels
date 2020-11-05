@@ -98,7 +98,9 @@ export function createSignatureArguments(
     const signedStatesForUniqueState = uniqueSignedStates.filter(s => s.state === uniqueStates[i]);
     // Iterate through the signatures and set signatures/whoSignedWhawt
     for (const ss of signedStatesForUniqueState) {
-      const participantIndex = participants.indexOf(getStateSignerAddress(ss));
+      const participantIndex = participants
+        .map(p => p.toLowerCase())
+        .indexOf(getStateSignerAddress(ss).toLowerCase());
 
       signatures[participantIndex] = ss.signature;
       whoSignedWhat[participantIndex] = i;
