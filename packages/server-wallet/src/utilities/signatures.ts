@@ -1,11 +1,12 @@
 import {Wallet} from 'ethers';
-import {State, toNitroState} from '@statechannels/wallet-core';
+import {Address, makeAddress, State, toNitroState} from '@statechannels/wallet-core';
 import * as wasmUtils from '@statechannels/wasm-utils';
 import {State as NitroState} from '@statechannels/nitro-protocol';
 
 const knownWallets: Record<string, string> = {};
 const cachedAddress = (privateKey: string): string =>
-  knownWallets[privateKey] || (knownWallets[privateKey] = new Wallet(privateKey).address);
+  knownWallets[privateKey] ||
+  (knownWallets[privateKey] = makeAddress(new Wallet(privateKey).address));
 
 export function signState(state: State, privateKey: string): {state: State; signature: string} {
   const address = cachedAddress(privateKey);
@@ -17,6 +18,6 @@ export function signState(state: State, privateKey: string): {state: State; sign
   return {state, signature};
 }
 
-export function recoverAddress(signature: string, state: NitroState): string {
-  return wasmUtils.recoverAddress(state, signature);
+export function recoverAddress(signature: string, state: NitroState): Address {
+  return makeAddress(wasmUtils.recoverAddress(state, signature));
 }

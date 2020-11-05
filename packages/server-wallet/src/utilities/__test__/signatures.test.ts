@@ -5,6 +5,7 @@ import {
   signState,
   getSignerAddress,
   toNitroState,
+  makeAddress,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
@@ -15,7 +16,8 @@ import {addHash} from '../../state-utils';
 
 it('sign vs wasmSign', async () => {
   _.range(5).map(async channelNonce => {
-    const {address, privateKey} = Wallet.createRandom();
+    const {address: ethAddress, privateKey} = Wallet.createRandom();
+    const address = makeAddress(ethAddress);
     const state: State = {
       chainId: '0x1',
       channelNonce,
@@ -41,7 +43,9 @@ it('sign vs wasmSign', async () => {
 
 it('getSignerAddress vs fastRecover', async () => {
   _.range(5).map(async channelNonce => {
-    const {address, privateKey} = Wallet.createRandom();
+    const {address: ethAddress, privateKey} = Wallet.createRandom();
+    const address = makeAddress(ethAddress);
+
     const state: State = {
       chainId: '0x1',
       channelNonce,

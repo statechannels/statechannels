@@ -1,5 +1,5 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, StateWithHash, State} from '@statechannels/wallet-core';
+import {SignatureEntry, StateWithHash, State, makeAddress} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Address, Bytes32} from '../type-aliases';
@@ -22,17 +22,18 @@ export class SigningWallet extends Model {
       json.address = address;
     }
 
+    json.address = makeAddress(json.address);
     return json;
   }
 
   $validate(json: Pojo): Pojo {
     super.$validate(json);
 
-    const w = new ethers.Wallet(json.privateKey);
-    if (w.address !== json.address) {
+    const addressFromPK = makeAddress(new ethers.Wallet(json.privateKey).address);
+    if (addressFromPK !== json.address) {
       throw new SigningWalletError(SigningWalletError.reasons.invalidAddress, {
         given: json.address,
-        correct: w.address,
+        correct: addressFromPK,
       });
     }
 
