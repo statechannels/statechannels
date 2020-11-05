@@ -76,7 +76,7 @@ export interface SignedState {
 }
 
 type _Objective<Name, Data> = {
-  participants: Participant[];
+  participants?: Participant[];
   type: Name;
   data: Data;
 };
