@@ -112,7 +112,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],
@@ -145,7 +144,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],
@@ -186,7 +184,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],
@@ -219,7 +216,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],
@@ -269,7 +265,6 @@
       },
       "required": [
         "recipient",
-        "sender",
         "data"
       ],
       "type": "object"
@@ -344,7 +339,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],
@@ -507,7 +501,6 @@
         }
       },
       "required": [
-        "participants",
         "type",
         "data"
       ],

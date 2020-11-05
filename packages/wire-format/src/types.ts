@@ -154,6 +154,6 @@ export interface Payload {
 
 export interface Message {
   recipient: string; // Identifier of user that the message should be relayed to
-  sender: string; // Identifier of user that the message is from
+  sender?: string; // Identifier of user that the message is from
   data: Payload;
 }
