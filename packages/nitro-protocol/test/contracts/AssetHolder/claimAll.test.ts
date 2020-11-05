@@ -14,6 +14,7 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+  writeGasConsumption,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -156,7 +157,8 @@ describe('claimAll', () => {
         });
 
         // Extract logs
-        const {logs} = await (await tx).wait();
+        const {logs, gasUsed} = await (await tx).wait();
+        await writeGasConsumption('./claimAll.gas.md', name, gasUsed);
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder]);
