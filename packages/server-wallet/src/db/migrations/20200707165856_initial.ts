@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import {addAddressCheck, addBytes32Check, addUint48Check} from '../utils';
+import {addAddressCheckOld, addBytes32CheckOld, addUint48Check} from '../utils';
 
 const channels = 'channels';
 const signingWallets = 'signing_wallets';
@@ -16,8 +16,8 @@ export async function up(knex: Knex): Promise<void> {
       .notNullable()
       .unique();
   });
-  await addBytes32Check(knex, signingWallets, 'private_key');
-  await addAddressCheck(knex, signingWallets, 'address');
+  await addBytes32CheckOld(knex, signingWallets, 'private_key');
+  await addAddressCheckOld(knex, signingWallets, 'address');
 
   await knex.schema.createTable(channels, function(table) {
     table.increments('id');
@@ -39,9 +39,9 @@ export async function up(knex: Knex): Promise<void> {
     table.jsonb('participants').notNullable();
   });
 
-  await addBytes32Check(knex, channels, 'channel_id');
-  await addAddressCheck(knex, channels, 'app_definition');
-  await addAddressCheck(knex, channels, 'signing_address');
+  await addBytes32CheckOld(knex, channels, 'channel_id');
+  await addAddressCheckOld(knex, channels, 'app_definition');
+  await addAddressCheckOld(knex, channels, 'signing_address');
   await addUint48Check(knex, channels, 'channel_nonce');
   await addUint48Check(knex, channels, 'challenge_duration');
 }
