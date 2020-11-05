@@ -1,6 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils} from 'ethers';
 
+import {convertBytes32ToAddress} from '../../../src/contract/asset-holder';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   allocationToParams,
@@ -103,7 +104,11 @@ describe('transferAll', () => {
           if (payouts[destination] && payouts[destination].gt(0)) {
             expectedEvents.push({
               event: 'AssetTransferred',
-              args: {channelId, destination, amount: payouts[destination]},
+              args: {
+                channelId,
+                destination: convertBytes32ToAddress(destination),
+                amount: payouts[destination],
+              },
             });
           }
         });
