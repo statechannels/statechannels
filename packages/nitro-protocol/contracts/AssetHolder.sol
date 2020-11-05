@@ -288,8 +288,8 @@ contract AssetHolder is IAssetHolder {
         bytes memory guaranteeBytes,
         bytes memory allocationBytes
     ) public override {
-        // checks
-
+        
+        // CHECKS
         require(
             assetOutcomeHashes[guarantorChannelId] ==
                 keccak256(
@@ -379,7 +379,7 @@ contract AssetHolder is IAssetHolder {
             }
         }
 
-        // effects
+        // EFFECTS
         holdings[guarantorChannelId] = balance;
 
         // at this point have payouts array of uint256s, each corresponding to original destinations
@@ -396,18 +396,6 @@ contract AssetHolder is IAssetHolder {
                 newAllocation[k] = allocation[j];
                 k++;
             }
-            if (payouts[j] > 0) {
-                if (_isExternalDestination(allocation[j].destination)) {
-                    _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(
-                        guarantorChannelId,
-                        allocation[j].destination,
-                        payouts[j]
-                    );
-                } else {
-                    holdings[allocation[j].destination] += payouts[j];
-                }
-            }
         }
         assert(k == newAllocationLength);
 
@@ -423,6 +411,23 @@ contract AssetHolder is IAssetHolder {
             );
         } else {
             delete assetOutcomeHashes[guarantee.targetChannelId];
+        }
+
+        // INTERACTIONS
+        for (uint256 j = 0; j < allocation.length; j++) {
+            // for each destination in the target channel's allocation
+            if (payouts[j] > 0) {
+                if (_isExternalDestination(allocation[j].destination)) {
+                    _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
+                    emit AssetTransferred(
+                        guarantorChannelId,
+                        allocation[j].destination,
+                        payouts[j]
+                    );
+                } else {
+                    holdings[allocation[j].destination] += payouts[j];
+                }
+            }
         }
     }
 
