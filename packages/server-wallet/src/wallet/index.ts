@@ -1,3 +1,5 @@
+export {WalletEvent, SingleChannelOutput, ObjectiveSucceededValue} from './wallet';
+
 import {ServerWalletConfig} from '../config';
 
 import {MultiThreadedWallet} from './multi-threaded-wallet';
@@ -14,3 +16,5 @@ export const Wallet = {
     }
   },
 };
+
+export {MultiThreadedWallet, SingleThreadedWallet};

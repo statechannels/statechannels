@@ -15,7 +15,7 @@ export default class ReceiverController {
   );
 
   public async warmup(): Promise<void> {
-    this.wallet.workerManager.warmUpThreads();
+    this.wallet.warmUpThreads();
   }
 
   private readonly myParticipantID: string = 'receiver';
