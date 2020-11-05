@@ -28,7 +28,7 @@ export type HoldingUpdatedArg = {
 export type AssetTransferredArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
-  to: Bytes32;
+  to: Address;
   amount: Uint256;
 };
 
@@ -280,7 +280,7 @@ export class ChainService implements ChainServiceInterface {
    *
    * @param appDefinition Address of state channels app
    *
-   * Rejects with 'Bytecode missint' if there is no contract deployed at `appDefinition`.
+   * Rejects with 'Bytecode missing' if there is no contract deployed at `appDefinition`.
    */
   public async fetchBytecode(appDefinition: string): Promise<string> {
     const result = await this.provider.getCode(appDefinition);

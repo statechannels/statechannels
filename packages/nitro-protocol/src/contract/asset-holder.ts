@@ -10,7 +10,7 @@ export interface DepositedEvent {
 
 export interface AssetTransferredEvent {
   channelId: string;
-  destination: string;
+  destination: string; // This is an ethereum address
   amount: BigNumber;
 }
 

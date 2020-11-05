@@ -23,7 +23,7 @@ const mockTransactionReceipt: providers.TransactionReceipt = {
   byzantium: false,
 };
 
-const mockTransactoinResponse: providers.TransactionResponse = {
+const mockTransactionResponse: providers.TransactionResponse = {
   hash: '',
   confirmations: 0,
   from: '',
@@ -39,7 +39,7 @@ const mockTransactoinResponse: providers.TransactionResponse = {
 
 export class MockChainService implements ChainServiceInterface {
   fundChannel(_arg: FundChannelArg): Promise<providers.TransactionResponse> {
-    return Promise.resolve(mockTransactoinResponse);
+    return Promise.resolve(mockTransactionResponse);
   }
 
   registerChannel(
@@ -55,7 +55,7 @@ export class MockChainService implements ChainServiceInterface {
   }
 
   concludeAndWithdraw(_finalizationProof: SignedState[]): Promise<providers.TransactionResponse> {
-    return Promise.resolve(mockTransactoinResponse);
+    return Promise.resolve(mockTransactionResponse);
   }
 
   async fetchBytecode(_appDefinition: string): Promise<string> {

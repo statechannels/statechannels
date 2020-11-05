@@ -13,6 +13,7 @@ import {
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
+import {convertBytes32ToAddress} from '../src/contract/asset-holder';
 import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
 import {
   AllocationAssetOutcome,
@@ -24,7 +25,7 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
-import {AssetTransferredEvent, Bytes32, DepositedEvent} from '../src';
+import {AssetTransferredEvent, Bytes32} from '../src';
 
 // Interfaces
 
@@ -357,7 +358,11 @@ export function assetTransferredEventsFromPayouts(
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        args: {channelId, destination, amount: singleAssetPayouts[destination]},
+        args: {
+          channelId,
+          destination: convertBytes32ToAddress(destination),
+          amount: singleAssetPayouts[destination],
+        },
       });
     }
   });
