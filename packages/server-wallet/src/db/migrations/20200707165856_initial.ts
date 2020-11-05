@@ -1,9 +1,28 @@
 import * as Knex from 'knex';
 
-import {addAddressCheckOld, addBytes32CheckOld, addUint48Check} from '../utils';
+import {addAddressCheckOld, addBytes32CheckOld, addUint48Check, dropConstraint} from '../utils';
 
 const channels = 'channels';
 const signingWallets = 'signing_wallets';
+
+export async function addByteContraints(knex: Knex): Promise<void> {
+  await addBytes32CheckOld(knex, signingWallets, 'private_key');
+  await addAddressCheckOld(knex, signingWallets, 'address');
+
+  await addBytes32CheckOld(knex, channels, 'channel_id');
+  await addAddressCheckOld(knex, channels, 'app_definition');
+  await addAddressCheckOld(knex, channels, 'signing_address');
+}
+
+export async function dropByteConstraints(knex: Knex): Promise<void> {
+  await dropConstraint(knex, signingWallets, 'private_key_is_bytes32');
+  await dropConstraint(knex, signingWallets, 'address_is_address');
+
+  await dropConstraint(knex, channels, 'channel_id_is_bytes32');
+  await dropConstraint(knex, channels, 'app_definition_is_address');
+  await dropConstraint(knex, channels, 'signing_address_is_address');
+}
+
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(signingWallets, function(table) {
     table.increments('id');
@@ -16,8 +35,6 @@ export async function up(knex: Knex): Promise<void> {
       .notNullable()
       .unique();
   });
-  await addBytes32CheckOld(knex, signingWallets, 'private_key');
-  await addAddressCheckOld(knex, signingWallets, 'address');
 
   await knex.schema.createTable(channels, function(table) {
     table.increments('id');
@@ -39,9 +56,7 @@ export async function up(knex: Knex): Promise<void> {
     table.jsonb('participants').notNullable();
   });
 
-  await addBytes32CheckOld(knex, channels, 'channel_id');
-  await addAddressCheckOld(knex, channels, 'app_definition');
-  await addAddressCheckOld(knex, channels, 'signing_address');
+  await addByteContraints(knex);
   await addUint48Check(knex, channels, 'channel_nonce');
   await addUint48Check(knex, channels, 'challenge_duration');
 }
