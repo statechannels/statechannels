@@ -113,14 +113,17 @@ contract AssetHolder is IAssetHolder {
             );
         } 
 
-        // storage updated BEFORE asset transferred (prevent reentrancy)
 
+        // Event emitted regardless of success of external calls
+        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+
+        // storage updated BEFORE asset transferred (prevent reentrancy)
         if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
-            emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
         } else {
             holdings[destination] += affordsForDestination;
         }
+
         
     }
 
@@ -192,6 +195,8 @@ contract AssetHolder is IAssetHolder {
         } else {
             delete assetOutcomeHashes[channelId];
         }
+
+
         // holdings updated BEFORE asset transferred (prevent reentrancy)
         uint256 payoutAmount;
         for (uint256 m = 0; m < numPayouts; m++) {
@@ -202,10 +207,11 @@ contract AssetHolder is IAssetHolder {
             }
             if (_isExternalDestination(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
-                emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
+            // Event emitted regardless of success of external calls
+            emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
         }
     }
 
@@ -421,15 +427,16 @@ contract AssetHolder is IAssetHolder {
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(
-                        guarantorChannelId,
-                        allocation[j].destination,
-                        payouts[j]
-                    );
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
             }
+            // Event emitted regardless of success of external calls
+            emit AssetTransferred(
+                        guarantorChannelId,
+                        allocation[j].destination,
+                        payouts[j]
+                    );
         }
     }
 
