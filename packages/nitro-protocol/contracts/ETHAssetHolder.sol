@@ -58,7 +58,7 @@ contract ETHAssetHolder is AssetHolder {
 
         // refund whatever wasn't deposited.
         uint256 refund = amount.sub(amountDeposited);
-        msg.sender.send(refund); // forwards a stipend of only 2300 gas, will not revert on failure 
+        msg.sender.send(refund); // forwards a stipend of only 2300 gas, will not revert on failure
         // We do not require success here, to block a griefing vector
     }
 
