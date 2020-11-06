@@ -84,7 +84,7 @@ contract ForceMove is IForceMove {
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
-            uint48(now) + fixedPart.challengeDuration,
+            uint48(now) + fixedPart.challengeDuration, // This could overflow, so don't join a channel with a huge challengeDuration
             challenger,
             isFinalCount > 0,
             fixedPart,
