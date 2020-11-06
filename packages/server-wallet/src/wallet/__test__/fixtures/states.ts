@@ -6,6 +6,7 @@ import {
   hashState,
   simpleEthAllocation,
   SignatureEntry,
+  makeAddress,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {flow} from 'fp-ts/lib/function';
@@ -19,7 +20,7 @@ import {alice as aliceWallet} from './signing-wallets';
 
 const defaultState: State = {
   appData: '0x',
-  appDefinition: '0x0000000000000000000000000000000000000000',
+  appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([

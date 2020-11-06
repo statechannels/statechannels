@@ -1,5 +1,5 @@
-import {MessageQueuedNotification, Address} from '@statechannels/client-api-schema';
-import {StateVariables} from '@statechannels/wallet-core';
+import {MessageQueuedNotification} from '@statechannels/client-api-schema';
+import {Address, StateVariables} from '@statechannels/wallet-core';
 
 import {Bytes32, Uint256} from '../type-aliases';
 

@@ -1,7 +1,7 @@
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {MOCK_TOKEN, MOCK_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../constants';
 import {BN} from '../bignumber';
-import {Address} from 'types';
+import {Address} from '../types';
 
 export function assetHolderAddress(tokenAddress: string): Address {
   if (BN.isZero(tokenAddress)) return ETH_ASSET_HOLDER_ADDRESS;

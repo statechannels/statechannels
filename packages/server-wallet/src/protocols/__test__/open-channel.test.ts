@@ -1,4 +1,4 @@
-import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
+import {simpleEthAllocation, BN, State, makeAddress} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
 import {ethers} from 'ethers';
 
@@ -36,7 +36,7 @@ const notFunded = () => ({amount: BN.from(0)});
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
 const fundChannelAction1 = fundChannel({
   channelId: channel().channelId,
-  assetHolderAddress: ethers.constants.AddressZero,
+  assetHolderAddress: makeAddress(ethers.constants.AddressZero),
   expectedHeld: BN.from(0),
   amount: BN.from(5),
 });
