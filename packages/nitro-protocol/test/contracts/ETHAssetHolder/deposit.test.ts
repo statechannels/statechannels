@@ -4,7 +4,12 @@ const {parseUnits} = ethers.utils;
 
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getTestProvider, setupContracts, writeGasConsumption} from '../../test-helpers';
+import {
+  getRandomNonce,
+  getTestProvider,
+  setupContracts,
+  writeGasConsumption,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
@@ -32,24 +37,19 @@ const description3 =
 
 // Amounts are valueString represenationa of wei
 describe('deposit', () => {
+  let channelNonce = getRandomNonce('deposit');
+  afterEach(() => {
+    channelNonce++;
+  });
   it.each`
-    description     | channelNonce | held   | expectedHeld | amount | msgValue | heldAfterString | reasonString
-    ${description0} | ${0}         | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}          | ${undefined}
-    ${description1} | ${1}         | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}          | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}          | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
-    ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
+    description     | held   | expectedHeld | amount | msgValue | heldAfterString | reasonString
+    ${description0} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}          | ${undefined}
+    ${description1} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}          | ${'Deposit | holdings[destination] is less than expected'}
+    ${description2} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}          | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description3} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
   `(
     '$description',
-    async ({
-      description,
-      channelNonce,
-      held,
-      expectedHeld,
-      amount,
-      msgValue,
-      reasonString,
-      heldAfterString,
-    }) => {
+    async ({description, held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
       held = parseUnits(held, 'wei');
       expectedHeld = parseUnits(expectedHeld, 'wei');
       amount = parseUnits(amount, 'wei');

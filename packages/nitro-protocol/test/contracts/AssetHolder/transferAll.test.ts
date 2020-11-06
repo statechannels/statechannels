@@ -4,6 +4,7 @@ import {Contract, BigNumber, utils} from 'ethers';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   allocationToParams,
+  getRandomNonce,
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
@@ -57,9 +58,7 @@ describe('transferAll', () => {
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
       // Compute channelId
-      const nonce = BigNumber.from(utils.id(name))
-        .mask(30)
-        .toNumber();
+      const nonce = getRandomNonce(name);
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;
 

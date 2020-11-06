@@ -18,6 +18,7 @@ import {
   compileEventsFromLogs,
   computeOutcome,
   getPlaceHolderContractAddress,
+  getRandomNonce,
   getTestProvider,
   OutcomeShortHand,
   randomChannelId,
@@ -121,7 +122,7 @@ const oneState = {
   appData: [ethers.constants.HashZero],
 };
 const turnNumRecord = 5;
-let channelNonce = 400;
+let channelNonce = getRandomNonce('concludePushOutcomeAndTransferAll');
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`

@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 import {getVariablePart, State, Channel} from '../../../src';
 
@@ -22,7 +22,7 @@ describe('null app', () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
       chainId: '0x1',
-      channelNonce: 0x1,
+      channelNonce: getRandomNonce('nullApp'),
     };
     const fromState: State = {
       channel,

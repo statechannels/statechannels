@@ -14,6 +14,7 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {
   getPlaceHolderContractAddress,
+  getRandomNonce,
   getTestProvider,
   setupContracts,
   writeGasConsumption,
@@ -56,7 +57,7 @@ const description5 =
   'It reverts a respond tx if the response state is not a validTransition from the challenge state';
 
 describe('respond', () => {
-  let channelNonce = 1000;
+  let channelNonce = getRandomNonce('respond');
   const future = 1e12;
   const past = 1;
   beforeEach(() => (channelNonce += 1));

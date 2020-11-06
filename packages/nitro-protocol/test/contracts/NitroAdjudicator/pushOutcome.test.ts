@@ -14,6 +14,7 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {
   finalizedOutcomeHash,
+  getRandomNonce,
   getTestProvider,
   randomExternalDestination,
   sendTransaction,
@@ -64,16 +65,19 @@ const description3 =
 const description4 = 'AssetHolders reject a setOutcome when outcomeHash already exists';
 
 describe('pushOutcome', () => {
+  let channelNonce = getRandomNonce('pushOutcome');
+  afterEach(() => {
+    channelNonce++;
+  });
   it.each`
-    description     | channelNonce | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | reasonString
-    ${description1} | ${1101}      | ${5}                | ${5}                  | ${true}   | ${false}         | ${undefined}
-    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${false}         | ${CHANNEL_NOT_FINALIZED}
-    ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${false}         | ${WRONG_CHANNEL_STORAGE}
-    ${description4} | ${1104}      | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
+    description     | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | reasonString
+    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${undefined}
+    ${description2} | ${5}                | ${5}                  | ${false}  | ${false}         | ${CHANNEL_NOT_FINALIZED}
+    ${description3} | ${4}                | ${5}                  | ${true}   | ${false}         | ${WRONG_CHANNEL_STORAGE}
+    ${description4} | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      channelNonce,
       storedTurnNumRecord,
       declaredTurnNumRecord,
       finalized,

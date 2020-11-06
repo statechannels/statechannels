@@ -387,5 +387,5 @@ export async function writeGasConsumption(
 }
 
 export function getRandomNonce(seed: string): number {
-  return Number.parseInt(ethers.utils.keccak256(seed).slice(2, 15), 16);
+  return Number.parseInt(ethers.utils.id(seed).slice(2, 11), 16);
 }

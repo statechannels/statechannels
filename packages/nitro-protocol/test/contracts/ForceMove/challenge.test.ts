@@ -21,6 +21,7 @@ import {
   clearedChallengeHash,
   finalizedOutcomeHash,
   getPlaceHolderContractAddress,
+  getRandomNonce,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
@@ -117,7 +118,7 @@ describe('forceMove', () => {
   const challengeAtTwenty = ongoingChallengeHash(20);
   const finalizedAtFive = finalizedOutcomeHash(5);
 
-  let channelNonce = 200;
+  let channelNonce = getRandomNonce('challenge');
   beforeEach(() => (channelNonce += 1));
   it.each`
     description | initialChannelStorageHash    | stateData      | challengeSignature | reasonString
