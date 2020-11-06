@@ -29,4 +29,4 @@ jobs:
           git config --global user.email "github-actions@users.noreply.github.com"
 
       - name: publish packages to npm
-        run: yarn run lerna publish --canary --force-publish --preid next.$(git rev-parse --short HEAD) --dist-tag next --yes
+        run: yarn run lerna publish --canary --force-publish --exact --preid next.$(git rev-parse --short HEAD) --dist-tag next --yes
