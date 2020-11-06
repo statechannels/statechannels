@@ -2,10 +2,10 @@ import axios from 'axios';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
-import {makeDestination, BN} from '@statechannels/wallet-core';
+import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 
 import {Wallet as ServerWallet} from '../../src';
-import {Bytes32, Address} from '../../src/type-aliases';
+import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {defaultConfig, ServerWalletConfig} from '../../src/config';
@@ -33,10 +33,10 @@ export default class PayerClient {
   public readonly participantId = 'payer';
 
   public get address(): Address {
-    return new Wallet(this.pk).address;
+    return makeAddress(new Wallet(this.pk).address);
   }
 
-  public get destination(): Address {
+  public get destination(): Destination {
     return makeDestination(this.address);
   }
 
