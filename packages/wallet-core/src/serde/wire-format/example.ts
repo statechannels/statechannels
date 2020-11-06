@@ -10,14 +10,14 @@ export const walletVersion = 'someWalletVersion';
 export const wireStateFormat: WireState = {
   participants: [
     {
-      destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-      participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-      signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf' // key: 0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318
+      destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      participantId: '0x11115faf6f1bf263e81956f0cc68aec8426607cf',
+      signingAddress: '0x11115faf6f1bf263e81956f0cc68aec8426607cf' // key: 0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318
     },
     {
-      destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-      participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-      signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9' // key: 0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727
+      destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      participantId: '0x2222e21c8019b14da16235319d34b5dd83e644a9',
+      signingAddress: '0x2222e21c8019b14da16235319d34b5dd83e644a9' // key: 0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727
     }
   ],
   appData:
@@ -56,7 +56,7 @@ const wireStateFormat2: WireState = {
   outcome: [
     {
       assetHolderAddress: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
-      destinations: ['0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'],
+      destinations: ['0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'],
       targetChannelId: '0xb08bc94ebfbe1b23c419bec2d57993d33c41b112fbbca5d51f0f18194baadcf1'
     }
   ],
@@ -67,13 +67,13 @@ export const internalStateFormat: SignedState = {
   participants: [
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-      participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+      participantId: '0x11115faf6f1bf263e81956f0cc68aec8426607cf',
       signingAddress: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf')
     },
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-      participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-      signingAddress: makeAddress('0x2222E21c8019b14dA16235319D34b5Dd83E644A9')
+      participantId: '0x2222e21c8019b14da16235319d34b5dd83e644a9',
+      signingAddress: makeAddress('0x2222e21c8019b14da16235319d34b5dd83e644a9')
     }
   ],
   appData:
@@ -106,7 +106,7 @@ export const internalStateFormat: SignedState = {
     {
       signature:
         '0xef7e226a43c52d4b8f7b14f13acdf9e75d871ea5c51235fbc4d538acf84c61c4727431f0cc83d0f566e222a21d35ae4d8d2a0dd4428cba7bf95bf7b3f11ad0c61c',
-      signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
+      signer: '0x2222e21c8019b14da16235319d34b5dd83e644a9'
     }
   ]
 };
@@ -124,8 +124,8 @@ export const internalStateFormat2: SignedState = {
 };
 
 export const wireMessageFormat: WireMessage = {
-  recipient: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-  sender: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+  recipient: '0x11115faf6f1bf263e81956f0cc68aec8426607cf',
+  sender: '0x2222e21c8019b14da16235319d34b5dd83e644a9',
   data: {
     walletVersion,
     signedStates: [wireStateFormat, wireStateFormat2],
@@ -139,14 +139,14 @@ export const wireMessageFormat: WireMessage = {
         },
         participants: [
           {
-            destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-            participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-            signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
+            destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            participantId: '0x11115faf6f1bf263e81956f0cc68aec8426607cf',
+            signingAddress: '0x11115faf6f1bf263e81956f0cc68aec8426607cf'
           },
           {
-            destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-            participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-            signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
+            destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            participantId: '0x2222e21c8019b14da16235319d34b5dd83e644a9',
+            signingAddress: '0x2222e21c8019b14da16235319d34b5dd83e644a9'
           }
         ]
       }
@@ -174,13 +174,13 @@ export const internalMessageFormat: Payload = {
       participants: [
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+          participantId: '0x11115faf6f1bf263e81956f0cc68aec8426607cf',
           signingAddress: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf')
         },
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-          signingAddress: makeAddress('0x2222E21c8019b14dA16235319D34b5Dd83E644A9')
+          participantId: '0x2222e21c8019b14da16235319d34b5dd83e644a9',
+          signingAddress: makeAddress('0x2222e21c8019b14da16235319d34b5dd83e644a9')
         }
       ]
     }
