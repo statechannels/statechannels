@@ -40,6 +40,25 @@
       "env": {
         "NODE_ENV": "test"
       }
+    },
+    {
+      "name": "Jest e2e Current",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--config=${workspaceRoot}/jest/jest.e2e.config.js",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test",
+        "SERVER_DB_NAME": "payer"
+      }
     }
   ]
 }
