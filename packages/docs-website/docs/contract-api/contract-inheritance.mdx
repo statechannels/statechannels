@@ -17,11 +17,13 @@ SafeMath([SafeMath])
 Outcome([Outcome])
 IAssetHolder
 AssetHolder
+IERC20
 ERC20AssetHolder
 ETHAssetHolder
 TESTAssetHolder
 IAssetHolder--> AssetHolder
 SafeMath-.-> AssetHolder
+IERC20-.-> ERC20AssetHolder
 Outcome-.-> AssetHolder
 AssetHolder-->ETHAssetHolder
 AssetHolder-->ERC20AssetHolder
@@ -33,7 +35,7 @@ classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
 classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
 classDef TestContract fill:#fafe4f,stroke-width:0px
 class SafeMath,Outcome Library;
-class IAssetHolder Interface;
+class IAssetHolder,IERC20 Interface;
 class AssetHolder,ETHAssetHolder,ERC20AssetHolder Contract;
 class TESTAssetHolder TestContract;
 class ETHAssetHolder,ERC20AssetHolder DeployedContract;
@@ -44,6 +46,7 @@ click ERC20AssetHolder "/contract-api/natspec/ERC20AssetHolder";
 click ETHAssetHolder "/contract-api/natspec/ETHAssetHolder";
 click IAssetHolder "/contract-api/natspec/IAssetHolder";
 click TESTAssetHolder "/contract-api/natspec/TESTAssetHolder";
+click IERC20 "/contract-api/natspec/IERC20";
 '
 />
 
