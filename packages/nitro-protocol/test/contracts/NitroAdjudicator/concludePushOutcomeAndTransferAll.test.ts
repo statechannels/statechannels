@@ -169,10 +169,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       if ('ERC20' in heldBefore) {
         await (
           await Token.transfer(ERC20AssetHolder.address, BigNumber.from(heldBefore.ERC20.c))
-        ).wait();
-        expect(await Token.balanceOf(ERC20AssetHolder.address)).toStrictEqual(
-          BigNumber.from(heldBefore.ERC20.c)
-        );
+        ).wait(); // if the tx is mined, we know we the transfer succeeded
       }
 
       // Transform input data (unpack addresses and BigNumberify amounts)
