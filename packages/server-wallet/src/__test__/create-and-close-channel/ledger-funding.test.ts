@@ -241,11 +241,6 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
-
     expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
       turnNum: 3,
       status: 'running',
@@ -272,11 +267,6 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      turnNum: 7,
-      status: 'running',
-    });
 
     expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
       turnNum: 4,
@@ -328,11 +318,6 @@ describe('Funding a single channel with 50% of ledger funds', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
-
     expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
       turnNum: 3,
       status: 'running',
@@ -369,11 +354,6 @@ describe('Funding a single channel with 50% of ledger funds', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      turnNum: 7,
-      status: 'running',
-    });
 
     expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
       turnNum: 4,
@@ -447,11 +427,6 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
-
     expect(allocationItems).toHaveLength(N);
 
     for (const channelId of channelIds) {
@@ -486,13 +461,6 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      // The ordering of the concurrent messages leads to closing one
-      // channel on turn 7 then the remaining N - 1 others on turn 9
-      turnNum: 9,
-      status: 'running',
-    });
 
     for (const channelId of appChannelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
@@ -552,7 +520,6 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     } = ledger;
 
     expect(ledger.status).toBe('running');
-    // there is a race condition which means the turNum should be either 5 or 7
 
     expect(allocationItems).toHaveLength(N * 2);
 
