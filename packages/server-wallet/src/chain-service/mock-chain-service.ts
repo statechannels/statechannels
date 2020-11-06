@@ -1,7 +1,7 @@
 import {providers, constants} from 'ethers';
-import {SignedState} from '@statechannels/wallet-core';
+import {Address, SignedState} from '@statechannels/wallet-core';
 
-import {Address, Bytes32} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 
 import {ChainServiceInterface} from './chain-service';
 

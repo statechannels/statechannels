@@ -1,11 +1,12 @@
 import {constants} from 'ethers';
+import {makeAddress} from '@statechannels/wallet-core';
 
 import {AppBytecode} from '../app-bytecode';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {DBAdmin} from '../../db-admin/db-admin';
 
 const CHAIN_ID = '0x01';
-const APP_DEFINTION = constants.AddressZero;
+const APP_DEFINTION = makeAddress(constants.AddressZero);
 const BYTE_CODE1 = '0x01';
 const BYTE_CODE2 = '0x02';
 describe('AppBytecode model', () => {

@@ -1,6 +1,7 @@
+import {Address} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 
-import {Address, Bytes32, Bytes} from '../type-aliases';
+import {Bytes32, Bytes} from '../type-aliases';
 
 export interface RequiredColumns {
   readonly chainId: Bytes32;

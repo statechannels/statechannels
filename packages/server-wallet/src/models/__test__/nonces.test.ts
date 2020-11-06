@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {Address} from '@statechannels/wallet-core';
 
 import {Nonce} from '../nonce';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
@@ -20,7 +21,7 @@ describe('asking for a new nonce', () => {
   });
 
   it('rejects when addresses is invalid', () =>
-    expect(Nonce.next(knex, ['notAnAddress'])).rejects.toThrow(
+    expect(Nonce.next(knex, ['notAnAddress' as Address])).rejects.toThrow(
       'violates check constraint "nonces_addresses_are_valid"'
     ));
 

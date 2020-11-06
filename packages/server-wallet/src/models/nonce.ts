@@ -1,8 +1,9 @@
 import Knex from 'knex';
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
 import {ethers} from 'ethers';
+import {Address} from '@statechannels/wallet-core';
 
-import {Address, Uint48} from '../type-aliases';
+import {Uint48} from '../type-aliases';
 import {WalletError, Values} from '../errors/wallet-error';
 
 export class Nonce extends Model {
