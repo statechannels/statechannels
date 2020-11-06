@@ -23,8 +23,8 @@ import {Bytes32} from '../type-aliases';
 
 // todo: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
-const nitroAdjudicatorAddress = process.env.NITRO_ADJUDICATOR_ADDRESS!;
+const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 export type HoldingUpdatedArg = {
