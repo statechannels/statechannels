@@ -23,7 +23,7 @@ export interface AssetBudget {
 }
 export interface Participant {
   participantId: string;
-  signingAddress: string;
+  signingAddress: Address;
   destination: Destination;
 }
 // signers
