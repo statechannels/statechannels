@@ -1,4 +1,3 @@
-import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';

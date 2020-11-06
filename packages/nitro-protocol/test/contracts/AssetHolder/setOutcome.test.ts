@@ -1,10 +1,9 @@
-import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, utils} from 'ethers';
 const {id, keccak256} = utils;
 
 import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let AssetHolder: Contract;
@@ -13,7 +12,7 @@ let channelId;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const chainId = '0x1234';
-const channelNonce = 0x9999;
+const channelNonce = getRandomNonce('setOutcome');
 const outcomeContent = id('some outcome data');
 
 // Populate wallets and participants array

@@ -4,7 +4,7 @@ import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
 import {State, VariablePart} from '../../../src/contract/state';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let trivialApp: Contract;
@@ -44,7 +44,7 @@ describe('validTransition', () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
       chainId: '0x1',
-      channelNonce: 0x01,
+      channelNonce: getRandomNonce('trivialApp'),
     };
     const fromState: State = {
       channel,

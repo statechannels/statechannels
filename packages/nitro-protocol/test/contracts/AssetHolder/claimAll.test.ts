@@ -8,6 +8,7 @@ import {
   AssetOutcomeShortHand,
   assetTransferredEventsFromPayouts,
   compileEventsFromLogs,
+  getRandomNonce,
   getTestProvider,
   guaranteeToParams,
   randomChannelId,
@@ -81,12 +82,8 @@ describe('claimAll', () => {
       reason;
     }) => {
       // Compute channelIds
-      const tNonce = BigNumber.from(utils.id(name))
-        .mask(30)
-        .toNumber();
-      const gNonce = BigNumber.from(utils.id(name + 'g'))
-        .mask(30)
-        .toNumber();
+      const tNonce = getRandomNonce(name);
+      const gNonce = getRandomNonce(name + 'g');
       const targetId = randomChannelId(tNonce);
       const guarantorId = randomChannelId(gNonce);
       addresses.t = targetId;

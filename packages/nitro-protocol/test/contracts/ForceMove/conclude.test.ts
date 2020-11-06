@@ -16,6 +16,7 @@ import {
   clearedChallengeHash,
   finalizedOutcomeHash,
   getPlaceHolderContractAddress,
+  getRandomNonce,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
@@ -83,7 +84,7 @@ const channelOpen = clearedChallengeHash(turnNumRecord);
 const challengeOngoing = ongoingChallengeHash(turnNumRecord);
 const finalized = finalizedOutcomeHash(turnNumRecord);
 
-let channelNonce = 400;
+let channelNonce = getRandomNonce('conclude');
 describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`

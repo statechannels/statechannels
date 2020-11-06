@@ -17,7 +17,12 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-import {getPlaceHolderContractAddress, getTestProvider, setupContracts} from '../../test-helpers';
+import {
+  getPlaceHolderContractAddress,
+  getRandomNonce,
+  getTestProvider,
+  setupContracts,
+} from '../../test-helpers';
 import {signStates} from '../../../src';
 
 const provider = getTestProvider();
@@ -82,7 +87,7 @@ const never = '0x00';
 const turnNumRecord = 7;
 
 describe('checkpoint', () => {
-  let channelNonce = 300;
+  let channelNonce = getRandomNonce('checkpoint');
   beforeEach(() => (channelNonce += 1));
   it.each`
     description | largestTurnNum       | support              | challenger    | finalizesAt  | reason
