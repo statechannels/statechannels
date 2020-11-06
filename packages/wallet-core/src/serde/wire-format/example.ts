@@ -106,7 +106,7 @@ export const internalStateFormat: SignedState = {
     {
       signature:
         '0xef7e226a43c52d4b8f7b14f13acdf9e75d871ea5c51235fbc4d538acf84c61c4727431f0cc83d0f566e222a21d35ae4d8d2a0dd4428cba7bf95bf7b3f11ad0c61c',
-      signer: '0x2222e21c8019b14da16235319d34b5dd83e644a9'
+      signer: makeAddress('0x2222e21c8019b14da16235319d34b5dd83e644a9')
     }
   ]
 };

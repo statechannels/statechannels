@@ -81,7 +81,7 @@ export function createSignatureEntry(state: State, privateKey: string): Signatur
   const {address} = new Wallet(privateKey);
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
-  return {signature: utils.joinSignature(signature), signer: address};
+  return {signature: utils.joinSignature(signature), signer: makeAddress(address)};
 }
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
