@@ -79,8 +79,8 @@
     "test": "run-s test:contracts 'test:app --all'",
     "test:app": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test:ci:app && yarn test:ci:contracts",
-    "test:ci:app": "yarn test:app --all --ci --bail",
-    "test:ci:contracts": "yarn test:contracts --all --ci --bail",
+    "test:ci:app": "yarn test:app --all --ci --bail --maxWorkers=4",
+    "test:ci:contracts": "yarn test:contracts --all --ci --bail --maxWorkers=4",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js"
   },
   "types": "lib/src/index.d.ts"
