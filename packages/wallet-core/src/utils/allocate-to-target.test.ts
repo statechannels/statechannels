@@ -1,5 +1,6 @@
 import {BN} from '../bignumber';
 import {AllocationItem} from '../types';
+import {MOCK_TOKEN} from '../constants';
 
 import {
   Errors,
@@ -94,8 +95,12 @@ describe('allocateToTarget with valid input', () => {
     ).toMatchObject(simpleEthAllocation(expectedAllocation));
 
     expect(
-      allocateToTarget(simpleTokenAllocation('foo', ledgerAllocation), deductions, targetChannelId)
-    ).toMatchObject(simpleTokenAllocation('foo', expectedAllocation));
+      allocateToTarget(
+        simpleTokenAllocation(MOCK_TOKEN, ledgerAllocation),
+        deductions,
+        targetChannelId
+      )
+    ).toMatchObject(simpleTokenAllocation(MOCK_TOKEN, expectedAllocation));
   });
 });
 

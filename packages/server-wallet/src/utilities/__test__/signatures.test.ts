@@ -26,7 +26,7 @@ it('sign vs wasmSign', async () => {
       turnNum: 1,
       isFinal: false,
       appData: '0x00',
-      appDefinition: ethers.constants.AddressZero,
+      appDefinition: makeAddress(ethers.constants.AddressZero),
       challengeDuration: 0x5,
     };
 
@@ -55,7 +55,7 @@ it('getSignerAddress vs fastRecover', async () => {
       turnNum: 1,
       isFinal: false,
       appData: '0x00',
-      appDefinition: ethers.constants.AddressZero,
+      appDefinition: makeAddress(ethers.constants.AddressZero),
       challengeDuration: 0x5,
     };
 

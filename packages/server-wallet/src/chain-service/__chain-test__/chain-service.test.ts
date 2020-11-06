@@ -1,7 +1,9 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
 import {
+  Address,
   BN,
+  makeAddress,
   makeDestination,
   simpleEthAllocation,
   simpleTokenAllocation,
@@ -11,7 +13,6 @@ import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
 import {defaultTestConfig} from '../../config';
-import {Address} from '../../type-aliases';
 import {
   alice as aliceParticipant,
   bob as bobParticipant,
@@ -20,9 +21,9 @@ import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/s
 import {AssetTransferredArg, ChainService, HoldingUpdatedArg} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = process.env.ETH_ASSET_HOLDER_ADDRESS!;
-const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
-const erc20Address = process.env.ERC20_ADDRESS!;
+const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
+const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
+const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
@@ -92,7 +93,7 @@ async function setUpConclude(isEth = true) {
       ]);
   const state1: State = {
     appData: constants.HashZero,
-    appDefinition: constants.AddressZero,
+    appDefinition: makeAddress(constants.AddressZero),
     isFinal: true,
     turnNum: 4,
     outcome,

@@ -1,7 +1,7 @@
 import {Allocations} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
 
-import {SimpleAllocation, MixedAllocation} from '../../types';
+import {SimpleAllocation, MixedAllocation, makeAddress} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {makeDestination} from '../../utils';
 import {ETH_TOKEN} from '../../constants';
@@ -71,7 +71,7 @@ export const internalMixedAllocation: MixedAllocation = {
     internalEthAllocation,
     {
       type: 'SimpleAllocation',
-      assetHolderAddress: '0x1111111111111111111111111111111111111111',
+      assetHolderAddress: makeAddress('0x1111111111111111111111111111111111111111'),
       allocationItems: [
         {
           amount: BN.from(utils.hexZeroPad('0x1', 32)),

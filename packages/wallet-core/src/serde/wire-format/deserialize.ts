@@ -80,6 +80,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
   const deserializedState = {
     ...state,
     channelId: undefined,
+    appDefinition: makeAddress(state.appDefinition),
     outcome: deserializeOutcome(state.outcome),
     participants: state.participants.map(convertToInternalParticipant)
   };
@@ -126,7 +127,8 @@ export function deserializeOutcome(outcome: OutcomeWire): Outcome {
     } else {
       return {
         type: 'SimpleGuarantee',
-        ...outcome[0]
+        ...outcome[0],
+        assetHolderAddress: makeAddress(outcome[0].assetHolderAddress)
       };
     }
   }
@@ -138,7 +140,7 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
   const {assetHolderAddress, allocationItems} = allocation;
   return {
     type: 'SimpleAllocation',
-    assetHolderAddress,
+    assetHolderAddress: makeAddress(assetHolderAddress),
     allocationItems: allocationItems.map(deserializeAllocationItem)
   };
 }

@@ -1,5 +1,5 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {BN, makeDestination, Participant} from '@statechannels/wallet-core';
+import {BN, makeAddress, makeDestination, Participant} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Outgoing} from '../..';
@@ -8,7 +8,7 @@ import {Bytes32} from '../../type-aliases';
 import {Wallet} from '../../wallet';
 import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpers';
 
-const ETH_ASSET_HOLDER_ADDRESS = ethers.constants.AddressZero;
+const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
 let a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
 let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});

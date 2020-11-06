@@ -1,10 +1,10 @@
 import {JSONSchema, Model} from 'objection';
-import {Zero} from '@statechannels/wallet-core';
+import {Address, Destination, Zero} from '@statechannels/wallet-core';
 import Knex from 'knex';
 
-import {Uint256, Bytes32, Address} from '../type-aliases';
+import {Uint256, Bytes32} from '../type-aliases';
 
-type TransferredOutEntry = {toAddress: Address; amount: Uint256};
+type TransferredOutEntry = {toAddress: Destination; amount: Uint256};
 
 export const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
 export interface RequiredColumns {
@@ -60,7 +60,12 @@ export class Funding extends Model implements RequiredColumns {
       .first();
 
     if (!existing) {
-      return await Funding.query(knex).insert({channelId, amount, assetHolder, transferredOut: []});
+      return await Funding.query(knex).insert({
+        channelId,
+        amount,
+        assetHolder,
+        transferredOut: [],
+      });
     } else {
       return await Funding.query(knex)
         .patch({amount})
@@ -74,8 +79,8 @@ export class Funding extends Model implements RequiredColumns {
     knex: Knex,
     channelId: Bytes32,
     assetHolder: Address,
-    toAddress: Uint256,
-    amount: Address
+    toAddress: Destination,
+    amount: Uint256
   ): Promise<Funding> {
     return knex.transaction(async tx => {
       const errorMessage = `Expected for funding row to exists with channelId ${channelId}, assetHolder ${assetHolder}`;

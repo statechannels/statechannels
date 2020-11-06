@@ -1,4 +1,4 @@
-import {BN} from '@statechannels/wallet-core';
+import {BN, makeAddress} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {channel} from '../../../models/__test__/fixtures/channel';
@@ -13,7 +13,7 @@ import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 
-const {AddressZero} = ethers.constants;
+const AddressZero = makeAddress(ethers.constants.AddressZero);
 
 let w: Wallet;
 beforeEach(async () => {

@@ -9,11 +9,12 @@ import {
   hashState,
   outcomesEqual,
   Zero,
+  Address,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 
-import {Address, Bytes32, Uint48} from '../type-aliases';
+import {Bytes32, Uint48} from '../type-aliases';
 import {
   ChannelState,
   toChannelResult,
@@ -77,7 +78,7 @@ export class Channel extends Model implements RequiredColumns {
   readonly fundingStrategy!: FundingStrategy;
 
   readonly assetHolderAddress!: string; // only Ledger channels have this
-  readonly fundingLedgerChannelId!: Address; // only App channels funded by Ledger have this
+  readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
   static get jsonSchema(): JSONSchema {
     return {

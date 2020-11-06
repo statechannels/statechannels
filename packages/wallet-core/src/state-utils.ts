@@ -46,7 +46,7 @@ export function fromNitroState(state: NitroState): State {
   const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
 
   return {
-    appDefinition,
+    appDefinition: makeAddress(appDefinition),
     isFinal,
     appData,
     outcome: fromNitroOutcome(outcome),
@@ -202,7 +202,7 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (typeof singleOutcomeItem['allocationItems'] !== 'undefined') {
     return {
       type: 'SimpleAllocation',
-      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      assetHolderAddress: makeAddress(singleOutcomeItem.assetHolderAddress),
       allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems'])
     };
   }
@@ -210,7 +210,7 @@ export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (typeof singleOutcomeItem['guarantee'] !== 'undefined') {
     return {
       type: 'SimpleGuarantee',
-      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      assetHolderAddress: makeAddress(singleOutcomeItem.assetHolderAddress),
       targetChannelId: singleOutcomeItem['guarantee'].targetChannelId,
       destinations: singleOutcomeItem['guarantee'].destinations
     };
