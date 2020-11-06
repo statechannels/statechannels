@@ -7,7 +7,8 @@ import {
   SimpleGuarantee,
   Outcome,
   Allocation,
-  Destination
+  Destination,
+  Address
 } from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BN, Zero} from '../bignumber';
@@ -45,7 +46,7 @@ export const simpleEthGuarantee = (
 });
 
 export const simpleTokenAllocation = (
-  assetHolderAddress: string,
+  assetHolderAddress: Address,
   allocationItems: AllocationItem[]
 ): SimpleAllocation => ({
   type: 'SimpleAllocation',

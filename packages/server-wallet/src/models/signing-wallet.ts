@@ -1,8 +1,14 @@
 import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {SignatureEntry, StateWithHash, State, makeAddress} from '@statechannels/wallet-core';
+import {
+  SignatureEntry,
+  StateWithHash,
+  State,
+  makeAddress,
+  Address,
+} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Address, Bytes32} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
 import {signState as wasmSignState} from '../utilities/signatures';
 import {addHash} from '../state-utils';

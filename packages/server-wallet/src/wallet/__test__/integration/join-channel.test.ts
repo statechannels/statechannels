@@ -6,6 +6,7 @@ import {
   makeDestination,
   SignedStateWithHash,
   serializeOutcome,
+  makeAddress,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
@@ -238,7 +239,7 @@ describe('ledger funded app scenarios', () => {
       turnNum: 6,
       outcome: {
         type: 'SimpleAllocation' as const,
-        assetHolderAddress: '0x0000000000000000000000000000000000000000',
+        assetHolderAddress: makeAddress('0x0000000000000000000000000000000000000000'),
         allocationItems: [
           {
             destination: makeDestination(app.channelId), // Funds allocated to channel

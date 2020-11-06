@@ -5,10 +5,12 @@ import {
   isAllocation,
   State,
   Participant,
+  Address,
+  Destination,
 } from '@statechannels/wallet-core';
 import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
 
-import {Address, Uint256} from '../type-aliases';
+import {Bytes32, Uint256} from '../type-aliases';
 
 import {ProtocolAction} from './actions';
 
@@ -23,7 +25,7 @@ export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 export type ChainServiceRequests = ChainServiceApi[];
 export type ChannelStateFunding = {
   amount: Uint256;
-  transferredOut: {toAddress: Address; amount: Uint256}[];
+  transferredOut: {toAddress: Destination; amount: Uint256}[];
 };
 
 /*
@@ -41,7 +43,7 @@ export type ChannelState = {
   funding: (address: Address) => ChannelStateFunding;
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
-  fundingLedgerChannelId?: Address; // only present if funding strategy is Ledger
+  fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
 };
 
 type WithSupported = {supported: SignedStateWithHash};

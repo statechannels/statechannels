@@ -1,6 +1,6 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
-import {BN} from '@statechannels/wallet-core';
+import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
@@ -8,8 +8,8 @@ import {defaultTestConfig} from '../../config';
 import {ChainService} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const erc20AssetHolderAddress = process.env.ERC20_ASSET_HOLDER_ADDRESS!;
-const erc20Address = process.env.ERC20_ADDRESS!;
+const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
+const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');

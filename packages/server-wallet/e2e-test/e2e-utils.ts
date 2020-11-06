@@ -2,7 +2,7 @@ import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_p
 
 import kill = require('tree-kill');
 import Knex = require('knex');
-import {Participant, makeDestination} from '@statechannels/wallet-core';
+import {Participant, makeDestination, makeAddress} from '@statechannels/wallet-core';
 import {Wallet} from 'ethers';
 import axios from 'axios';
 
@@ -147,7 +147,7 @@ export async function seedTestChannels(
 }
 
 export function getParticipant(participantId: string, privateKey: string): Participant {
-  const signingAddress = new Wallet(privateKey).address;
+  const signingAddress = makeAddress(new Wallet(privateKey).address);
   return {
     signingAddress,
     participantId,

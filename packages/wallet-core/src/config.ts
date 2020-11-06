@@ -1,6 +1,6 @@
 import {constants} from 'ethers';
 
-import {Destination} from './types';
+import {Address, Destination, makeAddress} from './types';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -27,8 +27,9 @@ export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 
-export const ETH_ASSET_HOLDER_ADDRESS: string =
-  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero;
+export const ETH_ASSET_HOLDER_ADDRESS: Address = makeAddress(
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
+);
 
 export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
 export const HUB_ADDRESS: string =

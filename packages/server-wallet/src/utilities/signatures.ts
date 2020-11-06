@@ -3,8 +3,8 @@ import {Address, makeAddress, State, toNitroState} from '@statechannels/wallet-c
 import * as wasmUtils from '@statechannels/wasm-utils';
 import {State as NitroState} from '@statechannels/nitro-protocol';
 
-const knownWallets: Record<string, string> = {};
-const cachedAddress = (privateKey: string): string =>
+const knownWallets: Record<string, Address> = {};
+const cachedAddress = (privateKey: string): Address =>
   knownWallets[privateKey] ||
   (knownWallets[privateKey] = makeAddress(new Wallet(privateKey).address));
 

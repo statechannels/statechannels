@@ -4,14 +4,22 @@ import {
   createETHDepositTransaction,
   Transactions,
 } from '@statechannels/nitro-protocol';
-import {BN, SignedState, toNitroSignedState, Uint256} from '@statechannels/wallet-core';
+import {
+  Address,
+  BN,
+  Destination,
+  makeAddress,
+  SignedState,
+  toNitroSignedState,
+  Uint256,
+} from '@statechannels/wallet-core';
 import {Contract, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 
-import {Address, Bytes32} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 
 // todo: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -28,7 +36,7 @@ export type HoldingUpdatedArg = {
 export type AssetTransferredArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
-  to: Bytes32;
+  to: Destination;
   amount: Uint256;
 };
 
@@ -220,7 +228,10 @@ export class ChainService implements ChainServiceInterface {
         next: event => {
           switch (event.type) {
             case Deposited:
-              subscriber.holdingUpdated(event);
+              subscriber.holdingUpdated({
+                ...event,
+                assetHolderAddress: makeAddress(event.assetHolderAddress),
+              });
               break;
             case AssetTransferred:
               subscriber.assetTransferred(event);
@@ -258,7 +269,7 @@ export class ChainService implements ChainServiceInterface {
         subs.next({
           type: Deposited,
           channelId: destination,
-          assetHolderAddress: contract.address,
+          assetHolderAddress: makeAddress(contract.address),
           amount: BN.from(destinationHoldings),
         })
       );
@@ -266,7 +277,7 @@ export class ChainService implements ChainServiceInterface {
         subs.next({
           type: AssetTransferred,
           channelId,
-          assetHolderAddress: contract.address,
+          assetHolderAddress: makeAddress(contract.address),
           to: destination,
           amount: BN.from(payoutAmount),
         })

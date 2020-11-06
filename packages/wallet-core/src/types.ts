@@ -42,13 +42,13 @@ export interface AllocationItem {
 }
 export interface SimpleAllocation {
   type: 'SimpleAllocation';
-  assetHolderAddress: string;
+  assetHolderAddress: Address;
   allocationItems: AllocationItem[];
 }
 export interface SimpleGuarantee {
   type: 'SimpleGuarantee';
   targetChannelId: string;
-  assetHolderAddress: string;
+  assetHolderAddress: Address;
   destinations: string[];
 }
 export interface MixedAllocation {
@@ -68,7 +68,7 @@ export interface ChannelConstants {
   chainId: string;
   participants: Participant[];
   channelNonce: number;
-  appDefinition: string;
+  appDefinition: Address;
   challengeDuration: number;
 }
 

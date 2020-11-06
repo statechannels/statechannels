@@ -1,20 +1,23 @@
 import {constants} from 'ethers';
-const {AddressZero, HashZero} = constants;
 
+import {makeDestination} from '../utils';
 import {outcomesEqual} from '../state-utils';
-import {SimpleAllocation, Destination} from '../types';
+import {SimpleAllocation, makeAddress} from '../types';
 import {BN} from '../bignumber';
+
+const AddressZero = makeAddress(constants.AddressZero);
+const HashZero = constants.HashZero;
 
 const simpleAllocation1: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x2')}]
+  allocationItems: [{destination: makeDestination(HashZero), amount: BN.from('0x2')}]
 };
 
 const simpleAllocation2: SimpleAllocation = {
   type: 'SimpleAllocation',
   assetHolderAddress: AddressZero,
-  allocationItems: [{destination: HashZero as Destination, amount: BN.from('0x02')}]
+  allocationItems: [{destination: makeDestination(HashZero), amount: BN.from('0x02')}]
 };
 
 describe('outcomesEqual', () => {

@@ -20,6 +20,8 @@ import {
   OpenChannel,
   makePrivateKey,
   makeAddress,
+  Address,
+  Destination,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -33,7 +35,7 @@ import {SigningWallet} from '../models/signing-wallet';
 import {addHash, addState, clearOldStates, fastDeserializeState} from '../state-utils';
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
-import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
+import {Bytes32, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
 import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
@@ -99,7 +101,7 @@ export class Store {
     };
   }
 
-  async getOrCreateSigningAddress(): Promise<string> {
+  async getOrCreateSigningAddress(): Promise<Address> {
     const randomWallet = ethers.Wallet.createRandom();
     // signing_wallets table allows for only one row via database constraints
     try {
@@ -539,7 +541,7 @@ export class Store {
     outcome: Outcome,
     fundingStrategy: FundingStrategy,
     role: 'app' | 'ledger' = 'app',
-    fundingLedgerChannelId?: Address
+    fundingLedgerChannelId?: Bytes32
   ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: Objective}> {
     return await this.knex.transaction(async tx => {
       const {channelId, participants} = await createChannel(
@@ -590,7 +592,7 @@ export class Store {
   async updateTransferredOut(
     channelId: string,
     assetHolder: Address,
-    toAddress: Address,
+    toAddress: Destination,
     amount: Uint256
   ): Promise<void> {
     await Funding.updateTransferredOut(this.knex, channelId, assetHolder, toAddress, amount);
@@ -629,7 +631,7 @@ class StoreError extends WalletError {
 async function createChannel(
   constants: ChannelConstants,
   fundingStrategy: FundingStrategy,
-  fundingLedgerChannelId: Address | undefined,
+  fundingLedgerChannelId: Bytes32 | undefined,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   const addresses = constants.participants.map(p => p.signingAddress);
