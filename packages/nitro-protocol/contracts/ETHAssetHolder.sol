@@ -7,7 +7,6 @@ import './AssetHolder.sol';
  * @dev Ther ETHAssetHolder contract extends the AssetHolder contract, and adds the following functionality: it allows ETH to be escrowed against a state channelId and to be transferred to external destinations.
  */
 contract ETHAssetHolder is AssetHolder {
-
     using SafeMath for uint256;
 
     /**

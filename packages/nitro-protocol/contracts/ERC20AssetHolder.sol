@@ -11,7 +11,7 @@ contract ERC20AssetHolder is AssetHolder {
     using SafeMath for uint256;
 
     IERC20 public Token;
-    
+
     /**
      * @notice Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
      * @dev Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
