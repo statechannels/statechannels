@@ -8,8 +8,10 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
  * @dev Ther ERC20AssetHolder contract extends the AssetHolder contract, and adds the following functionality: it allows ERC20 tokens to be escrowed against a state channelId and to be transferred to external destinations.
  */
 contract ERC20AssetHolder is AssetHolder {
-    IERC20 public Token;
+    using SafeMath for uint256;
 
+    IERC20 public Token;
+    
     /**
      * @notice Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
      * @dev Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
