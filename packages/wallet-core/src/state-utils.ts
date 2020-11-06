@@ -22,7 +22,8 @@ import {
   Destination,
   SimpleAllocation,
   SignatureEntry,
-  makeAddress
+  makeAddress,
+  Address
 } from './types';
 import {BN} from './bignumber';
 
@@ -93,9 +94,11 @@ export function hashState(state: State): string {
   return hashNitroState(nitroState);
 }
 
-export function getSignerAddress(state: State, signature: string): string {
+export function getSignerAddress(state: State, signature: string): Address {
   const nitroState = toNitroState(state);
-  return getNitroSignerAddress({state: nitroState, signature: utils.splitSignature(signature)});
+  return makeAddress(
+    getNitroSignerAddress({state: nitroState, signature: utils.splitSignature(signature)})
+  );
 }
 
 export function statesEqual(left: State, right: State): boolean {
