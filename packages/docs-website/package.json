@@ -1,7 +1,7 @@
 {
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
@@ -9,9 +9,9 @@
     "@docusaurus/preset-classic": "2.0.0-alpha.64",
     "@mdx-js/react": "1.6.18",
     "@microsoft/api-documenter": "7.8.21",
-    "@statechannels/channel-client": "0.4.5",
-    "@statechannels/iframe-channel-provider": "0.3.16",
-    "@statechannels/nitro-protocol": "0.6.0",
+    "@statechannels/channel-client": "0.4.6",
+    "@statechannels/iframe-channel-provider": "0.3.17",
+    "@statechannels/nitro-protocol": "0.7.0",
     "clsx": "1.1.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.17](https://github.com/statechannels/statechannels/compare/@statechannels/iframe-channel-provider@0.3.16...@statechannels/iframe-channel-provider@0.3.17) (2020-11-06)
+
+**Note:** Version bump only for package @statechannels/iframe-channel-provider
+
+
+
+
+
 ## [0.3.16](https://github.com/statechannels/statechannels/compare/@statechannels/iframe-channel-provider@0.3.14...@statechannels/iframe-channel-provider@0.3.16) (2020-11-03)
 
 **Note:** Version bump only for package @statechannels/iframe-channel-provider
