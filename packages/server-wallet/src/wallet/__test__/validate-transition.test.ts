@@ -1,4 +1,4 @@
-import {SimpleAllocation} from '@statechannels/wallet-core';
+import {makeAddress, SimpleAllocation} from '@statechannels/wallet-core';
 
 import {validateTransition} from '../../utilities/validate-transition';
 
@@ -7,12 +7,12 @@ import {stateWithHashSignedBy} from './fixtures/states';
 
 const outcome1: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+  assetHolderAddress: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'),
   allocationItems: [],
 };
 const outcome2: SimpleAllocation = {
   type: 'SimpleAllocation',
-  assetHolderAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+  assetHolderAddress: makeAddress('0x2222E21c8019b14dA16235319D34b5Dd83E644A9'),
   allocationItems: [],
 };
 describe('validate transition', () => {
