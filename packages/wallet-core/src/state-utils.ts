@@ -21,7 +21,8 @@ import {
   SignedState,
   Destination,
   SimpleAllocation,
-  SignatureEntry
+  SignatureEntry,
+  makeAddress
 } from './types';
 import {BN} from './bignumber';
 
@@ -53,7 +54,7 @@ export function fromNitroState(state: NitroState): State {
     channelNonce: Number(channel.channelNonce),
     chainId: channel.chainId,
     participants: channel.participants.map(x => ({
-      signingAddress: x,
+      signingAddress: makeAddress(x),
       // FIXME: Get real values
       participantId: x,
       destination: x.padStart(64, '0') as Destination

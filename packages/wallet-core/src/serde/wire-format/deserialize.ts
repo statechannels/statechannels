@@ -17,7 +17,8 @@ import {
   SimpleAllocation,
   Objective,
   Participant,
-  Payload
+  Payload,
+  makeAddress
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
@@ -28,7 +29,11 @@ export function convertToInternalParticipant(participant: {
   signingAddress: string;
   participantId: string;
 }): Participant {
-  return {...participant, destination: makeDestination(participant.destination)};
+  return {
+    ...participant,
+    signingAddress: makeAddress(participant.signingAddress),
+    destination: makeDestination(participant.destination)
+  };
 }
 
 type WirePayload = WireMessage['data'];
@@ -91,6 +96,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
 export function deserializeObjective(objective: ObjectiveWire): Objective {
   const participants = objective.participants?.map(p => ({
     ...p,
+    signingAddress: makeAddress(p.signingAddress),
     destination: makeDestination(p.destination)
   }));
 

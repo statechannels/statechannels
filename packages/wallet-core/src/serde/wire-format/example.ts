@@ -1,7 +1,7 @@
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
 import {BN} from '../../bignumber';
-import {Payload, SignedState} from '../../types';
+import {makeAddress, Payload, SignedState} from '../../types';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
@@ -68,12 +68,12 @@ export const internalStateFormat: SignedState = {
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
       participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-      signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
+      signingAddress: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf')
     },
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
       participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-      signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
+      signingAddress: makeAddress('0x2222E21c8019b14dA16235319D34b5Dd83E644A9')
     }
   ],
   appData:
@@ -175,12 +175,12 @@ export const internalMessageFormat: Payload = {
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
           participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-          signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
+          signingAddress: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf')
         },
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
           participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-          signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
+          signingAddress: makeAddress('0x2222E21c8019b14dA16235319D34b5Dd83E644A9')
         }
       ]
     }
