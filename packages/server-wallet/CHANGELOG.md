@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.10.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.7.0...@statechannels/server-wallet@1.10.0) (2020-11-06)
+
+
+### Bug Fixes
+
+* add jsonSchema to the Funding table ([8910f6e](https://github.com/statechannels/statechannels/commit/8910f6e162ba1167b3c2b00d73ac33f9a0b5e997))
+* change transferred out to snake case ([70448d3](https://github.com/statechannels/statechannels/commit/70448d3647ef599c6197b53aa9c6a601fb99ceda))
+* directly-funded-channel test passing ([2737502](https://github.com/statechannels/statechannels/commit/2737502f3edd3b70aac43e2625c6e2a16419eb94))
+* do not block runloop on chain service transaction submission ([a23d494](https://github.com/statechannels/statechannels/commit/a23d494dce0fcd548c7c473eebd0d69614c8f435))
+* ignore older states when validating ([7993a5b](https://github.com/statechannels/statechannels/commit/7993a5ba2ff67474517559ceff4b53f5bdbe49fe))
+* only crank channels related to those in the arguments to crankUntilIdle ([593fe68](https://github.com/statechannels/statechannels/commit/593fe68923a6a7cae767c3514a9a40bd03c4e213))
+* shouldValidate should not be async ([c5b614e](https://github.com/statechannels/statechannels/commit/c5b614ebcaf6b45e51d0163eab5516b21a84cfd2))
+* successfulWithdraw is no longer hardcoded to true ([e76383a](https://github.com/statechannels/statechannels/commit/e76383a4c0e7855a5c6f83349fdfb7ac4b8c38c7))
+* successfulWithdraw returns true for non directly funded channels ([ff79d83](https://github.com/statechannels/statechannels/commit/ff79d83f1726fc7bfbef89d7d11f2b17c2cb2ce0))
+* typo ([675ceb5](https://github.com/statechannels/statechannels/commit/675ceb54fb566295c7036be0b9e360e7ffbe7328))
+* use class logger in crankUntilIdle ([3009b96](https://github.com/statechannels/statechannels/commit/3009b966f0300503b200ee55911d03db2bed0ae3))
+* use isLedger from channel ([b232ec9](https://github.com/statechannels/statechannels/commit/b232ec948a84eb06e071c560e66c5f45fb610c44))
+* use toLowerCase instead of toLocaleLowerCase ([24f0e1d](https://github.com/statechannels/statechannels/commit/24f0e1dc3064981be6bad58229f3d8aa8333a399))
+
+
+### Features
+
+* add asset transferred record keeping to the funding table ([8f5ada6](https://github.com/statechannels/statechannels/commit/8f5ada645981b9f1a5627965b3735ed4aafbbdd6))
+* add syncChannels API method handler on server-wallet ([ff875f9](https://github.com/statechannels/statechannels/commit/ff875f99e04ff4b8fdb08736b240dee237418eb8))
+* add walletVersion to Message type ([16c205c](https://github.com/statechannels/statechannels/commit/16c205c72483a7b9b3445163065c74ff88fa55f5))
+* emit channelUpdate event ([a36c1e8](https://github.com/statechannels/statechannels/commit/a36c1e811622cac3173b31ed39d27b74ee2414f9))
+* errors during pushMessage have version ([dc23ac1](https://github.com/statechannels/statechannels/commit/dc23ac17e1a60399f1f46cf798708e53856f6034))
+* wallets own their own child logger ([73e6bfe](https://github.com/statechannels/statechannels/commit/73e6bfede7cebfa407eed1026fa42d7f60c3ee1e))
+
+
+
+
+
 # [1.9.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.7.0...@statechannels/server-wallet@1.9.0) (2020-11-03)
 
 

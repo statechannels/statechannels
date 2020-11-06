@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.3...@statechannels/nitro-protocol@0.7.0) (2020-11-06)
+
+
+### Bug Fixes
+
+* add requirement to prevent underflow ([fcbed12](https://github.com/statechannels/monorepo/commit/fcbed12ac3de90b42ffe0ab274b0395355b1cdd1))
+* correct function name ([89fcdd1](https://github.com/statechannels/monorepo/commit/89fcdd12ee19babd1ccae95c3f22389406ddefa1))
+* prefer .call.value to .transfer ([0fbcacc](https://github.com/statechannels/monorepo/commit/0fbcacc3497c115eedbaaaed5fb97baac6954e0b))
+* prevent underflow ([5d5269d](https://github.com/statechannels/monorepo/commit/5d5269d05d8df0d4f2de27fbc39c43d0947750ec))
+* remove need for requirement ([beabd19](https://github.com/statechannels/monorepo/commit/beabd198615a882c14eeee046c109f90ab09a557))
+* replace arithmetic operations with SafeMath ([fbda8af](https://github.com/statechannels/monorepo/commit/fbda8af3d0470d461abca090baf1293ea2bd6e73))
+* typo ([227c4e0](https://github.com/statechannels/monorepo/commit/227c4e0b75461723de42ac20f0c6e0c4fd84ebca))
+* use checks/effects/interactions in claimAll ([cbbe9e9](https://github.com/statechannels/monorepo/commit/cbbe9e90e45862748621c8ad367b04db527f38e4))
+
+
+### Features
+
+* add transfer method to AssetHolder ([6cd5c97](https://github.com/statechannels/monorepo/commit/6cd5c97ba1e95065a0e1e6366d6f0ff41595fecb))
+
+
+### Performance Improvements
+
+* delete guarantor storage during claimAll ([802ec40](https://github.com/statechannels/monorepo/commit/802ec40bc781956ca5c381dfee1545cc8697b8c0))
+* use solidity-bytes-utils.equal ([6737a7b](https://github.com/statechannels/monorepo/commit/6737a7b9f22999136fde7446fd8a5c21a0864d89))
+
+
+
+
+
 # [0.6.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.3...@statechannels/nitro-protocol@0.6.0) (2020-11-03)
 
 

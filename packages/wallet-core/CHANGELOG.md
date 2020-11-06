@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.5.5...@statechannels/wallet-core@0.8.0) (2020-11-06)
+
+
+### Features
+
+* add walletVersion to Message type ([16c205c](https://github.com/statechannels/statechannels/commit/16c205c72483a7b9b3445163065c74ff88fa55f5))
+
+
+
+
+
 # [0.7.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.5.5...@statechannels/wallet-core@0.7.0) (2020-11-03)
 
 

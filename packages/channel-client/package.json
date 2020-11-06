@@ -1,11 +1,11 @@
 {
   "name": "@statechannels/channel-client",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "author": "snario <liam@l4v.io>",
   "dependencies": {
-    "@statechannels/client-api-schema": "0.4.4",
-    "@statechannels/iframe-channel-provider": "0.3.16",
+    "@statechannels/client-api-schema": "0.4.5",
+    "@statechannels/iframe-channel-provider": "0.3.17",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",
     "loglevel": "1.6.8"
