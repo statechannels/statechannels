@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import {addAddressCheck, addBytes32Check, dropConstraint} from '../utils';
+import {addAddressCheck, addBytes32Check, addBytesCheck, dropConstraint} from '../utils';
 
 import {
   dropByteConstraints as dropOldByteConstraints,
@@ -9,6 +9,7 @@ import {
 
 const channels = 'channels';
 const signingWallets = 'signing_wallets';
+const app_bytecode = 'app_bytecode';
 
 export async function addByteContraints(knex: Knex): Promise<void> {
   await addBytes32Check(knex, signingWallets, 'private_key');
@@ -17,6 +18,12 @@ export async function addByteContraints(knex: Knex): Promise<void> {
   await addBytes32Check(knex, channels, 'channel_id');
   await addAddressCheck(knex, channels, 'app_definition');
   await addAddressCheck(knex, channels, 'signing_address');
+  await addBytes32Check(knex, channels, 'funding_ledger_channel_id');
+
+  await addAddressCheck(knex, app_bytecode, 'app_definition');
+  await addBytesCheck(knex, app_bytecode, app_bytecode);
+
+  await addAddressCheck(knex, 'funding', 'asset_holder');
 }
 
 export async function dropByteConstraints(knex: Knex): Promise<void> {
@@ -26,6 +33,12 @@ export async function dropByteConstraints(knex: Knex): Promise<void> {
   await dropConstraint(knex, channels, 'channel_id_is_bytes32');
   await dropConstraint(knex, channels, 'app_definition_is_address');
   await dropConstraint(knex, channels, 'signing_address_is_address');
+  await dropConstraint(knex, channels, 'funding_ledger_channel_id_is_bytes32');
+
+  await dropConstraint(knex, app_bytecode, 'app_definition_is_address');
+  await dropConstraint(knex, app_bytecode, 'app_bytecode_is_bytes');
+
+  await dropConstraint(knex, 'funding', 'asset_holder_is_address');
 }
 
 export async function up(knex: Knex): Promise<any> {
