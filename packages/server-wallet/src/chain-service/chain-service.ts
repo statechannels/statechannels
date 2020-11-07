@@ -13,7 +13,7 @@ import {
   toNitroSignedState,
   Uint256,
 } from '@statechannels/wallet-core';
-import {Contract, providers, utils, Wallet} from 'ethers';
+import {Contract, ethers, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
@@ -23,8 +23,12 @@ import {Bytes32} from '../type-aliases';
 
 // todo: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
+const ethAssetHolderAddress = makeAddress(
+  process.env.ETH_ASSET_HOLDER_ADDRESS || ethers.constants.AddressZero
+);
+const nitroAdjudicatorAddress = makeAddress(
+  process.env.NITRO_ADJUDICATOR_ADDRESS! || ethers.constants.AddressZero
+);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
 export type HoldingUpdatedArg = {
