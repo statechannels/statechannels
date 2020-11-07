@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "author": "",
   "dependencies": {
     "@connext/pure-evm-wasm": "0.1.4",
