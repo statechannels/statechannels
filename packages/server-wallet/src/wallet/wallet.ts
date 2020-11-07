@@ -23,6 +23,8 @@ import {
   assetHolderAddress as getAssetHolderAddress,
   Zero,
   Payload,
+  makeAddress,
+  Address as CoreAddress,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -161,11 +163,19 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
-    await this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
+    await this.store.upsertBytecode(
+      this.walletConfig.chainNetworkID,
+      makeAddress(appDefinition),
+      bytecode
+    );
   }
 
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
-    return this.store.upsertBytecode(this.walletConfig.chainNetworkID, appDefinition, bytecode);
+    return this.store.upsertBytecode(
+      this.walletConfig.chainNetworkID,
+      makeAddress(appDefinition),
+      bytecode
+    );
   }
 
   public mergeMessages(messages: Message[]): MultipleChannelOutput {
@@ -256,7 +266,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return {outbox, channelResult: channelResults[0]};
   }
 
-  public async getSigningAddress(): Promise<string> {
+  public async getSigningAddress(): Promise<CoreAddress> {
     return await this.store.getOrCreateSigningAddress();
   }
 
@@ -341,7 +351,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
 
     const constants = {
-      appDefinition,
+      appDefinition: makeAddress(appDefinition),
       chainId: this.walletConfig.chainNetworkID,
       challengeDuration: 9001,
       channelNonce,
