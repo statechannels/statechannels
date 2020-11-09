@@ -15,7 +15,3 @@ export function isReverseSorted(arr: number[]): boolean {
   }
   return true;
 }
-
-export function isDefined(s: string | undefined): s is string {
-  return s !== undefined;
-}
