@@ -13,7 +13,7 @@ import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceRequest} from '../models/chain-service-request';
 
-import {ChannelState, stage, Stage} from './state';
+import {ChannelState} from './state';
 import {
   completeObjective,
   Withdraw,
@@ -159,13 +159,14 @@ export type ProtocolState = {
   ledgerChannelId?: Bytes32;
 };
 
-const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
-  !!s && stage(s) === guardStage;
-
-const isFinal = stageGuard('Final');
-
-function everyoneSignedFinalState(app: ChannelState): boolean {
-  return (app.support || []).every(isFinal) && isFinal(app.latestSignedByMe);
+function everyoneSignedFinalState({latestSignedByMe, support, supported}: ChannelState): boolean {
+  return (
+    !!latestSignedByMe &&
+    !!supported &&
+    latestSignedByMe.isFinal &&
+    supported.isFinal &&
+    (support || []).every(s => s.isFinal)
+  );
 }
 
 // TODO: where is the corresponding logic for ledger channels?
@@ -188,9 +189,10 @@ const isMyTurn = (ps: ProtocolState): boolean =>
 //
 const signFinalState = (ps: ProtocolState): SignState | false =>
   !!ps.app.supported && // there is a supported state
-  !isFinal(ps.app.latestSignedByMe) && // I haven't yet signed a final state
+  !!ps.app.latestSignedByMe &&
+  !ps.app.latestSignedByMe.isFinal && // I haven't yet signed a final state
   // if there's an existing final state double-sign it
-  ((isFinal(ps.app.supported) &&
+  ((ps.app.supported.isFinal &&
     signState({
       channelId: ps.app.channelId,
       ...ps.app.supported,
