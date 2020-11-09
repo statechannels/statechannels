@@ -1,11 +1,11 @@
-import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
+import {BN, isSimpleAllocation, checkThat, SignedState} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
   signState,
   noAction,
@@ -33,16 +33,14 @@ export type LedgerFundedAppState = AppState & {
 
 export type ProtocolState = DirectlyFundedAppState | LedgerFundedAppState;
 
-const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
-  !!s && stage(s) === guardStage;
+const isPreFundSetup = (state?: SignedState): boolean =>
+  !!state && state.turnNum < state.participants.length;
 
-const isPrefundSetup = stageGuard('PrefundSetup');
-
-// These are currently unused, but will be used
-// const isRunning = stageGuard('Running');
-// const isPostfundSetup = stageGuard('PostfundSetup');
-const isRunning = stageGuard('Running');
-// const isMissing = (s: State | undefined): s is undefined => stage(s) === 'Missing';
+const isRunning = (channelState: ChannelState): boolean =>
+  !!channelState.supported &&
+  !!channelState.support &&
+  channelState.supported.turnNum === channelState.participants.length * 2 - 1 &&
+  channelState.support.every(state => state.turnNum >= state.participants.length);
 
 function ledgerFundedThisChannel(ledger: ChannelState, app: ChannelState): boolean {
   if (!ledger.supported) return false;
@@ -159,8 +157,8 @@ const fundViaLedger = (ps: ProtocolState): RequestLedgerFunding | false => {
 };
 
 const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
-  isPrefundSetup(ps.app.supported) &&
-  isPrefundSetup(ps.app.latestSignedByMe) &&
+  isPreFundSetup(ps.app.supported) &&
+  isPreFundSetup(ps.app.latestSignedByMe) &&
   (fundDirectly(ps) || fundViaLedger(ps));
 
 const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
@@ -185,9 +183,7 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
   });
 
 const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
-  (ps.app.supported?.turnNum === ps.app.participants.length * 2 - 1 ||
-    isRunning(ps.app.supported)) &&
-  completeObjective({channelId: ps.app.channelId});
+  isRunning(ps.app) && completeObjective({channelId: ps.app.channelId});
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
   signPreFundSetup(ps) ||

@@ -3,7 +3,6 @@ import {
   serializeAllocation,
   checkThat,
   isAllocation,
-  State,
   Participant,
   Address,
   Destination,
@@ -52,47 +51,54 @@ type SignedByMe = {latestSignedByMe: SignedStateWithHash};
 export type ChannelStateWithMe = ChannelState & SignedByMe;
 export type ChannelStateWithSupported = ChannelState & SignedByMe & WithSupported;
 
-export type Stage = 'Missing' | 'PrefundSetup' | 'PostfundSetup' | 'Running' | 'Final';
 /**
- *
- * @param state: SignedStateWithHash | undefined
- * Returns stage of state.
- *
- * Useful for partitioning the protocol state to decide what action to next take.
+ * The definition of a ChannelStatus is still under debate, but for now
+ * this is what we have settled on. Future changes should include 'funding',
+ * 'defunding', and state related to challenging, probably. See this issue
+ * for more: https://github.com/statechannels/statechannels/issues/2509
  */
-export const stage = (state: State | undefined): Stage =>
-  !state
-    ? 'Missing'
-    : state.isFinal
-    ? 'Final'
-    : state.turnNum <= state.participants.length - 1
-    ? 'PrefundSetup'
-    : state.turnNum <= state.participants.length * 2 - 1
-    ? 'PostfundSetup'
-    : 'Running';
+export const status = (channelState: ChannelState): ChannelStatus => {
+  const {supported, latest, latestSignedByMe, support} = channelState;
+  const {participants} = supported ?? latest;
+  if (latest.isFinal) {
+    if (support?.every(s => s.isFinal)) {
+      return 'closed'; // the entire support chain isFinal
+    } else {
+      return 'closing'; // at least one isFinal state proposed
+    }
+  } else {
+    if (latest.turnNum >= participants.length * 2) {
+      return 'running'; // unambiguously running e.g., 4, 5, 6, ...
+    } else {
+      if (latest.turnNum < participants.length) {
+        if (latestSignedByMe) {
+          return 'opening'; // 0 or 1 signed by me
+        } else {
+          return 'proposed'; // 0 or 1 signed, but not by me
+        }
+      } else {
+        if (support?.every(s => s.turnNum >= participants.length)) {
+          return 'running'; // <-- e.g., 2 and 3 both signed
+        } else {
+          return 'opening'; // <-- debatebly this could be 'funding'
+        }
+      }
+    }
+  }
+};
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, latestSignedByMe, support} = channelState;
-
+  const {channelId, supported, latest} = channelState;
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
-
-  const status: ChannelStatus = ((): ChannelStatus => {
-    switch (stage(supported)) {
-      case 'Missing':
-      case 'PrefundSetup':
-        return latestSignedByMe ? 'opening' : 'proposed';
-      case 'PostfundSetup':
-        return (supported?.turnNum || 0) < participants.length * 2 - 1 ? 'opening' : 'running';
-      case 'Running':
-        return 'running';
-      case 'Final':
-        return support?.find(s => !s.isFinal) ? 'closing' : 'closed';
-    }
-  })();
-
-  const allocations = serializeAllocation(checkThat(outcome, isAllocation));
-
-  return {appData, appDefinition, channelId, participants, turnNum, allocations, status};
+  return {
+    appData,
+    appDefinition,
+    channelId,
+    participants,
+    turnNum,
+    allocations: serializeAllocation(checkThat(outcome, isAllocation)),
+    status: status(channelState),
+  };
 };
 
 /*

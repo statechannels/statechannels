@@ -1,10 +1,10 @@
-import {BN, checkThat, isSimpleAllocation, State} from '@statechannels/wallet-core';
+import {BN, checkThat, isSimpleAllocation} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
   completeObjective,
   Withdraw,
@@ -23,13 +23,14 @@ export type ProtocolState = {
   ledgerChannelId?: Bytes32;
 };
 
-const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
-  !!s && stage(s) === guardStage;
-
-const isFinal = stageGuard('Final');
-
 function everyoneSignedFinalState(ps: ProtocolState): boolean {
-  return (ps.app.support || []).every(isFinal) && isFinal(ps.app.latestSignedByMe);
+  return (
+    !!ps.app.latestSignedByMe &&
+    ps.app.latestSignedByMe.isFinal &&
+    !!ps.app.supported &&
+    ps.app.supported.isFinal &&
+    (ps.app.support || []).every(s => s.isFinal)
+  );
 }
 
 // TODO: where is the corresponding logic for ledger channels?
@@ -66,9 +67,10 @@ const isMyTurn = (ps: ProtocolState): boolean =>
 //
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   !!ps.app.supported && // there is a supported state
-  !isFinal(ps.app.latestSignedByMe) && // I haven't yet signed a final state
+  !!ps.app.latestSignedByMe &&
+  !ps.app.latestSignedByMe.isFinal && // I haven't yet signed a final state
   // if there's an existing final state double-sign it
-  ((isFinal(ps.app.supported) &&
+  ((ps.app.supported.isFinal &&
     signState({
       channelId: ps.app.channelId,
       ...ps.app.supported,
