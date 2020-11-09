@@ -17,4 +17,4 @@ export const Wallet = {
   },
 };
 
-export {MultiThreadedWallet, SingleThreadedWallet, ServerWalletConfig};
+export {ServerWalletConfig};
