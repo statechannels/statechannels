@@ -53,7 +53,6 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {DBObjective} from '../models/objective';
 import {LedgerRequest} from '../models/ledger-request';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
@@ -68,12 +67,10 @@ import {WalletInterface} from './types';
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
-  objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
-  objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
 export type Message = SingleChannelOutput | MultipleChannelOutput;
 
@@ -574,9 +571,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       };
     }
 
-    const {channelIds, objectives, channelResults: fromStoring} = await this.store.pushMessage(
-      wirePayload
-    );
+    const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
@@ -592,7 +587,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return {
       outbox: mergeOutgoing(outbox),
       channelResults: mergeChannelResults(channelResults),
-      objectivesToApprove: objectives,
     };
   }
 
