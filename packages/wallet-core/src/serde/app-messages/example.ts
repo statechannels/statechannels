@@ -13,11 +13,11 @@ export const externalEthAllocation: Allocations = [
     allocationItems: [
       {
         amount: utils.hexZeroPad('0x5', 32),
-        destination: '0x000000000000000000000000a5c9d076b3fc5910d67b073cbf75c4e13a5ac6e5'
+        destination: '0x000000000000000000000000A5C9d076B3FC5910d67b073CBF75C4e13a5AC6E5'
       },
       {
         amount: utils.hexZeroPad('0x5', 32),
-        destination: '0x000000000000000000000000baf5d86514365d487ea69b7d7c85913e5df51648'
+        destination: '0x000000000000000000000000BAF5D86514365D487ea69B7D7c85913E5dF51648'
       }
     ]
   }
