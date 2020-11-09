@@ -5,3 +5,13 @@ export function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K> {
   });
   return ret;
 }
+
+export function isReverseSorted(arr: number[]): boolean {
+  const len = arr.length - 1;
+  for (let i = 0; i < len; ++i) {
+    if (arr[i] < arr[i + 1]) {
+      return false;
+    }
+  }
+  return true;
+}
