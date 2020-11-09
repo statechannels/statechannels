@@ -1,4 +1,5 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
+import {utils} from 'ethers';
 
 export type Uint256 = string & {_isUint256: void};
 // These "integers" have "type-safe" addition:
@@ -245,4 +246,6 @@ export type PrivateKey = string & {_isPrivateKey: void};
 export const makePrivateKey: (input: string) => PrivateKey = makeBytesCurried<PrivateKey>(64);
 
 export type Address = string & {_isAddressKey: void};
-export const makeAddress: (input: string) => Address = makeBytesCurried<Address>(40);
+export function makeAddress(input: string): Address {
+  return utils.getAddress(input) as Address;
+}

@@ -8,7 +8,8 @@ import {
   Outcome,
   Allocation,
   Destination,
-  Address
+  Address,
+  makeAddress
 } from '../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
 import {BN, Zero} from '../bignumber';
@@ -99,13 +100,21 @@ export function allocateToTarget(
 }
 
 export function makeDestination(addressOrDestination: string): Destination {
-  if (addressOrDestination.length === 42) {
-    return ethers.utils.hexZeroPad(
-      ethers.utils.getAddress(addressOrDestination).toLowerCase(),
-      32
-    ) as Destination;
-  } else if (addressOrDestination.length === 66) {
-    return addressOrDestination.toLowerCase() as Destination;
+  const addressLength = 20 * 2 + 2;
+  const destinationLength = 32 * 2 + 2;
+  const zeroPrefix =
+    '0x' + _.range(destinationLength - addressLength).reduce(soFar => soFar.concat('0'), '');
+
+  if (addressOrDestination.length === addressLength) {
+    return ethers.utils.hexZeroPad(makeAddress(addressOrDestination), 32) as Destination;
+  } else if (addressOrDestination.length === destinationLength) {
+    if (addressOrDestination.startsWith(zeroPrefix)) {
+      return ethers.utils.hexZeroPad(
+        makeAddress(addressOrDestination.substr(zeroPrefix.length)),
+        32
+      ) as Destination;
+    }
+    return addressOrDestination as Destination;
   } else {
     throw new Error('Invalid input');
   }
