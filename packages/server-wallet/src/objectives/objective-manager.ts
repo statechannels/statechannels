@@ -12,6 +12,7 @@ import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
 
 import {ObjectiveManagerParams} from './types';
+import {CloseChannelObjective} from './close-channel';
 
 export class ObjectiveManager {
   private store: Store;
@@ -142,5 +143,9 @@ export class ObjectiveManager {
         }
       });
     }
+  }
+
+  public async commenceCloseChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
+    return CloseChannelObjective.commence(channelId, response, this.store);
   }
 }

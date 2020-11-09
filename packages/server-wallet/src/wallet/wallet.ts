@@ -35,7 +35,6 @@ import {Outgoing} from '../protocols/actions';
 import {createLogger} from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
-import * as CloseChannel from '../handlers/close-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError, PushMessageError} from '../errors/wallet-error';
@@ -54,7 +53,6 @@ import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerRequest} from '../models/ledger-request';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
-import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
@@ -456,32 +454,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   private async _closeChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
-    await this.store.lockApp(
-      channelId,
-      async (tx, channel) => {
-        if (hasSupportedState(channel) && !isMyTurn(channel))
-          throw new CloseChannel.CloseChannelError(
-            CloseChannel.CloseChannelError.reasons.notMyTurn
-          );
-
-        const dbObjective = await this.store.addObjective(
-          {
-            type: 'CloseChannel',
-            participants: [],
-            data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
-          },
-          tx
-        );
-        // add new objective to the response
-        response.queueCreatedObjective(dbObjective, channel.myIndex, channel.participants);
-      },
-      () => {
-        throw new CloseChannel.CloseChannelError(
-          CloseChannel.CloseChannelError.reasons.channelMissing,
-          {channelId}
-        );
-      }
-    );
+    await this.objectiveManager.commenceCloseChannel(channelId, response);
   }
 
   async getLedgerChannels(
