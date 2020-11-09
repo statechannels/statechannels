@@ -11,6 +11,7 @@ import {
   makeDestination,
   deserializeObjective,
   isOpenChannel,
+  isCloseChannel,
   SignedState,
   objectiveId,
   isSimpleAllocation,
@@ -32,7 +33,7 @@ import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
-import {isReverseSorted, pick, isDefined} from '../utilities/helpers';
+import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {ObjectiveModel, DBObjective} from '../models/objective';
@@ -297,10 +298,9 @@ export class Store {
         storedObjectives.push(await this.addObjective(o, tx));
       }
 
-      const objectiveChannelIds =
-        storedObjectives
-          .map(objective => (isOpenChannel(objective) ? objective.data.targetChannelId : undefined))
-          .filter(isDefined) || [];
+      const objectiveChannelIds = storedObjectives
+        .filter(objective => isOpenChannel(objective) || isCloseChannel(objective))
+        .map(objective => objective.data.targetChannelId);
 
       return {
         channelIds: stateChannelIds.concat(objectiveChannelIds),
