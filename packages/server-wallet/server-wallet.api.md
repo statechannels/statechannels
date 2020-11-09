@@ -8,6 +8,7 @@ import { Address } from '@statechannels/client-api-schema';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';
+import { CloseChannel } from '@statechannels/wallet-core';
 import { CloseChannelParams } from '@statechannels/client-api-schema';
 import { CreateChannelParams } from '@statechannels/client-api-schema';
 import EventEmitter from 'eventemitter3';
@@ -22,6 +23,7 @@ import { MessageQueuedNotification } from '@statechannels/client-api-schema';
 import { Model } from 'objection';
 import { ModelOptions } from 'objection';
 import { Objective } from '@statechannels/wallet-core';
+import { OpenChannel } from '@statechannels/wallet-core';
 import { Outcome } from '@statechannels/wallet-core';
 import { Participant } from '@statechannels/wallet-core';
 import { Participant as Participant_2 } from '@statechannels/client-api-schema';
@@ -46,10 +48,78 @@ import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
 export { Message }
 
+// @public (undocumented)
+export class MultiThreadedWallet extends SingleThreadedWallet {
+    protected constructor(walletConfig?: ServerWalletConfig);
+    // (undocumented)
+    static create(walletConfig?: ServerWalletConfig): MultiThreadedWallet;
+    // (undocumented)
+    destroy(): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "MultipleChannelOutput" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    warmUpThreads(): Promise<void>;
+    }
+
 // Warning: (ae-forgotten-export) The symbol "Notice" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
 export type Outgoing = Notice;
+
+// @public (undocumented)
+export interface ServerWalletConfig {
+    // (undocumented)
+    chainNetworkID: string;
+    // (undocumented)
+    debugKnex?: string;
+    // (undocumented)
+    erc20Address?: string;
+    // (undocumented)
+    erc20AssetHolderAddress?: string;
+    // (undocumented)
+    ethAssetHolderAddress?: string;
+    // (undocumented)
+    logDestination?: string;
+    // (undocumented)
+    logLevel: pino.Level;
+    // (undocumented)
+    metricsOutputFile?: string;
+    // (undocumented)
+    nodeEnv?: 'test' | 'development' | 'production';
+    // (undocumented)
+    postgresDatabaseUrl?: string;
+    // (undocumented)
+    postgresDBName?: string;
+    // (undocumented)
+    postgresDBPassword?: string;
+    // (undocumented)
+    postgresDBUser?: string;
+    // (undocumented)
+    postgresHost?: string;
+    // (undocumented)
+    postgresPoolSize?: {
+        max: number;
+        min: number;
+    };
+    // (undocumented)
+    postgresPort?: string;
+    // (undocumented)
+    rpcEndpoint?: string;
+    // (undocumented)
+    serverPrivateKey: string;
+    // (undocumented)
+    serverSignerPrivateKey: string;
+    // (undocumented)
+    skipEvmValidation: boolean;
+    // (undocumented)
+    timingMetrics: boolean;
+    // (undocumented)
+    workerThreadAmount: number;
+}
 
 // @public (undocumented)
 export type SingleChannelOutput = {
@@ -63,8 +133,8 @@ export type SingleChannelOutput = {
 // Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export class Wallet extends EventEmitter<EventEmitterType> implements WalletInterface, ChainEventSubscriberInterface {
-    constructor(walletConfig?: ServerWalletConfig);
+export class SingleThreadedWallet extends EventEmitter<EventEmitterType> implements WalletInterface, ChainEventSubscriberInterface {
+    protected constructor(walletConfig?: ServerWalletConfig);
     // Warning: (ae-forgotten-export) The symbol "AssetTransferredArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -75,10 +145,10 @@ export class Wallet extends EventEmitter<EventEmitterType> implements WalletInte
     chainService: ChainServiceInterface;
     // (undocumented)
     closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    static create(walletConfig?: ServerWalletConfig): SingleThreadedWallet;
     // (undocumented)
     createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
     // (undocumented)
@@ -114,7 +184,6 @@ export class Wallet extends EventEmitter<EventEmitterType> implements WalletInte
     // (undocumented)
     logger: Logger;
     // Warning: (ae-forgotten-export) The symbol "Message" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "MultipleChannelOutput" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     mergeMessages(messages: Message_2[]): MultipleChannelOutput;
@@ -125,7 +194,7 @@ export class Wallet extends EventEmitter<EventEmitterType> implements WalletInte
     // (undocumented)
     pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
     // (undocumented)
-    pushMessageInternal(wirePayload: Payload): Promise<MultipleChannelOutput>;
+    _pushMessage(wirePayload: Payload): Promise<MultipleChannelOutput>;
     // (undocumented)
     registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
     // (undocumented)
@@ -136,34 +205,40 @@ export class Wallet extends EventEmitter<EventEmitterType> implements WalletInte
     store: Store;
     // (undocumented)
     syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     takeActions: (channels: Bytes32[]) => Promise<ExecutionResult_2>;
     // (undocumented)
-    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+    updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
     // (undocumented)
     updateChannelFunding({ channelId, token, amount, }: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
-    // (undocumented)
-    updateChannelInternal({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "UpdateChannelFundingParams" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "ServerWalletConfig" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     readonly walletConfig: ServerWalletConfig;
-    // Warning: (ae-forgotten-export) The symbol "WorkerManager" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    workerManager: WorkerManager;
+    warmUpThreads(): Promise<void>;
 }
+
+// @public (undocumented)
+export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
+
+// @public (undocumented)
+export const Wallet: {
+    create(walletConfig?: ServerWalletConfig | undefined): Wallet;
+};
 
 
 // Warnings were encountered during analysis:
 //
-// src/wallet/index.ts:71:3 - (ae-forgotten-export) The symbol "DBObjective" needs to be exported by the entry point index.d.ts
+// src/wallet/wallet.ts:71:3 - (ae-forgotten-export) The symbol "DBObjective" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
