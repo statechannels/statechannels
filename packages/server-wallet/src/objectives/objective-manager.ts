@@ -1,6 +1,7 @@
 import {Logger} from 'pino';
 import {BN} from '@statechannels/wallet-core';
 
+import {Bytes32} from '../type-aliases';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';

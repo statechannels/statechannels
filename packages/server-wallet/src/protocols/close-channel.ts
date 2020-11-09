@@ -53,8 +53,12 @@ function successfulWithdraw({app}: ProtocolState): boolean {
   return BN.eq(amountOwedToMe, amountTransferredToMe);
 }
 
+const isMyTurn = (ps: ProtocolState): boolean =>
+  !!ps.app.supported && (ps.app.supported.turnNum + 1) % 2 === ps.app.myIndex;
+
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
   !!ps.app.supported &&
+  isMyTurn(ps) && // is my turn
   !isFinal(ps.app.latestSignedByMe) &&
   signState({
     channelId: ps.app.channelId,
