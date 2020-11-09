@@ -464,11 +464,14 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     const {channelResults, outbox} = await this.takeActions(channelIds);
 
-    (outbox[0].params.data as Payload).objectives = channelIds.map(channelId => ({
-      type: 'CloseChannel',
+    const makeCloseChannelObjective = (targetChannelId: Bytes32) => ({
+      type: 'CloseChannel' as const,
       participants: [],
-      data: {targetChannelId: channelId, fundingStrategy: 'Unknown'},
-    }));
+      data: {targetChannelId, fundingStrategy: 'Unknown' as const},
+    });
+
+    if (outbox.length > 0)
+      (outbox[0].params.data as Payload).objectives = channelIds.map(makeCloseChannelObjective);
 
     return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
   }
