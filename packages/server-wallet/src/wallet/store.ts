@@ -15,6 +15,8 @@ import {
   objectiveId,
   isSimpleAllocation,
   checkThat,
+  CloseChannel,
+  OpenChannel,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -30,7 +32,7 @@ import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Address, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
-import {isReverseSorted, pick} from '../utilities/helpers';
+import {isReverseSorted, pick, isDefined} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {ObjectiveModel, DBObjective} from '../models/objective';
@@ -296,9 +298,6 @@ export class Store {
         storedObjectives.push(await this.addObjective(o, tx));
       }
 
-      function isDefined(s: string | undefined): s is string {
-        return s !== undefined;
-      }
       const objectiveChannelIds =
         storedObjectives
           .map(objective => (isOpenChannel(objective) ? objective.data.targetChannelId : undefined))
@@ -350,78 +349,93 @@ export class Store {
   }
 
   async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
-    if (isOpenChannel(objective)) {
-      const {
-        data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
-      } = objective;
-
-      // fetch the channel to make sure the channel exists
-      const channel = await Channel.forId(channelId, tx);
-      if (!channel) {
-        throw new StoreError(StoreError.reasons.channelMissing, {channelId});
-      }
-
-      if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
-        throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
-
-      const objectiveToBeStored: DBObjective = {
-        objectiveId: objectiveId(objective),
-        participants: [],
-        status: 'pending',
-        type: objective.type,
-        data: {
-          fundingStrategy,
-          fundingLedgerChannelId,
-          targetChannelId: channelId,
-          role,
-        },
-      };
-
-      if (role === 'ledger')
-        await Channel.setLedger(
-          channelId,
-          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-          tx
-        );
-
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-
-      await Channel.query(tx)
-        .where({channelId: channel.channelId})
-        .patch({fundingStrategy, fundingLedgerChannelId})
-        .returning('*')
-        .first();
-
-      return objectiveToBeStored;
-    } else if (objective.type === 'CloseChannel') {
-      const {
-        data: {targetChannelId, fundingStrategy},
-      } = objective;
-      // fetch the channel to make sure the channel exists
-      const channel = await Channel.forId(targetChannelId, tx);
-      if (!channel) {
-        throw new StoreError(StoreError.reasons.channelMissing, {
-          channelId: targetChannelId,
-        });
-      }
-
-      const objectiveToBeStored: DBObjective = {
-        objectiveId: objectiveId(objective),
-        status: 'approved',
-        type: objective.type,
-        participants: [],
-        data: {
-          targetChannelId,
-          fundingStrategy,
-        },
-      };
-
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-
-      return objectiveToBeStored;
-    } else {
-      throw new StoreError(StoreError.reasons.unimplementedObjective);
+    switch (objective.type) {
+      case 'OpenChannel':
+        return this.addOpenChannelObjective(objective, tx);
+      case 'CloseChannel':
+        return this.addCloseChannelObjective(objective, tx);
+      default:
+        throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
+  }
+
+  private async addOpenChannelObjective(
+    objective: OpenChannel,
+    tx: Transaction
+  ): Promise<DBObjective> {
+    const {
+      data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
+    } = objective;
+
+    // fetch the channel to make sure the channel exists
+    const channel = await this.getChannel(channelId, tx);
+    if (!channel) {
+      throw new StoreError(StoreError.reasons.channelMissing, {channelId});
+    }
+
+    if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
+      throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
+
+    const objectiveToBeStored: DBObjective = {
+      objectiveId: objectiveId(objective),
+      participants: [],
+      status: 'pending',
+      type: objective.type,
+      data: {
+        fundingStrategy,
+        fundingLedgerChannelId,
+        targetChannelId: channelId,
+        role,
+      },
+    };
+
+    if (role === 'ledger')
+      await Channel.setLedger(
+        channelId,
+        checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+        tx
+      );
+
+    await ObjectiveModel.insert(objectiveToBeStored, tx);
+
+    await Channel.query(tx)
+      .where({channelId: channel.channelId})
+      .patch({fundingStrategy, fundingLedgerChannelId})
+      .returning('*')
+      .first();
+
+    return objectiveToBeStored;
+  }
+
+  private async addCloseChannelObjective(
+    objective: CloseChannel,
+    tx: Transaction
+  ): Promise<DBObjective> {
+    const {
+      data: {targetChannelId, fundingStrategy},
+    } = objective;
+
+    // fetch the channel to make sure the channel exists
+    const channel = await this.getChannel(targetChannelId, tx);
+    if (!channel)
+      throw new StoreError(StoreError.reasons.channelMissing, {
+        channelId: targetChannelId,
+      });
+
+    const objectiveToBeStored: DBObjective = {
+      objectiveId: objectiveId(objective),
+      status: 'approved',
+      type: objective.type,
+      participants: [],
+      data: {
+        targetChannelId,
+        fundingStrategy,
+      },
+    };
+
+    await ObjectiveModel.insert(objectiveToBeStored, tx);
+
+    return objectiveToBeStored;
   }
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
