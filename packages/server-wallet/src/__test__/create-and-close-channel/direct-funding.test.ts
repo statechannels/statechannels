@@ -154,14 +154,14 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 });
 
-it('Rejects b closing with `not your turn`', async () => {
+it('Accepts b closing', async () => {
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };
 
   const bCloseChannel = b.closeChannel(closeChannelParams);
 
-  await expect(bCloseChannel).rejects.toMatchObject(new Error('not my turn'));
+  await bCloseChannel;
 });
 
 it('Closes the channel', async () => {
@@ -171,6 +171,8 @@ it('Closes the channel', async () => {
 
   // A generates isFinal4
   const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+  // it shouldn't error if close channel is called twice
+  await a.closeChannel(closeChannelParams);
 
   expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
     status: 'closing',
