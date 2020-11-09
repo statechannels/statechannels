@@ -48,23 +48,6 @@ import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
 export { Message }
 
-// @public (undocumented)
-export class MultiThreadedWallet extends SingleThreadedWallet {
-    protected constructor(walletConfig?: ServerWalletConfig);
-    // (undocumented)
-    static create(walletConfig?: ServerWalletConfig): MultiThreadedWallet;
-    // (undocumented)
-    destroy(): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "MultipleChannelOutput" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
-    warmUpThreads(): Promise<void>;
-    }
-
 // Warning: (ae-forgotten-export) The symbol "Notice" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
@@ -128,105 +111,9 @@ export type SingleChannelOutput = {
     objectivesToApprove?: Omit<DBObjective, 'status'>[];
 };
 
-// Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "WalletInterface" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "SingleThreadedWallet" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "MultiThreadedWallet" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
-export class SingleThreadedWallet extends EventEmitter<EventEmitterType> implements WalletInterface, ChainEventSubscriberInterface {
-    protected constructor(walletConfig?: ServerWalletConfig);
-    // Warning: (ae-forgotten-export) The symbol "AssetTransferredArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    assetTransferred(arg: AssetTransferredArg): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    chainService: ChainServiceInterface;
-    // (undocumented)
-    closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
-    closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    static create(walletConfig?: ServerWalletConfig): SingleThreadedWallet;
-    // (undocumented)
-    createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "DBAdmin" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    dbAdmin(): DBAdmin;
-    // (undocumented)
-    destroy(): Promise<void>;
-    // (undocumented)
-    getChannels(): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    getParticipant(): Promise<Participant | undefined>;
-    // (undocumented)
-    getSigningAddress(): Promise<string>;
-    // (undocumented)
-    getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    holdingUpdated(arg: HoldingUpdatedArg): void;
-    // (undocumented)
-    joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
-    joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    knex: Knex;
-    // (undocumented)
-    logger: Logger;
-    // Warning: (ae-forgotten-export) The symbol "Message" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    mergeMessages(messages: Message_2[]): MultipleChannelOutput;
-    // Warning: (ae-forgotten-export) The symbol "ObjectiveManager" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    objectiveManager: ObjectiveManager;
-    // (undocumented)
-    pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    _pushMessage(wirePayload: Payload): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-    // (undocumented)
-    registerAppDefinition(appDefinition: string): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "Store" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    store: Store;
-    // (undocumented)
-    syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    takeActions: (channels: Bytes32[]) => Promise<ExecutionResult_2>;
-    // (undocumented)
-    updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
-    updateChannelFunding({ channelId, token, amount, }: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "UpdateChannelFundingParams" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
-    readonly walletConfig: ServerWalletConfig;
-    // (undocumented)
-    warmUpThreads(): Promise<void>;
-}
-
 // @public (undocumented)
 export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
 
