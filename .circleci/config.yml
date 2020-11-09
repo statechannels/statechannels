@@ -32,19 +32,14 @@ save_dep: &save_dep
     key: v9-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
-      - packages/benchmarking/node_modules
-      - packages/channel-client/node_modules
       - packages/client-api-schema/node_modules
       - packages/devtools/node_modules
       - packages/docs-website/node_modules
-      - packages/iframe-channel-provider/node_modules
-      - packages/integration-tests/node_modules
       - packages/jest-gas-reporter/node_modules
       - packages/nitro-protocol/node_modules
       - packages/server-wallet/node_modules
       - packages/wallet-core/node_modules
       - packages/wire-format/node_modules
-      - packages/xstate-wallet/node_modules
 
 restore_dep: &restore_dep
   restore_cache:
@@ -57,19 +52,14 @@ save_built_artifacts: &save_built_artifacts
     paths:
       # Various TypeScript emissions
       - packages/channel-client/lib
-      - packages/iframe-channel-provider/lib
       - packages/client-api-schema/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib
       - packages/nitro-protocol/lib
-      - packages/simple-hub/lib
       - packages/wire-format/lib
-      - packages/xstate-wallet/lib
       - packages/server-wallet/lib
       # Smart contract compiles
       - packages/nitro-protocol/build
-      # Webpack builds & contract compiles
-      - packages/xstate-wallet/build
 
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
@@ -424,30 +414,12 @@ jobs:
             git push origin deploy
       - notify_slack
 
-  integration-tests:
-    <<: *defaults
-    description: 'Running integration tests'
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /home/circleci/project
-      - run:
-          command: mkdir logs
-      - run:
-          command: SC_ENV=integration-tests yarn start-servers
-          background: true
-      - run: (cd packages/integration-tests && yarn integration-tests)
-
 workflows:
   statechannels:
     jobs:
       - prepare
 
       - test:
-          requires:
-            - prepare
-
-      - integration-tests:
           requires:
             - prepare
 
