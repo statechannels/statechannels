@@ -22,6 +22,9 @@
     },
     {
       "path": "../wallet-core"
+    },
+    {
+      "path": "../chain-service"
     }
   ],
   "include": ["src", "e2e-test", "deployment", "jest"]

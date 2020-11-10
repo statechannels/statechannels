@@ -1,11 +1,12 @@
 import {providers, constants} from 'ethers';
 import {Address, SignedState} from '@statechannels/wallet-core';
+import {
+  ChainServiceInterface,
+  ChainEventSubscriberInterface,
+  FundChannelArg,
+} from '@statechannels/chain-service';
 
 import {Bytes32} from '../type-aliases';
-
-import {ChainServiceInterface} from './chain-service';
-
-import {ChainEventSubscriberInterface, FundChannelArg} from './';
 
 const mockTransactionReceipt: providers.TransactionReceipt = {
   to: '',

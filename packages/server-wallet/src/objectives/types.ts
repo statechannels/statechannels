@@ -1,8 +1,8 @@
 import {Logger} from 'pino';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChainServiceInterface} from '@statechannels/chain-service';
 
 import {Store} from '../wallet/store';
-import {ChainServiceInterface} from '../chain-service';
 import {Outgoing} from '../protocols/actions';
 import {WalletEvent} from '../wallet';
 

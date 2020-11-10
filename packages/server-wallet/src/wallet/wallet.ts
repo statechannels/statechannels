@@ -26,6 +26,13 @@ import {
   makeAddress,
   Address as CoreAddress,
 } from '@statechannels/wallet-core';
+import {
+  ChainServiceInterface,
+  ChainEventSubscriberInterface,
+  HoldingUpdatedArg,
+  AssetTransferredArg,
+  ChainService,
+} from '@statechannels/chain-service';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
@@ -46,20 +53,13 @@ import {isWalletError, PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
-import {
-  ChainServiceInterface,
-  ChainEventSubscriberInterface,
-  HoldingUpdatedArg,
-  AssetTransferredArg,
-  ChainService,
-  MockChainService,
-} from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerRequest} from '../models/ledger-request';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
+import {MockChainService} from './mock-chain-service';
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
 

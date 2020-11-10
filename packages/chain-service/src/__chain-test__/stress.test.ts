@@ -4,8 +4,8 @@ import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig} from '../../config';
 import {ChainService} from '../chain-service';
+import defaultTestConfig from '../config';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);

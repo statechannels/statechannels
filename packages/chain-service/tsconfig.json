@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true, // import _ from 'lodash' uses this
+    "outDir": "lib",
+    "target": "es2019",      // same as @statechannels/server-wallet
+    "module": "commonjs",    // same as @statechannels/server-wallet
+    "esModuleInterop": true, // same as @statechannels/server-wallet
+    "lib": [
+      "ES2019", // We use .flatMap in this package
+      "dom" // Monorepo related errors (webgl) if this is omitted :/
+    ],
+    "noImplicitAny": true
+  },
+  "references": [
+    {
+      "path": "../devtools"
+    },
+    {
+      "path": "../client-api-schema"
+    },
+    {
+      "path": "../nitro-protocol"
+    },
+    {
+      "path": "../wallet-core"
+    },
+  ],
+  "include": ["src"]
+}

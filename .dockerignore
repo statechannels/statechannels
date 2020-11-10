@@ -19,6 +19,7 @@
 !./packages/client-api-schema
 !./packages/nitro-protocol
 !./packages/simple-hub/
+!./packages/chain-service/
 !./packages/wire-format
 # Then ignore node_modules
 **/node_modules

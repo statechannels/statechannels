@@ -33,6 +33,7 @@ save_dep: &save_dep
     paths:
       - node_modules
       - packages/client-api-schema/node_modules
+      - packages/chain-service/node_modules
       - packages/devtools/node_modules
       - packages/docs-website/node_modules
       - packages/jest-gas-reporter/node_modules
@@ -52,6 +53,7 @@ save_built_artifacts: &save_built_artifacts
     paths:
       # Various TypeScript emissions
       - packages/channel-client/lib
+      - packages/chain-service/lib
       - packages/client-api-schema/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib

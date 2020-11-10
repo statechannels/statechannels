@@ -1,6 +1,7 @@
 import {Logger} from 'pino';
 import {serializeMessage, Participant, BN, Payload} from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChainServiceInterface} from '@statechannels/chain-service';
 
 import {Bytes32} from '../type-aliases';
 import * as OpenChannelProtocol from '../protocols/open-channel';
@@ -8,7 +9,6 @@ import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
-import {ChainServiceInterface} from '../chain-service';
 import {Outgoing, ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WALLET_VERSION} from '../version';

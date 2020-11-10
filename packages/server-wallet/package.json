@@ -5,12 +5,12 @@
   "author": "",
   "dependencies": {
     "@connext/pure-evm-wasm": "0.1.4",
-    "@ethersproject/experimental": "5.0.5",
     "@statechannels/client-api-schema": "0.4.5",
     "@statechannels/nitro-protocol": "0.7.0",
     "@statechannels/wallet-core": "0.8.0",
     "@statechannels/wasm-utils": "0.1.5",
     "@statechannels/wire-format": "0.8.0",
+    "@statechannels/chain-service": "0.0.1",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",
     "fp-ts": "2.7.0",
@@ -20,7 +20,6 @@
     "p-queue": "^6.6.2",
     "pg": "7.17.1",
     "pino": "6.2.0",
-    "rxjs": "6.6.3",
     "tarn": "3.0.0"
   },
   "devDependencies": {
@@ -61,6 +60,7 @@
     "npm-run-all": "4.1.5",
     "pino-pretty": "4.0.0",
     "prettier": "1.19.1",
+    "rxjs": "6.6.3",
     "tree-kill": "1.2.2",
     "ts-jest": "26.4.1",
     "ts-node": "8.9.1",

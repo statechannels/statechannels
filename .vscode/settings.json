@@ -3,6 +3,7 @@
   "eslint.workingDirectories": [
     {"directory": "packages/benchmarking", "changeProcessCWD": true },
     {"directory": "packages/channel-client", "changeProcessCWD": true },
+    {"directory": "packages/chain-service", "changeProcessCWD": true },
     {"directory": "packages/client-api-schema", "changeProcessCWD": true },
     {"directory": "packages/devtools", "changeProcessCWD": true },
     {"directory": "packages/docs-website", "changeProcessCWD": true },

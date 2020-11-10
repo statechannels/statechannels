@@ -6,6 +6,9 @@
 
 import { Address } from '@statechannels/client-api-schema';
 import { Address as Address_2 } from '@statechannels/wallet-core';
+import { AssetTransferredArg } from '@statechannels/chain-service';
+import { ChainEventSubscriberInterface } from '@statechannels/chain-service';
+import { ChainServiceInterface } from '@statechannels/chain-service';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';
@@ -16,6 +19,7 @@ import { Destination } from '@statechannels/wallet-core';
 import EventEmitter from 'eventemitter3';
 import { FundingStrategy } from '@statechannels/client-api-schema';
 import { GetStateParams } from '@statechannels/client-api-schema';
+import { HoldingUpdatedArg } from '@statechannels/chain-service';
 import { JoinChannelParams } from '@statechannels/client-api-schema';
 import { JSONSchema } from 'objection';
 import Knex from 'knex';
@@ -32,7 +36,6 @@ import { Participant as Participant_2 } from '@statechannels/client-api-schema';
 import { Payload } from '@statechannels/wire-format';
 import * as pino from 'pino';
 import { Pojo } from 'objection';
-import { providers } from 'ethers';
 import { QueryContext } from 'objection';
 import { SignatureEntry } from '@statechannels/wallet-core';
 import { SignedState } from '@statechannels/wallet-core';
@@ -45,7 +48,6 @@ import { StateWithHash } from '@statechannels/wallet-core';
 import { SyncChannelParams } from '@statechannels/client-api-schema';
 import { Transaction } from 'objection';
 import { TransactionOrKnex } from 'objection';
-import { Uint256 as Uint256_2 } from '@statechannels/wallet-core';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
 export { Message }

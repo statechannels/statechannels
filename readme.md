@@ -32,6 +32,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 
 - [benchmarking](./packages/benchmarking) : Small application that generates time-taken data for our libraries and applications
 - [channel-client](./packages/channel-client) : A JavaScript object interface for the state channels client API
+- [chain-service](./packages/chain-service) : A service for state channels wallets to connect to blockchain data
 - [docs-websitel](./packages/docs-website/website) : Documentation website
 - [iframe-channel-provider](./packages/iframe-channel-provider) : Thin wrapper around PostMessage communication between an App and a Wallet
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings

@@ -12,13 +12,12 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig} from '../../config';
-import {
-  alice as aliceParticipant,
-  bob as bobParticipant,
-} from '../../wallet/__test__/fixtures/participants';
-import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
-import {AssetTransferredArg, ChainService, HoldingUpdatedArg} from '../chain-service';
+import {ChainService} from '../chain-service';
+import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
+import config from '../config';
+
+import {alice as aliceParticipant, bob as bobParticipant} from './fixtures/participants';
+import {alice as aWallet, bob as bWallet} from './fixtures/signing-wallets';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -26,8 +25,8 @@ const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRE
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultTestConfig.rpcEndpoint;
+if (!config.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = config.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
 let chainService: ChainService;

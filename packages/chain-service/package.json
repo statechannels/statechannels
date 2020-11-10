@@ -1,0 +1,53 @@
+{
+  "name": "@statechannels/chain-service",
+  "description": "companion package to server-wallet to support chain interactions",
+  "version": "0.0.1",
+  "author": "",
+  "dependencies": {
+    "@ethersproject/experimental": "5.0.5",
+    "@statechannels/client-api-schema": "0.4.5",
+    "@statechannels/nitro-protocol": "0.7.0",
+    "@statechannels/wallet-core": "0.8.0",
+    "ethers": "5.0.12",
+    "p-queue": "6.6.2",
+    "rxjs": "6.6.3"
+  },
+  "devDependencies": {
+    "@statechannels/devtools": "0.4.3",
+    "@types/eslint": "7.2.3",
+    "@types/eslint-plugin-prettier": "2.2.0",
+    "@types/jest": "26.0.14",
+    "@types/lodash": "4.14.161",
+    "@types/prettier": "1.19.0",
+    "@typescript-eslint/eslint-plugin": "4.3.0",
+    "@typescript-eslint/parser": "4.3.0",
+    "eslint": "7.10.0",
+    "eslint-config-prettier": "6.10.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-jest": "23.6.0",
+    "eslint-plugin-prettier": "3.1.2",
+    "eslint-plugin-unicorn": "21.0.0",
+    "jest": "26.4.2",
+    "lint-staged": "10.0.4",
+    "lodash": "4.17.20",
+    "prettier": "1.19.1",
+    "ts-jest": "26.4.1",
+    "ts-node": "8.9.1",
+    "typescript": "4.0.3"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "src/**/*.ts": "eslint --max-warnings=0"
+  },
+  "main": "lib/src/index.js",
+  "scripts": {
+    "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
+    "lint:write": "eslint \"*/**/*.{js,ts}\" --fix",
+    "precommit": "lint-staged --quiet",
+    "prepare": "echo 'nothing to prepare; chain-service is TS code only'",
+    "prestart": "yarn prepare",
+    "test": "yarn jest -c ./jest/jest.config.js --runInBand",
+    "test:ci": "yarn test --ci --bail"
+  },
+  "types": "lib/src/index.d.ts"
+}
