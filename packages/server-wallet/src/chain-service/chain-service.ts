@@ -9,6 +9,7 @@ import {
   BN,
   Destination,
   makeAddress,
+  makeDestination,
   SignedState,
   toNitroSignedState,
   Uint256,
@@ -220,7 +221,7 @@ export class ChainService implements ChainServiceInterface {
         (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
           type: Deposited,
           channelId,
-          assetHolderAddress: contract.address,
+          assetHolderAddress: makeAddress(contract.address),
           amount: BN.from(holding),
         }))
       );
@@ -232,10 +233,7 @@ export class ChainService implements ChainServiceInterface {
         next: event => {
           switch (event.type) {
             case Deposited:
-              subscriber.holdingUpdated({
-                ...event,
-                assetHolderAddress: makeAddress(event.assetHolderAddress),
-              });
+              subscriber.holdingUpdated(event);
               break;
             case AssetTransferred:
               subscriber.assetTransferred(event);
@@ -282,7 +280,7 @@ export class ChainService implements ChainServiceInterface {
           type: AssetTransferred,
           channelId,
           assetHolderAddress: makeAddress(contract.address),
-          to: destination,
+          to: makeDestination(destination),
           amount: BN.from(payoutAmount),
         })
       );
