@@ -537,6 +537,14 @@ export class Store {
     };
   }
 
+  async getMyLedgerCommit(channelId: Bytes32, tx?: Transaction): Promise<Outcome | undefined> {
+    return (
+      await Channel.query(tx || this.knex)
+        .where({channelId})
+        .first()
+    ).myUnsignedCommitment;
+  }
+
   async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx?: Transaction): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})

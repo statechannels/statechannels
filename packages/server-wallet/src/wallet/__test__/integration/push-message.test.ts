@@ -11,8 +11,8 @@ import {
   serializeOutcome,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {PartialModelObject} from 'objection';
+import {constants} from 'ethers';
 
 import {Channel} from '../../../models/channel';
 import {addHash} from '../../../state-utils';
@@ -417,6 +417,54 @@ describe('when there is a request provided', () => {
       ],
     });
   });
+
+  it('appends proposed ledger update to the outbox satisfying a GetChannel request', async () => {
+    // Set up test by adding a single state into the DB via pushMessage call
+    const channelsBefore = await Channel.query(wallet.knex).select();
+    expect(channelsBefore).toHaveLength(0);
+    const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
+    await wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates});
+
+    // Get the channelId of that which was added
+    const [{channelId}] = await Channel.query(wallet.knex).select();
+
+    // Manually set this channel as a ledger
+    await Channel.setLedger(
+      channelId,
+      makeAddress('0x0000000000000000000000000000000000001337'),
+      wallet.knex
+    );
+
+    // Store some outcome in the my_unsigned_commitment column
+    const someArbitraryOutcome: SimpleAllocation = {
+      type: 'SimpleAllocation',
+      assetHolderAddress: makeAddress('0x0000000000000000000000000000000000001337'),
+      allocationItems: [],
+    };
+    await wallet.store.storeMyLedgerCommit(channelId, someArbitraryOutcome);
+
+    // Expect a GetChannel request to produce an outbound message with all states
+    await expect(
+      wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        requests: [{type: 'GetChannel', channelId}],
+      })
+    ).resolves.toMatchObject({
+      outbox: [
+        {
+          method: 'MessageQueued',
+          params: {
+            data: {
+              signedStates,
+              requests: [
+                {type: 'ProposeLedger', channelId, outcome: serializeOutcome(someArbitraryOutcome)},
+              ],
+            },
+          },
+        },
+      ],
+    });
+  });
 });
 
 describe('ledger funded app scenarios', () => {
@@ -447,7 +495,7 @@ describe('ledger funded app scenarios', () => {
       })
     );
 
-    await Channel.setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS, wallet.knex);
+    await Channel.setLedger(ledger.channelId, makeAddress(constants.AddressZero), wallet.knex);
 
     // Generate application channel
     app = channel({
