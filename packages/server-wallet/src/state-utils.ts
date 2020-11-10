@@ -10,6 +10,7 @@ import {
   SignedState,
   SignedStateWithHash,
   wireStateToNitroState,
+  makeAddress,
 } from '@statechannels/wallet-core';
 import {hashState} from '@statechannels/wasm-utils';
 import _ from 'lodash';
@@ -122,6 +123,7 @@ export function fastDeserializeState(channelId: Bytes32, state: WireSignedState)
 
   return {
     ...state,
+    appDefinition: makeAddress(state.appDefinition),
     outcome: deserializeOutcome(outcome),
     participants: participants.map(convertToInternalParticipant),
     signatures: signatureEntries,
