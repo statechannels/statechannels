@@ -51,7 +51,6 @@ save_built_artifacts: &save_built_artifacts
     key: v6-built-artifacts-cache-{{ epoch }}
     paths:
       # Various TypeScript emissions
-      - packages/channel-client/lib
       - packages/client-api-schema/lib
       - packages/devtools/lib
       - packages/jest-gas-reporter/lib
@@ -385,8 +384,8 @@ jobs:
       - <<: *restore_dep
       - <<: *restore_built_artifacts
       - run:
-          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
-          channel-client client-api-schema xstate-wallet
+          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs
+          client-api-schema
       - run: yarn --frozen-lockfile
       - build_push_release:
           dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
