@@ -120,7 +120,7 @@ export function makeDestination(addressOrDestination: string): Destination {
         32
       ) as Destination;
     }
-    return addressOrDestination as Destination;
+    return addressOrDestination.toLowerCase() as Destination;
   } else {
     throw new Error('Invalid input');
   }
