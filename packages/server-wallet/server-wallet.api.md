@@ -5,12 +5,14 @@
 ```ts
 
 import { Address } from '@statechannels/client-api-schema';
+import { Address as Address_2 } from '@statechannels/wallet-core';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';
 import { CloseChannel } from '@statechannels/wallet-core';
 import { CloseChannelParams } from '@statechannels/client-api-schema';
 import { CreateChannelParams } from '@statechannels/client-api-schema';
+import { Destination } from '@statechannels/wallet-core';
 import EventEmitter from 'eventemitter3';
 import { FundingStrategy } from '@statechannels/client-api-schema';
 import { GetStateParams } from '@statechannels/client-api-schema';
