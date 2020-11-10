@@ -13,12 +13,8 @@
 !yarn.lock
 !./package.json
 !./packages/devtools
-!./packages/e2e-tests
-!./packages/persistent-seeder
-!./packages/iframe-channel-provider
 !./packages/client-api-schema
 !./packages/nitro-protocol
-!./packages/simple-hub/
 !./packages/wire-format
 # Then ignore node_modules
 **/node_modules
