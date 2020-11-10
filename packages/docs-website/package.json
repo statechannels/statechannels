@@ -43,7 +43,7 @@
     "rename-version": "docusaurus-rename-version",
     "start": "yarn trigger-api-generation && yarn api-documenter && docusaurus start",
     "swizzle": "docusaurus swizzle",
-    "trigger-api-generation": "cd ../.. && yarn lerna run generate-api cd packages/docs-website",
+    "trigger-api-generation": "yarn lerna run generate-api",
     "write-translations": "docusaurus-write-translations"
   }
 }
