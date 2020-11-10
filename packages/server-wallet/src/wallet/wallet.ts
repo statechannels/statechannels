@@ -202,6 +202,11 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     response.queueChannelRequest(channelId, myIndex, participants);
     response.queueChannelState(channelState);
+
+    if (await this.store.isLedger(channelId)) {
+      const outcome = await this.store.getMyLedgerCommit(channelId);
+      if (outcome) response.queueProposeLedger(channelId, myIndex, participants, outcome);
+    }
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
