@@ -14,7 +14,7 @@ export interface ServerWalletConfig {
   postgresDBName?: string;
   postgresDBUser?: string;
   postgresDBPassword?: string;
-  serverSignerPrivateKey: string;
+  stateChannelPrivateKey: string;
   ethereumPrivateKey: string;
   rpcEndpoint?: string;
   chainNetworkID: string;
@@ -40,7 +40,7 @@ export const defaultConfig: ServerWalletConfig = {
   postgresDBName: process.env.SERVER_DB_NAME,
   postgresDBUser: process.env.SERVER_DB_USER,
   postgresDBPassword: process.env.SERVER_DB_PASSWORD,
-  serverSignerPrivateKey:
+  stateChannelPrivateKey:
     process.env.SERVER_SIGNER_PRIVATE_KEY ||
     '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b',
   ethereumPrivateKey:
