@@ -15,12 +15,12 @@ let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
   ...defaultTestConfig,
   postgresDBName: 'TEST_B',
-  serverPrivateKey: ETHERLIME_ACCOUNTS[1].privateKey,
+  ethereumPrivateKey: ETHERLIME_ACCOUNTS[1].privateKey,
 });
 const a = Wallet.create({
   ...defaultTestConfig,
   postgresDBName: 'TEST_A',
-  serverPrivateKey: ETHERLIME_ACCOUNTS[2].privateKey,
+  ethereumPrivateKey: ETHERLIME_ACCOUNTS[2].privateKey,
 });
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';

@@ -15,7 +15,7 @@ export type TestNetworkContext = {
 
 export async function deploy(): Promise<TestNetworkContext> {
   // TODO: best way to configure this?
-  const deployer = new GanacheDeployer(8545, defaultConfig.serverPrivateKey);
+  const deployer = new GanacheDeployer(8545, defaultConfig.ethereumPrivateKey);
   const {
     EthAssetHolderArtifact,
     TokenArtifact,
