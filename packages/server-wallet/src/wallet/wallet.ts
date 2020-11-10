@@ -62,6 +62,7 @@ import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
+import {ResponseBuilder, WalletResponse} from './response-builder';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -198,26 +199,28 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   public async syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
-    const results = await Promise.all(channelIds.map(channelId => this.syncChannel({channelId})));
-    return {
-      outbox: mergeOutgoing(results.flatMap(r => r.outbox)),
-      channelResults: mergeChannelResults(results.flatMap(r => r.channelResult)),
-    };
+    const response = WalletResponse.initialize();
+
+    await Promise.all(channelIds.map(channelId => this._syncChannel(channelId, response)));
+
+    return response.multipleChannelOutput();
   }
 
   public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
+    const response = WalletResponse.initialize();
+    await this._syncChannel(channelId, response);
+    return response.singleChannelOutput();
+  }
+
+  private async _syncChannel(channelId: string, responseBuilder: ResponseBuilder): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
-    const {participants, myIndex} = channelState;
+    const {myIndex, participants} = channelState;
 
-    return {
-      outbox: createOutboxFor(channelId, myIndex, participants, {
-        walletVersion: WALLET_VERSION,
-        signedStates: states,
-        requests: [{type: 'GetChannel', channelId}],
-      }),
-      channelResult: ChannelState.toChannelResult(channelState),
-    };
+    states.forEach(s => responseBuilder.stateSigned(s, myIndex, channelId));
+
+    responseBuilder.requestGetChannel(channelId, myIndex, participants);
+    responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(channelState));
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
