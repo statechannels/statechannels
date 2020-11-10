@@ -68,6 +68,8 @@ export interface ServerWalletConfig {
     // (undocumented)
     ethAssetHolderAddress?: string;
     // (undocumented)
+    ethereumPrivateKey: string;
+    // (undocumented)
     logDestination?: string;
     // (undocumented)
     logLevel: pino.Level;
@@ -95,11 +97,9 @@ export interface ServerWalletConfig {
     // (undocumented)
     rpcEndpoint?: string;
     // (undocumented)
-    serverPrivateKey: string;
-    // (undocumented)
-    serverSignerPrivateKey: string;
-    // (undocumented)
     skipEvmValidation: boolean;
+    // (undocumented)
+    stateChannelPrivateKey: string;
     // (undocumented)
     timingMetrics: boolean;
     // (undocumented)
