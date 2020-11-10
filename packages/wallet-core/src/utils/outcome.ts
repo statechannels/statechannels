@@ -100,14 +100,20 @@ export function allocateToTarget(
 }
 
 export function makeDestination(addressOrDestination: string): Destination {
+  // '0x' + 20 byte ethereum address and 0x
   const addressLength = 20 * 2 + 2;
+  // '0x' + 32 bytes
   const destinationLength = 32 * 2 + 2;
   const zeroPrefix =
     '0x' + _.range(destinationLength - addressLength).reduce(soFar => soFar.concat('0'), '');
 
+  // If an ethereum address is passed in, prepend 0s
   if (addressOrDestination.length === addressLength) {
     return ethers.utils.hexZeroPad(makeAddress(addressOrDestination), 32) as Destination;
+    // The full length destination might be a channel ID or an ethereum address prepended with 0s
   } else if (addressOrDestination.length === destinationLength) {
+    // This is an etherum address prepended with 0s
+    // Checksum the address
     if (addressOrDestination.startsWith(zeroPrefix)) {
       return ethers.utils.hexZeroPad(
         makeAddress(addressOrDestination.substr(zeroPrefix.length)),
