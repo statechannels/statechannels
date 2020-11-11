@@ -407,7 +407,7 @@ describe('when there is a request provided', () => {
       outbox: [
         {
           method: 'MessageQueued',
-          params: {data: {signedStates}},
+          params: {data: {signedStates: expect.arrayContaining(signedStates)}},
         },
       ],
     });

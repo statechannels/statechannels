@@ -38,7 +38,7 @@ describe('happy path', () => {
               signedStates: [{turnNum: 0}],
               objectives: [
                 {
-                  participants: [alice(), bob()],
+                  participants: [], // todo: remove when fully deprecated
                   data: {
                     fundingStrategy: 'Direct',
                   },
