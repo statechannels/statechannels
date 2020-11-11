@@ -1,5 +1,6 @@
 import {objectiveId, Objective, OpenChannel, CloseChannel} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
+import _ from 'lodash';
 
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
@@ -31,6 +32,10 @@ export type SupportedWireObjective = OpenChannel | CloseChannel;
 export type DBObjective = SupportedWireObjective & {
   objectiveId: string;
   status: ObjectiveStatus;
+};
+
+export const toWireObjective = (dbObj: DBObjective): Objective => {
+  return _.omit(dbObj, ['objectiveId', 'status']);
 };
 
 export class ObjectiveChannelModel extends Model {
