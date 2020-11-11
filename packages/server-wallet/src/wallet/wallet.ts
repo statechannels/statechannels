@@ -391,7 +391,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     this.registerChannelWithChainService(channelId);
 
     // set strict=false to silently drop any ledger channel updates from channelResults
-    // todo: change api so that joinChannel returns a MultipleChannelOutput
+    // TODO: change api so that joinChannel returns a MultipleChannelOutput
     return response.singleChannelOutput(false);
   }
 
@@ -691,7 +691,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   async assetTransferred(arg: AssetTransferredArg): Promise<void> {
     const response = WalletResponse.initialize();
-    // todo: make sure that arg.to is checksummed
+    // TODO: make sure that arg.to is checksummed
     await this.store.updateTransferredOut(
       arg.channelId,
       arg.assetHolderAddress,
@@ -700,7 +700,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     );
     await this.takeActions([arg.channelId], response);
 
-    // todo: shouldn't we be returning a response here?
+    // TODO: shouldn't we be returning a response here?
   }
 
   private async registerChannelWithChainService(channelId: string): Promise<void> {

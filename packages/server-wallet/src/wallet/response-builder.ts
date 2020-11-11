@@ -144,7 +144,7 @@ export class WalletResponse implements ResponseBuilder {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
-      // objectivesToApprove: this.objectivesToApprove, // todo: re-enable
+      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
 
@@ -168,7 +168,7 @@ export class WalletResponse implements ResponseBuilder {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
-      // objectivesToApprove: this.objectivesToApprove, // todo: re-enable
+      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
 
@@ -191,7 +191,7 @@ export class WalletResponse implements ResponseBuilder {
       type: 'channelUpdated' as const,
       value: {
         channelResult,
-        outbox: [], // todo: doesn't seem like this should be on this event?
+        outbox: [], // TODO: doesn't seem like this should be on this event?
       },
     }));
   }

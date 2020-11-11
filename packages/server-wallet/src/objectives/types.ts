@@ -13,7 +13,7 @@ export interface ObjectiveManagerParams {
   timingMetrics: boolean;
 }
 
-// todo: currently duplicated in wallet/index.ts
+// TODO: currently duplicated in wallet/index.ts
 export type ExecutionResult = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];

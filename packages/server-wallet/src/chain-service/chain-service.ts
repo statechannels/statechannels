@@ -22,7 +22,7 @@ import PQueue from 'p-queue';
 
 import {Bytes32} from '../type-aliases';
 
-// todo: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
+// TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(
   process.env.ETH_ASSET_HOLDER_ADDRESS || ethers.constants.AddressZero
@@ -69,7 +69,7 @@ interface ChainEventEmitterInterface {
 }
 
 interface ChainModifierInterface {
-  // todo: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
+  // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
   concludeAndWithdraw(
     finalizationProof: SignedState[]
@@ -266,7 +266,7 @@ export class ChainService implements ChainServiceInterface {
   private addContractObservable(contract: Contract): Observable<ContractEvent> {
     // Create an observable that emits events on contract events
     const obs = new Observable<ContractEvent>(subs => {
-      // todo: add other event types
+      // TODO: add other event types
       contract.on(Deposited, (destination, _amountDeposited, destinationHoldings) =>
         subs.next({
           type: Deposited,

@@ -16,7 +16,7 @@ import {ProtocolAction} from './actions';
 
 export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 /**
- * todo: This should be a dictionary instead of a list.
+ * TODO: This should be a dictionary instead of a list.
  * The values of this dictionary should represent the parameter with which the api is called.
  * - fund: the value is the asset holder address
  * - withdraw: might not need a value?
