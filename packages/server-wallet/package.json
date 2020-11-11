@@ -81,6 +81,8 @@
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
     "db:setup:dev": "yarn db:drop && yarn db:create && yarn db:migrate",
+    "db:reset": "yarn db:drop; yarn db:create && yarn db:migrate",
+    "db:reset:test": "(NODE_ENV=test yarn db:reset)",
     "generate-api": "yarn api-extractor run --local",
     "lint:check": "eslint \"*/**/*.{js,ts}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts}\" --fix",
