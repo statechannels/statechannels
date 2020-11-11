@@ -1,20 +1,17 @@
 import {Logger} from 'pino';
-import {serializeMessage, Participant, BN, Payload} from '@statechannels/wallet-core';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {BN} from '@statechannels/wallet-core';
 
-import {Bytes32} from '../type-aliases';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
-import {Outgoing, ProtocolAction} from '../protocols/actions';
+import {ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
-import {WALLET_VERSION} from '../version';
-import {WalletEvent} from '../wallet';
+import {ResponseBuilder} from '../wallet/response-builder';
 
-import {ObjectiveManagerParams, ExecutionResult} from './types';
+import {ObjectiveManagerParams} from './types';
 
 export class ObjectiveManager {
   private store: Store;
@@ -33,12 +30,15 @@ export class ObjectiveManager {
     this.timingMetrics = timingMetrics;
   }
 
-  async crank(objectiveId: string): Promise<ExecutionResult> {
-    const outbox: Outgoing[] = [];
-    const channelResults: ChannelResult[] = [];
-    let maybeError: any = undefined;
-    let eventsToEmit: WalletEvent[] = [];
-
+  /**
+   * Attempts to advance the given objective
+   *
+   * Swallows (and logs) any errors
+   *
+   * @param objectiveId - id of objective to try to advance
+   * @param responseBuilder - response builder; will be modified by the method
+   */
+  async crank(objectiveId: string, responseBuilder: ResponseBuilder): Promise<void> {
     const objective = await this.store.getObjective(objectiveId);
 
     let channelToLock;
@@ -77,12 +77,9 @@ export class ObjectiveManager {
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
             case 'SignState': {
-              const {myIndex, participants, channelId} = protocolState.app;
+              const {myIndex, channelId} = protocolState.app;
               const signedState = await this.store.signState(action.channelId, action, tx);
-              createOutboxFor(channelId, myIndex, participants, {
-                walletVersion: WALLET_VERSION,
-                signedStates: [signedState],
-              }).map(outgoing => outbox.push(outgoing));
+              responseBuilder.stateSigned(signedState, myIndex, channelId);
               return;
             }
             case 'FundChannel':
@@ -96,14 +93,10 @@ export class ObjectiveManager {
               return;
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
-              channelResults.push(ChannelState.toChannelResult(protocolState.app));
-              eventsToEmit = eventsToEmit.concat({
-                type: 'objectiveSucceeded',
-                value: {
-                  channelId: objective.data.targetChannelId,
-                  objectiveType: objective.type,
-                },
-              });
+
+              responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
+              responseBuilder.objectiveSucceeded(objective);
+
               attemptAnotherProtocolStep = false;
               return;
             case 'Withdraw':
@@ -142,36 +135,13 @@ export class ObjectiveManager {
           } catch (error) {
             this.logger.error({error}, 'Error handling action');
             await tx.rollback(error);
-            maybeError = error;
             attemptAnotherProtocolStep = false;
           }
         } else {
-          channelResults.push(ChannelState.toChannelResult(protocolState.app));
+          responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
           attemptAnotherProtocolStep = false;
         }
       });
     }
-
-    return {channelResults, outbox, events: eventsToEmit, error: maybeError};
   }
 }
-
-// todo: refactor this away
-const createOutboxFor = (
-  channelId: Bytes32,
-  myIndex: number,
-  participants: Participant[],
-  data: Payload
-): Outgoing[] =>
-  participants
-    .filter((_p, i: number): boolean => i !== myIndex)
-    .map(({participantId: recipient}) => ({
-      method: 'MessageQueued' as const,
-      params: serializeMessage(
-        WALLET_VERSION,
-        data,
-        recipient,
-        participants[myIndex].participantId,
-        channelId
-      ),
-    }));
