@@ -19,7 +19,6 @@ import {
   BN,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
-  Payload,
   makeAddress,
   Address as CoreAddress,
 } from '@statechannels/wallet-core';
