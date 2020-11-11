@@ -542,7 +542,7 @@ export class Store {
     fundingStrategy: FundingStrategy,
     role: 'app' | 'ledger' = 'app',
     fundingLedgerChannelId?: Bytes32
-  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: Objective}> {
+  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: DBObjective}> {
     return await this.knex.transaction(async tx => {
       const {channelId, participants} = await createChannel(
         constants,
@@ -563,7 +563,7 @@ export class Store {
         tx
       );
 
-      const objective = {
+      const objectiveParams = {
         type: 'OpenChannel' as const,
         participants,
         data: {
@@ -574,8 +574,8 @@ export class Store {
         },
       };
 
-      const {objectiveId} = await this.addObjective(objective, tx);
-      await this.approveObjective(objectiveId, tx);
+      const objective = await this.addObjective(objectiveParams, tx);
+      await this.approveObjective(objective.objectiveId, tx);
 
       return {channel: await this.getChannel(channelId, tx), firstSignedState, objective};
     });
