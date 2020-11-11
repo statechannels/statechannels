@@ -49,7 +49,7 @@ export interface ResponseBuilder {
 }
 
 export class WalletResponse implements ResponseBuilder {
-  channelResults: ChannelResult[] = [];
+  _channelResults: Record<string, ChannelResult> = {};
   outbox: Outgoing[] = [];
   objectivesToSend: DBObjective[] = [];
   objectivesToApprove: DBObjective[] = [];
@@ -61,11 +61,11 @@ export class WalletResponse implements ResponseBuilder {
   }
 
   channelUpdated(channel: Channel): void {
-    this.channelResults.push(channel.channelResult);
+    this._channelResults[channel.channelId] = channel.channelResult;
   }
 
   channelUpdatedResult(channelResult: ChannelResult): void {
-    this.channelResults.push(channelResult);
+    this._channelResults[channelResult.channelId] = channelResult;
   }
 
   stateSigned(state: SignedState, myIndex: number, channelId?: string): void {
@@ -173,5 +173,8 @@ export class WalletResponse implements ResponseBuilder {
         objectiveType: objective.type,
       },
     }));
+  }
+  private get channelResults(): ChannelResult[] {
+    return Object.values(this._channelResults);
   }
 }
