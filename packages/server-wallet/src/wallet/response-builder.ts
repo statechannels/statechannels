@@ -127,7 +127,7 @@ export class WalletResponse implements ResponseBuilder {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
-      objectivesToApprove: this.objectivesToApprove,
+      // objectivesToApprove: this.objectivesToApprove, // todo: re-enable
     };
   }
   singleChannelOutput(): SingleChannelOutput {
@@ -140,7 +140,7 @@ export class WalletResponse implements ResponseBuilder {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
-      objectivesToApprove: this.objectivesToApprove,
+      // objectivesToApprove: this.objectivesToApprove, // todo: re-enable
     };
   }
 
