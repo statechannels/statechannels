@@ -346,7 +346,7 @@ export class Store {
   }
 
   async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<DBObjective> {
-    tx = tx || this.knex; // todo: make tx required
+    tx = tx || this.knex; // TODO: make tx required
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 

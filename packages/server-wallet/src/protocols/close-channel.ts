@@ -32,7 +32,7 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
   return (ps.app.support || []).every(isFinal) && isFinal(ps.app.latestSignedByMe);
 }
 
-// todo: where is the corresponding logic for ledger channels?
+// TODO: where is the corresponding logic for ledger channels?
 //       should there be a generic logic for computing whether a channel is defunded regardless of funding type?
 function successfulWithdraw({app}: ProtocolState): boolean {
   if (app.fundingStrategy !== 'Direct') return true;

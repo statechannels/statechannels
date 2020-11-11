@@ -64,7 +64,7 @@ const incrementTurnNumber = (args: UpdateChannelHandlerParams) => (
 });
 // END helper functions
 
-// todo: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
+// TODO: check if the channel is funded and that no challenge exists once that data is part of the ChannelState
 export function updateChannel(
   args: UpdateChannelHandlerParams,
   channelState: ChannelState
