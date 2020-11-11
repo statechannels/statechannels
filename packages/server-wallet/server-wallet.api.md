@@ -124,6 +124,10 @@ export const Wallet: {
 };
 
 
+// Warnings were encountered during analysis:
+//
+// src/wallet/wallet.ts:72:3 - (ae-forgotten-export) The symbol "DBObjective" needs to be exported by the entry point index.d.ts
+
 // (No @packageDocumentation comment for this package)
 
 ```
