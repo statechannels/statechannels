@@ -147,8 +147,19 @@ export class WalletResponse implements ResponseBuilder {
       // objectivesToApprove: this.objectivesToApprove, // todo: re-enable
     };
   }
-  singleChannelOutput(): SingleChannelOutput {
-    if (this.channelResults.length !== 1) {
+
+  /**
+   * Returns a SingleChannelOutput
+   *
+   * @param strict - causes method to throw if > 1 channelResult is found
+   *
+   * Note: we should get rid of strict and return MultipleChannelOutputs
+   * wherever it is used
+   */
+  singleChannelOutput(strict = true): SingleChannelOutput {
+    const numResults = this.channelResults.length;
+
+    if (numResults === 0 || (strict && numResults > 1)) {
       throw Error(
         `Response: expected exactly one channelResult. Found ${this.channelResults.length}.`
       );
