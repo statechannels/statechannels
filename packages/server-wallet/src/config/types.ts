@@ -54,7 +54,6 @@ export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: 
 export type RequiredServerWalletConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
   networkConfiguration: NetworkConfiguration;
-  ethereumPrivateKey: string;
 };
 
 /**
@@ -84,7 +83,6 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  * Various network configuration options
  */
 export type NetworkConfiguration = {
-  rpcEndpoint?: string;
   chainNetworkID: number;
 };
 

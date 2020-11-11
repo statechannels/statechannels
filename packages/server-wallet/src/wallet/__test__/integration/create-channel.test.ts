@@ -4,10 +4,11 @@ import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {createWalletForTests} from '../fixtures/wallet';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig());
+  w = createWalletForTests(defaultTestConfig());
   await new DBAdmin(w.knex).truncateDB();
 });
 

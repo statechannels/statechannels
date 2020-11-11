@@ -49,8 +49,6 @@ import {
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
   AssetTransferredArg,
-  ChainService,
-  MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
@@ -104,12 +102,18 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   readonly walletConfig: ServerWalletConfig;
 
-  public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
-    return new SingleThreadedWallet(walletConfig);
+  public static create(
+    chainService: ChainServiceInterface,
+    walletConfig: IncomingServerWalletConfig
+  ): SingleThreadedWallet {
+    return new SingleThreadedWallet(chainService, walletConfig);
   }
 
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
-  protected constructor(walletConfig: IncomingServerWalletConfig) {
+  protected constructor(
+    chainService: ChainServiceInterface,
+    walletConfig: IncomingServerWalletConfig
+  ) {
     super();
     this.walletConfig = _.assign({}, defaultConfig, walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
@@ -131,18 +135,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile);
     }
 
-    if (this.walletConfig.networkConfiguration.rpcEndpoint) {
-      this.chainService = new ChainService({
-        provider: this.walletConfig.networkConfiguration.rpcEndpoint,
-        pk: this.walletConfig.ethereumPrivateKey,
-        allowanceMode: 'MaxUint',
-      });
-    } else {
-      this.logger.debug(
-        'rpcEndpoint and ethereumPrivateKey must be defined for the wallet to use chain service'
-      );
-      this.chainService = new MockChainService();
-    }
+    this.chainService = chainService;
 
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,

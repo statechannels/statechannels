@@ -138,7 +138,6 @@ export type MultipleChannelOutput = {
 
 // @public (undocumented)
 export type NetworkConfiguration = {
-    rpcEndpoint?: string;
     chainNetworkID: number;
 };
 
@@ -195,7 +194,6 @@ export type RequiredDatabaseConfiguration = {
 export type RequiredServerWalletConfig = {
     databaseConfiguration: RequiredDatabaseConfiguration;
     networkConfiguration: NetworkConfiguration;
-    ethereumPrivateKey: string;
 };
 
 // @public (undocumented)
@@ -215,7 +213,7 @@ export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
 
 // @public (undocumented)
 export const Wallet: {
-    create(walletConfig: IncomingServerWalletConfig): Wallet;
+    create(chainService: ChainServiceInterface, walletConfig: IncomingServerWalletConfig): Wallet;
 };
 
 // Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
@@ -223,6 +221,10 @@ export const Wallet: {
 // @public (undocumented)
 export type WalletEvent = ChannelUpdatedEvent;
 
+
+// Warnings were encountered during analysis:
+//
+// src/wallet/index.ts:11:20 - (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

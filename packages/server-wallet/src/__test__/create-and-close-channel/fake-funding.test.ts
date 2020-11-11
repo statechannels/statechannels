@@ -8,13 +8,13 @@ import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
-import {Wallet} from '../../wallet';
+import {createWalletForTests} from '../../wallet/__test__/fixtures/wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
-const a = Wallet.create(
+const a = createWalletForTests(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
 );
-const b = Wallet.create(
+const b = createWalletForTests(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_B'})
 );
 

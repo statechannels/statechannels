@@ -12,6 +12,7 @@ import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {createWalletForTests} from '../fixtures/wallet';
 
 let w: Wallet;
 
@@ -22,7 +23,7 @@ afterEach(async () => {
 const appData1 = utils.defaultAbiCoder.encode(['uint256'], [1]);
 const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
-  w = Wallet.create({...defaultTestConfig(), skipEvmValidation: false});
+  w = createWalletForTests({...defaultTestConfig(), skipEvmValidation: false});
 
   await new DBAdmin(knex).truncateDB();
   await seedAlicesSigningWallet(knex);

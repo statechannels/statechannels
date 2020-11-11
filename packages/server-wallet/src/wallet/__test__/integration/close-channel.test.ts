@@ -6,10 +6,11 @@ import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {Bytes32} from '../../../type-aliases';
+import {createWalletForTests} from '../fixtures/wallet';
 
 let w: Wallet;
 beforeAll(async () => {
-  w = Wallet.create(defaultTestConfig());
+  w = createWalletForTests(defaultTestConfig());
   await seedAlicesSigningWallet(w.knex);
 });
 

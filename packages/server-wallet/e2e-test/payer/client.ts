@@ -9,6 +9,7 @@ import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {defaultConfig, ServerWalletConfig} from '../../src/config';
+import {MockChainService} from '../../src/chain-service';
 
 export default class PayerClient {
   private readonly wallet: ServerWallet;
@@ -18,7 +19,7 @@ export default class PayerClient {
     readonly config?: ServerWalletConfig
   ) {
     this.wallet = recordFunctionMetrics(
-      ServerWallet.create(this.config || payerConfig),
+      ServerWallet.create(new MockChainService(), this.config || payerConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
   }

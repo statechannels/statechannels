@@ -10,6 +10,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
 import {extractDBConfigFromServerWalletConfig, defaultConfig} from '../src/config';
+import {MockChainService} from '../src/chain-service/mock-chain-service';
 
 const knex: Knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
@@ -29,7 +30,7 @@ async function benchmark(): Promise<void> {
   const c = withSupportedState()({vars: [stateVars()]});
   await Channel.query(knex).insert(c);
 
-  const wallet = Wallet.create(defaultConfig);
+  const wallet = Wallet.create(new MockChainService(), defaultConfig);
 
   const iter = _.range(NUM_CALLS);
   const key = `getChannel x ${NUM_CALLS}`;

@@ -14,7 +14,6 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/confi
 import {PartialModelObject} from 'objection';
 
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
 import {addHash} from '../../../state-utils';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
@@ -29,10 +28,11 @@ import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-hel
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/wallet-error';
+import {createWalletForTests} from '../fixtures/wallet';
 
 jest.setTimeout(20_000);
 
-const wallet = Wallet.create(defaultTestConfig());
+const wallet = createWalletForTests(defaultTestConfig());
 
 beforeAll(async () => {
   await wallet.dbAdmin().migrateDB();

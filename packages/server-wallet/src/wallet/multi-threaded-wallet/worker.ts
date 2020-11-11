@@ -6,6 +6,7 @@ import {createLogger} from '../../logger';
 import {Wallet} from '../..';
 import {timerFactory} from '../../metrics';
 import {ServerWalletConfig} from '../../config';
+import {MockChainService} from '../../chain-service';
 
 import {isStateChannelWorkerData} from './worker-data';
 
@@ -22,7 +23,7 @@ const walletConfig: ServerWalletConfig = {
 const logger = createLogger(walletConfig);
 
 logger.debug(`Worker %o starting`, threadId);
-const wallet = Wallet.create(walletConfig);
+const wallet = Wallet.create(new MockChainService(), walletConfig);
 parentPort?.on('message', async (message: any) => {
   if (isMainThread) {
     parentPort?.postMessage(

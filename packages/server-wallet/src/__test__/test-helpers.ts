@@ -4,6 +4,7 @@ import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-cor
 
 import {Wallet} from '../wallet';
 import {Outgoing} from '..';
+import {createWalletForTests} from '../wallet/__test__/fixtures/wallet';
 
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
   const filteredOutbox = outbox.filter(outboxItem => outboxItem.params.recipient === participantId);
@@ -37,7 +38,7 @@ export function getSignedStateFor(channelId: string, outbox: Outgoing[]): Signed
 export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
   const config = wallet.walletConfig;
   await wallet.destroy();
-  return Wallet.create(config); // Wallet that will "restart"
+  return createWalletForTests(config); // Wallet that will "restart"
 }
 
 export async function interParticipantChannelResultsAreEqual(a: Wallet, b: Wallet): Promise<void> {

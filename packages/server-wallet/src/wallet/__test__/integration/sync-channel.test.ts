@@ -10,12 +10,13 @@ import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {createWalletForTests} from '../fixtures/wallet';
 
 let w: Wallet;
 beforeEach(async () => {
   await new DBAdmin(knex).truncateDB();
 
-  w = Wallet.create(defaultTestConfig());
+  w = createWalletForTests(defaultTestConfig());
 });
 
 afterEach(async () => {

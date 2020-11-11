@@ -7,10 +7,11 @@ import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
 import {WALLET_VERSION} from '../../src/version';
+import {createWalletForTests} from '../../src/wallet/__test__/fixtures/wallet';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
-    Wallet.create(receiverConfig),
+    createWalletForTests(receiverConfig),
     defaultConfig.metricsConfiguration.timingMetrics
   );
 

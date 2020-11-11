@@ -11,6 +11,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {Wallet} from '../src/wallet';
 import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/config';
+import {MockChainService} from '../src/chain-service';
 
 const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
@@ -34,7 +35,7 @@ async function setup(n = NUM_UPDATES): Promise<Channel[]> {
 async function benchmark(): Promise<void> {
   await knex.migrate.rollback();
   await knex.migrate.latest();
-  const wallet = Wallet.create(defaultConfig);
+  const wallet = Wallet.create(new MockChainService(), defaultConfig);
 
   // Warm up each worker thread.
   // eslint-disable-next-line no-process-env
