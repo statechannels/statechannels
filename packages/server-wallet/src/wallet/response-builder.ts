@@ -2,7 +2,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
 
 import {Channel} from '../models/channel';
-import {DBObjective} from '../models/objective';
+import {DBObjective, toWireObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {WALLET_VERSION} from '../version';
@@ -30,7 +30,7 @@ export interface ResponseBuilder {
   /**
    * Queues objectives for sending to opponent
    */
-  objectiveCreated: (objective: DBObjective) => void;
+  objectiveCreated: (objective: DBObjective, myIndex: number, participants: Participant[]) => void;
 
   /**
    * Queues objectives for approval by the user
@@ -89,8 +89,25 @@ export class WalletResponse implements ResponseBuilder {
     });
   }
 
-  objectiveCreated(objective: DBObjective): void {
-    this.objectivesToSend.push(objective);
+  objectiveCreated(objective: DBObjective, myIndex: number, participants: Participant[]): void {
+    const myParticipantId = participants[myIndex].participantId;
+
+    participants.forEach((p, i) => {
+      if (i !== myIndex) {
+        this.outbox.push({
+          method: 'MessageQueued' as const,
+          params: serializeMessage(
+            WALLET_VERSION,
+            {
+              walletVersion: WALLET_VERSION,
+              objectives: [toWireObjective(objective)],
+            },
+            p.participantId,
+            myParticipantId
+          ),
+        });
+      }
+    });
   }
 
   objectiveReceived(objective: DBObjective): void {
