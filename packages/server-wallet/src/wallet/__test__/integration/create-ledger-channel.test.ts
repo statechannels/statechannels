@@ -5,7 +5,6 @@ import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
-import {alice, bob} from '../fixtures/participants';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
