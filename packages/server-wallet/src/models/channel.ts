@@ -393,6 +393,14 @@ export class Channel extends Model implements RequiredColumns {
     }
     return true;
   }
+
+  public get otherParticipants(): Participant[] {
+    return this.participants.filter((_, index) => index !== this.myIndex);
+  }
+
+  public get myParticipantId(): string {
+    return this.participants[this.myIndex].participantId;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
