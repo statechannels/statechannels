@@ -174,6 +174,17 @@ export class WalletResponse implements ResponseBuilder {
       },
     }));
   }
+
+  channelUpdatedEvents(): WalletEvent[] {
+    return this.channelResults.map(channelResult => ({
+      type: 'channelUpdated' as const,
+      value: {
+        channelResult,
+        outbox: [], // todo: doesn't seem like this should be on this event?
+      },
+    }));
+  }
+
   private get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
   }
