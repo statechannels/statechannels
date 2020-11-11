@@ -9,17 +9,14 @@ import {
   Address,
   Participant as APIParticipant,
   ChannelId,
-  FundingStrategy,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
   validatePayload,
-  ChannelRequest,
   Outcome,
   convertToParticipant,
   Participant,
   BN,
-  serializeMessage,
   assetHolderAddress as getAssetHolderAddress,
   Zero,
   Payload,
@@ -34,7 +31,7 @@ import {ethers} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 
-import {Bytes, Bytes32, Uint256} from '../type-aliases';
+import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing} from '../protocols/actions';
 import {createLogger} from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
@@ -239,37 +236,29 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   public async updateFundingForChannels(
     args: UpdateChannelFundingParams[]
   ): Promise<MultipleChannelOutput> {
-    const results = await Promise.all(args.map(a => this.updateChannelFunding(a)));
+    const response = WalletResponse.initialize();
 
-    const channelResults = results.map(r => r.channelResult);
-    const outgoing = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
+    await Promise.all(args.map(a => this._updateChannelFunding(a, response)));
 
-    return {
-      channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outgoing),
-    };
+    return response.multipleChannelOutput();
   }
-  async updateChannelFunding({
-    channelId,
-    token,
-    amount,
-  }: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
+
+  async updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
+    const response = WalletResponse.initialize();
+
+    await this._updateChannelFunding(args, response);
+
+    return response.singleChannelOutput();
+  }
+
+  private async _updateChannelFunding(
+    {channelId, token, amount}: UpdateChannelFundingParams,
+    response: ResponseBuilder
+  ): Promise<void> {
     const assetHolderAddress = getAssetHolderAddress(token || Zero);
-    return this.updateChannelFundingForAssetHolder({
-      channelId,
-      assetHolderAddress,
-      amount: BN.from(amount),
-    });
-  }
-
-  private async updateChannelFundingForAssetHolder({
-    channelId,
-    assetHolderAddress,
-    amount,
-  }: HoldingUpdatedArg): Promise<SingleChannelOutput> {
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
-    const {channelResults, outbox} = await this.takeActions([channelId]);
-    return {outbox, channelResult: channelResults[0]};
+
+    await this.takeActions([channelId], response);
   }
 
   public async getSigningAddress(): Promise<CoreAddress> {
@@ -280,34 +269,48 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     args: Pick<CreateChannelParams, 'participants' | 'allocations'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
   ): Promise<SingleChannelOutput> {
-    const {participants: serializedParticipants, allocations} = args;
+    const response = WalletResponse.initialize();
 
-    const participants = serializedParticipants.map(convertToParticipant);
-    const outcome = deserializeAllocations(allocations);
-
-    const {channelResult, outbox} = await this.createChannelInternal(
-      ethers.constants.AddressZero, // appDefinition
-      '0x00', // appData,
-      participants,
-      outcome, // outcome
-      fundingStrategy, // fundingStrategy,
-      undefined, // fundingLedgerChannelId
-      'ledger' // role
+    await this._createChannel(
+      response,
+      {
+        ...args,
+        appDefinition: ethers.constants.AddressZero,
+        appData: '0x00',
+        fundingStrategy,
+      },
+      'ledger'
     );
 
-    this.registerChannelWithChainService(channelResult);
-
-    return {channelResult, outbox};
+    return response.singleChannelOutput();
   }
 
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
-    return this.createChannels(args, 1);
+    const response = WalletResponse.initialize();
+
+    await this._createChannel(response, args, 'app');
+
+    return response.multipleChannelOutput();
   }
 
   async createChannels(
     args: CreateChannelParams,
     numberOfChannels: number
   ): Promise<MultipleChannelOutput> {
+    const response = WalletResponse.initialize();
+
+    await Promise.all(
+      _.range(numberOfChannels).map(() => this._createChannel(response, args, 'app'))
+    );
+
+    return response.multipleChannelOutput();
+  }
+
+  private async _createChannel(
+    response: ResponseBuilder,
+    args: CreateChannelParams,
+    role: 'app' | 'ledger' = 'app'
+  ): Promise<string> {
     const {
       participants: serializedParticipants,
       appDefinition,
@@ -320,40 +323,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const participants = serializedParticipants.map(convertToParticipant);
     const outcome: Outcome = deserializeAllocations(allocations);
 
-    const results = await Promise.all(
-      _.range(numberOfChannels).map(() =>
-        this.createChannelInternal(
-          appDefinition,
-          appData,
-          participants,
-          outcome,
-          fundingStrategy,
-          fundingLedgerChannelId,
-          'app'
-        )
-      )
-    );
-
-    const channelResults = results.map(r => r.channelResult);
-    const outbox = results.map(r => r.outbox).reduce((p, c) => p.concat(c));
-
-    channelResults.map(cR => this.registerChannelWithChainService(cR));
-
-    return {
-      channelResults: mergeChannelResults(channelResults),
-      outbox: mergeOutgoing(outbox),
-    };
-  }
-
-  private async createChannelInternal(
-    appDefinition: Address,
-    appData: Bytes,
-    participants: Participant[],
-    outcome: Outcome,
-    fundingStrategy: FundingStrategy,
-    fundingLedgerChannelId?: Bytes32,
-    role: 'app' | 'ledger' = 'app'
-  ): Promise<SingleChannelOutput> {
     const channelNonce = await this.store.nextNonce(participants.map(p => p.signingAddress));
 
     const constants = {
@@ -373,17 +342,17 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       fundingLedgerChannelId
     );
 
-    return {
-      channelResult: ChannelState.toChannelResult(channel),
-      outbox: createOutboxFor(channel.channelId, channel.myIndex, participants, {
-        walletVersion: WALLET_VERSION,
-        signedStates: [signedState],
-        objectives: [objective],
-      }),
-    };
+    response.stateSigned(signedState, channel.myIndex, channel.channelId);
+    response.objectiveCreated(objective, channel.myIndex, channel.participants);
+    response.channelUpdatedResult(ChannelState.toChannelResult(channel));
+
+    this.registerChannelWithChainService(channel.channelId);
+
+    return channel.channelId;
   }
 
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
+    const response = WalletResponse.initialize();
     const objectives = await this.store.getObjectives(channelIds);
 
     await Promise.all(
@@ -393,14 +362,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       )
     );
 
-    const {outbox, channelResults} = await this.takeActions(channelIds);
+    await this.takeActions(channelIds, response);
 
-    channelResults.map(cR => this.registerChannelWithChainService(cR));
+    channelIds.map(id => this.registerChannelWithChainService(id));
 
-    return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
+    return response.multipleChannelOutput();
   }
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+    const response = WalletResponse.initialize();
     const channel = await this.store.getChannel(channelId);
 
     if (!channel)
@@ -417,17 +387,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     if (objectives[0].type === 'OpenChannel')
       await this.store.approveObjective(objectives[0].objectiveId);
 
-    const {outbox, channelResults} = await this.takeActions([channelId]);
+    await this.takeActions([channelId], response);
 
-    // eslint-disable-next-line
-    const channelResult = channelResults.find(c => c.channelId === channelId)!;
+    this.registerChannelWithChainService(channelId);
 
-    this.registerChannelWithChainService(channelResult);
-
-    return {
-      outbox: mergeOutgoing(outbox),
-      channelResult,
-    };
+    // set strict=false to silently drop any ledger channel updates from channelResults
+    // todo: change api so that joinChannel returns a MultipleChannelOutput
+    return response.singleChannelOutput(false);
   }
 
   async updateChannel({
@@ -443,7 +409,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       );
     };
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const {myIndex, participants} = channel;
+      const response = WalletResponse.initialize();
+      const {myIndex} = channel;
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
@@ -459,42 +426,37 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       const signedState = await timer('signing state', () =>
         this.store.signState(channelId, nextState, tx)
       );
+      response.stateSigned(signedState, myIndex, channelId);
 
-      return {
-        outbox: createOutboxFor(channelId, myIndex, participants, {
-          walletVersion: WALLET_VERSION,
-          signedStates: [signedState],
-        }),
-        channelResult: ChannelState.toChannelResult(await this.store.getChannel(channelId, tx)),
-      };
+      const channelState = await this.store.getChannel(channelId, tx);
+      response.channelUpdatedResult(ChannelState.toChannelResult(channelState));
+
+      return response.singleChannelOutput();
     };
 
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
   }
 
   async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
-    for (const channelId of channelIds) await this.closeChannelInternal(channelId);
+    const response = WalletResponse.initialize();
 
-    const {channelResults, outbox} = await this.takeActions(channelIds);
+    for (const channelId of channelIds) await this._closeChannel(channelId, response);
 
-    const makeCloseChannelObjective = (targetChannelId: Bytes32) => ({
-      type: 'CloseChannel' as const,
-      participants: [],
-      data: {targetChannelId, fundingStrategy: 'Unknown' as const},
-    });
+    await this.takeActions(channelIds, response);
 
-    if (outbox.length > 0)
-      (outbox[0].params.data as Payload).objectives = channelIds.map(makeCloseChannelObjective);
-
-    return {channelResults: mergeChannelResults(channelResults), outbox: mergeOutgoing(outbox)};
+    return response.multipleChannelOutput();
   }
 
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
-    const {outbox, channelResults} = await this.closeChannels([channelId]);
-    return {outbox, channelResult: channelResults[0]};
+    const response = WalletResponse.initialize();
+
+    await this._closeChannel(channelId, response);
+    await this.takeActions([channelId], response);
+
+    return response.singleChannelOutput();
   }
 
-  private async closeChannelInternal(channelId: Bytes32): Promise<void> {
+  private async _closeChannel(channelId: Bytes32, response: ResponseBuilder): Promise<void> {
     await this.store.lockApp(
       channelId,
       async (tx, channel) => {
@@ -503,7 +465,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
             CloseChannel.CloseChannelError.reasons.notMyTurn
           );
 
-        await this.store.addObjective(
+        const dbObjective = await this.store.addObjective(
           {
             type: 'CloseChannel',
             participants: [],
@@ -511,6 +473,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           },
           tx
         );
+        // add new objective to the response
+        response.objectiveCreated(dbObjective, channel.myIndex, channel.participants);
       },
       () => {
         throw new CloseChannel.CloseChannelError(
@@ -525,34 +489,36 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     assetHolderAddress: string,
     participants: APIParticipant[]
   ): Promise<MultipleChannelOutput> {
+    const response = WalletResponse.initialize();
+
     const channelStates = await this.store.getLedgerChannels(
       assetHolderAddress,
       participants.map(convertToParticipant)
     );
-    return {
-      channelResults: mergeChannelResults(channelStates.map(ChannelState.toChannelResult)),
-      outbox: [],
-    };
+
+    channelStates.forEach(cs => response.channelUpdatedResult(ChannelState.toChannelResult(cs)));
+
+    return response.multipleChannelOutput();
   }
 
   async getChannels(): Promise<MultipleChannelOutput> {
+    const response = WalletResponse.initialize();
+
     const channelStates = await this.store.getChannels();
-    return {
-      channelResults: mergeChannelResults(
-        channelStates.map(cS => ChannelState.toChannelResult(cS))
-      ),
-      outbox: [],
-    };
+    channelStates.forEach(cs => response.channelUpdatedResult(ChannelState.toChannelResult(cs)));
+
+    return response.multipleChannelOutput();
   }
 
   async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
+    const response = WalletResponse.initialize();
+
     try {
       const channel = await this.store.getChannel(channelId);
 
-      return {
-        channelResult: ChannelState.toChannelResult(channel),
-        outbox: [],
-      };
+      response.channelUpdatedResult(ChannelState.toChannelResult(channel));
+
+      return response.singleChannelOutput();
     } catch (err) {
       this.logger.error({err}, 'Could not get channel');
       throw err;
@@ -561,69 +527,53 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     const wirePayload = validatePayload(rawPayload);
-    return this._pushMessage(wirePayload).catch(e => {
+
+    const response = WalletResponse.initialize();
+
+    try {
+      await this._pushMessage(wirePayload, response);
+
+      return response.multipleChannelOutput();
+    } catch (e) {
       throw new PushMessageError('Error during pushMessage', {
         thisWalletVersion: WALLET_VERSION,
         payloadWalletVersion: wirePayload.walletVersion,
         cause: e,
       });
-    });
+    }
   }
 
-  async _pushMessage(wirePayload: WirePayload): Promise<MultipleChannelOutput> {
+  async _pushMessage(wirePayload: WirePayload, response: ResponseBuilder): Promise<void> {
     const store = this.store;
-
-    // TODO: Move into utility somewhere?
-    function handleRequest(outbox: Outgoing[]): (req: ChannelRequest) => Promise<void> {
-      return async ({channelId}: ChannelRequest): Promise<void> => {
-        const {states: signedStates, channelState} = await store.getStates(channelId);
-
-        const {participants, myIndex} = channelState;
-
-        createOutboxFor(channelId, myIndex, participants, {
-          walletVersion: WALLET_VERSION,
-          signedStates,
-        }).map(outgoing => outbox.push(outgoing));
-      };
-    }
 
     const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
 
-    const {channelResults, outbox} = await this.takeActions(channelIds);
+    // add channelResults to response
+    fromStoring.forEach(cr => response.channelUpdatedResult(cr));
 
-    for (const channel of mergeChannelResults(fromStoring)) {
-      if (!_.some(channelResults, c => c.channelId === channel.channelId))
-        channelResults.push(channel);
+    await this.takeActions(channelIds, response);
+
+    for (const request of wirePayload.requests || []) {
+      const channelId = request.channelId;
+
+      const {states: signedStates, channelState} = await store.getStates(channelId);
+
+      // add signed states to response
+      signedStates.forEach(s => response.stateSigned(s, channelState.myIndex, channelId));
     }
-
-    if (wirePayload.requests && wirePayload.requests.length > 0)
-      // Modifies outbox, may append new messages
-      await Promise.all(wirePayload.requests.map(wP => handleRequest(outbox)(wP)));
-
-    return {
-      outbox: mergeOutgoing(outbox),
-      channelResults: mergeChannelResults(channelResults),
-    };
   }
 
-  takeActions = async (channels: Bytes32[]): Promise<ExecutionResult> => {
-    const outbox: Outgoing[] = [];
-    const channelResults: ChannelResult[] = [];
-
-    const accumulator = {outbox, channelResults};
-
+  takeActions = async (channels: Bytes32[], response: ResponseBuilder): Promise<void> => {
     let needToCrank = true;
     while (needToCrank) {
-      await this.crankUntilIdle(channels, accumulator);
-      needToCrank = await this.processLedgerQueue(channels, accumulator);
+      await this.crankUntilIdle(channels, response);
+      needToCrank = await this.processLedgerQueue(channels, response);
     }
-
-    return accumulator;
   };
 
   private async processLedgerQueue(
     channels: Bytes32[],
-    {outbox, channelResults, error}: ExecutionResult
+    response: ResponseBuilder
   ): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
@@ -640,21 +590,16 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       .uniqBy('ledgerChannelId')
       .value();
 
-    while (ledgersToProcess.length && !error) {
+    while (ledgersToProcess.length) {
       const {ledgerChannelId} = ledgersToProcess[0];
 
       await this.store.lockApp(ledgerChannelId, async tx => {
         const setError = async (e: Error): Promise<void> => {
-          error = e;
-          await tx.rollback(error);
+          await tx.rollback(e);
         };
 
         const markLedgerAsProcessed = (): void => {
           ledgersToProcess.shift();
-        };
-
-        const addChannelResult = (channel: ChannelState.ChannelState): void => {
-          channelResults.push(ChannelState.toChannelResult(channel));
         };
 
         const protocolState = await ProcessLedgerQueue.getProcessLedgerQueueProtocolState(
@@ -669,28 +614,22 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
         if (!action) {
           markLedgerAsProcessed();
-          addChannelResult(protocolState.fundingChannel);
+          response.channelUpdatedResult(ChannelState.toChannelResult(protocolState.fundingChannel));
         } else {
           try {
             switch (action.type) {
               case 'SignLedgerState': {
-                const {myIndex, participants, channelId} = protocolState.fundingChannel;
+                const {myIndex, channelId} = protocolState.fundingChannel;
 
-                const payload: Payload = {
-                  walletVersion: WALLET_VERSION,
-                  signedStates: [await this.store.signState(channelId, action.stateToSign, tx)],
-                };
+                const signedState = await this.store.signState(channelId, action.stateToSign, tx);
+
+                response.stateSigned(signedState, myIndex, channelId);
 
                 await Promise.all(
                   action.channelsNotFunded.map(
                     async c => await LedgerRequest.setRequestStatus(c, 'fund', 'failed', tx)
                   )
                 );
-
-                const messages = createOutboxFor(channelId, myIndex, participants, payload);
-
-                messages.forEach(message => outbox.push(message));
-
                 return;
               }
 
@@ -718,10 +657,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // todo(tom): change function to return a value instead of mutating input args
-  private async crankUntilIdle(
-    channels: Bytes32[],
-    {outbox, channelResults, error}: ExecutionResult
-  ): Promise<void> {
+  private async crankUntilIdle(channels: Bytes32[], response: ResponseBuilder): Promise<void> {
     // Fetch channels related to the channels argument where related means, either:
     // - The channel is in the channels array
     // - The channel is being funded by one of the channels in the channels array
@@ -735,28 +671,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     ).filter(objective => objective.status === 'approved');
 
     // todo(tom): why isn't this just a for loop?
-    while (objectives.length && !error) {
+    while (objectives.length) {
       const objective = objectives[0];
 
-      const {
-        channelResults: newChannelResults,
-        outbox: newOutbox,
-        events,
-        error: newError,
-      } = await this.objectiveManager.crank(objective.objectiveId);
-
-      // add channel result
-      channelResults.push(...newChannelResults);
-      outbox.push(...newOutbox);
-
-      try {
-        events?.map(event => this.emit(event.type, event.value));
-      } catch (error) {
-        this.logger.error('Unable to emit events', {error, events});
-      }
-
-      // todo(tom): this how the code behaved previously. Is it actually what we want?
-      error = newError;
+      await this.objectiveManager.crank(objective.objectiveId, response);
 
       // remove objective from list
       objectives.shift();
@@ -764,14 +682,16 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // ChainEventSubscriberInterface implementation
-  holdingUpdated(arg: HoldingUpdatedArg): void {
-    const channelUpdated: ChannelUpdatedEventName = 'channelUpdated';
-    this.updateChannelFundingForAssetHolder(arg).then(singleChannelOutput =>
-      this.emit(channelUpdated, singleChannelOutput)
-    );
+  async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
+    const response = WalletResponse.initialize();
+
+    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+
+    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   async assetTransferred(arg: AssetTransferredArg): Promise<void> {
+    const response = WalletResponse.initialize();
     // todo: make sure that arg.to is checksummed
     await this.store.updateTransferredOut(
       arg.channelId,
@@ -779,12 +699,17 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       arg.to,
       arg.amount
     );
-    await this.takeActions([arg.channelId]);
+    await this.takeActions([arg.channelId], response);
+
+    // todo: shouldn't we be returning a response here?
   }
 
-  private registerChannelWithChainService(cr: ChannelResult): void {
-    const assetHolderAddresses = cr.allocations.map(a => getAssetHolderAddress(a.token));
-    this.chainService.registerChannel(cr.channelId, assetHolderAddresses, this);
+  private async registerChannelWithChainService(channelId: string): Promise<void> {
+    const channel = await this.store.getChannel(channelId);
+    const channelResult = ChannelState.toChannelResult(channel);
+
+    const assetHolderAddresses = channelResult.allocations.map(a => getAssetHolderAddress(a.token));
+    this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 
   dbAdmin(): DBAdmin {
@@ -796,12 +721,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 }
 
-type ExecutionResult = {
-  outbox: Outgoing[];
-  channelResults: ChannelResult[];
-  error?: any;
-};
-
 // TODO: This should be removed, and not used externally.
 // It is a fill-in until the wallet API is specced out.
 export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
@@ -811,22 +730,3 @@ export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
     }
   )(result);
 }
-
-const createOutboxFor = (
-  channelId: Bytes32,
-  myIndex: number,
-  participants: Participant[],
-  data: Payload
-): Outgoing[] =>
-  participants
-    .filter((_p, i: number): boolean => i !== myIndex)
-    .map(({participantId: recipient}) => ({
-      method: 'MessageQueued' as const,
-      params: serializeMessage(
-        WALLET_VERSION,
-        data,
-        recipient,
-        participants[myIndex].participantId,
-        channelId
-      ),
-    }));
