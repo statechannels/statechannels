@@ -23,8 +23,8 @@ const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignSt
 test.each`
   supported        | latestSignedByMe | latest           | action                      | cond                                                                  | result
   ${postFundState} | ${postFundState} | ${postFundState} | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
-  ${closingState}  | ${postFundState} | ${closingState}  | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
-  ${closingState2} | ${runningState}  | ${closingState2} | ${signState(closingState2)} | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
+  ${closingState}  | ${postFundState} | ${closingState}  | ${signState(closingState)}  | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
+  ${closingState2} | ${runningState}  | ${closingState2} | ${signState(closingState2)} | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
 `('$result $cond', ({supported, latest, latestSignedByMe, action}) => {
   const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe}});
   expect(protocol(ps)).toMatchObject(action);
