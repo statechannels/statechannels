@@ -79,7 +79,7 @@ export class ObjectiveManager {
             case 'SignState': {
               const {myIndex, channelId} = protocolState.app;
               const signedState = await this.store.signState(action.channelId, action, tx);
-              response.stateSigned(signedState, myIndex, channelId);
+              response.queueState(signedState, myIndex, channelId);
               return;
             }
             case 'FundChannel':
@@ -94,8 +94,8 @@ export class ObjectiveManager {
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
 
-              response.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
-              response.objectiveSucceeded(objective);
+              response.queueChannelResult(ChannelState.toChannelResult(protocolState.app));
+              response.queueSucceededObjective(objective);
               attemptAnotherProtocolStep = false;
               return;
             case 'Withdraw':
@@ -137,7 +137,7 @@ export class ObjectiveManager {
             attemptAnotherProtocolStep = false;
           }
         } else {
-          response.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
+          response.queueChannelResult(ChannelState.toChannelResult(protocolState.app));
           attemptAnotherProtocolStep = false;
         }
       });
