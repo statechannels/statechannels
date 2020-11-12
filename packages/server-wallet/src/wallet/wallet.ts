@@ -702,7 +702,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     );
     await this.takeActions([arg.channelId], response);
 
-    // TODO: shouldn't we be returning a response here?
+    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   private async registerChannelWithChainService(channelId: string): Promise<void> {
