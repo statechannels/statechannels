@@ -94,7 +94,7 @@ export class ObjectiveManager {
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
 
-              response.queueChannelResult(ChannelState.toChannelResult(protocolState.app));
+              response.queueChannelState(protocolState.app);
               response.queueSucceededObjective(objective);
               attemptAnotherProtocolStep = false;
               return;
@@ -137,7 +137,7 @@ export class ObjectiveManager {
             attemptAnotherProtocolStep = false;
           }
         } else {
-          response.queueChannelResult(ChannelState.toChannelResult(protocolState.app));
+          response.queueChannelState(protocolState.app);
           attemptAnotherProtocolStep = false;
         }
       });
