@@ -46,6 +46,8 @@ export interface ResponseBuilder {
    * Add a GetChannelRequest to outbox for given channelId
    */
   requestGetChannel: (channelId: string, myIndex: number, participants: Participant[]) => void;
+
+  objectiveSucceededEvents: () => WalletEvent[];
 }
 
 export class WalletResponse implements ResponseBuilder {
@@ -191,7 +193,7 @@ export class WalletResponse implements ResponseBuilder {
       type: 'channelUpdated' as const,
       value: {
         channelResult,
-        outbox: [], // TODO: doesn't seem like this should be on this event?
+        outbox: this.outbox, // TODO: doesn't seem like this should be on this event?
       },
     }));
   }
