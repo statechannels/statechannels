@@ -9,48 +9,7 @@ import {WALLET_VERSION} from '../version';
 
 import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
 
-export interface ResponseBuilder {
-  /**
-   * Queues channel for notification to user
-   */
-  channelUpdated: (channel: Channel) => void;
-
-  /**
-   * Same as channelUpdated but accepts a channelResult instead of a Channel
-   *
-   * Plan to deprecate.
-   */
-  channelUpdatedResult: (channelResult: ChannelResult) => void;
-
-  /**
-   * Queues state for sending to opponent
-   */
-  stateSigned: (state: SignedState, myIndex: number, channelId?: string) => void;
-
-  /**
-   * Queues objectives for sending to opponent
-   */
-  objectiveCreated: (objective: DBObjective, myIndex: number, participants: Participant[]) => void;
-
-  /**
-   * Queues objectives for approval by the user
-   */
-  objectiveReceived: (objective: DBObjective) => void;
-
-  /**
-   * Queue succeeded objectives, so we can emit events
-   */
-  objectiveSucceeded: (objective: DBObjective) => void;
-
-  /**
-   * Add a GetChannelRequest to outbox for given channelId
-   */
-  requestGetChannel: (channelId: string, myIndex: number, participants: Participant[]) => void;
-
-  objectiveSucceededEvents: () => WalletEvent[];
-}
-
-export class WalletResponse implements ResponseBuilder {
+export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
   outbox: Outgoing[] = [];
   objectivesToSend: DBObjective[] = [];
@@ -62,14 +21,25 @@ export class WalletResponse implements ResponseBuilder {
     return new this();
   }
 
+  /**
+   * Queues channel for notification to user
+   */
   channelUpdated(channel: Channel): void {
     this._channelResults[channel.channelId] = channel.channelResult;
   }
 
+  /**
+   * Same as channelUpdated but accepts a channelResult instead of a Channel
+   *
+   * Plan to deprecate.
+   */
   channelUpdatedResult(channelResult: ChannelResult): void {
     this._channelResults[channelResult.channelId] = channelResult;
   }
 
+  /**
+   * Queues state for sending to opponent
+   */
   stateSigned(state: SignedState, myIndex: number, channelId?: string): void {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
@@ -91,6 +61,9 @@ export class WalletResponse implements ResponseBuilder {
     });
   }
 
+  /**
+   * Queues objectives for sending to opponent
+   */
   objectiveCreated(objective: DBObjective, myIndex: number, participants: Participant[]): void {
     const myParticipantId = participants[myIndex].participantId;
 
@@ -112,14 +85,23 @@ export class WalletResponse implements ResponseBuilder {
     });
   }
 
+  /**
+   * Queues objectives for approval by the user
+   */
   objectiveReceived(objective: DBObjective): void {
     this.objectivesToApprove.push(objective);
   }
 
+  /**
+   * Queue succeeded objectives, so we can emit events
+   */
   objectiveSucceeded(objective: DBObjective): void {
     this.succeededObjectives.push(objective);
   }
 
+  /**
+   * Add a GetChannelRequest to outbox for given channelId
+   */
   requestGetChannel(channelId: string, myIndex: number, participants: Participant[]): void {
     const myParticipantId = participants[myIndex].participantId;
 

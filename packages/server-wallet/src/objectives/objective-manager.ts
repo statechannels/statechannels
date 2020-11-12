@@ -9,7 +9,7 @@ import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
 import {ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
-import {ResponseBuilder} from '../wallet/response-builder';
+import {WalletResponse} from '../wallet/response-builder';
 
 import {ObjectiveManagerParams} from './types';
 
@@ -36,9 +36,9 @@ export class ObjectiveManager {
    * Swallows (and logs) any errors
    *
    * @param objectiveId - id of objective to try to advance
-   * @param responseBuilder - response builder; will be modified by the method
+   * @param response - response builder; will be modified by the method
    */
-  async crank(objectiveId: string, responseBuilder: ResponseBuilder): Promise<void> {
+  async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     const objective = await this.store.getObjective(objectiveId);
 
     let channelToLock;
@@ -79,7 +79,7 @@ export class ObjectiveManager {
             case 'SignState': {
               const {myIndex, channelId} = protocolState.app;
               const signedState = await this.store.signState(action.channelId, action, tx);
-              responseBuilder.stateSigned(signedState, myIndex, channelId);
+              response.stateSigned(signedState, myIndex, channelId);
               return;
             }
             case 'FundChannel':
@@ -94,8 +94,8 @@ export class ObjectiveManager {
             case 'CompleteObjective':
               await this.store.markObjectiveAsSucceeded(objective, tx);
 
-              responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
-              responseBuilder.objectiveSucceeded(objective);
+              response.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
+              response.objectiveSucceeded(objective);
               attemptAnotherProtocolStep = false;
               return;
             case 'Withdraw':
@@ -137,7 +137,7 @@ export class ObjectiveManager {
             attemptAnotherProtocolStep = false;
           }
         } else {
-          responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
+          response.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
           attemptAnotherProtocolStep = false;
         }
       });

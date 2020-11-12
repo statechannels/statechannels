@@ -58,7 +58,7 @@ import {hasSupportedState, isMyTurn} from '../handlers/helpers';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
-import {ResponseBuilder, WalletResponse} from './response-builder';
+import {WalletResponse} from './response-builder';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -208,15 +208,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.singleChannelOutput();
   }
 
-  private async _syncChannel(channelId: string, responseBuilder: ResponseBuilder): Promise<void> {
+  private async _syncChannel(channelId: string, response: WalletResponse): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {myIndex, participants} = channelState;
 
-    states.forEach(s => responseBuilder.stateSigned(s, myIndex, channelId));
+    states.forEach(s => response.stateSigned(s, myIndex, channelId));
 
-    responseBuilder.requestGetChannel(channelId, myIndex, participants);
-    responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(channelState));
+    response.requestGetChannel(channelId, myIndex, participants);
+    response.channelUpdatedResult(ChannelState.toChannelResult(channelState));
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
@@ -252,7 +252,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   private async _updateChannelFunding(
     {channelId, token, amount}: UpdateChannelFundingParams,
-    response: ResponseBuilder
+    response: WalletResponse
   ): Promise<void> {
     const assetHolderAddress = getAssetHolderAddress(token || Zero);
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
@@ -306,7 +306,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   private async _createChannel(
-    response: ResponseBuilder,
+    response: WalletResponse,
     args: CreateChannelParams,
     role: 'app' | 'ledger' = 'app'
   ): Promise<string> {
@@ -455,7 +455,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.singleChannelOutput();
   }
 
-  private async _closeChannel(channelId: Bytes32, response: ResponseBuilder): Promise<void> {
+  private async _closeChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
     await this.store.lockApp(
       channelId,
       async (tx, channel) => {
@@ -542,7 +542,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
   }
 
-  async _pushMessage(wirePayload: WirePayload, response: ResponseBuilder): Promise<void> {
+  async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
     const store = this.store;
 
     const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
@@ -562,7 +562,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
   }
 
-  takeActions = async (channels: Bytes32[], response: ResponseBuilder): Promise<void> => {
+  takeActions = async (channels: Bytes32[], response: WalletResponse): Promise<void> => {
     let needToCrank = true;
     while (needToCrank) {
       await this.crankUntilIdle(channels, response);
@@ -572,7 +572,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   private async processLedgerQueue(
     channels: Bytes32[],
-    response: ResponseBuilder
+    response: WalletResponse
   ): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
@@ -656,7 +656,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // todo(tom): change function to return a value instead of mutating input args
-  private async crankUntilIdle(channels: Bytes32[], response: ResponseBuilder): Promise<void> {
+  private async crankUntilIdle(channels: Bytes32[], response: WalletResponse): Promise<void> {
     // Fetch channels related to the channels argument where related means, either:
     // - The channel is in the channels array
     // - The channel is being funded by one of the channels in the channels array
