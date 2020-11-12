@@ -6,6 +6,7 @@ import {DBObjective, toWireObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {WALLET_VERSION} from '../version';
+import {ChannelState, toChannelResult} from '../protocols/state';
 
 import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
 
@@ -35,6 +36,15 @@ export class WalletResponse {
    */
   queueChannelResult(channelResult: ChannelResult): void {
     this._channelResults[channelResult.channelId] = channelResult;
+  }
+
+  /**
+   * Same as queueChannel but accepts a channelState instead of a Channel
+   *
+   * Plan to deprecate.
+   */
+  queueChannelState(channelState: ChannelState): void {
+    this.queueChannelResult(toChannelResult(channelState));
   }
 
   /**

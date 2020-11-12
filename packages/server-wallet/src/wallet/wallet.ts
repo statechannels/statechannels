@@ -216,7 +216,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     states.forEach(s => response.queueState(s, myIndex, channelId));
 
     response.queueChannelRequest(channelId, myIndex, participants);
-    response.queueChannelResult(ChannelState.toChannelResult(channelState));
+    response.queueChannelState(channelState);
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
@@ -343,7 +343,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
-    response.queueChannelResult(ChannelState.toChannelResult(channel));
+    response.queueChannelState(channel);
 
     this.registerChannelWithChainService(channel.channelId);
 
@@ -428,7 +428,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       response.queueState(signedState, myIndex, channelId);
 
       const channelState = await this.store.getChannel(channelId, tx);
-      response.queueChannelResult(ChannelState.toChannelResult(channelState));
+      response.queueChannelState(channelState);
 
       return response.singleChannelOutput();
     };
@@ -495,7 +495,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       participants.map(convertToParticipant)
     );
 
-    channelStates.forEach(cs => response.queueChannelResult(ChannelState.toChannelResult(cs)));
+    channelStates.forEach(cs => response.queueChannelState(cs));
 
     return response.multipleChannelOutput();
   }
@@ -504,7 +504,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const response = WalletResponse.initialize();
 
     const channelStates = await this.store.getChannels();
-    channelStates.forEach(cs => response.queueChannelResult(ChannelState.toChannelResult(cs)));
+    channelStates.forEach(cs => response.queueChannelState(cs));
 
     return response.multipleChannelOutput();
   }
@@ -515,7 +515,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     try {
       const channel = await this.store.getChannel(channelId);
 
-      response.queueChannelResult(ChannelState.toChannelResult(channel));
+      response.queueChannelState(channel);
 
       return response.singleChannelOutput();
     } catch (err) {
@@ -613,7 +613,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
         if (!action) {
           markLedgerAsProcessed();
-          response.queueChannelResult(ChannelState.toChannelResult(protocolState.fundingChannel));
+          response.queueChannelState(protocolState.fundingChannel);
         } else {
           try {
             switch (action.type) {
