@@ -22,6 +22,7 @@ import {
   makeAddress,
   Address,
   Destination,
+  PrivateKey,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -92,6 +93,10 @@ export class Store {
     await this.knex.destroy();
   }
 
+  async addSigningKey(privateKey: PrivateKey): Promise<void> {
+    await this.getOrCreateSigningAddress(new ethers.Wallet(privateKey));
+  }
+
   async getFirstParticipant(): Promise<Participant> {
     const signingAddress = await this.getOrCreateSigningAddress();
     return {
@@ -101,16 +106,15 @@ export class Store {
     };
   }
 
-  async getOrCreateSigningAddress(): Promise<Address> {
-    const randomWallet = ethers.Wallet.createRandom();
+  async getOrCreateSigningAddress(wallet = ethers.Wallet.createRandom()): Promise<Address> {
     // signing_wallets table allows for only one row via database constraints
     try {
       // returning('*') only works with Postgres
       // https://vincit.github.io/objection.js/recipes/returning-tricks.html
       const signingWallet = await SigningWallet.query(this.knex)
         .insert({
-          privateKey: makePrivateKey(randomWallet.privateKey),
-          address: makeAddress(randomWallet.address),
+          privateKey: makePrivateKey(wallet.privateKey),
+          address: makeAddress(wallet.address),
         })
         .returning('*');
       return signingWallet.address;

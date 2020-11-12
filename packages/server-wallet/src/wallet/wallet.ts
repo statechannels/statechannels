@@ -21,6 +21,7 @@ import {
   Zero,
   makeAddress,
   Address as CoreAddress,
+  PrivateKey,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -157,6 +158,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       logger: this.logger,
       timingMetrics: this.walletConfig.timingMetrics,
     });
+  }
+
+  public async addSigningKey(privateKey: PrivateKey): Promise<void> {
+    await this.store.addSigningKey(privateKey);
   }
 
   public async registerAppDefinition(appDefinition: string): Promise<void> {
