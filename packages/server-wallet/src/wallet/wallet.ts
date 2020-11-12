@@ -674,6 +674,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       const objective = objectives[0];
 
       await this.objectiveManager.crank(objective.objectiveId, response);
+      response.objectiveSucceededEvents().map(event => this.emit(event.type, event.value));
 
       // remove objective from list
       objectives.shift();
@@ -685,6 +686,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const response = WalletResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+    await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }

@@ -96,7 +96,6 @@ export class ObjectiveManager {
 
               responseBuilder.channelUpdatedResult(ChannelState.toChannelResult(protocolState.app));
               responseBuilder.objectiveSucceeded(objective);
-
               attemptAnotherProtocolStep = false;
               return;
             case 'Withdraw':
