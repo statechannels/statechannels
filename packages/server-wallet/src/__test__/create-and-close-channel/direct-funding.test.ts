@@ -152,9 +152,11 @@ it('Create a directly funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
-});
 
-it('Accepts b closing', async () => {
+  // -------------------------------
+  // B closes when it isn't B's turn
+  // -------------------------------
+
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };
@@ -162,12 +164,10 @@ it('Accepts b closing', async () => {
   const bCloseChannel = b.closeChannel(closeChannelParams);
 
   await bCloseChannel;
-});
 
-it('Closes the channel', async () => {
-  const closeChannelParams: CloseChannelParams = {
-    channelId,
-  };
+  // -------------------------------
+  // A closes on A's turn
+  // -------------------------------
 
   // A generates isFinal4
   const aCloseChannelResult = await a.closeChannel(closeChannelParams);

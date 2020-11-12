@@ -41,7 +41,7 @@ it("signs a final state when it's my turn", async () => {
   expect(updated.protocolState).toMatchObject({latest: closingState, supported: closingState});
 });
 
-it("reject when it's not my turn", async () => {
+it("accepts and sends an objective when it isn't my turn", async () => {
   const appData = '0x0f00';
   const turnNum = 8;
   const runningState = {turnNum, appData};
@@ -53,10 +53,10 @@ it("reject when it's not my turn", async () => {
 
   const channelId = c.channelId;
 
-  await expect(w.closeChannel({channelId})).rejects.toMatchObject(new Error('not my turn'));
-
-  const updated = await Channel.forId(channelId, w.knex);
-  expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
+  await expect(w.closeChannel({channelId})).resolves.toMatchObject({
+    channelResult: {status: 'running'},
+    outbox: [{method: 'MessageQueued', params: {data: {objectives: [{type: 'CloseChannel'}]}}}],
+  });
 });
 
 it("signs a final state when it's my turn for many channels at once", async () => {

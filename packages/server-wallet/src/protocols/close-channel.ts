@@ -56,16 +56,32 @@ function successfulWithdraw({app}: ProtocolState): boolean {
 const isMyTurn = (ps: ProtocolState): boolean =>
   !!ps.app.supported && (ps.app.supported.turnNum + 1) % 2 === ps.app.myIndex;
 
+// I want to sign the final state if:
+// - the objective has been approved
+// - I haven't yet signed a final state
+// - and either
+//    - there's an existing final state (in which case I double sign)
+//    - or it's my turn (in which case I craft the final state)
+//
 const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
-  !!ps.app.supported &&
-  isMyTurn(ps) && // is my turn
-  !isFinal(ps.app.latestSignedByMe) &&
-  signState({
-    channelId: ps.app.channelId,
-    ...ps.app.supported,
-    turnNum: ps.app.supported.turnNum + (isFinal(ps.app.supported) ? 0 : 1),
-    isFinal: true,
-  });
+  !!ps.app.supported && // there is a supported state
+  !isFinal(ps.app.latestSignedByMe) && // I haven't yet signed a final state
+  // if there's an existing final state double-sign it
+  ((isFinal(ps.app.supported) &&
+    signState({
+      channelId: ps.app.channelId,
+      ...ps.app.supported,
+      turnNum: ps.app.supported.turnNum,
+      isFinal: true,
+    })) ||
+    // otherwise, if it's my turn, sign a final state
+    (isMyTurn(ps) &&
+      signState({
+        channelId: ps.app.channelId,
+        ...ps.app.supported,
+        turnNum: ps.app.supported.turnNum + 1,
+        isFinal: true,
+      })));
 
 const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
   isLedgerFunded(ps.app) &&

@@ -107,19 +107,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     status: 'running',
     turnNum: 3,
   });
-});
 
-it('Rejects b closing with `not your turn`', async () => {
-  const closeChannelParams: CloseChannelParams = {
-    channelId,
-  };
-
-  const bCloseChannel = b.closeChannel(closeChannelParams);
-
-  await expect(bCloseChannel).rejects.toMatchObject(new Error('not my turn'));
-});
-
-it('Closes the channel', async () => {
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };

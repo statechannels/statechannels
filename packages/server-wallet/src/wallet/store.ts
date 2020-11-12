@@ -79,7 +79,7 @@ export class Store {
       this.getChannel = recordFunctionMetrics(this.getChannel);
       this.getStates = recordFunctionMetrics(this.getStates);
       this.getChannels = recordFunctionMetrics(this.getChannels);
-      this.addObjective = recordFunctionMetrics(this.addObjective);
+      this.ensureObjective = recordFunctionMetrics(this.ensureObjective);
       this.pushMessage = recordFunctionMetrics(this.pushMessage);
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
@@ -299,7 +299,7 @@ export class Store {
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
       const storedObjectives = [];
       for (const o of deserializedObjectives) {
-        storedObjectives.push(await this.addObjective(o, tx));
+        storedObjectives.push(await this.ensureObjective(o, tx));
       }
 
       const objectiveChannelIds = storedObjectives
@@ -350,18 +350,18 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
-  async addObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
+  async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     switch (objective.type) {
       case 'OpenChannel':
-        return this.addOpenChannelObjective(objective, tx);
+        return this.ensureOpenChannelObjective(objective, tx);
       case 'CloseChannel':
-        return this.addCloseChannelObjective(objective, tx);
+        return this.ensureCloseChannelObjective(objective, tx);
       default:
         throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
   }
 
-  private async addOpenChannelObjective(
+  private async ensureOpenChannelObjective(
     objective: OpenChannel,
     tx: Transaction
   ): Promise<DBObjective> {
@@ -398,7 +398,11 @@ export class Store {
         tx
       );
 
-    await ObjectiveModel.insert(objectiveToBeStored, tx);
+    try {
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
+    } catch (e) {
+      if (e.name !== 'UniqueViolationError') throw e;
+    }
 
     await Channel.query(tx)
       .where({channelId: channel.channelId})
@@ -409,7 +413,7 @@ export class Store {
     return objectiveToBeStored;
   }
 
-  private async addCloseChannelObjective(
+  private async ensureCloseChannelObjective(
     objective: CloseChannel,
     tx: Transaction
   ): Promise<DBObjective> {
@@ -435,7 +439,11 @@ export class Store {
       },
     };
 
-    await ObjectiveModel.insert(objectiveToBeStored, tx);
+    try {
+      await ObjectiveModel.insert(objectiveToBeStored, tx);
+    } catch (e) {
+      if (e.name !== 'UniqueViolationError') throw e;
+    }
 
     return objectiveToBeStored;
   }
@@ -574,7 +582,7 @@ export class Store {
         },
       };
 
-      const objective = await this.addObjective(objectiveParams, tx);
+      const objective = await this.ensureObjective(objectiveParams, tx);
       await this.approveObjective(objective.objectiveId, tx);
 
       return {channel: await this.getChannel(channelId, tx), firstSignedState, objective};

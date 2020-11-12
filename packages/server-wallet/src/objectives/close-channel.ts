@@ -12,7 +12,7 @@ export class CloseChannelObjective {
     await store.lockApp(
       channelId,
       async (tx, channel) => {
-        const dbObjective = await store.addObjective(
+        const dbObjective = await store.ensureObjective(
           {
             type: 'CloseChannel',
             participants: [],
