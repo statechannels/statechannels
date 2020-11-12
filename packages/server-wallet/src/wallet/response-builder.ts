@@ -24,7 +24,7 @@ export class WalletResponse {
   /**
    * Queues channel for notification to user
    */
-  channelUpdated(channel: Channel): void {
+  queueChannel(channel: Channel): void {
     this._channelResults[channel.channelId] = channel.channelResult;
   }
 
@@ -33,14 +33,14 @@ export class WalletResponse {
    *
    * Plan to deprecate.
    */
-  channelUpdatedResult(channelResult: ChannelResult): void {
+  queueChannelResult(channelResult: ChannelResult): void {
     this._channelResults[channelResult.channelId] = channelResult;
   }
 
   /**
    * Queues state for sending to opponent
    */
-  stateSigned(state: SignedState, myIndex: number, channelId?: string): void {
+  queueState(state: SignedState, myIndex: number, channelId?: string): void {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
       if (i !== myIndex) {
@@ -64,7 +64,11 @@ export class WalletResponse {
   /**
    * Queues objectives for sending to opponent
    */
-  objectiveCreated(objective: DBObjective, myIndex: number, participants: Participant[]): void {
+  queueCreatedObjective(
+    objective: DBObjective,
+    myIndex: number,
+    participants: Participant[]
+  ): void {
     const myParticipantId = participants[myIndex].participantId;
 
     participants.forEach((p, i) => {
@@ -88,21 +92,21 @@ export class WalletResponse {
   /**
    * Queues objectives for approval by the user
    */
-  objectiveReceived(objective: DBObjective): void {
+  queueReceivedObjective(objective: DBObjective): void {
     this.objectivesToApprove.push(objective);
   }
 
   /**
    * Queue succeeded objectives, so we can emit events
    */
-  objectiveSucceeded(objective: DBObjective): void {
+  queueSucceededObjective(objective: DBObjective): void {
     this.succeededObjectives.push(objective);
   }
 
   /**
    * Add a GetChannelRequest to outbox for given channelId
    */
-  requestGetChannel(channelId: string, myIndex: number, participants: Participant[]): void {
+  queueChannelRequest(channelId: string, myIndex: number, participants: Participant[]): void {
     const myParticipantId = participants[myIndex].participantId;
 
     participants.forEach((p, i) => {
