@@ -54,7 +54,8 @@ function successfulWithdraw({app}: ProtocolState): boolean {
 }
 
 const isMyTurn = (ps: ProtocolState): boolean =>
-  !!ps.app.supported && (ps.app.supported.turnNum + 1) % 2 === ps.app.myIndex;
+  !!ps.app.supported &&
+  (ps.app.supported.turnNum + 1) % ps.app.participants.length === ps.app.myIndex;
 
 // I want to sign the final state if:
 // - the objective has been approved
