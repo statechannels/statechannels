@@ -2,6 +2,7 @@ import {
   ContractArtifacts,
   createERC20DepositTransaction,
   createETHDepositTransaction,
+  getChannelId,
   Transactions,
 } from '@statechannels/nitro-protocol';
 import {
@@ -95,6 +96,7 @@ export class ChainService implements ChainServiceInterface {
   private addressToObservable: Map<Address, Observable<ContractEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
+  private nitroAdjudicator: Contract;
 
   private transactionQueue = new PQueue({concurrency: 1});
 
@@ -105,6 +107,11 @@ export class ChainService implements ChainServiceInterface {
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
     this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
+    this.nitroAdjudicator = new Contract(
+      nitroAdjudicatorAddress,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
+      this.ethWallet
+    );
   }
 
   // Only used for unit tests
@@ -190,8 +197,33 @@ export class ChainService implements ChainServiceInterface {
       to: nitroAdjudicatorAddress,
     };
 
-    const captureExpectedErrors = (reason: any) => {
-      if (!reason.error.message.includes('revert Channel finalized')) throw reason;
+    const captureExpectedErrors = async (reason: any) => {
+      if (reason.error?.message.includes('Channel finalized')) {
+        return;
+      }
+      const firstState = finalizationProof[0];
+      const [
+        _turnNumRecord,
+        finalizesAt,
+        _fingerprint,
+      ] = await this.nitroAdjudicator.getChannelStorage(
+        getChannelId({
+          ...firstState,
+          participants: firstState.participants.map(p => p.signingAddress),
+        })
+      );
+
+      // Check if the channel has been finalized in the past or will finalize in the next 10 minutes
+      const timeNowSeconds = Date.now() / 1_000;
+      if (
+        finalizesAt &&
+        (timeNowSeconds - Number(finalizesAt) >= 0 ||
+          Number(finalizesAt) - timeNowSeconds <= 60 * 10)
+      ) {
+        return;
+      }
+
+      throw reason;
     };
     const transactionResponse = this.sendTransaction(transactionRequest).catch(
       captureExpectedErrors
