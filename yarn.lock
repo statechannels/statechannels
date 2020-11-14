@@ -4131,6 +4131,13 @@
     eventemitter3 "4.0.7"
     loglevel "1.6.8"
 
+"@statechannels/client-api-schema@0.4.5":
+  version "0.4.5"
+  resolved "https://registry.npmjs.org/@statechannels/client-api-schema/-/client-api-schema-0.4.5.tgz#bf293179008d136c833c6a1a8e06e4a814a9d656"
+  integrity sha512-gclJYSMF6OazrGM+Q/NbQqGR1qlQb2QrufHN43Dz8TR8McZdJOqg98J8b86oOasJ/T9ZfypP9uLapp4jQDyhLw==
+  dependencies:
+    ajv "6.11.0"
+
 "@statechannels/iframe-channel-provider@0.3.17":
   version "0.3.17"
   resolved "https://registry.npmjs.org/@statechannels/iframe-channel-provider/-/iframe-channel-provider-0.3.17.tgz#e0b335ce4db170aef2a9a0765903376155accc9a"
