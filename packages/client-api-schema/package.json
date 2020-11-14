@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/client-api-schema",
   "description": "JSON-RPC Schema and TypeScript typings for the State Channels Client API",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "author": "snario <liam@l4v.io>",
   "contributors": [
     "Alex Gap <alex.gap@consensys.net>",

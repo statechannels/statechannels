@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.0...@statechannels/wire-format@0.8.1) (2020-11-14)
+
+
+### Bug Fixes
+
+* make objective participants optional ([533c411](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/533c4119402dac59c9d37c9aeb3c2b054ebe6be9))
+* make sender optional in WireMessage ([b97167a](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/b97167a91e13e58a3e274dda671f0e1cef7805e8))
+
+
+
+
+
 # [0.8.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.5.4...@statechannels/wire-format@0.8.0) (2020-11-06)
 
 
