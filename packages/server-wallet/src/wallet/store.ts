@@ -48,7 +48,7 @@ import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {logger as defaultLogger} from '../logger';
 
-export type AppHandler<T> = (tx: Transaction, channel: ChannelState) => T;
+export type AppHandler<T> = (tx: Transaction, channel: ChannelState, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
 
 class UniqueViolationError extends Error {
@@ -136,30 +136,37 @@ export class Store {
   async lockApp<T>(
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
-    onChannelMissing: MissingAppHandler<T> = throwMissingChannel
+    onChannelMissing: MissingAppHandler<T> = throwMissingChannel,
+    needsSigningWallet = false
   ): Promise<T> {
     return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
-      const channel = await timer('getting channel', () =>
-        Channel.query(tx)
+      const channel = await timer('getting channel', () => {
+        let query = Channel.query(tx)
           .where({channelId})
           .forUpdate()
-          .first()
-      );
+          .first();
+
+        if (needsSigningWallet) query = query.withGraphFetched('signingWallet');
+
+        return query;
+      });
 
       if (!channel) return onChannelMissing(channelId);
-      return timer('critical code', async () => criticalCode(tx, channel.protocolState));
+      return timer('critical code', async () => criticalCode(tx, channel.protocolState, channel));
     });
   }
 
   async signState(
-    channelId: Bytes32,
+    channelOrId: Bytes32 | Channel,
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
   ): Promise<SignedState> {
+    const channelId = typeof channelOrId === 'string' ? channelOrId : channelOrId.channelId;
     const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
-
-    const channel = await timer('getting channel', async () => Channel.forId(channelId, tx));
+    const channel = await (typeof channelOrId === 'string'
+      ? timer('getting channel', async () => Channel.forId(channelOrId, tx))
+      : channelOrId);
 
     const state = addHash({...channel.channelConstants, ...vars});
 
