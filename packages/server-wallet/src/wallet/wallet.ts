@@ -192,7 +192,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   public async destroy(): Promise<void> {
-    await this.store.destroy(); // TODO this destroys this.knex(), which seems quite unexpected
+    await this.knex.destroy();
     this.chainService.destructor();
   }
 

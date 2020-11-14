@@ -90,10 +90,6 @@ export class Store {
     }
   }
 
-  async destroy(): Promise<void> {
-    await this.knex.destroy();
-  }
-
   async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.getOrCreateSigningAddress(new ethers.Wallet(privateKey));
   }
