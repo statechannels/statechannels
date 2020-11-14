@@ -7,7 +7,7 @@ import {validateTransitionWithEVM} from '../evm-validator';
 
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
 
-it('returns true for a valid transition', async () => {
+it('returns true for a valid transition', () => {
   const fromState = toNitroState(
     createState({
       appDefinition: COUNTING_APP_DEFINITION,
@@ -20,10 +20,10 @@ it('returns true for a valid transition', async () => {
       appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
     })
   );
-  expect(await validateTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(true);
+  expect(validateTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(true);
 });
 
-it('returns false for an invalid transition', async () => {
+it('returns false for an invalid transition', () => {
   const fromState = toNitroState(
     createState({
       appDefinition: COUNTING_APP_DEFINITION,
@@ -36,16 +36,14 @@ it('returns false for an invalid transition', async () => {
       appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
     })
   );
-  expect(await validateTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(
-    false
-  );
+  expect(validateTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(false);
 });
 
-it('returns false when no byte code exists for the app definition', async () => {
+it('returns false when no byte code exists for the app definition', () => {
   const state = toNitroState(
     createState({
       appDefinition: UNDEFINED_APP_DEFINITION,
     })
   );
-  expect(await validateTransitionWithEVM(state, state, '0x')).toBe(false);
+  expect(validateTransitionWithEVM(state, state, '0x')).toBe(false);
 });

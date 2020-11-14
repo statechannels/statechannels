@@ -10,11 +10,11 @@ import {Bytes} from './type-aliases';
  * Returns a promise that resolves to true if the validateTransition
  * returns true false otherwise
  */
-export const validateTransitionWithEVM = async (
+export const validateTransitionWithEVM = (
   from: NitroState,
   to: NitroState,
   bytecode: Bytes
-): Promise<boolean | undefined> => {
+): boolean | undefined => {
   if (from.appDefinition !== to.appDefinition) {
     logger.error('Invalid transition', {
       error: new Error('States are using different appDefinitions'),
