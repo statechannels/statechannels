@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.6](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.4.5...@statechannels/client-api-schema@0.4.6) (2020-11-14)
+
+
+### Bug Fixes
+
+* make sender optional in WireMessage ([b97167a](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/b97167a91e13e58a3e274dda671f0e1cef7805e8))
+* updates to reflect fact that participants are optional ([657c631](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/657c6312da1a33b72234e04895e415c557257334))
+
+
+
+
+
 ## [0.4.5](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.4.4...@statechannels/client-api-schema@0.4.5) (2020-11-06)
 
 **Note:** Version bump only for package @statechannels/client-api-schema

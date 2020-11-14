@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.11.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.10.1...@statechannels/server-wallet@1.11.0) (2020-11-14)
+
+
+### Bug Fixes
+
+* cast Addresses and Destinations for events ([8697235](https://github.com/statechannels/statechannels/commit/869723577dc5a0410be54497969c2b2dbd28071a))
+* chain-service asset holder default addresses converted to Address ([7e06925](https://github.com/statechannels/statechannels/commit/7e069252cf004c0f9c18ab606067e1a4c454f68d))
+* correct Address types after rebase ([3495b71](https://github.com/statechannels/statechannels/commit/3495b71fd6076238591ec377b055fc45eb0bc037))
+* don't throw an error on closeChannels call with empty array ([43bed62](https://github.com/statechannels/statechannels/commit/43bed626f742bb75a45db8264ca55dd6acca0eb1))
+* ensure check on closeChannel in pushMessage ([d16d0a6](https://github.com/statechannels/statechannels/commit/d16d0a6139d6c09950e4a1344882a17fc4ea2559))
+* export a little more from server-wallet ([ffc7dc6](https://github.com/statechannels/statechannels/commit/ffc7dc6d2a9708e90dd2a0d867f43e50654504de))
+* finish off close-not-on-turn behaviour and change tests to reflect it ([7c59fb5](https://github.com/statechannels/statechannels/commit/7c59fb5a152da7acd55fce0078ca532691802c95))
+* not able to start wallet when contract addresses are undefined ([562d521](https://github.com/statechannels/statechannels/commit/562d5213806f99ffc8d9af5b2734df0433368bca))
+* remove destination lower casing in close-channel protocol ([6cf2f5d](https://github.com/statechannels/statechannels/commit/6cf2f5d660b279fae5ec805a57a9aab7548f1a53))
+* remove unnecessary list reversal ([43c7c77](https://github.com/statechannels/statechannels/commit/43c7c7729800e2f6e4f554075d2d65f5d800aef6))
+* remove unused output objectivesToApprove ([d5d01f1](https://github.com/statechannels/statechannels/commit/d5d01f16df3540f386b972a4404a5c8e7c0dcf57))
+* resolve issues with nominal Address type ([dcd071d](https://github.com/statechannels/statechannels/commit/dcd071d61229652abfb4618deef39933bab0b868))
+* run yarn generate-api ([b78b4df](https://github.com/statechannels/statechannels/commit/b78b4df3851153e285657ce4980ab3028e661164))
+* support variable length channels in close channel ([85fd136](https://github.com/statechannels/statechannels/commit/85fd13681aea3eeeeb1b82200b94b2b30995c815))
+* type error in state-utils ([f4cf8c0](https://github.com/statechannels/statechannels/commit/f4cf8c0c671584fc09ea2ae3215557e490960ba0))
+
+
+### Features
+
+* add addSigningKey method to wallet API ([a61e979](https://github.com/statechannels/statechannels/commit/a61e97948bceaab28329b03417ef689ee53468c4))
+* add lower case bytes constraints to db ([032cf9f](https://github.com/statechannels/statechannels/commit/032cf9fd46d9570867052c7febfea7c58b81cb49))
+* additional constraints on bytes columns ([b818ac0](https://github.com/statechannels/statechannels/commit/b818ac055b23edafb1b87905f861fcf57bc6008f))
+* allow channel closing not on your turn ([9167dfe](https://github.com/statechannels/statechannels/commit/9167dfea41f3d9e7a165b63599b4f9fca048ef80))
+* assert and assume checksum addresses ([48b961b](https://github.com/statechannels/statechannels/commit/48b961b66cc877f68c02b4a818849538721f53db))
+* introduce Address and PrivateKey nominal types ([4b253fc](https://github.com/statechannels/statechannels/commit/4b253fc0594af6f163f5929fd4cfbfea1d3ed457))
+
+
+
+
+
 ## [1.10.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.10.0...@statechannels/server-wallet@1.10.1) (2020-11-07)
 
 

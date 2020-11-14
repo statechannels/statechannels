@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.7.0...@statechannels/nitro-protocol@0.8.0) (2020-11-14)
+
+
+### Bug Fixes
+
+* ignore participant address case in createSignatureArguments ([e9068fa](https://github.com/statechannels/monorepo/commit/e9068fa6738fd9fc39cba1a9c9193cc36206ae2a))
+* mark _transferAsset as virtual ([534a803](https://github.com/statechannels/monorepo/commit/534a803eee4e28cc0c6f7713931f77912dd8f00b))
+* nitro protocol address comparison no longer case sensitive ([37b63ae](https://github.com/statechannels/monorepo/commit/37b63aea4bf289cdda22dc49f1ba98e4f1f9d767))
+* redeclare SafeMath in derived contracts ([9dd07ce](https://github.com/statechannels/monorepo/commit/9dd07ce263d29cbc9577c91fcbd52a51dfda4a9d))
+
+
+### Features
+
+* assert and assume checksum addresses ([48b961b](https://github.com/statechannels/monorepo/commit/48b961b66cc877f68c02b4a818849538721f53db))
+
+
+
+
+
 # [0.7.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.4.3...@statechannels/nitro-protocol@0.7.0) (2020-11-06)
 
 

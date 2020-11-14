@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.8.0...@statechannels/wallet-core@0.9.0) (2020-11-14)
+
+
+### Bug Fixes
+
+* convert destinations to lower case in makeDestination ([02a64aa](https://github.com/statechannels/statechannels/commit/02a64aa8c0bd9e97549cb5c1ca0d083ab4394f44))
+* ensure check on closeChannel in pushMessage ([d16d0a6](https://github.com/statechannels/statechannels/commit/d16d0a6139d6c09950e4a1344882a17fc4ea2559))
+* if a destination is a channel id, lower case the destination ([d53539d](https://github.com/statechannels/statechannels/commit/d53539d919fabf9679bce1290b9f31676209c51a))
+* resolve issues with nominal Address type ([dcd071d](https://github.com/statechannels/statechannels/commit/dcd071d61229652abfb4618deef39933bab0b868))
+* serde/wire-format/serde.test.ts passing ([05d640f](https://github.com/statechannels/statechannels/commit/05d640fd80393659196a24e6f79f4dc961dd55b4))
+* SignatureEntry signer is now an Address ([aea92b1](https://github.com/statechannels/statechannels/commit/aea92b1ae0e10d4d5a9d1913803db57f976124ce))
+* updates to reflect fact that participants are optional ([657c631](https://github.com/statechannels/statechannels/commit/657c6312da1a33b72234e04895e415c557257334))
+* use Address nominal type for participant signingAddress ([b04be48](https://github.com/statechannels/statechannels/commit/b04be48dae1206472b4cdbd2b366808ed5089834))
+
+
+### Features
+
+* assert and assume checksum addresses ([48b961b](https://github.com/statechannels/statechannels/commit/48b961b66cc877f68c02b4a818849538721f53db))
+* introduce Address and PrivateKey nominal types ([4b253fc](https://github.com/statechannels/statechannels/commit/4b253fc0594af6f163f5929fd4cfbfea1d3ed457))
+
+
+
+
+
 # [0.8.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.5.5...@statechannels/wallet-core@0.8.0) (2020-11-06)
 
 
