@@ -426,7 +426,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         )
       );
       const signedState = await timer('signing state', () =>
-        this.store.signState(channelId, nextState, tx)
+        this.store.signState(channelId, nextState, tx).catch(err => {
+          this.logger.error({err, nextState}, 'Unable to update channel');
+          throw err;
+        })
       );
       response.queueState(signedState, myIndex, channelId);
 
