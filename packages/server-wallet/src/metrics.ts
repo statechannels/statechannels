@@ -45,9 +45,18 @@ export function setupDBMetrics(knex: Knex): void {
 export const timerFactory = (timingMetrics: boolean, prefix: string) => async <T>(
   label: string,
   cb: () => Promise<T>
-): Promise<T> => time(timingMetrics, `${prefix}: ${label}`, cb);
+): Promise<T> => timeAsync(timingMetrics, `${prefix}: ${label}`, cb);
 
-async function time<T>(timingMetrics: boolean, label: string, cb: () => Promise<T>): Promise<T> {
+export const timerFactorySync = (timingMetrics: boolean, prefix: string) => <T>(
+  label: string,
+  cb: () => T
+): T => timeSync(timingMetrics, `${prefix}: ${label}`, cb);
+
+async function timeAsync<T>(
+  timingMetrics: boolean,
+  label: string,
+  cb: () => Promise<T>
+): Promise<T> {
   if (timingMetrics) {
     performance.mark(`${label}-start`);
     const result = await cb();
@@ -57,6 +66,19 @@ async function time<T>(timingMetrics: boolean, label: string, cb: () => Promise<
     return result;
   } else {
     return await cb();
+  }
+}
+
+function timeSync<T>(timingMetrics: boolean, label: string, cb: () => T): T {
+  if (timingMetrics) {
+    performance.mark(`${label}-start`);
+    const result = cb();
+    performance.mark(`${label}-end`);
+    performance.measure(label, `${label}-start`, `${label}-end`);
+
+    return result;
+  } else {
+    return cb();
   }
 }
 

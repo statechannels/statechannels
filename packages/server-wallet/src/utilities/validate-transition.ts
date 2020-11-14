@@ -25,12 +25,12 @@ export function shouldValidateTransition(incomingState: StateWithHash, channel: 
 }
 // Port of the following solidity code
 // https://github.com/statechannels/statechannels/blob/a3d21827e340c0cc086f1abad7685345885bf245/packages/nitro-protocol/contracts/ForceMove.sol#L492-L534
-export async function validateTransition(
+export function validateTransition(
   fromState: SignedState,
   toState: SignedState,
   bytecode: Bytes = '0x',
   skipEvmValidation = false
-): Promise<boolean> {
+): boolean {
   const fromMoverIndex = fromState.turnNum % fromState.participants.length;
   const fromMover = fromState.participants[fromMoverIndex].signingAddress;
 
@@ -101,7 +101,7 @@ export async function validateTransition(
   // We only want to run the validation for states not in a funding or final stage
   // per the force move contract
   if (!skipEvmValidation && !isInFundingStage && !toState.isFinal) {
-    const evmValidation = await validateTransitionWithEVM(
+    const evmValidation = validateTransitionWithEVM(
       toNitroState(fromState),
       toNitroState(toState),
       bytecode

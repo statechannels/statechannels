@@ -38,7 +38,7 @@ import {addHash, addState, clearOldStates, fastDeserializeState} from '../state-
 import {ChannelState, ChainServiceApi} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Uint256, Bytes} from '../type-aliases';
-import {timerFactory, recordFunctionMetrics, setupDBMetrics} from '../metrics';
+import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} from '../metrics';
 import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding} from '../models/funding';
 import {Nonce} from '../models/nonce';
@@ -498,10 +498,11 @@ export class Store {
     wireState: WireSignedState,
     tx: Transaction
   ): Promise<Channel> {
-    const timer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
+    const syncTimer = timerFactorySync(this.timingMetrics, `add signed state ${channelId}`);
+    const asyncTimer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
     // Deserialize (and validate signatures in the process)
-    const deserializedState = await timer('validating signatures', async () =>
+    const deserializedState = syncTimer('validating signatures', () =>
       fastDeserializeState(channelId, wireState)
     );
 
@@ -522,7 +523,7 @@ export class Store {
           error: new Error(`No byte code for ${supported.appDefinition}`),
         });
 
-      const isValidTransition = await timer('validating transition', async () =>
+      const isValidTransition = syncTimer('validating transition', () =>
         validateTransition(supported, state, bytecode, this.skipEvmValidation)
       );
 
@@ -535,18 +536,16 @@ export class Store {
     }
 
     // Create the new Channel object by adding the new state
-    channel.vars = await timer('adding state', async () => addState(channel.vars, state));
+    channel.vars = syncTimer('adding state', () => addState(channel.vars, state));
 
     // Do 'garbage collection' by removing unnecessary / stale states
     channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
 
     // Do checks on the Channel object before inserting into the database
-    await timer('validating invariants', async () =>
-      validateInvariants(channel.vars, channel.myAddress)
-    );
+    syncTimer('validating invariants', () => validateInvariants(channel.vars, channel.myAddress));
 
     // Insert into the DB
-    return await timer('updating', () =>
+    return await asyncTimer('updating', () =>
       Channel.query(tx)
         .where({channelId: channel.channelId})
         .patch({vars: channel.vars})
