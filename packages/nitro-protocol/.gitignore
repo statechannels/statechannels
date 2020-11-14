@@ -22,3 +22,6 @@ dist
 docs/natspec/*.md
 ganache/*[.js,.json]
 .eslintcache
+
+# hardhat directories
+cache

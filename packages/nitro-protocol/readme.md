@@ -27,24 +27,20 @@ import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
 import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 
 contract MyStateChannelApp is ForceMoveApp {
+  function validTransition(
+    VariablePart memory a,
+    VariablePart memory b,
+    uint256 turnNumB,
+    uint256 nParticipants
+  ) public override pure returns (bool) {
+    Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
+    Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
 
-    function validTransition(
-        VariablePart memory a,
-        VariablePart memory b,
-        uint256 turnNumB,
-        uint256 nParticipants
-    ) override public pure returns (bool) {
+    /* The rest of your logic */
 
-        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
-
-        /* The rest of your logic */
-
-        return true;
-    }
+    return true;
+  }
 }
-
-
 ```
 
 ### Import precompiled artifacts for deployment/testing
@@ -101,3 +97,11 @@ See https://docusaurus.io/docs/en/installation for more information.
 NB: you may run into difficulty running `docgen / solidoc` if you have the native solc compiler installed at the incorrect version number. You may refer to the circle `config.yml` at the monorepo root to check which version is being used as a part of our continuous integration.
 
 To add a new version of the docs, follow the instructions at https://docusaurus.io/docs/en/tutorial-version. We try to keep the documentation version in sync with the @statechannels/nitro-protocol npm package.
+
+## Deploying contracts to a testnet
+
+The current [hardhat](https://www.npmjs.com/package/hardhat-deploy) config works with Rinkeby testnet. It can be added on to for any other network.
+
+```
+INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] npx hardhat deploy --network rinkeby
+```
