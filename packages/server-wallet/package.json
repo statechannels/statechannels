@@ -93,7 +93,6 @@
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "start:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:chain": "jest -c ./jest/jest.chain.config.js --runInBand",
     "test:ci": "yarn test --bail && yarn test:chain --bail",
