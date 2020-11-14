@@ -524,7 +524,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
   }
 
-  async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
+  private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
     const store = this.store;
 
     const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
@@ -544,13 +544,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
   }
 
-  takeActions = async (channels: Bytes32[], response: WalletResponse): Promise<void> => {
+  private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
     let needToCrank = true;
     while (needToCrank) {
       await this.crankUntilIdle(channels, response);
       needToCrank = await this.processLedgerQueue(channels, response);
     }
-  };
+  }
 
   private async processLedgerQueue(
     channels: Bytes32[],
