@@ -328,50 +328,6 @@ jobs:
             cp /home/circleci/project/packages/server-wallet/metrics.log  /home/circleci/project/artifacts
       - upload_artifacts
 
-  release-pull-request:
-    <<: *defaults
-    resource_class: large
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: yarn build:netlify:incremental
-      - run: yarn release:netlify:incremental
-      - notify_slack
-
-  release-master:
-    <<: *defaults
-    resource_class: large
-    steps:
-      - checkout
-      - log_stats:
-          file: netlify-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: yarn build:netlify
-      - run: yarn release:netlify
-      - upload_logs:
-          file: netlify-stats
-      - notify_slack
-
-  release-netlify-production:
-    <<: *defaults
-    resource_class: large
-    environment:
-      SC_ENV: production-goerli
-    steps:
-      - checkout
-      - log_stats:
-          file: netlify-stats
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: yarn build:netlify:production
-      - run: yarn release:netlify:production
-      - upload_logs:
-          file: netlify-stats
-      - notify_slack
-
-
   push-master-to-deploy:
     working_directory: /home/circleci/project
     resource_class: small
@@ -410,25 +366,6 @@ workflows:
       - server-wallet-e2e-test:
           requires:
             - prepare
-
-      - release-pull-request:
-          requires:
-            - prepare
-          filters:
-            branches:
-              ignore: master
-      - release-master:
-          requires:
-            - prepare
-          filters:
-            branches:
-              only: master
-      - release-netlify-production:
-          requires:
-            - prepare
-          filters:
-            branches:
-              only: deploy
 
   ## We are chosing to disable the daily release for now.
   # scheduled-release:

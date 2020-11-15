@@ -39,7 +39,6 @@
     "docusaurus": "docusaurus",
     "examples": "docusaurus-examples",
     "publish-gh-pages": "docusaurus-publish",
-    "release:netlify:disabled-for-now": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=build",
     "rename-version": "docusaurus-rename-version",
     "start": "yarn trigger-api-generation && yarn api-documenter && docusaurus start",
     "swizzle": "docusaurus swizzle",
