@@ -373,29 +373,6 @@ jobs:
           file: netlify-stats
       - notify_slack
 
-  release-hub-production:
-    working_directory: /home/circleci/project
-    resource_class: large
-    docker:
-      - image: circleci/node:10.16
-    steps:
-      - setup_remote_docker
-      - checkout
-      - <<: *restore_dep
-      - <<: *restore_built_artifacts
-      - run:
-          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs
-          client-api-schema
-      - run: yarn --frozen-lockfile
-      - build_push_release:
-          dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
-          pipeline: simple-hub
-          app: simple-hub-production
-      - slack/status:
-          # notify-deployments
-          channel: C0125NB072B
-          failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
-          success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
 
   push-master-to-deploy:
     working_directory: /home/circleci/project
@@ -455,10 +432,6 @@ workflows:
             branches:
               only: deploy
 
-      - release-hub-production:
-          filters:
-            branches:
-              only: deploy
   ## We are chosing to disable the daily release for now.
   # scheduled-release:
   #   triggers:
