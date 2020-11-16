@@ -58,8 +58,8 @@ export type ChannelStateWithSupported = ChannelState & SignedByMe & WithSupporte
  * for more: https://github.com/statechannels/statechannels/issues/2509
  */
 export const status = (channelState: ChannelState): ChannelStatus => {
-  const {supported, latest, latestSignedByMe, support} = channelState;
-  const {participants} = supported ?? latest;
+  const {latest, latestSignedByMe, support} = channelState;
+  const {participants} = latest;
   if (latest.isFinal) {
     if (support?.every(s => s.isFinal)) {
       return 'closed'; // the entire support chain isFinal
