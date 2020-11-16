@@ -834,21 +834,4 @@ contract ForceMove is IForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
     }
-
-    // events
-    event ChallengeRegistered(
-        bytes32 indexed channelId,
-        // everything needed to respond or checkpoint
-        uint48 turnNumRecord,
-        uint48 finalizesAt,
-        address challenger,
-        bool isFinal,
-        FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts,
-        Signature[] sigs,
-        uint8[] whoSignedWhat
-    );
-
-    event ChallengeCleared(bytes32 indexed channelId, uint48 newTurnNumRecord);
-    event Concluded(bytes32 indexed channelId);
 }
