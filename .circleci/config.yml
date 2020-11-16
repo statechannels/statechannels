@@ -59,7 +59,7 @@ save_built_artifacts: &save_built_artifacts
       # Smart contract compiles
       - packages/nitro-protocol/artifacts
 
-restore_built_artifacts: &restore_built_artifacts
+restore_built_artifacts: &restore_built_artifacts # only used by release-hub-production
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
     key: v7-built-artifacts-cache-
@@ -180,6 +180,7 @@ jobs:
           paths:
             - packages/*/dist
             - packages/*/build
+            - packages/nitro-protocol/artifacts
             - packages/*/lib
             - packages/*/node_modules
             - packages/client-api-schema/types
