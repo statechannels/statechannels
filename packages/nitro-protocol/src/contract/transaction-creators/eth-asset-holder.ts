@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 
-import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import EthAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';

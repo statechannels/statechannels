@@ -1,11 +1,11 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, BigNumber} from 'ethers';
 
-import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
-import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json';
-import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-import TokenArtifact from '../../../build/contracts/Token.json';
-import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import AssetHolderArtifact1 from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+import AssetHolderArtifact2 from '../../../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
+import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
+import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
+import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';

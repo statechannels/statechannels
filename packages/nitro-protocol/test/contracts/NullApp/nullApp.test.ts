@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
 import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
-import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {getVariablePart, State, Channel} from '../../../src';
 
 const provider = getTestProvider();

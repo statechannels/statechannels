@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, BigNumber, ethers} from 'ethers';
 const {parseUnits} = ethers.utils;
 
-import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {
   getRandomNonce,

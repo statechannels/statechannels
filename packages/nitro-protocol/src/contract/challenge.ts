@@ -1,7 +1,7 @@
 import {ethers, BigNumber, utils, Signature} from 'ethers';
 const {Interface, keccak256, defaultAbiCoder} = utils;
 
-import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
+import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import {SignedState} from '../signatures';
 import {Channel} from '..';
 

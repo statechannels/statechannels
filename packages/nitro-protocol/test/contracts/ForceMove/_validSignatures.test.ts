@@ -1,7 +1,7 @@
 import {Contract, Wallet, utils} from 'ethers';
 const {id} = utils;
 
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 import {sign} from '../../../src/signatures';
 const provider = getTestProvider();

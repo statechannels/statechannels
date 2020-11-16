@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils} from 'ethers';
 
-import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,

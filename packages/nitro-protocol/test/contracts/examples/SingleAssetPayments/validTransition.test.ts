@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
 
 const {HashZero} = ethers.constants;
-import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
+import SingleAssetPaymentsArtifact from '../../../../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {

@@ -1,6 +1,6 @@
 import {Contract, Wallet, ethers, utils} from 'ethers';
 
-import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
+import TrivialAppArtifact from '../../../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
 import {State, VariablePart} from '../../../src/contract/state';
