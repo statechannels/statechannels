@@ -7,9 +7,10 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
  */
 contract Token is ERC20 {
     /**
-     * @dev Constructor function minting 10,000,000,000 tokens to the msg.sender (deploying account).
+     * @dev Constructor function minting 10 billion tokens to the owner. Do not use msg.sender for default owner as that will not work with CREATE2
+     * @param owner Tokens are minted to the owner address
      */
-    constructor(uint256) ERC20('TestToken', 'TEST') {
-        _mint(msg.sender, 10000000000);
+    constructor(address owner) public ERC20('TestToken', 'TEST') {
+        _mint(owner, 10_000_000_000);
     }
 }
