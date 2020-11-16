@@ -5,8 +5,10 @@ import pino from 'pino';
 
 const ARTIFACTS_DIR = '../../artifacts';
 
-if (!fs.existsSync(ARTIFACTS_DIR)) {
+try {
   fs.mkdirSync(ARTIFACTS_DIR);
+} catch (err) {
+  if (err.message !== "EEXIST: file already exists, mkdir '../../artifacts'") throw err;
 }
 
 const destination = pino.destination(path.join(ARTIFACTS_DIR, 'e2e.log'));
