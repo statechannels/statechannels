@@ -70,7 +70,7 @@
   "scripts": {
     "build:typescript": "rm -rf lib; yarn tsc -b .",
     "build:webpack": "webpack",
-    "contract:compile": "INFURA_TOKEN=foo RINKEBY_DEPLOYER_PK=bar yarn hardhat compile --force",
+    "contract:compile": "yarn hardhat compile --force",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",
