@@ -6,13 +6,12 @@ orbs:
 
 defaults: &defaults
   environment:
-    USE_NATIVE_SOLC: true
     PSQL_ARGS: -p 5432 -h localhost
     NODE_ENV: test
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: geoknee/statechannels:12.18-solc0.6.12 # Fast contract compilation with solc installed
+    - image: geoknee/statechannels:12.18-solc0.6.12 # solc installed (unecessary since hardhat will re-download solc)
     - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
       environment:
         POSTGRES_USER: root
@@ -247,7 +246,6 @@ jobs:
     <<: *defaults
     resource_class: xlarge
     environment:
-      USE_NATIVE_SOLC: true
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 6
@@ -277,7 +275,6 @@ jobs:
     <<: *defaults
     resource_class: xlarge
     environment:
-      USE_NATIVE_SOLC: true
       PSQL_ARGS: -p 5432 -h localhost
       NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 0
