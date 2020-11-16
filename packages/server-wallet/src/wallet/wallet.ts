@@ -51,7 +51,6 @@ import {
   MockChainService,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
-import {LedgerRequest} from '../models/ledger-request';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 
@@ -607,24 +606,18 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
                 response.queueState(signedState, myIndex, channelId);
 
-                await Promise.all(
-                  action.channelsNotFunded.map(
-                    async c => await LedgerRequest.setRequestStatus(c, 'fund', 'failed', tx)
-                  )
-                );
+                await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
+
                 return;
               }
 
-              case 'MarkLedgerFundingRequestsAsComplete':
-                await LedgerRequest.markLedgerRequestsSuccessful(action.fundedChannels, 'fund', tx);
-                await LedgerRequest.markLedgerRequestsSuccessful(
-                  action.defundedChannels,
-                  'defund',
-                  tx
-                );
+              case 'MarkLedgerFundingRequestsAsComplete': {
+                const {fundedChannels, defundedChannels} = action;
+                await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
+                await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
                 requiresAnotherCrankUponCompletion = true;
                 return;
-
+              }
               default:
                 throw 'Unimplemented';
             }
@@ -643,7 +636,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     // Fetch channels related to the channels argument where related means, either:
     // - The channel is in the channels array
     // - The channel is being funded by one of the channels in the channels array
-    const ledgerRequests = await LedgerRequest.getAllPendingRequests(this.knex);
+    const ledgerRequests = await this.store.getAllPendingLedgerRequests();
     const channelsWithRelevantPendingReqs = ledgerRequests
       .filter(req => channels.includes(req.ledgerChannelId))
       .map(req => req.channelToBeFunded);

@@ -30,6 +30,7 @@ import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import {ethers} from 'ethers';
 import Knex from 'knex';
 import {Logger} from 'pino';
+import pMap from 'p-map';
 
 import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
@@ -464,7 +465,7 @@ export class Store {
     return LedgerRequest.getRequest(channelId, type, tx || this.knex);
   }
 
-  async getAllPendingLedgerRequests(tx?: Transaction): Promise<LedgerRequestType[] | undefined> {
+  async getAllPendingLedgerRequests(tx?: Transaction): Promise<LedgerRequestType[]> {
     return LedgerRequest.getAllPendingRequests(tx || this.knex);
   }
 
@@ -473,6 +474,17 @@ export class Store {
     tx?: Transaction
   ): Promise<LedgerRequestType[] | undefined> {
     return LedgerRequest.getPendingRequests(ledgerChannelId, tx || this.knex);
+  }
+
+  async markLedgerRequests(
+    channelIds: Bytes32[],
+    type: 'fund' | 'defund',
+    status: 'succeeded' | 'failed' | 'pending',
+    tx?: TransactionOrKnex
+  ): Promise<void> {
+    await pMap(channelIds, request =>
+      LedgerRequest.setRequestStatus(request, type, status, tx || this.knex)
+    );
   }
 
   /**
