@@ -554,6 +554,18 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
           // add signed states to response
           signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
+
+          if (await this.store.isLedger(channelId)) {
+            const commit = await this.store.getMyLedgerCommit(channelId);
+            if (commit)
+              response.queueProposeLedger(
+                channelId,
+                channelState.myIndex,
+                channelState.participants,
+                commit
+              );
+          }
+
           continue;
         }
         case 'ProposeLedger':
