@@ -1,8 +1,8 @@
 {
   "pathToRoot": "./",
+  "artifactDir": "artifacts",
   "repoUrl": "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/",
   "outputPath": "../docs-website/docs/contract-api/natspec",
   "noCompilation": true,
-  "compiler": "etherlime compile",
   "language": "en"
 }
