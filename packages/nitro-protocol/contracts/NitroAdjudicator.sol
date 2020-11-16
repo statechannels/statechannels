@@ -139,7 +139,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         // effects
 
         channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, uint48(now), bytes32(0), address(0), outcomeHash)
+            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
 
