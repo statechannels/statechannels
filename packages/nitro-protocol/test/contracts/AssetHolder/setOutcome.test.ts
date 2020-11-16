@@ -1,7 +1,7 @@
 import {Contract, Wallet, utils} from 'ethers';
 const {id, keccak256} = utils;
 
-import AssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
 

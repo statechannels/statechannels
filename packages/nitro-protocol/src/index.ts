@@ -1,17 +1,17 @@
-import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
-import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
-import TokenArtifact from '../build/contracts/Token.json';
-import AssetHolderArtifact from '../build/contracts/AssetHolder.json';
-import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
-import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
+import NitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
+import TrivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
+import TokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
+import AssetHolderArtifact from '../artifacts/contracts/AssetHolder.sol/AssetHolder.json';
+import Erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
+import EthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 
 export const ContractArtifacts = {
   NitroAdjudicatorArtifact,
-  TrivialAppArtifact,
+  TrivialAppArtifact, // TODO do we want to export this?
   Erc20AssetHolderArtifact,
   EthAssetHolderArtifact,
-  TokenArtifact,
-  AssetHolderArtifact,
+  TokenArtifact, // TODO do we want to export this?
+  AssetHolderArtifact, // TODO do we want to export this?
 };
 
 export {

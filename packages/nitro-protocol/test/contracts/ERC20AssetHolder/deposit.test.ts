@@ -3,8 +3,8 @@ import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
 
 const {AddressZero} = ethers.constants;
 
-import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-import TokenArtifact from '../../../build/contracts/Token.json';
+import ERC20AssetHolderArtifact from '../../../artifacts/contracts//test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
+import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {
   getRandomNonce,

@@ -1,6 +1,6 @@
 import {Signature, ethers} from 'ethers';
 
-import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
+import ForceMoveArtifact from '../../../artifacts/contracts/ForceMove.sol/ForceMove.json';
 import {signChallengeMessage} from '../../signatures';
 import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';

@@ -12,6 +12,6 @@
     "types": ["node", "jest"],
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "test/**/*", "build/contracts/*.json"],
+  "include": ["src/**/*", "test/**/*", "artifacts/**/*.json"],
   "references": [{"path": "../jest-gas-reporter"}]
 }

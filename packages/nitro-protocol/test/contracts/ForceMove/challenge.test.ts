@@ -4,7 +4,7 @@ import {Contract, Wallet, ethers} from 'ethers';
 const {HashZero} = ethers.constants;
 const {defaultAbiCoder, hexlify} = ethers.utils;
 
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
 import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';

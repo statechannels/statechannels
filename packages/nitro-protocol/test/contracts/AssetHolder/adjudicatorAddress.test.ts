@@ -1,6 +1,6 @@
 import {Contract} from 'ethers';
 
-import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();

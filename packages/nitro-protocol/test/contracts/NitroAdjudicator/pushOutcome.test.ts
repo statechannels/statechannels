@@ -1,9 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
-import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
-import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
+import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
+import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';

@@ -1,16 +1,16 @@
 const {GanacheDeployer} = require('@statechannels/devtools');
 
-const countingAppArtifact = require('../build/contracts/CountingApp.json');
-const erc20AssetHolderArtifact = require('../build/contracts/TestErc20AssetHolder.json');
-const ethAssetHolderArtifact = require('../build/contracts/TestEthAssetHolder.json');
-const nitroAdjudicatorArtifact = require('../build/contracts/NitroAdjudicator.json');
-const singleAssetPaymentsArtifact = require('../build/contracts/SingleAssetPayments.json');
-const testAssetHolderArtifact1 = require('../build/contracts/TESTAssetHolder.json');
-const testAssetHolderArtifact2 = require('../build/contracts/TESTAssetHolder2.json');
-const testForceMoveArtifact = require('../build/contracts/TESTForceMove.json');
-const testNitroAdjudicatorArtifact = require('../build/contracts/TESTNitroAdjudicator.json');
-const tokenArtifact = require('../build/contracts/Token.json');
-const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
+const countingAppArtifact = require('../artifacts/contracts/CountingApp.sol/CountingApp.json');
+const erc20AssetHolderArtifact = require('../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json');
+const ethAssetHolderArtifact = require('../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json');
+const nitroAdjudicatorArtifact = require('../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json');
+const singleAssetPaymentsArtifact = require('../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json');
+const testAssetHolderArtifact1 = require('../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json');
+const testAssetHolderArtifact2 = require('../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json');
+const testForceMoveArtifact = require('../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json');
+const testNitroAdjudicatorArtifact = require('../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json');
+const tokenArtifact = require('../artifacts/contracts/Token.sol/Token.json');
+const trivialAppArtifact = require('../artifacts/contracts/TrivialApp.sol/TrivialApp.json');
 
 const deploy = async () => {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));

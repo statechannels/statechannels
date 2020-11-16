@@ -50,7 +50,7 @@
   },
   "files": [
     "contracts/*",
-    "lib/build/contracts/*.json",
+    "lib/artifacts/contracts/*.json",
     "lib/src/*",
     "lib/test/*"
   ],
@@ -70,7 +70,7 @@
   "scripts": {
     "build:typescript": "rm -rf lib; yarn tsc -b .",
     "build:webpack": "webpack",
-    "contract:compile": "yarn node ./bin/compile.js",
+    "contract:compile": "INFURA_TOKEN=foo RINKEBY_DEPLOYER_PK=bar yarn hardhat compile --force",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",

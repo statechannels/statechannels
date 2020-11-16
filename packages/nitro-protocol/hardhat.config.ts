@@ -17,24 +17,25 @@ if (!rinkebyDeployerPK) {
 
 module.exports = {
   solidity: '0.6.12',
-  namedAccounts: {
-    deployer: {
-      // Address used for the initial deploy of the contracts.
-      // Ask @kerzhner for the private key if you would like to deploy from the same address
-      // Otherwise uncomment the line below
-      //rinkeby: 0,
-      rinkeby: '0x87612aAD373586A38062c29F833A2AbC72038591',
-    },
-  },
-  networks: {
-    rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/' + infuraToken,
-      accounts: [rinkebyDeployerPK],
-    },
-  },
-  paths: {
-    sources: 'contracts',
-    deploy: 'hardhat-deploy',
-    deployments: 'hardhat-deployments',
-  },
+  // TODO uncomment this (it interferes with hardhat compile)
+  // namedAccounts: {
+  //   deployer: {
+  //     // Address used for the initial deploy of the contracts.
+  //     // Ask @kerzhner for the private key if you would like to deploy from the same address
+  //     // Otherwise uncomment the line below
+  //     //rinkeby: 0,
+  //     rinkeby: '0x87612aAD373586A38062c29F833A2AbC72038591',
+  //   },
+  // },
+  // networks: {
+  //   rinkeby: {
+  //     url: 'https://rinkeby.infura.io/v3/' + infuraToken,
+  //     accounts: [rinkebyDeployerPK],
+  //   },
+  // },
+  // paths: {
+  //   sources: 'contracts',
+  //   deploy: 'hardhat-deploy',
+  //   deployments: 'hardhat-deployments',
+  // },
 };
