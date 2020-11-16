@@ -48,7 +48,7 @@ restore_dep: &restore_dep
 save_built_artifacts: &save_built_artifacts
   save_cache:
     # Force a new cache on each build
-    key: v6-built-artifacts-cache-{{ epoch }}
+    key: v7-built-artifacts-cache-{{ epoch }}
     paths:
       # Various TypeScript emissions
       - packages/client-api-schema/lib
@@ -58,12 +58,12 @@ save_built_artifacts: &save_built_artifacts
       - packages/wire-format/lib
       - packages/server-wallet/lib
       # Smart contract compiles
-      - packages/nitro-protocol/build
+      - packages/nitro-protocol/artifacts
 
 restore_built_artifacts: &restore_built_artifacts
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
-    key: v6-built-artifacts-cache-
+    key: v7-built-artifacts-cache-
 
 # END MACROS
 
