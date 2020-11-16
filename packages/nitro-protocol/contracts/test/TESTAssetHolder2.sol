@@ -12,7 +12,7 @@ contract TESTAssetHolder2 is TESTAssetHolder {
      * @dev Constructor function storing the AdjudicatorAddress.
      * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
      */
-    constructor(address _AdjudicatorAddress) public TESTAssetHolder(_AdjudicatorAddress) {}
+    constructor(address _AdjudicatorAddress) TESTAssetHolder(_AdjudicatorAddress) {}
 
     bool public dummy;
 }

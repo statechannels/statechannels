@@ -9,7 +9,6 @@ import './TESTAssetHolder.sol';
  */
 contract TestErc20AssetHolder is ERC20AssetHolder {
     constructor(address _AdjudicatorAddress, address _TokenAddress)
-        public
         ERC20AssetHolder(_AdjudicatorAddress, _TokenAddress)
     {}
 

@@ -18,7 +18,7 @@ contract ERC20AssetHolder is AssetHolder {
      * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
      * @param _TokenAddress Address of an ERC20 Token  contract, supplied at deploy-time.
      */
-    constructor(address _AdjudicatorAddress, address _TokenAddress) public {
+    constructor(address _AdjudicatorAddress, address _TokenAddress) {
         AdjudicatorAddress = _AdjudicatorAddress;
         Token = IERC20(_TokenAddress);
     }

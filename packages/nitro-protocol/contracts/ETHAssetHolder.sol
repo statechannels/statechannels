@@ -14,7 +14,7 @@ contract ETHAssetHolder is AssetHolder {
      * @dev Constructor function storing the AdjudicatorAddress.
      * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
      */
-    constructor(address _AdjudicatorAddress) public {
+    constructor(address _AdjudicatorAddress) {
         AdjudicatorAddress = _AdjudicatorAddress;
     }
 
