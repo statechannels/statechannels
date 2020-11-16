@@ -84,7 +84,7 @@ contract ForceMove is IForceMove {
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
-            uint48(now) + fixedPart.challengeDuration, // This could overflow, so don't join a channel with a huge challengeDuration
+            uint48(block.timestamp) + fixedPart.challengeDuration, // This could overflow, so don't join a channel with a huge challengeDuration
             challenger,
             isFinalCount > 0,
             fixedPart,
@@ -96,7 +96,7 @@ contract ForceMove is IForceMove {
         channelStorageHashes[channelId] = _hashChannelData(
             ChannelData(
                 largestTurnNum,
-                uint48(now) + fixedPart.challengeDuration,
+                uint48(block.timestamp) + fixedPart.challengeDuration,
                 supportedStateHash,
                 challenger,
                 keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
@@ -274,7 +274,7 @@ contract ForceMove is IForceMove {
 
         // effects
         channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, uint48(now), bytes32(0), address(0), outcomeHash)
+            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
     }
@@ -707,7 +707,7 @@ contract ForceMove is IForceMove {
         (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
-        } else if (finalizesAt <= now) {
+        } else if (finalizesAt <= block.timestamp) {
             return ChannelMode.Finalized;
         } else {
             return ChannelMode.Challenge;
