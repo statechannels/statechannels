@@ -103,5 +103,5 @@ To add a new version of the docs, follow the instructions at https://docusaurus.
 The current [hardhat](https://www.npmjs.com/package/hardhat-deploy) config works with Rinkeby testnet. It can be added on to for any other network.
 
 ```
-INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] npx hardhat deploy --network rinkeby
+INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] yarn hardhat deploy --network rinkeby
 ```
