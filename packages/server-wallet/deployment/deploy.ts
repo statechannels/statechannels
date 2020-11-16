@@ -23,16 +23,17 @@ export async function deploy(): Promise<TestNetworkContext> {
     NitroAdjudicatorArtifact,
   } = ContractArtifacts;
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
-  const ERC20_ADDRESS = await deployer.deploy(TokenArtifact, {}, 0);
+
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact as any);
+  const ERC20_ADDRESS = await deployer.deploy(TokenArtifact as any, {}, 0);
   const ERC20_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    Erc20AssetHolderArtifact,
+    Erc20AssetHolderArtifact as any,
     {},
     NITRO_ADJUDICATOR_ADDRESS,
     ERC20_ADDRESS
   );
   const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    EthAssetHolderArtifact,
+    EthAssetHolderArtifact as any,
     {},
     NITRO_ADJUDICATOR_ADDRESS
   );
