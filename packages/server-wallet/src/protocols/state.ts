@@ -64,7 +64,7 @@ export const status = (channelState: ChannelState): ChannelStatus => {
     if (support?.every(s => s.isFinal)) {
       return 'closed'; // the entire support chain isFinal
     } else {
-      return 'closing'; // at least one isFinal state proposed
+      return 'closing'; // the latest state, and possibly other states, are isFinal
     }
   } else {
     if (latest.turnNum >= participants.length * 2) {
