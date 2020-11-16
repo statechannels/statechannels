@@ -6,7 +6,23 @@ import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 
 const config = {
-  solidity: '0.6.12',
+  solidity: {
+    version: '0.6.12',
+    settings: {
+      outputSelection: {
+        '*': {
+          '*': [
+            'evm.bytecode.object',
+            'evm.deployedBytecode.object',
+            'abi',
+            'evm.bytecode.sourceMap',
+            'evm.deployedBytecode.sourceMap',
+          ],
+          '': ['ast'],
+        },
+      },
+    },
+  },
   namedAccounts: {
     deployer: {},
   },
