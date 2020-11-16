@@ -14,7 +14,7 @@
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",
     "fp-ts": "2.7.0",
-    "knex": "0.20.9",
+    "knex": "0.21.12",
     "lodash": "4.17.20",
     "objection": "2.2.3",
     "p-queue": "^6.6.2",
