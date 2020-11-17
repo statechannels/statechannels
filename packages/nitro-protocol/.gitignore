@@ -25,3 +25,4 @@ ganache/*[.js,.json]
 
 # hardhat directories
 cache
+solcInputs/
