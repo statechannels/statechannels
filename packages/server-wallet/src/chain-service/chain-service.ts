@@ -213,15 +213,11 @@ export class ChainService implements ChainServiceInterface {
         })
       );
 
-      // Check if the channel has been finalized in the past or will finalize in the next 10 minutes
-      const timeNowSeconds = Date.now() / 1_000;
-      if (
-        finalizesAt &&
-        (timeNowSeconds - Number(finalizesAt) >= 0 ||
-          Number(finalizesAt) - timeNowSeconds <= 60 * 10)
-      ) {
-        return;
-      }
+      const latestBlockTimestamp = (
+        await this.provider.getBlock(await this.provider.getBlockNumber())
+      ).timestamp;
+      // Check if the channel has been finalized in the past
+      if (latestBlockTimestamp >= Number(finalizesAt)) return;
 
       throw reason;
     };
