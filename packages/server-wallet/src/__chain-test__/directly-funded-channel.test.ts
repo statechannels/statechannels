@@ -1,6 +1,6 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {BN, makeDestination} from '@statechannels/wallet-core';
+import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers, providers} from 'ethers';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
@@ -70,7 +70,7 @@ it('Create a directly funded channel between two wallets ', async () => {
         amount: bFunding,
       },
     ],
-    assetHolderAddress: '0x00', // must be even length
+    assetHolderAddress: makeAddress(constants.AddressZero),
   };
 
   const channelParams: CreateChannelParams = {

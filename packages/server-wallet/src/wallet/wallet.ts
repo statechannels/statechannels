@@ -19,13 +19,12 @@ import {
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
-  Zero,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {ethers} from 'ethers';
+import {ethers, constants} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 
@@ -257,7 +256,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     await this.store.updateFunding(
       channelId,
       BN.from(amount),
-      assetHolderAddress || makeAddress(Zero)
+      assetHolderAddress || makeAddress(constants.AddressZero)
     );
 
     await this.takeActions([channelId], response);
