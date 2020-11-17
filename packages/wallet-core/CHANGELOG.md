@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.3](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.2...@statechannels/wallet-core@0.9.3) (2020-11-17)
+
+
+### Bug Fixes
+
+* revert version change ([ff30eed](https://github.com/statechannels/statechannels/commit/ff30eed36b25696f9a98bb97184dc7aab238401b))
+
+
+
+
+
 ## [0.9.2](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.0...@statechannels/wallet-core@0.9.2) (2020-11-17)
 
 
