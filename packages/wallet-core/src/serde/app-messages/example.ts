@@ -4,12 +4,11 @@ import {utils} from 'ethers';
 import {SimpleAllocation, MixedAllocation, makeAddress} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {makeDestination} from '../../utils';
-import {ETH_TOKEN} from '../../constants';
 import {BN} from '../../bignumber';
 
 export const externalEthAllocation: Allocations = [
   {
-    assetHolderAddress: ETH_TOKEN,
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     allocationItems: [
       {
         amount: utils.hexZeroPad('0x5', 32),
@@ -71,7 +70,7 @@ export const internalMixedAllocation: MixedAllocation = {
     internalEthAllocation,
     {
       type: 'SimpleAllocation',
-      assetHolderAddress: makeAddress('0x1111111111111111111111111111111111111111'),
+      assetHolderAddress: makeAddress('0x1000000000000000000000000000000000000001'),
       allocationItems: [
         {
           amount: BN.from(utils.hexZeroPad('0x1', 32)),
