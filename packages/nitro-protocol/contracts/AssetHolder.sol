@@ -61,6 +61,8 @@ contract AssetHolder is IAssetHolder {
             }
         }
 
+        require(affordsForDestination > 0, '_transfer fromChannel allocates 0 to destination');
+        
         // effects
         holdings[fromChannelId] -= affordsForDestination;
 
