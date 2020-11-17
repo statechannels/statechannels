@@ -70,7 +70,8 @@ it('Create a directly funded channel between two wallets ', async () => {
         amount: bFunding,
       },
     ],
-    assetHolderAddress: makeAddress(constants.AddressZero),
+    // eslint-disable-next-line
+    assetHolderAddress: makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS as string),
   };
 
   const channelParams: CreateChannelParams = {
