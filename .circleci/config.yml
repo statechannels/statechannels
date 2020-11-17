@@ -19,9 +19,9 @@ postgres: &postgres
     - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
   environment:
     NODE_ENV: test
-    PSQL_ARGS: -p 5432 -h localhost -U root
-    SERVER_DB_USER: root
-    POSTGRES_USER: root       
+    PSQL_ARGS: -p 5432 -h localhost -U postgres
+    SERVER_DB_USER: postgres
+    POSTGRES_USER: postgres     
 
 # MACROS
 
