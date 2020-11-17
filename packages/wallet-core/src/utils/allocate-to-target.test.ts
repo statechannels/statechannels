@@ -1,6 +1,6 @@
 import {BN} from '../bignumber';
 import {AllocationItem} from '../types';
-import {MOCK_TOKEN} from '../constants';
+import {MOCK_ASSET_HOLDER_ADDRESS} from '../constants';
 
 import {
   Errors,
@@ -96,11 +96,11 @@ describe('allocateToTarget with valid input', () => {
 
     expect(
       allocateToTarget(
-        simpleTokenAllocation(MOCK_TOKEN, ledgerAllocation),
+        simpleTokenAllocation(MOCK_ASSET_HOLDER_ADDRESS, ledgerAllocation),
         deductions,
         targetChannelId
       )
-    ).toMatchObject(simpleTokenAllocation(MOCK_TOKEN, expectedAllocation));
+    ).toMatchObject(simpleTokenAllocation(MOCK_ASSET_HOLDER_ADDRESS, expectedAllocation));
   });
 });
 
