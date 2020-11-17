@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.11.5](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.4...@statechannels/server-wallet@1.11.5) (2020-11-17)
+
+
+### Bug Fixes
+
+* do not rely on revert reason in chain service ([13d9f4e](https://github.com/statechannels/statechannels/commit/13d9f4edc516629196a367fc63a034c047584b55))
+* use latest block timestamp for computing channel finalization ([123d0ea](https://github.com/statechannels/statechannels/commit/123d0eaf78889fc2702270e8d1c454430167f7d2))
+
+
+
+
+
 ## [1.11.4](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.3...@statechannels/server-wallet@1.11.4) (2020-11-17)
 
 
