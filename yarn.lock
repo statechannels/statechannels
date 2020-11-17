@@ -20728,21 +20728,6 @@ solc@0.7.3:
     semver "^5.5.0"
     tmp "0.0.33"
 
-solc@0.7.4:
-  version "0.7.4"
-  resolved "https://registry.npmjs.org/solc/-/solc-0.7.4.tgz#9c5ed81ae0692e3e614e47cd5b500b0f9485b98d"
-  integrity sha512-IVLqAfUkJqgTS0JIgFPeC50ehUeBXu2eE+iU+rqb6UeOyf6w/BB/EsNcTSTpjtUti8BTG/sCd2qVhrWVYy7p0g==
-  dependencies:
-    command-exists "^1.2.8"
-    commander "3.0.2"
-    follow-redirects "^1.12.1"
-    fs-extra "^0.30.0"
-    js-sha3 "0.8.0"
-    memorystream "^0.3.1"
-    require-from-string "^2.0.0"
-    semver "^5.5.0"
-    tmp "0.0.33"
-
 "solidoc@https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd":
   version "1.0.4"
   resolved "https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd"
