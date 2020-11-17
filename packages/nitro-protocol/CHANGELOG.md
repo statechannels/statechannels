@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.4](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.8.4) (2020-11-17)
+
+
+### Bug Fixes
+
+* fix artifacts path ([c1b30fa](https://github.com/statechannels/monorepo/commit/c1b30fa2b7c1bf1450154cd288c7d889663ea932))
+
+
+
+
+
 ## [0.8.3](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.2...@statechannels/nitro-protocol@0.8.3) (2020-11-17)
 
 
