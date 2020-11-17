@@ -430,13 +430,13 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
-            }
             // Event emitted regardless of success of external calls
             emit AssetTransferred(
                         guarantorChannelId,
                         allocation[j].destination,
                         payouts[j]
                     );
+            }
         }
     }
 
