@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.11.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.0...@statechannels/server-wallet@1.11.1) (2020-11-17)
+
+
+### Bug Fixes
+
+* log failed signState attempt ([c39f3da](https://github.com/statechannels/statechannels/commit/c39f3dacbdbd41f5e99a321cc4de3c24c2c82458)), closes [#2876](https://github.com/statechannels/statechannels/issues/2876)
+* remove store.destroy method ([519caa9](https://github.com/statechannels/statechannels/commit/519caa9c60ccb2e21909b4dfe8107928b73981f5))
+* upgrade knex to 0.21.x ([7316b5a](https://github.com/statechannels/statechannels/commit/7316b5a4120282f444cb40344fce2316a016c432)), closes [/github.com/knex/knex/issues/2820#issuecomment-620628867](https://github.com//github.com/knex/knex/issues/2820/issues/issuecomment-620628867)
+
+
+
+
+
 # [1.11.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.10.1...@statechannels/server-wallet@1.11.0) (2020-11-14)
 
 
