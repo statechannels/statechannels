@@ -22,6 +22,7 @@ postgres: &postgres
     PSQL_ARGS: -p 5432 -h localhost -U postgres
     SERVER_DB_USER: postgres
     POSTGRES_USER: postgres     
+    AMOUNT_OF_WORKER_THREADS: 0
 
 # MACROS
 
@@ -190,6 +191,10 @@ jobs:
     <<: *postgres
     resource_class: xlarge
     environment:
+      NODE_ENV: test
+      PSQL_ARGS: -p 5432 -h localhost -U postgres
+      SERVER_DB_USER: postgres
+      POSTGRES_USER: postgres     
       AMOUNT_OF_WORKER_THREADS: 6
       LOG_DESTINATION: /home/circleci/project/artifacts/wallet.log
     steps:
@@ -215,8 +220,6 @@ jobs:
   server-wallet-stress-test:
     <<: *postgres
     resource_class: xlarge
-    environment:
-      AMOUNT_OF_WORKER_THREADS: 0
     steps:
       - checkout
       - attach_workspace:
