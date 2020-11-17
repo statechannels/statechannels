@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.3](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.2...@statechannels/nitro-protocol@0.8.3) (2020-11-17)
+
+
+### Bug Fixes
+
+* revert version change ([ff30eed](https://github.com/statechannels/monorepo/commit/ff30eed36b25696f9a98bb97184dc7aab238401b))
+
+
+
+
+
 ## [0.8.2](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.0...@statechannels/nitro-protocol@0.8.2) (2020-11-17)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.1...@statechannels/wire-format@0.8.2) (2020-11-17)
+
+
+### Bug Fixes
+
+* chore(release): publish [skip ci] ([caa958d](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/caa958dcfdc6fbcf07ebb0b9001552ef41ebbc9c))
+* revert version change ([ff30eed](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/ff30eed36b25696f9a98bb97184dc7aab238401b))
+
+
+
+
+
 ## [0.8.1](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.0...@statechannels/wire-format@0.8.1) (2020-11-14)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.11.4](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.3...@statechannels/server-wallet@1.11.4) (2020-11-17)
+
+
+### Bug Fixes
+
+* revert version change ([ff30eed](https://github.com/statechannels/statechannels/commit/ff30eed36b25696f9a98bb97184dc7aab238401b))
+
+
+
+
+
 ## [1.11.3](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.2...@statechannels/server-wallet@1.11.3) (2020-11-17)
 
 **Note:** Version bump only for package @statechannels/server-wallet
