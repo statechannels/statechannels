@@ -117,14 +117,6 @@ export const goodErrorResponses: StateChannelsErrorResponse[] = [
     jsonrpc: '2.0',
     id: 1581594378830,
     error: {
-      code: 1002,
-      message: 'This token is not supported'
-    }
-  },
-  {
-    jsonrpc: '2.0',
-    id: 1581594378830,
-    error: {
       code: 1100,
       message: 'Could not find channel'
     }

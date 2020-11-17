@@ -24,12 +24,5 @@ type InvalidAppDefinition = JsonRpcError<
   ErrorCodes['InvalidAppDefinition'],
   'Invalid App Definition'
 >;
-type UnsupportedAssetHolderAddress = JsonRpcError<
-  ErrorCodes['UnsupportedAssetHolderAddress'],
-  'This asset holder address is not supported'
->;
 
-export type CreateChannelError =
-  | SigningAddressNotFound
-  | InvalidAppDefinition
-  | UnsupportedAssetHolderAddress;
+export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition;
