@@ -182,10 +182,9 @@ export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Warning: (ae-forgotten-export) The symbol "SigningAddressNotFound" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "InvalidAppDefinition" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "UnsupportedAssetHolderAddress" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition | UnsupportedAssetHolderAddress;
+export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition;
 
 // @public (undocumented)
 export interface CreateChannelParams {
@@ -270,7 +269,6 @@ export type ErrorCodes = {
     CreateChannel: {
         SigningAddressNotFound: 1000;
         InvalidAppDefinition: 1001;
-        UnsupportedAssetHolderAddress: 1002;
     };
     JoinChannel: {
         ChannelNotFound: 1100;
@@ -295,7 +293,7 @@ export interface Funds {
     // (undocumented)
     amount: Uint256;
     // (undocumented)
-    token: Address;
+    assetHolderAddress: Address;
 }
 
 // @public (undocumented)

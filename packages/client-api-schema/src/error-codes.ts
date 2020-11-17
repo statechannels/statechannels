@@ -12,7 +12,6 @@ Beyond the standard errors from that spec, the following domain-specific errors 
  * <li> 900: The message is not addressed to this wallet.</li>
  * <li> 1000: The wallet can't find the signing key corresponding to the first signing address in the participants array.</li>
  * <li> 1001: There isn't a contract deployed at the app definition address. </li>
- * <li> 1002: The wallet doesn't support one or more of the tokens appearing in the allocation.</li>
  * <li> 1100: The wallet can't find the channel corresponding to the channelId</li>
  * <li> 1101: The wallet contains invalid state data</li>
  * <li> 1200: The wallet can't find the channel corresponding to the channelId</li>
@@ -46,7 +45,6 @@ export type ErrorCodes = {
   CreateChannel: {
     SigningAddressNotFound: 1000;
     InvalidAppDefinition: 1001;
-    UnsupportedAssetHolderAddress: 1002;
   };
   JoinChannel: {
     ChannelNotFound: 1100;

@@ -260,9 +260,6 @@
         },
         {
           "$ref": "#/definitions/JsonRpcError%3C1001%2C%22Invalid%20App%20Definition%22%3E"
-        },
-        {
-          "$ref": "#/definitions/JsonRpcError%3C1002%2C%22This%20asset%20holder%20address%20is%20not%20supported%22%3E"
         }
       ]
     },
@@ -373,7 +370,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-2780-3076-src_data-types.ts-0-3494%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-2793-3089-src_data-types.ts-0-3507%5B%5D%3E"
     },
     "GetStateError": {
       "$ref": "#/definitions/JsonRpcError%3C1200%2C%22Could%20not%20find%20channel%22%3E"
@@ -504,32 +501,6 @@
         },
         "message": {
           "const": "Invalid App Definition",
-          "description": "Error message",
-          "type": "string"
-        }
-      },
-      "required": [
-        "code",
-        "message"
-      ],
-      "type": "object"
-    },
-    "JsonRpcError<1002,\"This asset holder address is not supported\">": {
-      "additionalProperties": false,
-      "description": "Specifies error object as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
-      "properties": {
-        "code": {
-          "const": 1002,
-          "description": "Error code",
-          "type": "number"
-        },
-        "data": {
-          "description": "Error data",
-          "not": {
-          }
-        },
-        "message": {
-          "const": "This asset holder address is not supported",
           "description": "Error message",
           "type": "string"
         }
@@ -1691,7 +1662,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src_data-types.ts-2780-3076-src_data-types.ts-0-3494[]>": {
+    "JsonRpcResponse<def-interface-src_data-types.ts-2793-3089-src_data-types.ts-0-3507[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
