@@ -44,7 +44,7 @@ async function benchmark(): Promise<void> {
     channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
-        allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
+        allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
         appData: '0x',
       })
     )
@@ -57,7 +57,7 @@ async function benchmark(): Promise<void> {
   for (const channel of channels) {
     await wallet.updateChannel({
       channelId: channel.channelId,
-      allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
+      allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
       appData: '0x',
     });
   }
@@ -70,7 +70,7 @@ async function benchmark(): Promise<void> {
     channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
-        allocations: [{token: ethers.constants.AddressZero, allocationItems: []}],
+        allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
         appData: '0x',
       })
     )

@@ -46,7 +46,7 @@ export type ErrorCodes = {
   CreateChannel: {
     SigningAddressNotFound: 1000;
     InvalidAppDefinition: 1001;
-    UnsupportedToken: 1002;
+    UnsupportedAssetHolderAddress: 1002;
   };
   JoinChannel: {
     ChannelNotFound: 1100;

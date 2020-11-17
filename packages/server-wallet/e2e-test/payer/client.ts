@@ -79,7 +79,7 @@ export default class PayerClient {
         participants: [this.me, receiver],
         allocations: [
           {
-            token: AddressZero,
+            assetHolderAddress: AddressZero,
             allocationItems: [
               {
                 amount: BN.from(0),

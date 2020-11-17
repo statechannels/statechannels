@@ -19,7 +19,7 @@ import {
   SignedState,
   ChannelConstants
 } from '../../types';
-import {checkThat, exists, formatAmount, tokenAddress} from '../../utils';
+import {checkThat, exists, formatAmount} from '../../utils';
 import {BN} from '../../bignumber';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
@@ -30,7 +30,7 @@ export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
       amount: formatAmount(BN.from(assetBudget.channels[channelId].amount))
     }));
     return {
-      token: tokenAddress(assetHolderAddress) || constants.AddressZero,
+      assetHolderAddress: assetHolderAddress || constants.AddressZero,
       availableReceiveCapacity: formatAmount(assetBudget.availableReceiveCapacity),
       availableSendCapacity: formatAmount(assetBudget.availableSendCapacity),
       channels
@@ -54,14 +54,9 @@ export function serializeAllocation(allocation: Allocation): AppAllocations {
 }
 
 function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation {
-  const token = tokenAddress(allocation.assetHolderAddress);
-  if (!token) {
-    throw new Error(`Can't find token address for asset holder ${allocation.assetHolderAddress}`);
-  }
-
   return {
     allocationItems: allocation.allocationItems.map(serializeAllocationItem),
-    token
+    assetHolderAddress: allocation.assetHolderAddress
   };
 }
 

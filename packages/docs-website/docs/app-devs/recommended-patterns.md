@@ -270,7 +270,7 @@ const formatParticipants = (
 const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
   return [
     {
-      token: '0x00', // We are sticking to ETH here
+      assetHolderAddress: '0x00', // We are sticking to ETH here
       allocationItems: [
         {destination: aAddress, amount: BigNumber.from(aBal).toHexString()},
         {destination: bAddress, amount: BigNumber.from(bBal).toHexString()}

@@ -36,7 +36,7 @@ export interface AllocationItem {
 }
 
 export interface Allocation {
-  assetHolderAddress: Address; // The token's contract address.
+  assetHolderAddress: Address; // The asset holder address.
   allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 

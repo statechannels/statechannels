@@ -70,7 +70,7 @@ it('Create a directly funded channel between two wallets ', async () => {
         amount: bFunding,
       },
     ],
-    token: '0x00', // must be even length
+    assetHolderAddress: '0x00', // must be even length
   };
 
   const channelParams: CreateChannelParams = {

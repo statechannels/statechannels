@@ -4,8 +4,7 @@
 
 ```ts
 
-import { Address } from '@statechannels/client-api-schema';
-import { Address as Address_2 } from '@statechannels/wallet-core';
+import { Address } from '@statechannels/wallet-core';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';

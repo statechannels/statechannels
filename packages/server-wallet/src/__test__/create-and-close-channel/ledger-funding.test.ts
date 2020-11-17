@@ -67,7 +67,7 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
             amount: bDepositAmtETH,
           },
         ],
-        token: ETH_ASSET_HOLDER_ADDRESS,
+        assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       },
     ],
   };
@@ -79,14 +79,14 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
   const fundingPostADeposit = {
     channelId,
-    token: ETH_ASSET_HOLDER_ADDRESS,
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     amount: aDepositAmtETH,
   };
   await a.updateFundingForChannels([fundingPostADeposit]);
   await b.updateFundingForChannels([fundingPostADeposit]);
   const fundingPostBDeposit = {
     channelId,
-    token: ETH_ASSET_HOLDER_ADDRESS,
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     amount: BN.add(aDepositAmtETH, bDepositAmtETH),
   };
   const resultA2 = await a.updateFundingForChannels([fundingPostBDeposit]);
@@ -119,7 +119,7 @@ const testCreateChannelParams = (
           amount: BN.from(bAllocation),
         },
       ],
-      token: ETH_ASSET_HOLDER_ADDRESS, // must be even length
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, // must be even length
     },
   ],
   appDefinition: ethers.constants.AddressZero,

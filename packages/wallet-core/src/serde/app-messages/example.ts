@@ -9,7 +9,7 @@ import {BN} from '../../bignumber';
 
 export const externalEthAllocation: Allocations = [
   {
-    token: ETH_TOKEN,
+    assetHolderAddress: ETH_TOKEN,
     allocationItems: [
       {
         amount: utils.hexZeroPad('0x5', 32),
@@ -44,7 +44,7 @@ export const internalEthAllocation: SimpleAllocation = {
 export const externalMixedAllocation: Allocations = [
   externalEthAllocation[0],
   {
-    token: '0x1000000000000000000000000000000000000001',
+    assetHolderAddress: '0x1000000000000000000000000000000000000001',
     allocationItems: [
       {
         amount: utils.hexZeroPad('0x1', 32),
