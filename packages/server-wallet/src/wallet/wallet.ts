@@ -365,7 +365,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     await this.takeActions(channelIds, response);
 
-    channelIds.map(id => this.registerChannelWithChainService(id));
+    await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
 
     return response.multipleChannelOutput();
   }
