@@ -1,5 +1,6 @@
-import {BN} from '@statechannels/wallet-core';
+import {BN, makeAddress} from '@statechannels/wallet-core';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
+import {constants} from 'ethers';
 
 import {channel} from '../../../models/__test__/fixtures/channel';
 
@@ -11,7 +12,7 @@ const defaultVars: UpdateChannelParams = {
   channelId: channel().channelId,
   allocations: [
     {
-      assetHolderAddress: '0x00',
+      assetHolderAddress: makeAddress(constants.AddressZero),
       allocationItems: [
         {destination: alice().destination, amount: BN.from(1)},
         {destination: bob().destination, amount: BN.from(3)},
