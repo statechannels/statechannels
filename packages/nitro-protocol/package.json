@@ -10,8 +10,8 @@
     "ethers": "5.0.12"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.4.4",
-    "@statechannels/jest-gas-reporter": "^0.4.4",
+    "@statechannels/devtools": "0.4.3",
+    "@statechannels/jest-gas-reporter": "0.4.3",
     "@types/eslint": "7.2.3",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "26.0.14",

@@ -10,7 +10,7 @@
     "@statechannels/nitro-protocol": "0.8.2",
     "@statechannels/wallet-core": "0.9.2",
     "@statechannels/wasm-utils": "0.1.5",
-    "@statechannels/wire-format": "^0.8.2",
+    "@statechannels/wire-format": "0.8.1",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",
     "fp-ts": "2.7.0",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@pacote/jest-either": "4.0.4",
-    "@statechannels/devtools": "^0.4.4",
+    "@statechannels/devtools": "0.4.3",
     "@types/autocannon": "4.1.0",
     "@types/body-parser": "1.19.0",
     "@types/eslint": "7.2.3",
