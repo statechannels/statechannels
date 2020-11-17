@@ -33,12 +33,19 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 let chainService: ChainService;
 let channelNonce = 0;
 
+jest.setTimeout(15_000);
+
 beforeAll(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
-  chainService = new ChainService(rpcEndpoint, ETHERLIME_ACCOUNTS[0].privateKey);
+  /* eslint-disable no-process-env */
+  chainService = new ChainService(
+    rpcEndpoint,
+    process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey
+  );
+  /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 });
 
 afterAll(() => chainService.destructor());
@@ -242,7 +249,7 @@ describe('registerChannel', () => {
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
     await p;
-  }, 15_000);
+  });
 });
 
 describe('concludeAndWithdraw', () => {
@@ -285,7 +292,7 @@ describe('concludeAndWithdraw', () => {
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
     await p;
-  }, 10_000);
+  });
 
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
@@ -332,7 +339,7 @@ describe('concludeAndWithdraw', () => {
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
 
     await p;
-  }, 10_000);
+  });
 });
 
 describe('getBytecode', () => {
