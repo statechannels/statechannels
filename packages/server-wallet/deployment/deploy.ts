@@ -2,6 +2,7 @@ import {Address} from '@statechannels/client-api-schema';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {GanacheDeployer} from '@statechannels/devtools';
 import {defaultConfig} from '../src/config';
+import {Wallet} from 'ethers';
 
 // NOTE: deploying contracts like this allows the onchain service package to
 // be easily extracted
@@ -23,9 +24,12 @@ export async function deploy(): Promise<TestNetworkContext> {
     NitroAdjudicatorArtifact,
   } = ContractArtifacts;
 
-
   const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact as any);
-  const ERC20_ADDRESS = await deployer.deploy(TokenArtifact as any, {}, 0);
+  const ERC20_ADDRESS = await deployer.deploy(
+    TokenArtifact as any,
+    {},
+    new Wallet(defaultConfig.ethereumPrivateKey).address
+  );
   const ERC20_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     Erc20AssetHolderArtifact as any,
     {},
