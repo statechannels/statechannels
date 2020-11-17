@@ -70,6 +70,7 @@
     "build:typescript": "rm -rf lib; yarn tsc -b .",
     "build:webpack": "webpack",
     "contract:compile": "yarn hardhat compile --force",
+    "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",

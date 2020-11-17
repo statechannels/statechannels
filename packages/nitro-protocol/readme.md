@@ -100,8 +100,10 @@ To add a new version of the docs, follow the instructions at https://docusaurus.
 
 ## Deploying contracts to a testnet
 
-The current [hardhat](https://www.npmjs.com/package/hardhat-deploy) config works with Rinkeby testnet. It can be added on to for any other network.
+The current [hardhat](https://www.npmjs.com/package/hardhat-deploy) config (`hardhat.config-rinkeby.ts`) works with Rinkeby testnet. It can be added on to for any other network.
 
 ```
-INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] yarn hardhat deploy --network rinkeby
+INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] yarn contract:deploy-rinkeby
 ```
+
+The config extends from a minimal base config (`hardhat.config.ts`) that is used for other tasks such as compilation.
