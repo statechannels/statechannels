@@ -47,7 +47,7 @@
   },
   "files": [
     "contracts/*",
-    "lib/artifacts/contracts/*.json",
+    "lib/artifacts/*",
     "lib/src/*",
     "lib/test/*"
   ],
