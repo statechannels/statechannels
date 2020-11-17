@@ -515,11 +515,12 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       await this._pushMessage(wirePayload, response);
 
       return response.multipleChannelOutput();
-    } catch (e) {
+    } catch (err) {
+      this.logger.error({err}, 'Error during pushMessage');
       throw new PushMessageError('Error during pushMessage', {
         thisWalletVersion: WALLET_VERSION,
         payloadWalletVersion: wirePayload.walletVersion,
-        cause: e,
+        cause: err,
       });
     }
   }
