@@ -4,12 +4,14 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination, Zero} from '@statechannels/wallet-core';
+import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+
+const AddressZero = ethers.constants.AddressZero;
 
 const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
 const b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
@@ -56,14 +58,14 @@ it('Create a directly funded channel between two wallets ', async () => {
         amount: BigNumber.from(1).toHexString(),
       },
     ],
-    assetHolderAddress: makeAddress(Zero), // must be even length
+    assetHolderAddress: makeAddress(AddressZero), // must be even length
   };
 
   const createChannelParams: CreateChannelParams = {
     participants: [participantA, participantB],
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
-    appData: makeAddress(Zero), // must be even length
+    appData: makeAddress(AddressZero), // must be even length
     fundingStrategy: 'Direct',
   };
 
@@ -110,7 +112,7 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   const depositByA = {
     channelId,
-    assetHolderAddress: makeAddress(Zero),
+    assetHolderAddress: makeAddress(AddressZero),
     amount: BigNumber.from(1).toHexString(),
   }; // A sends 1 ETH (1 total)
 
@@ -121,7 +123,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {
     channelId,
-    assetHolderAddress: makeAddress(Zero),
+    assetHolderAddress: makeAddress(AddressZero),
     amount: BigNumber.from(2).toHexString(),
   }; // B sends 1 ETH (2 total)
 
