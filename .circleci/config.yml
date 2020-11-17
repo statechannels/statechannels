@@ -5,26 +5,25 @@ orbs:
   slack: circleci/slack@3.4.1
 
 defaults: &defaults
-  environment:
-    PSQL_ARGS: -p 5432 -h localhost
-    NODE_ENV: test
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: geoknee/statechannels:12.18-solc0.7.4 # solc installed (unecessary since hardhat will re-download solc)
+    - image: cimg/node:12.18.0
+  environment:
+    NODE_ENV: test
+
+postgres: &postgres  
+  <<: *defaults
+  docker:
+    - image: cimg/node:12.18.0
     - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
-      environment:
-        POSTGRES_USER: root
+  environment:
+    NODE_ENV: test
+    PSQL_ARGS: -p 5432 -h localhost -U root
+    SERVER_DB_USER: root
+    POSTGRES_USER: root       
 
 # MACROS
-
-integration_test_settings: &integration_test_settings
-  resource_class: large
-  working_directory: /home/circleci/project
-  docker:
-    - image: circleci/node:12.16.3-browsers
-  environment:
-    SC_ENV: << parameters.sc_env >>
 
 save_dep: &save_dep
   save_cache:
@@ -43,26 +42,6 @@ save_dep: &save_dep
 restore_dep: &restore_dep
   restore_cache:
     key: v10-dependency-cache-{{ checksum "yarn.lock" }}
-
-save_built_artifacts: &save_built_artifacts
-  save_cache:
-    # Force a new cache on each build
-    key: v7-built-artifacts-cache-{{ epoch }}
-    paths:
-      # Various TypeScript emissions
-      - packages/client-api-schema/lib
-      - packages/devtools/lib
-      - packages/jest-gas-reporter/lib
-      - packages/nitro-protocol/lib
-      - packages/wire-format/lib
-      - packages/server-wallet/lib
-      # Smart contract compiles
-      - packages/nitro-protocol/artifacts
-
-restore_built_artifacts: &restore_built_artifacts # only used by release-hub-production
-  restore_cache:
-    # Restore from the most recently cached version of lib, using a partial key match
-    key: v7-built-artifacts-cache-
 
 # END MACROS
 
@@ -117,42 +96,6 @@ commands:
           mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
           only_for_branches: 'master,deploy'
 
-  install_xvfb:
-    description: 'Install display server' # See https://crbug.com/795759
-    steps:
-      - run:
-          command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
-
-  run_xvfb:
-    description: 'Run display server'
-    steps:
-      - run:
-          command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
-          background: true
-
-  build_push_release:
-    description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
-    parameters:
-      dockerfile_path:
-        type: string
-      pipeline:
-        type: string
-      app:
-        type: string
-    steps:
-      - run: curl https://cli-assets.heroku.com/install.sh | sh
-      - run: heroku container:login
-      - docker/build:
-          cache_from: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>:latest
-          dockerfile: << parameters.dockerfile_path >>
-          image: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>
-          tag: latest
-      - docker/push:
-          image: << parameters.app >>/<< parameters.pipeline >>
-          registry: registry.heroku.com
-          tag: latest
-      - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
-
   install_postgresql_client:
     description: 'Install postgresql client'
     steps:
@@ -190,7 +133,7 @@ jobs:
       - notify_slack
 
   test:
-    <<: *defaults
+    <<: *postgres
     resource_class: large
     steps:
       - checkout
@@ -222,7 +165,7 @@ jobs:
       - notify_slack
 
   server-wallet-e2e-test:
-    <<: *defaults
+    <<: *postgres
     steps:
       - checkout
       - attach_workspace:
@@ -244,13 +187,10 @@ jobs:
       - upload_artifacts
 
   server-wallet-stress-test-threaded:
-    <<: *defaults
+    <<: *postgres
     resource_class: xlarge
     environment:
-      PSQL_ARGS: -p 5432 -h localhost
-      NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 6
-      SERVER_DB_USER: root
       LOG_DESTINATION: /home/circleci/project/artifacts/wallet.log
     steps:
       - checkout
@@ -273,13 +213,10 @@ jobs:
       - upload_artifacts
 
   server-wallet-stress-test:
-    <<: *defaults
+    <<: *postgres
     resource_class: xlarge
     environment:
-      PSQL_ARGS: -p 5432 -h localhost
-      NODE_ENV: test
       AMOUNT_OF_WORKER_THREADS: 0
-      SERVER_DB_USER: root
     steps:
       - checkout
       - attach_workspace:
@@ -301,7 +238,7 @@ jobs:
       - upload_artifacts
 
   server-wallet-profiling:
-    <<: *defaults
+    <<: *postgres
     steps:
       - checkout
       - attach_workspace:
@@ -328,22 +265,6 @@ jobs:
             cp /home/circleci/project/packages/server-wallet/metrics.log  /home/circleci/project/artifacts
       - upload_artifacts
 
-  push-master-to-deploy:
-    working_directory: /home/circleci/project
-    resource_class: small
-    docker:
-      - image: circleci/node:10.16
-    steps:
-      - checkout
-      - run:
-          command: |
-            git config user.email circle@statechannels.org
-            git config user.name Circle
-            git checkout deploy
-            git rebase origin/master
-            git push origin deploy
-      - notify_slack
-
 workflows:
   statechannels:
     jobs:
@@ -366,16 +287,3 @@ workflows:
       - server-wallet-e2e-test:
           requires:
             - prepare
-
-  ## We are chosing to disable the daily release for now.
-  # scheduled-release:
-  #   triggers:
-  #     - schedule:
-  #         # Run once a day at midnight UTC
-  #         cron: '0 0 * * *'
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
-  #   jobs:
-  #     - push-master-to-deploy
