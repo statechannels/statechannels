@@ -1,7 +1,7 @@
 {
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
-  "version": "0.3.21",
+  "version": "0.3.22",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
@@ -11,8 +11,8 @@
     "@microsoft/api-documenter": "7.8.21",
     "@statechannels/channel-client": "0.4.6",
     "@statechannels/iframe-channel-provider": "0.3.17",
-    "@statechannels/nitro-protocol": "0.8.0",
-    "@statechannels/server-wallet": "1.11.0",
+    "@statechannels/nitro-protocol": "^0.8.1",
+    "@statechannels/server-wallet": "^1.11.1",
     "clsx": "1.1.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
