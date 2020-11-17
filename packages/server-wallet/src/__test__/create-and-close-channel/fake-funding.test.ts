@@ -4,7 +4,7 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeDestination} from '@statechannels/wallet-core';
+import {makeAddress, makeDestination, Zero} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
@@ -45,12 +45,12 @@ it('Create a fake-funded channel between two wallets ', async () => {
     ),
   };
 
-  const token = '0x00'; // must be even length
+  const assetHolderAddress = makeAddress(Zero);
   const aBal = BigNumber.from(1).toHexString();
 
   const allocation: Allocation = {
     allocationItems: [{destination: participantA.destination, amount: aBal}],
-    token,
+    assetHolderAddress,
   };
 
   const channelParams: CreateChannelParams = {

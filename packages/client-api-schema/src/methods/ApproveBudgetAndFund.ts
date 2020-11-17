@@ -4,7 +4,7 @@ import {JsonRpcRequest, JsonRpcResponse} from '../jsonrpc-header-types';
 export interface ApproveBudgetAndFundParams {
   hub: Participant;
   playerParticipantId: string;
-  token: Address;
+  assetHolderAddress: Address;
   requestedSendCapacity: Uint256;
   requestedReceiveCapacity: Uint256;
 }

@@ -82,7 +82,7 @@ const approveBudgetAndFund: ApproveBudgetAndFundRequest = {
   id: 1581594378832,
   method: 'ApproveBudgetAndFund',
   params: {
-    token: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+    assetHolderAddress: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
     hub: {
       destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
       participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
@@ -112,7 +112,7 @@ const createChannel = {
     ],
     allocations: [
       {
-        token: '0x00',
+        assetHolderAddress: '0x00',
         allocationItems: [
           {
             destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',

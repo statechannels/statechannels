@@ -10,7 +10,7 @@ export type Address = string;
 // @public
 export interface Allocation {
     allocationItems: AllocationItem[];
-    token: Address;
+    assetHolderAddress: Address;
 }
 
 // @public
@@ -25,6 +25,8 @@ export type Allocations = Allocation[];
 // @public (undocumented)
 export interface ApproveBudgetAndFundParams {
     // (undocumented)
+    assetHolderAddress: Address;
+    // (undocumented)
     hub: Participant;
     // (undocumented)
     playerParticipantId: string;
@@ -32,8 +34,6 @@ export interface ApproveBudgetAndFundParams {
     requestedReceiveCapacity: Uint256;
     // (undocumented)
     requestedSendCapacity: Uint256;
-    // (undocumented)
-    token: Address;
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "ApproveBudgetAndFundRequest" is marked as @public, but its signature references "JsonRpcRequest" which is marked as @beta
@@ -182,10 +182,10 @@ export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Warning: (ae-forgotten-export) The symbol "SigningAddressNotFound" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "InvalidAppDefinition" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "UnsupportedToken" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "UnsupportedAssetHolderAddress" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition | UnsupportedToken;
+export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition | UnsupportedAssetHolderAddress;
 
 // @public (undocumented)
 export interface CreateChannelParams {
@@ -270,7 +270,7 @@ export type ErrorCodes = {
     CreateChannel: {
         SigningAddressNotFound: 1000;
         InvalidAppDefinition: 1001;
-        UnsupportedToken: 1002;
+        UnsupportedAssetHolderAddress: 1002;
     };
     JoinChannel: {
         ChannelNotFound: 1100;
@@ -578,13 +578,13 @@ export type SyncChannelResponse = JsonRpcResponse<{}>;
 // @public (undocumented)
 export interface TokenBudget {
     // (undocumented)
+    assetHolderAddress: Address;
+    // (undocumented)
     availableReceiveCapacity: Uint256;
     // (undocumented)
     availableSendCapacity: Uint256;
     // (undocumented)
     channels: ChannelBudget[];
-    // (undocumented)
-    token: Address;
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "UiNotification" is marked as @public, but its signature references "JsonRpcNotification" which is marked as @beta

@@ -6,7 +6,6 @@ import {
   CloseChannelParams,
   ChannelResult,
   GetStateParams,
-  Address,
   Participant as APIParticipant,
   ChannelId,
 } from '@statechannels/client-api-schema';
@@ -17,11 +16,10 @@ import {
   convertToParticipant,
   Participant,
   BN,
-  assetHolderAddress as getAssetHolderAddress,
-  Zero,
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
+  Zero,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -99,7 +97,7 @@ const isSingleChannelMessage = (message: Message): message is SingleChannelOutpu
 
 export interface UpdateChannelFundingParams {
   channelId: ChannelId;
-  token?: Address;
+  assetHolderAddress?: CoreAddress;
   amount: Uint256;
 }
 
@@ -253,11 +251,14 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   private async _updateChannelFunding(
-    {channelId, token, amount}: UpdateChannelFundingParams,
+    {channelId, assetHolderAddress, amount}: UpdateChannelFundingParams,
     response: WalletResponse
   ): Promise<void> {
-    const assetHolderAddress = getAssetHolderAddress(token || Zero);
-    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+    await this.store.updateFunding(
+      channelId,
+      BN.from(amount),
+      assetHolderAddress || makeAddress(Zero)
+    );
 
     await this.takeActions([channelId], response);
   }
@@ -685,7 +686,9 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const channel = await this.store.getChannel(channelId);
     const channelResult = ChannelState.toChannelResult(channel);
 
-    const assetHolderAddresses = channelResult.allocations.map(a => getAssetHolderAddress(a.token));
+    const assetHolderAddresses = channelResult.allocations.map(a =>
+      makeAddress(a.assetHolderAddress)
+    );
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 

@@ -4,7 +4,7 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeDestination} from '@statechannels/wallet-core';
+import {makeAddress, makeDestination, Zero} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig} from '../../config';
@@ -52,14 +52,14 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
       {destination: participantB.destination, amount: BigNumber.from(1).toHexString()},
     ],
-    token: '0x00', // must be even length
+    assetHolderAddress: makeAddress(Zero), // must be even length
   };
 
   const createChannelParams: CreateChannelParams = {
     participants: [participantA, participantB],
     allocations: [allocation],
     appDefinition: ethers.constants.AddressZero,
-    appData: '0x00', // must be even length
+    appData: makeAddress(Zero), // must be even length
     fundingStrategy: 'Direct',
   };
 
@@ -107,7 +107,11 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 1,
   });
 
-  const depositByA = {channelId, token: '0x00', amount: BigNumber.from(1).toHexString()}; // A sends 1 ETH (1 total)
+  const depositByA = {
+    channelId,
+    assetHolderAddress: makeAddress(Zero),
+    amount: BigNumber.from(1).toHexString(),
+  }; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
   await a.updateFundingForChannels([depositByA]);
@@ -116,7 +120,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {
     channelId,
-    token: '0x00',
+    assetHolderAddress: makeAddress(Zero),
     amount: BigNumber.from(2).toHexString(),
   }; // B sends 1 ETH (2 total)
   // < PostFund3B

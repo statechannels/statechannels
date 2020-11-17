@@ -7,10 +7,17 @@ import {
 } from '@statechannels/client-api-schema';
 import {constants} from 'ethers';
 
-import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
+import {
+  Allocation,
+  AllocationItem,
+  SimpleAllocation,
+  DomainBudget,
+  AssetBudget,
+  makeAddress
+} from '../../types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../config';
 import {BN} from '../../bignumber';
-import {makeDestination, assetHolderAddress} from '../../utils';
+import {makeDestination} from '../../utils';
 
 export function deserializeBudgetRequest(
   budgetRequest: AppBudgetRequest,
@@ -31,7 +38,7 @@ export function deserializeBudgetRequest(
 
 export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBudget {
   const assetBudgets: AssetBudget[] = DomainBudget.budgets.map(b => ({
-    assetHolderAddress: assetHolderAddress(b.token) || constants.AddressZero,
+    assetHolderAddress: b.assetHolderAddress || constants.AddressZero,
     availableReceiveCapacity: BN.from(b.availableReceiveCapacity),
     availableSendCapacity: BN.from(b.availableSendCapacity),
     channels: b.channels.reduce((record, item) => {
@@ -66,15 +73,10 @@ export function deserializeAllocations(allocations: AppAllocations): Allocation 
 }
 
 function deserializeAllocation(allocation: AppAllocation): SimpleAllocation {
-  const assetHolder = assetHolderAddress(allocation.token);
-  if (!assetHolder) {
-    throw new Error(`Can't find asset holder for token ${allocation.token}`);
-  }
-
   return {
     type: 'SimpleAllocation',
     allocationItems: allocation.allocationItems.map(deserializeAllocationItem),
-    assetHolderAddress: assetHolder
+    assetHolderAddress: makeAddress(allocation.assetHolderAddress)
   };
 }
 

@@ -17,7 +17,7 @@ const createChannel = {
     ],
     allocations: [
       {
-        token: '0x00',
+        assetHolderAddress: '0x00',
         allocationItems: [
           {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'},
           {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'}

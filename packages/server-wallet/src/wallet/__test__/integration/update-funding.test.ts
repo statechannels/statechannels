@@ -1,4 +1,4 @@
-import {BN, makeAddress} from '@statechannels/wallet-core';
+import {BN, makeAddress, Zero} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {channel} from '../../../models/__test__/fixtures/channel';
@@ -76,7 +76,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   const {outbox, channelResults} = await w.updateFundingForChannels(
     channelIds.map(cId => ({
       channelId: cId,
-      token: '0x00',
+      assetHolderAddress: makeAddress(Zero),
       amount: BN.from(4),
     }))
   );
@@ -135,7 +135,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
   const result = await w.updateFundingForChannels([
     {
       channelId: c.channelId,
-      token: '0x00',
+      assetHolderAddress: makeAddress(Zero),
       amount: BN.from(4),
     },
   ]);
