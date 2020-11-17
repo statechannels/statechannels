@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.0...@statechannels/nitro-protocol@0.8.2) (2020-11-17)
+
+
+### Bug Fixes
+
+* chore(release): publish [skip ci] ([caa958d](https://github.com/statechannels/monorepo/commit/caa958dcfdc6fbcf07ebb0b9001552ef41ebbc9c))
+* do not redeclare events ([061824e](https://github.com/statechannels/monorepo/commit/061824e25d7ca0c533a0cadffc75fe7bdbf5da88))
+* hardcode the address used for rinkeby deployments ([f7b3a4a](https://github.com/statechannels/monorepo/commit/f7b3a4aed54490fbd8a8e2bb498a78aa438dbe33))
+* no need to declare visibility of constructor ([7bb89e6](https://github.com/statechannels/monorepo/commit/7bb89e61ebfc0c3fb4a61def6e86ce801494f435))
+* replace now with block.timestamp ([7afb073](https://github.com/statechannels/monorepo/commit/7afb073e00a01203cdf96524402441b1185dbf93))
+
+
+
+
+
 # [0.8.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.7.0...@statechannels/nitro-protocol@0.8.0) (2020-11-14)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.2](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.0...@statechannels/wallet-core@0.9.2) (2020-11-17)
+
+
+### Bug Fixes
+
+* chore(release): publish [skip ci] ([caa958d](https://github.com/statechannels/statechannels/commit/caa958dcfdc6fbcf07ebb0b9001552ef41ebbc9c))
+
+
+
+
+
 # [0.9.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.8.0...@statechannels/wallet-core@0.9.0) (2020-11-14)
 
 
