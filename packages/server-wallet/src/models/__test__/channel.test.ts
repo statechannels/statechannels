@@ -2,6 +2,7 @@ import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {dropNonVariables} from '../../state-utils';
 
 import {channel} from './fixtures/channel';
 
@@ -23,6 +24,18 @@ it('can insert Channel instances to, and fetch them from, the database', async (
     .first();
 
   expect(c1.vars).toMatchObject(c2.vars);
+});
+
+it('does not store extraneous fields in the variables property', async () => {
+  const vars = [{...stateWithHashSignedBy()(), extra: true}];
+  const c1 = channel({vars});
+  await Channel.transaction(knex, async tx => {
+    await Channel.query(tx).insert(c1);
+
+    const rawVars = (await tx.raw('select vars from channels')).rows[0].vars;
+    const expectedVars = [dropNonVariables(stateWithHashSignedBy()())];
+    expect(rawVars).toMatchObject(expectedVars);
+  });
 });
 
 it('can insert multiple channels instances within a transaction', async () => {

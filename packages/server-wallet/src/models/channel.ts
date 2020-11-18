@@ -22,6 +22,7 @@ import {
   ChannelStateFunding,
 } from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
+import {dropNonVariables} from '../state-utils';
 
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
@@ -190,6 +191,8 @@ export class Channel extends Model implements RequiredColumns {
         correctChannelId,
       });
     }
+    // Prevent extraneous fields from being stored
+    this.vars = this.vars.map(sv => dropNonVariables(sv));
 
     this.vars.map(sv => {
       const correctHash = hashState({...this.channelConstants, ...sv});
