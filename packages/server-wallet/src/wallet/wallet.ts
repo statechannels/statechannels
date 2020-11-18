@@ -50,6 +50,7 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
+import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
@@ -602,8 +603,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
             switch (action.type) {
               case 'SignLedgerState': {
                 const {myIndex, channelId} = protocolState.fundingChannel;
-
-                const signedState = await this.store.signState(channelId, action.stateToSign, tx);
+                const channel = await Channel.forId(channelId, tx);
+                const signedState = await this.store.signState(channel, action.stateToSign, tx);
 
                 response.queueState(signedState, myIndex, channelId);
 

@@ -160,15 +160,14 @@ export class Store {
   }
 
   async signState(
-    channelOrId: Bytes32 | Channel,
+    channel: Channel,
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
   ): Promise<SignedState> {
-    const channelId = typeof channelOrId === 'string' ? channelOrId : channelOrId.channelId;
-    const timer = timerFactory(this.timingMetrics, `signState ${channelId}`);
-    const channel = await (typeof channelOrId === 'string'
-      ? timer('getting channel', async () => Channel.forId(channelOrId, tx))
-      : channelOrId);
+    if (!channel.signingWallet) {
+      throw new Error('No signing wallets');
+    }
+    const timer = timerFactory(this.timingMetrics, `signState ${channel.channelId}`);
 
     const state = addHash({...channel.channelConstants, ...vars});
 
@@ -572,15 +571,10 @@ export class Store {
     fundingLedgerChannelId?: Bytes32
   ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: DBObjective}> {
     return await this.knex.transaction(async tx => {
-      const {channelId, participants} = await createChannel(
-        constants,
-        fundingStrategy,
-        fundingLedgerChannelId,
-        tx
-      );
-
+      const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
+      const {channelId, participants} = channel;
       const firstSignedState = await this.signState(
-        channelId,
+        channel,
         {
           ...constants,
           turnNum: 0,
@@ -689,6 +683,7 @@ async function createChannel(
   );
 
   return await Channel.query(txOrKnex)
+    .withGraphFetched('signingWallet')
     .insert(channel)
     .returning('*')
     .first();

@@ -56,4 +56,7 @@ function overwriteVars(result: Channel, props?: {vars: SignedStateVarsWithHash[]
 export const withSupportedState = (
   signingWallets: SigningWallet[] = [alice(), bob()]
 ): Fixture<Channel> =>
-  fixture(channel(), flow(overwriteVars, addHashes, signVars(signingWallets), addChannelId));
+  fixture(
+    channel({signingWallet: signingWallets.length > 0 ? signingWallets[0] : undefined}),
+    flow(overwriteVars, addHashes, signVars(signingWallets), addChannelId)
+  );

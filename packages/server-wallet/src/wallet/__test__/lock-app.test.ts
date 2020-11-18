@@ -31,7 +31,7 @@ it('works', async () => {
   const {channelId, latest} = c;
   await expect(
     store.lockApp(channelId, async tx =>
-      store.signState(channelId, {...latest, turnNum: latest.turnNum + 1}, tx)
+      store.signState(c, {...latest, turnNum: latest.turnNum + 1}, tx)
     )
   ).resolves.toMatchObject({turnNum: 6});
 });
@@ -76,10 +76,11 @@ describe('concurrency', () => {
 
   it('works when run concurrently with the same channel', async () => {
     const numAttempts = 4;
+    const channel = await Channel.forId(c.channelId, knex);
     await Promise.all(
       _.range(numAttempts).map(() =>
         store
-          .lockApp(channelId, async tx => store.signState(channelId, next(c.latest), tx))
+          .lockApp(channelId, async tx => store.signState(channel, next(c.latest), tx))
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
@@ -108,19 +109,22 @@ describe('concurrency', () => {
     async () => {
       await knex.raw('TRUNCATE TABLE channels RESTART IDENTITY CASCADE');
 
-      const channelIds = await Promise.all(
+      const channels = await Promise.all(
         _.range(NUM_ATTEMPTS).map(async channelNonce => {
           const c = withSupportedState()({vars: [stateVars({turnNum: 5})], channelNonce});
+
           await Channel.query(knex).insert(c);
-          return c.channelId;
+          return c;
         })
       );
 
       const t1 = Date.now();
       await Promise.all(
-        channelIds.map(channelId =>
+        channels.map(channel =>
           store
-            .lockApp(channelId, async (tx, c) => store.signState(channelId, next(c.latest), tx))
+            .lockApp(channel.channelId, async (tx, c) =>
+              store.signState(channel, next(c.latest), tx)
+            )
             .then(countResolvedPromise)
             .finally(countSettledPromise)
         )
@@ -131,7 +135,7 @@ describe('concurrency', () => {
 
       expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
-      await expect(store.getChannel(channelIds[1])).resolves.toMatchObject({
+      await expect(store.getChannel(channels[1].channelId)).resolves.toMatchObject({
         latest: {turnNum: 6},
       });
     },
@@ -139,10 +143,11 @@ describe('concurrency', () => {
   );
 
   test('sign state does not block concurrent updates', async () => {
+    const channel = await Channel.forId(c.channelId, knex);
     await Promise.all(
       _.range(NUM_ATTEMPTS).map(() =>
         store
-          .signState(channelId, next(c.latest), knex as any)
+          .signState(channel, next(c.latest), knex as any)
           .then(countResolvedPromise)
           .catch(countRejectedPromise)
           .finally(countSettledPromise)
