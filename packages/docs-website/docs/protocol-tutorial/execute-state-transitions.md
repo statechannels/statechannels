@@ -101,6 +101,15 @@ import {getFixedPart, getVariablePart} from '@statechannels/nitro-protocol';
 const fixedPart = getFixedPart(state);
 const getVariablePart = getVariablePart(state);
 ```
+### Precautions
+
+As a state channel participant, it is advised to check the `FixedPart` of any channel before participating in it. A good state channels wallet will perform these checks for you:
+
+- `chainId` -- This needs to match the id of the chain where assets are to be locked. The root of the funding tree for this channel.
+- `participants` -- This should have length at least 2, and include a public key (account) that you control.
+- `channelNonce` -- This should be different to any previous channelNonce used by the same `participants` and `chainId`. This is to prevent states from previous channels being "replayed" to conclude subsequent channels with unintended outcomes.
+- `appDefinition` -- There should be a [`ForceMoveApp`]('contract-api/natspec/ForceMove') compliant contract deployed at this address, and you should have confidence that it is not malicious or suffering from security flaws. You should inspect the source code (which should be publically available and verifiable) or appeal to a trusted authority to do this.
+- `challengeDuration` -- In the extreme, this should be at least 1 block time (15 seconds on mainnet) and less than `2**48-1` seconds. In practice we recommend somewhere between 5 minutes and 5 months.
 
 ## Conform to an on chain `validTransition` function
 
