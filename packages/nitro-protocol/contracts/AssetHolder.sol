@@ -116,15 +116,14 @@ contract AssetHolder is IAssetHolder {
         } 
 
 
-        // Event emitted regardless of success of external calls
-        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
-
-        // storage updated BEFORE asset transferred (prevent reentrancy)
+        // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
             _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
         } else {
             holdings[destination] += affordsForDestination;
         }
+        // Event emitted regardless of success of external calls
+        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
 
         
     }
@@ -199,7 +198,7 @@ contract AssetHolder is IAssetHolder {
         }
 
 
-        // holdings updated BEFORE asset transferred (prevent reentrancy)
+        // holdings updated BEFORE asset transferred (prevent reentrancy attacks)
         uint256 payoutAmount;
         for (uint256 m = 0; m < numPayouts; m++) {
             if (overlap && m == numPayouts.sub(1)) {
