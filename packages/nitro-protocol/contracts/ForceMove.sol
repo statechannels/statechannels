@@ -823,6 +823,15 @@ contract ForceMove is IForceMove {
         return keccak256(abi.encode(outcome));
     }
 
+
+    function getChainID() public pure returns (uint) {
+        uint id;
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
+
     /**
      * @notice Computes the unique id of a channel.
      * @dev Computes the unique id of a channel.
@@ -830,8 +839,9 @@ contract ForceMove is IForceMove {
      * @return channelId
      */
     function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {
+        require(fixedPart.chainId == getChainID(), 'Incorrect chainId');
         channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+            abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)
         );
     }
 }
