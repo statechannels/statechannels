@@ -48,7 +48,7 @@ import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {logger as defaultLogger} from '../logger';
 
-export type AppHandler<T> = (tx: Transaction, channel: ChannelState, channelRecord: Channel) => T;
+export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
 
 class UniqueViolationError extends Error {
@@ -127,33 +127,35 @@ export class Store {
    * Ensure a channel is only update-able by some criticable code within a transaction.
    *
    * @param channelId application channel Id
-   * @param cb critical code to be executed while holding a lock on channelId
+   * @param criticalCode critical code to be executed while holding a lock on channelId
+   * @param onChannelMissing An optional handler that is called when the channel cannot be found. Defaults to throwMissingChannel
+   * @param fetchSigningWallet Whether the signing wallets for a channel should be fetched when querying for the channel. Defaults to false
    *
-   * This excutes `cb` within the context of a SQL transaction, after first acquiring a row-level
-   * lock on a single row in the Channels table. This guarantees that at most one `cb` can be
+   * This excutes `criticalCode` within the context of a SQL transaction, after first acquiring a row-level
+   * lock on a single row in the Channels table. This guarantees that at most one `criticalCode` can be
    * executing concurrently across all wallets.
    */
   async lockApp<T>(
     channelId: Bytes32,
     criticalCode: AppHandler<T>,
     onChannelMissing: MissingAppHandler<T> = throwMissingChannel,
-    needsSigningWallet = false
+    fetchSigningWallet = false
   ): Promise<T> {
     return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer('getting channel', () => {
-        let query = Channel.query(tx)
+        const query = Channel.query(tx)
           .where({channelId})
           .forUpdate()
           .first();
 
-        if (needsSigningWallet) query = query.withGraphFetched('signingWallet');
+        if (fetchSigningWallet) return query.withGraphFetched('signingWallet');
 
         return query;
       });
 
       if (!channel) return onChannelMissing(channelId);
-      return timer('critical code', async () => criticalCode(tx, channel.protocolState, channel));
+      return timer('critical code', async () => criticalCode(tx, channel));
     });
   }
 

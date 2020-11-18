@@ -409,11 +409,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         {channelId}
       );
     };
-    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (
-      tx,
-      channel,
-      channelRecord
-    ) => {
+    const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const response = WalletResponse.initialize();
       const {myIndex} = channel;
 
@@ -424,13 +420,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
-          UpdateChannel.updateChannel({channelId, appData, outcome}, channel),
+          UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
           this.walletConfig.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
         try {
-          return this.store.signState(channelRecord, nextState, tx);
+          return this.store.signState(channel, nextState, tx);
         } catch (err) {
           this.logger.error({err, nextState}, 'Unable to update channel');
           throw err;
