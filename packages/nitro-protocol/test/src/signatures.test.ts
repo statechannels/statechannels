@@ -36,7 +36,7 @@ describe('signatures', () => {
       const wallet = Wallet.createRandom();
       const state: State = {
         channel: {
-          chainId: '0x1',
+          chainId: process.env.CHAIN_NETWORK_ID,
           channelNonce: 0x01,
           participants: [Wallet.createRandom().address],
         },
@@ -80,7 +80,7 @@ describe('signatures', () => {
       const wallet = Wallet.createRandom();
       const state: State = {
         channel: {
-          chainId: '0x1',
+          chainId: process.env.CHAIN_NETWORK_ID,
           channelNonce: 0x01,
           participants: [Wallet.createRandom().address],
         },
@@ -120,7 +120,7 @@ describe('signatures', () => {
       const wallet = Wallet.createRandom();
       const state: State = {
         channel: {
-          chainId: '0x1',
+          chainId: process.env.CHAIN_NETWORK_ID,
           channelNonce: 0x1,
           participants: [Wallet.createRandom().address],
         },

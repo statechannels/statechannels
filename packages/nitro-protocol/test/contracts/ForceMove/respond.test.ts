@@ -23,7 +23,7 @@ import {sign} from '../../../src/signatures';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-const chainId = '0x1234';
+const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;

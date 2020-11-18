@@ -823,9 +823,8 @@ contract ForceMove is IForceMove {
         return keccak256(abi.encode(outcome));
     }
 
-
-    function getChainID() public pure returns (uint) {
-        uint id;
+    function getChainID() public pure returns (uint256) {
+        uint256 id;
         assembly {
             id := chainid()
         }

@@ -13,7 +13,7 @@ import {
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
-const chainId = '0x1234';
+const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
 // Populate destinations array

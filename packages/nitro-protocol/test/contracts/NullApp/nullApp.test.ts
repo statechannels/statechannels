@@ -21,7 +21,7 @@ describe('null app', () => {
   it('should revert when validTransition is called', async () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
-      chainId: '0x1',
+      chainId: process.env.CHAIN_NETWORK_ID,
       channelNonce: getRandomNonce('nullApp'),
     };
     const fromState: State = {

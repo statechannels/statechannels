@@ -11,7 +11,7 @@ let channelId;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const chainId = '0x1234';
+const chainId = process.env.CHAIN_NETWORK_ID;
 const channelNonce = getRandomNonce('setOutcome');
 const outcomeContent = id('some outcome data');
 

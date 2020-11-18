@@ -33,10 +33,10 @@ const provider = getTestProvider();
 
 let ForceMove: Contract;
 
-const chainId = '0x1234';
+const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = 0x1;
+const challengeDuration = 86400; // 1 day
 const outcome = [{allocationItems: [], assetHolderAddress: Wallet.createRandom().address}];
 
 const appDefinition = getPlaceHolderContractAddress();
@@ -52,7 +52,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 const twoPartyChannel: Channel = {
-  chainId: '0x1',
+  chainId: process.env.CHAIN_NETWORK_ID,
   channelNonce: 0x1,
   participants: [wallets[0].address, wallets[1].address],
 };
@@ -100,7 +100,7 @@ const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition c
 const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
 const reverts5 = 'It reverts when the channel is finalized';
 
-describe('forceMove', () => {
+describe('challenge', () => {
   const threeStates = {appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2]};
   const oneState = {appDatas: [2], whoSignedWhat: [0, 0, 0]};
   const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
@@ -193,7 +193,7 @@ describe('forceMove', () => {
         await writeGasConsumption('./challenge.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
-        // Catch ForceMove event
+        // Catch ChallengeRegistered event
         const {
           channelId: eventChannelId,
           turnNumRecord: eventTurnNumRecord,
@@ -208,7 +208,9 @@ describe('forceMove', () => {
         expect(eventChannelId).toEqual(channelId);
         expect(eventTurnNumRecord).toEqual(largestTurnNum);
         expect(eventChallenger).toEqual(challenger.address);
-        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
+        expect(
+          ethers.BigNumber.from(eventFixedPart[0]).eq(ethers.BigNumber.from(fixedPart.chainId))
+        ).toBe(true);
         expect(eventFixedPart[1]).toEqual(fixedPart.participants);
         expect(eventFixedPart[2]).toEqual(fixedPart.channelNonce);
         expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);

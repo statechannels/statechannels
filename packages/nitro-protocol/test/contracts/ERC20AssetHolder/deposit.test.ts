@@ -18,7 +18,7 @@ const signer0 = provider.getSigner(0); // Convention matches setupContracts func
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
-const chainId = '0x1234';
+const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
 // Populate destinations array
