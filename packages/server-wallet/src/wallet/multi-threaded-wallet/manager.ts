@@ -64,6 +64,7 @@ export class WorkerManager {
     const resultPromise = new Promise<MultipleChannelOutput>((resolve, reject) =>
       worker.once('message', (response: Either<Error, MultipleChannelOutput>) => {
         this.pool?.release(worker);
+
         if (isLeft(response)) {
           reject(response.left);
         } else {
