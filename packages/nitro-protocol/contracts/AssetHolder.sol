@@ -18,8 +18,8 @@ contract AssetHolder is IAssetHolder {
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
     /**
-     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
-     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
@@ -130,8 +130,8 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Does not check allocationBytes against on chain storage.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Does not check allocationBytes against on chain storage.
      * @param channelId Unique identifier for a state channel.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      */
