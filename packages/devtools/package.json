@@ -16,7 +16,7 @@
     "etherlime-utils": "1.1.4",
     "ethers": "5.0.12",
     "fs-extra": "9.0.1",
-    "ganache-core": "2.12.1",
+    "ganache-core": "2.13.1",
     "lockfile": "1.0.4",
     "pino": "6.2.0",
     "pino-pretty": "4.0.0",

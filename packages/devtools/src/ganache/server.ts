@@ -154,7 +154,7 @@ export class GanacheServer {
       }
     };
 
-    this.server = ganache.server(serverOptions);
+    this.server = ganache.server({...serverOptions, _chainId: this.chainId} as any);
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.server.listen(this.port, () => {});
