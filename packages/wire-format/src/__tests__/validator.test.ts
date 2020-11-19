@@ -22,9 +22,7 @@ describe('validate message', () => {
     expect(validateMessage(good.goodMessage)).toEqual(good.goodMessage);
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _expect: any = Object.assign(expect);
-  _expect.extend({
+  expect.extend({
     toThrowValidationError(
       errThrower: () => Error,
       message: string,
@@ -76,36 +74,36 @@ describe('validate message', () => {
     // Otherwise jest complains about zero expectations
     expect(0).toEqual(0);
 
-    _expect(() => validateMessage(bad.dataMissing)).toThrowValidationError(
+    expect(() => validateMessage(bad.dataMissing)).toThrowValidationError(
       'Invalid message',
       bad.dataMissing,
       "Missing required property 'data' at root"
     );
-    _expect(() => validateMessage(bad.extraProperty)).toThrowValidationError(
+    expect(() => validateMessage(bad.extraProperty)).toThrowValidationError(
       'Invalid message',
       bad.extraProperty,
       "Unexpected property 'iShouldntBeHere' found at root "
     );
 
-    _expect(() => validateMessage(bad.emptyState)).toThrowValidationError(
+    expect(() => validateMessage(bad.emptyState)).toThrowValidationError(
       'Invalid message',
       bad.emptyState,
       "Missing required property 'appData' at root.data.signedStates[0]"
     );
 
-    _expect(() => validateMessage(bad.emptyStringObjectives)).toThrowValidationError(
+    expect(() => validateMessage(bad.emptyStringObjectives)).toThrowValidationError(
       'Invalid message',
       bad.emptyStringObjectives,
       'Property at root.data.objectives should be array'
     );
 
-    _expect(() => validateMessage(bad.nullObjectives)).toThrowValidationError(
+    expect(() => validateMessage(bad.nullObjectives)).toThrowValidationError(
       'Invalid message',
       bad.nullObjectives,
       'Property at root.data.objectives should be array'
     );
 
-    _expect(() => validateState({turnNum: 3})).toThrowValidationError(
+    expect(() => validateState({turnNum: 3})).toThrowValidationError(
       'Invalid state',
       {turnNum: 3},
       "Missing required property 'appData' at root"
