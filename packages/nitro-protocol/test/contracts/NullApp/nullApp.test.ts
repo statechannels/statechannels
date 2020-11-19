@@ -35,7 +35,7 @@ describe('null app', () => {
     };
     const toState: State = {...fromState, turnNum: 2};
 
-    expectRevert(async () => {
+    await expectRevert(async () => {
       await NitroAdjudicator.validTransition(
         1,
         [false, false],
