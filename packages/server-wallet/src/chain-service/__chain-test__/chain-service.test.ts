@@ -33,7 +33,7 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 let chainService: ChainService;
 let channelNonce = 0;
 
-jest.setTimeout(15_000);
+jest.setTimeout(20_000);
 
 beforeAll(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
